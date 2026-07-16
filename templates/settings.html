@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Settings · Frostgrave{% endblock %}
+{% block content %}
+  <section class="hero">
+    <h1>Settings</h1>
+    <p>Choose where warbands and portraits are saved on this PC.</p>
+  </section>
+
+  <div class="card">
+    <h2>Data folder</h2>
+    <p class="muted">
+      Currently using: <code>{{ active_dir }}</code>
+    </p>
+    {% if configured_dir != active_dir %}
+      <p class="flash success" style="display:block">
+        Configured folder is <code>{{ configured_dir }}</code> — restart the app for this to take effect.
+      </p>
+    {% endif %}
+    <form method="post" action="{{ url_for('settings') }}">
+      <div class="form-row inline">
+        <div style="flex:1">
+          <label for="data_dir">Folder path</label>
+          <input id="data_dir" name="data_dir" type="text" value="{{ configured_dir }}" style="width:100%" />
+        </div>
+        <div>
+          <label>&nbsp;</label>
+          <button type="button" class="btn secondary" id="browse-btn">Browse…</button>
+        </div>
+        <div>
+          <label>&nbsp;</label>
+          <button class="btn" type="submit">Save</button>
+        </div>
+      </div>
+    </form>
+    <p class="muted" style="font-size:0.85rem;margin-top:0.5rem">
+      Default: <code>{{ default_dir }}</code>. Changes take effect after restarting the app — warbands
+      already in the old folder are left where they are (they are not moved automatically).
+    </p>
+  </div>
+
+  <script>
+    (function () {
+      const btn = document.getElementById('browse-btn');
+      const input = document.getElementById('data_dir');
+      if (!btn) return;
+      btn.addEventListener('click', function () {
+        btn.disabled = true;
+        const original = btn.textContent;
+        btn.textContent = 'Waiting for folder picker…';
+        fetch("{{ url_for('settings_browse') }}", { method: 'POST' })
+          .then((r) => r.json())
+          .then((data) => {
+            if (data.path) input.value = data.path;
+          })
+          .catch(() => {})
+          .finally(() => {
+            btn.disabled = false;
+            btn.textContent = original;
+          });
+      });
+    })();
+  </script>
+{% endblock %}

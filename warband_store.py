@@ -10,6 +10,7 @@ from copy import deepcopy
 from datetime import datetime, timezone
 from pathlib import Path
 
+import paths
 from frostgrave_data import (
     ALIGNED_SCHOOL_SPELLS,
     APPRENTICE_BASE,
@@ -18,15 +19,28 @@ from frostgrave_data import (
     APPRENTICE_STAT_OFFSET,
     BASE_LOCATIONS,
     BASE_RESOURCES,
+    CAPTAIN_BASE,
+    CAPTAIN_HIRING_COST,
+    CAPTAIN_ITEM_SLOTS,
+    CAPTAIN_MAX_LEVEL,
+    CAPTAIN_MIND_CONTROL_DEFAULT,
+    CAPTAIN_MIND_CONTROL_OPTIONS,
+    CAPTAIN_STAT_CAPS,
+    LEVELUP_STATS,
     MAX_SOLDIERS,
     MAX_SPECIALISTS,
     NEUTRAL_SPELLS,
     OWN_SCHOOL_SPELLS,
+    PROMOTE_CAPTAIN_BONUS,
+    PROMOTE_CAPTAIN_COST,
+    PROMOTE_CAPTAIN_ITEM_SLOTS,
     SCHOOL_ALIGNED,
     SCHOOL_NEUTRAL,
     SCHOOL_OPPOSED,
     SCHOOL_RELATIONS,
     SCHOOLS,
+    SOLDIER_MAX_LEVELS,
+    SOLDIER_STAT_CAPS,
     SOLDIERS,
     STARTING_GOLD,
     STARTING_SPELL_COUNT,
@@ -43,9 +57,9 @@ from frostgrave_data import (
     xp_to_next_level,
 )
 
-BASE_DIR = Path(__file__).resolve().parent
-WARBAND_DIR = BASE_DIR / "data" / "warbands"
-PORTRAIT_DIR = BASE_DIR / "data" / "portraits"
+DATA_DIR = paths.user_data_dir()
+WARBAND_DIR = DATA_DIR / "warbands"
+PORTRAIT_DIR = DATA_DIR / "portraits"
 WARBAND_DIR.mkdir(parents=True, exist_ok=True)
 PORTRAIT_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -123,6 +137,48 @@ def empty_apprentice(name: str = "") -> dict:
         "items": [],
         "notes": "",
         "portrait": None,
+    }
+
+
+def default_homerules() -> dict:
+    """Optional house rules, off by default. See frostgrave_data.CAPTAIN_* etc. for context."""
+    return {
+        "captains_enabled": False,
+        "captain_hiring_cost": CAPTAIN_HIRING_COST,
+        "captain_item_slots": CAPTAIN_ITEM_SLOTS,
+        "captain_base_stats": deepcopy(CAPTAIN_BASE),
+        "captain_bonus_choice_enabled": True,
+        "captain_stat_caps": deepcopy(CAPTAIN_STAT_CAPS),
+        "captain_max_level": CAPTAIN_MAX_LEVEL,
+        "captain_mind_control": CAPTAIN_MIND_CONTROL_DEFAULT,
+        "soldier_leveling_enabled": False,
+        "soldier_max_levels": SOLDIER_MAX_LEVELS,
+        "soldier_stat_caps": deepcopy(SOLDIER_STAT_CAPS),
+        "promote_captain_enabled": False,
+        "promote_captain_cost": PROMOTE_CAPTAIN_COST,
+        "promote_captain_bonus": deepcopy(PROMOTE_CAPTAIN_BONUS),
+        "promote_captain_bonus_choice_enabled": False,
+        "promote_captain_item_slots": PROMOTE_CAPTAIN_ITEM_SLOTS,
+    }
+
+
+def empty_captain(name: str = "", homerules: dict | None = None, origin: str = "hired") -> dict:
+    hr = homerules or default_homerules()
+    stats = deepcopy(hr.get("captain_base_stats") or CAPTAIN_BASE)
+    n = int(hr.get("captain_item_slots", CAPTAIN_ITEM_SLOTS))
+    return {
+        "name": name,
+        "stats": stats,
+        "bonus_extra_stat": None,  # one of LEVELUP_STATS | None (hire/promote +1 pick)
+        "item_slots": empty_slots(n),
+        "has_dagger": False,
+        "notes": "",
+        "portrait": None,
+        "xp": 0,
+        "level": 0,
+        "levelup_counts": {s: 0 for s in LEVELUP_STATS},
+        "level_history": [],
+        "origin": origin,  # "hired" | "promoted"
     }
 
 
@@ -297,6 +353,7 @@ def create_warband(
                     "items": [],
                     "notes": "",
                     "portrait": None,
+                    **_new_soldier_leveling_fields(info),
                 }
             )
 
@@ -309,6 +366,8 @@ def create_warband(
         "notes": "",
         "wizard": empty_wizard(wizard_name.strip() or "Wizard", school),
         "apprentice": apprentice,
+        "captain": None,
+        "homerules": default_homerules(),
         "soldiers": hired,
         "vault_items": [],
         "base": empty_base(),
@@ -438,6 +497,45 @@ def load_warband(warband_id: str) -> dict | None:
         if "item_slots" not in ap or not isinstance(ap.get("item_slots"), list):
             ap["item_slots"] = normalize_item_slots(ap.get("items"), APPRENTICE_ITEM_SLOTS)
         sync_apprentice(wb)
+    # Homerules (Captains/Soldier Leveling/Promote Captain): backfill defensively,
+    # per-key, so future new fields backfill too.
+    hr = wb.setdefault("homerules", default_homerules())
+    # Migrate old flat per-stat cap fields (fight/shoot only) + XP multiplier into
+    # the new captain_stat_caps shape, then drop the old keys.
+    if "captain_fight_levelup_cap" in hr or "captain_shoot_levelup_cap" in hr:
+        caps = deepcopy(CAPTAIN_STAT_CAPS)
+        if "captain_fight_levelup_cap" in hr:
+            caps["fight"] = {"limit": int(hr["captain_fight_levelup_cap"]), "unlimited": False}
+        if "captain_shoot_levelup_cap" in hr:
+            caps["shoot"] = {"limit": int(hr["captain_shoot_levelup_cap"]), "unlimited": False}
+        hr["captain_stat_caps"] = caps
+    for old_key in ("captain_fight_levelup_cap", "captain_shoot_levelup_cap", "captain_xp_multiplier"):
+        hr.pop(old_key, None)
+    for k, v in default_homerules().items():
+        hr.setdefault(k, v)
+    wb.setdefault("captain", None)
+    if wb.get("captain"):
+        cap = wb["captain"]
+        cap.pop("bonus_choice", None)  # removed: fixed +3F/+2S hire bonus no longer exists
+        cap.setdefault("bonus_extra_stat", None)
+        cap.setdefault("xp", 0)
+        cap.setdefault("level_history", [])
+        cap.setdefault("has_dagger", False)
+        cap.setdefault("notes", "")
+        cap.setdefault("portrait", None)
+        cap.setdefault("origin", "hired")
+        counts = cap.setdefault("levelup_counts", {s: 0 for s in LEVELUP_STATS})
+        for s in LEVELUP_STATS:
+            counts.setdefault(s, 0)
+        if "fight_levelup_count" in cap:
+            counts["fight"] = int(cap.pop("fight_levelup_count"))
+        if "shoot_levelup_count" in cap:
+            counts["shoot"] = int(cap.pop("shoot_levelup_count"))
+        cap.setdefault("level", sum(counts.values()))
+        n = int(hr.get("captain_item_slots", CAPTAIN_ITEM_SLOTS))
+        if cap.get("origin") == "promoted":
+            n = int(hr.get("promote_captain_item_slots", PROMOTE_CAPTAIN_ITEM_SLOTS))
+        cap["item_slots"] = normalize_item_slots(cap.get("item_slots"), n)
     for s in wb.get("soldiers") or []:
         s.setdefault("portrait", None)
         s.setdefault("items", [])
@@ -449,6 +547,16 @@ def load_warband(warband_id: str) -> dict | None:
                 if text
                 else []
             )
+        if any(s.get(k) is None for k in ("fight", "shoot", "will", "health")):
+            info = get_soldier(s.get("type_key", "")) or {}
+            for k in ("fight", "shoot", "will", "health"):
+                s.setdefault(k, info.get(k))
+        s.setdefault("xp", 0)
+        s.setdefault("level", 0)
+        counts = s.setdefault("levelup_counts", {stat: 0 for stat in LEVELUP_STATS})
+        for stat in LEVELUP_STATS:
+            counts.setdefault(stat, 0)
+        s.setdefault("level_history", [])
     return wb
 
 
@@ -638,6 +746,8 @@ def warband_limits(wb: dict) -> dict:
     # Approximate gold spent on current roster from costs (not perfect for refunds)
     if wb.get("apprentice"):
         spent += APPRENTICE_COST
+    if wb.get("captain"):
+        spent += int((wb.get("homerules") or {}).get("captain_hiring_cost", CAPTAIN_HIRING_COST))
     for s in soldiers:
         info = SOLDIERS.get(s.get("type_key", ""), {})
         spent += int(info.get("cost", 0))
@@ -678,6 +788,26 @@ def _next_type_name(wb: dict, type_key: str, type_name: str) -> str:
     return f"{type_name} {len(existing) + 1}"
 
 
+def _new_soldier_leveling_fields(info: dict) -> dict:
+    """Levelable-stat snapshot + XP/level bookkeeping for a newly hired soldier.
+
+    Fight/Shoot/Will/Health are copied onto the soldier dict itself so they can
+    diverge from the catalog via Soldier Leveling; enrich_soldier()'s
+    {**catalog, **soldier} merge lets these override the catalog once present.
+    Move/Armour/cost/name/etc. are never stored per-soldier — always catalog.
+    """
+    return {
+        "fight": info.get("fight"),
+        "shoot": info.get("shoot"),
+        "will": info.get("will"),
+        "health": info.get("health"),
+        "xp": 0,
+        "level": 0,
+        "levelup_counts": {s: 0 for s in LEVELUP_STATS},
+        "level_history": [],
+    }
+
+
 def add_soldier(wb: dict, type_key: str, name: str = "") -> tuple[bool, str]:
     info = get_soldier(type_key)
     if not info:
@@ -699,6 +829,7 @@ def add_soldier(wb: dict, type_key: str, name: str = "") -> tuple[bool, str]:
         "items": [],
         "notes": "",
         "portrait": None,
+        **_new_soldier_leveling_fields(info),
     }
     wb["gold"] = int(wb.get("gold", 0)) - cost
     wb.setdefault("soldiers", []).append(soldier)
@@ -766,6 +897,346 @@ def dismiss_apprentice(wb: dict, refund: bool = False) -> tuple[bool, str]:
     return True, text
 
 
+def _parse_stat_caps(form, prefix: str, current: dict) -> dict:
+    """Parse the 4-stat {limit, unlimited} grid submitted as
+    {prefix}_cap_{stat}_limit / {prefix}_cap_{stat}_unlimited."""
+    caps = {}
+    for stat in LEVELUP_STATS:
+        cur = current.get(stat) or {"limit": 0, "unlimited": False}
+        limit = int(form.get(f"{prefix}_cap_{stat}_limit") or cur.get("limit", 0))
+        unlimited = form.get(f"{prefix}_cap_{stat}_unlimited") == "on"
+        caps[stat] = {"limit": max(0, limit), "unlimited": unlimited}
+    return caps
+
+
+def update_homerules(wb: dict, form) -> tuple[bool, str]:
+    """Parse and apply the per-warband homerule settings form."""
+    hr = wb.setdefault("homerules", default_homerules())
+    try:
+        new_hr = {
+            "captains_enabled": form.get("captains_enabled") == "on",
+            "captain_hiring_cost": int(form.get("captain_hiring_cost") or hr["captain_hiring_cost"]),
+            "captain_item_slots": int(form.get("captain_item_slots") or hr["captain_item_slots"]),
+            "captain_base_stats": {
+                "move": int(form.get("captain_base_move") or hr["captain_base_stats"]["move"]),
+                "fight": int(form.get("captain_base_fight") or hr["captain_base_stats"]["fight"]),
+                "shoot": int(form.get("captain_base_shoot") or hr["captain_base_stats"]["shoot"]),
+                "armour": int(form.get("captain_base_armour") or hr["captain_base_stats"]["armour"]),
+                "will": int(form.get("captain_base_will") or hr["captain_base_stats"]["will"]),
+                "health": int(form.get("captain_base_health") or hr["captain_base_stats"]["health"]),
+            },
+            "captain_bonus_choice_enabled": form.get("captain_bonus_choice_enabled") == "on",
+            "captain_stat_caps": _parse_stat_caps(form, "captain", hr["captain_stat_caps"]),
+            "captain_max_level": int(form.get("captain_max_level") or hr["captain_max_level"]),
+            "captain_mind_control": (
+                form.get("captain_mind_control")
+                if form.get("captain_mind_control") in CAPTAIN_MIND_CONTROL_OPTIONS
+                else hr["captain_mind_control"]
+            ),
+            "soldier_leveling_enabled": form.get("soldier_leveling_enabled") == "on",
+            "soldier_max_levels": int(form.get("soldier_max_levels") or hr["soldier_max_levels"]),
+            "soldier_stat_caps": _parse_stat_caps(form, "soldier", hr["soldier_stat_caps"]),
+            "promote_captain_enabled": form.get("promote_captain_enabled") == "on",
+            "promote_captain_cost": int(
+                form.get("promote_captain_cost") or hr["promote_captain_cost"]
+            ),
+            "promote_captain_bonus": {
+                stat: int(form.get(f"promote_bonus_{stat}") or hr["promote_captain_bonus"][stat])
+                for stat in LEVELUP_STATS
+            },
+            "promote_captain_bonus_choice_enabled": (
+                form.get("promote_captain_bonus_choice_enabled") == "on"
+            ),
+            "promote_captain_item_slots": int(
+                form.get("promote_captain_item_slots") or hr["promote_captain_item_slots"]
+            ),
+        }
+    except (TypeError, ValueError):
+        return False, "Invalid homerule value."
+    if new_hr["captain_item_slots"] < 1:
+        return False, "Captain item slots must be at least 1."
+    if new_hr["promote_captain_item_slots"] < 1:
+        return False, "Promoted captain item slots must be at least 1."
+    if new_hr["soldier_max_levels"] < 0:
+        return False, "Soldier max levels cannot be negative."
+    if new_hr["captain_max_level"] < 0:
+        return False, "Captain max level cannot be negative."
+    wb["homerules"] = new_hr
+    if wb.get("captain"):
+        cap = wb["captain"]
+        n = (
+            new_hr["promote_captain_item_slots"]
+            if cap.get("origin") == "promoted"
+            else new_hr["captain_item_slots"]
+        )
+        cap["item_slots"] = normalize_item_slots(cap.get("item_slots"), n)
+    add_history(wb, "Updated homerule settings.")
+    return True, "Homerules saved."
+
+
+def hire_captain(
+    wb: dict, name: str = "", extra_stat: str | None = None
+) -> tuple[bool, str]:
+    hr = wb.setdefault("homerules", default_homerules())
+    if not hr.get("captains_enabled"):
+        return False, "Captains are not enabled for this warband (see Homerules)."
+    if wb.get("captain"):
+        return False, "Warband already has a captain."
+    cost = int(hr.get("captain_hiring_cost", CAPTAIN_HIRING_COST))
+    if int(wb.get("gold", 0)) < cost:
+        return False, f"Need {cost} gc for a captain."
+    wb["gold"] = int(wb["gold"]) - cost
+    cap = empty_captain(name or "Captain", hr)
+    if hr.get("captain_bonus_choice_enabled") and extra_stat in LEVELUP_STATS:
+        cap["stats"][extra_stat] = int(cap["stats"].get(extra_stat, 0)) + 1
+        cap["bonus_extra_stat"] = extra_stat
+    wb["captain"] = cap
+    text = f"Hired captain for {cost} gc (starting equipment free)."
+    add_history(wb, text)
+    return True, text
+
+
+def dismiss_captain(wb: dict, refund: bool = False) -> tuple[bool, str]:
+    cap = wb.get("captain")
+    if not cap:
+        return False, "No captain to dismiss."
+    hr = wb.setdefault("homerules", default_homerules())
+    if cap.get("origin") == "promoted":
+        cost = int(hr.get("promote_captain_cost", PROMOTE_CAPTAIN_COST))
+    else:
+        cost = int(hr.get("captain_hiring_cost", CAPTAIN_HIRING_COST))
+    if refund:
+        wb["gold"] = int(wb.get("gold", 0)) + cost
+        text = f"Dismissed captain and refunded {cost} gc."
+    else:
+        text = "Dismissed captain (no refund)."
+    wb["captain"] = None
+    add_history(wb, text)
+    return True, text
+
+
+def _spend_stat_level_up(
+    entity: dict,
+    choice: str,
+    stat_caps: dict,
+    overall_max: int | None,
+    get_stat,
+    set_stat,
+    label: str,
+) -> tuple[bool, str]:
+    """Shared flat-XP level-up spend logic for Captain and Soldier (identical mechanics;
+    the Wizard keeps its own bespoke apply_level_up because of spell choices)."""
+    xp = int(entity.get("xp", 0))
+    level = int(entity.get("level", 0))
+    earned = level_from_xp(xp)
+    if level >= earned:
+        return False, f"No pending level-ups (level {level}, XP {xp}). Earn more XP first."
+    if choice not in LEVELUP_STATS:
+        return False, "Invalid level-up choice."
+    if overall_max is not None and level >= overall_max:
+        return False, f"{label} has reached the max level ({overall_max})."
+    cap = stat_caps.get(choice) or {"limit": 0, "unlimited": False}
+    counts = entity.setdefault("levelup_counts", {s: 0 for s in LEVELUP_STATS})
+    counts.setdefault(choice, 0)
+    if not cap.get("unlimited") and counts[choice] >= int(cap.get("limit", 0)):
+        return False, f"{label} has reached the level-up limit for {choice.capitalize()}."
+    set_stat(choice, get_stat(choice) + 1)
+    counts[choice] += 1
+    entity["level"] = level + 1
+    entity.setdefault("level_history", []).append(
+        {"level": level + 1, "choice": choice, "detail": f"+1 {choice.capitalize()}", "when": _now()}
+    )
+    return True, f"{label} +1 {choice.capitalize()} (level {level + 1})."
+
+
+def _reverse_last_stat_level_up(entity: dict, get_stat, set_stat, label: str) -> tuple[bool, str]:
+    history = entity.setdefault("level_history", [])
+    if not history:
+        return False, f"No {label} level-ups to reverse."
+    entry = history.pop()
+    choice = entry.get("choice")
+    if choice not in LEVELUP_STATS:
+        history.append(entry)
+        return False, f"Cannot reverse unknown {label} level-up."
+    set_stat(choice, get_stat(choice) - 1)
+    counts = entity.setdefault("levelup_counts", {s: 0 for s in LEVELUP_STATS})
+    counts[choice] = max(0, int(counts.get(choice, 0)) - 1)
+    entity["level"] = max(0, int(entity.get("level", 1)) - 1)
+    return True, f"Reversed {label} level-up: {entry.get('detail', choice)}."
+
+
+def apply_captain_level_up(wb: dict, choice: str) -> tuple[bool, str]:
+    """Spend one pending captain level-up (flat 100 XP/level, same as the wizard);
+    per-stat caps are homerule-editable (limit + unlimited toggle)."""
+    cap = wb.get("captain")
+    if not cap:
+        return False, "No captain hired."
+    hr = wb.setdefault("homerules", default_homerules())
+    ok, msg = _spend_stat_level_up(
+        cap,
+        choice,
+        hr.get("captain_stat_caps") or CAPTAIN_STAT_CAPS,
+        int(hr.get("captain_max_level", CAPTAIN_MAX_LEVEL)),
+        get_stat=lambda s: int(cap["stats"].get(s, 0)),
+        set_stat=lambda s, v: cap["stats"].__setitem__(s, v),
+        label="Captain",
+    )
+    if ok:
+        add_history(wb, msg)
+    return ok, msg
+
+
+def reverse_last_captain_level_up(wb: dict) -> tuple[bool, str]:
+    cap = wb.get("captain")
+    if not cap:
+        return False, "No captain hired."
+    ok, msg = _reverse_last_stat_level_up(
+        cap,
+        get_stat=lambda s: int(cap["stats"].get(s, 0)),
+        set_stat=lambda s, v: cap["stats"].__setitem__(s, v),
+        label="captain",
+    )
+    if ok:
+        add_history(wb, msg)
+    return ok, msg
+
+
+def add_captain_xp(wb: dict, amount: int) -> tuple[bool, str]:
+    cap = wb.get("captain")
+    if not cap:
+        return False, "No captain hired."
+    if amount <= 0:
+        return False, "Enter positive XP."
+    cap["xp"] = int(cap.get("xp", 0)) + int(amount)
+    text = f"Captain gained {amount} XP (total {cap['xp']})."
+    add_history(wb, text)
+    return True, text
+
+
+def promote_soldier_to_captain(
+    wb: dict,
+    soldier_id: str,
+    extra_stat: str | None = None,
+) -> tuple[bool, str]:
+    """Convert an active soldier into the warband's Captain (mutually exclusive with
+    hiring — only one captain slot exists at a time)."""
+    hr = wb.setdefault("homerules", default_homerules())
+    if not hr.get("promote_captain_enabled"):
+        return False, "Promote Captain is not enabled for this warband (see Homerules)."
+    if wb.get("captain"):
+        return False, "Warband already has a captain."
+    soldiers = wb.get("soldiers") or []
+    soldier = None
+    idx = None
+    for i, s in enumerate(soldiers):
+        if s.get("id") == soldier_id:
+            soldier, idx = s, i
+            break
+    if soldier is None:
+        return False, "Soldier not found."
+    if soldier.get("status") != "active":
+        return False, "Only an active soldier can be promoted."
+    cost = int(hr.get("promote_captain_cost", PROMOTE_CAPTAIN_COST))
+    if int(wb.get("gold", 0)) < cost:
+        return False, f"Need {cost} gc to promote a captain."
+
+    info = get_soldier(soldier.get("type_key", "")) or {}
+    stats = {
+        "move": int(info.get("move", 0)),
+        "fight": int(soldier.get("fight", info.get("fight", 0)) or 0),
+        "shoot": int(soldier.get("shoot", info.get("shoot", 0)) or 0),
+        "armour": int(info.get("armour", 0)),
+        "will": int(soldier.get("will", info.get("will", 0)) or 0),
+        "health": int(soldier.get("health", info.get("health", 0)) or 0),
+    }
+    # The promotion bonus package is always applied in full — it's defined by
+    # the homerule, not a per-promotion player choice. Only the optional extra
+    # +1 (gated by promote_captain_bonus_choice_enabled) is player-selectable.
+    bonus = hr.get("promote_captain_bonus") or PROMOTE_CAPTAIN_BONUS
+    for stat in LEVELUP_STATS:
+        stats[stat] = stats.get(stat, 0) + int(bonus.get(stat, 0))
+    applied_extra_stat = None
+    if hr.get("promote_captain_bonus_choice_enabled") and extra_stat in LEVELUP_STATS:
+        stats[extra_stat] = stats.get(extra_stat, 0) + 1
+        applied_extra_stat = extra_stat
+
+    wb["gold"] = int(wb.get("gold", 0)) - cost
+    n = int(hr.get("promote_captain_item_slots", PROMOTE_CAPTAIN_ITEM_SLOTS))
+    name = soldier.get("name", "Captain")
+    cap = {
+        "name": name,
+        "stats": stats,
+        "bonus_extra_stat": applied_extra_stat,
+        "item_slots": normalize_item_slots(soldier.get("items"), n),
+        "has_dagger": False,
+        "notes": soldier.get("notes", ""),
+        "portrait": soldier.get("portrait"),
+        "xp": 0,
+        "level": 0,
+        "levelup_counts": {s: 0 for s in LEVELUP_STATS},
+        "level_history": [],
+        "origin": "promoted",
+    }
+    wb["captain"] = cap
+    soldiers.pop(idx)
+    wb["soldiers"] = soldiers
+    text = (
+        f"Promoted {name} to Captain for {cost} gc "
+        "(prior soldier XP/levels are folded into the new base stats, not carried as banked XP)."
+    )
+    add_history(wb, text)
+    return True, text
+
+
+def apply_soldier_level_up(wb: dict, soldier_id: str, choice: str) -> tuple[bool, str]:
+    """Spend one pending soldier level-up. Requires the Soldier Leveling homerule."""
+    hr = wb.setdefault("homerules", default_homerules())
+    if not hr.get("soldier_leveling_enabled"):
+        return False, "Soldier Leveling is not enabled for this warband (see Homerules)."
+    for s in wb.get("soldiers") or []:
+        if s.get("id") == soldier_id:
+            ok, msg = _spend_stat_level_up(
+                s,
+                choice,
+                hr.get("soldier_stat_caps") or SOLDIER_STAT_CAPS,
+                int(hr.get("soldier_max_levels", SOLDIER_MAX_LEVELS)),
+                get_stat=lambda st: int(s.get(st, 0) or 0),
+                set_stat=lambda st, v: s.__setitem__(st, v),
+                label=s.get("name", "Soldier"),
+            )
+            if ok:
+                add_history(wb, msg)
+            return ok, msg
+    return False, "Soldier not found."
+
+
+def reverse_last_soldier_level_up(wb: dict, soldier_id: str) -> tuple[bool, str]:
+    for s in wb.get("soldiers") or []:
+        if s.get("id") == soldier_id:
+            ok, msg = _reverse_last_stat_level_up(
+                s,
+                get_stat=lambda st: int(s.get(st, 0) or 0),
+                set_stat=lambda st, v: s.__setitem__(st, v),
+                label=s.get("name", "Soldier"),
+            )
+            if ok:
+                add_history(wb, msg)
+            return ok, msg
+    return False, "Soldier not found."
+
+
+def add_soldier_xp(wb: dict, soldier_id: str, amount: int) -> tuple[bool, str]:
+    if amount <= 0:
+        return False, "Enter positive XP."
+    for s in wb.get("soldiers") or []:
+        if s.get("id") == soldier_id:
+            s["xp"] = int(s.get("xp", 0)) + int(amount)
+            text = f"{s.get('name', 'Soldier')} gained {amount} XP (total {s['xp']})."
+            add_history(wb, text)
+            return True, text
+    return False, "Soldier not found."
+
+
 def adjust_gold(wb: dict, delta: int, reason: str = "") -> None:
     wb["gold"] = int(wb.get("gold", 0)) + int(delta)
     sign = "+" if delta >= 0 else ""
@@ -804,6 +1275,7 @@ def record_game_loot(
     items: list[str],
     xp: int = 0,
     notes: str = "",
+    captain_xp: int = 0,
 ) -> str:
     parts = []
     if gold:
@@ -819,6 +1291,9 @@ def record_game_loot(
         wiz["xp"] = int(wiz.get("xp", 0)) + int(xp)
         parts.append(f"+{xp} XP")
         # Do not auto-raise level — player spends level-ups consciously
+    if captain_xp and wb.get("captain"):
+        wb["captain"]["xp"] = int(wb["captain"].get("xp", 0)) + int(captain_xp)
+        parts.append(f"Captain +{captain_xp} XP")
     if notes.strip():
         add_history(wb, f"Game notes: {notes.strip()}")
     summary = "After-game: " + (", ".join(parts) if parts else "no loot")

@@ -3,6 +3,8 @@
 {% block content %}
   {% set wiz = wb.wizard %}
   {% set ap = wb.apprentice %}
+  {% set cap = wb.captain %}
+  {% set hr = wb.homerules %}
 
   <section class="hero">
     <div class="hero-with-portrait">
@@ -23,7 +25,7 @@
             Specialists: {{ limits.specialists }} / {{ limits.max_specialists }}
           </div>
           <div class="limit">
-            Apprentice: {% if limits.has_apprentice %}yes (lvl {{ ap.level }}){% else %}no{% endif %}
+            Apprentice: {% if limits.has_apprentice %}yes{% else %}no{% endif %}
           </div>
           {% if pending_levels %}
             <div class="limit bad">{{ pending_levels }} level-up{% if pending_levels != 1 %}s{% endif %} ready</div>
@@ -46,95 +48,135 @@
     </div>
   </section>
 
-  {# ---- Level up ---- #}
-  <details class="card" id="level-up" open>
-    <summary><h2>Level up wizard</h2></summary>
-    <p class="muted">
-      XP is tracked on the wizard. When you have enough XP ({{ 100 }} per level), spend level-ups here.
-      The apprentice auto-levels: level = wizard÷2, stats = wizard with apprentice offsets, same spells.
+  {# ---- Homerules ---- #}
+  <details class="card" id="homerules">
+    <summary><h2>Homerules</h2></summary>
+    <p class="muted" style="font-size:0.85rem">
+      Optional house rules, off by default (not part of core 2e). Adapted from the FG1E Sellswords
+      supplement — tune these to match your group's own version.
     </p>
-    <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="form-row inline">
-      <input type="hidden" name="action" value="add_xp" />
-      <div>
-        <label for="xp">Add XP</label>
-        <input id="xp" name="xp" type="number" min="1" value="50" />
+    <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
+      <input type="hidden" name="action" value="update_homerules" />
+      <div class="checkbox-row">
+        <input id="captains_enabled" name="captains_enabled" type="checkbox" {% if hr.captains_enabled %}checked{% endif %} />
+        <label for="captains_enabled" style="margin:0">Enable Captains (FG1E Sellswords-style homerule)</label>
       </div>
-      <div>
-        <label>&nbsp;</label>
-        <button class="btn secondary" type="submit">Add XP</button>
+      <details class="ref-panel">
+        <summary>Captain settings</summary>
+        <div class="grid-2">
+          <div class="form-row">
+            <label for="captain_hiring_cost">Hiring cost (gc)</label>
+            <input id="captain_hiring_cost" name="captain_hiring_cost" type="number" min="0" value="{{ hr.captain_hiring_cost }}" />
+          </div>
+          <div class="form-row">
+            <label for="captain_item_slots">Item slots</label>
+            <input id="captain_item_slots" name="captain_item_slots" type="number" min="1" value="{{ hr.captain_item_slots }}" />
+          </div>
+          <div class="form-row">
+            <label for="captain_max_level">Max level</label>
+            <input id="captain_max_level" name="captain_max_level" type="number" min="0" value="{{ hr.captain_max_level }}" />
+          </div>
+          <div class="form-row">
+            <label>&nbsp;</label>
+            <div class="checkbox-row">
+              <input id="captain_bonus_choice_enabled" name="captain_bonus_choice_enabled" type="checkbox" {% if hr.captain_bonus_choice_enabled %}checked{% endif %} />
+              <label for="captain_bonus_choice_enabled" style="margin:0">Offer a +1-to-any-stat bonus at hire</label>
+            </div>
+          </div>
+          <div class="form-row">
+            <label for="captain_mind_control">Mind Control</label>
+            <select id="captain_mind_control" name="captain_mind_control">
+              {% for opt in CAPTAIN_MIND_CONTROL_OPTIONS %}
+                <option value="{{ opt }}" {% if hr.captain_mind_control == opt %}selected{% endif %}>{{ CAPTAIN_MIND_CONTROL_LABELS[opt] }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <p class="muted" style="font-size:0.85rem;margin-top:0.5rem">Starting stats (before any hire-time bonus)</p>
+        <div class="stat-row">
+          <div class="form-row"><label for="captain_base_move">Move</label><input id="captain_base_move" name="captain_base_move" type="number" value="{{ hr.captain_base_stats.move }}" /></div>
+          <div class="form-row"><label for="captain_base_fight">Fight</label><input id="captain_base_fight" name="captain_base_fight" type="number" value="{{ hr.captain_base_stats.fight }}" /></div>
+          <div class="form-row"><label for="captain_base_shoot">Shoot</label><input id="captain_base_shoot" name="captain_base_shoot" type="number" value="{{ hr.captain_base_stats.shoot }}" /></div>
+          <div class="form-row"><label for="captain_base_armour">Armour</label><input id="captain_base_armour" name="captain_base_armour" type="number" value="{{ hr.captain_base_stats.armour }}" /></div>
+          <div class="form-row"><label for="captain_base_will">Will</label><input id="captain_base_will" name="captain_base_will" type="number" value="{{ hr.captain_base_stats.will }}" /></div>
+          <div class="form-row"><label for="captain_base_health">Health</label><input id="captain_base_health" name="captain_base_health" type="number" value="{{ hr.captain_base_stats.health }}" /></div>
+        </div>
+        <p class="muted" style="font-size:0.85rem;margin-top:0.5rem">Level-up limits (check Unlimited to remove a stat's cap entirely)</p>
+        <div class="stat-row">
+          {% for stat in LEVELUP_STATS %}
+            <div class="form-row">
+              <label for="captain_cap_{{ stat }}_limit">{{ stat|capitalize }} level-ups allowed</label>
+              <input id="captain_cap_{{ stat }}_limit" name="captain_cap_{{ stat }}_limit" type="number" min="0" value="{{ hr.captain_stat_caps[stat].limit }}" />
+              <label class="checkbox-row" style="margin-top:0.3rem">
+                <input name="captain_cap_{{ stat }}_unlimited" type="checkbox" {% if hr.captain_stat_caps[stat].unlimited %}checked{% endif %} /> Unlimited
+              </label>
+            </div>
+          {% endfor %}
+        </div>
+      </details>
+
+      <details class="ref-panel">
+        <summary>Soldier Leveling</summary>
+        <div class="checkbox-row">
+          <input id="soldier_leveling_enabled" name="soldier_leveling_enabled" type="checkbox" {% if hr.soldier_leveling_enabled %}checked{% endif %} />
+          <label for="soldier_leveling_enabled" style="margin:0">Enable Soldier Leveling</label>
+        </div>
+        <div class="form-row">
+          <label for="soldier_max_levels">Max levels gained (per soldier)</label>
+          <input id="soldier_max_levels" name="soldier_max_levels" type="number" min="0" value="{{ hr.soldier_max_levels }}" />
+        </div>
+        <p class="muted" style="font-size:0.85rem;margin-top:0.5rem">Level-up limits (check Unlimited to remove a stat's cap entirely)</p>
+        <div class="stat-row">
+          {% for stat in LEVELUP_STATS %}
+            <div class="form-row">
+              <label for="soldier_cap_{{ stat }}_limit">{{ stat|capitalize }} level-ups allowed</label>
+              <input id="soldier_cap_{{ stat }}_limit" name="soldier_cap_{{ stat }}_limit" type="number" min="0" value="{{ hr.soldier_stat_caps[stat].limit }}" />
+              <label class="checkbox-row" style="margin-top:0.3rem">
+                <input name="soldier_cap_{{ stat }}_unlimited" type="checkbox" {% if hr.soldier_stat_caps[stat].unlimited %}checked{% endif %} /> Unlimited
+              </label>
+            </div>
+          {% endfor %}
+        </div>
+      </details>
+
+      <details class="ref-panel">
+        <summary>Promote Captain</summary>
+        <div class="checkbox-row">
+          <input id="promote_captain_enabled" name="promote_captain_enabled" type="checkbox" {% if hr.promote_captain_enabled %}checked{% endif %} />
+          <label for="promote_captain_enabled" style="margin:0">Allow promoting an active soldier to Captain</label>
+        </div>
+        <div class="grid-2">
+          <div class="form-row">
+            <label for="promote_captain_cost">Promotion cost (gc)</label>
+            <input id="promote_captain_cost" name="promote_captain_cost" type="number" min="0" value="{{ hr.promote_captain_cost }}" />
+          </div>
+          <div class="form-row">
+            <label for="promote_captain_item_slots">Item slots</label>
+            <input id="promote_captain_item_slots" name="promote_captain_item_slots" type="number" min="1" value="{{ hr.promote_captain_item_slots }}" />
+          </div>
+          <div class="form-row">
+            <label>&nbsp;</label>
+            <div class="checkbox-row">
+              <input id="promote_captain_bonus_choice_enabled" name="promote_captain_bonus_choice_enabled" type="checkbox" {% if hr.promote_captain_bonus_choice_enabled %}checked{% endif %} />
+              <label for="promote_captain_bonus_choice_enabled" style="margin:0">Let the player pick an extra +1 bonus stat</label>
+            </div>
+          </div>
+        </div>
+        <p class="muted" style="font-size:0.85rem;margin-top:0.5rem">Promotion bonus — always applied in full, not selectable at promotion</p>
+        <div class="stat-row">
+          {% for stat in LEVELUP_STATS %}
+            <div class="form-row">
+              <label for="promote_bonus_{{ stat }}">+{{ stat|capitalize }}</label>
+              <input id="promote_bonus_{{ stat }}" name="promote_bonus_{{ stat }}" type="number" min="0" value="{{ hr.promote_captain_bonus[stat] }}" />
+            </div>
+          {% endfor %}
+        </div>
+      </details>
+
+      <div class="actions">
+        <button class="btn" type="submit">Save homerules</button>
       </div>
     </form>
-
-    {% if pending_levels %}
-      <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:1rem">
-        <input type="hidden" name="action" value="level_up" />
-        <div class="form-row">
-          <label>Choose improvement ({{ pending_levels }} available)</label>
-          <select name="choice" id="level-choice" required>
-            {% for opt in LEVEL_UP_OPTIONS %}
-              <option value="{{ opt.id }}">{{ opt.label }}</option>
-            {% endfor %}
-          </select>
-        </div>
-        <div class="form-row" id="learn-spell-row" style="display:none">
-          <label for="learn_spell">New spell</label>
-          <select id="learn_spell" name="learn_spell">
-            {% for sp in learnable %}
-              <option value="{{ sp.id }}" title="{{ sp.description }}">{{ sp.name }} ({{ sp.school }}, your CN {{ sp.effective_cn }})</option>
-            {% endfor %}
-          </select>
-        </div>
-        <div class="form-row" id="improve-spell-row" style="display:none">
-          <label for="improve_spell">Improve spell (−1 CN, min 5)</label>
-          <select id="improve_spell" name="improve_spell">
-            {% for sp in wiz.spells %}
-              <option value="{{ sp.id }}">{{ sp.name }} (CN {{ sp.cn }})</option>
-            {% endfor %}
-          </select>
-        </div>
-        <button class="btn" type="submit">Confirm level-up</button>
-      </form>
-      <script>
-        const choice = document.getElementById('level-choice');
-        const learnRow = document.getElementById('learn-spell-row');
-        const impRow = document.getElementById('improve-spell-row');
-        function syncLevelUI() {
-          learnRow.style.display = choice.value === 'learn_spell' ? '' : 'none';
-          impRow.style.display = choice.value === 'improve_spell' ? '' : 'none';
-        }
-        choice.addEventListener('change', syncLevelUI);
-        syncLevelUI();
-      </script>
-    {% else %}
-      <p class="empty">No pending level-ups. Add XP from post-game rewards first.</p>
-    {% endif %}
-
-    {% if wiz.level_history %}
-      <h3>Level history</h3>
-      <ul class="list-plain">
-        {% for h in wiz.level_history|reverse %}
-          <li>
-            Level {{ h.level }}: {{ h.detail }}
-            {% if loop.first %}
-              <span class="muted">(latest)</span>
-            {% endif %}
-          </li>
-        {% endfor %}
-      </ul>
-      <form
-        method="post"
-        action="{{ url_for('warband_update', warband_id=wb.id) }}"
-        style="margin-top:0.75rem"
-        onsubmit="return confirm('Reverse the latest level-up ({{ wiz.level_history[-1].detail }})? XP is kept; only the level benefit is undone.');"
-      >
-        <input type="hidden" name="action" value="reverse_level_up" />
-        <button class="btn danger" type="submit">Reverse last level-up</button>
-      </form>
-      <p class="muted" style="font-size:0.85rem;margin-top:0.4rem">
-        Undoes only the most recent level-up (stats / spell learned / spell improved).
-        XP is not changed, so you can pick a different improvement.
-      </p>
-    {% endif %}
   </details>
 
   {# ---- Post-game loot ---- #}
@@ -152,6 +194,12 @@
           <label for="loot_xp">Wizard XP gained</label>
           <input id="loot_xp" name="loot_xp" type="number" min="0" value="0" />
         </div>
+        {% if hr.captains_enabled and cap %}
+          <div class="form-row">
+            <label for="loot_captain_xp">Captain XP gained</label>
+            <input id="loot_captain_xp" name="loot_captain_xp" type="number" min="0" value="0" />
+          </div>
+        {% endif %}
         <div class="form-row">
           <label for="loot_items">Items found (one per line)</label>
           <textarea id="loot_items" name="loot_items" placeholder="Grimoire: Bone Dart&#10;Potion of Healing&#10;Magic dagger"></textarea>
@@ -171,7 +219,7 @@
     <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" enctype="multipart/form-data">
       <input type="hidden" name="action" value="details" />
       <details class="ref-panel" open>
-        <summary>Wizard — {{ wiz.name }} · {{ wiz.school }} · H {{ wiz.stats.health }}</summary>
+        <summary>Wizard — {{ wiz.name }} · {{ wiz.school }}</summary>
         <div class="char-block">
           {% if wiz.portrait %}
             <img class="portrait-md" src="{{ url_for('portrait_file', relpath=wiz.portrait) }}" alt="" />
@@ -231,7 +279,7 @@
 
       {% if ap %}
         <details class="ref-panel" open>
-          <summary>Apprentice — {{ ap.name }} · {{ wiz.school }} · H {{ ap.stats.health }}</summary>
+          <summary>Apprentice — {{ ap.name }} · {{ wiz.school }}</summary>
           <div class="char-block">
             {% if ap.portrait %}
               <img class="portrait-md" src="{{ url_for('portrait_file', relpath=ap.portrait) }}" alt="" />
@@ -249,7 +297,7 @@
                   <input id="apprentice_portrait" name="apprentice_portrait" type="file" accept="image/*" />
                 </div>
               </div>
-              <p class="muted">Level {{ ap.level }} · stats synced from wizard (starting H12 when wizard is H14)</p>
+              <p class="muted">Stats synced from wizard (starting H12 when wizard is H14)</p>
               <div class="stat-row">
                 <div class="stat-pill"><span class="label">Move</span><span class="value">{{ ap.stats.move }}</span></div>
                 <div class="stat-pill"><span class="label">Fight</span><span class="value">{{ format_stat(ap.stats.fight) }}</span></div>
@@ -284,6 +332,96 @@
         <button class="btn" type="submit">Save details</button>
       </div>
     </form>
+
+    <details class="ref-panel">
+      <summary>Level up wizard {% if pending_levels %}({{ pending_levels }} ready){% endif %}</summary>
+      <p class="muted">
+        XP is tracked on the wizard. When you have enough XP ({{ 100 }} per level), spend level-ups here.
+        The apprentice auto-levels: level = wizard÷2, stats = wizard with apprentice offsets, same spells.
+      </p>
+      <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="form-row inline">
+        <input type="hidden" name="action" value="add_xp" />
+        <div>
+          <label for="xp">Add XP</label>
+          <input id="xp" name="xp" type="number" min="1" value="50" />
+        </div>
+        <div>
+          <label>&nbsp;</label>
+          <button class="btn secondary" type="submit">Add XP</button>
+        </div>
+      </form>
+
+      {% if pending_levels %}
+        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:1rem">
+          <input type="hidden" name="action" value="level_up" />
+          <div class="form-row">
+            <label>Choose improvement ({{ pending_levels }} available)</label>
+            <select name="choice" id="level-choice" required>
+              {% for opt in LEVEL_UP_OPTIONS %}
+                <option value="{{ opt.id }}">{{ opt.label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-row" id="learn-spell-row" style="display:none">
+            <label for="learn_spell">New spell</label>
+            <select id="learn_spell" name="learn_spell">
+              {% for sp in learnable %}
+                <option value="{{ sp.id }}" title="{{ sp.description }}">{{ sp.name }} ({{ sp.school }}, your CN {{ sp.effective_cn }})</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-row" id="improve-spell-row" style="display:none">
+            <label for="improve_spell">Improve spell (−1 CN, min 5)</label>
+            <select id="improve_spell" name="improve_spell">
+              {% for sp in wiz.spells %}
+                <option value="{{ sp.id }}">{{ sp.name }} (CN {{ sp.cn }})</option>
+              {% endfor %}
+            </select>
+          </div>
+          <button class="btn" type="submit">Confirm level-up</button>
+        </form>
+        <script>
+          const choice = document.getElementById('level-choice');
+          const learnRow = document.getElementById('learn-spell-row');
+          const impRow = document.getElementById('improve-spell-row');
+          function syncLevelUI() {
+            learnRow.style.display = choice.value === 'learn_spell' ? '' : 'none';
+            impRow.style.display = choice.value === 'improve_spell' ? '' : 'none';
+          }
+          choice.addEventListener('change', syncLevelUI);
+          syncLevelUI();
+        </script>
+      {% else %}
+        <p class="empty">No pending level-ups. Add XP from post-game rewards first.</p>
+      {% endif %}
+
+      {% if wiz.level_history %}
+        <h3>Level history</h3>
+        <ul class="list-plain">
+          {% for h in wiz.level_history|reverse %}
+            <li>
+              Level {{ h.level }}: {{ h.detail }}
+              {% if loop.first %}
+                <span class="muted">(latest)</span>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+        <form
+          method="post"
+          action="{{ url_for('warband_update', warband_id=wb.id) }}"
+          style="margin-top:0.75rem"
+          onsubmit="return confirm('Reverse the latest level-up ({{ wiz.level_history[-1].detail }})? XP is kept; only the level benefit is undone.');"
+        >
+          <input type="hidden" name="action" value="reverse_level_up" />
+          <button class="btn danger" type="submit">Reverse last level-up</button>
+        </form>
+        <p class="muted" style="font-size:0.85rem;margin-top:0.4rem">
+          Undoes only the most recent level-up (stats / spell learned / spell improved).
+          XP is not changed, so you can pick a different improvement.
+        </p>
+      {% endif %}
+    </details>
 
     {% if not ap %}
       <h3>Hire apprentice</h3>
@@ -325,7 +463,7 @@
         <span class="col-summary">Summary</span>
         <span class="col-info"></span>
       </div>
-      {% for it in standard_items %}
+      {% for it in full_standard_items %}
         <div class="item-row">
           <details class="item-desc">
             <summary class="item-row-main">
@@ -428,6 +566,167 @@
     {% endif %}
   </details>
 
+  {% if hr.captains_enabled or hr.promote_captain_enabled or cap %}
+    {# ---- Captain ---- #}
+    <details class="card" id="captain" open>
+      <summary><h2>Captain</h2></summary>
+      {% if cap %}
+        {% set cap_slots_n = hr.promote_captain_item_slots if cap.origin == 'promoted' else hr.captain_item_slots %}
+        {% set cap_dismiss_cost = hr.promote_captain_cost if cap.origin == 'promoted' else hr.captain_hiring_cost %}
+        <div class="char-block">
+          {% if cap.portrait %}
+            <img class="portrait-md" src="{{ url_for('portrait_file', relpath=cap.portrait) }}" alt="" />
+          {% else %}
+            <span class="portrait-placeholder portrait-md-ph">?</span>
+          {% endif %}
+          <div class="char-body">
+            <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" enctype="multipart/form-data">
+              <input type="hidden" name="action" value="captain_edit" />
+              <div class="grid-2">
+                <div class="form-row">
+                  <label for="captain_name">Name</label>
+                  <input id="captain_name" name="captain_name" type="text" value="{{ cap.name }}" />
+                </div>
+                <div class="form-row">
+                  <label for="captain_portrait">Change picture</label>
+                  <input id="captain_portrait" name="captain_portrait" type="file" accept="image/*" />
+                </div>
+              </div>
+              <div class="stat-row">
+                <div class="stat-pill"><span class="label">Move</span><span class="value">{{ cap.stats.move }}</span></div>
+                <div class="stat-pill"><span class="label">Fight</span><span class="value">{{ format_stat(cap.stats.fight) }}</span></div>
+                <div class="stat-pill"><span class="label">Shoot</span><span class="value">{{ format_stat(cap.stats.shoot) }}</span></div>
+                <div class="stat-pill"><span class="label">Armour</span><span class="value">{{ cap.stats.armour }}</span></div>
+                <div class="stat-pill"><span class="label">Will</span><span class="value">{{ format_stat(cap.stats.will) }}</span></div>
+                <div class="stat-pill"><span class="label">Health</span><span class="value">{{ cap.stats.health }}</span></div>
+              </div>
+              <p class="muted" style="font-size:0.85rem">
+                {{ 'Promoted from the ranks' if cap.origin == 'promoted' else 'Hired' }} · Level {{ cap.level }}/{{ hr.captain_max_level }} · XP {{ cap.xp }}
+                {% if cap.bonus_extra_stat %}
+                  · Starting bonus: +1 {{ cap.bonus_extra_stat|capitalize }}
+                {% endif %}
+                {% if hr.captain_mind_control != 'none' %}
+                  · {{ CAPTAIN_MIND_CONTROL_LABELS[hr.captain_mind_control] }} (homerule note — not simulated)
+                {% endif %}
+              </p>
+              <h3>Captain items ({{ cap_slots_n }} slots)</h3>
+              <div class="checkbox-row">
+                <input id="captain_dagger" name="captain_dagger" type="checkbox" {% if cap.has_dagger %}checked{% endif %} />
+                <label for="captain_dagger" style="margin:0">Carries a dagger (free slot)</label>
+              </div>
+              {% set slots = cap.item_slots if cap.item_slots is defined else [] %}
+              {% set prefix = 'captain' %}
+              {% set n = cap_slots_n %}
+              {% set standard_items = full_standard_items %}
+              {% include '_item_slots.html' %}
+              <div class="form-row">
+                <label for="captain_notes">Notes</label>
+                <textarea id="captain_notes" name="captain_notes">{{ cap.notes }}</textarea>
+              </div>
+              <div class="actions">
+                <button class="btn" type="submit">Save captain</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        {% set cap_pending = [level_from_xp(cap.xp), hr.captain_max_level]|min - cap.level %}
+        <details class="ref-panel">
+          <summary>Level up captain {% if cap_pending > 0 %}({{ cap_pending }} ready){% endif %}</summary>
+          <p class="muted" style="font-size:0.85rem">
+            Flat 100 XP per level, same as the wizard, up to level {{ hr.captain_max_level }}. Per-stat caps are set in Homerules.
+          </p>
+          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="form-row inline">
+            <input type="hidden" name="action" value="captain_add_xp" />
+            <div>
+              <label for="captain_xp_amount">Add XP</label>
+              <input id="captain_xp_amount" name="amount" type="number" min="1" value="50" />
+            </div>
+            <div>
+              <label>&nbsp;</label>
+              <button class="btn secondary" type="submit">Add XP</button>
+            </div>
+          </form>
+
+          {% if cap_pending > 0 %}
+            <div class="stack-sm" style="margin-top:0.75rem">
+              {% for stat in LEVELUP_STATS %}
+                {% set capcfg = hr.captain_stat_caps[stat] %}
+                {% set used = cap.levelup_counts[stat] %}
+                <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
+                  <input type="hidden" name="action" value="captain_level_up" />
+                  <input type="hidden" name="choice" value="{{ stat }}" />
+                  <button class="btn secondary small" type="submit" {% if not capcfg.unlimited and used >= capcfg.limit %}disabled{% endif %}>
+                    +1 {{ stat|capitalize }} ({% if capcfg.unlimited %}{{ used }}, unlimited{% else %}{{ used }}/{{ capcfg.limit }} used{% endif %})
+                  </button>
+                </form>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p class="empty">No pending level-ups. Add XP first.</p>
+          {% endif %}
+
+          {% if cap.level_history %}
+            <h3>Captain level history</h3>
+            <ul class="list-plain">
+              {% for h in cap.level_history|reverse %}
+                <li>Level {{ h.level }}: {{ h.detail }}{% if loop.first %} <span class="muted">(latest)</span>{% endif %}</li>
+              {% endfor %}
+            </ul>
+            <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:0.5rem">
+              <input type="hidden" name="action" value="reverse_captain_level_up" />
+              <button class="btn danger small" type="submit" onclick="return confirm('Reverse the latest captain level-up?');">Reverse last level-up</button>
+            </form>
+          {% endif %}
+        </details>
+
+        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="actions" style="margin-top:0.75rem">
+          <input type="hidden" name="action" value="dismiss_captain" />
+          <label class="checkbox-row" style="margin:0">
+            <input type="checkbox" name="refund" /> Refund {{ cap_dismiss_cost }} gc
+          </label>
+          <button class="btn danger small" type="submit" onclick="return confirm('Dismiss captain?');">Dismiss captain</button>
+        </form>
+      {% else %}
+        {% if hr.captains_enabled %}
+          <h3>Hire captain</h3>
+          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" enctype="multipart/form-data">
+            <input type="hidden" name="action" value="hire_captain" />
+            <div class="form-row inline">
+              <div>
+                <label for="captain_name">Name</label>
+                <input id="captain_name" name="captain_name" type="text" placeholder="Captain" />
+              </div>
+              {% if hr.captain_bonus_choice_enabled %}
+                <div>
+                  <label for="captain_extra_stat">+1 bonus to</label>
+                  <select id="captain_extra_stat" name="captain_extra_stat">
+                    {% for stat in LEVELUP_STATS %}
+                      <option value="{{ stat }}">{{ stat|capitalize }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              {% endif %}
+              <div>
+                <label for="captain_portrait">Picture</label>
+                <input id="captain_portrait" name="captain_portrait" type="file" accept="image/*" />
+              </div>
+              <div>
+                <label>&nbsp;</label>
+                <button class="btn gold" type="submit">Hire (−{{ hr.captain_hiring_cost }} gc)</button>
+              </div>
+            </div>
+          </form>
+        {% endif %}
+        {% if hr.promote_captain_enabled %}
+          <p class="muted" style="font-size:0.85rem">
+            No captain yet — promote an active soldier to Captain from Soldiers &amp; recruiting below.
+          </p>
+        {% endif %}
+      {% endif %}
+    </details>
+  {% endif %}
+
   {# ---- Soldiers / recruit ---- #}
   <details class="card" id="recruit" open>
     <summary><h2>Soldiers &amp; recruiting</h2></summary>
@@ -447,6 +746,7 @@
           <thead>
             <tr>
               <th>#</th>
+              <th>Sel.</th>
               <th></th>
               <th>Name</th>
               <th>Type</th>
@@ -461,13 +761,16 @@
               <tr class="status-{{ s.status }}" data-soldier-id="{{ s.id }}">
                 <td class="muted">{{ loop.index }}</td>
                 <td>
+                  <input type="radio" name="soldier-select" aria-label="Select {{ s.name }} to reorder" />
+                </td>
+                <td>
                   {% if s.portrait %}
                     <img class="portrait-sm" src="{{ url_for('portrait_file', relpath=s.portrait) }}" alt="" />
                   {% else %}
                     <span class="portrait-placeholder">?</span>
                   {% endif %}
                 </td>
-                <td><strong>{{ s.name }}</strong></td>
+                <td><strong>{{ s.name }}</strong>{% if hr.soldier_leveling_enabled and s.level %} <span class="muted">(Lv {{ s.level }})</span>{% endif %}</td>
                 <td>
                   {{ s.type_name }}
                   <div><span class="badge {{ s.category }}">{{ s.category }}</span></div>
@@ -502,6 +805,71 @@
                         <button class="btn small" type="submit">Update</button>
                       </form>
                     </details>
+                    {% if hr.soldier_leveling_enabled %}
+                      {% set s_pending = level_from_xp(s.xp) - s.level %}
+                      <details>
+                        <summary class="muted" style="cursor:pointer;font-size:0.85rem">Level up {% if s_pending > 0 %}({{ s_pending }} ready){% endif %}</summary>
+                        <div class="stack-sm" style="margin-top:0.4rem">
+                          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
+                            <input type="hidden" name="action" value="soldier_add_xp" />
+                            <input type="hidden" name="soldier_id" value="{{ s.id }}" />
+                            <input name="amount" type="number" min="1" value="50" style="width:5rem" />
+                            <button class="btn secondary small" type="submit">Add XP</button>
+                          </form>
+                          <p class="muted" style="font-size:0.8rem;margin:0">XP {{ s.xp }} · Level {{ s.level }}/{{ hr.soldier_max_levels }}</p>
+                          {% if s_pending > 0 %}
+                            {% for stat in LEVELUP_STATS %}
+                              {% set scapcfg = hr.soldier_stat_caps[stat] %}
+                              {% set sused = s.levelup_counts[stat] %}
+                              <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
+                                <input type="hidden" name="action" value="soldier_level_up" />
+                                <input type="hidden" name="soldier_id" value="{{ s.id }}" />
+                                <input type="hidden" name="choice" value="{{ stat }}" />
+                                <button class="btn secondary small" type="submit" {% if not scapcfg.unlimited and sused >= scapcfg.limit %}disabled{% endif %}>
+                                  +1 {{ stat|capitalize }} ({% if scapcfg.unlimited %}{{ sused }}, unlimited{% else %}{{ sused }}/{{ scapcfg.limit }} used{% endif %})
+                                </button>
+                              </form>
+                            {% endfor %}
+                          {% endif %}
+                          {% if s.level_history %}
+                            <ul class="list-plain" style="font-size:0.8rem">
+                              {% for h in s.level_history|reverse %}
+                                <li>Level {{ h.level }}: {{ h.detail }}{% if loop.first %} <span class="muted">(latest)</span>{% endif %}</li>
+                              {% endfor %}
+                            </ul>
+                            <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
+                              <input type="hidden" name="action" value="reverse_soldier_level_up" />
+                              <input type="hidden" name="soldier_id" value="{{ s.id }}" />
+                              <button class="btn danger small" type="submit" onclick="return confirm('Reverse the latest level-up for {{ s.name }}?');">Reverse last level-up</button>
+                            </form>
+                          {% endif %}
+                        </div>
+                      </details>
+                    {% endif %}
+                    {% if hr.promote_captain_enabled and not cap and s.status == 'active' %}
+                      <details>
+                        <summary class="muted" style="cursor:pointer;font-size:0.85rem">Promote to Captain</summary>
+                        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="stack-sm" style="margin-top:0.4rem" onsubmit="return confirm('Promote {{ s.name }} to Captain for {{ hr.promote_captain_cost }} gc?');">
+                          <input type="hidden" name="action" value="promote_soldier" />
+                          <input type="hidden" name="soldier_id" value="{{ s.id }}" />
+                          <p class="muted" style="font-size:0.8rem;margin:0">
+                            Grants +{{ hr.promote_captain_bonus.fight }} Fight, +{{ hr.promote_captain_bonus.shoot }} Shoot,
+                            +{{ hr.promote_captain_bonus.will }} Will, +{{ hr.promote_captain_bonus.health }} Health (set in Homerules).
+                          </p>
+                          {% if hr.promote_captain_bonus_choice_enabled %}
+                            <label style="font-size:0.8rem">
+                              Extra +1 bonus to
+                              <select name="extra_stat">
+                                {% for stat in LEVELUP_STATS %}
+                                  <option value="{{ stat }}">{{ stat|capitalize }}</option>
+                                {% endfor %}
+                              </select>
+                            </label>
+                          {% endif %}
+                          <button class="btn gold small" type="submit">Promote (−{{ hr.promote_captain_cost }} gc)</button>
+                        </form>
+                      </details>
+                    {% endif %}
                     <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" onsubmit="return confirm('Remove {{ s.name }}?');">
                       <input type="hidden" name="action" value="remove_soldier" />
                       <input type="hidden" name="soldier_id" value="{{ s.id }}" />
@@ -525,33 +893,47 @@
           <button type="button" class="btn secondary small" id="soldier-down">Move selected ↓</button>
           <button class="btn small" type="submit">Save soldier order</button>
         </div>
-        <p class="muted" style="font-size:0.85rem;margin-top:0.4rem">Click a soldier row to select it, then reorder. Order is used on the PDF roster.</p>
+        <p class="muted" style="font-size:0.85rem;margin-top:0.4rem">Pick the "Sel." radio on a soldier row, then reorder. Order is used on the PDF roster.</p>
       </form>
       <script>
         (function () {
           const body = document.getElementById('soldier-order-body');
           if (!body) return;
           const input = document.getElementById('view-soldier-order');
-          let selected = null;
           function rows() { return [...body.querySelectorAll('tr')]; }
+          function radios() { return [...body.querySelectorAll('input[name="soldier-select"]')]; }
+          function selectedRow() {
+            const radio = body.querySelector('input[name="soldier-select"]:checked');
+            return radio ? radio.closest('tr') : null;
+          }
+          function refreshHighlight() {
+            rows().forEach((r) => { r.style.outline = ''; });
+            const sel = selectedRow();
+            if (sel) sel.style.outline = '2px solid var(--accent)';
+          }
           function sync() {
             rows().forEach((r, i) => { r.cells[0].textContent = i + 1; });
             input.value = rows().map(r => r.dataset.soldierId).join('|');
           }
+          radios().forEach((radio) => radio.addEventListener('change', refreshHighlight));
           rows().forEach(r => r.addEventListener('click', (e) => {
             if (e.target.closest('form') || e.target.closest('select') || e.target.closest('button') || e.target.closest('input') || e.target.closest('details')) return;
-            rows().forEach(x => x.style.outline = '');
-            selected = r;
-            r.style.outline = '2px solid var(--accent)';
+            const radio = r.querySelector('input[name="soldier-select"]');
+            if (radio) {
+              radio.checked = true;
+              refreshHighlight();
+            }
           }));
           document.getElementById('soldier-up').onclick = () => {
-            if (!selected || !selected.previousElementSibling) return;
-            body.insertBefore(selected, selected.previousElementSibling);
+            const sel = selectedRow();
+            if (!sel || !sel.previousElementSibling) return;
+            body.insertBefore(sel, sel.previousElementSibling);
             sync();
           };
           document.getElementById('soldier-down').onclick = () => {
-            if (!selected || !selected.nextElementSibling) return;
-            body.insertBefore(selected.nextElementSibling, selected);
+            const sel = selectedRow();
+            if (!sel || !sel.nextElementSibling) return;
+            body.insertBefore(sel.nextElementSibling, sel);
             sync();
           };
         })();
