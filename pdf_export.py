@@ -209,12 +209,20 @@ def build_warband_pdf(wb: dict) -> bytes:
 
     wiz = wb.get("wizard") or {}
     ap = wb.get("apprentice")
+    cap = wb.get("captain")
+    homerules = wb.get("homerules") or {}
     portrait_gap = 4
     wiz_size = 28
     sol_size = 20
 
+    section_no = [1]
+
+    def _next_section(title: str) -> None:
+        _section(pdf, f"{section_no[0]}. {title}")
+        section_no[0] += 1
+
     # --- Wizard ---
-    _section(pdf, "1. Wizard")
+    _next_section("Wizard")
     y0 = pdf.get_y()
     _draw_portrait(pdf, wiz.get("portrait"), pdf.l_margin, y0, wiz_size)
     left = pdf.l_margin + wiz_size + portrait_gap
@@ -253,7 +261,7 @@ def build_warband_pdf(wb: dict) -> bytes:
 
     # --- Apprentice ---
     if ap:
-        _section(pdf, "2. Apprentice")
+        _next_section("Apprentice")
         y0 = pdf.get_y()
         _draw_portrait(pdf, ap.get("portrait"), pdf.l_margin, y0, wiz_size)
         left = pdf.l_margin + wiz_size + portrait_gap
@@ -292,7 +300,7 @@ def build_warband_pdf(wb: dict) -> bytes:
         pdf.ln(2)
 
     # --- Spells ---
-    _section(pdf, "3. Spells")
+    _next_section("Spells")
     spells = list(wiz.get("spells") or [])
     if not spells:
         pdf.set_font("Helvetica", "I", 10)
@@ -330,11 +338,44 @@ def build_warband_pdf(wb: dict) -> bytes:
             pdf.ln()
     pdf.ln(3)
 
-    # Soldiers start on their own page (spilling to further pages as needed)
-    pdf.add_page()
+    # Captain (if any) shares a fresh page with the Soldiers roster, above them.
+    if cap:
+        pdf.add_page()
+        cap_slot_key = "promote_captain_item_slots" if cap.get("origin") == "promoted" else "captain_item_slots"
+        cap_slots_n = int(homerules.get(cap_slot_key, 6))
+        _next_section("Captain")
+        y0 = pdf.get_y()
+        _draw_portrait(pdf, cap.get("portrait"), pdf.l_margin, y0, wiz_size)
+        left = pdf.l_margin + wiz_size + portrait_gap
+        pdf.set_xy(left, y0)
+        pdf.set_font("Helvetica", "B", 12)
+        pdf.cell(
+            0,
+            6,
+            _t(f"{cap.get('name', 'Captain')}  -  Level {cap.get('level', 0)}  -  XP {cap.get('xp', 0)}"),
+            new_x="LMARGIN",
+            new_y="NEXT",
+        )
+        pdf.set_x(left)
+        pdf.set_font("Helvetica", "", 10)
+        cstats = cap.get("stats") or {}
+        pdf.cell(
+            0, 5, _health_line(cstats.get("health", 14)), new_x="LMARGIN", new_y="NEXT", markdown=True
+        )
+        pdf.set_x(left)
+        pdf.cell(0, 5, _stat_line(cstats), new_x="LMARGIN", new_y="NEXT", markdown=True)
+        cap_slots = cap.get("item_slots") or []
+        _write_item_block(
+            pdf, left, cap_slots, cap_slots_n, bool(cap.get("has_dagger")), "Equipment"
+        )
+        pdf.set_y(max(pdf.get_y(), y0 + wiz_size + 2))
+        pdf.ln(2)
+    else:
+        # No captain: Soldiers still starts on its own fresh page.
+        pdf.add_page()
 
     # --- Soldiers ---
-    _section(pdf, "4. Soldiers")
+    _next_section("Soldiers")
     soldiers = [enrich_soldier(s) for s in wb.get("soldiers") or []]
     if not soldiers:
         pdf.set_font("Helvetica", "I", 10)
@@ -348,11 +389,14 @@ def build_warband_pdf(wb: dict) -> bytes:
             left = pdf.l_margin + sol_size + portrait_gap
             pdf.set_xy(left, y0)
             pdf.set_font("Helvetica", "B", 10)
+            level_suffix = ""
+            if homerules.get("soldier_leveling_enabled") and s.get("level", 0) > 0:
+                level_suffix = f"  ·  Level {s['level']}"
             pdf.cell(
                 0,
                 5,
                 _t(
-                    f"{s.get('name', '?')}  -  {s.get('type_name', s.get('type_key', '?'))}"
+                    f"{s.get('name', '?')}  -  {s.get('type_name', s.get('type_key', '?'))}{level_suffix}"
                 ),
                 new_x="LMARGIN",
                 new_y="NEXT",
@@ -413,7 +457,7 @@ def build_warband_pdf(wb: dict) -> bytes:
         pdf.add_page()
 
     if has_base:
-        _section(pdf, "5. Home base")
+        _next_section("Home base")
         if has_location:
             pdf.set_font("Helvetica", "B", 10)
             pdf.cell(
@@ -448,11 +492,14 @@ def build_warband_pdf(wb: dict) -> bytes:
 
     if vault:
         if has_base:
-            pdf.ln(6)  # one free line between sections 5 and 6
+            pdf.ln(6)  # one free line between the Home base and Vault sections
         if pdf.get_y() > 250:
             pdf.add_page()
         pdf.set_x(pdf.l_margin)
-        _section(pdf, "6. Vault" if has_base else "5. Vault")
+        _next_section("Vault")
+        pdf.set_font("Helvetica", "B", 9)
+        pdf.cell(0, 5, _t(f"Current gold: {wb.get('gold', 0)} gc"), new_x="LMARGIN", new_y="NEXT")
+        pdf.set_x(pdf.l_margin)
         pdf.set_font("Helvetica", "", 9)
         for it in vault:
             pdf.set_x(pdf.l_margin)

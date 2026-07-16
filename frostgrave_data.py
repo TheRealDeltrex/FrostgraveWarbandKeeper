@@ -26,6 +26,64 @@ WIZARD_ITEM_SLOTS = 5
 APPRENTICE_ITEM_SLOTS = 4
 SOLDIER_ITEM_SLOTS = 1
 
+# --- Captains (homerule, not core 2e) --------------------------------------
+# Not part of Frostgrave 2e core. Adapted from the FG1E Sellswords supplement;
+# the exact numbers are unsettled even in the source house-rules doc (e.g.
+# "Hiring Cost: Increase to 250 GC (300?, 500?)"), so every value below is only
+# a default — the app exposes them as editable per-warband homerule settings.
+CAPTAIN_HIRING_COST = 250
+CAPTAIN_ITEM_SLOTS = 6
+CAPTAIN_BASE = {
+    "move": 6,
+    "fight": 4,
+    "shoot": 0,
+    "armour": 12,
+    "will": 1,
+    "health": 14,
+}
+CAPTAIN_MAX_LEVEL = 10
+
+# The 4 stats that can ever be raised via a flat-XP level-up (Wizard, Captain,
+# Soldier all share this set — matches the stat subset in LEVEL_UP_OPTIONS).
+LEVELUP_STATS = ["fight", "shoot", "will", "health"]
+
+# Per-stat level-up cap shape used by both Captain and Soldier Leveling:
+# {"limit": int, "unlimited": bool} — limit is ignored when unlimited is True;
+# limit 0 (and not unlimited) means that stat can never be leveled.
+CAPTAIN_STAT_CAPS = {
+    "fight": {"limit": 1, "unlimited": False},
+    "shoot": {"limit": 1, "unlimited": False},
+    "will": {"limit": 0, "unlimited": True},
+    "health": {"limit": 0, "unlimited": True},
+}
+
+# Mind Control resistance flavor note (not simulated), per-warband selectable.
+CAPTAIN_MIND_CONTROL_OPTIONS = ["immune", "resistant", "none"]
+CAPTAIN_MIND_CONTROL_LABELS = {
+    "immune": "Immune to Mind Control",
+    "resistant": "Resistant to Mind Control",
+    "none": "None",
+}
+CAPTAIN_MIND_CONTROL_DEFAULT = "immune"
+
+# --- Soldier Leveling (homerule, not core 2e) -------------------------------
+SOLDIER_LEVELING_ENABLED = False
+SOLDIER_MAX_LEVELS = 3
+SOLDIER_STAT_CAPS = {
+    "fight": {"limit": 0, "unlimited": False},
+    "shoot": {"limit": 0, "unlimited": False},
+    "will": {"limit": 0, "unlimited": False},
+    "health": {"limit": 3, "unlimited": False},
+}
+
+# --- Promote Captain (homerule, not core 2e) --------------------------------
+# Independent of the Captains (hiring) homerule — a warband can allow only
+# promotion, only hiring, both, or neither.
+PROMOTE_CAPTAIN_ENABLED = False
+PROMOTE_CAPTAIN_COST = 150
+PROMOTE_CAPTAIN_BONUS = {"fight": 1, "shoot": 1, "will": 1, "health": 2}
+PROMOTE_CAPTAIN_ITEM_SLOTS = 6
+
 # Establishing a Base (2e core p.106–107)
 BASE_LOCATIONS: dict[str, dict] = {
     "none": {

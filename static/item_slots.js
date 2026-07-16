@@ -188,7 +188,11 @@
 
     function refreshLinked() {
       clearLinkedFlags();
-      for (let i = 0; i < n - 1; i++) {
+      // Walk forward, but once a pair (i, i+1) is linked, jump past both slots
+      // instead of re-examining slot i+1 as a fresh "start" — otherwise every
+      // slot after a 2H weapon cascades into the pairing (bug: filled all slots).
+      let i = 0;
+      while (i < n - 1) {
         const a = getText(i);
         const b = getText(i + 1);
         if (isTwoHandedName(a) && a && (b === a || !b || b === "—" || b === "(2H)")) {
@@ -199,18 +203,26 @@
           // sync UI of paired slot
           pickAt(i + 1).value = "Two-Handed Weapon";
           showMode(i + 1, "text");
+          i += 2;
+          continue;
         }
+        i += 1;
       }
     }
 
+    // A 2H weapon can be broken from either slot of its pair (the first or
+    // the second); clear whichever partner slot still holds the old value.
     function clearPairIfTwoHanded(i, previousValue) {
       if (!previousValue || !isTwoHandedName(previousValue)) return;
-      if (i + 1 >= n) return;
-      const nxt = getText(i + 1);
-      if (nxt === previousValue || !nxt || nxt === "—" || nxt === "(2H)") {
+      if (i + 1 < n && getText(i + 1) === previousValue) {
         setText(i + 1, "");
         pickAt(i + 1).value = "";
         showMode(i + 1, "text");
+      }
+      if (i > 0 && getText(i - 1) === previousValue) {
+        setText(i - 1, "");
+        pickAt(i - 1).value = "";
+        showMode(i - 1, "text");
       }
     }
 
@@ -224,24 +236,15 @@
         const slotCost = opt ? parseInt(opt.dataset.slots || "1", 10) : 1;
         const det = detailAt(i);
 
-        if (!value) {
-          clearPairIfTwoHanded(i, previous);
-          setText(i, "");
-          showMode(i, "text");
-          if (i > 0) {
-            const first = getText(i - 1);
-            if (first && isTwoHandedName(first) && previous === first) {
-              setText(i - 1, "");
-              pickAt(i - 1).value = "";
-              showMode(i - 1, "text");
-            }
-          }
-          refreshLinked();
-          return;
-        }
-
         if (previous && previous !== value && isTwoHandedName(previous)) {
           clearPairIfTwoHanded(i, previous);
+        }
+
+        if (!value) {
+          setText(i, "");
+          showMode(i, "text");
+          refreshLinked();
+          return;
         }
 
         if (kind === "potion" || kind === "scroll" || kind === "grimoire") {

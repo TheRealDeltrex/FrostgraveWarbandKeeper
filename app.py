@@ -7,8 +7,12 @@ level-up, post-game loot, and PDF rosters. Data saved locally (no login).
 from __future__ import annotations
 
 import os
-from pathlib import Path
+import subprocess
+import sys
+import threading
+import webbrowser
 
+import paths
 from flask import (
     Flask,
     Response,
@@ -28,7 +32,10 @@ from frostgrave_data import (
     APPRENTICE_ITEM_SLOTS,
     BASE_LOCATIONS,
     BASE_RESOURCES,
+    CAPTAIN_MIND_CONTROL_LABELS,
+    CAPTAIN_MIND_CONTROL_OPTIONS,
     LEVEL_UP_OPTIONS,
+    LEVELUP_STATS,
     MAX_SOLDIERS,
     MAX_SPECIALISTS,
     NEUTRAL_SPELLS,
@@ -45,6 +52,7 @@ from frostgrave_data import (
     all_spells_flat,
     cn_penalty,
     format_stat,
+    level_from_xp,
     soldier_list_for_ui,
     spell_id,
     spells_for_wizard_ui,
@@ -61,25 +69,37 @@ from game_content import (
 from pdf_export import build_warband_pdf
 from warband_store import (
     PORTRAIT_DIR,
+    WARBAND_DIR,
+    add_captain_xp,
     add_history,
     add_soldier,
+    add_soldier_xp,
     add_vault_item,
     adjust_gold,
+    apply_captain_level_up,
     apply_level_up,
+    apply_soldier_level_up,
+    reverse_last_captain_level_up,
     reverse_last_level_up,
+    reverse_last_soldier_level_up,
     base_summary,
     buy_base_resource,
     create_warband,
+    default_homerules,
     delete_warband,
     dismiss_apprentice,
+    dismiss_captain,
     duplicate_warband,
     enrich_soldier,
     export_warband_json,
     hire_apprentice,
+    hire_captain,
     import_warband_json,
     known_spell_ids,
     list_warbands,
     load_warband,
+    normalize_item_slots,
+    promote_soldier_to_captain,
     recompute_spell_cns,
     record_game_loot,
     recruit_preview,
@@ -92,10 +112,16 @@ from warband_store import (
     sell_or_remove_base_resource,
     set_base_location,
     set_soldier_status,
+    update_homerules,
     warband_limits,
 )
 
-app = Flask(__name__)
+_BUNDLE_DIR = paths.bundle_dir()
+app = Flask(
+    __name__,
+    template_folder=str(_BUNDLE_DIR / "templates"),
+    static_folder=str(_BUNDLE_DIR / "static"),
+)
 app.secret_key = os.environ.get("SECRET_KEY", "frostgrave-dev-key")
 app.config["MAX_CONTENT_LENGTH"] = 8 * 1024 * 1024  # 8 MB uploads
 
@@ -112,6 +138,10 @@ app.jinja_env.globals.update(
     LEVEL_UP_OPTIONS=LEVEL_UP_OPTIONS,
     WIZARD_ITEM_SLOTS=WIZARD_ITEM_SLOTS,
     APPRENTICE_ITEM_SLOTS=APPRENTICE_ITEM_SLOTS,
+    CAPTAIN_MIND_CONTROL_OPTIONS=CAPTAIN_MIND_CONTROL_OPTIONS,
+    CAPTAIN_MIND_CONTROL_LABELS=CAPTAIN_MIND_CONTROL_LABELS,
+    LEVELUP_STATS=LEVELUP_STATS,
+    level_from_xp=level_from_xp,
 )
 
 
@@ -300,6 +330,7 @@ def warband_view(warband_id: str):
         base_locations=BASE_LOCATIONS,
         base_resources=BASE_RESOURCES,
         standard_items=load_spellcaster_items(),  # no armour for wizard/apprentice UI
+        full_standard_items=load_standard_items(),  # includes armour/shield: captain picker + reference list
         wizard_spells_ui=wiz_spells,
         vault_names=vault_names,
         potion_choices=load_potion_choices(),
@@ -384,6 +415,104 @@ def warband_update(warband_id: str):
             if ok:
                 save_warband(wb)
 
+        elif action == "update_homerules":
+            ok, msg = update_homerules(wb, request.form)
+            flash(msg, "success" if ok else "error")
+            if ok:
+                save_warband(wb)
+
+        elif action == "hire_captain":
+            ok, msg = hire_captain(
+                wb,
+                (request.form.get("captain_name") or "").strip(),
+                request.form.get("captain_extra_stat") or None,
+            )
+            flash(msg, "success" if ok else "error")
+            if ok:
+                f = request.files.get("captain_portrait")
+                if f and f.filename:
+                    wb["captain"]["portrait"] = save_portrait(wb["id"], "captain", f)
+                save_warband(wb)
+
+        elif action == "dismiss_captain":
+            ok, msg = dismiss_captain(wb, refund=request.form.get("refund") == "on")
+            flash(msg, "success" if ok else "error")
+            if ok:
+                save_warband(wb)
+
+        elif action == "captain_edit":
+            cap = wb.get("captain")
+            if not cap:
+                flash("No captain hired.", "error")
+            else:
+                cap["name"] = (request.form.get("captain_name") or cap.get("name", "")).strip()
+                cap["notes"] = request.form.get("captain_notes") or ""
+                cap["has_dagger"] = request.form.get("captain_dagger") == "on"
+                hr = wb.get("homerules") or {}
+                slot_key = (
+                    "promote_captain_item_slots"
+                    if cap.get("origin") == "promoted"
+                    else "captain_item_slots"
+                )
+                n = int(hr.get(slot_key, 6))
+                slots = [(request.form.get(f"captain_slot_{i}") or "").strip() for i in range(n)]
+                cap["item_slots"] = normalize_item_slots(slots, n)
+                f = request.files.get("captain_portrait")
+                if f and f.filename:
+                    cap["portrait"] = save_portrait(wb["id"], "captain", f)
+                save_warband(wb)
+                flash(f"Updated {cap['name']}.", "success")
+
+        elif action == "captain_level_up":
+            ok, msg = apply_captain_level_up(wb, request.form.get("choice") or "")
+            flash(msg, "success" if ok else "error")
+            if ok:
+                save_warband(wb)
+
+        elif action == "reverse_captain_level_up":
+            ok, msg = reverse_last_captain_level_up(wb)
+            flash(msg, "success" if ok else "error")
+            if ok:
+                save_warband(wb)
+
+        elif action == "captain_add_xp":
+            amount = int(request.form.get("amount") or 0)
+            ok, msg = add_captain_xp(wb, amount)
+            flash(msg, "success" if ok else "error")
+            if ok:
+                save_warband(wb)
+
+        elif action == "promote_soldier":
+            ok, msg = promote_soldier_to_captain(
+                wb,
+                request.form.get("soldier_id") or "",
+                request.form.get("extra_stat") or None,
+            )
+            flash(msg, "success" if ok else "error")
+            if ok:
+                save_warband(wb)
+
+        elif action == "soldier_add_xp":
+            amount = int(request.form.get("amount") or 0)
+            ok, msg = add_soldier_xp(wb, request.form.get("soldier_id") or "", amount)
+            flash(msg, "success" if ok else "error")
+            if ok:
+                save_warband(wb)
+
+        elif action == "soldier_level_up":
+            ok, msg = apply_soldier_level_up(
+                wb, request.form.get("soldier_id") or "", request.form.get("choice") or ""
+            )
+            flash(msg, "success" if ok else "error")
+            if ok:
+                save_warband(wb)
+
+        elif action == "reverse_soldier_level_up":
+            ok, msg = reverse_last_soldier_level_up(wb, request.form.get("soldier_id") or "")
+            flash(msg, "success" if ok else "error")
+            if ok:
+                save_warband(wb)
+
         elif action == "adjust_gold":
             delta = int(request.form.get("delta") or 0)
             reason = (request.form.get("reason") or "").strip()
@@ -443,13 +572,14 @@ def warband_update(warband_id: str):
         elif action == "post_game":
             gold = int(request.form.get("loot_gold") or 0)
             xp = int(request.form.get("loot_xp") or 0)
+            captain_xp = int(request.form.get("loot_captain_xp") or 0)
             notes = request.form.get("loot_notes") or ""
             items_raw = request.form.get("loot_items") or ""
             items = [line.strip() for line in items_raw.splitlines() if line.strip()]
             # also support comma-separated single line
             if len(items) == 1 and "," in items[0]:
                 items = [x.strip() for x in items[0].split(",") if x.strip()]
-            summary = record_game_loot(wb, gold, items, xp, notes)
+            summary = record_game_loot(wb, gold, items, xp, notes, captain_xp)
             save_warband(wb)
             flash(summary, "success")
 
@@ -541,8 +671,6 @@ def warband_update(warband_id: str):
 
 
 def _update_details(wb: dict) -> None:
-    from warband_store import normalize_item_slots
-
     wb["name"] = (request.form.get("warband_name") or wb["name"]).strip()
     wb["notes"] = request.form.get("notes") or ""
     wiz = wb.setdefault("wizard", {})
@@ -645,13 +773,81 @@ def warband_import():
     return render_template("import.html")
 
 
+# ---- Settings (data folder) ------------------------------------------------
+
+@app.route("/settings", methods=["GET", "POST"])
+def settings():
+    if request.method == "POST":
+        new_dir = (request.form.get("data_dir") or "").strip()
+        if not new_dir:
+            flash("Enter a folder path.", "error")
+        else:
+            paths.set_user_data_dir(new_dir)
+            flash(
+                f"Data folder set to “{new_dir}”. Restart the app for this to take effect.",
+                "success",
+            )
+        return redirect(url_for("settings"))
+    return render_template(
+        "settings.html",
+        active_dir=str(WARBAND_DIR.parent),
+        configured_dir=str(paths.user_data_dir()),
+        default_dir=str(paths.default_user_data_dir()),
+    )
+
+
+@app.route("/settings/browse", methods=["POST"])
+def settings_browse():
+    """Show a native folder picker via a short-lived subprocess — tkinter's
+    dialog is not safe to call directly from a waitress worker thread."""
+    try:
+        if paths.is_frozen():
+            # Re-invoke the frozen exe itself; --pick-folder makes it just
+            # show the dialog, print the chosen path, and exit immediately.
+            cmd = [sys.executable, "--pick-folder"]
+        else:
+            script = (
+                "import tkinter, tkinter.filedialog\n"
+                "r = tkinter.Tk(); r.withdraw()\n"
+                "print(tkinter.filedialog.askdirectory() or '')\n"
+            )
+            cmd = [sys.executable, "-c", script]
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
+        chosen = (result.stdout or "").strip()
+    except Exception as exc:
+        return {"path": "", "error": str(exc)}, 500
+    return {"path": chosen}
+
+
 @app.errorhandler(404)
 def not_found(_e):
     flash("That page or warband was not found.", "error")
     return redirect(url_for("home"))
 
 
+def main():
+    # Hidden flag: re-invoked by /settings/browse in a frozen build to show a
+    # native folder picker without calling tkinter from a waitress worker
+    # thread. Just print the chosen path and exit — no server involved.
+    if "--pick-folder" in sys.argv:
+        import tkinter
+        from tkinter import filedialog
+
+        root = tkinter.Tk()
+        root.withdraw()
+        print(filedialog.askdirectory() or "")
+        return
+
+    port = int(os.environ.get("PORT", 5000))
+    if paths.is_frozen():
+        url = f"http://127.0.0.1:{port}/"
+        threading.Timer(1.0, lambda: webbrowser.open(url)).start()
+        from waitress import serve
+
+        serve(app, host="127.0.0.1", port=port)
+    else:
+        app.run(debug=True, host="127.0.0.1", port=port)
+
+
 if __name__ == "__main__":
-    Path("data/warbands").mkdir(parents=True, exist_ok=True)
-    Path("data/portraits").mkdir(parents=True, exist_ok=True)
-    app.run(debug=True, host="127.0.0.1", port=5000)
+    main()
