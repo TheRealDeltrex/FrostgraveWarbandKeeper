@@ -1,0 +1,559 @@
+{% extends "base.html" %}
+{% block title %}New warband · Frostgrave{% endblock %}
+{% block content %}
+  <section class="hero">
+    <h1>Create your warband</h1>
+    <p>
+      Rules from Frostgrave 2e core: start with
+      <span class="gold">{{ STARTING_GOLD }} gc</span>,
+      apprentice costs <span class="gold">{{ APPRENTICE_COST }} gc</span>,
+      max {{ MAX_SOLDIERS }} soldiers ({{ MAX_SPECIALISTS }} specialists).
+      Spells: <strong>{{ OWN_SCHOOL_SPELLS }} own</strong>,
+      <strong>1 from each aligned</strong>,
+      <strong>{{ NEUTRAL_SPELLS }} from different neutrals</strong>,
+      <strong>none from opposed</strong>.
+      Casting numbers include school penalties (own +0 / aligned +2 / neutral +4 / opposed +6).
+    </p>
+  </section>
+
+  <form method="post" action="{{ url_for('warband_new') }}" enctype="multipart/form-data" id="create-form">
+    <input type="hidden" name="spell_order" id="spell_order" value="" />
+
+    <div class="card">
+      <h2>1. Warband &amp; wizard</h2>
+      <div class="grid-2">
+        <div class="form-row">
+          <label for="warband_name">Warband name</label>
+          <input id="warband_name" name="warband_name" type="text" required placeholder="The Frozen Hand" />
+        </div>
+        <div class="form-row">
+          <label for="wizard_name">Wizard name</label>
+          <input id="wizard_name" name="wizard_name" type="text" required placeholder="Morvain" />
+        </div>
+        <div class="form-row">
+          <label for="school">School of magic</label>
+          <select id="school" name="school" onchange="location.href='{{ url_for('warband_new') }}?school='+encodeURIComponent(this.value)">
+            {% for s in schools %}
+              <option value="{{ s }}" {% if s == school %}selected{% endif %}>{{ s }}</option>
+            {% endfor %}
+          </select>
+          <div class="limit-bar" style="margin-top:0.5rem">
+            <div class="limit">Own (+0 CN): <strong>{{ school }}</strong></div>
+            <div class="limit">Aligned (+2): {{ relations.aligned|join(', ') }}</div>
+            <div class="limit">Neutral (+4): {{ relations.neutral|join(', ') }}</div>
+            <div class="limit bad">Opposed (+6, locked at start): {{ relations.opposed }}</div>
+          </div>
+        </div>
+        <div class="form-row">
+          <label for="wizard_portrait">Wizard picture</label>
+          <input id="wizard_portrait" name="wizard_portrait" type="file" accept="image/*" />
+        </div>
+      </div>
+      <p class="muted">Starting wizard stats: Move 6 · Fight +2 · Shoot +0 · Armour 10 · Will +4 · Health 14</p>
+    </div>
+
+    <details class="ref-panel card" style="margin-bottom:1.15rem">
+      <summary>Standard arms &amp; armour (open list)</summary>
+      <p class="muted" style="font-size:0.88rem">General Arms and Armour List (2e). Spellcasters may not wear armour or carry shields.</p>
+      <div class="item-list-detail">
+        <div class="item-list-head" aria-hidden="true">
+          <span class="col-name">Item</span>
+          <span class="col-cat">Category</span>
+          <span class="col-summary">Summary</span>
+          <span class="col-info"></span>
+        </div>
+        {% for it in standard_items %}
+          <div class="item-row">
+            <details class="item-desc">
+              <summary class="item-row-main">
+                <span class="col-name"><strong>{{ it.name }}</strong></span>
+                <span class="col-cat"><span class="badge">{{ it.category }}</span></span>
+                <span class="col-summary muted">{{ it.summary }}</span>
+                <span class="col-info item-desc-toggle">Info</span>
+              </summary>
+              <p class="item-desc-body">{{ it.description }}</p>
+            </details>
+          </div>
+        {% endfor %}
+      </div>
+    </details>
+
+    <div class="card">
+      <h2>2. Spells
+        <span class="muted" style="font-weight:500;font-size:0.9rem">
+          — <span id="spell-count">0</span> / {{ STARTING_SPELL_COUNT }}
+        </span>
+      </h2>
+      <p class="muted" style="font-size:0.88rem">Click <strong>Info</strong> on a spell line for its description (not on PDF).</p>
+
+      <div class="limit-bar" id="spell-limits">
+        <div class="limit" id="lim-own">Own ({{ school }}): <span id="own-count">0</span> / {{ OWN_SCHOOL_SPELLS }}</div>
+        {% for al in relations.aligned %}
+          <div class="limit" data-aligned="{{ al }}">Aligned {{ al }}: <span class="al-count">0</span> / 1</div>
+        {% endfor %}
+        <div class="limit" id="lim-neutral">Neutral (diff. schools): <span id="neu-count">0</span> / {{ NEUTRAL_SPELLS }}</div>
+        <div class="limit bad">Opposed {{ relations.opposed }}: locked</div>
+      </div>
+
+      <div class="grid-2" style="margin-top:1rem">
+        <div>
+          <h3>Available spells</h3>
+          <p class="muted" style="font-size:0.85rem">
+            CN shown is <strong>your effective casting number</strong> (base + school penalty).
+            Greyed-out spells cannot be picked under current selection rules.
+          </p>
+          {% set schools_order = [school] + relations.aligned + relations.neutral + [relations.opposed] %}
+          {% for sch in schools_order %}
+            {% set rel = 'own' if sch == school else ('aligned' if sch in relations.aligned else ('opposed' if sch == relations.opposed else 'neutral')) %}
+            <details class="spell-school" {% if sch == school or sch in relations.aligned %}open{% endif %}>
+              <summary>
+                <strong>{{ sch }}</strong>
+                <span class="badge {% if rel == 'own' %}specialist{% elif rel == 'aligned' %}standard{% elif rel == 'opposed' %}dead{% endif %}">
+                  {{ rel }}
+                  {% if rel == 'own' %}+0{% elif rel == 'aligned' %}+2{% elif rel == 'neutral' %}+4{% else %}+6{% endif %}
+                </span>
+              </summary>
+              <div class="spell-grid spell-grid-aligned">
+                <div class="spell-list-head spell-pick-head" aria-hidden="true">
+                  <span class="col-check"></span>
+                  <span class="col-name">Spell</span>
+                  <span class="col-cn">Your CN</span>
+                  <span class="col-type">Type</span>
+                  <span class="col-info"></span>
+                </div>
+                {% for sp in spells_for_wizard if sp.school == sch %}
+                  <div class="spell-option-wrap {% if sp.relation == 'opposed' %}is-opposed{% endif %}">
+                    <div class="spell-option-line">
+                      <label
+                        class="spell-option"
+                        data-spell-id="{{ sp.id }}"
+                        data-school="{{ sp.school }}"
+                        data-relation="{{ sp.relation }}"
+                      >
+                        <span class="col-check">
+                          <input
+                            type="checkbox"
+                            class="spell-cb"
+                            name="spells"
+                            value="{{ sp.id }}"
+                            data-school="{{ sp.school }}"
+                            data-relation="{{ sp.relation }}"
+                            data-name="{{ sp.name }}"
+                            data-base="{{ sp.cn }}"
+                            data-eff="{{ sp.effective_cn }}"
+                            {% if sp.id in selected %}checked{% endif %}
+                            {% if sp.relation == 'opposed' %}disabled{% endif %}
+                          />
+                        </span>
+                        <span class="col-name spell-name">{{ sp.name }}</span>
+                        <span class="col-cn spell-cn">
+                          {{ sp.effective_cn }}{% if sp.cn_penalty %}<span class="muted"> ({{ sp.cn }}+{{ sp.cn_penalty }})</span>{% endif %}
+                        </span>
+                        <span class="col-type spell-type muted">{{ sp.type }}</span>
+                      </label>
+                      <details class="spell-desc">
+                        <summary class="spell-desc-toggle col-info">Info</summary>
+                        <p class="spell-desc-body">{{ sp.description }}</p>
+                      </details>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            </details>
+          {% endfor %}
+        </div>
+
+        <div>
+          <h3>Selected spell order</h3>
+          <p class="muted" style="font-size:0.85rem">Drag to rearrange, or use ↑ / ↓. Order is saved on the warband sheet.</p>
+          <ol id="selected-list" class="selected-spells"></ol>
+          <p id="spell-status" class="empty"></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>3. Apprentice (optional)</h2>
+      <p class="muted">
+        Name + picture only. Stats auto: Move same, Fight −2, Shoot same, Armour 10, Will −2, Health −2 from wizard.
+        Same spells (cast with −2 to the roll). Cost: <span class="gold">{{ APPRENTICE_COST }} gc</span>.
+      </p>
+      <div class="checkbox-row">
+        <input id="with_apprentice" name="with_apprentice" type="checkbox" />
+        <label for="with_apprentice" style="margin:0">Hire apprentice (−{{ APPRENTICE_COST }} gc)</label>
+      </div>
+      <div class="grid-2">
+        <div class="form-row">
+          <label for="apprentice_name">Apprentice name</label>
+          <input id="apprentice_name" name="apprentice_name" type="text" placeholder="Sable" />
+        </div>
+        <div class="form-row">
+          <label for="apprentice_portrait">Apprentice picture</label>
+          <input id="apprentice_portrait" name="apprentice_portrait" type="file" accept="image/*" />
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>4. Recruit soldiers</h2>
+      <div class="limit-bar">
+        <div class="limit" id="sol-count">Soldiers: 0 / {{ MAX_SOLDIERS }}</div>
+        <div class="limit" id="spec-count">Specialists: 0 / {{ MAX_SPECIALISTS }}</div>
+        <div class="limit">Treasury: <span class="gold" id="gold-display">{{ STARTING_GOLD }}</span> gc</div>
+      </div>
+      <p class="muted" id="hire-status">Add soldiers now or leave empty and hire later.</p>
+
+      <div id="soldier-rows" class="stack-sm" style="margin:1rem 0"></div>
+      <button type="button" class="btn secondary" id="add-soldier-btn">+ Add soldier</button>
+
+      <template id="soldier-row-tpl">
+        <div class="soldier-row form-row inline">
+          <div style="flex:2">
+            <label>Type</label>
+            <select class="sol-type">
+              {% for c in catalog %}
+                <option value="{{ c.key }}" data-cost="{{ c.cost }}" data-cat="{{ c.category }}">
+                  {{ c.name }} — {{ c.cost }} gc ({{ c.category }})
+                  · Move {{ c.move }} · Fight {{ format_stat(c.fight) }} · Shoot {{ format_stat(c.shoot) }} · Armour {{ c.armour }} · Will {{ format_stat(c.will) }} · Health {{ c.health }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <label>Name</label>
+            <input type="text" class="sol-name" placeholder="Optional" />
+          </div>
+          <div>
+            <label>Picture</label>
+            <input type="file" class="sol-pic" accept="image/*" />
+          </div>
+          <div>
+            <label>&nbsp;</label>
+            <button type="button" class="btn danger small sol-remove">Remove</button>
+          </div>
+        </div>
+      </template>
+    </div>
+
+    <div class="card">
+      <h2>5. Confirm</h2>
+      <div class="actions">
+        <button class="btn" type="submit" id="submit-btn" disabled>Create warband</button>
+        <a class="btn secondary" href="{{ url_for('home') }}">Cancel</a>
+      </div>
+      <p class="muted" id="submit-hint" style="margin-top:0.5rem">Complete spell selection (and stay within gold/limits) to enable create.</p>
+    </div>
+  </form>
+
+  <script>
+  (function () {
+    const OWN = {{ school|tojson }};
+    const ALIGNED = {{ relations.aligned|tojson }};
+    const NEUTRAL = {{ relations.neutral|tojson }};
+    const OPPOSED = {{ relations.opposed|tojson }};
+    const NEED = {{ STARTING_SPELL_COUNT }};
+    const OWN_N = {{ OWN_SCHOOL_SPELLS }};
+    const NEU_N = {{ NEUTRAL_SPELLS }};
+    const MAX_SOL = {{ MAX_SOLDIERS }};
+    const MAX_SPEC = {{ MAX_SPECIALISTS }};
+    const START_GOLD = {{ STARTING_GOLD }};
+    const APP_COST = {{ APPRENTICE_COST }};
+
+    const selectedList = document.getElementById('selected-list');
+    const spellOrder = document.getElementById('spell_order');
+    const submitBtn = document.getElementById('submit-btn');
+    const spellStatus = document.getElementById('spell-status');
+    const withAp = document.getElementById('with_apprentice');
+    let order = []; // spell ids in display order
+    let soldierIdx = 0;
+
+    function boxes() { return [...document.querySelectorAll('.spell-cb')]; }
+
+    function counts() {
+      const checked = boxes().filter(b => b.checked);
+      const bySchool = {};
+      checked.forEach(b => {
+        bySchool[b.dataset.school] = (bySchool[b.dataset.school] || 0) + 1;
+      });
+      const own = bySchool[OWN] || 0;
+      const al = {};
+      ALIGNED.forEach(s => { al[s] = bySchool[s] || 0; });
+      const neuSchools = NEUTRAL.filter(s => (bySchool[s] || 0) > 0);
+      const neuTotal = neuSchools.reduce((a, s) => a + (bySchool[s] || 0), 0);
+      return { checked, bySchool, own, al, neuSchools, neuTotal, total: checked.length };
+    }
+
+    function canAdd(school, currentlyChecked) {
+      // Would checking this school be legal given current selection (excluding itself if already checked)?
+      if (school === OPPOSED) return false;
+      const c = counts();
+      // If already checked, always allow uncheck path — handled separately
+      if (currentlyChecked) return true;
+      if (c.total >= NEED) return false;
+
+      if (school === OWN) {
+        return c.own < OWN_N;
+      }
+      if (ALIGNED.includes(school)) {
+        return (c.al[school] || 0) < 1;
+      }
+      if (NEUTRAL.includes(school)) {
+        // Need room for neutral: total neutral spells < 2, and this school not already taken (must be different schools)
+        if ((c.bySchool[school] || 0) >= 1) return false;
+        if (c.neuTotal >= NEU_N) return false;
+        // Also: if we still need own/aligned slots, we could still pick neutral early — rules only care about final set.
+        // But greying: allow neutral only if we won't exceed 2 neutrals and school free.
+        return true;
+      }
+      return false;
+    }
+
+    /** Stricter greying: also grey neutrals/aligned if remaining slots must be filled by other requirements. */
+    function canAddSmart(school, currentlyChecked) {
+      if (currentlyChecked) return true;
+      if (school === OPPOSED) return false;
+      if (!canAdd(school, false)) return false;
+
+      const c = counts();
+      const remaining = NEED - c.total;
+      if (remaining <= 0) return false;
+
+      // Slots still required
+      let needOwn = Math.max(0, OWN_N - c.own);
+      let needAl = ALIGNED.reduce((n, s) => n + Math.max(0, 1 - (c.al[s] || 0)), 0);
+      let needNeu = Math.max(0, NEU_N - c.neuTotal);
+      // If already have a neutral from this school, can't
+      // Free remaining after mandatory
+      const mandatoryLeft = needOwn + needAl + needNeu;
+
+      if (school === OWN) {
+        // Can pick own if we still need own, OR if own is full we shouldn't — canAdd already handles own < 3
+        // Extra own beyond 3 not allowed
+        return c.own < OWN_N;
+      }
+      if (ALIGNED.includes(school)) {
+        return (c.al[school] || 0) < 1;
+      }
+      if (NEUTRAL.includes(school)) {
+        if ((c.bySchool[school] || 0) >= 1) return false;
+        if (c.neuTotal >= NEU_N) return false;
+        // If remaining slots are all needed for own/aligned, block neutral
+        // After this pick, remaining-1 must cover remaining mandatory excluding this neutral
+        const mandAfter = needOwn + needAl + Math.max(0, needNeu - 1);
+        return (remaining - 1) >= mandAfter;
+      }
+      return false;
+    }
+
+    function spellsValid(c) {
+      if (c.total !== NEED) return false;
+      if (c.own !== OWN_N) return false;
+      for (const s of ALIGNED) {
+        if ((c.al[s] || 0) !== 1) return false;
+      }
+      if (c.neuTotal !== NEU_N) return false;
+      if (c.neuSchools.length !== NEU_N) return false;
+      if (c.neuSchools.some(s => (c.bySchool[s] || 0) !== 1)) return false;
+      if ((c.bySchool[OPPOSED] || 0) > 0) return false;
+      return true;
+    }
+
+    function refreshSpellUI() {
+      const c = counts();
+      document.getElementById('spell-count').textContent = c.total;
+      document.getElementById('own-count').textContent = c.own;
+      document.getElementById('neu-count').textContent = c.neuTotal + ' (' + c.neuSchools.join(', ') + ')';
+
+      const limOwn = document.getElementById('lim-own');
+      limOwn.classList.toggle('bad', c.own !== OWN_N && c.total === NEED);
+      limOwn.classList.toggle('ok', c.own === OWN_N);
+
+      document.querySelectorAll('[data-aligned]').forEach(el => {
+        const s = el.getAttribute('data-aligned');
+        const n = c.al[s] || 0;
+        el.querySelector('.al-count').textContent = n;
+        el.classList.toggle('ok', n === 1);
+        el.classList.toggle('bad', n !== 1 && c.total === NEED);
+      });
+
+      // Grey out
+      boxes().forEach(b => {
+        const wrap = b.closest('.spell-option-wrap') || b.closest('.spell-option');
+        const label = b.closest('.spell-option');
+        if (b.dataset.relation === 'opposed') {
+          b.disabled = true;
+          if (wrap) wrap.classList.add('disabled');
+          if (label) label.classList.add('disabled');
+          return;
+        }
+        const allow = b.checked || canAddSmart(b.dataset.school, false);
+        b.disabled = !allow && !b.checked;
+        if (wrap) wrap.classList.toggle('disabled', b.disabled && !b.checked);
+        if (label) label.classList.toggle('disabled', b.disabled && !b.checked);
+      });
+
+      // Sync order list
+      const checkedIds = new Set(c.checked.map(b => b.value));
+      order = order.filter(id => checkedIds.has(id));
+      c.checked.forEach(b => {
+        if (!order.includes(b.value)) order.push(b.value);
+      });
+      renderSelected();
+      spellOrder.value = order.join('|');
+
+      const ok = spellsValid(c);
+      spellStatus.textContent = ok
+        ? 'Spell selection complete.'
+        : 'Need: 3 own · 1 each aligned · 2 neutrals (different schools) · 0 opposed.';
+      spellStatus.className = ok ? 'muted' : 'empty';
+      updateSubmit();
+    }
+
+    function renderSelected() {
+      selectedList.innerHTML = '';
+      order.forEach((id, idx) => {
+        const b = boxes().find(x => x.value === id);
+        if (!b) return;
+        const li = document.createElement('li');
+        li.draggable = true;
+        li.dataset.id = id;
+        li.innerHTML =
+          '<span class="sel-main"><strong>' + b.dataset.name + '</strong> ' +
+          '<span class="muted">' + b.dataset.school + '</span> ' +
+          '<span class="spell-cn">CN ' + b.dataset.eff + '</span></span>' +
+          '<span class="sel-btns">' +
+          '<button type="button" class="btn small secondary" data-up>↑</button> ' +
+          '<button type="button" class="btn small secondary" data-down>↓</button> ' +
+          '<button type="button" class="btn small danger" data-rm>×</button></span>';
+        li.querySelector('[data-up]').onclick = () => move(idx, -1);
+        li.querySelector('[data-down]').onclick = () => move(idx, 1);
+        li.querySelector('[data-rm]').onclick = () => {
+          b.checked = false;
+          refreshSpellUI();
+        };
+        li.addEventListener('dragstart', e => {
+          e.dataTransfer.setData('text/plain', String(idx));
+        });
+        li.addEventListener('dragover', e => e.preventDefault());
+        li.addEventListener('drop', e => {
+          e.preventDefault();
+          const from = parseInt(e.dataTransfer.getData('text/plain'), 10);
+          const to = idx;
+          if (isNaN(from)) return;
+          const item = order.splice(from, 1)[0];
+          order.splice(to, 0, item);
+          spellOrder.value = order.join('|');
+          renderSelected();
+        });
+        selectedList.appendChild(li);
+      });
+    }
+
+    function move(idx, dir) {
+      const j = idx + dir;
+      if (j < 0 || j >= order.length) return;
+      const t = order[idx];
+      order[idx] = order[j];
+      order[j] = t;
+      spellOrder.value = order.join('|');
+      renderSelected();
+    }
+
+    boxes().forEach(b => b.addEventListener('change', () => {
+      if (b.checked && !canAddSmart(b.dataset.school, false)) {
+        // double-check
+        const c = counts();
+        // if we just checked and invalid, undo unless valid
+        // canAddSmart was true at click time due to disabled state
+      }
+      refreshSpellUI();
+    }));
+
+    // --- Soldiers / gold ---
+    const rowsEl = document.getElementById('soldier-rows');
+    const tpl = document.getElementById('soldier-row-tpl');
+
+    function goldSpent() {
+      let g = 0;
+      if (withAp.checked) g += APP_COST;
+      rowsEl.querySelectorAll('.soldier-row').forEach(row => {
+        const opt = row.querySelector('.sol-type').selectedOptions[0];
+        g += parseInt(opt.dataset.cost, 10) || 0;
+      });
+      return g;
+    }
+
+    function soldierStats() {
+      let n = 0, sp = 0;
+      rowsEl.querySelectorAll('.soldier-row').forEach(row => {
+        n++;
+        const opt = row.querySelector('.sol-type').selectedOptions[0];
+        if (opt.dataset.cat === 'specialist') sp++;
+      });
+      return { n, sp };
+    }
+
+    function reindexSoldiers() {
+      [...rowsEl.querySelectorAll('.soldier-row')].forEach((row, i) => {
+        row.querySelector('.sol-type').name = 'soldier_type_' + i;
+        row.querySelector('.sol-name').name = 'soldier_name_' + i;
+        row.querySelector('.sol-pic').name = 'soldier_portrait_' + i;
+      });
+    }
+
+    function refreshGoldUI() {
+      const spent = goldSpent();
+      const left = START_GOLD - spent;
+      const { n, sp } = soldierStats();
+      document.getElementById('gold-display').textContent = left;
+      document.getElementById('sol-count').textContent = 'Soldiers: ' + n + ' / ' + MAX_SOL;
+      document.getElementById('spec-count').textContent = 'Specialists: ' + sp + ' / ' + MAX_SPEC;
+      document.getElementById('sol-count').classList.toggle('bad', n > MAX_SOL);
+      document.getElementById('spec-count').classList.toggle('bad', sp > MAX_SPEC);
+      const ok = left >= 0 && n <= MAX_SOL && sp <= MAX_SPEC;
+      document.getElementById('hire-status').textContent = ok
+        ? ('Cost so far: ' + spent + ' gc · Remaining: ' + left + ' gc')
+        : 'Over gold budget or unit limits!';
+      document.getElementById('hire-status').style.color = ok ? 'var(--muted)' : 'var(--error)';
+      updateSubmit();
+    }
+
+    function addSoldierRow() {
+      if (soldierStats().n >= MAX_SOL) return;
+      const node = tpl.content.cloneNode(true);
+      const row = node.querySelector('.soldier-row');
+      row.querySelector('.sol-type').addEventListener('change', refreshGoldUI);
+      row.querySelector('.sol-remove').addEventListener('click', () => {
+        row.remove();
+        reindexSoldiers();
+        refreshGoldUI();
+      });
+      rowsEl.appendChild(node);
+      reindexSoldiers();
+      refreshGoldUI();
+    }
+
+    document.getElementById('add-soldier-btn').addEventListener('click', addSoldierRow);
+    withAp.addEventListener('change', refreshGoldUI);
+
+    function updateSubmit() {
+      const c = counts();
+      const spent = goldSpent();
+      const { n, sp } = soldierStats();
+      const ok = spellsValid(c) && spent <= START_GOLD && n <= MAX_SOL && sp <= MAX_SPEC;
+      submitBtn.disabled = !ok;
+      document.getElementById('submit-hint').textContent = ok
+        ? 'Ready to create.'
+        : 'Complete spell selection and stay within gold / unit limits.';
+    }
+
+    document.getElementById('create-form').addEventListener('submit', e => {
+      spellOrder.value = order.join('|');
+      if (submitBtn.disabled) e.preventDefault();
+    });
+
+    refreshSpellUI();
+    refreshGoldUI();
+  })();
+  </script>
+{% endblock %}

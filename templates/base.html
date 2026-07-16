@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}Frostgrave Warbands{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  </head>
+  <body>
+    <div class="container">
+      <nav class="nav">
+        <a class="brand" href="{{ url_for('home') }}">
+          Frostgrave<span>Warband Keeper</span>
+        </a>
+        <ul class="nav-links">
+          <li>
+            <a href="{{ url_for('home') }}" class="{% if request.endpoint == 'home' %}active{% endif %}">Warbands</a>
+          </li>
+          <li>
+            <a href="{{ url_for('warband_new') }}" class="{% if request.endpoint == 'warband_new' %}active{% endif %}">New</a>
+          </li>
+          <li>
+            <a href="{{ url_for('warband_import') }}" class="{% if request.endpoint == 'warband_import' %}active{% endif %}">Import</a>
+          </li>
+          <li>
+            <a href="{{ url_for('reference') }}" class="{% if request.endpoint == 'reference' %}active{% endif %}">Reference</a>
+          </li>
+          <li>
+            <a href="{{ url_for('about') }}" class="{% if request.endpoint == 'about' %}active{% endif %}">About</a>
+          </li>
+        </ul>
+      </nav>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <ul class="flashes">
+            {% for category, message in messages %}
+              <li class="flash {{ category }}">{{ message }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      {% endwith %}
+
+      {% block content %}{% endblock %}
+
+      <footer>
+        Frostgrave warband creator &amp; maintainer · data saved locally · not affiliated with Osprey / Joseph A. McCullough
+      </footer>
+    </div>
+    <script src="{{ url_for('static', filename='item_slots.js') }}"></script>
+  </body>
+</html>

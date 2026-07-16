@@ -1,0 +1,776 @@
+{% extends "base.html" %}
+{% block title %}{{ wb.name }} · Frostgrave{% endblock %}
+{% block content %}
+  {% set wiz = wb.wizard %}
+  {% set ap = wb.apprentice %}
+
+  <section class="hero">
+    <div class="hero-with-portrait">
+      {% if wiz.portrait %}
+        <img class="portrait-lg" src="{{ url_for('portrait_file', relpath=wiz.portrait) }}" alt="{{ wiz.name }}" />
+      {% endif %}
+      <div>
+        <h1>{{ wb.name }}</h1>
+        <p>
+          {{ wiz.name }} · {{ wiz.school }} · Level {{ wiz.level }} ({{ wiz.xp }} XP)
+          · <span class="gold">{{ wb.gold }} gc</span>
+        </p>
+        <div class="limit-bar">
+          <div class="limit {% if not limits.soldiers_ok %}bad{% endif %}">
+            Soldiers: {{ limits.soldiers }} / {{ limits.max_soldiers }}
+          </div>
+          <div class="limit {% if not limits.specialists_ok %}bad{% endif %}">
+            Specialists: {{ limits.specialists }} / {{ limits.max_specialists }}
+          </div>
+          <div class="limit">
+            Apprentice: {% if limits.has_apprentice %}yes (lvl {{ ap.level }}){% else %}no{% endif %}
+          </div>
+          {% if pending_levels %}
+            <div class="limit bad">{{ pending_levels }} level-up{% if pending_levels != 1 %}s{% endif %} ready</div>
+          {% else %}
+            <div class="limit">{{ limits.xp_to_next }} XP to next level</div>
+          {% endif %}
+        </div>
+        <div class="section-actions">
+          <a class="btn" href="{{ url_for('warband_pdf', warband_id=wb.id) }}">Download PDF roster</a>
+          <a class="btn secondary" href="{{ url_for('warband_export', warband_id=wb.id) }}">Export warband</a>
+          <form class="inline-form" method="post" action="{{ url_for('warband_duplicate', warband_id=wb.id) }}">
+            <button class="btn secondary" type="submit">Duplicate</button>
+          </form>
+          <a class="btn secondary" href="{{ url_for('home') }}">All warbands</a>
+          <form class="inline-form" method="post" action="{{ url_for('warband_delete', warband_id=wb.id) }}" onsubmit="return confirm('Delete this warband?');">
+            <button class="btn danger" type="submit">Delete</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {# ---- Level up ---- #}
+  <details class="card" id="level-up" open>
+    <summary><h2>Level up wizard</h2></summary>
+    <p class="muted">
+      XP is tracked on the wizard. When you have enough XP ({{ 100 }} per level), spend level-ups here.
+      The apprentice auto-levels: level = wizard÷2, stats = wizard with apprentice offsets, same spells.
+    </p>
+    <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="form-row inline">
+      <input type="hidden" name="action" value="add_xp" />
+      <div>
+        <label for="xp">Add XP</label>
+        <input id="xp" name="xp" type="number" min="1" value="50" />
+      </div>
+      <div>
+        <label>&nbsp;</label>
+        <button class="btn secondary" type="submit">Add XP</button>
+      </div>
+    </form>
+
+    {% if pending_levels %}
+      <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:1rem">
+        <input type="hidden" name="action" value="level_up" />
+        <div class="form-row">
+          <label>Choose improvement ({{ pending_levels }} available)</label>
+          <select name="choice" id="level-choice" required>
+            {% for opt in LEVEL_UP_OPTIONS %}
+              <option value="{{ opt.id }}">{{ opt.label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-row" id="learn-spell-row" style="display:none">
+          <label for="learn_spell">New spell</label>
+          <select id="learn_spell" name="learn_spell">
+            {% for sp in learnable %}
+              <option value="{{ sp.id }}" title="{{ sp.description }}">{{ sp.name }} ({{ sp.school }}, your CN {{ sp.effective_cn }})</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-row" id="improve-spell-row" style="display:none">
+          <label for="improve_spell">Improve spell (−1 CN, min 5)</label>
+          <select id="improve_spell" name="improve_spell">
+            {% for sp in wiz.spells %}
+              <option value="{{ sp.id }}">{{ sp.name }} (CN {{ sp.cn }})</option>
+            {% endfor %}
+          </select>
+        </div>
+        <button class="btn" type="submit">Confirm level-up</button>
+      </form>
+      <script>
+        const choice = document.getElementById('level-choice');
+        const learnRow = document.getElementById('learn-spell-row');
+        const impRow = document.getElementById('improve-spell-row');
+        function syncLevelUI() {
+          learnRow.style.display = choice.value === 'learn_spell' ? '' : 'none';
+          impRow.style.display = choice.value === 'improve_spell' ? '' : 'none';
+        }
+        choice.addEventListener('change', syncLevelUI);
+        syncLevelUI();
+      </script>
+    {% else %}
+      <p class="empty">No pending level-ups. Add XP from post-game rewards first.</p>
+    {% endif %}
+
+    {% if wiz.level_history %}
+      <h3>Level history</h3>
+      <ul class="list-plain">
+        {% for h in wiz.level_history|reverse %}
+          <li>
+            Level {{ h.level }}: {{ h.detail }}
+            {% if loop.first %}
+              <span class="muted">(latest)</span>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+      <form
+        method="post"
+        action="{{ url_for('warband_update', warband_id=wb.id) }}"
+        style="margin-top:0.75rem"
+        onsubmit="return confirm('Reverse the latest level-up ({{ wiz.level_history[-1].detail }})? XP is kept; only the level benefit is undone.');"
+      >
+        <input type="hidden" name="action" value="reverse_level_up" />
+        <button class="btn danger" type="submit">Reverse last level-up</button>
+      </form>
+      <p class="muted" style="font-size:0.85rem;margin-top:0.4rem">
+        Undoes only the most recent level-up (stats / spell learned / spell improved).
+        XP is not changed, so you can pick a different improvement.
+      </p>
+    {% endif %}
+  </details>
+
+  {# ---- Post-game loot ---- #}
+  <details class="card" id="post-game" open>
+    <summary><h2>After the game — gold &amp; items</h2></summary>
+    <p class="muted">Enter treasure gold, XP, and items found so they appear in the treasury and vault.</p>
+    <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
+      <input type="hidden" name="action" value="post_game" />
+      <div class="grid-2">
+        <div class="form-row">
+          <label for="loot_gold">Gold gained (use negative for losses)</label>
+          <input id="loot_gold" name="loot_gold" type="number" value="0" />
+        </div>
+        <div class="form-row">
+          <label for="loot_xp">Wizard XP gained</label>
+          <input id="loot_xp" name="loot_xp" type="number" min="0" value="0" />
+        </div>
+        <div class="form-row">
+          <label for="loot_items">Items found (one per line)</label>
+          <textarea id="loot_items" name="loot_items" placeholder="Grimoire: Bone Dart&#10;Potion of Healing&#10;Magic dagger"></textarea>
+        </div>
+        <div class="form-row">
+          <label for="loot_notes">Game notes</label>
+          <textarea id="loot_notes" name="loot_notes" placeholder="Scenario, injuries, story…"></textarea>
+        </div>
+      </div>
+      <button class="btn gold" type="submit">Record loot</button>
+    </form>
+  </details>
+
+  {# ---- Wizard & apprentice details ---- #}
+  <details class="card" open>
+    <summary><h2>Wizard &amp; apprentice</h2></summary>
+    <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" enctype="multipart/form-data">
+      <input type="hidden" name="action" value="details" />
+      <details class="ref-panel" open>
+        <summary>Wizard — {{ wiz.name }} · {{ wiz.school }} · H {{ wiz.stats.health }}</summary>
+        <div class="char-block">
+          {% if wiz.portrait %}
+            <img class="portrait-md" src="{{ url_for('portrait_file', relpath=wiz.portrait) }}" alt="" />
+          {% endif %}
+          <div class="char-body">
+            <div class="grid-2">
+              <div class="form-row">
+                <label for="warband_name">Warband name</label>
+                <input id="warband_name" name="warband_name" type="text" value="{{ wb.name }}" />
+              </div>
+              <div class="form-row">
+                <label for="wizard_name">Wizard name</label>
+                <input id="wizard_name" name="wizard_name" type="text" value="{{ wiz.name }}" />
+              </div>
+              <div class="form-row">
+                <label for="school">School</label>
+                <select id="school" name="school">
+                  {% for s in schools %}
+                    <option value="{{ s }}" {% if s == wiz.school %}selected{% endif %}>{{ s }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="form-row">
+                <label for="wizard_portrait">Change picture</label>
+                <input id="wizard_portrait" name="wizard_portrait" type="file" accept="image/*" />
+              </div>
+            </div>
+            <div class="stat-row">
+              <div class="stat-pill"><span class="label">Move</span><span class="value">{{ wiz.stats.move }}</span></div>
+              <div class="stat-pill"><span class="label">Fight</span><span class="value">{{ format_stat(wiz.stats.fight) }}</span></div>
+              <div class="stat-pill"><span class="label">Shoot</span><span class="value">{{ format_stat(wiz.stats.shoot) }}</span></div>
+              <div class="stat-pill"><span class="label">Armour</span><span class="value">{{ wiz.stats.armour }}</span></div>
+              <div class="stat-pill"><span class="label">Will</span><span class="value">{{ format_stat(wiz.stats.will) }}</span></div>
+              <div class="stat-pill"><span class="label">Health</span><span class="value">{{ wiz.stats.health }}</span></div>
+            </div>
+            <h3>Wizard items ({{ WIZARD_ITEM_SLOTS }} slots)</h3>
+            <p class="muted" style="font-size:0.85rem">
+              Pick a standard item or vault loot, or type a custom name.
+              Two-handed weapons use two consecutive slots (shown on PDF as e.g. <code>2+3: Two-Handed Weapon</code>).
+              Dagger free slot: use the toggle.
+            </p>
+            <div class="checkbox-row">
+              <input id="wizard_dagger" name="wizard_dagger" type="checkbox" {% if wiz.has_dagger %}checked{% endif %} />
+              <label for="wizard_dagger" style="margin:0">Carries a dagger (free slot)</label>
+            </div>
+            {% set slots = wiz.item_slots if wiz.item_slots is defined else [] %}
+            {% set prefix = 'wizard' %}
+            {% set n = WIZARD_ITEM_SLOTS %}
+            {% include '_item_slots.html' %}
+            <div class="form-row">
+              <label for="wizard_notes">Wizard notes</label>
+              <textarea id="wizard_notes" name="wizard_notes">{{ wiz.notes }}</textarea>
+            </div>
+          </div>
+        </div>
+      </details>
+
+      {% if ap %}
+        <details class="ref-panel" open>
+          <summary>Apprentice — {{ ap.name }} · {{ wiz.school }} · H {{ ap.stats.health }}</summary>
+          <div class="char-block">
+            {% if ap.portrait %}
+              <img class="portrait-md" src="{{ url_for('portrait_file', relpath=ap.portrait) }}" alt="" />
+            {% else %}
+              <span class="portrait-placeholder portrait-md-ph">?</span>
+            {% endif %}
+            <div class="char-body">
+              <div class="grid-2">
+                <div class="form-row">
+                  <label for="apprentice_name">Name</label>
+                  <input id="apprentice_name" name="apprentice_name" type="text" value="{{ ap.name }}" />
+                </div>
+                <div class="form-row">
+                  <label for="apprentice_portrait">Change picture</label>
+                  <input id="apprentice_portrait" name="apprentice_portrait" type="file" accept="image/*" />
+                </div>
+              </div>
+              <p class="muted">Level {{ ap.level }} · stats synced from wizard (starting H12 when wizard is H14)</p>
+              <div class="stat-row">
+                <div class="stat-pill"><span class="label">Move</span><span class="value">{{ ap.stats.move }}</span></div>
+                <div class="stat-pill"><span class="label">Fight</span><span class="value">{{ format_stat(ap.stats.fight) }}</span></div>
+                <div class="stat-pill"><span class="label">Shoot</span><span class="value">{{ format_stat(ap.stats.shoot) }}</span></div>
+                <div class="stat-pill"><span class="label">Armour</span><span class="value">{{ ap.stats.armour }}</span></div>
+                <div class="stat-pill"><span class="label">Will</span><span class="value">{{ format_stat(ap.stats.will) }}</span></div>
+                <div class="stat-pill"><span class="label">Health</span><span class="value">{{ ap.stats.health }}</span></div>
+              </div>
+              <h3>Apprentice items ({{ APPRENTICE_ITEM_SLOTS }} slots)</h3>
+              <div class="checkbox-row">
+                <input id="apprentice_dagger" name="apprentice_dagger" type="checkbox" {% if ap.has_dagger %}checked{% endif %} />
+                <label for="apprentice_dagger" style="margin:0">Carries a dagger (free slot)</label>
+              </div>
+              {% set slots = ap.item_slots if ap.item_slots is defined else [] %}
+              {% set prefix = 'apprentice' %}
+              {% set n = APPRENTICE_ITEM_SLOTS %}
+              {% include '_item_slots.html' %}
+              <div class="form-row">
+                <label for="apprentice_notes">Notes</label>
+                <textarea id="apprentice_notes" name="apprentice_notes">{{ ap.notes }}</textarea>
+              </div>
+            </div>
+          </div>
+        </details>
+      {% endif %}
+
+      <div class="form-row">
+        <label for="notes">Warband notes</label>
+        <textarea id="notes" name="notes">{{ wb.notes }}</textarea>
+      </div>
+      <div class="actions">
+        <button class="btn" type="submit">Save details</button>
+      </div>
+    </form>
+
+    {% if not ap %}
+      <h3>Hire apprentice</h3>
+      <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" enctype="multipart/form-data">
+        <input type="hidden" name="action" value="hire_apprentice" />
+        <div class="form-row inline">
+          <div>
+            <label for="new_apprentice_name">Name</label>
+            <input id="new_apprentice_name" name="apprentice_name" type="text" />
+          </div>
+          <div>
+            <label for="new_apprentice_portrait">Picture</label>
+            <input id="new_apprentice_portrait" name="apprentice_portrait" type="file" accept="image/*" />
+          </div>
+          <div>
+            <label>&nbsp;</label>
+            <button class="btn gold" type="submit">Hire (−{{ APPRENTICE_COST }} gc)</button>
+          </div>
+        </div>
+      </form>
+    {% else %}
+      <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="actions" style="margin-top:0.75rem">
+        <input type="hidden" name="action" value="dismiss_apprentice" />
+        <label class="checkbox-row" style="margin:0">
+          <input type="checkbox" name="refund" /> Refund {{ APPRENTICE_COST }} gc
+        </label>
+        <button class="btn danger small" type="submit" onclick="return confirm('Dismiss apprentice?');">Dismiss apprentice</button>
+      </form>
+    {% endif %}
+  </details>
+
+  <details class="ref-panel card">
+    <summary>Standard arms &amp; armour (open list)</summary>
+    <p class="muted" style="font-size:0.88rem">General Arms and Armour List (2e). Spellcasters may not wear armour or carry shields.</p>
+    <div class="item-list-detail">
+      <div class="item-list-head" aria-hidden="true">
+        <span class="col-name">Item</span>
+        <span class="col-cat">Category</span>
+        <span class="col-summary">Summary</span>
+        <span class="col-info"></span>
+      </div>
+      {% for it in standard_items %}
+        <div class="item-row">
+          <details class="item-desc">
+            <summary class="item-row-main">
+              <span class="col-name"><strong>{{ it.name }}</strong></span>
+              <span class="col-cat"><span class="badge">{{ it.category }}</span></span>
+              <span class="col-summary muted">{{ it.summary }}</span>
+              <span class="col-info item-desc-toggle">Info</span>
+            </summary>
+            <p class="item-desc-body">{{ it.description }}</p>
+          </details>
+        </div>
+      {% endfor %}
+    </div>
+  </details>
+
+  {# ---- Spells ---- #}
+  <details class="card" open>
+    <summary><h2>Spells (wizard &amp; apprentice)</h2></summary>
+    <p class="muted">
+      Difficulty is shown as <strong>Wizard CN / Apprentice CN</strong>
+      (apprentice has −2 to cast rolls, so +2 effective difficulty).
+      CN already includes school penalty (own +0, aligned +2, neutral +4, opposed +6).
+      Open <strong>Info</strong> on a spell line to read what it does.
+    </p>
+    {% if wizard_spells_ui %}
+      <div class="spell-list-detail" id="spell-order-body">
+        <div class="spell-list-head" aria-hidden="true">
+          <span class="col-idx">#</span>
+          <span class="col-name">Spell</span>
+          <span class="col-rel">Rel.</span>
+          <span class="col-school">School</span>
+          <span class="col-cn">Wiz/App</span>
+          <span class="col-type">Type</span>
+          <span class="col-info"></span>
+        </div>
+        {% for sp in wizard_spells_ui %}
+          <div class="spell-row" data-spell-id="{{ sp.id }}">
+            <details class="spell-desc">
+              <summary class="spell-row-main">
+                <span class="col-idx muted spell-idx">{{ loop.index }}.</span>
+                <span class="col-name"><strong>{{ sp.name }}</strong></span>
+                <span class="col-rel"><span class="badge">{{ sp.relation or '—' }}</span></span>
+                <span class="col-school muted">{{ sp.school }}</span>
+                <span class="col-cn gold"><strong>{{ sp.cn }}/{{ sp.cn + 2 }}</strong></span>
+                <span class="col-type muted">{{ sp.type }}</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">{{ sp.description }}</p>
+            </details>
+          </div>
+        {% endfor %}
+      </div>
+      <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" id="reorder-form" style="margin-top:0.75rem">
+        <input type="hidden" name="action" value="reorder_spells" />
+        <input type="hidden" name="spell_order" id="view-spell-order" value="{% for sp in wizard_spells_ui %}{{ sp.id }}{% if not loop.last %}|{% endif %}{% endfor %}" />
+        <div class="actions">
+          <button type="button" class="btn secondary small" id="spell-up">Move selected ↑</button>
+          <button type="button" class="btn secondary small" id="spell-down">Move selected ↓</button>
+          <button class="btn small" type="submit">Save spell order</button>
+        </div>
+        <p class="muted" style="font-size:0.85rem;margin-top:0.4rem">Click a spell row to select it (use Info to open text), then reorder.</p>
+      </form>
+      <script>
+        (function () {
+          const body = document.getElementById('spell-order-body');
+          const input = document.getElementById('view-spell-order');
+          let selected = null;
+          function rows() { return [...body.querySelectorAll('.spell-row')]; }
+          function sync() {
+            rows().forEach((r, i) => {
+              const idx = r.querySelector('.spell-idx');
+              if (idx) idx.textContent = (i + 1) + '.';
+            });
+            input.value = rows().map(r => r.dataset.spellId).join('|');
+          }
+          rows().forEach(r => {
+            r.addEventListener('click', (e) => {
+              if (e.target.closest('.spell-desc-toggle') || e.target.closest('summary')) {
+                // allow details toggle; still select row
+              }
+              rows().forEach(x => x.classList.remove('selected'));
+              selected = r;
+              r.classList.add('selected');
+            });
+          });
+          document.getElementById('spell-up').onclick = () => {
+            if (!selected || !selected.previousElementSibling) return;
+            body.insertBefore(selected, selected.previousElementSibling);
+            sync();
+          };
+          document.getElementById('spell-down').onclick = () => {
+            if (!selected || !selected.nextElementSibling) return;
+            body.insertBefore(selected.nextElementSibling, selected);
+            sync();
+          };
+        })();
+      </script>
+    {% else %}
+      <p class="empty">No spells — recreate warband or learn via level-up.</p>
+    {% endif %}
+  </details>
+
+  {# ---- Soldiers / recruit ---- #}
+  <details class="card" id="recruit" open>
+    <summary><h2>Soldiers &amp; recruiting</h2></summary>
+    <div class="limit-bar" style="margin-bottom:1rem">
+      <div class="limit {% if not limits.soldiers_ok %}bad{% endif %}">
+        Total soldiers: {{ limits.soldiers }} / {{ limits.max_soldiers }}
+      </div>
+      <div class="limit {% if not limits.specialists_ok %}bad{% endif %}">
+        Specialists: {{ limits.specialists }} / {{ limits.max_specialists }}
+      </div>
+      <div class="limit">Treasury: <span class="gold">{{ wb.gold }} gc</span></div>
+    </div>
+
+    {% if soldiers %}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th></th>
+              <th>Name</th>
+              <th>Type</th>
+              <th>Status</th>
+              <th>Move</th><th>Fight</th><th>Shoot</th><th>Armour</th><th>Will</th><th>Health</th>
+              <th>Cost</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="soldier-order-body">
+            {% for s in soldiers %}
+              <tr class="status-{{ s.status }}" data-soldier-id="{{ s.id }}">
+                <td class="muted">{{ loop.index }}</td>
+                <td>
+                  {% if s.portrait %}
+                    <img class="portrait-sm" src="{{ url_for('portrait_file', relpath=s.portrait) }}" alt="" />
+                  {% else %}
+                    <span class="portrait-placeholder">?</span>
+                  {% endif %}
+                </td>
+                <td><strong>{{ s.name }}</strong></td>
+                <td>
+                  {{ s.type_name }}
+                  <div><span class="badge {{ s.category }}">{{ s.category }}</span></div>
+                </td>
+                <td><span class="badge {{ s.status }}">{{ s.status }}</span></td>
+                <td>{{ s.move }}</td>
+                <td>{{ format_stat(s.fight) }}</td>
+                <td>{{ format_stat(s.shoot) }}</td>
+                <td>{{ s.armour }}</td>
+                <td>{{ format_stat(s.will) }}</td>
+                <td>{{ s.health }}</td>
+                <td class="gold">{{ s.cost }}</td>
+                <td>
+                  <div class="stack-sm">
+                    <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
+                      <input type="hidden" name="action" value="soldier_status" />
+                      <input type="hidden" name="soldier_id" value="{{ s.id }}" />
+                      <select name="status" onchange="this.form.submit()">
+                        {% for st in ['active', 'injured', 'dead'] %}
+                          <option value="{{ st }}" {% if s.status == st %}selected{% endif %}>{{ st }}</option>
+                        {% endfor %}
+                      </select>
+                    </form>
+                    <details>
+                      <summary class="muted" style="cursor:pointer;font-size:0.85rem">Edit / picture</summary>
+                      <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" enctype="multipart/form-data" class="stack-sm" style="margin-top:0.4rem">
+                        <input type="hidden" name="action" value="soldier_edit" />
+                        <input type="hidden" name="soldier_id" value="{{ s.id }}" />
+                        <input name="soldier_name" type="text" value="{{ s.name }}" />
+                        <input name="soldier_portrait" type="file" accept="image/*" />
+                        <input name="notes" type="text" value="{{ s.notes }}" placeholder="Notes" />
+                        <button class="btn small" type="submit">Update</button>
+                      </form>
+                    </details>
+                    <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" onsubmit="return confirm('Remove {{ s.name }}?');">
+                      <input type="hidden" name="action" value="remove_soldier" />
+                      <input type="hidden" name="soldier_id" value="{{ s.id }}" />
+                      <label class="checkbox-row" style="margin:0;font-size:0.8rem">
+                        <input type="checkbox" name="refund" /> refund {{ s.cost }} gc
+                      </label>
+                      <button class="btn danger small" type="submit">Remove</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" id="soldier-reorder-form" style="margin-top:0.75rem">
+        <input type="hidden" name="action" value="reorder_soldiers" />
+        <input type="hidden" name="soldier_order" id="view-soldier-order" value="{% for s in soldiers %}{{ s.id }}{% if not loop.last %}|{% endif %}{% endfor %}" />
+        <div class="actions">
+          <button type="button" class="btn secondary small" id="soldier-up">Move selected ↑</button>
+          <button type="button" class="btn secondary small" id="soldier-down">Move selected ↓</button>
+          <button class="btn small" type="submit">Save soldier order</button>
+        </div>
+        <p class="muted" style="font-size:0.85rem;margin-top:0.4rem">Click a soldier row to select it, then reorder. Order is used on the PDF roster.</p>
+      </form>
+      <script>
+        (function () {
+          const body = document.getElementById('soldier-order-body');
+          if (!body) return;
+          const input = document.getElementById('view-soldier-order');
+          let selected = null;
+          function rows() { return [...body.querySelectorAll('tr')]; }
+          function sync() {
+            rows().forEach((r, i) => { r.cells[0].textContent = i + 1; });
+            input.value = rows().map(r => r.dataset.soldierId).join('|');
+          }
+          rows().forEach(r => r.addEventListener('click', (e) => {
+            if (e.target.closest('form') || e.target.closest('select') || e.target.closest('button') || e.target.closest('input') || e.target.closest('details')) return;
+            rows().forEach(x => x.style.outline = '');
+            selected = r;
+            r.style.outline = '2px solid var(--accent)';
+          }));
+          document.getElementById('soldier-up').onclick = () => {
+            if (!selected || !selected.previousElementSibling) return;
+            body.insertBefore(selected, selected.previousElementSibling);
+            sync();
+          };
+          document.getElementById('soldier-down').onclick = () => {
+            if (!selected || !selected.nextElementSibling) return;
+            body.insertBefore(selected.nextElementSibling, selected);
+            sync();
+          };
+        })();
+      </script>
+    {% else %}
+      <p class="empty">No soldiers yet. Thugs and thieves cost 0 gc.</p>
+    {% endif %}
+
+    <details class="ref-panel">
+      <summary>Hire soldier</summary>
+      <p class="muted" style="font-size:0.85rem">
+        Default name is the type plus a number (e.g. “Archer 1”). Rename and add a picture afterward via Edit / picture.
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Type</th><th>Cat</th><th>Cost</th>
+              <th>Move</th><th>Fight</th><th>Shoot</th><th>Armour</th><th>Will</th><th>Health</th><th>Gear</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for c in catalog %}
+              {% set can_afford = wb.gold >= c.cost %}
+              {% set within_soldiers = limits.soldiers < limits.max_soldiers %}
+              {% set within_specialists = c.category != 'specialist' or limits.specialists < limits.max_specialists %}
+              {% set can_hire = can_afford and within_soldiers and within_specialists %}
+              <tr {% if not can_hire %}style="opacity:0.5"{% endif %}>
+                <td><strong>{{ c.name }}</strong></td>
+                <td><span class="badge {{ c.category }}">{{ c.category }}</span></td>
+                <td class="gold">{% if c.cost == 0 %}Free{% else %}{{ c.cost }}{% endif %}</td>
+                <td>{{ c.move }}</td>
+                <td>{{ format_stat(c.fight) }}</td>
+                <td>{{ format_stat(c.shoot) }}</td>
+                <td>{{ c.armour }}</td>
+                <td>{{ format_stat(c.will) }}</td>
+                <td>{{ c.health }}</td>
+                <td class="muted">{{ c.gear }}</td>
+                <td>
+                  <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
+                    <input type="hidden" name="action" value="hire_soldier" />
+                    <input type="hidden" name="type_key" value="{{ c.key }}" />
+                    <button class="btn small" type="submit" {% if not can_hire %}disabled{% endif %}>Hire</button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </details>
+  </details>
+
+  {# ---- Vault & treasury ---- #}
+  <div class="grid-2">
+    <details class="card" open>
+      <summary><h2>Treasury <span class="gold">{{ wb.gold }} gc</span></h2></summary>
+      <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
+        <input type="hidden" name="action" value="adjust_gold" />
+        <div class="form-row inline">
+          <div>
+            <label for="delta">Change (+/−)</label>
+            <input id="delta" name="delta" type="number" required />
+          </div>
+          <div>
+            <label for="reason">Reason</label>
+            <input id="reason" name="reason" type="text" />
+          </div>
+        </div>
+        <button class="btn gold" type="submit">Apply</button>
+      </form>
+    </details>
+    <details class="card" open>
+      <summary><h2>Vault items</h2></summary>
+      {% if wb["vault_items"] %}
+        <ul class="list-plain">
+          {% for it in wb["vault_items"] %}
+            <li>
+              <strong>{{ it.name }}</strong>
+              {% if it.notes %}<span class="muted"> — {{ it.notes }}</span>{% endif %}
+              <form class="inline-form" method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
+                <input type="hidden" name="action" value="remove_vault_item" />
+                <input type="hidden" name="item_id" value="{{ it.id }}" />
+                <button class="btn danger small" type="submit">×</button>
+              </form>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="empty">No vault items yet. Add via post-game loot.</p>
+      {% endif %}
+      <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:0.75rem">
+        <input type="hidden" name="action" value="add_vault_item" />
+        <div class="form-row inline">
+          <div>
+            <label for="item_name">Add item</label>
+            <input id="item_name" name="item_name" type="text" required />
+          </div>
+          <div>
+            <label>&nbsp;</label>
+            <button class="btn secondary" type="submit">Add</button>
+          </div>
+        </div>
+      </form>
+    </details>
+  </div>
+
+  {# ---- Base ---- #}
+  <details class="card" id="base" open>
+    <summary><h2>Home base</h2></summary>
+    <p class="muted">
+      Establishing a base is free after one or more games (2e p.106).
+      Changing location loses purchased upgrades.
+    </p>
+    <div class="limit-bar">
+      <div class="limit">Location: <strong>{{ base.location_name }}</strong></div>
+      <div class="limit">Resources: {{ base.resources|length }}</div>
+    </div>
+    {% if base.location_key != 'none' %}
+      <p class="muted" style="margin-top:0.5rem">{{ base.location_effects }}</p>
+    {% endif %}
+
+    <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:1rem">
+      <input type="hidden" name="action" value="set_base_location" />
+      <div class="form-row">
+        <label for="location">Base location</label>
+        <select id="location" name="location">
+          {% for key, loc in base_locations.items() %}
+            <option value="{{ key }}" {% if key == base.location_key %}selected{% endif %}>
+              {{ loc.name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-row">
+        <label for="base_notes">Base notes</label>
+        <textarea id="base_notes" name="base_notes">{{ base.notes }}</textarea>
+      </div>
+      <button class="btn" type="submit">Save base location</button>
+    </form>
+
+    {% if base.location_key != 'none' %}
+      <h3>Owned resources</h3>
+      {% if base.resources %}
+        <ul class="list-plain">
+          {% for res in base.resources %}
+            <li>
+              <strong>{{ res.name }}</strong> ({{ res.cost }} gc)
+              <span class="muted">— {{ res.effects }}</span>
+              <form class="inline-form" method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
+                <input type="hidden" name="action" value="remove_base_resource" />
+                <input type="hidden" name="resource" value="{{ res.key }}" />
+                <label class="checkbox-row" style="display:inline-flex;margin:0 0.35rem;font-size:0.8rem">
+                  <input type="checkbox" name="refund" /> half refund
+                </label>
+                <button class="btn danger small" type="submit">Remove</button>
+              </form>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="empty">No resources purchased yet.</p>
+      {% endif %}
+
+      <h3>Buy resource</h3>
+      <p class="muted">Treasury: <span class="gold">{{ wb.gold }} gc</span>. Each type once only.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Resource</th><th>Cost</th><th>Effect</th><th></th></tr>
+          </thead>
+          <tbody>
+            {% for key, res in base_resources.items() %}
+              {% set owned = key in (wb.base.resources if wb.base is defined else []) or key in base.resources|map(attribute='key')|list %}
+              <tr {% if owned %}style="opacity:0.45"{% endif %}>
+                <td><strong>{{ res.name }}</strong></td>
+                <td class="gold">{{ res.cost }}</td>
+                <td class="muted">{{ res.effects }}</td>
+                <td>
+                  {% if not owned %}
+                    <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
+                      <input type="hidden" name="action" value="buy_base_resource" />
+                      <input type="hidden" name="resource" value="{{ key }}" />
+                      <button class="btn small gold" type="submit" {% if wb.gold < res.cost %}disabled{% endif %}>Buy</button>
+                    </form>
+                  {% else %}
+                    <span class="badge">owned</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% endif %}
+  </details>
+
+  <details class="card" open>
+    <summary><h2>Campaign log</h2></summary>
+    <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
+      <input type="hidden" name="action" value="add_log" />
+      <div class="form-row inline">
+        <div style="flex:3">
+          <label for="log_text">Entry</label>
+          <input id="log_text" name="log_text" type="text" required />
+        </div>
+        <div>
+          <label>&nbsp;</label>
+          <button class="btn secondary" type="submit">Add</button>
+        </div>
+      </div>
+    </form>
+    <ul class="history" style="margin-top:1rem">
+      {% for entry in (wb.history or [])|reverse %}
+        <li><time>{{ entry.when }}</time>{{ entry.text }}</li>
+      {% else %}
+        <li class="muted">No log entries yet.</li>
+      {% endfor %}
+    </ul>
+  </details>
+{% endblock %}
