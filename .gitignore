@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+data/uploads/*
+!data/uploads/.gitkeep
+data/warbands/*
+!data/warbands/.gitkeep
+data/portraits/*
+!data/portraits/.gitkeep
+*.egg-info/
+.DS_Store

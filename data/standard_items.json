@@ -1,0 +1,109 @@
+[
+  {
+    "name": "Dagger",
+    "category": "Weapon",
+    "kind": "simple",
+    "summary": "−1 damage. First dagger does not take an item slot.",
+    "description": "A knife or other small weapon such as a light club. Daggers have a −1 damage modifier. The first dagger carried by a figure does not take up an item slot.",
+    "slot_cost": 1
+  },
+  {
+    "name": "Hand Weapon",
+    "category": "Weapon",
+    "kind": "simple",
+    "summary": "No combat modifiers. One item slot.",
+    "description": "Swords, scimitars, hand axes, maces, light spears, etc. No modifiers in combat.",
+    "slot_cost": 1
+  },
+  {
+    "name": "Two-Handed Weapon",
+    "category": "Weapon",
+    "kind": "simple",
+    "summary": "+2 damage. Takes two item slots.",
+    "description": "Two-handed swords, battle-axes, polearms, large flails, heavy spears. +2 damage. Takes two item slots.",
+    "slot_cost": 2
+  },
+  {
+    "name": "Staff",
+    "category": "Weapon",
+    "kind": "simple",
+    "summary": "−1 damage; opponent −1 damage in hand-to-hand.",
+    "description": "Staffs do −1 damage and give the opponent −1 damage in hand-to-hand. Cannot be combined with a shield.",
+    "slot_cost": 1
+  },
+  {
+    "name": "Bow",
+    "category": "Missile",
+    "kind": "simple",
+    "summary": "Range 24\". Load and fire as one action. Needs a quiver.",
+    "description": "Load and fire as a single action. Maximum range 24\". Requires a quiver.",
+    "slot_cost": 1
+  },
+  {
+    "name": "Crossbow",
+    "category": "Missile",
+    "kind": "simple",
+    "summary": "+2 damage, range 24\". Separate load and fire. Needs a quiver.",
+    "description": "One action to load and one to fire. +2 damage, range 24\". Requires a quiver.",
+    "slot_cost": 1
+  },
+  {
+    "name": "Quiver",
+    "category": "Gear",
+    "kind": "simple",
+    "summary": "Required for bow/crossbow. One free magic ammo slot.",
+    "description": "Required to shoot a bow or crossbow. May carry one magic ammunition without an extra slot.",
+    "slot_cost": 1
+  },
+  {
+    "name": "Shield",
+    "category": "Armour",
+    "kind": "simple",
+    "summary": "+1 Armour. Not with two-handed weapon or staff. No spellcasters.",
+    "description": "+1 Armour. Cannot be carried with a two-handed weapon or staff. Spellcasters may not carry shields.",
+    "slot_cost": 1,
+    "spellcaster_allowed": false
+  },
+  {
+    "name": "Light Armour",
+    "category": "Armour",
+    "kind": "simple",
+    "summary": "+1 Armour. No spellcasters.",
+    "description": "+1 Armour. Spellcasters may not wear light armour.",
+    "slot_cost": 1,
+    "spellcaster_allowed": false
+  },
+  {
+    "name": "Heavy Armour",
+    "category": "Armour",
+    "kind": "simple",
+    "summary": "+2 Armour, −1 Move. No spellcasters.",
+    "description": "+2 Armour but −1 Move. Spellcasters may not wear heavy armour.",
+    "slot_cost": 1,
+    "spellcaster_allowed": false
+  },
+  {
+    "name": "Potion",
+    "category": "Consumable",
+    "kind": "potion",
+    "summary": "Pick a specific potion in the second field.",
+    "description": "Potions take one item slot. Choose the specific potion type after selecting this.",
+    "slot_cost": 1
+  },
+  {
+    "name": "Scroll",
+    "category": "Consumable",
+    "kind": "scroll",
+    "summary": "Pick which spell is on the scroll in the second field.",
+    "description": "One-use spell scroll. Cannot be used to learn a new spell. Sale value typically 30gc.",
+    "slot_cost": 1
+  },
+  {
+    "name": "Grimoire",
+    "category": "Consumable",
+    "kind": "grimoire",
+    "summary": "Pick which spell the grimoire teaches in the second field.",
+    "description": "Used to learn a new spell. After learning, remove from the sheet. Sale 200gc if already known.",
+    "slot_cost": 1
+  }
+]
