@@ -70,6 +70,23 @@ def enrich_spells_with_descriptions(spells: list[dict]) -> list[dict]:
     return out
 
 
+def equipment_bonuses(slots: list) -> dict:
+    """Sum the Armour/Move bonuses granted by known Armour-category items (Shield,
+    Light Armour, Heavy Armour) sitting in these item slots. Matches by exact
+    catalog name (case-insensitive), same idiom as item_slot_cost() below."""
+    bonus = {"armour": 0, "move": 0}
+    for raw in slots or []:
+        name = (raw or "").strip().lower()
+        if not name:
+            continue
+        for it in load_standard_items():
+            if it["name"].lower() == name:
+                bonus["armour"] += int(it.get("armour_bonus", 0))
+                bonus["move"] -= int(it.get("move_penalty", 0))
+                break
+    return bonus
+
+
 def item_slot_cost(name: str) -> int:
     """How many item slots this equipment uses (default 1)."""
     n = (name or "").strip().lower()

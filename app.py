@@ -34,6 +34,10 @@ from frostgrave_data import (
     BASE_RESOURCES,
     CAPTAIN_MIND_CONTROL_LABELS,
     CAPTAIN_MIND_CONTROL_OPTIONS,
+    CAPTAIN_MODE_LABELS,
+    CAPTAIN_MODE_OPTIONS,
+    CAPTAIN_TRICK_BY_ID,
+    CAPTAIN_TRICKS,
     LEVEL_UP_OPTIONS,
     LEVELUP_STATS,
     MAX_SOLDIERS,
@@ -77,6 +81,7 @@ from warband_store import (
     add_vault_item,
     adjust_gold,
     apply_captain_level_up,
+    apply_captain_trick,
     apply_level_up,
     apply_soldier_level_up,
     reverse_last_captain_level_up,
@@ -84,6 +89,7 @@ from warband_store import (
     reverse_last_soldier_level_up,
     base_summary,
     buy_base_resource,
+    captain_effective_stats,
     create_warband,
     default_homerules,
     delete_warband,
@@ -140,8 +146,13 @@ app.jinja_env.globals.update(
     APPRENTICE_ITEM_SLOTS=APPRENTICE_ITEM_SLOTS,
     CAPTAIN_MIND_CONTROL_OPTIONS=CAPTAIN_MIND_CONTROL_OPTIONS,
     CAPTAIN_MIND_CONTROL_LABELS=CAPTAIN_MIND_CONTROL_LABELS,
+    CAPTAIN_MODE_OPTIONS=CAPTAIN_MODE_OPTIONS,
+    CAPTAIN_MODE_LABELS=CAPTAIN_MODE_LABELS,
+    CAPTAIN_TRICKS=CAPTAIN_TRICKS,
+    CAPTAIN_TRICK_BY_ID=CAPTAIN_TRICK_BY_ID,
     LEVELUP_STATS=LEVELUP_STATS,
     level_from_xp=level_from_xp,
+    captain_effective_stats=captain_effective_stats,
 )
 
 
@@ -426,6 +437,7 @@ def warband_update(warband_id: str):
                 wb,
                 (request.form.get("captain_name") or "").strip(),
                 request.form.get("captain_extra_stat") or None,
+                request.form.getlist("captain_tricks"),
             )
             flash(msg, "success" if ok else "error")
             if ok:
@@ -475,6 +487,12 @@ def warband_update(warband_id: str):
             if ok:
                 save_warband(wb)
 
+        elif action == "captain_pick_trick":
+            ok, msg = apply_captain_trick(wb, request.form.get("trick_id") or "")
+            flash(msg, "success" if ok else "error")
+            if ok:
+                save_warband(wb)
+
         elif action == "captain_add_xp":
             amount = int(request.form.get("amount") or 0)
             ok, msg = add_captain_xp(wb, amount)
@@ -487,6 +505,7 @@ def warband_update(warband_id: str):
                 wb,
                 request.form.get("soldier_id") or "",
                 request.form.get("extra_stat") or None,
+                request.form.getlist("tricks"),
             )
             flash(msg, "success" if ok else "error")
             if ok:
