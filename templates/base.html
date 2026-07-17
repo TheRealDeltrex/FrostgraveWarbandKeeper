@@ -148,5 +148,28 @@
         });
       })();
     </script>
+    {% if IS_FROZEN %}
+      <script>
+        (function () {
+          // The packaged .exe has no window/console (frostgrave.spec,
+          // console=False) and keeps waitress running invisibly once the
+          // browser tab closes. idle_watchdog.py watches for that: a ping
+          // every few seconds says "a page is still open", and pagehide
+          // reports a page unloading (which also happens on ordinary in-app
+          // navigation — the watchdog only shuts down if no fresh ping
+          // follows within its grace period).
+          function ping(url) {
+            try {
+              navigator.sendBeacon(url);
+            } catch (err) {
+              fetch(url, { method: "POST", keepalive: true }).catch(function () {});
+            }
+          }
+          ping("/heartbeat");
+          setInterval(function () { ping("/heartbeat"); }, 5000);
+          window.addEventListener("pagehide", function () { ping("/heartbeat/closing"); });
+        })();
+      </script>
+    {% endif %}
   </body>
 </html>

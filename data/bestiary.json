@@ -1,0 +1,261 @@
+[
+  {
+    "name": "Bear",
+    "category": "Animal",
+    "source": "Core Rules",
+    "stats": "Move 6\" · Fight +4 · Shoot +0 · Armour 12 · Will +0 · Health 14",
+    "description": "Northern bears are mostly peaceful creatures but are easily spooked; one encountered in the city can be assumed to already be unhappy and desperate to leave. It counts as an Animal, is Large (suffering the -2 Large Target penalty against shooting attacks), and is Strong (dealing +2 damage)."
+  },
+  {
+    "name": "Boar",
+    "category": "Animal",
+    "source": "Core Rules",
+    "stats": "Move 6\" · Fight +2 · Shoot +0 · Armour 12 · Will +2 · Health 8",
+    "description": "Bad-tempered and aggressive wild boars are prized for their tusks (listed as Horns), which anyone who kills one may sell for a Bounty of 10gc. It counts as an Animal."
+  },
+  {
+    "name": "Giant Rat",
+    "category": "Animal",
+    "source": "Core Rules",
+    "stats": "Move 6\" · Fight +0 · Shoot +0 · Armour 6 · Will +0 · Health 1",
+    "description": "Descended from rats that survived the freezing of the city in the ancient sewers, these cat-sized rodents are usually encountered in small packs. It counts as an Animal and has the Pack Hunter trait: when multiple giant rats appear together they are placed in base contact and activate and move together as one, with a randomly determined leader dictating the pack's actions."
+  },
+  {
+    "name": "Ice Spider",
+    "category": "Animal",
+    "source": "Core Rules",
+    "stats": "Move 6\" · Fight +1 · Shoot +0 · Armour 8 · Will +0 · Health 4",
+    "description": "Hairy, wolf-sized arachnids that hunt actively rather than spinning webs, generally preying on small mammals but willing to try their luck against larger targets. It counts as an Animal, is an Expert Climber (no movement penalty for climbing), and its bite carries the Poison trait, dealing venomous damage."
+  },
+  {
+    "name": "Ice Toad",
+    "category": "Animal",
+    "source": "Core Rules",
+    "stats": "Move 4\" · Fight +2 · Shoot +0 · Armour 10 · Will +0 · Health 5",
+    "description": "Large, ponderous amphibians with devastatingly powerful jaws but otherwise weak; best avoided. It is Amphibious (automatically passes Swimming Rolls and treats water as normal terrain), counts as an Animal, and is Powerful, dealing double damage."
+  },
+  {
+    "name": "Snow Leopard",
+    "category": "Animal",
+    "source": "Core Rules",
+    "stats": "Move 8\" · Fight +3 · Shoot +0 · Armour 10 · Will +2 · Health 10",
+    "description": "The largest and most vicious of the big cats around Frostgrave, snow leopards have no fear of humans and attack when hungry or threatened. It counts as an Animal and is an Expert Climber."
+  },
+  {
+    "name": "White Gorilla",
+    "category": "Animal",
+    "source": "Core Rules",
+    "stats": "Move 6\" · Fight +4 · Shoot +0 · Armour 12 · Will +8 · Health 14",
+    "description": "A rarely seen colony of white gorillas calls the ruined city home; the males range out hunting and are not above eating human flesh. It counts as an Animal and is Strong, dealing +2 damage."
+  },
+  {
+    "name": "Wild Dog",
+    "category": "Animal",
+    "source": "Core Rules",
+    "stats": "Move 8\" · Fight +0 · Shoot +0 · Armour 8 · Will +0 · Health 4",
+    "description": "Scrawny, malnourished, and roaming in large packs through the ruins, wild dogs are extremely aggressive despite their poor condition. It counts as an Animal and has the Pack Hunter trait, activating and moving together with other wild dogs in base contact."
+  },
+  {
+    "name": "Wolf",
+    "category": "Animal",
+    "source": "Core Rules",
+    "stats": "Move 8\" · Fight +1 · Shoot +0 · Armour 10 · Will +0 · Health 6",
+    "description": "Wolves generally shy away from humans, but a few occasionally wander down into the city in search of prey. It counts as an Animal and has the Pack Hunter trait."
+  },
+  {
+    "name": "Small Construct",
+    "category": "Construct",
+    "source": "Core Rules",
+    "stats": "Move 6\" · Fight +1 · Shoot +0 · Armour 11 · Will +0 · Health 10",
+    "description": "Constructs smaller than most humans, often taking the form of a small humanoid or animal, or even an animated chair or toy. It has the Construct trait: immune to poison, never counts as wounded, and can pick up and carry treasure but has no item slots (though items may be permanently grafted to it if noted in that item's description)."
+  },
+  {
+    "name": "Medium Construct",
+    "category": "Construct",
+    "source": "Core Rules",
+    "stats": "Move 5\" · Fight +3 · Shoot +0 · Armour 12 · Will +0 · Health 12",
+    "description": "Roughly human-sized constructs built for all manner of purposes, from humanoid designs to machines for chopping wood or serving as a mount. It has the Construct trait (immune to poison, never wounded, can carry treasure but has no item slots)."
+  },
+  {
+    "name": "Large Construct",
+    "category": "Construct",
+    "source": "Core Rules",
+    "stats": "Move 4\" · Fight +4 · Shoot +0 · Armour 13 · Will +0 · Health 14",
+    "description": "Bigger than a human, sometimes humanoid but also seen as self-propelled wagons or shaped after large animals like bears. It has the Construct trait, is Large (-2 Large Target penalty against shooting), and is Strong, dealing +2 damage."
+  },
+  {
+    "name": "Imp",
+    "category": "Demon",
+    "source": "Core Rules",
+    "stats": "Move 6\" · Fight +1 · Shoot +0 · Armour 10 · Will +4 · Health 6",
+    "description": "The smallest and least powerful of demons, appearing in an infinite variety of forms across the planes. It has the Demon trait: all its attacks count as magic attacks, it is immune to poison, and it can carry treasure but has no item slots."
+  },
+  {
+    "name": "Minor Demon",
+    "category": "Demon",
+    "source": "Core Rules",
+    "stats": "Move 6\" · Fight +3 · Shoot +0 · Armour 11 · Will +4 · Health 12",
+    "description": "Close to human size, minor demons include recognizable 'species' such as human-animal hybrids and hunched, grey-skinned gargoyles that lair amongst the ruins. It has the Demon trait (magic attacks, immune to poison, can carry treasure with no item slots)."
+  },
+  {
+    "name": "Major Demon",
+    "category": "Demon",
+    "source": "Core Rules",
+    "stats": "Move 6\" · Fight +5 · Shoot +0 · Armour 12 · Will +6 · Health 15",
+    "description": "Powerful extra-planar entities of any size or shape, some capable of changing form at will; the given stats are only a guideline since major demons often have their own unique powers or spells. It has the Demon trait, is Large, Strong (+2 damage), and has True Sight (ignores Beauty and Invisibility, and destroys any Illusionary Soldier it fights)."
+  },
+  {
+    "name": "Frost Giant",
+    "category": "Miscellaneous",
+    "source": "Core Rules",
+    "stats": "Move 6\" · Fight +5 · Shoot +0 · Armour 15 · Will +4 · Health 25",
+    "description": "Since the great storm destroyed the city, frost giants occasionally wander down from the northern mountains; possessed of rudimentary intelligence, they can sometimes be reasoned with but usually see humans as food. It has Elemental Resistance (2) (increasing its effective armour by 2 against elemental damage), is Large, and is Strong, dealing +2 damage."
+  },
+  {
+    "name": "Giant Worm",
+    "category": "Miscellaneous",
+    "source": "Core Rules",
+    "stats": "Move 7\" · Fight +4 · Shoot +0 · Armour 10 · Will +5 · Health 20",
+    "description": "Bred long ago to devour waste in the city's sewers, these worms now emerge to hunt because the sewers no longer provide enough food. It has the Burrowing trait, allowing it to move through terrain as though it were not there (provided it can reach the far side) with no penalty for rough ground, and is Large."
+  },
+  {
+    "name": "Snow Troll",
+    "category": "Miscellaneous",
+    "source": "Core Rules",
+    "stats": "Move 4\" · Fight +4 · Shoot +0 · Armour 14 · Will +2 · Health 16",
+    "description": "Large, dumb, and dangerous, snow trolls consider anything alive and smaller than themselves to be food and attack without hesitation, though they are slow enough to usually be avoided or outpaced. It is Large and Strong, dealing +2 damage."
+  },
+  {
+    "name": "Werewolf",
+    "category": "Miscellaneous",
+    "source": "Core Rules",
+    "stats": "Move 7\" · Fight +4 · Shoot +0 · Armour 11 · Will +5 · Health 12",
+    "description": "Not true shapeshifters but some kind of wolf-human hybrid, werewolves live in small packs yet hunt and are typically encountered alone; their heads are highly prized trophies (Bounty 20gc). It is an Expert Climber."
+  },
+  {
+    "name": "Armoured Skeleton",
+    "category": "Undead",
+    "source": "Core Rules",
+    "stats": "Move 6\" · Fight +2 · Shoot +0 · Armour 12 · Will +0 · Health 1",
+    "description": "Skeletons animated specifically for use as soldiers; harder to create but tougher, more aggressive, and better equipped than common skeletons. It has the Pack Hunter trait (activating and moving together with other armoured skeletons in base contact) and the Undead trait (immune to poison, never wounded, can carry treasure but has no item slots)."
+  },
+  {
+    "name": "Animated Skull",
+    "category": "Undead",
+    "source": "Core Rules",
+    "stats": "Move 3\" · Fight +0 · Shoot +0 · Armour 10 · Will -2 · Health 1",
+    "description": "Necromancers animate skulls, usually human, to send messages, hold candles, or perform other minor tasks; they levitate and float about, and while not a huge threat, their broken-toothed bite can surprise the inattentive. It has the Levitate trait (no movement penalty for climbing or rough ground) and the Undead trait."
+  },
+  {
+    "name": "Ghoul",
+    "category": "Undead",
+    "source": "Core Rules",
+    "stats": "Move 6\" · Fight +2 · Shoot +0 · Armour 10 · Will +2 · Health 10",
+    "description": "Scavengers of the undead world, ghouls are usually created by accident when hunger or ignorance drives a living creature to eat tainted undead flesh; most ghouls haunting Frostgrave were once adventurers who explored the city. It has the Undead trait."
+  },
+  {
+    "name": "Skeleton",
+    "category": "Undead",
+    "source": "Core Rules",
+    "stats": "Move 6\" · Fight +1 · Shoot +0 · Armour 10 · Will +0 · Health 1",
+    "description": "The animated bones of a long-dead creature, held together and moved by magic; most were once human, though skeletons of dogs and other animals are also seen. It has the Undead trait."
+  },
+  {
+    "name": "Skeleton Archer",
+    "category": "Undead",
+    "source": "Core Rules",
+    "stats": "Move 6\" · Fight +0 · Shoot +0 · Armour 10 · Will +0 · Health 1",
+    "description": "Most skeletons lack the dexterity to fire a bow, but if the skeleton belonged to a skilled archer in life, some of that ability lingers on. It has the Undead trait and the Bow trait, allowing it to make shooting attacks."
+  },
+  {
+    "name": "Vampire",
+    "category": "Undead",
+    "source": "Core Rules",
+    "stats": "Move 7\" · Fight +4 · Shoot +0 · Armour 12 · Will +5 · Health 14",
+    "description": "Vampires troubled the city even at the height of its glory, too dangerous to allow free but too powerful to eliminate; frozen along with the rest of Frostgrave, they have since thawed out. It is Immune to Normal Weapons (can only be harmed by magic), has Magic Attack (all its attacks count as magic), Mind Lock (immune to Mind Control and Suggestion), True Sight, and the Undead trait."
+  },
+  {
+    "name": "Wraith",
+    "category": "Undead",
+    "source": "Core Rules",
+    "stats": "Move 6\" · Fight +2 · Shoot +0 · Armour 10 · Will +3 · Health 6",
+    "description": "A catch-all term for the ethereal undead of the city (also called ghosts or wights); extremely dangerous and hard to kill, their touch drains a victim's life force. It has Energy Drain (deals double damage in combat, though undead and constructs take only the standard amount), the Ethereal trait (can move through terrain, no penalty for climbing or rough ground), Immune to Normal Weapons, Magic Attack, and the Undead trait."
+  },
+  {
+    "name": "Zombie",
+    "category": "Undead",
+    "source": "Core Rules",
+    "stats": "Move 4\" · Fight +1 · Shoot +0 · Armour 12 · Will +0 · Health 6",
+    "description": "Probably the most numerous inhabitants of Frostgrave, zombies were reanimated soon after death and still retain most of their flesh; once household servants and messengers, they have gone feral and now hunger for living flesh. It has the Undead trait."
+  },
+  {
+    "name": "Banshee",
+    "category": "Undead",
+    "source": "Thaw of the Lich Lord",
+    "stats": "Move 9\" · Fight +0 · Shoot +0 · Armour 10 · Will +5 · Health 10",
+    "description": "The ethereal spirits of women who suffered some great wrong in life and cannot fully leave this plane. A banshee will never willingly attack a living creature directly; instead it always makes a random move for its first action and, if it has a second action, unleashes its soul-shattering Wail, forcing every non-undead, non-construct model within 6\" to pass a Will Roll (TN10) or take damage equal to the amount by which the roll failed. It is Undead and Immaterial (can move through terrain) and is Immune to Normal Weapons."
+  },
+  {
+    "name": "Blood Crow",
+    "category": "Animal",
+    "source": "Thaw of the Lich Lord",
+    "stats": "Move 9\" · Fight +0 · Shoot +0 · Armour 14 · Will +3 · Health 1",
+    "description": "Crows that have flocked to Frostgrave since its uncovering, feeding on long-frozen corpses and wandering zombies; the consumption of undead flesh has made them large and aggressive. It counts as an Animal and has the Flying trait, ignoring all terrain and movement penalties."
+  },
+  {
+    "name": "Death Cultist",
+    "category": "Miscellaneous",
+    "source": "Thaw of the Lich Lord",
+    "stats": "Move 6\" · Fight +0 · Shoot +0 · Armour 10 · Will +5 · Health 10",
+    "description": "Mortal men and women who have sworn service to an undead master in hope of achieving a form of immortality. Drawn from society's lowest rungs and lacking useful skills or combat training, they make up for it with fanaticism and fearlessness, generally concealing their identities behind masks and hoods adorned with bones and chains. It has no special traits beyond its stat line."
+  },
+  {
+    "name": "Frost Wraith",
+    "category": "Undead",
+    "source": "Thaw of the Lich Lord",
+    "stats": "Move 6\" · Fight +2 · Shoot +0 · Armour 10 · Will +3 · Health 6",
+    "description": "A peculiar ethereal undead found only in the ruins of Frostgrave, partially frozen into a semi-material form; unlike other ethereal undead it cannot move through terrain and is vulnerable to normal weapons, but its icy grasp is extremely painful to the living. It has the Undead trait and Icy Grasp, granting +2 Fight when fighting living creatures."
+  },
+  {
+    "name": "The Ghoul King",
+    "category": "Undead",
+    "source": "Thaw of the Lich Lord",
+    "stats": "Move 8\" · Fight +4 · Shoot +0 · Armour 12 · Will +6 · Health 14",
+    "description": "Despite his title and appearance, the Ghoul King is a revenant rather than a true ghoul; how he escaped his necromantic master and rose to lead a pack of ghouls is unknown, and he has been a minor power in the ruins since the city's rediscovery, though few wizards know of him. The Lich Lord has secured his services through promises of human flesh. It has the Undead trait, is Immune to Control Undead, and is Savage, fighting as though armed with a two-handed weapon."
+  },
+  {
+    "name": "Rangifer",
+    "category": "Miscellaneous",
+    "source": "Thaw of the Lich Lord",
+    "stats": "Move 7\" · Fight +2 · Shoot +0 · Armour 12 · Will +3 · Health 12",
+    "description": "Hybrids of reindeer and man displaying real intelligence — using and making simple tools, wearing clothing, and speaking a rudimentary language — the rangifer form one of the largest living populations in and around the ruins. They bear an inherent hatred of the undead and often attack such creatures on sight, sometimes even defeating undead that typically require magic to vanquish. It has Hate Undead, granting +1 Fight and magic attacks when fighting undead creatures."
+  },
+  {
+    "name": "Spectre",
+    "category": "Undead",
+    "source": "Thaw of the Lich Lord",
+    "stats": "Move 9\" · Fight +0 · Shoot +0 · Armour 10 · Will +10 · Health 8",
+    "description": "An uncommon form of ethereal undead resembling ghosts that glow with a faint greenish light; unlike ghosts they roam freely rather than haunting a fixed location, and while generally less dangerous than other ethereal undead, they are extremely quick and notoriously difficult to control. It has the Undead trait, is Immaterial (can move through terrain), and is Immune to Normal Weapons."
+  },
+  {
+    "name": "Wraith Knight",
+    "category": "Undead",
+    "source": "Thaw of the Lich Lord",
+    "stats": "Move 6\" · Fight +3 · Shoot +0 · Armour 10 · Will +5 · Health 10",
+    "description": "The most powerful creations of the Lich Lord, appearing as suits of heavy armour containing nothing but black emptiness and a pair of burning eyes. Capable of limited independent thought but unfailingly loyal to the Lich Lord, they can only be harmed by magic. It has the Undead trait, is Immaterial (moves through terrain), Immune to Normal Weapons, Immune to Control Undead, and has Drain Life Force, dealing double damage with all attacks."
+  },
+  {
+    "name": "Zombie Troll",
+    "category": "Undead",
+    "source": "Thaw of the Lich Lord",
+    "stats": "Move 4\" · Fight +4 · Shoot +0 · Armour 14 · Will +2 · Health 10",
+    "description": "While any corpse can theoretically be turned into a zombie, necromancers favour trolls for the extra strength they add to their forces; not quite as tough as a living troll, a zombie troll is still a creature to be feared. It has the Undead trait, is Large, and has Huge Weapon, fighting as though armed with a two-handed weapon."
+  },
+  {
+    "name": "The Lich Lord",
+    "category": "Undead",
+    "source": "Thaw of the Lich Lord",
+    "stats": "Move 6\" · Fight +4/+5 · Shoot +2 · Armour 14 · Will +5/+6 · Health 25",
+    "description": "Once an important figure in Felstad who embraced necromancy and traded his humanity for immortality, the Lich Lord sealed himself into a sarcophagus as the cataclysm struck and lay frozen for a thousand years. Now freed, he seeks to reclaim his city as a base for conquest. He is Undead and Immune to Control Undead, and is normally accompanied by a bodyguard (typically two wraith knights, four armoured skeletons, and four death cultists). His stats include bonuses from his Magical Sickle (+1 Fight) and Ring of Will (+1 Will); he also carries the Book of Bones, a Ring of Slow Fall, Robes of Arrow Turning, and a Staff of Power (3), and knows an extensive spell list including Bind Demon, Elemental Bolt, Steal Health, Strike Dead, and Raise Zombie. If run without a player controlling him, he follows a fixed reaction table prioritizing countering invisible spellcasters, attacking enemy spellcasters, healing himself via Steal Health when below 12 Health, and raising undead reinforcements."
+  }
+]

@@ -18,8 +18,10 @@ datas = [
     ("templates", "templates"),
     ("static", "static"),
     ("data/potions.json", "data"),
+    ("data/potion_descriptions.json", "data"),
     ("data/spell_descriptions.json", "data"),
     ("data/standard_items.json", "data"),
+    ("data/bestiary.json", "data"),
 ]
 
 a = Analysis(
@@ -27,7 +29,7 @@ a = Analysis(
     pathex=[],
     binaries=[],
     datas=datas,
-    hiddenimports=["waitress"],
+    hiddenimports=["waitress", "pystray", "pystray._win32"],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
