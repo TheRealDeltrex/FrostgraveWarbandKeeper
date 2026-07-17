@@ -844,6 +844,7 @@
                         {% endfor %}
                       </select>
                     </form>
+                    <div class="actions" style="align-items:flex-start;margin-top:0">
                     <details>
                       <summary class="muted" style="cursor:pointer;font-size:0.85rem">Edit / picture</summary>
                       <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" enctype="multipart/form-data" class="stack-sm" style="margin-top:0.4rem">
@@ -943,6 +944,7 @@
                       </label>
                       <button class="btn danger small" type="submit">Remove</button>
                     </form>
+                    </div>
                   </div>
                 </td>
               </tr>
@@ -1197,6 +1199,7 @@
     {% endif %}
   </details>
 
+  {# Campaign log — hidden from the UI for now, kept here in case it's wanted back later.
   <details class="card">
     <summary><h2>Campaign log</h2></summary>
     <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
@@ -1220,6 +1223,7 @@
       {% endfor %}
     </ul>
   </details>
+  #}
 
   <script>
     (function () {

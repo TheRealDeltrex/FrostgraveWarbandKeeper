@@ -95,13 +95,14 @@
         <div class="limit bad">Opposed {{ relations.opposed }}: locked</div>
       </div>
 
-      <div class="grid-2" style="margin-top:1rem">
-        <div>
-          <h3>Available spells</h3>
-          <p class="muted" style="font-size:0.85rem">
-            CN shown is <strong>your effective casting number</strong> (base + school penalty).
-            Greyed-out spells cannot be picked under current selection rules.
-          </p>
+      <div style="margin-top:1rem">
+        <h3>Available spells</h3>
+        <p class="muted" style="font-size:0.85rem">
+          CN shown is <strong>your effective casting number</strong> (base + school penalty).
+          Greyed-out spells cannot be picked under current selection rules.
+        </p>
+        <details class="ref-panel" open>
+          <summary>Spell list (collapse all)</summary>
           {% set schools_order = [school] + relations.aligned + relations.neutral + [relations.opposed] %}
           {% for sch in schools_order %}
             {% set rel = 'own' if sch == school else ('aligned' if sch in relations.aligned else ('opposed' if sch == relations.opposed else 'neutral')) %}
@@ -161,14 +162,14 @@
               </div>
             </details>
           {% endfor %}
-        </div>
+        </details>
+      </div>
 
-        <div>
-          <h3>Selected spell order</h3>
-          <p class="muted" style="font-size:0.85rem">Drag to rearrange, or use ↑ / ↓. Order is saved on the warband sheet.</p>
-          <ol id="selected-list" class="selected-spells"></ol>
-          <p id="spell-status" class="empty"></p>
-        </div>
+      <div style="margin-top:1.5rem">
+        <h3>Selected spell order</h3>
+        <p class="muted" style="font-size:0.85rem">Drag to rearrange, or use ↑ / ↓. Order is saved on the warband sheet.</p>
+        <ol id="selected-list" class="selected-spells"></ol>
+        <p id="spell-status" class="empty"></p>
       </div>
     </div>
 

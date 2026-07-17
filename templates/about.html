@@ -29,4 +29,19 @@
       </p>
     </div>
   </div>
+
+  <div class="card">
+    <h2>Support</h2>
+    <p>This app was created by Deltrex. If you like it you can buy me a coffee to keep me working later at night.</p>
+    <button type="button" class="btn gold" id="paypal-btn">Donate with PayPal</button>
+    <p id="paypal-msg" class="muted" style="margin-top:0.75rem;display:none"></p>
+  </div>
+
+  <script>
+    document.getElementById('paypal-btn').addEventListener('click', function () {
+      var msg = document.getElementById('paypal-msg');
+      msg.textContent = "You actually wanted to buy me coffee, you're great and I like you!";
+      msg.style.display = '';
+    });
+  </script>
 {% endblock %}

@@ -31,7 +31,7 @@ SOLDIER_ITEM_SLOTS = 1
 # the exact numbers are unsettled even in the source house-rules doc (e.g.
 # "Hiring Cost: Increase to 250 GC (300?, 500?)"), so every value below is only
 # a default — the app exposes them as editable per-warband homerule settings.
-CAPTAIN_HIRING_COST = 250
+CAPTAIN_HIRING_COST = 125
 CAPTAIN_ITEM_SLOTS = 6
 CAPTAIN_BASE = {
     "move": 6,
