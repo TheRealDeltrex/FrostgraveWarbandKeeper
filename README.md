@@ -4,9 +4,9 @@ This branch (`devversion`) holds the **full Python/Flask source code**. It exist
 run from source, read, and altered — if you (or your gaming group) need a feature, rule tweak, or
 homerule this app doesn't already support, this is the branch to work from.
 
-If you just want to run the app and don't need to touch the code, use the prebuilt Windows
-executable instead: see the [`main` branch](../../tree/main) / the
-[latest Release](../../releases/latest).
+If you just want to run the app and don't need to touch the code, use a prebuilt build instead
+(Windows or Linux): see the [download page](https://therealdeltrex.github.io/FrostgraveWarbandKeeper/),
+the [`main` branch](../../tree/main), or the [latest Release](../../releases/latest).
 
 A local Flask app for creating and maintaining warbands for **Frostgrave (2nd Edition)**. No login, no server — your warbands are saved as plain files on your own machine.
 
@@ -15,7 +15,7 @@ Not affiliated with Osprey Games / Joseph A. McCullough.
 ## Features
 
 - **Create a warband**: wizard (name, school, portrait), starting spells (3 own / 1 each aligned / 2 neutral, per 2e rules), an optional apprentice, and starting soldiers.
-- **Maintain between games**: level up your wizard (stat increases, learn spells, improve spells), record post-game loot (gold, XP, items), manage the vault, and keep a campaign log.
+- **Maintain between games**: level up your wizard (stat increases, learn spells, improve spells), record post-game loot (gold, XP, items), and manage the vault.
 - **Soldiers**: hire from the full 2e roster with correct cost/unit limits (max 8 soldiers, max 4 specialists), track status (active/injured/dead), reorder the roster, and optionally level them up.
 - **Captain homerule**: an optional, fully-tunable per-warband house rule — hire a Captain or promote an existing soldier into one, with configurable cost, starting stats, item slots, and Mind Control setting.
 - **Home base**: set a base location and buy base resources, per the 2e core rules.
@@ -37,9 +37,9 @@ Then open http://127.0.0.1:5000.
 
 Warband data, portraits, and uploads are saved under `data/` and are not tracked in git.
 
-## Building the Windows executable yourself
+## Building the executables yourself
 
-The `main` branch's Release is built from this source via [PyInstaller](https://pyinstaller.org/):
+Windows (build on Windows — PyInstaller can't cross-compile):
 
 ```bash
 pip install -r requirements-dev.txt
@@ -49,9 +49,24 @@ python -m PyInstaller frostgrave.spec --noconfirm
 This produces `dist/FrostgraveWarbandKeeper/` — a folder containing `FrostgraveWarbandKeeper.exe`
 plus its bundled resources. Copy the whole folder wherever you want to run it from.
 
+Linux (build on Linux, for the same cross-compile reason — this repo builds it via
+`.github/workflows/build-linux.yml` on a GitHub Actions Ubuntu runner rather than locally):
+
+```bash
+pip install -r requirements-dev.txt
+python -m PyInstaller frostgrave-linux.spec --noconfirm
+```
+
+This produces a single `dist/FrostgraveWarbandKeeper` binary (onefile, unlike the Windows onedir
+build — simpler to hand to someone with just `chmod +x` and run). It skips the tray icon (see
+`tray.py` / `app.py`'s `main()`) since that needs GTK/AppIndicator or X11 libraries a generic
+Linux build can't assume are present; auto-shutdown-on-browser-close (`idle_watchdog.py`) still
+works the same as on Windows.
+
 ## Repo layout
 
-- `main` — the distribution branch: just a README pointing at the built Windows executable (via
-  GitHub Releases). No source code.
+- `main` — the distribution branch: a README pointing at the built executables (via GitHub
+  Releases), plus `docs/index.html` — a static, server-free download landing page published via
+  GitHub Pages. No application source code.
 - `devversion` (this branch) — the actual application source, for anyone who wants to run it from
   source or modify it.
