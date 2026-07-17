@@ -1,0 +1,65 @@
+name: Build Linux
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Existing GitHub Release tag to attach the built binary to (leave blank to just produce a workflow artifact)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install system Tk (bundled for the Settings folder-picker dialog)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-tk
+
+      - name: Install Python dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Build with PyInstaller
+        run: pyinstaller frostgrave-linux.spec --noconfirm
+
+      - name: Smoke test the binary
+        run: |
+          chmod +x dist/FrostgraveWarbandKeeper
+          FWK_DATA_DIR=/tmp/fwk-ci-data PORT=5000 ./dist/FrostgraveWarbandKeeper &
+          pid=$!
+          ok=""
+          for i in $(seq 1 20); do
+            if curl -sf http://127.0.0.1:5000/ > /dev/null; then ok=1; break; fi
+            sleep 0.5
+          done
+          test -n "$ok"
+          curl -sf http://127.0.0.1:5000/ > /dev/null
+          curl -sf http://127.0.0.1:5000/reference > /dev/null
+          curl -sf http://127.0.0.1:5000/about > /dev/null
+          kill "$pid"
+
+      - name: Package
+        run: |
+          mkdir -p out
+          tar -C dist -czf out/FrostgraveWarbandKeeper-linux-x64.tar.gz FrostgraveWarbandKeeper
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: FrostgraveWarbandKeeper-linux-x64
+          path: out/FrostgraveWarbandKeeper-linux-x64.tar.gz
+
+      - name: Attach to release
+        if: ${{ inputs.release_tag != '' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "${{ inputs.release_tag }}" out/FrostgraveWarbandKeeper-linux-x64.tar.gz --clobber --repo "${{ github.repository }}"
