@@ -891,14 +891,23 @@ def main():
         ).start()
 
         import idle_watchdog
-        import tray
 
-        # This is a windowless, console-less build (see frostgrave.spec) — without
-        # these, the server would keep running invisibly after the browser tab
-        # (and even the browser itself) is closed, with no way to stop it short
-        # of Task Manager.
+        # This is a windowless, console-less build — without these, the server
+        # would keep running invisibly after the browser tab (and even the
+        # browser itself) is closed, with no way to stop it short of killing
+        # the process by hand.
         idle_watchdog.start()
-        tray.run(url)  # blocks on the tray icon's event loop until Quit
+
+        if sys.platform.startswith("win"):
+            try:
+                import tray
+
+                tray.run(url)  # blocks on the tray icon's event loop until Quit
+                return
+            except Exception:
+                pass  # no usable tray backend — fall back to idle_watchdog alone
+
+        threading.Event().wait()  # keep the main thread alive; idle_watchdog exits the process
     else:
         app.run(debug=True, host="127.0.0.1", port=port)
 
