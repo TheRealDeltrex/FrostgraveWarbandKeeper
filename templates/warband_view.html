@@ -345,12 +345,14 @@
       <p class="muted">
         XP is tracked on the wizard. When you have enough XP ({{ 100 }} per level), spend level-ups here.
         The apprentice auto-levels: level = wizard÷2, stats = wizard with apprentice offsets, same spells.
+        Enter a negative number to remove XP; if that drops below the level you're at, the most
+        recent level-up(s) are automatically reversed.
       </p>
       <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="form-row inline">
         <input type="hidden" name="action" value="add_xp" />
         <div>
-          <label for="xp">Add XP</label>
-          <input id="xp" name="xp" type="number" min="1" value="50" />
+          <label for="xp">Add/remove XP</label>
+          <input id="xp" name="xp" type="text" inputmode="numeric" pattern="[+-]?[0-9]+" value="50" />
         </div>
         <div>
           <label>&nbsp;</label>
@@ -658,12 +660,14 @@
           <summary>Level up captain {% if cap_pending > 0 %}({{ cap_pending }} ready){% endif %}</summary>
           <p class="muted" style="font-size:0.85rem">
             Flat 100 XP per level, same as the wizard, up to level {{ hr.captain_max_level }}. Per-stat caps are set in Homerules.
+            Enter a negative number to remove XP; if that drops below the level you're at, the
+            most recent level-up(s) are automatically reversed.
           </p>
           <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="form-row inline">
             <input type="hidden" name="action" value="captain_add_xp" />
             <div>
-              <label for="captain_xp_amount">Add XP</label>
-              <input id="captain_xp_amount" name="amount" type="number" min="1" value="50" />
+              <label for="captain_xp_amount">Add/remove XP</label>
+              <input id="captain_xp_amount" name="amount" type="text" inputmode="numeric" pattern="[+-]?[0-9]+" value="50" />
             </div>
             <div>
               <label>&nbsp;</label>
@@ -864,8 +868,8 @@
                           <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
                             <input type="hidden" name="action" value="soldier_add_xp" />
                             <input type="hidden" name="soldier_id" value="{{ s.id }}" />
-                            <input name="amount" type="number" min="1" value="50" style="width:5rem" />
-                            <button class="btn secondary small" type="submit">Add XP</button>
+                            <input name="amount" type="text" inputmode="numeric" pattern="[+-]?[0-9]+" value="50" style="width:5rem" title="Negative removes XP (reverses a level-up if it drops below the current level)" />
+                            <button class="btn secondary small" type="submit">Add/remove XP</button>
                           </form>
                           <p class="muted" style="font-size:0.8rem;margin:0">XP {{ s.xp }} · Level {{ s.level }}/{{ hr.soldier_max_levels }}</p>
                           {% if s_pending > 0 %}
@@ -1064,7 +1068,7 @@
         <div class="form-row inline">
           <div>
             <label for="delta">Change (+/−)</label>
-            <input id="delta" name="delta" type="number" required />
+            <input id="delta" name="delta" type="text" inputmode="numeric" pattern="[+-]?[0-9]+" required />
           </div>
           <div>
             <label for="reason">Reason</label>

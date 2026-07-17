@@ -82,6 +82,7 @@ from warband_store import (
     add_soldier,
     add_soldier_xp,
     add_vault_item,
+    add_wizard_xp,
     adjust_gold,
     apply_captain_level_up,
     apply_captain_trick,
@@ -165,6 +166,17 @@ def _require_warband(warband_id: str) -> dict:
     if not wb:
         abort(404)
     return wb
+
+
+def _parse_signed_int(raw: str | None) -> int | None:
+    """Accepts "30", "+30", or "-30" (surrounding whitespace ok); None if not a whole number."""
+    raw = (raw or "").strip()
+    if not raw:
+        return None
+    try:
+        return int(raw)
+    except ValueError:
+        return None
 
 
 @app.route("/")
@@ -514,11 +526,14 @@ def warband_update(warband_id: str):
                 save_warband(wb)
 
         elif action == "captain_add_xp":
-            amount = int(request.form.get("amount") or 0)
-            ok, msg = add_captain_xp(wb, amount)
-            flash(msg, "success" if ok else "error")
-            if ok:
-                save_warband(wb)
+            amount = _parse_signed_int(request.form.get("amount"))
+            if amount is None:
+                flash("Enter a whole number for XP.", "error")
+            else:
+                ok, msg = add_captain_xp(wb, amount)
+                flash(msg, "success" if ok else "error")
+                if ok:
+                    save_warband(wb)
 
         elif action == "promote_soldier":
             ok, msg = promote_soldier_to_captain(
@@ -532,11 +547,14 @@ def warband_update(warband_id: str):
                 save_warband(wb)
 
         elif action == "soldier_add_xp":
-            amount = int(request.form.get("amount") or 0)
-            ok, msg = add_soldier_xp(wb, request.form.get("soldier_id") or "", amount)
-            flash(msg, "success" if ok else "error")
-            if ok:
-                save_warband(wb)
+            amount = _parse_signed_int(request.form.get("amount"))
+            if amount is None:
+                flash("Enter a whole number for XP.", "error")
+            else:
+                ok, msg = add_soldier_xp(wb, request.form.get("soldier_id") or "", amount)
+                flash(msg, "success" if ok else "error")
+                if ok:
+                    save_warband(wb)
 
         elif action == "soldier_level_up":
             ok, msg = apply_soldier_level_up(
@@ -553,9 +571,11 @@ def warband_update(warband_id: str):
                 save_warband(wb)
 
         elif action == "adjust_gold":
-            delta = int(request.form.get("delta") or 0)
+            delta = _parse_signed_int(request.form.get("delta"))
             reason = (request.form.get("reason") or "").strip()
-            if delta == 0:
+            if delta is None:
+                flash("Enter a whole number for the gold amount.", "error")
+            elif delta == 0:
                 flash("Enter a non-zero gold amount.", "error")
             else:
                 adjust_gold(wb, delta, reason)
@@ -598,15 +618,16 @@ def warband_update(warband_id: str):
                 save_warband(wb)
 
         elif action == "add_xp":
-            xp = int(request.form.get("xp") or 0)
-            if xp <= 0:
-                flash("Enter positive XP.", "error")
+            xp = _parse_signed_int(request.form.get("xp"))
+            if xp is None:
+                flash("Enter a whole number for XP.", "error")
             else:
-                wiz = wb.setdefault("wizard", {})
-                wiz["xp"] = int(wiz.get("xp", 0)) + xp
-                add_history(wb, f"Wizard gained {xp} XP (total {wiz['xp']}).")
-                save_warband(wb)
-                flash(f"+{xp} XP. Pending level-ups: {warband_limits(wb)['pending_levels']}.", "success")
+                ok, msg = add_wizard_xp(wb, xp)
+                if ok:
+                    save_warband(wb)
+                    flash(f"{msg} Pending level-ups: {warband_limits(wb)['pending_levels']}.", "success")
+                else:
+                    flash(msg, "error")
 
         elif action == "post_game":
             gold = int(request.form.get("loot_gold") or 0)
