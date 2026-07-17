@@ -187,7 +187,7 @@
   </details>
 
   {# ---- Post-game loot ---- #}
-  <details class="card" id="post-game" open>
+  <details class="card" id="post-game">
     <summary><h2>After the game — gold &amp; items</h2></summary>
     <p class="muted">Enter treasure gold, XP, and items found so they appear in the treasury and vault.</p>
     <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
@@ -221,7 +221,7 @@
   </details>
 
   {# ---- Wizard & apprentice details ---- #}
-  <details class="card" open>
+  <details class="card">
     <summary><h2>Wizard &amp; apprentice</h2></summary>
     <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" enctype="multipart/form-data">
       <input type="hidden" name="action" value="details" />
@@ -487,7 +487,7 @@
   </details>
 
   {# ---- Spells ---- #}
-  <details class="card" open>
+  <details class="card">
     <summary><h2>Spells (wizard &amp; apprentice)</h2></summary>
     <p class="muted">
       Difficulty is shown as <strong>Wizard CN / Apprentice CN</strong>
@@ -575,7 +575,7 @@
 
   {% if hr.captain_mode != 'off' or cap %}
     {# ---- Captain ---- #}
-    <details class="card" id="captain" open>
+    <details class="card" id="captain">
       <summary><h2>Captain</h2></summary>
       {% if cap %}
         {% set cap_slots_n = hr.promote_captain_item_slots if cap.origin == 'promoted' else hr.captain_item_slots %}
@@ -778,7 +778,7 @@
   {% endif %}
 
   {# ---- Soldiers / recruit ---- #}
-  <details class="card" id="recruit" open>
+  <details class="card" id="recruit">
     <summary><h2>Soldiers &amp; recruiting</h2></summary>
     <div class="limit-bar" style="margin-bottom:1rem">
       <div class="limit {% if not limits.soldiers_ok %}bad{% endif %}">
@@ -1055,7 +1055,7 @@
 
   {# ---- Vault & treasury ---- #}
   <div class="grid-2">
-    <details class="card" open>
+    <details class="card">
       <summary><h2>Treasury <span class="gold">{{ wb.gold }} gc</span></h2></summary>
       <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
         <input type="hidden" name="action" value="adjust_gold" />
@@ -1072,7 +1072,7 @@
         <button class="btn gold" type="submit">Apply</button>
       </form>
     </details>
-    <details class="card" open>
+    <details class="card">
       <summary><h2>Vault items</h2></summary>
       {% if wb["vault_items"] %}
         <ul class="list-plain">
@@ -1108,7 +1108,7 @@
   </div>
 
   {# ---- Base ---- #}
-  <details class="card" id="base" open>
+  <details class="card" id="base">
     <summary><h2>Home base</h2></summary>
     <p class="muted">
       Establishing a base is free after one or more games (2e p.106).
@@ -1197,7 +1197,7 @@
     {% endif %}
   </details>
 
-  <details class="card" open>
+  <details class="card">
     <summary><h2>Campaign log</h2></summary>
     <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
       <input type="hidden" name="action" value="add_log" />

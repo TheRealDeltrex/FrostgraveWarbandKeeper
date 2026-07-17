@@ -63,13 +63,16 @@ from frostgrave_data import (
 )
 from game_content import (
     enrich_spells_with_descriptions,
+    load_bestiary,
     load_potion_choices,
+    load_potion_choices_detailed,
     load_spell_descriptions,
     load_spell_names,
     load_spellcaster_items,
     load_standard_items,
     spell_description,
 )
+from idle_watchdog import note_closing, note_heartbeat
 from pdf_export import build_warband_pdf
 from warband_store import (
     PORTRAIT_DIR,
@@ -153,6 +156,7 @@ app.jinja_env.globals.update(
     LEVELUP_STATS=LEVELUP_STATS,
     level_from_xp=level_from_xp,
     captain_effective_stats=captain_effective_stats,
+    IS_FROZEN=paths.is_frozen(),
 )
 
 
@@ -189,6 +193,8 @@ def reference():
         relations=SCHOOL_RELATIONS,
         standard_items=load_standard_items(),  # full list incl. armour (for reference)
         potion_choices=load_potion_choices(),
+        potions_detailed=load_potion_choices_detailed(),
+        bestiary=load_bestiary(),
         spell_names=load_spell_names(),
     )
 
@@ -196,6 +202,20 @@ def reference():
 @app.route("/about")
 def about():
     return render_template("about.html")
+
+
+@app.route("/heartbeat", methods=["POST"])
+def heartbeat():
+    """Pinged periodically by every open page — see idle_watchdog.py."""
+    note_heartbeat()
+    return ("", 204)
+
+
+@app.route("/heartbeat/closing", methods=["POST"])
+def heartbeat_closing():
+    """Pinged via sendBeacon when a page unloads — see idle_watchdog.py."""
+    note_closing()
+    return ("", 204)
 
 
 @app.route("/portraits/<path:relpath>")
@@ -863,7 +883,22 @@ def main():
         threading.Timer(1.0, lambda: webbrowser.open(url)).start()
         from waitress import serve
 
-        serve(app, host="127.0.0.1", port=port)
+        threading.Thread(
+            target=serve,
+            args=(app,),
+            kwargs={"host": "127.0.0.1", "port": port},
+            daemon=True,
+        ).start()
+
+        import idle_watchdog
+        import tray
+
+        # This is a windowless, console-less build (see frostgrave.spec) — without
+        # these, the server would keep running invisibly after the browser tab
+        # (and even the browser itself) is closed, with no way to stop it short
+        # of Task Manager.
+        idle_watchdog.start()
+        tray.run(url)  # blocks on the tray icon's event loop until Quit
     else:
         app.run(debug=True, host="127.0.0.1", port=port)
 

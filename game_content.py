@@ -38,6 +38,36 @@ def load_potion_choices() -> list[str]:
 
 
 @lru_cache(maxsize=1)
+def load_potion_descriptions() -> dict[str, str]:
+    path = DATA / "potion_descriptions.json"
+    if not path.is_file():
+        return {}
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def load_potion_choices_detailed() -> list[dict]:
+    """Potions with a derived category label and rules description, for the reference page."""
+    descs = load_potion_descriptions()
+    out = []
+    for name in load_potion_choices():
+        kind = name.split(" of ")[0] if " of " in name else name.split()[-1]
+        out.append({
+            "name": name,
+            "kind": kind,
+            "description": descs.get(name, "") or "No description available.",
+        })
+    return out
+
+
+@lru_cache(maxsize=1)
+def load_bestiary() -> list[dict]:
+    path = DATA / "bestiary.json"
+    if not path.is_file():
+        return []
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+@lru_cache(maxsize=1)
 def load_spell_names() -> list[str]:
     try:
         from frostgrave_data import SPELLS

@@ -12,8 +12,8 @@
     </p>
   </section>
 
-  <div class="card">
-    <h2>Schools</h2>
+  <details class="card">
+    <summary><h2>Schools</h2></summary>
     <div class="table-wrap">
       <table>
         <thead><tr><th>School</th><th>Aligned (+2)</th><th>Neutral (+4)</th><th>Opposed (+6)</th></tr></thead>
@@ -29,9 +29,38 @@
         </tbody>
       </table>
     </div>
-  </div>
+  </details>
 
-  <details class="ref-panel card" open>
+  <details class="card">
+    <summary><h2>Spells by school (base casting number)</h2></summary>
+    <p class="muted">Click <strong>Info</strong> on a spell line for full text.</p>
+    {% for sch, splist in spells.items() %}
+      <h3>{{ sch }}</h3>
+      <div class="spell-list-detail">
+        <div class="spell-list-head spell-ref-head" aria-hidden="true">
+          <span class="col-name">Spell</span>
+          <span class="col-cn">Base CN</span>
+          <span class="col-type">Type</span>
+          <span class="col-info"></span>
+        </div>
+        {% for sp in splist %}
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>{{ sp.name }}</strong></span>
+                <span class="col-cn gold"><strong>{{ sp.cn }}</strong></span>
+                <span class="col-type muted">{{ sp.type }}</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">{{ sp.description }}</p>
+            </details>
+          </div>
+        {% endfor %}
+      </div>
+    {% endfor %}
+  </details>
+
+  <details class="ref-panel card">
     <summary>Standard arms, armour &amp; consumables</summary>
     <p class="muted">General Arms and Armour List from Frostgrave 2e, plus potion / scroll / grimoire types.</p>
     <div class="item-list-detail">
@@ -55,14 +84,36 @@
         </div>
       {% endfor %}
     </div>
-    {% if potion_choices %}
-      <h3 style="margin-top:1rem">Potions</h3>
-      <p class="muted">{{ potion_choices|join(' · ') }}</p>
+    {% if potions_detailed %}
+      <details class="ref-panel" style="margin-top:1rem">
+        <summary>Potions, elixirs &amp; bottles ({{ potions_detailed|length }})</summary>
+        <div class="item-list-detail">
+          <div class="item-list-head" aria-hidden="true">
+            <span class="col-name">Name</span>
+            <span class="col-cat">Kind</span>
+            <span class="col-summary"></span>
+            <span class="col-info"></span>
+          </div>
+          {% for p in potions_detailed %}
+            <div class="item-row">
+              <details class="item-desc">
+                <summary class="item-row-main">
+                  <span class="col-name"><strong>{{ p.name }}</strong></span>
+                  <span class="col-cat"><span class="badge">{{ p.kind }}</span></span>
+                  <span class="col-summary"></span>
+                  <span class="col-info item-desc-toggle">Info</span>
+                </summary>
+                <p class="item-desc-body">{{ p.description }}</p>
+              </details>
+            </div>
+          {% endfor %}
+        </div>
+      </details>
     {% endif %}
   </details>
 
-  <div class="card">
-    <h2>Soldiers (core tables)</h2>
+  <details class="card">
+    <summary><h2>Soldiers (core tables)</h2></summary>
     <div class="table-wrap">
       <table>
         <thead>
@@ -89,34 +140,43 @@
         </tbody>
       </table>
     </div>
-  </div>
+  </details>
 
-  <div class="card">
-    <h2>Spells by school (base casting number)</h2>
-    <p class="muted">Click <strong>Info</strong> on a spell line for full text.</p>
-    {% for sch, splist in spells.items() %}
-      <h3>{{ sch }}</h3>
-      <div class="spell-list-detail">
-        <div class="spell-list-head spell-ref-head" aria-hidden="true">
-          <span class="col-name">Spell</span>
-          <span class="col-cn">Base CN</span>
-          <span class="col-type">Type</span>
-          <span class="col-info"></span>
-        </div>
-        {% for sp in splist %}
-          <div class="spell-row">
-            <details class="spell-desc">
-              <summary class="spell-row-main spell-row-main-ref">
-                <span class="col-name"><strong>{{ sp.name }}</strong></span>
-                <span class="col-cn gold"><strong>{{ sp.cn }}</strong></span>
-                <span class="col-type muted">{{ sp.type }}</span>
-                <span class="col-info spell-desc-toggle">Info</span>
-              </summary>
-              <p class="spell-desc-body">{{ sp.description }}</p>
-            </details>
-          </div>
-        {% endfor %}
-      </div>
-    {% endfor %}
-  </div>
+  <details class="card">
+    <summary><h2>Bestiary ({{ bestiary|length }})</h2></summary>
+    <p class="muted">Creatures from the Core Rules and Thaw of the Lich Lord. Click <strong>Info</strong> for full rules text.</p>
+    {% if bestiary %}
+      {% for category in ['Animal', 'Construct', 'Demon', 'Undead', 'Miscellaneous'] %}
+        {% set creatures = bestiary|selectattr('category', 'equalto', category)|list %}
+        {% if creatures %}
+          <details class="ref-panel">
+            <summary>{{ category }} ({{ creatures|length }})</summary>
+            <div class="item-list-detail">
+              <div class="item-list-head" aria-hidden="true">
+                <span class="col-name">Creature</span>
+                <span class="col-cat">Source</span>
+                <span class="col-summary">Stats</span>
+                <span class="col-info"></span>
+              </div>
+              {% for c in creatures %}
+                <div class="item-row">
+                  <details class="item-desc">
+                    <summary class="item-row-main">
+                      <span class="col-name"><strong>{{ c.name }}</strong></span>
+                      <span class="col-cat"><span class="badge">{{ c.source }}</span></span>
+                      <span class="col-summary muted">{{ c.stats }}</span>
+                      <span class="col-info item-desc-toggle">Info</span>
+                    </summary>
+                    <p class="item-desc-body">{{ c.description }}</p>
+                  </details>
+                </div>
+              {% endfor %}
+            </div>
+          </details>
+        {% endif %}
+      {% endfor %}
+    {% else %}
+      <p class="empty">No bestiary data loaded.</p>
+    {% endif %}
+  </details>
 {% endblock %}
