@@ -53,8 +53,8 @@ LEVELUP_STATS = ["fight", "shoot", "will", "health"]
 CAPTAIN_STAT_CAPS = {
     "fight": {"limit": 1, "unlimited": False},
     "shoot": {"limit": 1, "unlimited": False},
-    "will": {"limit": 0, "unlimited": True},
-    "health": {"limit": 0, "unlimited": True},
+    "will": {"limit": 1, "unlimited": False},
+    "health": {"limit": 2, "unlimited": False},
 }
 
 # Mind Control resistance flavor note (not simulated), per-warband selectable.
@@ -66,20 +66,51 @@ CAPTAIN_MIND_CONTROL_LABELS = {
 }
 CAPTAIN_MIND_CONTROL_DEFAULT = "immune"
 
+# How a warband can get a Captain at all: hiring, promoting an existing soldier,
+# both, or neither (off — the default, like every other homerule here).
+CAPTAIN_MODE_OPTIONS = ["off", "hire", "promote", "both"]
+CAPTAIN_MODE_LABELS = {
+    "off": "Off (no captain homerule)",
+    "hire": "Hire only",
+    "promote": "Promote only",
+    "both": "Hire or promote",
+}
+CAPTAIN_MODE_DEFAULT = "off"
+
+# "Tricks of the Trade" (FG1E Sellswords supplement, p.20) — purely descriptive,
+# not mechanically simulated (the player applies these at the table, same as
+# Mind Control above). A starting captain knows CAPTAIN_STARTING_TRICKS of
+# these (per-warband editable); every level-up may be spent learning one more
+# instead of a stat point.
+CAPTAIN_TRICKS = [
+    {"id": "furious_attack", "name": "Furious Attack", "effect": "+3 Fight for one attack", "declare": "Before the rolls are made"},
+    {"id": "riposte", "name": "Riposte", "effect": "+1 Fight for one attack", "declare": "After the rolls are made"},
+    {"id": "coup_de_grace", "name": "Coup de Grâce", "effect": "+2 Damage to any hand-to-hand attack that has dealt at least 1 point of damage", "declare": "After damage is calculated"},
+    {"id": "steady_hand", "name": "Steady Hand", "effect": "+3 Shoot for one attack", "declare": "Before the rolls are made"},
+    {"id": "dead_eye", "name": "Dead Eye", "effect": "+1 Shoot for one attack", "declare": "After the rolls are made"},
+    {"id": "brace", "name": "Brace", "effect": "+3 Armour for one attack", "declare": "Before the rolls are made"},
+    {"id": "dodge", "name": "Dodge", "effect": "+1 Armour to one attack", "declare": "After the rolls are made"},
+    {"id": "nerves_of_steel", "name": "Nerves of Steel", "effect": "+4 Will for one Will roll", "declare": "Before the roll is made"},
+    {"id": "iron_heart", "name": "Iron Heart", "effect": "+2 Will for one Will roll", "declare": "After the roll is made"},
+    {"id": "sprint", "name": "Sprint", "effect": "+2 Move for the rest of the turn", "declare": "Upon activation"},
+    {"id": "leadership", "name": "Leadership", "effect": "If using a Group Activation, the captain may activate up to three soldiers within 3\" who have not already been activated in the turn", "declare": "Upon activation"},
+]
+CAPTAIN_TRICK_IDS = {t["id"] for t in CAPTAIN_TRICKS}
+CAPTAIN_TRICK_BY_ID = {t["id"]: t for t in CAPTAIN_TRICKS}
+CAPTAIN_STARTING_TRICKS = 2
+
 # --- Soldier Leveling (homerule, not core 2e) -------------------------------
 SOLDIER_LEVELING_ENABLED = False
 SOLDIER_MAX_LEVELS = 3
 SOLDIER_STAT_CAPS = {
     "fight": {"limit": 0, "unlimited": False},
     "shoot": {"limit": 0, "unlimited": False},
-    "will": {"limit": 0, "unlimited": False},
-    "health": {"limit": 3, "unlimited": False},
+    "will": {"limit": 1, "unlimited": False},
+    "health": {"limit": 2, "unlimited": False},
 }
 
 # --- Promote Captain (homerule, not core 2e) --------------------------------
-# Independent of the Captains (hiring) homerule — a warband can allow only
-# promotion, only hiring, both, or neither.
-PROMOTE_CAPTAIN_ENABLED = False
+# Whether promotion (vs. hiring) is available is governed by CAPTAIN_MODE_* above.
 PROMOTE_CAPTAIN_COST = 150
 PROMOTE_CAPTAIN_BONUS = {"fight": 1, "shoot": 1, "will": 1, "health": 2}
 PROMOTE_CAPTAIN_ITEM_SLOTS = 6

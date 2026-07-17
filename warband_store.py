@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import paths
+from game_content import equipment_bonuses
 from frostgrave_data import (
     ALIGNED_SCHOOL_SPELLS,
     APPRENTICE_BASE,
@@ -25,7 +26,13 @@ from frostgrave_data import (
     CAPTAIN_MAX_LEVEL,
     CAPTAIN_MIND_CONTROL_DEFAULT,
     CAPTAIN_MIND_CONTROL_OPTIONS,
+    CAPTAIN_MODE_DEFAULT,
+    CAPTAIN_MODE_OPTIONS,
+    CAPTAIN_STARTING_TRICKS,
     CAPTAIN_STAT_CAPS,
+    CAPTAIN_TRICK_BY_ID,
+    CAPTAIN_TRICK_IDS,
+    CAPTAIN_TRICKS,
     LEVELUP_STATS,
     MAX_SOLDIERS,
     MAX_SPECIALISTS,
@@ -143,7 +150,7 @@ def empty_apprentice(name: str = "") -> dict:
 def default_homerules() -> dict:
     """Optional house rules, off by default. See frostgrave_data.CAPTAIN_* etc. for context."""
     return {
-        "captains_enabled": False,
+        "captain_mode": CAPTAIN_MODE_DEFAULT,  # "off" | "hire" | "promote" | "both"
         "captain_hiring_cost": CAPTAIN_HIRING_COST,
         "captain_item_slots": CAPTAIN_ITEM_SLOTS,
         "captain_base_stats": deepcopy(CAPTAIN_BASE),
@@ -151,10 +158,10 @@ def default_homerules() -> dict:
         "captain_stat_caps": deepcopy(CAPTAIN_STAT_CAPS),
         "captain_max_level": CAPTAIN_MAX_LEVEL,
         "captain_mind_control": CAPTAIN_MIND_CONTROL_DEFAULT,
+        "captain_starting_tricks": CAPTAIN_STARTING_TRICKS,
         "soldier_leveling_enabled": False,
         "soldier_max_levels": SOLDIER_MAX_LEVELS,
         "soldier_stat_caps": deepcopy(SOLDIER_STAT_CAPS),
-        "promote_captain_enabled": False,
         "promote_captain_cost": PROMOTE_CAPTAIN_COST,
         "promote_captain_bonus": deepcopy(PROMOTE_CAPTAIN_BONUS),
         "promote_captain_bonus_choice_enabled": False,
@@ -179,7 +186,20 @@ def empty_captain(name: str = "", homerules: dict | None = None, origin: str = "
         "levelup_counts": {s: 0 for s in LEVELUP_STATS},
         "level_history": [],
         "origin": origin,  # "hired" | "promoted"
+        "known_tricks": [],  # list of CAPTAIN_TRICK ids
     }
+
+
+def captain_effective_stats(cap: dict) -> dict:
+    """Base captain stats plus Armour/Move bonuses from equipped Shield/Armour items.
+    Computed fresh from item_slots every time rather than stored — Armour and Move
+    aren't level-up stats, so there's no persisted value that could drift out of
+    sync with whatever the captain currently has equipped."""
+    stats = dict(cap.get("stats") or {})
+    bonus = equipment_bonuses(cap.get("item_slots") or [])
+    stats["armour"] = int(stats.get("armour", 0)) + bonus["armour"]
+    stats["move"] = int(stats.get("move", 0)) + bonus["move"]
+    return stats
 
 
 def sync_apprentice(wb: dict) -> None:
@@ -511,6 +531,21 @@ def load_warband(warband_id: str) -> dict | None:
         hr["captain_stat_caps"] = caps
     for old_key in ("captain_fight_levelup_cap", "captain_shoot_levelup_cap", "captain_xp_multiplier"):
         hr.pop(old_key, None)
+    # Migrate the old independent captains_enabled/promote_captain_enabled booleans
+    # into the single captain_mode select ("off" | "hire" | "promote" | "both").
+    if "captain_mode" not in hr:
+        old_hire = bool(hr.get("captains_enabled", False))
+        old_promote = bool(hr.get("promote_captain_enabled", False))
+        if old_hire and old_promote:
+            hr["captain_mode"] = "both"
+        elif old_hire:
+            hr["captain_mode"] = "hire"
+        elif old_promote:
+            hr["captain_mode"] = "promote"
+        else:
+            hr["captain_mode"] = "off"
+    hr.pop("captains_enabled", None)
+    hr.pop("promote_captain_enabled", None)
     for k, v in default_homerules().items():
         hr.setdefault(k, v)
     wb.setdefault("captain", None)
@@ -524,6 +559,7 @@ def load_warband(warband_id: str) -> dict | None:
         cap.setdefault("notes", "")
         cap.setdefault("portrait", None)
         cap.setdefault("origin", "hired")
+        cap.setdefault("known_tricks", [])
         counts = cap.setdefault("levelup_counts", {s: 0 for s in LEVELUP_STATS})
         for s in LEVELUP_STATS:
             counts.setdefault(s, 0)
@@ -909,12 +945,27 @@ def _parse_stat_caps(form, prefix: str, current: dict) -> dict:
     return caps
 
 
+def _validate_tricks(tricks: list[str] | None, required: int) -> tuple[bool, str]:
+    """Shared validation for the starting-trick picker used by hire_captain and
+    promote_soldier_to_captain: no duplicates, all ids known, exact count."""
+    tricks = tricks or []
+    if len(set(tricks)) != len(tricks) or any(t not in CAPTAIN_TRICK_IDS for t in tricks):
+        return False, "Invalid trick selection."
+    if len(tricks) != required:
+        return False, f"Pick exactly {required} tricks (got {len(tricks)})."
+    return True, ""
+
+
 def update_homerules(wb: dict, form) -> tuple[bool, str]:
     """Parse and apply the per-warband homerule settings form."""
     hr = wb.setdefault("homerules", default_homerules())
     try:
         new_hr = {
-            "captains_enabled": form.get("captains_enabled") == "on",
+            "captain_mode": (
+                form.get("captain_mode")
+                if form.get("captain_mode") in CAPTAIN_MODE_OPTIONS
+                else hr["captain_mode"]
+            ),
             "captain_hiring_cost": int(form.get("captain_hiring_cost") or hr["captain_hiring_cost"]),
             "captain_item_slots": int(form.get("captain_item_slots") or hr["captain_item_slots"]),
             "captain_base_stats": {
@@ -933,10 +984,12 @@ def update_homerules(wb: dict, form) -> tuple[bool, str]:
                 if form.get("captain_mind_control") in CAPTAIN_MIND_CONTROL_OPTIONS
                 else hr["captain_mind_control"]
             ),
+            "captain_starting_tricks": int(
+                form.get("captain_starting_tricks") or hr["captain_starting_tricks"]
+            ),
             "soldier_leveling_enabled": form.get("soldier_leveling_enabled") == "on",
             "soldier_max_levels": int(form.get("soldier_max_levels") or hr["soldier_max_levels"]),
             "soldier_stat_caps": _parse_stat_caps(form, "soldier", hr["soldier_stat_caps"]),
-            "promote_captain_enabled": form.get("promote_captain_enabled") == "on",
             "promote_captain_cost": int(
                 form.get("promote_captain_cost") or hr["promote_captain_cost"]
             ),
@@ -961,6 +1014,10 @@ def update_homerules(wb: dict, form) -> tuple[bool, str]:
         return False, "Soldier max levels cannot be negative."
     if new_hr["captain_max_level"] < 0:
         return False, "Captain max level cannot be negative."
+    if new_hr["captain_starting_tricks"] < 0:
+        return False, "Captain starting tricks cannot be negative."
+    if new_hr["captain_starting_tricks"] > len(CAPTAIN_TRICKS):
+        return False, f"Captain starting tricks cannot exceed {len(CAPTAIN_TRICKS)} (the number of known tricks)."
     wb["homerules"] = new_hr
     if wb.get("captain"):
         cap = wb["captain"]
@@ -975,18 +1032,26 @@ def update_homerules(wb: dict, form) -> tuple[bool, str]:
 
 
 def hire_captain(
-    wb: dict, name: str = "", extra_stat: str | None = None
+    wb: dict,
+    name: str = "",
+    extra_stat: str | None = None,
+    tricks: list[str] | None = None,
 ) -> tuple[bool, str]:
     hr = wb.setdefault("homerules", default_homerules())
-    if not hr.get("captains_enabled"):
-        return False, "Captains are not enabled for this warband (see Homerules)."
+    if hr.get("captain_mode") not in ("hire", "both"):
+        return False, "Hiring a captain is not enabled for this warband (see Homerules)."
     if wb.get("captain"):
         return False, "Warband already has a captain."
+    n_tricks = int(hr.get("captain_starting_tricks", CAPTAIN_STARTING_TRICKS))
+    ok, msg = _validate_tricks(tricks, n_tricks)
+    if not ok:
+        return False, msg
     cost = int(hr.get("captain_hiring_cost", CAPTAIN_HIRING_COST))
     if int(wb.get("gold", 0)) < cost:
         return False, f"Need {cost} gc for a captain."
     wb["gold"] = int(wb["gold"]) - cost
     cap = empty_captain(name or "Captain", hr)
+    cap["known_tricks"] = list(tricks or [])
     if hr.get("captain_bonus_choice_enabled") and extra_stat in LEVELUP_STATS:
         cap["stats"][extra_stat] = int(cap["stats"].get(extra_stat, 0)) + 1
         cap["bonus_extra_stat"] = extra_stat
@@ -1015,6 +1080,18 @@ def dismiss_captain(wb: dict, refund: bool = False) -> tuple[bool, str]:
     return True, text
 
 
+def _pending_level_check(entity: dict, overall_max: int | None, label: str) -> tuple[bool, str]:
+    """Shared earned-XP / max-level guard for any level-up spend (stat or trick)."""
+    xp = int(entity.get("xp", 0))
+    level = int(entity.get("level", 0))
+    earned = level_from_xp(xp)
+    if level >= earned:
+        return False, f"No pending level-ups (level {level}, XP {xp}). Earn more XP first."
+    if overall_max is not None and level >= overall_max:
+        return False, f"{label} has reached the max level ({overall_max})."
+    return True, ""
+
+
 def _spend_stat_level_up(
     entity: dict,
     choice: str,
@@ -1026,15 +1103,12 @@ def _spend_stat_level_up(
 ) -> tuple[bool, str]:
     """Shared flat-XP level-up spend logic for Captain and Soldier (identical mechanics;
     the Wizard keeps its own bespoke apply_level_up because of spell choices)."""
-    xp = int(entity.get("xp", 0))
+    ok, msg = _pending_level_check(entity, overall_max, label)
+    if not ok:
+        return False, msg
     level = int(entity.get("level", 0))
-    earned = level_from_xp(xp)
-    if level >= earned:
-        return False, f"No pending level-ups (level {level}, XP {xp}). Earn more XP first."
     if choice not in LEVELUP_STATS:
         return False, "Invalid level-up choice."
-    if overall_max is not None and level >= overall_max:
-        return False, f"{label} has reached the max level ({overall_max})."
     cap = stat_caps.get(choice) or {"limit": 0, "unlimited": False}
     counts = entity.setdefault("levelup_counts", {s: 0 for s in LEVELUP_STATS})
     counts.setdefault(choice, 0)
@@ -1086,10 +1160,49 @@ def apply_captain_level_up(wb: dict, choice: str) -> tuple[bool, str]:
     return ok, msg
 
 
+def apply_captain_trick(wb: dict, trick_id: str) -> tuple[bool, str]:
+    """Spend one pending captain level-up on learning a new trick instead of a stat
+    point (FG1E Sellswords p.21: "he may select a new trick... he does not already
+    have"). Purely descriptive — not mechanically simulated, same as Mind Control."""
+    cap = wb.get("captain")
+    if not cap:
+        return False, "No captain hired."
+    if trick_id not in CAPTAIN_TRICK_IDS:
+        return False, "Invalid trick."
+    hr = wb.setdefault("homerules", default_homerules())
+    ok, msg = _pending_level_check(cap, int(hr.get("captain_max_level", CAPTAIN_MAX_LEVEL)), "Captain")
+    if not ok:
+        return False, msg
+    known = cap.setdefault("known_tricks", [])
+    if trick_id in known:
+        return False, "Captain already knows this trick."
+    level = int(cap.get("level", 0))
+    known.append(trick_id)
+    cap["level"] = level + 1
+    name = CAPTAIN_TRICK_BY_ID[trick_id]["name"]
+    cap.setdefault("level_history", []).append(
+        {"level": level + 1, "choice": "trick", "trick_id": trick_id, "detail": f"New trick: {name}", "when": _now()}
+    )
+    text = f"Captain learned a new trick: {name} (level {level + 1})."
+    add_history(wb, text)
+    return True, text
+
+
 def reverse_last_captain_level_up(wb: dict) -> tuple[bool, str]:
     cap = wb.get("captain")
     if not cap:
         return False, "No captain hired."
+    history = cap.get("level_history") or []
+    if history and history[-1].get("choice") == "trick":
+        entry = history.pop()
+        trick_id = entry.get("trick_id")
+        known = cap.setdefault("known_tricks", [])
+        if trick_id in known:
+            known.remove(trick_id)
+        cap["level"] = max(0, int(cap.get("level", 1)) - 1)
+        msg = f"Reversed captain level-up: {entry.get('detail', trick_id)}."
+        add_history(wb, msg)
+        return True, msg
     ok, msg = _reverse_last_stat_level_up(
         cap,
         get_stat=lambda s: int(cap["stats"].get(s, 0)),
@@ -1117,14 +1230,19 @@ def promote_soldier_to_captain(
     wb: dict,
     soldier_id: str,
     extra_stat: str | None = None,
+    tricks: list[str] | None = None,
 ) -> tuple[bool, str]:
     """Convert an active soldier into the warband's Captain (mutually exclusive with
     hiring — only one captain slot exists at a time)."""
     hr = wb.setdefault("homerules", default_homerules())
-    if not hr.get("promote_captain_enabled"):
-        return False, "Promote Captain is not enabled for this warband (see Homerules)."
+    if hr.get("captain_mode") not in ("promote", "both"):
+        return False, "Promoting a captain is not enabled for this warband (see Homerules)."
     if wb.get("captain"):
         return False, "Warband already has a captain."
+    n_tricks = int(hr.get("captain_starting_tricks", CAPTAIN_STARTING_TRICKS))
+    ok, msg = _validate_tricks(tricks, n_tricks)
+    if not ok:
+        return False, msg
     soldiers = wb.get("soldiers") or []
     soldier = None
     idx = None
@@ -1176,6 +1294,7 @@ def promote_soldier_to_captain(
         "levelup_counts": {s: 0 for s in LEVELUP_STATS},
         "level_history": [],
         "origin": "promoted",
+        "known_tricks": list(tricks or []),
     }
     wb["captain"] = cap
     soldiers.pop(idx)

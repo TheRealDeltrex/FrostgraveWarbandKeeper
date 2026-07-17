@@ -57,9 +57,13 @@
     </p>
     <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
       <input type="hidden" name="action" value="update_homerules" />
-      <div class="checkbox-row">
-        <input id="captains_enabled" name="captains_enabled" type="checkbox" {% if hr.captains_enabled %}checked{% endif %} />
-        <label for="captains_enabled" style="margin:0">Enable Captains (FG1E Sellswords-style homerule)</label>
+      <div class="form-row">
+        <label for="captain_mode">Captain (FG1E Sellswords-style homerule)</label>
+        <select id="captain_mode" name="captain_mode">
+          {% for opt in CAPTAIN_MODE_OPTIONS %}
+            <option value="{{ opt }}" {% if hr.captain_mode == opt %}selected{% endif %}>{{ CAPTAIN_MODE_LABELS[opt] }}</option>
+          {% endfor %}
+        </select>
       </div>
       <details class="ref-panel">
         <summary>Captain settings</summary>
@@ -75,6 +79,10 @@
           <div class="form-row">
             <label for="captain_max_level">Max level</label>
             <input id="captain_max_level" name="captain_max_level" type="number" min="0" value="{{ hr.captain_max_level }}" />
+          </div>
+          <div class="form-row">
+            <label for="captain_starting_tricks">Starting tricks</label>
+            <input id="captain_starting_tricks" name="captain_starting_tricks" type="number" min="0" max="{{ CAPTAIN_TRICKS|length }}" value="{{ hr.captain_starting_tricks }}" />
           </div>
           <div class="form-row">
             <label>&nbsp;</label>
@@ -141,10 +149,9 @@
 
       <details class="ref-panel">
         <summary>Promote Captain</summary>
-        <div class="checkbox-row">
-          <input id="promote_captain_enabled" name="promote_captain_enabled" type="checkbox" {% if hr.promote_captain_enabled %}checked{% endif %} />
-          <label for="promote_captain_enabled" style="margin:0">Allow promoting an active soldier to Captain</label>
-        </div>
+        <p class="muted" style="font-size:0.85rem">
+          Enabled via the Captain mode select above ("Promote only" or "Hire or promote"). Settings below apply whenever promotion is allowed.
+        </p>
         <div class="grid-2">
           <div class="form-row">
             <label for="promote_captain_cost">Promotion cost (gc)</label>
@@ -194,7 +201,7 @@
           <label for="loot_xp">Wizard XP gained</label>
           <input id="loot_xp" name="loot_xp" type="number" min="0" value="0" />
         </div>
-        {% if hr.captains_enabled and cap %}
+        {% if cap %}
           <div class="form-row">
             <label for="loot_captain_xp">Captain XP gained</label>
             <input id="loot_captain_xp" name="loot_captain_xp" type="number" min="0" value="0" />
@@ -566,13 +573,14 @@
     {% endif %}
   </details>
 
-  {% if hr.captains_enabled or hr.promote_captain_enabled or cap %}
+  {% if hr.captain_mode != 'off' or cap %}
     {# ---- Captain ---- #}
     <details class="card" id="captain" open>
       <summary><h2>Captain</h2></summary>
       {% if cap %}
         {% set cap_slots_n = hr.promote_captain_item_slots if cap.origin == 'promoted' else hr.captain_item_slots %}
         {% set cap_dismiss_cost = hr.promote_captain_cost if cap.origin == 'promoted' else hr.captain_hiring_cost %}
+        {% set cap_eff = captain_effective_stats(cap) %}
         <div class="char-block">
           {% if cap.portrait %}
             <img class="portrait-md" src="{{ url_for('portrait_file', relpath=cap.portrait) }}" alt="" />
@@ -593,13 +601,14 @@
                 </div>
               </div>
               <div class="stat-row">
-                <div class="stat-pill"><span class="label">Move</span><span class="value">{{ cap.stats.move }}</span></div>
+                <div class="stat-pill"><span class="label">Move</span><span class="value">{{ cap_eff.move }}</span></div>
                 <div class="stat-pill"><span class="label">Fight</span><span class="value">{{ format_stat(cap.stats.fight) }}</span></div>
                 <div class="stat-pill"><span class="label">Shoot</span><span class="value">{{ format_stat(cap.stats.shoot) }}</span></div>
-                <div class="stat-pill"><span class="label">Armour</span><span class="value">{{ cap.stats.armour }}</span></div>
+                <div class="stat-pill"><span class="label">Armour</span><span class="value">{{ cap_eff.armour }}</span></div>
                 <div class="stat-pill"><span class="label">Will</span><span class="value">{{ format_stat(cap.stats.will) }}</span></div>
                 <div class="stat-pill"><span class="label">Health</span><span class="value">{{ cap.stats.health }}</span></div>
               </div>
+              <p class="muted" style="font-size:0.8rem">Move and Armour include bonuses from equipped Shield/Light Armour/Heavy Armour.</p>
               <p class="muted" style="font-size:0.85rem">
                 {{ 'Promoted from the ranks' if cap.origin == 'promoted' else 'Hired' }} · Level {{ cap.level }}/{{ hr.captain_max_level }} · XP {{ cap.xp }}
                 {% if cap.bonus_extra_stat %}
@@ -609,6 +618,20 @@
                   · {{ CAPTAIN_MIND_CONTROL_LABELS[hr.captain_mind_control] }} (homerule note — not simulated)
                 {% endif %}
               </p>
+              <details class="ref-panel">
+                <summary>Tricks of the Trade ({{ cap.known_tricks|length }})</summary>
+                {% if cap.known_tricks %}
+                  <ul class="list-plain">
+                    {% for tid in cap.known_tricks %}
+                      {% set trick = CAPTAIN_TRICK_BY_ID[tid] %}
+                      <li><strong>{{ trick.name }}</strong> — {{ trick.effect }} <span class="muted">({{ trick.declare }})</span></li>
+                    {% endfor %}
+                  </ul>
+                {% else %}
+                  <p class="empty">No tricks known.</p>
+                {% endif %}
+                <p class="muted" style="font-size:0.8rem">Each trick may be used once per game — purely descriptive, tracked at the table, not simulated here.</p>
+              </details>
               <h3>Captain items ({{ cap_slots_n }} slots)</h3>
               <div class="checkbox-row">
                 <input id="captain_dagger" name="captain_dagger" type="checkbox" {% if cap.has_dagger %}checked{% endif %} />
@@ -661,6 +684,20 @@
                   </button>
                 </form>
               {% endfor %}
+              {% set available_tricks = CAPTAIN_TRICKS|rejectattr('id', 'in', cap.known_tricks)|list %}
+              {% if available_tricks %}
+                <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
+                  <input type="hidden" name="action" value="captain_pick_trick" />
+                  <select name="trick_id">
+                    {% for trick in available_tricks %}
+                      <option value="{{ trick.id }}">{{ trick.name }} — {{ trick.effect }}</option>
+                    {% endfor %}
+                  </select>
+                  <button class="btn secondary small" type="submit">Learn trick (instead of a stat)</button>
+                </form>
+              {% else %}
+                <p class="muted" style="font-size:0.85rem">All tricks known.</p>
+              {% endif %}
             </div>
           {% else %}
             <p class="empty">No pending level-ups. Add XP first.</p>
@@ -688,7 +725,7 @@
           <button class="btn danger small" type="submit" onclick="return confirm('Dismiss captain?');">Dismiss captain</button>
         </form>
       {% else %}
-        {% if hr.captains_enabled %}
+        {% if hr.captain_mode in ('hire', 'both') %}
           <h3>Hire captain</h3>
           <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" enctype="multipart/form-data">
             <input type="hidden" name="action" value="hire_captain" />
@@ -716,9 +753,22 @@
                 <button class="btn gold" type="submit">Hire (−{{ hr.captain_hiring_cost }} gc)</button>
               </div>
             </div>
+            {% if hr.captain_starting_tricks > 0 %}
+              <details class="ref-panel trick-picker" data-required="{{ hr.captain_starting_tricks }}" style="margin-top:0.75rem">
+                <summary>Pick {{ hr.captain_starting_tricks }} starting tricks (<span class="trick-count">0</span>/{{ hr.captain_starting_tricks }} selected)</summary>
+                <div class="stack-sm">
+                  {% for trick in CAPTAIN_TRICKS %}
+                    <label class="checkbox-row" style="align-items:flex-start">
+                      <input type="checkbox" class="trick-cb" name="captain_tricks" value="{{ trick.id }}" />
+                      <span><strong>{{ trick.name }}</strong> — {{ trick.effect }} <span class="muted">({{ trick.declare }})</span></span>
+                    </label>
+                  {% endfor %}
+                </div>
+              </details>
+            {% endif %}
           </form>
         {% endif %}
-        {% if hr.promote_captain_enabled %}
+        {% if hr.captain_mode in ('promote', 'both') %}
           <p class="muted" style="font-size:0.85rem">
             No captain yet — promote an active soldier to Captain from Soldiers &amp; recruiting below.
           </p>
@@ -846,7 +896,7 @@
                         </div>
                       </details>
                     {% endif %}
-                    {% if hr.promote_captain_enabled and not cap and s.status == 'active' %}
+                    {% if hr.captain_mode in ('promote', 'both') and not cap and s.status == 'active' %}
                       <details>
                         <summary class="muted" style="cursor:pointer;font-size:0.85rem">Promote to Captain</summary>
                         <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="stack-sm" style="margin-top:0.4rem" onsubmit="return confirm('Promote {{ s.name }} to Captain for {{ hr.promote_captain_cost }} gc?');">
@@ -865,6 +915,21 @@
                                 {% endfor %}
                               </select>
                             </label>
+                          {% endif %}
+                          {% if hr.captain_starting_tricks > 0 %}
+                            <details class="trick-picker" data-required="{{ hr.captain_starting_tricks }}">
+                              <summary class="muted" style="cursor:pointer;font-size:0.8rem">
+                                Pick {{ hr.captain_starting_tricks }} starting tricks (<span class="trick-count">0</span>/{{ hr.captain_starting_tricks }} selected)
+                              </summary>
+                              <div class="stack-sm">
+                                {% for trick in CAPTAIN_TRICKS %}
+                                  <label class="checkbox-row" style="align-items:flex-start;font-size:0.8rem">
+                                    <input type="checkbox" class="trick-cb" name="tricks" value="{{ trick.id }}" />
+                                    <span><strong>{{ trick.name }}</strong> — {{ trick.effect }} <span class="muted">({{ trick.declare }})</span></span>
+                                  </label>
+                                {% endfor %}
+                              </div>
+                            </details>
                           {% endif %}
                           <button class="btn gold small" type="submit">Promote (−{{ hr.promote_captain_cost }} gc)</button>
                         </form>
@@ -1155,4 +1220,24 @@
       {% endfor %}
     </ul>
   </details>
+
+  <script>
+    (function () {
+      // Enforce "pick exactly N tricks" on every .trick-picker on the page
+      // (the hire form, plus one per active soldier's Promote-to-Captain form).
+      document.querySelectorAll('.trick-picker').forEach((picker) => {
+        const required = parseInt(picker.dataset.required || '0', 10);
+        const boxes = [...picker.querySelectorAll('.trick-cb')];
+        const countEl = picker.querySelector('.trick-count');
+        function refresh() {
+          const checked = boxes.filter((b) => b.checked);
+          if (countEl) countEl.textContent = checked.length;
+          const atLimit = checked.length >= required;
+          boxes.forEach((b) => { b.disabled = atLimit && !b.checked; });
+        }
+        boxes.forEach((b) => b.addEventListener('change', refresh));
+        refresh();
+      });
+    })();
+  </script>
 {% endblock %}

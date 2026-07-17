@@ -62,7 +62,8 @@
     "summary": "+1 Armour. Not with two-handed weapon or staff. No spellcasters.",
     "description": "+1 Armour. Cannot be carried with a two-handed weapon or staff. Spellcasters may not carry shields.",
     "slot_cost": 1,
-    "spellcaster_allowed": false
+    "spellcaster_allowed": false,
+    "armour_bonus": 1
   },
   {
     "name": "Light Armour",
@@ -71,7 +72,8 @@
     "summary": "+1 Armour. No spellcasters.",
     "description": "+1 Armour. Spellcasters may not wear light armour.",
     "slot_cost": 1,
-    "spellcaster_allowed": false
+    "spellcaster_allowed": false,
+    "armour_bonus": 1
   },
   {
     "name": "Heavy Armour",
@@ -80,7 +82,9 @@
     "summary": "+2 Armour, −1 Move. No spellcasters.",
     "description": "+2 Armour but −1 Move. Spellcasters may not wear heavy armour.",
     "slot_cost": 1,
-    "spellcaster_allowed": false
+    "spellcaster_allowed": false,
+    "armour_bonus": 2,
+    "move_penalty": 1
   },
   {
     "name": "Potion",

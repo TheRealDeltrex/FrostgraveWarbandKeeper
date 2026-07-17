@@ -10,11 +10,13 @@ from PIL import Image
 
 from frostgrave_data import (
     APPRENTICE_ITEM_SLOTS,
+    CAPTAIN_TRICK_BY_ID,
     WIZARD_ITEM_SLOTS,
     format_stat,
 )
 from game_content import item_slot_cost
 from warband_store import (
+    captain_effective_stats,
     enrich_soldier,
     normalize_item_slots,
     portrait_filesystem_path,
@@ -359,14 +361,29 @@ def build_warband_pdf(wb: dict) -> bytes:
         pdf.set_x(left)
         pdf.set_font("Helvetica", "", 10)
         cstats = cap.get("stats") or {}
+        cstats_eff = captain_effective_stats(cap)
         pdf.cell(
             0, 5, _health_line(cstats.get("health", 14)), new_x="LMARGIN", new_y="NEXT", markdown=True
         )
         pdf.set_x(left)
-        pdf.cell(0, 5, _stat_line(cstats), new_x="LMARGIN", new_y="NEXT", markdown=True)
+        pdf.cell(0, 5, _stat_line(cstats_eff), new_x="LMARGIN", new_y="NEXT", markdown=True)
         cap_slots = cap.get("item_slots") or []
         _write_item_block(
             pdf, left, cap_slots, cap_slots_n, bool(cap.get("has_dagger")), "Equipment"
+        )
+        trick_names = [
+            CAPTAIN_TRICK_BY_ID[tid]["name"]
+            for tid in cap.get("known_tricks") or []
+            if tid in CAPTAIN_TRICK_BY_ID
+        ]
+        pdf.set_x(left)
+        pdf.multi_cell(
+            0,
+            4.5,
+            _t(f"**Tricks:** {', '.join(trick_names) if trick_names else 'none'}"),
+            new_x="LMARGIN",
+            new_y="NEXT",
+            markdown=True,
         )
         pdf.set_y(max(pdf.get_y(), y0 + wiz_size + 2))
         pdf.ln(2)
