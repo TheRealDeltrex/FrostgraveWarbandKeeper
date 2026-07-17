@@ -7,8 +7,12 @@ Not affiliated with Osprey Games / Joseph A. McCullough.
 
 ## Download
 
-This is the **distribution branch** — it just contains this README. Grab a packaged build from
-the [Releases page](../../releases/latest). No Python install needed on either platform.
+👉 **[Download page](https://therealdeltrex.github.io/FrostgraveWarbandKeeper/)** — Windows and
+Linux builds, one click each.
+
+This is the **distribution branch** — it just contains this README. You can also grab a packaged
+build directly from the [Releases page](../../releases/latest). No Python install needed on
+either platform.
 
 ### Windows
 
