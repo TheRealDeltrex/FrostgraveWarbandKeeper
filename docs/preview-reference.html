@@ -1,0 +1,2586 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Reference · Frostgrave</title>
+    <link rel="stylesheet" href="static/style.css" />
+  
+    <style>
+      /* Scoped to the preview banner only — kept out of the shared style.css copy so that file
+         stays a verbatim, byte-for-byte copy of the real app's stylesheet. */
+      .preview-banner {
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 0.65rem 1rem;
+        margin: 1rem 0;
+        font-size: 0.9rem;
+        color: var(--text);
+      }
+      .preview-banner a { color: var(--accent); margin-left: 0.4rem; }
+      .preview-banner a:hover { color: var(--accent-hover); }
+    </style>
+</head>
+  <body>
+    <div class="container">
+      <div class="preview-banner">
+        <strong>Live Preview</strong> — a static, read-only sample. Nothing here saves.
+        <a href="index.html">&larr; Download the app</a> &middot;
+        <a href="preview-warband.html">See a sample warband</a>
+      </div>
+    
+      
+
+      
+        
+      
+
+      
+  <section class="hero">
+    <h1>Reference (2e core)</h1>
+    <p>
+      Starting gold <span class="gold">400 gc</span> ·
+      Apprentice <span class="gold">100 gc</span> ·
+      Max 8 soldiers · Max 4 specialists ·
+      Spells: 3 own + 1 each aligned + 2 neutrals (different schools) · no opposed at start.
+      CN penalties: own +0 · aligned +2 · neutral +4 · opposed +6.
+    </p>
+  </section>
+
+  <details class="card">
+    <summary><h2>Schools</h2></summary>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>School</th><th>Aligned (+2)</th><th>Neutral (+4)</th><th>Opposed (+6)</th></tr></thead>
+        <tbody>
+          
+            <tr>
+              <td><strong>Chronomancer</strong></td>
+              <td class="muted">Elementalist, Necromancer, Soothsayer</td>
+              <td class="muted">Illusionist, Sigilist, Summoner, Thaumaturge, Witch</td>
+              <td>Enchanter</td>
+            </tr>
+          
+            <tr>
+              <td><strong>Elementalist</strong></td>
+              <td class="muted">Chronomancer, Enchanter, Summoner</td>
+              <td class="muted">Necromancer, Sigilist, Soothsayer, Thaumaturge, Witch</td>
+              <td>Illusionist</td>
+            </tr>
+          
+            <tr>
+              <td><strong>Enchanter</strong></td>
+              <td class="muted">Elementalist, Sigilist, Witch</td>
+              <td class="muted">Illusionist, Necromancer, Soothsayer, Summoner, Thaumaturge</td>
+              <td>Chronomancer</td>
+            </tr>
+          
+            <tr>
+              <td><strong>Illusionist</strong></td>
+              <td class="muted">Sigilist, Soothsayer, Thaumaturge</td>
+              <td class="muted">Chronomancer, Enchanter, Necromancer, Summoner, Witch</td>
+              <td>Elementalist</td>
+            </tr>
+          
+            <tr>
+              <td><strong>Necromancer</strong></td>
+              <td class="muted">Chronomancer, Summoner, Witch</td>
+              <td class="muted">Elementalist, Enchanter, Illusionist, Sigilist, Soothsayer</td>
+              <td>Thaumaturge</td>
+            </tr>
+          
+            <tr>
+              <td><strong>Sigilist</strong></td>
+              <td class="muted">Enchanter, Illusionist, Thaumaturge</td>
+              <td class="muted">Chronomancer, Elementalist, Necromancer, Soothsayer, Witch</td>
+              <td>Summoner</td>
+            </tr>
+          
+            <tr>
+              <td><strong>Soothsayer</strong></td>
+              <td class="muted">Chronomancer, Illusionist, Thaumaturge</td>
+              <td class="muted">Elementalist, Enchanter, Necromancer, Sigilist, Summoner</td>
+              <td>Witch</td>
+            </tr>
+          
+            <tr>
+              <td><strong>Summoner</strong></td>
+              <td class="muted">Elementalist, Necromancer, Witch</td>
+              <td class="muted">Chronomancer, Enchanter, Illusionist, Soothsayer, Thaumaturge</td>
+              <td>Sigilist</td>
+            </tr>
+          
+            <tr>
+              <td><strong>Thaumaturge</strong></td>
+              <td class="muted">Illusionist, Sigilist, Soothsayer</td>
+              <td class="muted">Chronomancer, Elementalist, Enchanter, Summoner, Witch</td>
+              <td>Necromancer</td>
+            </tr>
+          
+            <tr>
+              <td><strong>Witch</strong></td>
+              <td class="muted">Enchanter, Necromancer, Summoner</td>
+              <td class="muted">Chronomancer, Elementalist, Illusionist, Sigilist, Thaumaturge</td>
+              <td>Soothsayer</td>
+            </tr>
+          
+        </tbody>
+      </table>
+    </div>
+  </details>
+
+  <details class="card">
+    <summary><h2>Spells by school (base casting number)</h2></summary>
+    <p class="muted">Click <strong>Info</strong> on a spell line for full text.</p>
+    
+      <h3>Chronomancer</h3>
+      <div class="spell-list-detail">
+        <div class="spell-list-head spell-ref-head" aria-hidden="true">
+          <span class="col-name">Spell</span>
+          <span class="col-cn">Base CN</span>
+          <span class="col-type">Type</span>
+          <span class="col-info"></span>
+        </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Crumble</strong></span>
+                <span class="col-cn gold"><strong>10</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">This spell can only target inanimate structures such as buildings and walls. The spellcaster rapidly speeds up the passing of time in a small area of the structure, causing it to collapse. This can create a doorway-sized hole through any wall, which should be indicated on the table somehow. The spell can also be used to collapse a section of floor beneath a figure standing on a level above the ground. In this case, the figure about to be affected must pass a Move Roll (TN22) or fall to the next level down and taking damage appropriately. If this spell is cast on a wall created by the Wall spell, the wall is completely destroyed. If it is cast on terrain holding a Wizard Eye, the Wizard Eye is cancelled.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Decay</strong></span>
+                <span class="col-cn gold"><strong>12</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">The spellcaster selects and attacks a target’s weapon, causing it to decay and fall apart, rendering it useless for the rest of the game. This spell has no effect on magic weapons (even those only temporarily enchanted). This spell has no effect on creatures (unless they are specifically identified as being equipped with a weapon from the General Arms and Armour List).</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Fast Act</strong></span>
+                <span class="col-cn gold"><strong>8</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">This spell may only be cast on a member of the spellcaster’s warband or an uncontrolled creature. This figure will activate at the end of the current phase instead of in its normal phase. For example, if an apprentice casts this spell on an uncontrolled creature, the creature will activate at the end of that player’s Apprentice phase instead of the Creature phase. Spellcasters may not cast this spell on themselves, nor on a figure that has already activated in the current turn.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Fleet Feet</strong></span>
+                <span class="col-cn gold"><strong>10</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">The target receives +2 Move for the rest of the game. Multiple castings of Fleet Feet on the same target have no effect.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Petrify</strong></span>
+                <span class="col-cn gold"><strong>10</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">The target figure must make an immediate Will Roll with a Target Number equal to the Casting Roll. If it fails, it receives no actions in its next activation. Furthermore, the figure suffers -3 Fight (to a minimum of +0) and may not have Leap cast upon it until after it makes its next move action. Large creatures receive +8 to their Will Roll to resist this spell.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Slow</strong></span>
+                <span class="col-cn gold"><strong>10</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">The target is reduced to a maximum of one action per activation (which can be any action, it does not have to be movement). It may make an Will Roll verses the Casting Roll at the end of each of its activations. If successful the spell is cancelled.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Time Store</strong></span>
+                <span class="col-cn gold"><strong>14</strong></span>
+                <span class="col-type muted">Self Only</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">The spellcaster captures a fragment of their own present to save for future use. To cast this spell, the spellcaster must be able to take two actions during their activation. They must spend the first action casting Time Store. If successful, the second action is lost. This spellcaster is now considered to have a stored ‘extra action’ that they may use in a future turn. This action can only be used during the spellcaster’s activation and can give the spellcaster three actions in one activation.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Time Walk</strong></span>
+                <span class="col-cn gold"><strong>14</strong></span>
+                <span class="col-type muted">Self Only</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">Wizard only. The wizard will activate again in the Apprentice phase and the Soldier phase. This is in addition to the figures that can normally activate in those phases. The wizard may not activate any additional soldiers or be part of a group activation in these phases. The wizard may perform one action in each of these two phases and may take any action – they are not limited to movement. If the wizard moved at all in a previous activation during the turn, any additional move actions are at half rate. If a wizard casts this spell in consecutive turns, they immediately suffer 8 points of damage. CHRONOMANCER</p>
+            </details>
+          </div>
+        
+      </div>
+    
+      <h3>Elementalist</h3>
+      <div class="spell-list-detail">
+        <div class="spell-list-head spell-ref-head" aria-hidden="true">
+          <span class="col-name">Spell</span>
+          <span class="col-cn">Base CN</span>
+          <span class="col-type">Type</span>
+          <span class="col-info"></span>
+        </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Call Storm</strong></span>
+                <span class="col-cn gold"><strong>12</strong></span>
+                <span class="col-type muted">Area Effect</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">All bow and crossbow attacks are made with -1 Shoot for the rest of the game. This spell may be cast multiple times (and by multiple spellcasters), with each additional casting increasing the penalty by a further -1, up to a maximum of -5.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Destructive Sphere</strong></span>
+                <span class="col-cn gold"><strong>12</strong></span>
+                <span class="col-type muted">Area Effect</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">Every figure within 3” of the spellcaster (but not counting the spellcaster) suffers a +5 elemental magic attack.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Elemental Ball</strong></span>
+                <span class="col-cn gold"><strong>12</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">The spellcaster selects an enemy figure within 16” and line of sight and hurls a ball of destructive elemental energy at it. The target and every figure within 1” and line of sight of the target immediately suffers a +5 elemental magic shooting attack. Roll this shooting attack separately for each figure. Treat the target figure as the origin of the attack for the purposes of determining cover or intervening terrain for all other figures suffering the attack. This spell may not target an enemy figure that is even partially obscured by another figure.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Elemental Bolt</strong></span>
+                <span class="col-cn gold"><strong>12</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">The spellcaster makes a +7 elemental magic shooting attack against a target figure within 16” and line of sight.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Elemental Hammer</strong></span>
+                <span class="col-cn gold"><strong>10</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">This spell is cast upon a weapon. The next time the figure wielding this weapon wins a round of combat and does at least 1 point of damage, this weapon inflicts an additional 5 points of elemental magic damage. If cast on a normal weapon, which is then used against a creature that is Immune to Normal Weapons, this weapon will only deal the 5 points of elemental magic damage. If cast on a bow or crossbow the spell only applies to the next attack.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Elemental Shield</strong></span>
+                <span class="col-cn gold"><strong>10</strong></span>
+                <span class="col-type muted">Self Only</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">The spellcaster forms a floating shield that absorbs the next 3 points of damage the spellcaster would normally suffer in combat or from a shooting attack. Once 3 points have been absorbed the spell is cancelled. A spellcaster may only have one Elemental Shield active at any time.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Scatter Shot</strong></span>
+                <span class="col-cn gold"><strong>12</strong></span>
+                <span class="col-type muted">Area Effect</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">The spellcaster makes a +0 elemental magic shooting attack against every enemy figure (either from an opposing warband or uncontrolled creature) within 12” and line of sight. This may include enemy figures in combat, although the normal rules for shooting into combat are followed in this case.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Wall</strong></span>
+                <span class="col-cn gold"><strong>10</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">This spell creates a 6”-long, 3”-high wall, part of which must be within 10” and line of sight of the spellcaster. This wall can be climbed as normal. At the end of each turn, after the turn in which the spell was cast, roll a die, on a 1–4 the wall vanishes. ELEMENTALIST</p>
+            </details>
+          </div>
+        
+      </div>
+    
+      <h3>Enchanter</h3>
+      <div class="spell-list-detail">
+        <div class="spell-list-head spell-ref-head" aria-hidden="true">
+          <span class="col-name">Spell</span>
+          <span class="col-cn">Base CN</span>
+          <span class="col-type">Type</span>
+          <span class="col-info"></span>
+        </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Animate Construct</strong></span>
+                <span class="col-cn gold"><strong>10</strong></span>
+                <span class="col-type muted">Out of Game (B)</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">It is assumed that the spellcaster has built a construct prior to using this spell to animate it. If the spell is successfully cast, the construct immediately becomes a permanent member of the warband, taking the place of a soldier. A spellcaster must declare the size of construct they are attempting to animate (small, medium, or large – page 183 before rolling to cast the spell. The larger the construct, the harder it is to animate, so the following modifiers are applied to the Casting Roll: Small -0, Medium -3, Large -6. There is no limit to the number of constructs in a warband other than the normal limits for soldiers. Large constructs count as specialist soldiers, the others as standard soldiers.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Control Construct</strong></span>
+                <span class="col-cn gold"><strong>12</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">The target construct must make an immediate Will Roll with a Target Number equal to the Casting Roll. If the roll fails, the construct becomes a temporary member of the spellcaster’s warband. This control lasts for the rest of the game or until the spell is cancelled. The spellcaster may spend an action to cancel this spell. A spellcaster may only control one construct at a time.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Embed Enchantment</strong></span>
+                <span class="col-cn gold"><strong>14</strong></span>
+                <span class="col-type muted">Out of Game (A)</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">This spell causes any one Enchant Armour or Enchant Weapon spell that is still active at the end of a game to become permanent, and the weapon or armour in question to become a magic weapon or armour. The newly created magic weapon or armour takes up an item slot as normal.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Enchant Armour</strong></span>
+                <span class="col-cn gold"><strong>8</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">This spell may only be cast on a figure wearing armour. The armour worn by the target now counts as magic armour and grants +1 Armour for the rest of the game. Multiple castings of this spell on the same target have no effect.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Enchant Weapon</strong></span>
+                <span class="col-cn gold"><strong>8</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">This spell targets a weapon of the spellcaster’s choosing. If cast on a melee weapon, this weapon counts as a magic weapon with +1 Fight. Bows and crossbows count as magic weapons with +1 Shoot, but the attacks made with them do not count as magic attacks. This spell may be cast on a single arrow or crossbow bolt, in which case that ammunition gives +1 Shoot and its attack counts as magic, but for the next shooting attack only. This spell may only be cast once on each weapon. When using both a magic missile weapon and magic ammunition, the shooter may choose to apply the bonus of one or the other, but not both.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Grenade</strong></span>
+                <span class="col-cn gold"><strong>10</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">The spellcaster takes an object, commonly a simple rock, imbues it with magic energy and throws it at their target, whereupon it explodes into hundreds of fragments. The spellcaster picks a target point within 14”. Every figure, including allies, within 1.5” of that point immediately suffers a +3 magic shooting attack. Use the target point as the origin of the attack for working out line of sight and cover.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Strength</strong></span>
+                <span class="col-cn gold"><strong>10</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">The target receives +2 Fight. Multiple Strength spells on the same target have no effect.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Telekinesis</strong></span>
+                <span class="col-cn gold"><strong>10</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">The spellcaster may move any treasure token within 16” by up to 6” in any direction, so long as it remains in line of sight the entire time. If the treasure moves out of line of sight, it immediately falls straight to the ground. This spell has no effect on a treasure token that has any special requirements for how and when it can be picked up, nor on one being carried by a figure. This spell may not target the central treasure, until after that treasure has been picked up for the first time. ENCHANTER</p>
+            </details>
+          </div>
+        
+      </div>
+    
+      <h3>Illusionist</h3>
+      <div class="spell-list-detail">
+        <div class="spell-list-head spell-ref-head" aria-hidden="true">
+          <span class="col-name">Spell</span>
+          <span class="col-cn">Base CN</span>
+          <span class="col-type">Type</span>
+          <span class="col-info"></span>
+        </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Beauty</strong></span>
+                <span class="col-cn gold"><strong>10</strong></span>
+                <span class="col-type muted">Self Only</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">This spell causes anyone who looks on the spellcaster to see a paragon of beauty. Any member of an opposing warband must make a Will Roll with a Target Number equal to the Casting Roll if they wish to do any of the following: move into combat with the spellcaster, make a shooting attack that could potentially hit the spellcaster (including shooting attacks generated by spells), or cast any spell that targets the spellcaster. Spellcasters may empower this Will Roll in the same way they would to resist a spell. A figure may only attempt such a Will Roll once per turn. This spell has no effect on creatures (anything found in Chapter Six: Bestiary, page 176) or war hounds.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Blink</strong></span>
+                <span class="col-cn gold"><strong>12</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">This spell may target any figure within 12”. Move that figure 4” in a random direction. A figure may make a Will Roll with a Target Number equal to the Casting Roll in order to resist this spell. If successful, the figure does not move. Uncontrolled creatures will always attempt this Will Roll.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Fool&#39;s Gold</strong></span>
+                <span class="col-cn gold"><strong>10</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">This spell may only be cast on a figure carrying a treasure token. That figure must make an immediate Will Roll with a Target Number equal to the Casting Roll. If it fails, the spellcaster may take the treasure token from the figure and move it up to 4&#34; in any direction, provided the final spot is within line of sight of the spellcaster.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Glow</strong></span>
+                <span class="col-cn gold"><strong>10</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">A brightly glowing light surrounds the target figure. For the rest of the game, all shooting attacks against this figure from any source are at +3. Multiple castings of Glow on the same target have no effect.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Illusionary Soldier</strong></span>
+                <span class="col-cn gold"><strong>12</strong></span>
+                <span class="col-type muted">Out of Game (B) / Touch</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">An illusionary soldier becomes a temporary member of the warband for the next battle (if cast Out of Game) or until the end of the game (if cast during a battle). This soldier can be of any type found on the Soldier Tables (pages 30 and 31) except an apothecary. This soldier cannot pick up treasure, nor can it deal damage, but will otherwise count as a regular soldier for all other the purposes – it may engage in combat, albeit dealing no damage if it wins (it would still have the option to push back its opponent, however), lend support to other figures in combat, etc. If the illusionary soldier ever suffers damage of any type, it is removed. A warband may only have one illusionary soldier at any given time. The player must reveal which mem</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Invisibility</strong></span>
+                <span class="col-cn gold"><strong>12</strong></span>
+                <span class="col-type muted">Touch</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">The target figure becomes invisible. No figure may move into combat with the invisible figure, nor target it with any attack or spell (although it may still be affected by area effects, such as the blast radius of a Grenade spell). If the invisible figure moves into combat, casts a spell, or picks up a treasure token, the Invisibility spell is cancelled. This spell may be cast on a figure already carrying treasure, rendering both invisible. In this case, if the figure drops the treasure, the spell is cancelled.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Teleport</strong></span>
+                <span class="col-cn gold"><strong>10</strong></span>
+                <span class="col-type muted">Self Only</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">The spellcaster immediately moves to any location within line of sight, but may take no other actions this turn after casting this spell. This spell may not be used to enter combat or to move off the table.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Transpose</strong></span>
+                <span class="col-cn gold"><strong>12</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">This spell switches the position of two figures on the table. The two figures being transposed must both be within line of sight of the spellcaster and within 12” of one another. The spellcaster may cast Transpose to switch themselves with another figure. Members of opposing warbands are eligible targets for being transposed but may make a Will Roll with a Target Number equal to the Casting Roll to attempt to resist the spell. If successful, the spell is cancelled and no figures are moved. Friendly figures and uncontrolled creatures will not make such Will Rolls. ILLUSIONIST</p>
+            </details>
+          </div>
+        
+      </div>
+    
+      <h3>Necromancer</h3>
+      <div class="spell-list-detail">
+        <div class="spell-list-head spell-ref-head" aria-hidden="true">
+          <span class="col-name">Spell</span>
+          <span class="col-cn">Base CN</span>
+          <span class="col-type">Type</span>
+          <span class="col-info"></span>
+        </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Animate Skull</strong></span>
+                <span class="col-cn gold"><strong>8</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">The spellcaster fills a skull with magic malice and throws it at an opponent. Place one animated skull (page 190) within 6” of the spellcaster. It can be placed directly into combat. This skull is an uncontrolled creature. The spellcaster may not cast this spell again until this creature is removed from the table, but may spend an action to cancel the spell, in which case the animated skull is immediately removed from the table.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Bone Dart</strong></span>
+                <span class="col-cn gold"><strong>10</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">This spell fires a small, sharp shard of bone. The spellcaster makes a +5 shooting attack against any figure within line of sight and 12”. This does not count as a magic attack.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Bones of the Earth</strong></span>
+                <span class="col-cn gold"><strong>10</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">A skeletal hand reaches out of the ground and grabs the target’s ankle. The figure may not take any move actions until it escapes. Any form of magic movement, except the Leap spell, allows a figure to escape the hand; otherwise, the only way to escape is to fight the hand, which has Fight +0, Health 1. If the hand takes one point of damage, it vanishes, and the target is free. Other figures in base contact may attack the hand or give a support bonus. If the hand wins the fight, it does damage as normal. This spell may only be cast against a target that is standing on the ground. Large creatures are unaffected by this spell. The maximum range for this spell is 18”.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Control Undead</strong></span>
+                <span class="col-cn gold"><strong>12</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">The target undead creature must make an immediate Will Roll with a Target Number equal to the Casting Roll. If the roll fails, the undead creature becomes a temporary member of the spellcaster’s warband. This control lasts for the rest of the game or until the spell is cancelled. The spellcaster may spend an action to cancel this spell. A spellcaster may only control one undead creature at a time.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Raise Zombie</strong></span>
+                <span class="col-cn gold"><strong>10</strong></span>
+                <span class="col-type muted">Out of Game (B) / Touch</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">The spellcaster adds one zombie (page 193) to their warband as a temporary member. If the spell is cast before the game, the zombie can be deployed normally. If it is cast during a game, the zombie appears in base contact with the spellcaster. A warband may only have one raised zombie at any one time. If the zombie is killed or exits the table, Raise Zombie can be cast again to create another.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Spell Eater</strong></span>
+                <span class="col-cn gold"><strong>12</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">Casting this spell causes the spellcaster to immediately take 1 point of damage. When this spell is cast, it cancels the effects of a single casting of any one spell currently in play. This spell cannot unsummon a creature, but it can cancel the control of a creature.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Steal Health</strong></span>
+                <span class="col-cn gold"><strong>10</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">The target must make an immediate Will Roll with a Target Number equal to the Casting Roll. If failed, the target immediately loses 3 Health and the spellcaster regains 3 Health. The spellcaster gains 3 Health, even if the target had less Health than that remaining. This may not take the spellcaster above their starting Health. This spell has no effect on undead or constructs. A spellcaster may target a member of their own warband – if they do, however, the target immediately (and permanently) leaves the warband and is treated as an uncontrolled creature for the rest of the game.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Strike Dead</strong></span>
+                <span class="col-cn gold"><strong>18</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">This spell targets a figure within 8”. The target must make a Will Roll with a Target Number equal to the Casting Roll or be immediately reduced to 0 Health. All figures may empower their Will Roll to resist this spell, even non-spellcasters. The spellcaster immediately loses 1 Health upon attempting this spell (even if it is cast successfully), in addition to any loss incurred by failure or empowerment. This spell has no effect on undead or constructs. NECROMANCER</p>
+            </details>
+          </div>
+        
+      </div>
+    
+      <h3>Sigilist</h3>
+      <div class="spell-list-detail">
+        <div class="spell-list-head spell-ref-head" aria-hidden="true">
+          <span class="col-name">Spell</span>
+          <span class="col-cn">Base CN</span>
+          <span class="col-type">Type</span>
+          <span class="col-info"></span>
+        </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Absorb Knowledge</strong></span>
+                <span class="col-cn gold"><strong>12</strong></span>
+                <span class="col-type muted">Out of Game (A)</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">Wizard only. This spell allows a wizard to absorb the knowledge from a written work without having to read it. A wizard immediately gains 40 experience points for casting this spell to represent the speed with which they can gain knowledge. This experience does not count against the maximum that can be earned in one game. This spell may only be cast after a game in which the wizard was not reduced to 0 Health.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Bridge</strong></span>
+                <span class="col-cn gold"><strong>10</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">The spellcaster uses the parchment of a long scroll to create a temporary bridge, ramp, or staircase. Place a bridge 6” long and 2” wide anywhere that is completely in the line of sight of the spellcaster. The bridge has no appreciable thickness and is essentially two-dimensional. The ends of this bridge do not have to be on the same horizontal plane, nor do the ends of the bridge need to be anchored on terrain, they may float in the air. Figures may move along this bridge at their normal movement rate, even when essentially climbing. Each spellcaster may only have one bridge in play at any time. Whenever the spellcaster activates, they may cancel this spell as a free action. Otherwise roll a die at the end of every turn: on a 1–2 the bridg</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Draining Word</strong></span>
+                <span class="col-cn gold"><strong>14</strong></span>
+                <span class="col-type muted">Area Effect</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">This spell draws a bright rune of power in the sky. The spellcaster may choose one spell for Draining Word to affect. All rolls to attempt to cast that particular spell are at -3 for the rest of the game. A spellcaster may only have one Draining Word spell in effect at a time. Only one Draining Word can be active for each specific target spell at one time.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Explosive Rune</strong></span>
+                <span class="col-cn gold"><strong>10</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">The spellcaster draws a bright, glowing rune of power on the ground or a wall anywhere within 4” and line of sight. A marker should be placed on the table to represent the rune. If any character or creature that was not part of the spellcaster’s warband at the start of the game moves within 1” of the rune, it explodes, and every figure, friend or foe, within 2” suffers an immediate +5 magic attack. Note that if the rune is placed within 1” of a figure, it does not explode immediately – that figure must move to set it off. A spellcaster may have up to three such runes in play at any time. At the end of any turn, they may choose to cancel any or all their runes. If the spellcaster that placed a rune is no longer on the table, roll a die for e</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Furious Quill</strong></span>
+                <span class="col-cn gold"><strong>10</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">The target is attacked by a sharp animated quill. Although the quill does no damage, it is highly irritating and extremely distracting. While under attack, the target suffers -1 Move, -2 Fight, -4 Shoot, and -2 to all Casting Rolls. Whenever the target is activated, it may make a Will Roll with a Target Number equal to the Casting Roll – if successful, the quill is caught and destroyed. Multiple castings of Furious Quill against the same target have no effect.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Power Word</strong></span>
+                <span class="col-cn gold"><strong>14</strong></span>
+                <span class="col-type muted">Area Effect</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">This spell draws a bright rune of power in the sky. The spellcaster may pick one spell for the Power Word to affect. All rolls to cast that particular spell are at +3 for every spellcaster for the rest of the game. A spellcaster may only have one Power Word spell in effect at a time. Only one Power Word can be active for each specific target spell at one time.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Push</strong></span>
+                <span class="col-cn gold"><strong>8</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">The target suffers an immediate +10 attack. Instead of taking damage from this attack, the target is moved 1” directly away from the spellcaster for every point of damage they would have taken. If this pushes the target into the edge of the table or a piece of terrain over ½” high, they stop immediately. Other figures do not stop (or get hit by) a pushed figure – they are assumed to step out of the way. If this spell is cast from beneath a figure it will push them up. If the target is pushed up or off a height, it suffers falling damage as normal. This spell can push a figure out of combat, and as it is not a shooting attack, the target is not randomized.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Write Scroll</strong></span>
+                <span class="col-cn gold"><strong>12</strong></span>
+                <span class="col-type muted">Out of Game (A)</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">This spell creates one scroll. The scroll must be of a spell that the spellcaster either knows or a spell for which they own the grimoire. The scroll may be sold, given to a figure, or stored in the wizard’s vault. SIGILIST</p>
+            </details>
+          </div>
+        
+      </div>
+    
+      <h3>Soothsayer</h3>
+      <div class="spell-list-detail">
+        <div class="spell-list-head spell-ref-head" aria-hidden="true">
+          <span class="col-name">Spell</span>
+          <span class="col-cn">Base CN</span>
+          <span class="col-type">Type</span>
+          <span class="col-info"></span>
+        </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Awareness</strong></span>
+                <span class="col-cn gold"><strong>12</strong></span>
+                <span class="col-type muted">Out of Game (B)</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">If this spellcaster is on the table, its warband may add +2 to its Initiative Rolls for the purposes of determining the primary player only. This bonus stacks so, if both the wizard and the apprentice have cast this spell and are both on the table, the player may add +4 to their Initiative Rolls. The maximum possible bonus is +4. This spell counts as active on the spellcaster during the game and may be cancelled by anything that cancels spells.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Combat Awareness</strong></span>
+                <span class="col-cn gold"><strong>12</strong></span>
+                <span class="col-type muted">Touch</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">This spell gives the target a magic insight into the moves their opponent will attempt in a fight. It grants the target +1 Fight and +1 Armour for the remainder of the game. Multiple castings of this spell on the same target have no effect.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Mind Control</strong></span>
+                <span class="col-cn gold"><strong>12</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">The target figure must make an immediate Will Roll with a Target Number equal to the Casting Roll. If it fails, the target temporarily joins the spellcaster’s warband, activating as normal. After the figure activates each turn, it must make another Will Roll with a Target Number equal to the Casting Roll. If successful, the spell is cancelled and the figure returns to its normal allegiance. A spellcaster may only have one active Mind Control spell at a time. A figure under Mind Control cannot purposely take any action that causes it immediate damage but can be moved into combat and may attack an enemy figure. A figure under Mind Control is not allowed to move off the table. A spellcaster may cancel an active Mind Control at the end of any t</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Mind Lock</strong></span>
+                <span class="col-cn gold"><strong>12</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">The target of this spell becomes immune to Mind Control and Suggestion spells for the rest of the game, and any current Mind Control spells on the figure are cancelled. The figure gains +2 Will for the rest of the game.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Reveal Secret</strong></span>
+                <span class="col-cn gold"><strong>12</strong></span>
+                <span class="col-type muted">Out of Game (B)</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">This spell imparts knowledge on some lost treasure. Every successful casting of this spell before a game allows the player to make two rolls for a single treasure token (other than the central treasure, which is unaffected by this spell) after the game and choose which one to take.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Suggestion</strong></span>
+                <span class="col-cn gold"><strong>12</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">The target of this spell immediately drops any treasure tokens it is carrying. The spellcaster may move the figure up to 3” in any direction provided this does not move the figure into combat or cause it any immediate damage (e.g. falling more than 3”). The target of this spell may make a Will Roll with a Target Number equal to the Casting Roll. If successful, the spell has no effect.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>True Sight</strong></span>
+                <span class="col-cn gold"><strong>10</strong></span>
+                <span class="col-type muted">Self Only</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">The spellcaster, and all friendly figures within 6” of the spellcaster, can see invisible figures and are immune to the effects of the Beauty spell. Furthermore, if an invisible figure is within 6” of the spellcaster, the Invisibility spell is cancelled. If an Illusionary Soldier is within 6” of the spellcaster, it is immediately removed from the table.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Wizard Eye</strong></span>
+                <span class="col-cn gold"><strong>8</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">This spell may be cast on any terrain feature within 12” that has a flat side, such as most ruins. Place a token on or next to the terrain feature to represent the Wizard Eye. For the rest of the game, the caster may choose to draw line of sight from the Wizard Eye instead of from the figure when casting spells. The Wizard Eye has 180-degree field of vision. A spellcaster may only maintain one Wizard Eye at a time. If the terrain piece on which the Wizard Eye is placed is damaged or destroyed (such as by a Crumble spell) the spell is cancelled. The spellcaster may cancel this spell at the end of any turn. SOOTHSAYER</p>
+            </details>
+          </div>
+        
+      </div>
+    
+      <h3>Summoner</h3>
+      <div class="spell-list-detail">
+        <div class="spell-list-head spell-ref-head" aria-hidden="true">
+          <span class="col-name">Spell</span>
+          <span class="col-cn">Base CN</span>
+          <span class="col-type">Type</span>
+          <span class="col-info"></span>
+        </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Control Demon</strong></span>
+                <span class="col-cn gold"><strong>10</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">The target demon must make an immediate Will Roll with a Target Number equal to the Casting Roll. If it fails, it becomes a temporary member of the spellcaster’s warband. This control lasts for the rest of the game or until the spell is cancelled. The spellcaster may spend an action to cancel this spell. A spellcaster may only control one demon at a time.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Imp</strong></span>
+                <span class="col-cn gold"><strong>10</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">The spellcaster places an imp (page 184) on the table anywhere within the spellcaster’s line of sight, but no closer than 3” to any other figure. The imp follows the normal rules for uncontrolled creatures and will activate in the next Creature phase. If the spellcaster casts this spell a second time, the first imp immediately vanishes.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Leap</strong></span>
+                <span class="col-cn gold"><strong>8</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">This spell may only be cast on a member of the spellcaster’s warband. Immediately move the target figure up to 10” in any direction, including vertically. This move must either be in a straight line or an arc. It cannot curve around corners. If this move leaves the figure above the ground, it immediately falls, taking damage as normal. If the target is carrying treasure, this move is reduced to 5”. This move may not take a figure off the table or into combat. The target of the Leap spell may take no other actions this turn, though it may have taken actions previously.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Plague of Insects</strong></span>
+                <span class="col-cn gold"><strong>10</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">The target figure is attacked by a cloud of stinging or biting insects that irritate and distract. The cloud of insects has a 1” radius centred on, and moving with, the target figure. It affects all figures, including the target figure, fully or partially within this radius. While being pestered by the insects, a figure has -4 Fight and -4 Shoot (to a minimum of +0) and -2 to Casting Rolls. After this figure activates each turn, it may make a Will Roll with a Target Number equal to the Casting Roll. If successful, the spell is cancelled. Other figures within the radius may simply move away to escape. A figure may only ever be affected by one Plague of Insects spell at a time, whether as a target or by virtue of being within the 1” radius. L</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Planar Tear</strong></span>
+                <span class="col-cn gold"><strong>12</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">The spellcaster creates a small tear in the fabric of the universe. This rift is painful to humans and creatures, but lethal to demons. The spellcaster selects a target point. All figures within 2” of that point must make a Will Roll with a Target Number equal to the Casting Roll or suffer 2 points of damage. Demons that fail the Will Roll take damage equal to the Casting Roll.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Plane Walk</strong></span>
+                <span class="col-cn gold"><strong>10</strong></span>
+                <span class="col-type muted">Self Only</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">Although the spellcaster remains in the same physical location, they move briefly between planes of existence. For the rest of this turn, they can ignore all terrain when moving, thus walking through walls or across chasms. They may not be the target of any shooting attacks or spells. The spellcaster will never be considered in combat during the turn, nor can they be attacked by any figure. They may not, however, pick up treasure or in any way affect other figures or terrain on the table. If they are carrying treasure, they drop it. It is incredibly draining to move between planes of existence, so if a spellcaster attempts to cast this spell in a second consecutive turn, they suffer a -5 modifier to their Casting Roll, -10 if they attempt i</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Possess</strong></span>
+                <span class="col-cn gold"><strong>12</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">This spell may only be cast on a permanent or temporary member of the spellcaster’s own warband, except the wizard, apprentice, or demons. The target is possessed by a demon and gains +2 Fight, +1 Armour, and -2 Will and counts as a demon (i.e. it will be affected by Banish, Control Demon, Circle of Protection, etc.). This figure may not be part of a group activation. If removed from the game for any reason (such as being hit by a Banish spell), check for the character’s survival as normal. A spellcaster may only have one Possess spell active at a time.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Summon Demon</strong></span>
+                <span class="col-cn gold"><strong>12</strong></span>
+                <span class="col-type muted">Touch</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">Immediately place a demon on the table within 1” of the spellcaster. It may not be placed straight into combat. This demon is considered to be under the effects of a Control Demon spell by the same spellcaster, and thus this spell may not be cast if the spellcaster is already controlling a demon. The type of demon summoned depends on the amount by which the spellcaster succeeded on their Casting Roll: 0–5 imp, 6–12 minor demon, 13+ major demon. If a spellcaster rolls a 1 while attempting to cast this spell, they summon an uncontrolled demon and must place this demon in combat with the spellcaster. Roll a die to determine the type of demon 1–10 imp, 11–17 minor demon, 18+ major demon. A spellcaster cannot empower a roll of 1 when casting thi</p>
+            </details>
+          </div>
+        
+      </div>
+    
+      <h3>Thaumaturge</h3>
+      <div class="spell-list-detail">
+        <div class="spell-list-head spell-ref-head" aria-hidden="true">
+          <span class="col-name">Spell</span>
+          <span class="col-cn">Base CN</span>
+          <span class="col-type">Type</span>
+          <span class="col-info"></span>
+        </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Banish</strong></span>
+                <span class="col-cn gold"><strong>10</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">All demons within line of sight of the spellcaster must pass an immediate Will Roll with a Target Number equal to the Casting Roll. If a demon fails the roll and its current Will is +4 or less, it is immediately reduced to 0 Health and removed from the table. If its current Will is +5 or higher, it suffers damage equal to three times the amount by which it failed the Will Roll.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Blinding Light</strong></span>
+                <span class="col-cn gold"><strong>8</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">The target must make an immediate Will Roll with a Target Number equal to the Casting Roll. If it fails, it may not attack, shoot, or cast Line of Sight spells. Its Fight stat is reduced to +0 and its Move to 1. At the end of each turn, the figure may attempt another Will Roll with the same Target Number. If successful, the spell is cancelled.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Circle of Protection</strong></span>
+                <span class="col-cn gold"><strong>12</strong></span>
+                <span class="col-type muted">Touch</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">Creates a circle with a 3” diameter which no demon or undead creature can enter or pass through. If something forces them into contact with the circle, they stop at its edge. A spellcaster may only have one active circle of protection at a time, but they do not have to remain within it. The spellcaster may cancel this spell at the end of any turn. Otherwise, roll a die at the end of every turn: on a 1–3 the spell is cancelled.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Destroy Undead</strong></span>
+                <span class="col-cn gold"><strong>10</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">The target undead creature must make a Will Roll with a Target Number equal to the Casting Roll. If the undead creature fails the roll and its current Will is +2 or less, it is immediately reduced to 0 Health and is removed from the table. If its current Will is +3 or higher, it suffers damage equal to three times the amount by which it failed the Will Roll.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Dispel</strong></span>
+                <span class="col-cn gold"><strong>12</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">Immediately cancels the ongoing effect of any one casting of any one spell. It cannot unsummon a creature, but it can cancel the control of a creature that is a temporary member of a warband.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Heal</strong></span>
+                <span class="col-cn gold"><strong>8</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">This spell restores up to 5 points of lost Health to a target figure within 6”. This spell cannot take a model above its starting Health. This spell has no effect on undead or constructs.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Miraculous Cure</strong></span>
+                <span class="col-cn gold"><strong>16</strong></span>
+                <span class="col-type muted">Out of Game (A)</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">Wizard only. This spell may be used in several different ways. A successful casting of this spell will remove all permanent injuries from one figure. For example, a wizard suffering from Lost Fingers regrows all their missing digits, regardless of how many times they have suffered that particular injury. Or, it may be cast on a Badly Wounded figure – if successful, the soldier is healed and may participate in the next game with no penalty. Finally, it may be used to attempt to bring a figure back from the dead. The figure must have died in the game just played, and using the spell in this fashion incurs a -4 penalty to the Casting Roll. If successful, the figure is restored to life, and may participate in the next game with no penalty. If M</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Shield</strong></span>
+                <span class="col-cn gold"><strong>10</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">The target receives +2 Armour for the rest of the game. The maximum armour rule (see, p.36) still applies. Multiple castings of Shield on the same target have no effect. THAUMATURGE</p>
+            </details>
+          </div>
+        
+      </div>
+    
+      <h3>Witch</h3>
+      <div class="spell-list-detail">
+        <div class="spell-list-head spell-ref-head" aria-hidden="true">
+          <span class="col-name">Spell</span>
+          <span class="col-cn">Base CN</span>
+          <span class="col-type">Type</span>
+          <span class="col-info"></span>
+        </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Animal Companion</strong></span>
+                <span class="col-cn gold"><strong>10</strong></span>
+                <span class="col-type muted">Out of Game (B)</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">The spellcaster summons an animal companion of their choice from the following options to become a permanent member of their warband: bear (page 179), ice toad (page 180), snow leopard (page 182), or wolf (page 182). All Animal Companions count as standard soldiers. Animal companions are more strong-willed than wild examples of their species and receive a permanent +3 Will. A spellcaster may only have one animal companion at any time.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Brew Potion</strong></span>
+                <span class="col-cn gold"><strong>12</strong></span>
+                <span class="col-type muted">Out of Game (B)</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">The spellcaster creates one Lesser Potion of their choice (page 86) that may be sold, stored in the wizard’s vault, or given to a member of the warband. A wizard (and only a wizard) may use this spell to create a Greater Potion (page 87). First, they must declare what potion they are attempting to brew and pay the listed ingredients cost. The wizard should then roll to cast Brew Potion with a -4 to the Casting Roll. If successful, the potion is created and can be immediately assigned to a figure in the warband, sold, or stored in the wizard’s vault. If unsuccessful, the potion is not created and the money spent on ingredients is lost.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Control Animal</strong></span>
+                <span class="col-cn gold"><strong>12</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">The target animal must make an immediate Will Roll with a Target Number equal to the Casting Roll. If the roll fails, the animal becomes a temporary member of the spellcaster’s warband. This control lasts for the rest of the game or until the spell is cancelled. The spellcaster may spend an action to cancel this spell. A spellcaster may only control one animal at a time.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Curse</strong></span>
+                <span class="col-cn gold"><strong>8</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">The target suffers -2 to all die rolls. At the end of each turn, the target may make a Will Roll with the Target Number equal to the Casting Roll (at -2, of course). If successful, this spell is cancelled. Curse cannot be cast on a figure already suffering the effects of a Curse spell.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Familiar</strong></span>
+                <span class="col-cn gold"><strong>10</strong></span>
+                <span class="col-type muted">Out of Game (B)</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">The spellcaster gains a familiar, which can take the form of any small creature. It is not depicted on the table, unless the player wants to include it on the spellcaster figure. A spellcaster with a familiar gains +2 Health (write as a split stat). If the spellcaster is ever reduced to 1 Health or less, the familiar is destroyed. At the start of the next game, the spellcaster reverts to their normal Health, unless another Familiar spell is successfully cast</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Fog</strong></span>
+                <span class="col-cn gold"><strong>8</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">Place a line of fog, 6” long, 3” high, and 1” thick anywhere on the table as long as some part of it is within line of sight of the spellcaster and all of it is within 24”. Figures can move through the fog with no penalty, but line of sight may not be drawn through it. At the start of each new turn, roll a die. On a result of 1–4 the fog dissipates and is removed from the table.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Mud</strong></span>
+                <span class="col-cn gold"><strong>10</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">All ground within 3” of a target point becomes rough ground.</p>
+            </details>
+          </div>
+        
+          <div class="spell-row">
+            <details class="spell-desc">
+              <summary class="spell-row-main spell-row-main-ref">
+                <span class="col-name"><strong>Poison Dart</strong></span>
+                <span class="col-cn gold"><strong>10</strong></span>
+                <span class="col-type muted">Line of Sight</span>
+                <span class="col-info spell-desc-toggle">Info</span>
+              </summary>
+              <p class="spell-desc-body">Make an immediate plus +3 poisoned shooting attack against the target figure. This is a non-magic attack. WITCH</p>
+            </details>
+          </div>
+        
+      </div>
+    
+  </details>
+
+  <details class="ref-panel card">
+    <summary>Standard arms, armour &amp; consumables</summary>
+    <p class="muted">General Arms and Armour List from Frostgrave 2e, plus potion / scroll / grimoire types.</p>
+    <div class="item-list-detail">
+      <div class="item-list-head" aria-hidden="true">
+        <span class="col-name">Item</span>
+        <span class="col-cat">Category</span>
+        <span class="col-summary">Summary</span>
+        <span class="col-info"></span>
+      </div>
+      
+        <div class="item-row">
+          <details class="item-desc">
+            <summary class="item-row-main">
+              <span class="col-name"><strong>Dagger</strong></span>
+              <span class="col-cat"><span class="badge">Weapon</span></span>
+              <span class="col-summary muted">−1 damage. First dagger does not take an item slot.</span>
+              <span class="col-info item-desc-toggle">Info</span>
+            </summary>
+            <p class="item-desc-body">A knife or other small weapon such as a light club. Daggers have a −1 damage modifier. The first dagger carried by a figure does not take up an item slot.</p>
+          </details>
+        </div>
+      
+        <div class="item-row">
+          <details class="item-desc">
+            <summary class="item-row-main">
+              <span class="col-name"><strong>Hand Weapon</strong></span>
+              <span class="col-cat"><span class="badge">Weapon</span></span>
+              <span class="col-summary muted">No combat modifiers. One item slot.</span>
+              <span class="col-info item-desc-toggle">Info</span>
+            </summary>
+            <p class="item-desc-body">Swords, scimitars, hand axes, maces, light spears, etc. No modifiers in combat.</p>
+          </details>
+        </div>
+      
+        <div class="item-row">
+          <details class="item-desc">
+            <summary class="item-row-main">
+              <span class="col-name"><strong>Two-Handed Weapon</strong></span>
+              <span class="col-cat"><span class="badge">Weapon</span></span>
+              <span class="col-summary muted">+2 damage. Takes two item slots.</span>
+              <span class="col-info item-desc-toggle">Info</span>
+            </summary>
+            <p class="item-desc-body">Two-handed swords, battle-axes, polearms, large flails, heavy spears. +2 damage. Takes two item slots.</p>
+          </details>
+        </div>
+      
+        <div class="item-row">
+          <details class="item-desc">
+            <summary class="item-row-main">
+              <span class="col-name"><strong>Staff</strong></span>
+              <span class="col-cat"><span class="badge">Weapon</span></span>
+              <span class="col-summary muted">−1 damage; opponent −1 damage in hand-to-hand.</span>
+              <span class="col-info item-desc-toggle">Info</span>
+            </summary>
+            <p class="item-desc-body">Staffs do −1 damage and give the opponent −1 damage in hand-to-hand. Cannot be combined with a shield.</p>
+          </details>
+        </div>
+      
+        <div class="item-row">
+          <details class="item-desc">
+            <summary class="item-row-main">
+              <span class="col-name"><strong>Bow</strong></span>
+              <span class="col-cat"><span class="badge">Missile</span></span>
+              <span class="col-summary muted">Range 24&#34;. Load and fire as one action. Needs a quiver.</span>
+              <span class="col-info item-desc-toggle">Info</span>
+            </summary>
+            <p class="item-desc-body">Load and fire as a single action. Maximum range 24&#34;. Requires a quiver.</p>
+          </details>
+        </div>
+      
+        <div class="item-row">
+          <details class="item-desc">
+            <summary class="item-row-main">
+              <span class="col-name"><strong>Crossbow</strong></span>
+              <span class="col-cat"><span class="badge">Missile</span></span>
+              <span class="col-summary muted">+2 damage, range 24&#34;. Separate load and fire. Needs a quiver.</span>
+              <span class="col-info item-desc-toggle">Info</span>
+            </summary>
+            <p class="item-desc-body">One action to load and one to fire. +2 damage, range 24&#34;. Requires a quiver.</p>
+          </details>
+        </div>
+      
+        <div class="item-row">
+          <details class="item-desc">
+            <summary class="item-row-main">
+              <span class="col-name"><strong>Quiver</strong></span>
+              <span class="col-cat"><span class="badge">Gear</span></span>
+              <span class="col-summary muted">Required for bow/crossbow. One free magic ammo slot.</span>
+              <span class="col-info item-desc-toggle">Info</span>
+            </summary>
+            <p class="item-desc-body">Required to shoot a bow or crossbow. May carry one magic ammunition without an extra slot.</p>
+          </details>
+        </div>
+      
+        <div class="item-row">
+          <details class="item-desc">
+            <summary class="item-row-main">
+              <span class="col-name"><strong>Shield</strong></span>
+              <span class="col-cat"><span class="badge">Armour</span></span>
+              <span class="col-summary muted">+1 Armour. Not with two-handed weapon or staff. No spellcasters.</span>
+              <span class="col-info item-desc-toggle">Info</span>
+            </summary>
+            <p class="item-desc-body">+1 Armour. Cannot be carried with a two-handed weapon or staff. Spellcasters may not carry shields.</p>
+          </details>
+        </div>
+      
+        <div class="item-row">
+          <details class="item-desc">
+            <summary class="item-row-main">
+              <span class="col-name"><strong>Light Armour</strong></span>
+              <span class="col-cat"><span class="badge">Armour</span></span>
+              <span class="col-summary muted">+1 Armour. No spellcasters.</span>
+              <span class="col-info item-desc-toggle">Info</span>
+            </summary>
+            <p class="item-desc-body">+1 Armour. Spellcasters may not wear light armour.</p>
+          </details>
+        </div>
+      
+        <div class="item-row">
+          <details class="item-desc">
+            <summary class="item-row-main">
+              <span class="col-name"><strong>Heavy Armour</strong></span>
+              <span class="col-cat"><span class="badge">Armour</span></span>
+              <span class="col-summary muted">+2 Armour, −1 Move. No spellcasters.</span>
+              <span class="col-info item-desc-toggle">Info</span>
+            </summary>
+            <p class="item-desc-body">+2 Armour but −1 Move. Spellcasters may not wear heavy armour.</p>
+          </details>
+        </div>
+      
+        <div class="item-row">
+          <details class="item-desc">
+            <summary class="item-row-main">
+              <span class="col-name"><strong>Potion</strong></span>
+              <span class="col-cat"><span class="badge">Consumable</span></span>
+              <span class="col-summary muted">Pick a specific potion in the second field.</span>
+              <span class="col-info item-desc-toggle">Info</span>
+            </summary>
+            <p class="item-desc-body">Potions take one item slot. Choose the specific potion type after selecting this.</p>
+          </details>
+        </div>
+      
+        <div class="item-row">
+          <details class="item-desc">
+            <summary class="item-row-main">
+              <span class="col-name"><strong>Scroll</strong></span>
+              <span class="col-cat"><span class="badge">Consumable</span></span>
+              <span class="col-summary muted">Pick which spell is on the scroll in the second field.</span>
+              <span class="col-info item-desc-toggle">Info</span>
+            </summary>
+            <p class="item-desc-body">One-use spell scroll. Cannot be used to learn a new spell. Sale value typically 30gc.</p>
+          </details>
+        </div>
+      
+        <div class="item-row">
+          <details class="item-desc">
+            <summary class="item-row-main">
+              <span class="col-name"><strong>Grimoire</strong></span>
+              <span class="col-cat"><span class="badge">Consumable</span></span>
+              <span class="col-summary muted">Pick which spell the grimoire teaches in the second field.</span>
+              <span class="col-info item-desc-toggle">Info</span>
+            </summary>
+            <p class="item-desc-body">Used to learn a new spell. After learning, remove from the sheet. Sale 200gc if already known.</p>
+          </details>
+        </div>
+      
+    </div>
+    
+      <details class="ref-panel" style="margin-top:1rem">
+        <summary>Potions, elixirs &amp; bottles (28)</summary>
+        <div class="item-list-detail">
+          <div class="item-list-head" aria-hidden="true">
+            <span class="col-name">Name</span>
+            <span class="col-cat">Kind</span>
+            <span class="col-summary"></span>
+            <span class="col-info"></span>
+          </div>
+          
+            <div class="item-row">
+              <details class="item-desc">
+                <summary class="item-row-main">
+                  <span class="col-name"><strong>Potion of Healing</strong></span>
+                  <span class="col-cat"><span class="badge">Potion</span></span>
+                  <span class="col-summary"></span>
+                  <span class="col-info item-desc-toggle">Info</span>
+                </summary>
+                <p class="item-desc-body">This potion restores up to 5 lost points of Health to the figure that drinks it. It may not take a figure above its normal starting Health.</p>
+              </details>
+            </div>
+          
+            <div class="item-row">
+              <details class="item-desc">
+                <summary class="item-row-main">
+                  <span class="col-name"><strong>Potion of Strength</strong></span>
+                  <span class="col-cat"><span class="badge">Potion</span></span>
+                  <span class="col-summary"></span>
+                  <span class="col-info item-desc-toggle">Info</span>
+                </summary>
+                <p class="item-desc-body">A figure that drinks this potion receives +1 Fight for the rest of the game.</p>
+              </details>
+            </div>
+          
+            <div class="item-row">
+              <details class="item-desc">
+                <summary class="item-row-main">
+                  <span class="col-name"><strong>Potion of Toughness</strong></span>
+                  <span class="col-cat"><span class="badge">Potion</span></span>
+                  <span class="col-summary"></span>
+                  <span class="col-info item-desc-toggle">Info</span>
+                </summary>
+                <p class="item-desc-body">The figure that drinks this potion receives +1 Armour for the rest of the game.</p>
+              </details>
+            </div>
+          
+            <div class="item-row">
+              <details class="item-desc">
+                <summary class="item-row-main">
+                  <span class="col-name"><strong>Elixir of Speed</strong></span>
+                  <span class="col-cat"><span class="badge">Elixir</span></span>
+                  <span class="col-summary"></span>
+                  <span class="col-info item-desc-toggle">Info</span>
+                </summary>
+                <p class="item-desc-body">The figure who drinks this potion receives +2 Move for the rest of the game. This may not take a figure&#39;s Move above 9.</p>
+              </details>
+            </div>
+          
+            <div class="item-row">
+              <details class="item-desc">
+                <summary class="item-row-main">
+                  <span class="col-name"><strong>Potion of Invisibility</strong></span>
+                  <span class="col-cat"><span class="badge">Potion</span></span>
+                  <span class="col-summary"></span>
+                  <span class="col-info item-desc-toggle">Info</span>
+                </summary>
+                <p class="item-desc-body">A figure that drinks this potion is treated as though an Invisibility spell was cast upon it, becoming unable to be targeted or engaged in combat unless it acts (such as attacking, casting, or picking up treasure), which cancels the effect.</p>
+              </details>
+            </div>
+          
+            <div class="item-row">
+              <details class="item-desc">
+                <summary class="item-row-main">
+                  <span class="col-name"><strong>Explosive Cocktail</strong></span>
+                  <span class="col-cat"><span class="badge">Cocktail</span></span>
+                  <span class="col-summary"></span>
+                  <span class="col-info item-desc-toggle">Info</span>
+                </summary>
+                <p class="item-desc-body">Throwing this cocktail follows all the rules of casting the Grenade spell (a +3 magic attack against everyone within 1.5&#34; of the target point within 14&#34;), except it can be thrown by a non-spellcaster with no Casting Roll needed, the target point must be within 8&#34;, and using it cannot replace a move action.</p>
+              </details>
+            </div>
+          
+            <div class="item-row">
+              <details class="item-desc">
+                <summary class="item-row-main">
+                  <span class="col-name"><strong>Potion of Teleportation</strong></span>
+                  <span class="col-cat"><span class="badge">Potion</span></span>
+                  <span class="col-summary"></span>
+                  <span class="col-info item-desc-toggle">Info</span>
+                </summary>
+                <p class="item-desc-body">A figure that drinks this potion is treated as though it had just cast the Teleport spell, immediately moving to any location within line of sight but taking no other actions that turn.</p>
+              </details>
+            </div>
+          
+            <div class="item-row">
+              <details class="item-desc">
+                <summary class="item-row-main">
+                  <span class="col-name"><strong>Potion of Elemental Absorption</strong></span>
+                  <span class="col-cat"><span class="badge">Potion</span></span>
+                  <span class="col-summary"></span>
+                  <span class="col-info item-desc-toggle">Info</span>
+                </summary>
+                <p class="item-desc-body">A figure that drinks this potion ignores the next 5 points of elemental damage it takes.</p>
+              </details>
+            </div>
+          
+            <div class="item-row">
+              <details class="item-desc">
+                <summary class="item-row-main">
+                  <span class="col-name"><strong>Cordial of Clearsight</strong></span>
+                  <span class="col-cat"><span class="badge">Cordial</span></span>
+                  <span class="col-summary"></span>
+                  <span class="col-info item-desc-toggle">Info</span>
+                </summary>
+                <p class="item-desc-body">A figure that drinks this potion ignores the effects of Beauty and Invisibility spells for the rest of the game. Furthermore, if this figure moves into combat with an Illusionary Soldier, that Illusionary Soldier is immediately removed from the table.</p>
+              </details>
+            </div>
+          
+            <div class="item-row">
+              <details class="item-desc">
+                <summary class="item-row-main">
+                  <span class="col-name"><strong>Poison</strong></span>
+                  <span class="col-cat"><span class="badge">Poison</span></span>
+                  <span class="col-summary"></span>
+                  <span class="col-info item-desc-toggle">Info</span>
+                </summary>
+                <p class="item-desc-body">This sticky poison coats any weapon except a staff, bow, or crossbow (or a single arrow or crossbow bolt). The next time the weapon causes damage, the figure struck is poisoned unless immune, after which the weapon loses its poisoning ability. This effect is not magic and is unaffected by anything that cancels magic.</p>
+              </details>
+            </div>
+          
+            <div class="item-row">
+              <details class="item-desc">
+                <summary class="item-row-main">
+                  <span class="col-name"><strong>Philtre of Fury</strong></span>
+                  <span class="col-cat"><span class="badge">Philtre</span></span>
+                  <span class="col-summary"></span>
+                  <span class="col-info item-desc-toggle">Info</span>
+                </summary>
+                <p class="item-desc-body">The figure that drinks this potion gains +1 Fight and an additional +1 damage modifier on any successful hand-to-hand attack. However, it must, if possible, use all of its actions every turn to move into combat with and fight the closest enemy figure or uncontrolled creature in line of sight that is not already in combat.</p>
+              </details>
+            </div>
+          
+            <div class="item-row">
+              <details class="item-desc">
+                <summary class="item-row-main">
+                  <span class="col-name"><strong>Potion of Iron Mind</strong></span>
+                  <span class="col-cat"><span class="badge">Potion</span></span>
+                  <span class="col-summary"></span>
+                  <span class="col-info item-desc-toggle">Info</span>
+                </summary>
+                <p class="item-desc-body">A figure that drinks this potion gains +5 Will for the rest of the game.</p>
+              </details>
+            </div>
+          
+            <div class="item-row">
+              <details class="item-desc">
+                <summary class="item-row-main">
+                  <span class="col-name"><strong>Bottle of Burrowing</strong></span>
+                  <span class="col-cat"><span class="badge">Bottle</span></span>
+                  <span class="col-summary"></span>
+                  <span class="col-info item-desc-toggle">Info</span>
+                </summary>
+                <p class="item-desc-body">A figure that drinks this potion may use any remaining actions in its activation to move directly through terrain, so long as it has enough movement to pass completely through the terrain piece (it may not end its activation inside terrain).</p>
+              </details>
+            </div>
+          
+            <div class="item-row">
+              <details class="item-desc">
+                <summary class="item-row-main">
+                  <span class="col-name"><strong>Philtre of Fairy Dust</strong></span>
+                  <span class="col-cat"><span class="badge">Philtre</span></span>
+                  <span class="col-summary"></span>
+                  <span class="col-info item-desc-toggle">Info</span>
+                </summary>
+                <p class="item-desc-body">If this dust is sprinkled over a weapon, that weapon counts as a magic weapon for the rest of the game. It may instead be sprinkled over a single arrow or crossbow bolt, which becomes a one-use magic missile.</p>
+              </details>
+            </div>
+          
+            <div class="item-row">
+              <details class="item-desc">
+                <summary class="item-row-main">
+                  <span class="col-name"><strong>Construct Oil</strong></span>
+                  <span class="col-cat"><span class="badge">Oil</span></span>
+                  <span class="col-summary"></span>
+                  <span class="col-info item-desc-toggle">Info</span>
+                </summary>
+                <p class="item-desc-body">After any game, a wizard may use this oil on one construct in their warband to give it a permanent +1 to its Move stat. Each construct may only ever benefit from construct oil once.</p>
+              </details>
+            </div>
+          
+            <div class="item-row">
+              <details class="item-desc">
+                <summary class="item-row-main">
+                  <span class="col-name"><strong>Potion of Fire Breath</strong></span>
+                  <span class="col-cat"><span class="badge">Potion</span></span>
+                  <span class="col-summary"></span>
+                  <span class="col-info item-desc-toggle">Info</span>
+                </summary>
+                <p class="item-desc-body">A figure that drinks this potion and still has an action remaining in the same activation may use that action to make a +3 elemental magic shooting attack against a figure within 6&#34;.</p>
+              </details>
+            </div>
+          
+            <div class="item-row">
+              <details class="item-desc">
+                <summary class="item-row-main">
+                  <span class="col-name"><strong>Potion of Preservation</strong></span>
+                  <span class="col-cat"><span class="badge">Potion</span></span>
+                  <span class="col-summary"></span>
+                  <span class="col-info item-desc-toggle">Info</span>
+                </summary>
+                <p class="item-desc-body">This potion may be used on any figure, other than a wizard, that died in the previous game, perfectly preserving the body for the next five games. During that time an Elixir of Life or the Miraculous Cure spell may be used to bring the figure back to life; a preserved figure does not count toward warband size until revived, and a wizard cannot hire another apprentice while one is preserved. If the figure is not revived within five games, it is permanently dead and removed from the Wizard Sheet.</p>
+              </details>
+            </div>
+          
+            <div class="item-row">
+              <details class="item-desc">
+                <summary class="item-row-main">
+                  <span class="col-name"><strong>Elixir of the Chameleon</strong></span>
+                  <span class="col-cat"><span class="badge">Elixir</span></span>
+                  <span class="col-summary"></span>
+                  <span class="col-info item-desc-toggle">Info</span>
+                </summary>
+                <p class="item-desc-body">This potion lets a figure blend in with its surroundings: no other figure may draw line of sight to it from more than 12&#34; away, so it can only be targeted by an attack or spell from within 12&#34;.</p>
+              </details>
+            </div>
+          
+            <div class="item-row">
+              <details class="item-desc">
+                <summary class="item-row-main">
+                  <span class="col-name"><strong>Cordial of Empowerment</strong></span>
+                  <span class="col-cat"><span class="badge">Cordial</span></span>
+                  <span class="col-summary"></span>
+                  <span class="col-info item-desc-toggle">Info</span>
+                </summary>
+                <p class="item-desc-body">The next spell a spellcaster casts after drinking this potion gets +4 to its Casting Roll but the caster suffers 2 damage, in addition to any other effects of the spell. A spellcaster may only use one Cordial of Empowerment per game, and it cannot be used to cast Out of Game spells.</p>
+              </details>
+            </div>
+          
+            <div class="item-row">
+              <details class="item-desc">
+                <summary class="item-row-main">
+                  <span class="col-name"><strong>Shrinking Potion</strong></span>
+                  <span class="col-cat"><span class="badge">Potion</span></span>
+                  <span class="col-summary"></span>
+                  <span class="col-info item-desc-toggle">Info</span>
+                </summary>
+                <p class="item-desc-body">A figure carrying treasure may use this potion to shrink it down to pocket size, removing any Move, Fight, or swimming penalties for carrying it and allowing the figure to carry a second treasure token as well. If the effect is cancelled while carrying two treasures, one must be dropped immediately, and a dropped shrunk treasure returns to its normal size.</p>
+              </details>
+            </div>
+          
+            <div class="item-row">
+              <details class="item-desc">
+                <summary class="item-row-main">
+                  <span class="col-name"><strong>Potion of Restoration</strong></span>
+                  <span class="col-cat"><span class="badge">Potion</span></span>
+                  <span class="col-summary"></span>
+                  <span class="col-info item-desc-toggle">Info</span>
+                </summary>
+                <p class="item-desc-body">A figure that drinks this potion is immediately restored to its starting Health and cured of any poison or temporary stat reductions. It may also be used after a game to cure the figure of any permanent injuries.</p>
+              </details>
+            </div>
+          
+            <div class="item-row">
+              <details class="item-desc">
+                <summary class="item-row-main">
+                  <span class="col-name"><strong>Bottle of Dreams and Nightmares</strong></span>
+                  <span class="col-cat"><span class="badge">Bottle</span></span>
+                  <span class="col-summary"></span>
+                  <span class="col-info item-desc-toggle">Info</span>
+                </summary>
+                <p class="item-desc-body">Usable only by a wizard immediately before a game, this potion requires an immediate Will Roll (TN12). Success grants the wizard an extra 50 experience points after the game (not counting toward the normal maximum); failure deducts 30 experience points from those earned (not below 0), also reducing the maximum obtainable that game to 270.</p>
+              </details>
+            </div>
+          
+            <div class="item-row">
+              <details class="item-desc">
+                <summary class="item-row-main">
+                  <span class="col-name"><strong>Shatterstar Draught</strong></span>
+                  <span class="col-cat"><span class="badge">Draught</span></span>
+                  <span class="col-summary"></span>
+                  <span class="col-info item-desc-toggle">Info</span>
+                </summary>
+                <p class="item-desc-body">If a figure drinks this potion and casts a spell during the same activation, it may attempt to cast that spell twice in a row, declaring a separate target for each attempt before any rolls are made.</p>
+              </details>
+            </div>
+          
+            <div class="item-row">
+              <details class="item-desc">
+                <summary class="item-row-main">
+                  <span class="col-name"><strong>Bottle of Darkness</strong></span>
+                  <span class="col-cat"><span class="badge">Bottle</span></span>
+                  <span class="col-summary"></span>
+                  <span class="col-info item-desc-toggle">Info</span>
+                </summary>
+                <p class="item-desc-body">If a figure shatters this bottle on the ground, an unnatural darkness falls upon the battlefield, reducing everyone&#39;s line of sight to 12&#34; for the rest of the game.</p>
+              </details>
+            </div>
+          
+            <div class="item-row">
+              <details class="item-desc">
+                <summary class="item-row-main">
+                  <span class="col-name"><strong>Ethereal Vacuum</strong></span>
+                  <span class="col-cat"><span class="badge">Vacuum</span></span>
+                  <span class="col-summary"></span>
+                  <span class="col-info item-desc-toggle">Info</span>
+                </summary>
+                <p class="item-desc-body">When a character spends an action to open this bottle, all creatures with the Ethereal trait within 8&#34; must make a Will Roll (TN20) or be sucked into the bottle and imprisoned; the figure is removed from the table and any experience for killing it is awarded as normal.</p>
+              </details>
+            </div>
+          
+            <div class="item-row">
+              <details class="item-desc">
+                <summary class="item-row-main">
+                  <span class="col-name"><strong>Potion of Invulnerability</strong></span>
+                  <span class="col-cat"><span class="badge">Potion</span></span>
+                  <span class="col-summary"></span>
+                  <span class="col-info item-desc-toggle">Info</span>
+                </summary>
+                <p class="item-desc-body">A figure that drinks this potion becomes immune to damage from non-magic weapons. Whenever the figure activates, roll a die; on a 17 or higher, the potion&#39;s effect ends immediately.</p>
+              </details>
+            </div>
+          
+            <div class="item-row">
+              <details class="item-desc">
+                <summary class="item-row-main">
+                  <span class="col-name"><strong>Bottle of Null</strong></span>
+                  <span class="col-cat"><span class="badge">Bottle</span></span>
+                  <span class="col-summary"></span>
+                  <span class="col-info item-desc-toggle">Info</span>
+                </summary>
+                <p class="item-desc-body">If a figure opens this bottle, all spells currently in play are immediately cancelled (this cannot unsummon creatures but does cancel Control spells, including the Control Demon effect from Summon Demon). All spellcasters must also make a Will Roll (TN14) or suffer 1 point of damage.</p>
+              </details>
+            </div>
+          
+            <div class="item-row">
+              <details class="item-desc">
+                <summary class="item-row-main">
+                  <span class="col-name"><strong>Elixir of Life</strong></span>
+                  <span class="col-cat"><span class="badge">Elixir</span></span>
+                  <span class="col-summary"></span>
+                  <span class="col-info item-desc-toggle">Info</span>
+                </summary>
+                <p class="item-desc-body">The rarest and most valuable of all potions, it can never be bought and is rarely sold. Used immediately after any game, it brings one figure who died during that game back to life with no ill effects, allowing it to take part in the next game.</p>
+              </details>
+            </div>
+          
+        </div>
+      </details>
+    
+  </details>
+
+  <details class="card">
+    <summary><h2>Soldiers (core tables)</h2></summary>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Type</th><th>Cat</th><th>Cost</th>
+            <th>Move</th><th>Fight</th><th>Shoot</th><th>Armour</th><th>Will</th><th>Health</th><th>Gear</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+            <tr>
+              <td><strong>Thief</strong></td>
+              <td><span class="badge standard">standard</span></td>
+              <td class="gold">Free</td>
+              <td>7</td>
+              <td>+1</td>
+              <td>+0</td>
+              <td>10</td>
+              <td>+0</td>
+              <td>10</td>
+              <td class="muted">Dagger</td>
+            </tr>
+          
+            <tr>
+              <td><strong>Thug</strong></td>
+              <td><span class="badge standard">standard</span></td>
+              <td class="gold">Free</td>
+              <td>6</td>
+              <td>+2</td>
+              <td>+0</td>
+              <td>10</td>
+              <td>-1</td>
+              <td>10</td>
+              <td class="muted">Hand weapon</td>
+            </tr>
+          
+            <tr>
+              <td><strong>War Hound</strong></td>
+              <td><span class="badge standard">standard</span></td>
+              <td class="gold">10</td>
+              <td>8</td>
+              <td>+1</td>
+              <td>+0</td>
+              <td>10</td>
+              <td>-2</td>
+              <td>8</td>
+              <td class="muted">—</td>
+            </tr>
+          
+            <tr>
+              <td><strong>Infantryman</strong></td>
+              <td><span class="badge standard">standard</span></td>
+              <td class="gold">50</td>
+              <td>6</td>
+              <td>+3</td>
+              <td>+0</td>
+              <td>11</td>
+              <td>+0</td>
+              <td>10</td>
+              <td class="muted">Two-handed weapon, light armour</td>
+            </tr>
+          
+            <tr>
+              <td><strong>Apothecary</strong></td>
+              <td><span class="badge standard">standard</span></td>
+              <td class="gold">75</td>
+              <td>6</td>
+              <td>+1</td>
+              <td>+0</td>
+              <td>10</td>
+              <td>+3</td>
+              <td>12</td>
+              <td class="muted">Staff, healing potion</td>
+            </tr>
+          
+            <tr>
+              <td><strong>Man-at-Arms</strong></td>
+              <td><span class="badge standard">standard</span></td>
+              <td class="gold">75</td>
+              <td>6</td>
+              <td>+3</td>
+              <td>+0</td>
+              <td>12</td>
+              <td>+1</td>
+              <td>12</td>
+              <td class="muted">Hand weapon, shield, light armour</td>
+            </tr>
+          
+            <tr>
+              <td><strong>Archer</strong></td>
+              <td><span class="badge specialist">specialist</span></td>
+              <td class="gold">75</td>
+              <td>6</td>
+              <td>+1</td>
+              <td>+2</td>
+              <td>11</td>
+              <td>+0</td>
+              <td>10</td>
+              <td class="muted">Bow, quiver, dagger, light armour</td>
+            </tr>
+          
+            <tr>
+              <td><strong>Crossbowman</strong></td>
+              <td><span class="badge specialist">specialist</span></td>
+              <td class="gold">75</td>
+              <td>6</td>
+              <td>+1</td>
+              <td>+2</td>
+              <td>11</td>
+              <td>+0</td>
+              <td>10</td>
+              <td class="muted">Crossbow, quiver, dagger, light armour</td>
+            </tr>
+          
+            <tr>
+              <td><strong>Tracker</strong></td>
+              <td><span class="badge specialist">specialist</span></td>
+              <td class="gold">100</td>
+              <td>7</td>
+              <td>+1</td>
+              <td>+2</td>
+              <td>11</td>
+              <td>+1</td>
+              <td>12</td>
+              <td class="muted">Staff, bow, quiver, light armour</td>
+            </tr>
+          
+            <tr>
+              <td><strong>Treasure Hunter</strong></td>
+              <td><span class="badge specialist">specialist</span></td>
+              <td class="gold">100</td>
+              <td>7</td>
+              <td>+3</td>
+              <td>+0</td>
+              <td>11</td>
+              <td>+2</td>
+              <td>12</td>
+              <td class="muted">Hand weapon, dagger, light armour</td>
+            </tr>
+          
+            <tr>
+              <td><strong>Barbarian</strong></td>
+              <td><span class="badge specialist">specialist</span></td>
+              <td class="gold">125</td>
+              <td>6</td>
+              <td>+4</td>
+              <td>+0</td>
+              <td>10</td>
+              <td>+3</td>
+              <td>14</td>
+              <td class="muted">Two-handed weapon, dagger</td>
+            </tr>
+          
+            <tr>
+              <td><strong>Knight</strong></td>
+              <td><span class="badge specialist">specialist</span></td>
+              <td class="gold">125</td>
+              <td>5</td>
+              <td>+4</td>
+              <td>+0</td>
+              <td>13</td>
+              <td>+1</td>
+              <td>12</td>
+              <td class="muted">Hand weapon, dagger, shield, heavy armour</td>
+            </tr>
+          
+            <tr>
+              <td><strong>Marksman</strong></td>
+              <td><span class="badge specialist">specialist</span></td>
+              <td class="gold">125</td>
+              <td>5</td>
+              <td>+2</td>
+              <td>+2</td>
+              <td>12</td>
+              <td>+1</td>
+              <td>12</td>
+              <td class="muted">Crossbow, quiver, hand weapon, heavy armour</td>
+            </tr>
+          
+            <tr>
+              <td><strong>Ranger</strong></td>
+              <td><span class="badge specialist">specialist</span></td>
+              <td class="gold">125</td>
+              <td>7</td>
+              <td>+2</td>
+              <td>+2</td>
+              <td>11</td>
+              <td>+2</td>
+              <td>12</td>
+              <td class="muted">Bow, quiver, hand weapon, light armour</td>
+            </tr>
+          
+            <tr>
+              <td><strong>Templar</strong></td>
+              <td><span class="badge specialist">specialist</span></td>
+              <td class="gold">125</td>
+              <td>5</td>
+              <td>+4</td>
+              <td>+0</td>
+              <td>12</td>
+              <td>+1</td>
+              <td>12</td>
+              <td class="muted">Two-handed weapon, heavy armour</td>
+            </tr>
+          
+        </tbody>
+      </table>
+    </div>
+  </details>
+
+  <details class="card">
+    <summary><h2>Bestiary (37)</h2></summary>
+    <p class="muted">Creatures from the Core Rules and Thaw of the Lich Lord. Click <strong>Info</strong> for full rules text.</p>
+    
+      
+        
+        
+          <details class="ref-panel">
+            <summary>Animal (10)</summary>
+            <div class="item-list-detail">
+              <div class="item-list-head" aria-hidden="true">
+                <span class="col-name">Creature</span>
+                <span class="col-cat">Source</span>
+                <span class="col-summary">Stats</span>
+                <span class="col-info"></span>
+              </div>
+              
+                <div class="item-row">
+                  <details class="item-desc">
+                    <summary class="item-row-main">
+                      <span class="col-name"><strong>Bear</strong></span>
+                      <span class="col-cat"><span class="badge">Core Rules</span></span>
+                      <span class="col-summary muted">Move 6&#34; · Fight +4 · Shoot +0 · Armour 12 · Will +0 · Health 14</span>
+                      <span class="col-info item-desc-toggle">Info</span>
+                    </summary>
+                    <p class="item-desc-body">Northern bears are mostly peaceful creatures but are easily spooked; one encountered in the city can be assumed to already be unhappy and desperate to leave. It counts as an Animal, is Large (suffering the -2 Large Target penalty against shooting attacks), and is Strong (dealing +2 damage).</p>
+                  </details>
+                </div>
+              
+                <div class="item-row">
+                  <details class="item-desc">
+                    <summary class="item-row-main">
+                      <span class="col-name"><strong>Boar</strong></span>
+                      <span class="col-cat"><span class="badge">Core Rules</span></span>
+                      <span class="col-summary muted">Move 6&#34; · Fight +2 · Shoot +0 · Armour 12 · Will +2 · Health 8</span>
+                      <span class="col-info item-desc-toggle">Info</span>
+                    </summary>
+                    <p class="item-desc-body">Bad-tempered and aggressive wild boars are prized for their tusks (listed as Horns), which anyone who kills one may sell for a Bounty of 10gc. It counts as an Animal.</p>
+                  </details>
+                </div>
+              
+                <div class="item-row">
+                  <details class="item-desc">
+                    <summary class="item-row-main">
+                      <span class="col-name"><strong>Giant Rat</strong></span>
+                      <span class="col-cat"><span class="badge">Core Rules</span></span>
+                      <span class="col-summary muted">Move 6&#34; · Fight +0 · Shoot +0 · Armour 6 · Will +0 · Health 1</span>
+                      <span class="col-info item-desc-toggle">Info</span>
+                    </summary>
+                    <p class="item-desc-body">Descended from rats that survived the freezing of the city in the ancient sewers, these cat-sized rodents are usually encountered in small packs. It counts as an Animal and has the Pack Hunter trait: when multiple giant rats appear together they are placed in base contact and activate and move together as one, with a randomly determined leader dictating the pack&#39;s actions.</p>
+                  </details>
+                </div>
+              
+                <div class="item-row">
+                  <details class="item-desc">
+                    <summary class="item-row-main">
+                      <span class="col-name"><strong>Ice Spider</strong></span>
+                      <span class="col-cat"><span class="badge">Core Rules</span></span>
+                      <span class="col-summary muted">Move 6&#34; · Fight +1 · Shoot +0 · Armour 8 · Will +0 · Health 4</span>
+                      <span class="col-info item-desc-toggle">Info</span>
+                    </summary>
+                    <p class="item-desc-body">Hairy, wolf-sized arachnids that hunt actively rather than spinning webs, generally preying on small mammals but willing to try their luck against larger targets. It counts as an Animal, is an Expert Climber (no movement penalty for climbing), and its bite carries the Poison trait, dealing venomous damage.</p>
+                  </details>
+                </div>
+              
+                <div class="item-row">
+                  <details class="item-desc">
+                    <summary class="item-row-main">
+                      <span class="col-name"><strong>Ice Toad</strong></span>
+                      <span class="col-cat"><span class="badge">Core Rules</span></span>
+                      <span class="col-summary muted">Move 4&#34; · Fight +2 · Shoot +0 · Armour 10 · Will +0 · Health 5</span>
+                      <span class="col-info item-desc-toggle">Info</span>
+                    </summary>
+                    <p class="item-desc-body">Large, ponderous amphibians with devastatingly powerful jaws but otherwise weak; best avoided. It is Amphibious (automatically passes Swimming Rolls and treats water as normal terrain), counts as an Animal, and is Powerful, dealing double damage.</p>
+                  </details>
+                </div>
+              
+                <div class="item-row">
+                  <details class="item-desc">
+                    <summary class="item-row-main">
+                      <span class="col-name"><strong>Snow Leopard</strong></span>
+                      <span class="col-cat"><span class="badge">Core Rules</span></span>
+                      <span class="col-summary muted">Move 8&#34; · Fight +3 · Shoot +0 · Armour 10 · Will +2 · Health 10</span>
+                      <span class="col-info item-desc-toggle">Info</span>
+                    </summary>
+                    <p class="item-desc-body">The largest and most vicious of the big cats around Frostgrave, snow leopards have no fear of humans and attack when hungry or threatened. It counts as an Animal and is an Expert Climber.</p>
+                  </details>
+                </div>
+              
+                <div class="item-row">
+                  <details class="item-desc">
+                    <summary class="item-row-main">
+                      <span class="col-name"><strong>White Gorilla</strong></span>
+                      <span class="col-cat"><span class="badge">Core Rules</span></span>
+                      <span class="col-summary muted">Move 6&#34; · Fight +4 · Shoot +0 · Armour 12 · Will +8 · Health 14</span>
+                      <span class="col-info item-desc-toggle">Info</span>
+                    </summary>
+                    <p class="item-desc-body">A rarely seen colony of white gorillas calls the ruined city home; the males range out hunting and are not above eating human flesh. It counts as an Animal and is Strong, dealing +2 damage.</p>
+                  </details>
+                </div>
+              
+                <div class="item-row">
+                  <details class="item-desc">
+                    <summary class="item-row-main">
+                      <span class="col-name"><strong>Wild Dog</strong></span>
+                      <span class="col-cat"><span class="badge">Core Rules</span></span>
+                      <span class="col-summary muted">Move 8&#34; · Fight +0 · Shoot +0 · Armour 8 · Will +0 · Health 4</span>
+                      <span class="col-info item-desc-toggle">Info</span>
+                    </summary>
+                    <p class="item-desc-body">Scrawny, malnourished, and roaming in large packs through the ruins, wild dogs are extremely aggressive despite their poor condition. It counts as an Animal and has the Pack Hunter trait, activating and moving together with other wild dogs in base contact.</p>
+                  </details>
+                </div>
+              
+                <div class="item-row">
+                  <details class="item-desc">
+                    <summary class="item-row-main">
+                      <span class="col-name"><strong>Wolf</strong></span>
+                      <span class="col-cat"><span class="badge">Core Rules</span></span>
+                      <span class="col-summary muted">Move 8&#34; · Fight +1 · Shoot +0 · Armour 10 · Will +0 · Health 6</span>
+                      <span class="col-info item-desc-toggle">Info</span>
+                    </summary>
+                    <p class="item-desc-body">Wolves generally shy away from humans, but a few occasionally wander down into the city in search of prey. It counts as an Animal and has the Pack Hunter trait.</p>
+                  </details>
+                </div>
+              
+                <div class="item-row">
+                  <details class="item-desc">
+                    <summary class="item-row-main">
+                      <span class="col-name"><strong>Blood Crow</strong></span>
+                      <span class="col-cat"><span class="badge">Thaw of the Lich Lord</span></span>
+                      <span class="col-summary muted">Move 9&#34; · Fight +0 · Shoot +0 · Armour 14 · Will +3 · Health 1</span>
+                      <span class="col-info item-desc-toggle">Info</span>
+                    </summary>
+                    <p class="item-desc-body">Crows that have flocked to Frostgrave since its uncovering, feeding on long-frozen corpses and wandering zombies; the consumption of undead flesh has made them large and aggressive. It counts as an Animal and has the Flying trait, ignoring all terrain and movement penalties.</p>
+                  </details>
+                </div>
+              
+            </div>
+          </details>
+        
+      
+        
+        
+          <details class="ref-panel">
+            <summary>Construct (3)</summary>
+            <div class="item-list-detail">
+              <div class="item-list-head" aria-hidden="true">
+                <span class="col-name">Creature</span>
+                <span class="col-cat">Source</span>
+                <span class="col-summary">Stats</span>
+                <span class="col-info"></span>
+              </div>
+              
+                <div class="item-row">
+                  <details class="item-desc">
+                    <summary class="item-row-main">
+                      <span class="col-name"><strong>Small Construct</strong></span>
+                      <span class="col-cat"><span class="badge">Core Rules</span></span>
+                      <span class="col-summary muted">Move 6&#34; · Fight +1 · Shoot +0 · Armour 11 · Will +0 · Health 10</span>
+                      <span class="col-info item-desc-toggle">Info</span>
+                    </summary>
+                    <p class="item-desc-body">Constructs smaller than most humans, often taking the form of a small humanoid or animal, or even an animated chair or toy. It has the Construct trait: immune to poison, never counts as wounded, and can pick up and carry treasure but has no item slots (though items may be permanently grafted to it if noted in that item&#39;s description).</p>
+                  </details>
+                </div>
+              
+                <div class="item-row">
+                  <details class="item-desc">
+                    <summary class="item-row-main">
+                      <span class="col-name"><strong>Medium Construct</strong></span>
+                      <span class="col-cat"><span class="badge">Core Rules</span></span>
+                      <span class="col-summary muted">Move 5&#34; · Fight +3 · Shoot +0 · Armour 12 · Will +0 · Health 12</span>
+                      <span class="col-info item-desc-toggle">Info</span>
+                    </summary>
+                    <p class="item-desc-body">Roughly human-sized constructs built for all manner of purposes, from humanoid designs to machines for chopping wood or serving as a mount. It has the Construct trait (immune to poison, never wounded, can carry treasure but has no item slots).</p>
+                  </details>
+                </div>
+              
+                <div class="item-row">
+                  <details class="item-desc">
+                    <summary class="item-row-main">
+                      <span class="col-name"><strong>Large Construct</strong></span>
+                      <span class="col-cat"><span class="badge">Core Rules</span></span>
+                      <span class="col-summary muted">Move 4&#34; · Fight +4 · Shoot +0 · Armour 13 · Will +0 · Health 14</span>
+                      <span class="col-info item-desc-toggle">Info</span>
+                    </summary>
+                    <p class="item-desc-body">Bigger than a human, sometimes humanoid but also seen as self-propelled wagons or shaped after large animals like bears. It has the Construct trait, is Large (-2 Large Target penalty against shooting), and is Strong, dealing +2 damage.</p>
+                  </details>
+                </div>
+              
+            </div>
+          </details>
+        
+      
+        
+        
+          <details class="ref-panel">
+            <summary>Demon (3)</summary>
+            <div class="item-list-detail">
+              <div class="item-list-head" aria-hidden="true">
+                <span class="col-name">Creature</span>
+                <span class="col-cat">Source</span>
+                <span class="col-summary">Stats</span>
+                <span class="col-info"></span>
+              </div>
+              
+                <div class="item-row">
+                  <details class="item-desc">
+                    <summary class="item-row-main">
+                      <span class="col-name"><strong>Imp</strong></span>
+                      <span class="col-cat"><span class="badge">Core Rules</span></span>
+                      <span class="col-summary muted">Move 6&#34; · Fight +1 · Shoot +0 · Armour 10 · Will +4 · Health 6</span>
+                      <span class="col-info item-desc-toggle">Info</span>
+                    </summary>
+                    <p class="item-desc-body">The smallest and least powerful of demons, appearing in an infinite variety of forms across the planes. It has the Demon trait: all its attacks count as magic attacks, it is immune to poison, and it can carry treasure but has no item slots.</p>
+                  </details>
+                </div>
+              
+                <div class="item-row">
+                  <details class="item-desc">
+                    <summary class="item-row-main">
+                      <span class="col-name"><strong>Minor Demon</strong></span>
+                      <span class="col-cat"><span class="badge">Core Rules</span></span>
+                      <span class="col-summary muted">Move 6&#34; · Fight +3 · Shoot +0 · Armour 11 · Will +4 · Health 12</span>
+                      <span class="col-info item-desc-toggle">Info</span>
+                    </summary>
+                    <p class="item-desc-body">Close to human size, minor demons include recognizable &#39;species&#39; such as human-animal hybrids and hunched, grey-skinned gargoyles that lair amongst the ruins. It has the Demon trait (magic attacks, immune to poison, can carry treasure with no item slots).</p>
+                  </details>
+                </div>
+              
+                <div class="item-row">
+                  <details class="item-desc">
+                    <summary class="item-row-main">
+                      <span class="col-name"><strong>Major Demon</strong></span>
+                      <span class="col-cat"><span class="badge">Core Rules</span></span>
+                      <span class="col-summary muted">Move 6&#34; · Fight +5 · Shoot +0 · Armour 12 · Will +6 · Health 15</span>
+                      <span class="col-info item-desc-toggle">Info</span>
+                    </summary>
+                    <p class="item-desc-body">Powerful extra-planar entities of any size or shape, some capable of changing form at will; the given stats are only a guideline since major demons often have their own unique powers or spells. It has the Demon trait, is Large, Strong (+2 damage), and has True Sight (ignores Beauty and Invisibility, and destroys any Illusionary Soldier it fights).</p>
+                  </details>
+                </div>
+              
+            </div>
+          </details>
+        
+      
+        
+        
+          <details class="ref-panel">
+            <summary>Undead (15)</summary>
+            <div class="item-list-detail">
+              <div class="item-list-head" aria-hidden="true">
+                <span class="col-name">Creature</span>
+                <span class="col-cat">Source</span>
+                <span class="col-summary">Stats</span>
+                <span class="col-info"></span>
+              </div>
+              
+                <div class="item-row">
+                  <details class="item-desc">
+                    <summary class="item-row-main">
+                      <span class="col-name"><strong>Armoured Skeleton</strong></span>
+                      <span class="col-cat"><span class="badge">Core Rules</span></span>
+                      <span class="col-summary muted">Move 6&#34; · Fight +2 · Shoot +0 · Armour 12 · Will +0 · Health 1</span>
+                      <span class="col-info item-desc-toggle">Info</span>
+                    </summary>
+                    <p class="item-desc-body">Skeletons animated specifically for use as soldiers; harder to create but tougher, more aggressive, and better equipped than common skeletons. It has the Pack Hunter trait (activating and moving together with other armoured skeletons in base contact) and the Undead trait (immune to poison, never wounded, can carry treasure but has no item slots).</p>
+                  </details>
+                </div>
+              
+                <div class="item-row">
+                  <details class="item-desc">
+                    <summary class="item-row-main">
+                      <span class="col-name"><strong>Animated Skull</strong></span>
+                      <span class="col-cat"><span class="badge">Core Rules</span></span>
+                      <span class="col-summary muted">Move 3&#34; · Fight +0 · Shoot +0 · Armour 10 · Will -2 · Health 1</span>
+                      <span class="col-info item-desc-toggle">Info</span>
+                    </summary>
+                    <p class="item-desc-body">Necromancers animate skulls, usually human, to send messages, hold candles, or perform other minor tasks; they levitate and float about, and while not a huge threat, their broken-toothed bite can surprise the inattentive. It has the Levitate trait (no movement penalty for climbing or rough ground) and the Undead trait.</p>
+                  </details>
+                </div>
+              
+                <div class="item-row">
+                  <details class="item-desc">
+                    <summary class="item-row-main">
+                      <span class="col-name"><strong>Ghoul</strong></span>
+                      <span class="col-cat"><span class="badge">Core Rules</span></span>
+                      <span class="col-summary muted">Move 6&#34; · Fight +2 · Shoot +0 · Armour 10 · Will +2 · Health 10</span>
+                      <span class="col-info item-desc-toggle">Info</span>
+                    </summary>
+                    <p class="item-desc-body">Scavengers of the undead world, ghouls are usually created by accident when hunger or ignorance drives a living creature to eat tainted undead flesh; most ghouls haunting Frostgrave were once adventurers who explored the city. It has the Undead trait.</p>
+                  </details>
+                </div>
+              
+                <div class="item-row">
+                  <details class="item-desc">
+                    <summary class="item-row-main">
+                      <span class="col-name"><strong>Skeleton</strong></span>
+                      <span class="col-cat"><span class="badge">Core Rules</span></span>
+                      <span class="col-summary muted">Move 6&#34; · Fight +1 · Shoot +0 · Armour 10 · Will +0 · Health 1</span>
+                      <span class="col-info item-desc-toggle">Info</span>
+                    </summary>
+                    <p class="item-desc-body">The animated bones of a long-dead creature, held together and moved by magic; most were once human, though skeletons of dogs and other animals are also seen. It has the Undead trait.</p>
+                  </details>
+                </div>
+              
+                <div class="item-row">
+                  <details class="item-desc">
+                    <summary class="item-row-main">
+                      <span class="col-name"><strong>Skeleton Archer</strong></span>
+                      <span class="col-cat"><span class="badge">Core Rules</span></span>
+                      <span class="col-summary muted">Move 6&#34; · Fight +0 · Shoot +0 · Armour 10 · Will +0 · Health 1</span>
+                      <span class="col-info item-desc-toggle">Info</span>
+                    </summary>
+                    <p class="item-desc-body">Most skeletons lack the dexterity to fire a bow, but if the skeleton belonged to a skilled archer in life, some of that ability lingers on. It has the Undead trait and the Bow trait, allowing it to make shooting attacks.</p>
+                  </details>
+                </div>
+              
+                <div class="item-row">
+                  <details class="item-desc">
+                    <summary class="item-row-main">
+                      <span class="col-name"><strong>Vampire</strong></span>
+                      <span class="col-cat"><span class="badge">Core Rules</span></span>
+                      <span class="col-summary muted">Move 7&#34; · Fight +4 · Shoot +0 · Armour 12 · Will +5 · Health 14</span>
+                      <span class="col-info item-desc-toggle">Info</span>
+                    </summary>
+                    <p class="item-desc-body">Vampires troubled the city even at the height of its glory, too dangerous to allow free but too powerful to eliminate; frozen along with the rest of Frostgrave, they have since thawed out. It is Immune to Normal Weapons (can only be harmed by magic), has Magic Attack (all its attacks count as magic), Mind Lock (immune to Mind Control and Suggestion), True Sight, and the Undead trait.</p>
+                  </details>
+                </div>
+              
+                <div class="item-row">
+                  <details class="item-desc">
+                    <summary class="item-row-main">
+                      <span class="col-name"><strong>Wraith</strong></span>
+                      <span class="col-cat"><span class="badge">Core Rules</span></span>
+                      <span class="col-summary muted">Move 6&#34; · Fight +2 · Shoot +0 · Armour 10 · Will +3 · Health 6</span>
+                      <span class="col-info item-desc-toggle">Info</span>
+                    </summary>
+                    <p class="item-desc-body">A catch-all term for the ethereal undead of the city (also called ghosts or wights); extremely dangerous and hard to kill, their touch drains a victim&#39;s life force. It has Energy Drain (deals double damage in combat, though undead and constructs take only the standard amount), the Ethereal trait (can move through terrain, no penalty for climbing or rough ground), Immune to Normal Weapons, Magic Attack, and the Undead trait.</p>
+                  </details>
+                </div>
+              
+                <div class="item-row">
+                  <details class="item-desc">
+                    <summary class="item-row-main">
+                      <span class="col-name"><strong>Zombie</strong></span>
+                      <span class="col-cat"><span class="badge">Core Rules</span></span>
+                      <span class="col-summary muted">Move 4&#34; · Fight +1 · Shoot +0 · Armour 12 · Will +0 · Health 6</span>
+                      <span class="col-info item-desc-toggle">Info</span>
+                    </summary>
+                    <p class="item-desc-body">Probably the most numerous inhabitants of Frostgrave, zombies were reanimated soon after death and still retain most of their flesh; once household servants and messengers, they have gone feral and now hunger for living flesh. It has the Undead trait.</p>
+                  </details>
+                </div>
+              
+                <div class="item-row">
+                  <details class="item-desc">
+                    <summary class="item-row-main">
+                      <span class="col-name"><strong>Banshee</strong></span>
+                      <span class="col-cat"><span class="badge">Thaw of the Lich Lord</span></span>
+                      <span class="col-summary muted">Move 9&#34; · Fight +0 · Shoot +0 · Armour 10 · Will +5 · Health 10</span>
+                      <span class="col-info item-desc-toggle">Info</span>
+                    </summary>
+                    <p class="item-desc-body">The ethereal spirits of women who suffered some great wrong in life and cannot fully leave this plane. A banshee will never willingly attack a living creature directly; instead it always makes a random move for its first action and, if it has a second action, unleashes its soul-shattering Wail, forcing every non-undead, non-construct model within 6&#34; to pass a Will Roll (TN10) or take damage equal to the amount by which the roll failed. It is Undead and Immaterial (can move through terrain) and is Immune to Normal Weapons.</p>
+                  </details>
+                </div>
+              
+                <div class="item-row">
+                  <details class="item-desc">
+                    <summary class="item-row-main">
+                      <span class="col-name"><strong>Frost Wraith</strong></span>
+                      <span class="col-cat"><span class="badge">Thaw of the Lich Lord</span></span>
+                      <span class="col-summary muted">Move 6&#34; · Fight +2 · Shoot +0 · Armour 10 · Will +3 · Health 6</span>
+                      <span class="col-info item-desc-toggle">Info</span>
+                    </summary>
+                    <p class="item-desc-body">A peculiar ethereal undead found only in the ruins of Frostgrave, partially frozen into a semi-material form; unlike other ethereal undead it cannot move through terrain and is vulnerable to normal weapons, but its icy grasp is extremely painful to the living. It has the Undead trait and Icy Grasp, granting +2 Fight when fighting living creatures.</p>
+                  </details>
+                </div>
+              
+                <div class="item-row">
+                  <details class="item-desc">
+                    <summary class="item-row-main">
+                      <span class="col-name"><strong>The Ghoul King</strong></span>
+                      <span class="col-cat"><span class="badge">Thaw of the Lich Lord</span></span>
+                      <span class="col-summary muted">Move 8&#34; · Fight +4 · Shoot +0 · Armour 12 · Will +6 · Health 14</span>
+                      <span class="col-info item-desc-toggle">Info</span>
+                    </summary>
+                    <p class="item-desc-body">Despite his title and appearance, the Ghoul King is a revenant rather than a true ghoul; how he escaped his necromantic master and rose to lead a pack of ghouls is unknown, and he has been a minor power in the ruins since the city&#39;s rediscovery, though few wizards know of him. The Lich Lord has secured his services through promises of human flesh. It has the Undead trait, is Immune to Control Undead, and is Savage, fighting as though armed with a two-handed weapon.</p>
+                  </details>
+                </div>
+              
+                <div class="item-row">
+                  <details class="item-desc">
+                    <summary class="item-row-main">
+                      <span class="col-name"><strong>Spectre</strong></span>
+                      <span class="col-cat"><span class="badge">Thaw of the Lich Lord</span></span>
+                      <span class="col-summary muted">Move 9&#34; · Fight +0 · Shoot +0 · Armour 10 · Will +10 · Health 8</span>
+                      <span class="col-info item-desc-toggle">Info</span>
+                    </summary>
+                    <p class="item-desc-body">An uncommon form of ethereal undead resembling ghosts that glow with a faint greenish light; unlike ghosts they roam freely rather than haunting a fixed location, and while generally less dangerous than other ethereal undead, they are extremely quick and notoriously difficult to control. It has the Undead trait, is Immaterial (can move through terrain), and is Immune to Normal Weapons.</p>
+                  </details>
+                </div>
+              
+                <div class="item-row">
+                  <details class="item-desc">
+                    <summary class="item-row-main">
+                      <span class="col-name"><strong>Wraith Knight</strong></span>
+                      <span class="col-cat"><span class="badge">Thaw of the Lich Lord</span></span>
+                      <span class="col-summary muted">Move 6&#34; · Fight +3 · Shoot +0 · Armour 10 · Will +5 · Health 10</span>
+                      <span class="col-info item-desc-toggle">Info</span>
+                    </summary>
+                    <p class="item-desc-body">The most powerful creations of the Lich Lord, appearing as suits of heavy armour containing nothing but black emptiness and a pair of burning eyes. Capable of limited independent thought but unfailingly loyal to the Lich Lord, they can only be harmed by magic. It has the Undead trait, is Immaterial (moves through terrain), Immune to Normal Weapons, Immune to Control Undead, and has Drain Life Force, dealing double damage with all attacks.</p>
+                  </details>
+                </div>
+              
+                <div class="item-row">
+                  <details class="item-desc">
+                    <summary class="item-row-main">
+                      <span class="col-name"><strong>Zombie Troll</strong></span>
+                      <span class="col-cat"><span class="badge">Thaw of the Lich Lord</span></span>
+                      <span class="col-summary muted">Move 4&#34; · Fight +4 · Shoot +0 · Armour 14 · Will +2 · Health 10</span>
+                      <span class="col-info item-desc-toggle">Info</span>
+                    </summary>
+                    <p class="item-desc-body">While any corpse can theoretically be turned into a zombie, necromancers favour trolls for the extra strength they add to their forces; not quite as tough as a living troll, a zombie troll is still a creature to be feared. It has the Undead trait, is Large, and has Huge Weapon, fighting as though armed with a two-handed weapon.</p>
+                  </details>
+                </div>
+              
+                <div class="item-row">
+                  <details class="item-desc">
+                    <summary class="item-row-main">
+                      <span class="col-name"><strong>The Lich Lord</strong></span>
+                      <span class="col-cat"><span class="badge">Thaw of the Lich Lord</span></span>
+                      <span class="col-summary muted">Move 6&#34; · Fight +4/+5 · Shoot +2 · Armour 14 · Will +5/+6 · Health 25</span>
+                      <span class="col-info item-desc-toggle">Info</span>
+                    </summary>
+                    <p class="item-desc-body">Once an important figure in Felstad who embraced necromancy and traded his humanity for immortality, the Lich Lord sealed himself into a sarcophagus as the cataclysm struck and lay frozen for a thousand years. Now freed, he seeks to reclaim his city as a base for conquest. He is Undead and Immune to Control Undead, and is normally accompanied by a bodyguard (typically two wraith knights, four armoured skeletons, and four death cultists). His stats include bonuses from his Magical Sickle (+1 Fight) and Ring of Will (+1 Will); he also carries the Book of Bones, a Ring of Slow Fall, Robes of Arrow Turning, and a Staff of Power (3), and knows an extensive spell list including Bind Demon, Elemental Bolt, Steal Health, Strike Dead, and Raise Zombie. If run without a player controlling him, he follows a fixed reaction table prioritizing countering invisible spellcasters, attacking enemy spellcasters, healing himself via Steal Health when below 12 Health, and raising undead reinforcements.</p>
+                  </details>
+                </div>
+              
+            </div>
+          </details>
+        
+      
+        
+        
+          <details class="ref-panel">
+            <summary>Miscellaneous (6)</summary>
+            <div class="item-list-detail">
+              <div class="item-list-head" aria-hidden="true">
+                <span class="col-name">Creature</span>
+                <span class="col-cat">Source</span>
+                <span class="col-summary">Stats</span>
+                <span class="col-info"></span>
+              </div>
+              
+                <div class="item-row">
+                  <details class="item-desc">
+                    <summary class="item-row-main">
+                      <span class="col-name"><strong>Frost Giant</strong></span>
+                      <span class="col-cat"><span class="badge">Core Rules</span></span>
+                      <span class="col-summary muted">Move 6&#34; · Fight +5 · Shoot +0 · Armour 15 · Will +4 · Health 25</span>
+                      <span class="col-info item-desc-toggle">Info</span>
+                    </summary>
+                    <p class="item-desc-body">Since the great storm destroyed the city, frost giants occasionally wander down from the northern mountains; possessed of rudimentary intelligence, they can sometimes be reasoned with but usually see humans as food. It has Elemental Resistance (2) (increasing its effective armour by 2 against elemental damage), is Large, and is Strong, dealing +2 damage.</p>
+                  </details>
+                </div>
+              
+                <div class="item-row">
+                  <details class="item-desc">
+                    <summary class="item-row-main">
+                      <span class="col-name"><strong>Giant Worm</strong></span>
+                      <span class="col-cat"><span class="badge">Core Rules</span></span>
+                      <span class="col-summary muted">Move 7&#34; · Fight +4 · Shoot +0 · Armour 10 · Will +5 · Health 20</span>
+                      <span class="col-info item-desc-toggle">Info</span>
+                    </summary>
+                    <p class="item-desc-body">Bred long ago to devour waste in the city&#39;s sewers, these worms now emerge to hunt because the sewers no longer provide enough food. It has the Burrowing trait, allowing it to move through terrain as though it were not there (provided it can reach the far side) with no penalty for rough ground, and is Large.</p>
+                  </details>
+                </div>
+              
+                <div class="item-row">
+                  <details class="item-desc">
+                    <summary class="item-row-main">
+                      <span class="col-name"><strong>Snow Troll</strong></span>
+                      <span class="col-cat"><span class="badge">Core Rules</span></span>
+                      <span class="col-summary muted">Move 4&#34; · Fight +4 · Shoot +0 · Armour 14 · Will +2 · Health 16</span>
+                      <span class="col-info item-desc-toggle">Info</span>
+                    </summary>
+                    <p class="item-desc-body">Large, dumb, and dangerous, snow trolls consider anything alive and smaller than themselves to be food and attack without hesitation, though they are slow enough to usually be avoided or outpaced. It is Large and Strong, dealing +2 damage.</p>
+                  </details>
+                </div>
+              
+                <div class="item-row">
+                  <details class="item-desc">
+                    <summary class="item-row-main">
+                      <span class="col-name"><strong>Werewolf</strong></span>
+                      <span class="col-cat"><span class="badge">Core Rules</span></span>
+                      <span class="col-summary muted">Move 7&#34; · Fight +4 · Shoot +0 · Armour 11 · Will +5 · Health 12</span>
+                      <span class="col-info item-desc-toggle">Info</span>
+                    </summary>
+                    <p class="item-desc-body">Not true shapeshifters but some kind of wolf-human hybrid, werewolves live in small packs yet hunt and are typically encountered alone; their heads are highly prized trophies (Bounty 20gc). It is an Expert Climber.</p>
+                  </details>
+                </div>
+              
+                <div class="item-row">
+                  <details class="item-desc">
+                    <summary class="item-row-main">
+                      <span class="col-name"><strong>Death Cultist</strong></span>
+                      <span class="col-cat"><span class="badge">Thaw of the Lich Lord</span></span>
+                      <span class="col-summary muted">Move 6&#34; · Fight +0 · Shoot +0 · Armour 10 · Will +5 · Health 10</span>
+                      <span class="col-info item-desc-toggle">Info</span>
+                    </summary>
+                    <p class="item-desc-body">Mortal men and women who have sworn service to an undead master in hope of achieving a form of immortality. Drawn from society&#39;s lowest rungs and lacking useful skills or combat training, they make up for it with fanaticism and fearlessness, generally concealing their identities behind masks and hoods adorned with bones and chains. It has no special traits beyond its stat line.</p>
+                  </details>
+                </div>
+              
+                <div class="item-row">
+                  <details class="item-desc">
+                    <summary class="item-row-main">
+                      <span class="col-name"><strong>Rangifer</strong></span>
+                      <span class="col-cat"><span class="badge">Thaw of the Lich Lord</span></span>
+                      <span class="col-summary muted">Move 7&#34; · Fight +2 · Shoot +0 · Armour 12 · Will +3 · Health 12</span>
+                      <span class="col-info item-desc-toggle">Info</span>
+                    </summary>
+                    <p class="item-desc-body">Hybrids of reindeer and man displaying real intelligence — using and making simple tools, wearing clothing, and speaking a rudimentary language — the rangifer form one of the largest living populations in and around the ruins. They bear an inherent hatred of the undead and often attack such creatures on sight, sometimes even defeating undead that typically require magic to vanquish. It has Hate Undead, granting +1 Fight and magic attacks when fighting undead creatures.</p>
+                  </details>
+                </div>
+              
+            </div>
+          </details>
+        
+      
+    
+  </details>
+
+
+      <footer>
+        Frostgrave warband creator &amp; maintainer · data saved locally · not affiliated with Osprey / Joseph A. McCullough
+      </footer>
+    </div>
+    <script src="static/item_slots.js" defer></script>
+    <script>
+      (function () {
+        // Saving a form (post -> redirect -> get, same URL) should return the
+        // user to where they were on the page — same scroll position, and the
+        // same cards left open/collapsed — instead of resetting to the top.
+        var scrollKey = "scrollpos:" + location.pathname;
+        var detailsKey = "detailsstate:" + location.pathname;
+
+        function allDetails() {
+          return [].slice.call(document.querySelectorAll("details"));
+        }
+
+        // Stable per-element key: prefer a real id; for repeated per-soldier
+        // panels (Edit / Level up / Promote) key off the soldier row's id;
+        // otherwise fall back to the summary text (+ position to disambiguate).
+        function keyFor(d, idx) {
+          if (d.id) return "id:" + d.id;
+          var summary = d.querySelector(":scope > summary");
+          var text = summary ? summary.textContent.trim().replace(/\s+/g, " ") : "";
+          var row = d.closest("[data-soldier-id]");
+          if (row) return "soldier:" + row.dataset.soldierId + ":" + text;
+          return "pos:" + idx + ":" + text;
+        }
+
+        function saveDetailsState() {
+          try {
+            var state = {};
+            allDetails().forEach(function (d, i) {
+              state[keyFor(d, i)] = d.open;
+            });
+            sessionStorage.setItem(detailsKey, JSON.stringify(state));
+          } catch (err) {
+            /* ignore */
+          }
+        }
+
+        function restoreDetailsState() {
+          var raw = null;
+          try {
+            raw = sessionStorage.getItem(detailsKey);
+          } catch (err) {
+            /* ignore */
+          }
+          if (!raw) return;
+          var state;
+          try {
+            state = JSON.parse(raw);
+          } catch (err) {
+            return;
+          }
+          allDetails().forEach(function (d, i) {
+            var k = keyFor(d, i);
+            if (Object.prototype.hasOwnProperty.call(state, k)) {
+              d.open = state[k];
+            }
+          });
+        }
+
+        document.addEventListener(
+          "submit",
+          function (e) {
+            var form = e.target;
+            if (form && form.tagName === "FORM" && (form.method || "get").toLowerCase() === "post") {
+              try {
+                sessionStorage.setItem(scrollKey, String(window.scrollY));
+              } catch (err) {
+                /* sessionStorage unavailable (private mode etc.) — ignore */
+              }
+              saveDetailsState();
+            }
+          },
+          true
+        );
+
+        // Runs immediately (this script is at the end of <body>, so the DOM —
+        // including every <details> — already exists) to avoid a visible flash
+        // of the server-rendered default state before it flips.
+        restoreDetailsState();
+
+        window.addEventListener("load", function () {
+          var y = null;
+          try {
+            y = sessionStorage.getItem(scrollKey);
+          } catch (err) {
+            /* ignore */
+          }
+          if (y !== null) {
+            window.scrollTo(0, parseInt(y, 10) || 0);
+            try {
+              sessionStorage.removeItem(scrollKey);
+            } catch (err) {
+              /* ignore */
+            }
+          }
+        });
+      })();
+    </script>
+    
+  
+    <script>
+      // This is a static preview — nothing here is real. Belt-and-suspenders: block both the
+      // normal submit event AND HTMLFormElement.submit() (the soldier-status dropdown calls the
+      // latter directly, which per spec does NOT fire a 'submit' event).
+      document.addEventListener('submit', function (e) { e.preventDefault(); }, true);
+      HTMLFormElement.prototype.submit = function () {};
+    </script>
+</body>
+</html>
