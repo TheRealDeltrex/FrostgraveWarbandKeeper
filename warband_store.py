@@ -1080,6 +1080,41 @@ def dismiss_captain(wb: dict, refund: bool = False) -> tuple[bool, str]:
     return True, text
 
 
+def _apply_xp_delta(
+    entity: dict,
+    amount: int,
+    reverse_one_level,
+    overall_max: int | None,
+    label: str,
+) -> tuple[bool, str]:
+    """Shared XP add/remove logic for Wizard, Captain, and Soldier. A negative amount
+    removes XP (clamped so the total never drops below 0). If that leaves the recorded
+    level higher than what the new XP total actually earns, auto-reverses the most
+    recent level-up(s) — via `reverse_one_level` (each call also logs its own history
+    entry) — until the level catches back up."""
+    if amount == 0:
+        return False, "Enter a non-zero XP amount."
+    old_xp = int(entity.get("xp", 0))
+    new_xp = max(0, old_xp + amount)
+    entity["xp"] = new_xp
+    actual = new_xp - old_xp
+    sign = "+" if actual >= 0 else ""
+    msg = f"{label} {sign}{actual} XP (total {new_xp})."
+
+    earned = level_from_xp(new_xp)
+    if overall_max is not None:
+        earned = min(earned, overall_max)
+    lost = 0
+    while int(entity.get("level", 0)) > earned:
+        ok, _ = reverse_one_level()
+        if not ok:
+            break
+        lost += 1
+    if lost:
+        msg += f" Lost {lost} level-up{'s' if lost != 1 else ''} (now level {entity.get('level', 0)})."
+    return True, msg
+
+
 def _pending_level_check(entity: dict, overall_max: int | None, label: str) -> tuple[bool, str]:
     """Shared earned-XP / max-level guard for any level-up spend (stat or trick)."""
     xp = int(entity.get("xp", 0))
@@ -1218,12 +1253,12 @@ def add_captain_xp(wb: dict, amount: int) -> tuple[bool, str]:
     cap = wb.get("captain")
     if not cap:
         return False, "No captain hired."
-    if amount <= 0:
-        return False, "Enter positive XP."
-    cap["xp"] = int(cap.get("xp", 0)) + int(amount)
-    text = f"Captain gained {amount} XP (total {cap['xp']})."
-    add_history(wb, text)
-    return True, text
+    hr = wb.setdefault("homerules", default_homerules())
+    overall_max = int(hr.get("captain_max_level", CAPTAIN_MAX_LEVEL))
+    ok, msg = _apply_xp_delta(cap, amount, lambda: reverse_last_captain_level_up(wb), overall_max, "Captain")
+    if ok:
+        add_history(wb, msg)
+    return ok, msg
 
 
 def promote_soldier_to_captain(
@@ -1345,14 +1380,20 @@ def reverse_last_soldier_level_up(wb: dict, soldier_id: str) -> tuple[bool, str]
 
 
 def add_soldier_xp(wb: dict, soldier_id: str, amount: int) -> tuple[bool, str]:
-    if amount <= 0:
-        return False, "Enter positive XP."
+    hr = wb.setdefault("homerules", default_homerules())
+    overall_max = int(hr.get("soldier_max_levels", SOLDIER_MAX_LEVELS))
     for s in wb.get("soldiers") or []:
         if s.get("id") == soldier_id:
-            s["xp"] = int(s.get("xp", 0)) + int(amount)
-            text = f"{s.get('name', 'Soldier')} gained {amount} XP (total {s['xp']})."
-            add_history(wb, text)
-            return True, text
+            ok, msg = _apply_xp_delta(
+                s,
+                amount,
+                lambda: reverse_last_soldier_level_up(wb, soldier_id),
+                overall_max,
+                s.get("name", "Soldier"),
+            )
+            if ok:
+                add_history(wb, msg)
+            return ok, msg
     return False, "Soldier not found."
 
 
@@ -1614,6 +1655,14 @@ def reverse_last_level_up(wb: dict) -> tuple[bool, str]:
         msg += f" Apprentice re-synced to level {wb['apprentice'].get('level', 0)}."
     add_history(wb, msg)
     return True, msg
+
+
+def add_wizard_xp(wb: dict, amount: int) -> tuple[bool, str]:
+    wiz = wb.setdefault("wizard", {})
+    ok, msg = _apply_xp_delta(wiz, amount, lambda: reverse_last_level_up(wb), None, "Wizard")
+    if ok:
+        add_history(wb, msg)
+    return ok, msg
 
 
 def known_spell_ids(wb: dict) -> set[str]:
