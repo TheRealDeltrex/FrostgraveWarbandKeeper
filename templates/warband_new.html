@@ -212,6 +212,7 @@
           <div style="flex:2">
             <label>Type</label>
             <select class="sol-type">
+              <option value="" data-cost="0" selected>— Choose a soldier —</option>
               {% for c in catalog if c.source == 'Core Rules' %}
                 <option value="{{ c.key }}" data-cost="{{ c.cost }}" data-cat="{{ c.category }}">
                   {{ c.name }} — {{ c.cost }} gc ({{ c.category }})
@@ -479,6 +480,7 @@
       if (withAp.checked) g += APP_COST;
       rowsEl.querySelectorAll('.soldier-row').forEach(row => {
         const opt = row.querySelector('.sol-type').selectedOptions[0];
+        if (!opt || !opt.value) return;   // placeholder: nothing chosen yet
         g += parseInt(opt.dataset.cost, 10) || 0;
       });
       return g;
@@ -487,8 +489,9 @@
     function soldierStats() {
       let n = 0, sp = 0;
       rowsEl.querySelectorAll('.soldier-row').forEach(row => {
-        n++;
         const opt = row.querySelector('.sol-type').selectedOptions[0];
+        if (!opt || !opt.value) return;   // placeholder: not a hired soldier yet
+        n++;
         if (opt.dataset.cat === 'specialist') sp++;
       });
       return { n, sp };
