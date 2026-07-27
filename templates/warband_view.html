@@ -34,8 +34,10 @@
           {% endif %}
         </div>
         <div class="section-actions">
-          <a class="btn" href="{{ url_for('warband_pdf', warband_id=wb.id) }}">Download PDF roster</a>
-          <a class="btn secondary" href="{{ url_for('warband_export', warband_id=wb.id) }}">Export warband</a>
+          {% if not BROWSER_MODE %}
+            <a class="btn" href="{{ url_for('warband_pdf', warband_id=wb.id) }}">Download PDF roster</a>
+          {% endif %}
+          <a class="btn{% if not BROWSER_MODE %} secondary{% endif %}" href="{{ url_for('warband_export', warband_id=wb.id) }}">{% if BROWSER_MODE %}Export warband (save to file){% else %}Export warband{% endif %}</a>
           <form class="inline-form" method="post" action="{{ url_for('warband_duplicate', warband_id=wb.id) }}">
             <button class="btn secondary" type="submit">Duplicate</button>
           </form>
