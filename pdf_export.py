@@ -6,7 +6,13 @@ from io import BytesIO
 from pathlib import Path
 
 from fpdf import FPDF
-from PIL import Image
+
+try:
+    from PIL import Image
+except Exception:  # pragma: no cover - Pillow is absent in the in-browser build
+    # Portraits aren't used in the online (Pyodide) build, so PDF export must
+    # still work without Pillow. _crop_to_square guards on Image being None.
+    Image = None
 
 from frostgrave_data import (
     APPRENTICE_ITEM_SLOTS,
@@ -81,6 +87,8 @@ def _health_line(max_health: object) -> str:
 
 def _crop_to_square(path: Path) -> BytesIO | None:
     """Center-crop to square (no stretch); cut off excess sides/top/bottom."""
+    if Image is None:
+        return None
     try:
         img = Image.open(path)
         img = img.convert("RGB")
