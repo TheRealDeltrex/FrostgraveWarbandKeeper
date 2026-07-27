@@ -115,11 +115,21 @@
       "        resp = _client.open(path, method=method, data=body,",
       "                            content_type='application/x-www-form-urlencoded',",
       "                            follow_redirects=True)",
+      "    ctype = resp.headers.get('Content-Type', '')",
+      "    is_text = (ctype == '' or ctype.startswith('text/') or 'html' in ctype",
+      "               or 'json' in ctype or 'xml' in ctype or 'javascript' in ctype)",
+      "    raw = resp.get_data(as_text=False)",
+      "    if is_text:",
+      "        body = raw.decode('utf-8', 'replace')",
+      "    else:",
+      "        import base64",
+      "        body = base64.b64encode(raw).decode('ascii')",
       "    return json.dumps({",
       "        'status': resp.status_code,",
-      "        'content_type': resp.headers.get('Content-Type', ''),",
+      "        'content_type': ctype,",
       "        'content_disposition': resp.headers.get('Content-Disposition', ''),",
-      "        'body': resp.get_data(as_text=True),",
+      "        'is_binary': (not is_text),",
+      "        'body': body,",
       "    })",
       ""
     ].join("\n");
@@ -219,6 +229,18 @@
       setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
     }
 
+    function downloadBinary(b64, filename, type) {
+      var bin = atob(b64);
+      var bytes = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      var blob = new Blob([bytes], { type: type || "application/octet-stream" });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url; a.download = filename || "roster.pdf";
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
+    }
+
     var toastEl = document.getElementById("toast");
     var toastTimer = null;
     function showToast(msg, ms) {
@@ -242,9 +264,15 @@
       if (/attachment/i.test(cd)) {
         var m = /filename\*?=(?:UTF-8'')?"?([^";]+)"?/i.exec(cd);
         var fname = m ? decodeURIComponent(m[1]) : "warband.warbands";
-        downloadText(res.body, fname, res.content_type || "application/json");
-        sessionDirty = false;
-        showToast("Exported “" + fname + "”. Keep that file safe — it's the only copy.");
+        if (res.is_binary) {
+          // e.g. the PDF roster — body is base64-encoded bytes, not text.
+          downloadBinary(res.body, fname, res.content_type || "application/octet-stream");
+          showToast("Downloaded “" + fname + "”.");
+        } else {
+          downloadText(res.body, fname, res.content_type || "application/json");
+          sessionDirty = false;
+          showToast("Exported “" + fname + "”. Keep that file safe — it's the only copy.");
+        }
         return;
       }
       renderPage(res.body);
@@ -277,6 +305,14 @@
         await pyodide.loadPackage("micropip");
         var micropip = pyodide.pyimport("micropip");
         await micropip.install("flask");
+
+        setMsg("Enabling PDF export…");
+        try {
+          await micropip.install("fpdf2");
+        } catch (pdfErr) {
+          // Non-fatal: the app still runs, only the PDF roster button will error.
+          console.warn("PDF export could not be enabled:", pdfErr);
+        }
 
         setMsg("Loading the warband keeper…");
         var resp = await fetch("bundle.json?v=" + Date.now());
