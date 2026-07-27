@@ -32,7 +32,7 @@
         </div>
         <div class="form-row">
           <label for="school">School of magic</label>
-          <select id="school" name="school" onchange="location.href='{{ url_for('warband_new') }}?school='+encodeURIComponent(this.value)">
+          <select id="school" name="school" onchange="(window.fgNavigate||function(u){location.href=u})('{{ url_for('warband_new') }}?school='+encodeURIComponent(this.value))">
             {% for s in schools %}
               <option value="{{ s }}" {% if s == school %}selected{% endif %}>{{ s }}</option>
             {% endfor %}
