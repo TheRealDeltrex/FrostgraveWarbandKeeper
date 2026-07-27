@@ -671,18 +671,216 @@ SOLDIERS: dict[str, dict] = {
         "gear": "Crossbow, quiver, hand weapon, heavy armour",
         "notes": "Specialist.",
     },
+    # --- Supplement soldiers (gated by the per-warband source-book toggles) ---
+    # Categorisation (standard/specialist) follows the Supplemental Soldier
+    # Table in the 2e core rulebook (p.199).
+    "javelineer": {
+        "name": "Javelineer",
+        "cost": 25,
+        "category": "standard",
+        "source": "Thaw of the Lich Lord",
+        "move": 6,
+        "fight": 0,
+        "shoot": 0,
+        "armour": 10,
+        "will": 0,
+        "health": 10,
+        "gear": "Javelins",
+        "notes": "Javelins are hand weapons in melee and may be thrown up to 10\" as a shooting attack.",
+    },
+    "pack_mule": {
+        "name": "Pack Mule",
+        "cost": 20,
+        "category": "standard",
+        "source": "Thaw of the Lich Lord",
+        "move": 6,
+        "fight": 0,
+        "shoot": 0,
+        "armour": 10,
+        "will": 0,
+        "health": 10,
+        "gear": "Dagger",
+        "notes": "May carry up to three items and hand them to nearby warband members (3 item slots).",
+    },
+    "bard": {
+        "name": "Bard",
+        "cost": 100,
+        "category": "standard",
+        "source": "Thaw of the Lich Lord",
+        "move": 6,
+        "fight": 2,
+        "shoot": 0,
+        "armour": 11,
+        "will": 4,
+        "health": 12,
+        "gear": "Hand weapon, leather armour",
+        "notes": "Soldiers within 6\" and line of sight gain +1 to Will rolls (once per warband).",
+    },
+    "crow_master": {
+        "name": "Crow Master",
+        "cost": 100,
+        "category": "standard",
+        "source": "Thaw of the Lich Lord",
+        "move": 6,
+        "fight": 0,
+        "shoot": 0,
+        "armour": 11,
+        "will": 2,
+        "health": 10,
+        "gear": "Hand weapon, leather armour",
+        "notes": "Requires a Crow Roost base upgrade (100gc). Brings one blood crow; may carry treasure but no items.",
+    },
+    "rangifer": {
+        "name": "Rangifer",
+        "cost": 100,
+        "category": "standard",
+        "source": "Thaw of the Lich Lord",
+        "move": 7,
+        "fight": 2,
+        "shoot": 0,
+        "armour": 12,
+        "will": 3,
+        "health": 12,
+        "gear": "Hand weapon",
+        "notes": "Reindeer-man hybrid. Hate Undead: +1 Fight and magic attacks when fighting undead.",
+    },
+    "trap_expert": {
+        "name": "Trap Expert",
+        "cost": 50,
+        "category": "standard",
+        "source": "Into the Breeding Pits",
+        "move": 6,
+        "fight": 2,
+        "shoot": 0,
+        "armour": 11,
+        "will": 1,
+        "health": 12,
+        "gear": "Two daggers, leather armour",
+        "notes": "Once per game, may treat the first initiative roll of 2 as a 1 for the purpose of springing a trap.",
+    },
+    "tunnel_fighter": {
+        "name": "Tunnel Fighter",
+        "cost": 80,
+        "category": "standard",
+        "source": "Into the Breeding Pits",
+        "move": 6,
+        "fight": 3,
+        "shoot": 0,
+        "armour": 11,
+        "will": 1,
+        "health": 12,
+        "gear": "Two hand weapons, leather armour",
+        "notes": "With the Secret Passages rules, an initiative roll of 19 lets one tunnel fighter discover a secret passage.",
+    },
+    "assassin": {
+        "name": "Assassin",
+        "cost": 80,
+        "category": "standard",
+        "source": "Forgotten Pacts",
+        "move": 6,
+        "fight": 2,
+        "shoot": 0,
+        "armour": 10,
+        "will": 3,
+        "health": 12,
+        "gear": "Hand weapon",
+        "notes": "Attacks poison (target reduced to one action). +2 Fight when already supported; never counts as a supporting figure.",
+    },
+    "demonic_servant": {
+        "name": "Demonic Servant",
+        "cost": 0,
+        "category": "standard",
+        "source": "Forgotten Pacts",
+        "move": 6,
+        "fight": 1,
+        "shoot": 0,
+        "armour": 10,
+        "will": 4,
+        "health": 10,
+        "gear": "—",
+        "notes": "Normally only joins via the Demonic Servant spell (not purchased). Demon; one minor demonic attribute; aids Summon Demon rolls.",
+    },
+    "demon_hunter": {
+        "name": "Demon Hunter",
+        "cost": 100,
+        "category": "specialist",
+        "source": "Forgotten Pacts",
+        "move": 6,
+        "fight": 2,
+        "shoot": 2,
+        "armour": 11,
+        "will": 2,
+        "health": 12,
+        "gear": "Two-handed weapon, crossbow, leather armour",
+        "notes": "+1 Fight and +1 damage vs demons. Variable cost: base 100gc (+25gc if the wizard knows Summon Demon/Imp/Possess, +25gc if a Summoner, +50gc if the base has a summoning circle).",
+    },
+    "monk": {
+        "name": "Monk",
+        "cost": 100,
+        "category": "specialist",
+        "source": "Forgotten Pacts",
+        "move": 6,
+        "fight": 4,
+        "shoot": 0,
+        "armour": 10,
+        "will": 4,
+        "health": 12,
+        "gear": "Bladed staff",
+        "notes": "Bladed staff: +1 Fight and -1 to the enemy's hand-to-hand attacks.",
+    },
+    "mystic_warrior": {
+        "name": "Mystic Warrior",
+        "cost": 100,
+        "category": "specialist",
+        "source": "Forgotten Pacts",
+        "move": 6,
+        "fight": 4,
+        "shoot": 0,
+        "armour": 10,
+        "will": 4,
+        "health": 12,
+        "gear": "Unarmed (gauntlets / vambraces)",
+        "notes": "Never suffers unarmed penalties; all hand-to-hand attacks count as magic attacks.",
+    },
 }
+
+# Extra source books whose soldiers / creatures / rules can be toggled on per
+# warband from the "Additional Rules and Homerules" tab. Core Rules content is
+# always available and is not part of this list. Order = release order.
+SOURCE_BOOKS = [
+    "Thaw of the Lich Lord",
+    "Into the Breeding Pits",
+    "Forgotten Pacts",
+    "The Maze of Malcor",
+    "The Perilous Dark",
+]
+
+
+def source_slug(name: str) -> str:
+    """Stable form-field key for a source book name, e.g. 'the-maze-of-malcor'."""
+    import re
+
+    return re.sub(r"[^a-z0-9]+", "-", (name or "").lower()).strip("-")
+
+
+# [{"name": ..., "slug": ...}] convenience for templates/forms.
+SOURCE_BOOK_OPTIONS = [{"name": b, "slug": source_slug(b)} for b in SOURCE_BOOKS]
+SOURCE_BOOK_BY_SLUG = {source_slug(b): b for b in SOURCE_BOOKS}
 
 
 def soldier_list_for_ui() -> list[dict]:
-    rows = [{"key": k, **v} for k, v in SOLDIERS.items()]
-    rows.sort(key=lambda r: (r["category"] != "standard", r["cost"], r["name"]))
+    rows = [{"key": k, "source": "Core Rules", **v} for k, v in SOLDIERS.items()]
+    rows.sort(key=lambda r: (r["source"] != "Core Rules", r["category"] != "standard", r["cost"], r["name"]))
     return rows
 
 
 def get_soldier(type_key: str) -> dict | None:
     s = SOLDIERS.get(type_key)
-    return deepcopy(s) if s else None
+    if not s:
+        return None
+    out = deepcopy(s)
+    out.setdefault("source", "Core Rules")
+    return out
 
 
 def format_stat(value: int) -> str:

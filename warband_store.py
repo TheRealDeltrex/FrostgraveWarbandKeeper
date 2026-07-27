@@ -49,6 +49,8 @@ from frostgrave_data import (
     SOLDIER_MAX_LEVELS,
     SOLDIER_STAT_CAPS,
     SOLDIERS,
+    SOURCE_BOOKS,
+    SOURCE_BOOK_BY_SLUG,
     STARTING_GOLD,
     STARTING_SPELL_COUNT,
     WIZARD_BASE,
@@ -166,7 +168,26 @@ def default_homerules() -> dict:
         "promote_captain_bonus": deepcopy(PROMOTE_CAPTAIN_BONUS),
         "promote_captain_bonus_choice_enabled": False,
         "promote_captain_item_slots": PROMOTE_CAPTAIN_ITEM_SLOTS,
+        # Per-source-book content toggles (soldiers/creatures/rules from the
+        # supplements). Off by default, like every other homerule here.
+        "enabled_sources": {book: False for book in SOURCE_BOOKS},
     }
+
+
+def enabled_sources(wb: dict) -> set[str]:
+    """Source-book names whose extra content is switched on for this warband
+    (Core Rules is always implicitly included)."""
+    hr = wb.get("homerules") or {}
+    es = hr.get("enabled_sources") or {}
+    return {"Core Rules"} | {book for book in SOURCE_BOOKS if es.get(book)}
+
+
+def soldier_source_allowed(wb: dict, type_key: str) -> bool:
+    """Whether a soldier type may be hired given this warband's source toggles."""
+    info = get_soldier(type_key)
+    if not info:
+        return False
+    return info.get("source", "Core Rules") in enabled_sources(wb)
 
 
 def empty_captain(name: str = "", homerules: dict | None = None, origin: str = "hired") -> dict:
@@ -548,6 +569,9 @@ def load_warband(warband_id: str) -> dict | None:
     hr.pop("promote_captain_enabled", None)
     for k, v in default_homerules().items():
         hr.setdefault(k, v)
+    es = hr.setdefault("enabled_sources", {})
+    for book in SOURCE_BOOKS:
+        es.setdefault(book, False)
     wb.setdefault("captain", None)
     if wb.get("captain"):
         cap = wb["captain"]
@@ -848,6 +872,9 @@ def add_soldier(wb: dict, type_key: str, name: str = "") -> tuple[bool, str]:
     info = get_soldier(type_key)
     if not info:
         return False, "Unknown soldier type."
+    src = info.get("source", "Core Rules")
+    if src not in enabled_sources(wb):
+        return False, f"{info['name']} is from {src}; enable that source under Additional Rules and Homerules first."
     active = active_soldiers(wb)
     if len(active) >= MAX_SOLDIERS:
         return False, f"Soldier limit reached ({MAX_SOLDIERS})."
@@ -1003,6 +1030,10 @@ def update_homerules(wb: dict, form) -> tuple[bool, str]:
             "promote_captain_item_slots": int(
                 form.get("promote_captain_item_slots") or hr["promote_captain_item_slots"]
             ),
+            "enabled_sources": {
+                book: form.get(f"source_enabled_{slug}") == "on"
+                for slug, book in SOURCE_BOOK_BY_SLUG.items()
+            },
         }
     except (TypeError, ValueError):
         return False, "Invalid homerule value."

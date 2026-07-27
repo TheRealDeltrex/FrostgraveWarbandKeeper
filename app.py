@@ -49,6 +49,7 @@ from frostgrave_data import (
     SCHOOL_OPPOSED,
     SCHOOL_RELATIONS,
     SCHOOLS,
+    SOURCE_BOOK_OPTIONS,
     SPELLS,
     STARTING_GOLD,
     STARTING_SPELL_COUNT,
@@ -378,6 +379,7 @@ def warband_view(warband_id: str):
         vault_names=vault_names,
         potion_choices=load_potion_choices(),
         spell_names=load_spell_names(),
+        source_books=SOURCE_BOOK_OPTIONS,
     )
 
 

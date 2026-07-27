@@ -212,7 +212,7 @@
           <div style="flex:2">
             <label>Type</label>
             <select class="sol-type">
-              {% for c in catalog %}
+              {% for c in catalog if c.source == 'Core Rules' %}
                 <option value="{{ c.key }}" data-cost="{{ c.cost }}" data-cat="{{ c.category }}">
                   {{ c.name }} — {{ c.cost }} gc ({{ c.category }})
                   · Move {{ c.move }} · Fight {{ format_stat(c.fight) }} · Shoot {{ format_stat(c.shoot) }} · Armour {{ c.armour }} · Will {{ format_stat(c.will) }} · Health {{ c.health }}

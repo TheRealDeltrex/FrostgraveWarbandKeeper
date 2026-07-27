@@ -257,5 +257,306 @@
     "source": "Thaw of the Lich Lord",
     "stats": "Move 6\" · Fight +4/+5 · Shoot +2 · Armour 14 · Will +5/+6 · Health 25",
     "description": "Once an important figure in Felstad who embraced necromancy and traded his humanity for immortality, the Lich Lord sealed himself into a sarcophagus as the cataclysm struck and lay frozen for a thousand years. Now freed, he seeks to reclaim his city as a base for conquest. He is Undead and Immune to Control Undead, and is normally accompanied by a bodyguard (typically two wraith knights, four armoured skeletons, and four death cultists). His stats include bonuses from his Magical Sickle (+1 Fight) and Ring of Will (+1 Will); he also carries the Book of Bones, a Ring of Slow Fall, Robes of Arrow Turning, and a Staff of Power (3), and knows an extensive spell list including Bind Demon, Elemental Bolt, Steal Health, Strike Dead, and Raise Zombie. If run without a player controlling him, he follows a fixed reaction table prioritizing countering invisible spellcasters, attacking enemy spellcasters, healing himself via Steal Health when below 12 Health, and raising undead reinforcements."
+  },
+  {
+    "name": "Amplipede",
+    "category": "Animal",
+    "source": "Into the Breeding Pits",
+    "stats": "Move 5\" · Fight -2 · Shoot +0 · Armour 7 · Will +0 · Health 1",
+    "description": "Arm-length venomous creatures resembling large centipedes but more closely related to rats; never found above ground, they thrive in the warmer tunnels. A figure that takes damage from an amplipede is treated as Wounded for the rest of the game, or until healed by a Heal spell or healing potion. It counts as an Animal and has the Poison trait; undead and constructs are immune."
+  },
+  {
+    "name": "Basilisk",
+    "category": "Animal",
+    "source": "Into the Breeding Pits",
+    "stats": "Move 4\" · Fight +3 · Shoot +0 · Armour 13 · Will +2 · Health 14",
+    "description": "Large, reptilian carnivores with a powerful hypnotic gaze, once used as pest control in the ancient city. Whenever a figure within 6\" and line of sight of a basilisk activates, it must make an immediate Will roll against a Petrify spell with a casting roll of 12 or be petrified and lose the activation. It is Large."
+  },
+  {
+    "name": "Devourer",
+    "category": "Miscellaneous",
+    "source": "Into the Breeding Pits",
+    "stats": "Move 4\" · Fight +6 · Shoot +6 · Armour 15 · Will +0 · Health 22",
+    "description": "One of the largest and deadliest creatures beneath Frostgrave, resembling a coach-sized armoured beetle with giant mandibles. A devourer at full Health is peaceful, making only random moves; once hurt it becomes savagely aggressive and can spit acidic larvae as a shooting attack that treats non-magic-armoured targets as Armour 10. It is Burrowing, Large, Peaceful Until Hurt, and Savage (treat as armed with a two-handed weapon)."
+  },
+  {
+    "name": "Gnoll Chieftain",
+    "category": "Miscellaneous",
+    "source": "Into the Breeding Pits",
+    "stats": "Move 7\" · Fight +4 · Shoot +0 · Armour 12 · Will +5 · Health 14",
+    "description": "A powerful gnoll warrior, the leader of a warparty or whole tribe. Gnolls are anthropomorphic animal hybrids bred by the Beastcrafters; most use the same stats as the equivalent human soldier, but the chieftain has no human equivalent. It carries a hand weapon, shield and leather armour."
+  },
+  {
+    "name": "Gnoll Shaman",
+    "category": "Miscellaneous",
+    "source": "Into the Breeding Pits",
+    "stats": "Move 6\" · Fight +1 · Shoot +0 · Armour 11 · Will +5 · Health 12",
+    "description": "Gnoll priests and advisors, known for their extensive use of poisons. A figure that takes damage from a gnoll shaman is treated as Wounded for the rest of the game, or until healed by a Heal spell or healing potion (undead and constructs are immune). It has the Inspiring trait: all gnolls within 6\" gain +2 Will."
+  },
+  {
+    "name": "Hydra",
+    "category": "Animal",
+    "source": "Into the Breeding Pits",
+    "stats": "Move 5\" · Fight +3 · Shoot +0 · Armour 14 · Will +4 · Health 16",
+    "description": "Catch-all name for large, artificially created reptiles with multiple snake- or dragon-like heads, once popular guard beasts in Felstad. Fighting a hydra works like fighting multiple opponents: it gains +4 Fight against a single foe, +2 against two, and no attacker ever gains a supporting-figure bonus against it. It is an Animal, Large, and Savage (treat as armed with a two-handed weapon); rare strains may be serpentine, poisonous, or fire-breathing."
+  },
+  {
+    "name": "Hyena",
+    "category": "Animal",
+    "source": "Into the Breeding Pits",
+    "stats": "Move 7\" · Fight +0 · Shoot +0 · Armour 10 · Will +3 · Health 6",
+    "description": "Originally imported to Felstad as raw material for the gnoll strains, some hyenas escaped during the cataclysm and survive to the present, travelling in small packs. Some are domesticated by gnolls as guard dogs and trackers. It counts as an Animal."
+  },
+  {
+    "name": "Minotaur",
+    "category": "Miscellaneous",
+    "source": "Into the Breeding Pits",
+    "stats": "Move 6\" · Fight +3 · Shoot +0 · Armour 12 · Will +4 · Health 14",
+    "description": "One of the most popular creatures of the underground gladiatorial arenas, combining the features of humans and bulls; almost all are bad-tempered and prone to extreme violence. If a minotaur moves into combat and attacks in the same activation, it receives +2 Fight (Bull Rush) to that attack. It is Large and Savage (treat as armed with a two-handed weapon)."
+  },
+  {
+    "name": "Sewer Slime",
+    "category": "Miscellaneous",
+    "source": "Into the Breeding Pits",
+    "stats": "Move 4\" · Fight +2 · Shoot +0 · Armour 20 (12) · Will +6 · Health 10",
+    "description": "Large, amorphous blobs of goo in a variety of colours, often mistaken for a pool of dark water until they strike. While resistant to physical harm (Armour 20), a sewer slime's Armour drops to 12 when hit by any magic attack. It is Immune to Critical Hits (which deal no extra damage against it) and has Magic Vulnerability."
+  },
+  {
+    "name": "Two-Headed Troll",
+    "category": "Miscellaneous",
+    "source": "Into the Breeding Pits",
+    "stats": "Move 4\" · Fight +4 · Shoot +0 · Armour 14 · Will +2 · Health 16",
+    "description": "A rare troll mutation shunned by others of its kind and generally solitary. Because it can look in two directions at once, a figure fighting a two-headed troll always counts as having one supporting figure fewer than it actually does. It is Large, has Two Heads, and wields a Huge Weapon (treat as armed with a two-handed weapon)."
+  },
+  {
+    "name": "Vaplorhine",
+    "category": "Miscellaneous",
+    "source": "Into the Breeding Pits",
+    "stats": "Move 6\" · Fight +1 · Shoot +0 · Armour 10 · Will +4 · Health 8",
+    "description": "Often described as “a hairless demonic monkey”, most likely the result of Beastcrafters infusing primates with demon blood, though they show no particular weakness to demon-targeting magic. Feared for their extraordinary speed, vaplorhines are Extremely Fast: they activate twice each turn, once at the end of the Apprentice Phase and again in the Creature Phase."
+  },
+  {
+    "name": "Violent Fungus",
+    "category": "Miscellaneous",
+    "source": "Into the Breeding Pits",
+    "stats": "Move 4\" · Fight +0 · Shoot +0 · Armour 10 · Will +6 · Health 6",
+    "description": "Aggressive fungi of the warmer, humid chambers, most resembling a cross between man and mushroom. When it takes damage in combat it spews poisonous spores: any figure in combat with it must make a Will roll (TN10) or be poisoned and treated as Wounded for the rest of the game. It is immune to poison and to the Beauty, Mind Control, Monstrous Form and Reveal Death spells (Spell Immunity)."
+  },
+  {
+    "name": "Bile Hound",
+    "category": "Demon",
+    "source": "Forgotten Pacts",
+    "stats": "Move 8\" · Fight +2 · Shoot +0 · Armour 10 · Will +1 · Health 10",
+    "description": "About the size of a large dog, with long rat-like heads and powerful jaws dripping corrosive saliva; often found as the servants or pets of more powerful demons. Due to its acidic bite, any figure damaged by a bile hound suffers -4 Armour for that attack. It has the Demon trait."
+  },
+  {
+    "name": "Chilopendra",
+    "category": "Demon",
+    "source": "Forgotten Pacts",
+    "stats": "Move 6\" · Fight +4 · Shoot +0 · Armour 12 · Will +4 · Health 14",
+    "description": "Demon/human hybrids created when a human sacrifices himself to the demon lord Tiszirain; human from the waist up, with the lower body of a great centipede. Though they often carry weapons, they are just as deadly without, attacking with sharp horns or envenomed legs. It is a Demon, has Horns, and is Poisonous."
+  },
+  {
+    "name": "Failing Wretch",
+    "category": "Demon",
+    "source": "Forgotten Pacts",
+    "stats": "Move 5\" · Fight +1 · Shoot +0 · Armour 10 · Will +4 · Health 10",
+    "description": "A common minor demon, living embodiment of senescence, mostly resembling very old, fat men with bulging eyes and long curving fingernails. Like their patron Ambronnax they possess Decaying Touch: any figure that activates while in combat with a failing wretch immediately loses 1 Health before taking any actions (undead, constructs and demons are immune). It has the Demon trait."
+  },
+  {
+    "name": "Grakyura",
+    "category": "Demon",
+    "source": "Forgotten Pacts",
+    "stats": "Move 6\" · Fight +3 · Shoot +0 · Armour 15 · Will +3 · Health 12",
+    "description": "Hog-sized demons resembling a union of turtle and crab, with an armoured shell and massive grasping claws. When a grakyura wins a fight it does +2 damage and flings its opponent back 6\" (or until they hit terrain), then moves back into combat if it can. It is a Demon with True Sight and the Fling Opponent ability."
+  },
+  {
+    "name": "Kaylakid",
+    "category": "Demon",
+    "source": "Forgotten Pacts",
+    "stats": "Move 5\" · Fight +1 · Shoot +0 · Armour 12 · Will +0 · Health 12",
+    "description": "Commonly encountered minor demons resembling man-sized squids that float on a mass of writhing tentacles, operating almost entirely by instinct. A figure in combat with a kaylakid may only step back or push it away if it deals damage; its static discharge deals +2 damage (+3 versus mail armour). It is a Demon with Grasping Tentacles, Levitation and Static Discharge."
+  },
+  {
+    "name": "Toravor",
+    "category": "Demon",
+    "source": "Forgotten Pacts",
+    "stats": "Move 6\" · Fight +2 · Shoot +0 · Armour 12 · Will +0 · Health 12",
+    "description": "Eyeless, possibly earless demons with a pair of heads that each end in a large, tooth-filled maw, plus powerful clawed forelimbs; suspected to live underground on their home plane. These features let them burrow extremely quickly, so wizards often employ them to explore the passages beneath the Frozen City. It is a Demon with Burrowing and Two Heads."
+  },
+  {
+    "name": "Ambronnax, Endower of Senescence",
+    "category": "Demon",
+    "source": "Forgotten Pacts",
+    "stats": "Move 4\" · Fight +6 · Shoot +0 · Armour 15 · Will +12 · Health 28",
+    "description": "A major demon that feeds on the slow decay of life force given off by all living things as they age; worshipped in Felstad as a living embodiment of mortality. He has the body of a bloated ape and two warthog-like heads, seated on a levitating disc. He is a Demon with Levitation, Magic Attack, True Sight and Two Heads, plus Decaying Touch (figures in combat with him lose 1 Health on activation) and Time Decay (figures within 12\" may take only a single action)."
+  },
+  {
+    "name": "Balkren, Barbarian Summoner",
+    "category": "Miscellaneous",
+    "source": "Forgotten Pacts",
+    "stats": "Move 6\" · Fight +4 · Shoot +0 · Armour 11 · Will +5 · Health 16",
+    "description": "One of the most powerful sorcerers among the northern tribes and a devoted follower of the demon lord Tiszirain, whose True Name he discovered. He carries a Ring of Protection (+1 Armour) and the Blade of Feasting and knows the True Name of Tiszirain. His spells include Bind Demon, Brew Potion, Fog, Imp, Plague of Insects, Spell Eater, Steal Health, Strength and Summon Demon."
+  },
+  {
+    "name": "Kornovik, Barbarian Outcast",
+    "category": "Miscellaneous",
+    "source": "Forgotten Pacts",
+    "stats": "Move 7\" · Fight +5 · Shoot +4 · Armour 12 · Will +6 · Health 18",
+    "description": "Cast out of his tribe for the murder of his parents, Kornovik has become the bane of the northern tribes, raiding for pleasure as much as gain. In battle he rides a brutal woolly rhinoceros and shares a single stat profile with it, never dismounting; the rhino can climb slopes up to about 45 degrees. He carries a two-handed weapon, bow and mail armour, has Two Heads and Horns, and always forces combat if possible."
+  },
+  {
+    "name": "Tiszirain",
+    "category": "Demon",
+    "source": "Forgotten Pacts",
+    "stats": "Move 9\" · Fight +8 · Shoot +0 · Armour 16 · Will +10 · Health 30",
+    "description": "A demon lord of victory and consumption — an eater of the dead — who takes the form of a gigantic hybrid of man and centipede, usually accompanied by chilopendra. Incredibly powerful but rarely a lasting threat, he makes only short visits to reality, killing everything he perceives as a threat before returning home. He is a Demon, Large, Horrific, with Horns, Invulnerability, Magic Attack, Mind Lock and Poisonous."
+  },
+  {
+    "name": "Acrisbird",
+    "category": "Animal",
+    "source": "The Maze of Malcor",
+    "stats": "Move 6\" · Fight +3 · Shoot +0 · Armour 12 · Will +0 · Health 8",
+    "description": "A six-foot flightless bird resembling a mangy cross between an ostrich and a vulture. Naturally peaceful in their southern-island habitat, the acrisbirds that survived a thousand years imprisoned in the Collegium have become indiscriminate carnivores and brutal hunters. It counts as an Animal and is Immune to Mind Control (though Control Animal works normally)."
+  },
+  {
+    "name": "Bloodwave",
+    "category": "Miscellaneous",
+    "source": "The Maze of Malcor",
+    "stats": "Move 5\" · Fight +3 · Shoot +0 · Armour 10 · Will +6 · Health 6",
+    "description": "A semi-sentient liquid predator found in deep caverns, deep red to orangey-brown in colour, that kills its prey by suffocation. When in combat with a bloodwave a figure uses its Will stat instead of Fight for Fight Rolls, and if the bloodwave wins it treats all enemies as Armour 10. It is Immune to non-magic weapons, Mind Control, poison and critical hits, and is Never Wounded."
+  },
+  {
+    "name": "Bog Man",
+    "category": "Undead",
+    "source": "The Maze of Malcor",
+    "stats": "Move 5\" · Fight +0 · Shoot +0 · Armour 10 · Will +0 · Health 6",
+    "description": "A rare form of undead found only in soft bogs — essentially a bag of flesh filled with peat, dirt and marsh gas, with no skeleton, that flaps and flops as it walks. When a bog man is killed, roll a die: on 15+ it releases a cloud of marsh gas, and every figure within 3\" must make a Will roll (TN12), taking damage equal to the amount they failed by. It has the Undead trait."
+  },
+  {
+    "name": "Coal Man",
+    "category": "Construct",
+    "source": "The Maze of Malcor",
+    "stats": "Move 4\" · Fight +3 · Shoot +0 · Armour 13 · Will +0 · Health 14",
+    "description": "Stone constructs roughly hewn into human form, built to withstand extreme heat and once used to work the furnaces of Felstad's larger buildings; blackened by the coal dust that coats them. Due to their natural resistance they receive +4 Armour against elemental magic or any fire-based attack. It has the Construct trait and is Large."
+  },
+  {
+    "name": "Collegium Porter",
+    "category": "Construct",
+    "source": "The Maze of Malcor",
+    "stats": "Move 5\" · Fight +4 · Shoot +0 · Armour 13 · Will +3 · Health 14",
+    "description": "Constructs unique to the Collegium that served as door guards, message carriers and low-level security, most resembling fancy furniture with short legs and long arms; with no staff to command them they have gone feral. A porter will never force combat with a spellcaster (dealing no damage and stepping back if it wins), and no experience is gained for killing one. It has the Construct trait; if it joins a warband it has 3 item slots usable only for potions or scrolls."
+  },
+  {
+    "name": "Glass Spider",
+    "category": "Construct",
+    "source": "The Maze of Malcor",
+    "stats": "Move 5\" · Fight +0 · Shoot +0 · Armour 11 · Will +0 · Health 8",
+    "description": "A house-cat-sized construct — a hollow glass orb on eight wooden and metal legs — originally designed by Malcor to refill wine-cups at feasts, later filled with acids and corrosives by the Wraith of Malcor. When a glass spider hits an opponent, that opponent suffers -2 Armour (minimum 10); when killed it shatters, making a +0 shooting attack against every figure within 1\". It has the Construct trait, an Acid Attack and Explosive Demise."
+  },
+  {
+    "name": "Mantodeus",
+    "category": "Animal",
+    "source": "The Maze of Malcor",
+    "stats": "Move 5\" · Fight +4 · Shoot +0 · Armour 12 · Will +4 · Health 6",
+    "description": "Large predatory insects native to the distant east, brought to the Collegium as specimens; standing nearly five feet tall with strong barbed forelimbs and razor mandibles. Their huge, near-all-round vision means a figure never gains a bonus for supporting figures when fighting a mantodeus. It counts as an Animal, is Powerful (treat as armed with a two-handed weapon), and can Fly (ignoring terrain for movement)."
+  },
+  {
+    "name": "Phase Cat",
+    "category": "Animal",
+    "source": "The Maze of Malcor",
+    "stats": "Move 6\" · Fight +0 · Shoot +0 · Armour 8 · Will +2 · Health 8",
+    "description": "Oversized house cats unique to the Collegium, bred over generations to become attuned to Fatecasting magic, which they use to teleport short distances; territorial, they attack intruders, especially thieves. When a phase cat activates, if any warband member within 10\" is carrying a treasure token, it immediately teleports into combat with the closest such figure. It counts as an Animal with Limited Teleportation."
+  },
+  {
+    "name": "Shrieking Wolf",
+    "category": "Construct",
+    "source": "The Maze of Malcor",
+    "stats": "Move 1\" · Fight +1 · Shoot +0 · Armour 15 · Will +4 · Health 18",
+    "description": "Large, slow guardian constructs (which despite the name may depict any creature) used in far-eastern buildings as alarms to scare off intruders. Whenever a figure comes within 2\" of a shrieking wolf, or it activates with a figure within 2\", it emits a shriek: every figure within 8\" must make a Will roll (TN12) or take 2 damage and be reduced to 1 action on its next activation. It has the Construct trait and the Shriek ability."
+  },
+  {
+    "name": "Starfire Elemental",
+    "category": "Miscellaneous",
+    "source": "The Maze of Malcor",
+    "stats": "Move 5\" · Fight +7 · Shoot +0 · Armour 6 · Will +5 · Health 1",
+    "description": "Semi-sentient balls of blue-white flame, incredibly destructive but unable to survive long within an atmosphere. Nothing blocks its line of sight, so it always moves toward the closest figure regardless of terrain, and it is never slowed by difficult ground or climbing. It is Immune to non-magic weapons but is Destroyed if it Inflicts Damage in hand-to-hand combat (removed from play, but not counted as killed), and is immune to Mind Control, Beauty, Invisibility, Monstrous Form, Bones of the Earth and Possess."
+  },
+  {
+    "name": "Advisory Council",
+    "category": "Undead",
+    "source": "The Maze of Malcor",
+    "stats": "Move 6\" · Fight +3 · Shoot +0 · Armour 10 · Will +3 · Health 12",
+    "description": "Three senior members of Malcor's staff, brought back as wraiths who almost always accompany their headmaster and respond instantly to his commands. They never make random movements, instead moving toward the closest warband member. They have the Undead trait, are Immaterial (can move through terrain), Drain Life Force (all attacks do double damage), and are Immune to non-magic weapons, Mind Control and Control Undead. If the Wraith of Malcor is killed, the Advisory Council immediately vanish."
+  },
+  {
+    "name": "The Wraith of Malcor",
+    "category": "Undead",
+    "source": "The Maze of Malcor",
+    "stats": "Move 6\" · Fight +3 · Shoot +0 · Armour 10 · Will +5 · Health 15",
+    "description": "Malcor served as Headmaster of the Collegium for a record 137 years, incredibly old and, by most accounts, completely mad; bound to the Collegium, some part of him will haunt its halls even if his wraith form is destroyed. He carries a collection of casting wands and can summon his five Wizard Shades via Call Wraith. He has the Undead trait, is Immaterial, has Magic Attacks and Drain Life Force (all attacks do double damage), and is Immune to non-magic weapons, Mind Control, Control Undead and critical hits."
+  },
+  {
+    "name": "Ballista II",
+    "category": "Construct",
+    "source": "The Perilous Dark",
+    "stats": "Move 4\" · Fight +3 · Shoot +2 · Armour 13 · Will +4 · Health 14",
+    "description": "A popular construct model from the Kregian Armour Works, combining the durability of a large construct with long-range firepower from an integrated bow. All its bow attacks do +2 damage and knock the target back 2\" (Large creatures are immune to the knockback); if it ever rolls a 1 on a shooting attack it runs out of ammunition for the rest of the scenario. It has the Construct trait, is Large, and has a Bow."
+  },
+  {
+    "name": "Borock",
+    "category": "Miscellaneous",
+    "source": "The Perilous Dark",
+    "stats": "Move 6\" · Fight +5 · Shoot +0 · Armour 12 · Will +6 · Health 16",
+    "description": "A horrific amalgam of gnoll and minotaur whose size and power made him alpha of his gnoll tribe, spreading his savagery to the rest of them. Any gnoll within 12\" of Borock does +1 damage in combat; Borock himself already does +2 damage from the huge weapon he always carries. He is Large and Immune to Mind Control."
+  },
+  {
+    "name": "Chronohound",
+    "category": "Animal",
+    "source": "The Perilous Dark",
+    "stats": "Move 8\" · Fight +3 · Shoot +0 · Armour 10 · Will +8 · Health 10",
+    "description": "Rarely seen hounds that can move through time as other creatures move through space, making them practically immortal; lean, hairless, constantly salivating, and relentlessly aggressive. They can see invisible figures, always draw line of sight to warband members through terrain, and are immune to Control Animal, Mind Control, Monstrous Form, Reveal Death, Slow, Transpose, all poison and all wounding. It counts as an Animal and is Never Wounded."
+  },
+  {
+    "name": "Hellcrow",
+    "category": "Demon",
+    "source": "The Perilous Dark",
+    "stats": "Move 6\" · Fight +1 · Shoot +0 · Armour 10 · Will +3 · Health 6",
+    "description": "A generic term for the small, winged imps that vaguely resemble birds, marked by a malevolent intelligence in their eyes; they prefer to dive on prey and kill with quick strikes and acidic bile. A hellcrow gains +2 Fight if it moves into combat and attacks in the same activation, and if it wins and deals at least 1 damage it inflicts a further 4 points from its bile. It has the Demon and Flying traits and always has line of sight to all figures."
+  },
+  {
+    "name": "Magmite",
+    "category": "Demon",
+    "source": "The Perilous Dark",
+    "stats": "Move 5\" · Fight +3 · Shoot +0 · Armour 13 · Will +4 · Health 6",
+    "description": "Little demons about 3' tall that thrive in lava and magma, moving freely through it and all but immune to elemental fire. Whenever a figure in combat with a magmite rolls 5 or less on its Fight Roll, it is splashed with lava for 2 damage; a non-magic weapon that damages a magmite may be destroyed (roll 6 or less). It has the Demon trait, Elemental Resistance (5), and Powerful Claws (treat as armed with a two-handed weapon)."
+  },
+  {
+    "name": "Manaworm",
+    "category": "Animal",
+    "source": "The Perilous Dark",
+    "stats": "Move 4\" · Fight +1 · Shoot +0 · Armour 8 · Will +4 · Health 6",
+    "description": "Brightly-coloured, fanged worms two to three feet long, the bane of wizards, drawn to magic and those who wield it. A manaworm always has line of sight to spellcasters and makes an immediate 3\" move toward any spellcaster who casts a spell; if a figure loses a fight to it, all spells currently active on that figure are dispelled. It counts as an Animal, can see invisible figures, and suffers no movement penalty for climbing or rough ground."
+  },
+  {
+    "name": "Matriarch",
+    "category": "Animal",
+    "source": "The Perilous Dark",
+    "stats": "Move 6\" · Fight +3 · Shoot +0 · Armour 12 · Will +6 · Health 16",
+    "description": "A giant ice spider grown to the size of a bull, a nimble hunter that never suffers movement penalties for climbing or rough ground. Its venom paralyses and even runs through its ichor, so any figure that damages it in combat must make a Will roll (TN14) or be poisoned and treated as Wounded. A figure reduced to 0 Health by a matriarch may re-roll its first 'dead' survival result; attackers gain only +1 Fight per supporting figure against it. It counts as an Animal and is Large."
+  },
+  {
+    "name": "Planar Lurker",
+    "category": "Miscellaneous",
+    "source": "The Perilous Dark",
+    "stats": "Move 6\" · Fight +2 · Shoot +0 · Armour 10 · Will +6 · Health 25",
+    "description": "Semi-ethereal embodiments of magic — vaguely humanoid masses of writhing purple shadow — thought to be the souls of ancient spellcasters lost in other planes, whose only desire is to consume mystical energy. They are drawn to and seek out spellcasters above all others, take only half damage (rounded down) from magic attacks, and are Immaterial (can move through terrain). Each has a unique ability (Explosive Demise, Magic Absorption, Spell Reflection or Spell Scatter)."
+  },
+  {
+    "name": "Reaver Wight",
+    "category": "Undead",
+    "source": "The Perilous Dark",
+    "stats": "Move 6\" · Fight +4 · Shoot +0 · Armour 11 · Will +6 · Health 14",
+    "description": "The restless dead of the Reavers, an infamous Felstad mercenary outfit whose crypt does not lie quiet; callous, bitter men in life, they react violently when their remains are disturbed. Semi-ethereal, they can move through terrain and take only half damage (rounded down) from non-magic weapons, and their spectral blades count as magic two-handed weapons. They have the Undead trait and are immune to Mind Control, Control Undead, Bones of the Earth, Petrify, Reveal Death and Steal Health."
   }
 ]

@@ -113,12 +113,14 @@
   </details>
 
   <details class="card">
-    <summary><h2>Soldiers (core tables)</h2></summary>
+    <summary><h2>Soldiers ({{ soldiers|length }})</h2></summary>
+    <p class="muted">Core tables plus every supplement soldier. Supplement soldiers must have their source
+      book switched on under a warband's Additional Rules and Homerules before they can be hired.</p>
     <div class="table-wrap">
       <table>
         <thead>
           <tr>
-            <th>Type</th><th>Cat</th><th>Cost</th>
+            <th>Type</th><th>Cat</th><th>Source</th><th>Cost</th>
             <th>Move</th><th>Fight</th><th>Shoot</th><th>Armour</th><th>Will</th><th>Health</th><th>Gear</th>
           </tr>
         </thead>
@@ -127,6 +129,7 @@
             <tr>
               <td><strong>{{ s.name }}</strong></td>
               <td><span class="badge {{ s.category }}">{{ s.category }}</span></td>
+              <td class="muted">{% if s.source != 'Core Rules' %}<span class="badge">{{ s.source }}</span>{% else %}Core Rules{% endif %}</td>
               <td class="gold">{% if s.cost == 0 %}Free{% else %}{{ s.cost }}{% endif %}</td>
               <td>{{ s.move }}</td>
               <td>{{ format_stat(s.fight) }}</td>
@@ -144,7 +147,9 @@
 
   <details class="card">
     <summary><h2>Bestiary ({{ bestiary|length }})</h2></summary>
-    <p class="muted">Creatures from the Core Rules and Thaw of the Lich Lord. Click <strong>Info</strong> for full rules text.</p>
+    <p class="muted">Creatures from the Core Rules and the supplements (Thaw of the Lich Lord, Into the Breeding
+      Pits, Forgotten Pacts, The Maze of Malcor, The Perilous Dark). Each carries its source. Click
+      <strong>Info</strong> for full rules text.</p>
     {% if bestiary %}
       {% for category in ['Animal', 'Construct', 'Demon', 'Undead', 'Miscellaneous'] %}
         {% set creatures = bestiary|selectattr('category', 'equalto', category)|list %}
