@@ -48,15 +48,33 @@
     </div>
   </section>
 
-  {# ---- Homerules ---- #}
+  {# ---- Additional Rules and Homerules ---- #}
   <details class="card" id="homerules">
-    <summary><h2>Homerules</h2></summary>
+    <summary><h2>Additional Rules and Homerules</h2></summary>
     <p class="muted" style="font-size:0.85rem">
-      Optional house rules, off by default (not part of core 2e). Adapted from the FG1E Sellswords
-      supplement — tune these to match your group's own version.
+      Optional house rules and supplement content, off by default (not part of core 2e). Turn on a source
+      book to make its soldiers available to this warband; the captain / soldier-leveling options below are
+      adapted from the FG1E Sellswords supplement — tune these to match your group's own version.
     </p>
     <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
       <input type="hidden" name="action" value="update_homerules" />
+
+      <details class="ref-panel" open>
+        <summary>Source books</summary>
+        <p class="muted" style="font-size:0.85rem">
+          Switch on the supplements you play with. Enabled books add their mercenaries to the Hire soldier
+          list. Every creature is always browsable on the <a href="{{ url_for('reference') }}">Reference</a> page.
+        </p>
+        <div class="stat-row">
+          {% for book in source_books %}
+            <label class="checkbox-row" style="margin:0.2rem 0">
+              <input name="source_enabled_{{ book.slug }}" type="checkbox" {% if hr.enabled_sources.get(book.name) %}checked{% endif %} />
+              {{ book.name }}
+            </label>
+          {% endfor %}
+        </div>
+      </details>
+
       <div class="form-row">
         <label for="captain_mode">Captain (FG1E Sellswords-style homerule)</label>
         <select id="captain_mode" name="captain_mode">
@@ -1017,18 +1035,20 @@
       <summary>Hire soldier</summary>
       <p class="muted" style="font-size:0.85rem">
         Default name is the type plus a number (e.g. “Archer 1”). Rename and add a picture afterward via Edit / picture.
+        Soldiers from the supplements only appear here once their source book is switched on under
+        <a href="#homerules">Additional Rules and Homerules</a>.
       </p>
       <div class="table-wrap">
         <table>
           <thead>
             <tr>
-              <th>Type</th><th>Cat</th><th>Cost</th>
+              <th>Type</th><th>Cat</th><th>Source</th><th>Cost</th>
               <th>Move</th><th>Fight</th><th>Shoot</th><th>Armour</th><th>Will</th><th>Health</th><th>Gear</th>
               <th></th>
             </tr>
           </thead>
           <tbody>
-            {% for c in catalog %}
+            {% for c in catalog if c.source == 'Core Rules' or hr.enabled_sources.get(c.source) %}
               {% set can_afford = wb.gold >= c.cost %}
               {% set within_soldiers = limits.soldiers < limits.max_soldiers %}
               {% set within_specialists = c.category != 'specialist' or limits.specialists < limits.max_specialists %}
@@ -1036,6 +1056,7 @@
               <tr {% if not can_hire %}style="opacity:0.5"{% endif %}>
                 <td><strong>{{ c.name }}</strong></td>
                 <td><span class="badge {{ c.category }}">{{ c.category }}</span></td>
+                <td class="muted">{% if c.source != 'Core Rules' %}<span class="badge">{{ c.source }}</span>{% else %}—{% endif %}</td>
                 <td class="gold">{% if c.cost == 0 %}Free{% else %}{{ c.cost }}{% endif %}</td>
                 <td>{{ c.move }}</td>
                 <td>{{ format_stat(c.fight) }}</td>
