@@ -5,6 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{% block title %}Frostgrave Warbands{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+    {% if BROWSER_MODE %}
+      <style>
+        .session-warning {
+          margin: 0 0 1rem;
+          padding: 0.7rem 1rem;
+          border: 1px solid #b8862b;
+          border-left: 4px solid #e0a93a;
+          border-radius: 8px;
+          background: rgba(224, 169, 58, 0.12);
+          color: #f0d9a6;
+          font-size: 0.9rem;
+          line-height: 1.4;
+        }
+        .session-warning a { color: #ffd479; }
+        /* Portrait uploads don't persist in a session-only browser build, so
+           hide those pickers — but keep the Import page's file input (name="file"). */
+        .form-row:has(input[type="file"]:not([name="file"])),
+        .soldier-row > div:has(input[type="file"]) { display: none !important; }
+        input[type="file"]:not([name="file"]) { display: none !important; }
+      </style>
+    {% endif %}
   </head>
   <body>
     <div class="container">
@@ -28,11 +49,22 @@
           <li>
             <a href="{{ url_for('about') }}" class="{% if request.endpoint == 'about' %}active{% endif %}">About</a>
           </li>
+          {% if not BROWSER_MODE %}
           <li>
             <a href="{{ url_for('settings') }}" class="{% if request.endpoint == 'settings' %}active{% endif %}">Settings</a>
           </li>
+          {% endif %}
         </ul>
       </nav>
+
+      {% if BROWSER_MODE %}
+        <div class="session-warning" role="alert">
+          <strong>⚠ Online session — nothing is saved.</strong>
+          This warband lives only in this browser tab. Use <strong>Export</strong> on a warband to
+          download it as a file, and <a href="{{ url_for('warband_import') }}">Import</a> to load it
+          again later. If you close or refresh this tab, anything not exported is gone.
+        </div>
+      {% endif %}
 
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}

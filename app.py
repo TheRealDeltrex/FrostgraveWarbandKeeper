@@ -74,7 +74,6 @@ from game_content import (
     spell_description,
 )
 from idle_watchdog import note_closing, note_heartbeat
-from pdf_export import build_warband_pdf
 from warband_store import (
     PORTRAIT_DIR,
     WARBAND_DIR,
@@ -136,6 +135,11 @@ app = Flask(
 app.secret_key = os.environ.get("SECRET_KEY", "frostgrave-dev-key")
 app.config["MAX_CONTENT_LENGTH"] = 8 * 1024 * 1024  # 8 MB uploads
 
+# Set by the in-browser (Pyodide) build. When on, the UI drops desktop-only
+# affordances (native folder picker / Settings, PDF roster, portrait uploads)
+# and shows a "session only — export to save" reminder, since nothing persists.
+BROWSER_MODE = os.environ.get("FWK_BROWSER") == "1"
+
 app.jinja_env.globals.update(
     format_stat=format_stat,
     STARTING_GOLD=STARTING_GOLD,
@@ -159,6 +163,7 @@ app.jinja_env.globals.update(
     level_from_xp=level_from_xp,
     captain_effective_stats=captain_effective_stats,
     IS_FROZEN=paths.is_frozen(),
+    BROWSER_MODE=BROWSER_MODE,
 )
 
 
@@ -803,6 +808,10 @@ def warband_export(warband_id: str):
 @app.route("/warband/<warband_id>/pdf")
 def warband_pdf(warband_id: str):
     wb = _require_warband(warband_id)
+    # Imported lazily so the app can start without the PDF stack (fpdf / Pillow)
+    # present — e.g. the in-browser build, where PDF export is not offered.
+    from pdf_export import build_warband_pdf
+
     data = build_warband_pdf(wb)
     filename = secure_filename(f"{wb.get('name', 'warband')}-roster.pdf") or "roster.pdf"
     return Response(
