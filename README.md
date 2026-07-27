@@ -4,9 +4,13 @@ This branch (`devversion`) holds the **full Python/Flask source code**. It exist
 run from source, read, and altered — if you (or your gaming group) need a feature, rule tweak, or
 homerule this app doesn't already support, this is the branch to work from.
 
-If you just want to run the app and don't need to touch the code, use a prebuilt build instead
-(Windows or Linux): see the [download page](https://therealdeltrex.github.io/FrostgraveWarbandKeeper/),
-the [`main` branch](../../tree/main), or the [latest Release](../../releases/latest).
+If you just want to run the app and don't need to touch the code, you don't need this branch:
+
+- **Play online, no install** — [the in-browser version](https://therealdeltrex.github.io/FrostgraveWarbandKeeper/app/)
+  runs the whole app in your browser tab (nothing is stored; export a warband to a file to keep it).
+- **Download a build** (Windows or Linux) from the
+  [download page](https://therealdeltrex.github.io/FrostgraveWarbandKeeper/), the
+  [`main` branch](../../tree/main), or the [latest Release](../../releases/latest).
 
 A local Flask app for creating and maintaining warbands for **Frostgrave (2nd Edition)**. No login, no server — your warbands are saved as plain files on your own machine.
 
@@ -15,11 +19,12 @@ Not affiliated with Osprey Games / Joseph A. McCullough.
 ## Features
 
 - **Create a warband**: wizard (name, school, portrait), starting spells (3 own / 1 each aligned / 2 neutral, per 2e rules), an optional apprentice, and starting soldiers.
-- **Maintain between games**: level up your wizard (stat increases, learn spells, improve spells), record post-game loot (gold, XP, items), and manage the vault.
+- **Maintain between games**: level up your wizard (stat increases, learn spells, improve spells), record post-game loot (gold, XP, items), and manage the vault. XP can be added or removed (negative XP auto-reverses lost level-ups).
 - **Soldiers**: hire from the full 2e roster with correct cost/unit limits (max 8 soldiers, max 4 specialists), track status (active/injured/dead), reorder the roster, and optionally level them up.
-- **Captain homerule**: an optional, fully-tunable per-warband house rule — hire a Captain or promote an existing soldier into one, with configurable cost, starting stats, item slots, and Mind Control setting.
+- **Supplement content**: 12 extra mercenaries and 43 extra creatures from Thaw of the Lich Lord, Into the Breeding Pits, Forgotten Pacts, The Maze of Malcor and The Perilous Dark — each labelled with its source book.
+- **Additional Rules and Homerules**: a per-warband tab with a toggle for every supplement source book (supplement mercenaries only become hireable once their book is switched on) plus the optional Captain house rule — hire a Captain or promote an existing soldier into one, with configurable cost, starting stats, item slots, and Mind Control setting.
 - **Home base**: set a base location and buy base resources, per the 2e core rules.
-- **Reference pages**: full spell list per school with casting numbers and descriptions, school relationship table (own/aligned/neutral/opposed), and the standard arms & armour list.
+- **Reference pages**: full spell list per school with casting numbers and descriptions, the school relationship table (own/aligned/neutral/opposed), the standard arms & armour list, and a full bestiary — every creature browsable with its source and rules text.
 - **PDF roster export**: a clean, printable warband sheet.
 - **Import/export**: warbands are saved as `.warbands` files (plain JSON) that can be exported, shared, and re-imported.
 - **Settings page**: choose where warband data is saved on disk (used mainly by the packaged executable — see below).
@@ -63,10 +68,37 @@ build — simpler to hand to someone with just `chmod +x` and run). It skips the
 Linux build can't assume are present; auto-shutdown-on-browser-close (`idle_watchdog.py`) still
 works the same as on Windows.
 
+## In-browser (online) build
+
+`docs/app/` on the `main` branch is a zero-backend build of the app that runs entirely in the
+browser via [Pyodide](https://pyodide.org/): it loads Python + Flask in the tab, unpacks the app,
+and drives it through Flask's test client. Storage is in-memory only, so it's session-only —
+export a warband to a file to keep it.
+
+The browser build embeds a copy of the app's Python, templates and reference data in a single
+bundle. Regenerate it after any source change and commit the result on `main`:
+
+```bash
+python scripts/build_browser_bundle.py   # writes docs/app/bundle.json
+```
+
+The hand-written shell/loader lives in `docs/app/index.html`. Browser-specific UI (session-only
+banner, no PDF/portraits/Settings) is gated behind `FWK_BROWSER=1` in `app.py` and the templates.
+
+## Static preview pages
+
+The download landing page also hosts click-around, read-only preview snapshots
+(`docs/preview-*.html`). Regenerate them after template/CSS changes:
+
+```bash
+python scripts/build_preview_pages.py    # writes docs/preview-*.html + docs/static/*
+```
+
 ## Repo layout
 
 - `main` — the distribution branch: a README pointing at the built executables (via GitHub
-  Releases), plus `docs/index.html` — a static, server-free download landing page published via
-  GitHub Pages. No application source code.
+  Releases), plus `docs/` — a static, server-free GitHub Pages site: `index.html` (download
+  landing page), `app/` (the in-browser build), and `preview-*.html` (live preview snapshots).
+  No application source code.
 - `devversion` (this branch) — the actual application source, for anyone who wants to run it from
   source or modify it.
