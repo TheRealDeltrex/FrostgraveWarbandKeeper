@@ -5,14 +5,21 @@ warbands are saved as plain files on your own machine.
 
 Not affiliated with Osprey Games / Joseph A. McCullough.
 
-## Download
+## Play online or download
 
-👉 **[Download page](https://therealdeltrex.github.io/FrostgraveWarbandKeeper/)** — Windows and
-Linux builds, one click each.
+Two ways to use it — pick whichever suits you:
 
-This is the **distribution branch** — it just contains this README. You can also grab a packaged
-build directly from the [Releases page](../../releases/latest). No Python install needed on
-either platform.
+- **▶ [Play online — no install](https://therealdeltrex.github.io/FrostgraveWarbandKeeper/app/)** —
+  the whole app runs right in your browser tab. Nothing is stored, so it's session-only: **export a
+  warband to a file to keep it**, and import it again next time. Great for a quick try or a one-off
+  game. (First load fetches a runtime, so give it a few seconds.)
+- **💾 [Download page](https://therealdeltrex.github.io/FrostgraveWarbandKeeper/)** — packaged
+  Windows and Linux builds, one click each, that save your warbands as files on your own machine.
+
+This is the **distribution branch** — it just contains this README plus the
+[download / online site](https://therealdeltrex.github.io/FrostgraveWarbandKeeper/). You can also
+grab a packaged build directly from the [Releases page](../../releases/latest). No Python install
+needed on either platform.
 
 ### Windows
 
@@ -44,13 +51,14 @@ folder.
 ## Features
 
 - **Create a warband**: wizard (name, school, portrait), starting spells (3 own / 1 each aligned / 2 neutral, per 2e rules), an optional apprentice, and starting soldiers.
-- **Maintain between games**: level up your wizard (stat increases, learn spells, improve spells), record post-game loot (gold, XP, items), and manage the vault.
+- **Maintain between games**: level up your wizard (stat increases, learn spells, improve spells), record post-game loot (gold, XP, items), and manage the vault. XP can be added or removed (negative XP auto-reverses lost level-ups).
 - **Soldiers**: hire from the full 2e roster with correct cost/unit limits (max 8 soldiers, max 4 specialists), track status (active/injured/dead), reorder the roster, and optionally level them up.
-- **Captain homerule**: an optional, fully-tunable per-warband house rule — hire a Captain or promote an existing soldier into one.
+- **Supplement content**: 12 extra mercenaries and 43 extra creatures from Thaw of the Lich Lord, Into the Breeding Pits, Forgotten Pacts, The Maze of Malcor and The Perilous Dark — each labelled with its source book.
+- **Additional Rules and Homerules**: a per-warband tab with a toggle for every supplement source book (its mercenaries become hireable only when switched on), plus the optional Captain house rule — hire a Captain or promote an existing soldier into one.
 - **Home base**: set a base location and buy base resources, per the 2e core rules.
-- **Reference pages**: full spell list per school with casting numbers and descriptions, school relationship table (own/aligned/neutral/opposed), and the standard arms & armour list.
+- **Reference pages**: full spell list per school with casting numbers and descriptions, the school relationship table (own/aligned/neutral/opposed), the standard arms & armour list, and a full bestiary — every creature with its source and rules text.
 - **PDF roster export**: a clean, printable warband sheet.
-- **Import/export**: warbands are saved as `.warbands` files (plain JSON) that can be exported, shared, and re-imported.
+- **Import/export**: warbands are saved as `.warbands` files (plain JSON) that can be exported, shared, and re-imported. (In the online version, this is how you save.)
 
 ## Want to modify the code?
 
