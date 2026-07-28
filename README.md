@@ -47,7 +47,7 @@ folder.
 - **Create a warband**: wizard (name, school, portrait), starting spells (3 own / 1 each aligned / 2 neutral, per 2e rules), and an optional apprentice. Soldiers are recruited afterwards on the warband page.
 - **Maintain between games**: level up your wizard (stat increases, learn spells, improve spells), record post-game loot (gold, XP, items), and manage the vault. XP can be added or removed (negative XP auto-reverses lost level-ups).
 - **Soldiers**: hire from the full 2e roster with correct cost/unit limits (max 8 soldiers, max 4 specialists), track status (active/injured/dead), reorder the roster, and optionally level them up.
-- **Character pictures**: every wizard, apprentice and soldier type comes with its own artwork, shown until you upload a picture of your own. Defaults appear on the warband page and in the PDF roster.
+- **Character pictures**: every wizard, apprentice, captain and soldier type comes with its own artwork, shown until you upload a picture of your own. Defaults appear on the warband page and in the PDF roster.
 - **Supplement content**: 12 extra mercenaries and 43 extra creatures from Thaw of the Lich Lord, Into the Breeding Pits, Forgotten Pacts, The Maze of Malcor and The Perilous Dark — each labelled with its source book.
 - **Additional Rules and Homerules**: a per-warband tab with a toggle for every supplement source book (its mercenaries become hireable only when switched on), plus the optional Captain house rule — hire a Captain or promote an existing soldier into one.
 - **Home base**: set a base location and buy base resources, per the 2e core rules.
