@@ -842,6 +842,106 @@ SOLDIERS: dict[str, dict] = {
         "gear": "Unarmed (gauntlets / vambraces)",
         "notes": "Never suffers unarmed penalties; all hand-to-hand attacks count as magic attacks.",
     },
+    # --- Spell-summoned members: only hireable (free) when the wizard knows the
+    # listed spell. Gated by "requires_spell", not a source book. ---
+    "small_construct": {
+        "name": "Small Construct",
+        "cost": 0,
+        "category": "standard",
+        "requires_spell": "Animate Construct",
+        "move": 6,
+        "fight": 1,
+        "shoot": 0,
+        "armour": 11,
+        "will": 0,
+        "health": 10,
+        "gear": "Unarmed",
+        "notes": "Construct: immune to poison, never counts as wounded; carries treasure but has no item slots. Animated by the Animate Construct spell (small, -0 to cast).",
+    },
+    "medium_construct": {
+        "name": "Medium Construct",
+        "cost": 0,
+        "category": "standard",
+        "requires_spell": "Animate Construct",
+        "move": 5,
+        "fight": 3,
+        "shoot": 0,
+        "armour": 12,
+        "will": 0,
+        "health": 12,
+        "gear": "Unarmed",
+        "notes": "Construct: immune to poison, never wounded; carries treasure but has no item slots. Animated by the Animate Construct spell (medium, -3 to cast).",
+    },
+    "large_construct": {
+        "name": "Large Construct",
+        "cost": 0,
+        "category": "specialist",
+        "requires_spell": "Animate Construct",
+        "move": 4,
+        "fight": 4,
+        "shoot": 0,
+        "armour": 13,
+        "will": 0,
+        "health": 14,
+        "gear": "Unarmed",
+        "notes": "Construct; Large (-2 Large Target vs shooting); Strong (+2 damage). Counts as a specialist. Animated by the Animate Construct spell (large, -6 to cast).",
+    },
+    "companion_bear": {
+        "name": "Bear",
+        "cost": 0,
+        "category": "standard",
+        "requires_spell": "Animal Companion",
+        "move": 6,
+        "fight": 4,
+        "shoot": 0,
+        "armour": 12,
+        "will": 3,
+        "health": 14,
+        "gear": "Unarmed",
+        "notes": "Animal Companion; Animal; Large; Strong (+2 damage). Will includes the +3 Animal Companion bonus.",
+    },
+    "companion_ice_toad": {
+        "name": "Ice Toad",
+        "cost": 0,
+        "category": "standard",
+        "requires_spell": "Animal Companion",
+        "move": 4,
+        "fight": 2,
+        "shoot": 0,
+        "armour": 10,
+        "will": 3,
+        "health": 5,
+        "gear": "Unarmed",
+        "notes": "Animal Companion; Animal; Amphibious; Powerful (double damage). Will includes the +3 Animal Companion bonus.",
+    },
+    "companion_snow_leopard": {
+        "name": "Snow Leopard",
+        "cost": 0,
+        "category": "standard",
+        "requires_spell": "Animal Companion",
+        "move": 8,
+        "fight": 3,
+        "shoot": 0,
+        "armour": 10,
+        "will": 5,
+        "health": 10,
+        "gear": "Unarmed",
+        "notes": "Animal Companion; Animal; Expert Climber. Will includes the +3 Animal Companion bonus.",
+    },
+    "companion_wolf": {
+        "name": "Wolf",
+        "cost": 0,
+        "category": "standard",
+        "requires_spell": "Animal Companion",
+        "move": 8,
+        "fight": 1,
+        "shoot": 0,
+        "armour": 10,
+        "will": 3,
+        "health": 6,
+        "gear": "Unarmed",
+        "notes": "Animal Companion; Animal; Pack Hunter. Will includes the +3 Animal Companion bonus.",
+    },
 }
 
 # Extra source books whose soldiers / creatures / rules can be toggled on per
@@ -870,8 +970,23 @@ SOURCE_BOOK_BY_SLUG = {source_slug(b): b for b in SOURCE_BOOKS}
 
 def soldier_list_for_ui() -> list[dict]:
     rows = [{"key": k, "source": "Core Rules", **v} for k, v in SOLDIERS.items()]
-    rows.sort(key=lambda r: (r["source"] != "Core Rules", r["category"] != "standard", r["cost"], r["name"]))
+    # Core soldiers first, then spell-gated summons (constructs / animal
+    # companions), then the supplement books; each group by category, cost, name.
+    rows.sort(
+        key=lambda r: (
+            r["source"] != "Core Rules",
+            bool(r.get("requires_spell")),
+            r["category"] != "standard",
+            r["cost"],
+            r["name"],
+        )
+    )
     return rows
+
+
+def animal_companion_type_keys() -> set[str]:
+    """Soldier type keys summoned by the Animal Companion spell (one allowed at a time)."""
+    return {k for k, v in SOLDIERS.items() if v.get("requires_spell") == "Animal Companion"}
 
 
 def get_soldier(type_key: str) -> dict | None:

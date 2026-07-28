@@ -1010,7 +1010,9 @@
       <p class="muted" style="font-size:0.85rem">
         Default name is the type plus a number (e.g. “Archer 1”). Rename and add a picture afterward via Edit / picture.
         Soldiers from the supplements only appear here once their source book is switched on under
-        <a href="#homerules">Additional Rules and Homerules</a>.
+        <a href="#homerules">Additional Rules and Homerules</a>. Spell-summoned members (constructs from
+        <em>Animate Construct</em>, animals from <em>Animal Companion</em>) appear for free only when your
+        wizard knows that spell.
       </p>
       <div class="table-wrap">
         <table>
@@ -1022,15 +1024,16 @@
             </tr>
           </thead>
           <tbody>
-            {% for c in catalog if c.source == 'Core Rules' or hr.enabled_sources.get(c.source) %}
+            {% for c in catalog if (c.source == 'Core Rules' or hr.enabled_sources.get(c.source)) and (not c.requires_spell or c.requires_spell in known_spell_names) %}
               {% set can_afford = wb.gold >= c.cost %}
               {% set within_soldiers = limits.soldiers < limits.max_soldiers %}
               {% set within_specialists = c.category != 'specialist' or limits.specialists < limits.max_specialists %}
-              {% set can_hire = can_afford and within_soldiers and within_specialists %}
+              {% set companion_blocked = c.requires_spell == 'Animal Companion' and has_animal_companion %}
+              {% set can_hire = can_afford and within_soldiers and within_specialists and not companion_blocked %}
               <tr {% if not can_hire %}style="opacity:0.5"{% endif %}>
                 <td><strong>{{ c.name }}</strong></td>
                 <td><span class="badge {{ c.category }}">{{ c.category }}</span></td>
-                <td class="muted">{% if c.source != 'Core Rules' %}<span class="badge">{{ c.source }}</span>{% else %}—{% endif %}</td>
+                <td class="muted">{% if c.requires_spell %}<span class="badge">via {{ c.requires_spell }}</span>{% elif c.source != 'Core Rules' %}<span class="badge">{{ c.source }}</span>{% else %}—{% endif %}</td>
                 <td class="gold">{% if c.cost == 0 %}Free{% else %}{{ c.cost }}{% endif %}</td>
                 <td>{{ c.move }}</td>
                 <td>{{ format_stat(c.fight) }}</td>
@@ -1043,7 +1046,7 @@
                   <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
                     <input type="hidden" name="action" value="hire_soldier" />
                     <input type="hidden" name="type_key" value="{{ c.key }}" />
-                    <button class="btn small" type="submit" {% if not can_hire %}disabled{% endif %}>Hire</button>
+                    <button class="btn small" type="submit" {% if not can_hire %}disabled{% endif %}{% if companion_blocked %} title="You may only have one Animal Companion at a time."{% endif %}>Hire</button>
                   </form>
                 </td>
               </tr>
