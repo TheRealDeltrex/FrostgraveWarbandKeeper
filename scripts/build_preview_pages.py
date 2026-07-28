@@ -63,12 +63,6 @@ def build_sample_warband() -> str:
             "spells": spells,
             "with_apprentice": "on",
             "apprentice_name": "Toby Ash",
-            "soldier_type_0": "thug",
-            "soldier_name_0": "Garrik",
-            "soldier_type_1": "thief",
-            "soldier_name_1": "Nissa",
-            "soldier_type_2": "archer",
-            "soldier_name_2": "Wren",
         },
     )
     location = resp.headers["Location"]
@@ -76,6 +70,11 @@ def build_sample_warband() -> str:
 
     def update(data: dict):
         post(f"/warband/{warband_id}/update", data)
+
+    # Soldiers are recruited on the warband page now, not at creation.
+    update({"action": "hire_soldier", "type_key": "thug", "soldier_name": "Garrik"})
+    update({"action": "hire_soldier", "type_key": "thief", "soldier_name": "Nissa"})
+    update({"action": "hire_soldier", "type_key": "archer", "soldier_name": "Wren"})
 
     update({"action": "update_homerules", "captain_mode": "hire", "soldier_leveling_enabled": "on"})
     update({"action": "hire_captain", "captain_name": "Kess Thorne", "captain_tricks": ["furious_attack", "riposte"]})

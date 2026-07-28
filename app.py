@@ -262,24 +262,12 @@ def warband_new():
         with_apprentice = request.form.get("with_apprentice") == "on"
         apprentice_name = (request.form.get("apprentice_name") or "").strip()
 
-        # Soldiers from creation form: soldier_type_N, soldier_name_N
-        soldiers = []
-        for key in request.form:
-            if key.startswith("soldier_type_"):
-                idx = key[len("soldier_type_") :]
-                type_key = request.form.get(key) or ""
-                if type_key:
-                    soldiers.append(
-                        {
-                            "type_key": type_key,
-                            "name": (request.form.get(f"soldier_name_{idx}") or "").strip(),
-                        }
-                    )
-
         if not name or not wizard:
             flash("Warband name and wizard name are required.", "error")
             return _render_new(school=school, selected=spell_keys)
 
+        # Soldiers are not hired at creation — they're recruited later on the
+        # warband page (from the full roster, including supplement mercenaries).
         wb, msg = create_warband(
             name,
             wizard,
@@ -287,7 +275,6 @@ def warband_new():
             spell_keys,
             with_apprentice,
             apprentice_name,
-            soldiers=soldiers or None,
         )
         if not wb:
             flash(msg, "error")
@@ -303,10 +290,6 @@ def warband_new():
                 if ap_file and ap_file.filename:
                     rel = save_portrait(wb["id"], "apprentice", ap_file)
                     wb["apprentice"]["portrait"] = rel
-            for i, s in enumerate(wb.get("soldiers") or []):
-                f = request.files.get(f"soldier_portrait_{i}")
-                if f and f.filename:
-                    s["portrait"] = save_portrait(wb["id"], f"soldier_{s['id']}", f)
         except ValueError as exc:
             flash(str(exc), "error")
 
@@ -333,10 +316,6 @@ def _render_new(school: str = "Elementalist", selected: list | None = None):
         neutral=SCHOOL_NEUTRAL,
         relations=rel,
         selected=selected or [],
-        catalog=soldier_list_for_ui(),
-        standard_items=load_spellcaster_items(),
-        potion_choices=load_potion_choices(),
-        spell_names=load_spell_names(),
     )
 
 
