@@ -881,7 +881,13 @@ def add_soldier(wb: dict, type_key: str, name: str = "") -> tuple[bool, str]:
         if req_spell not in known_spell_names(wb):
             return False, f"{info['name']} can only be summoned with the {req_spell} spell — your wizard doesn't know it."
         if req_spell == "Animal Companion" and has_animal_companion(wb):
-            return False, "You may only have one Animal Companion at a time."
+            limit = animal_companion_limit(wb)
+            if limit == 1:
+                return False, (
+                    "You may only have one Animal Companion at a time — hire an "
+                    "apprentice to field a second (one per spellcaster)."
+                )
+            return False, f"You may only have {limit} Animal Companions at a time (one per spellcaster)."
     active = active_soldiers(wb)
     if len(active) >= MAX_SOLDIERS:
         return False, f"Soldier limit reached ({MAX_SOLDIERS})."
@@ -1712,13 +1718,25 @@ def known_spell_names(wb: dict) -> set[str]:
     return {s.get("name") for s in (wb.get("wizard") or {}).get("spells") or [] if s.get("name")}
 
 
-def has_animal_companion(wb: dict) -> bool:
-    """True if the warband already fields an Animal Companion (dead ones don't count)."""
+def count_animal_companions(wb: dict) -> int:
+    """How many Animal Companions the warband currently fields (dead ones don't count)."""
     companion_keys = animal_companion_type_keys()
-    return any(
-        s.get("type_key") in companion_keys and s.get("status") != "dead"
+    return sum(
+        1
         for s in wb.get("soldiers") or []
+        if s.get("type_key") in companion_keys and s.get("status") != "dead"
     )
+
+
+def animal_companion_limit(wb: dict) -> int:
+    """Animal Companions allowed at once — one per spellcaster (the wizard, plus the
+    apprentice if the warband has one), since each can cast the spell."""
+    return 2 if wb.get("apprentice") else 1
+
+
+def has_animal_companion(wb: dict) -> bool:
+    """True if the warband is at its Animal Companion limit already."""
+    return count_animal_companions(wb) >= animal_companion_limit(wb)
 
 
 def set_base_location(wb: dict, location_key: str) -> tuple[bool, str]:

@@ -1046,7 +1046,7 @@
                   <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
                     <input type="hidden" name="action" value="hire_soldier" />
                     <input type="hidden" name="type_key" value="{{ c.key }}" />
-                    <button class="btn small" type="submit" {% if not can_hire %}disabled{% endif %}{% if companion_blocked %} title="You may only have one Animal Companion at a time."{% endif %}>Hire</button>
+                    <button class="btn small" type="submit" {% if not can_hire %}disabled{% endif %}{% if companion_blocked %} title="{% if animal_companion_limit == 1 %}You may only have one Animal Companion at a time — hire an apprentice to field a second (one per spellcaster).{% else %}You may only have {{ animal_companion_limit }} Animal Companions at a time (one per spellcaster).{% endif %}"{% endif %}>Hire</button>
                   </form>
                 </td>
               </tr>
