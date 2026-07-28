@@ -75,6 +75,22 @@ PORTRAIT_DIR.mkdir(parents=True, exist_ok=True)
 
 ALLOWED_IMAGE_EXT = {".jpg", ".jpeg", ".png", ".gif", ".webp"}
 
+# Artwork shipped with the app, shown for anyone who hasn't uploaded their own
+# picture. Named after what it depicts — "wizard", "apprentice", or a soldier
+# type_key — see scripts/build_default_portraits.py.
+DEFAULT_PORTRAIT_DIR = paths.bundle_dir() / "static" / "portraits"
+
+
+def default_portrait_name(kind: str, type_key: str | None = None) -> str | None:
+    """Filename under static/portraits/ for a character with no custom picture,
+    or None if nothing suitable ships with the app (e.g. a hired Captain, which
+    has no artwork of its own)."""
+    stem = type_key if kind == "soldier" else kind
+    if not stem:
+        return None
+    name = f"{stem}.png"
+    return name if (DEFAULT_PORTRAIT_DIR / name).is_file() else None
+
 
 def _now() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
@@ -785,6 +801,19 @@ def portrait_filesystem_path(rel: str | None) -> Path | None:
     return path if path.is_file() else None
 
 
+def resolve_portrait_path(
+    rel: str | None, kind: str, type_key: str | None = None
+) -> Path | None:
+    """The picture to actually show: the uploaded one if there is one, else the
+    default that ships with the app. Used by the PDF export; the web templates go
+    through the portrait_src() Jinja global for the same decision."""
+    path = portrait_filesystem_path(rel)
+    if path:
+        return path
+    name = default_portrait_name(kind, type_key)
+    return (DEFAULT_PORTRAIT_DIR / name) if name else None
+
+
 def count_specialists(wb: dict) -> int:
     n = 0
     for s in wb.get("soldiers") or []:
@@ -1368,6 +1397,9 @@ def promote_soldier_to_captain(
         "has_dagger": False,
         "notes": soldier.get("notes", ""),
         "portrait": soldier.get("portrait"),
+        # Kept so a promoted captain who never uploaded a picture keeps showing
+        # the default artwork of the soldier type they were promoted from.
+        "type_key": soldier.get("type_key"),
         "xp": 0,
         "level": 0,
         "levelup_counts": {s: 0 for s in LEVELUP_STATS},

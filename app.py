@@ -106,6 +106,7 @@ from warband_store import (
     hire_captain,
     import_warband_json,
     animal_companion_limit,
+    default_portrait_name,
     has_animal_companion,
     known_spell_ids,
     known_spell_names,
@@ -143,7 +144,19 @@ app.config["MAX_CONTENT_LENGTH"] = 8 * 1024 * 1024  # 8 MB uploads
 # and shows a "session only — export to save" reminder, since nothing persists.
 BROWSER_MODE = os.environ.get("FWK_BROWSER") == "1"
 
+
+def portrait_src(portrait: str | None, kind: str, type_key: str | None = None) -> str | None:
+    """URL of the picture to show for a character: their uploaded one, else the
+    default artwork shipped with the app. None means neither exists, and the
+    template should fall back to its "?" placeholder."""
+    if portrait:
+        return url_for("portrait_file", relpath=portrait)
+    name = default_portrait_name(kind, type_key)
+    return url_for("static", filename=f"portraits/{name}") if name else None
+
+
 app.jinja_env.globals.update(
+    portrait_src=portrait_src,
     format_stat=format_stat,
     STARTING_GOLD=STARTING_GOLD,
     APPRENTICE_COST=APPRENTICE_COST,

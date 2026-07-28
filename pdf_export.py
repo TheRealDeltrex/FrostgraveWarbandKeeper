@@ -25,8 +25,8 @@ from warband_store import (
     captain_effective_stats,
     enrich_soldier,
     normalize_item_slots,
-    portrait_filesystem_path,
     recompute_spell_cns,
+    resolve_portrait_path,
 )
 
 # Apprentice casts with -2 to the roll => effective difficulty is wizard CN + 2
@@ -116,14 +116,17 @@ def _draw_portrait(
     x: float,
     y: float,
     size: float = 26,
+    kind: str = "",
+    type_key: str | None = None,
 ) -> None:
-    """Framed portrait; crop-to-fit (no stretch). Empty frame if no image."""
+    """Framed portrait; crop-to-fit (no stretch). Falls back to the default
+    artwork shipped with the app, then to an empty frame if there is none."""
     pdf.set_draw_color(50, 80, 110)
     pdf.set_line_width(0.4)
     pdf.set_fill_color(245, 248, 252)
     pdf.rect(x, y, size, size, style="DF")
 
-    path = portrait_filesystem_path(rel)
+    path = resolve_portrait_path(rel, kind, type_key)
     if path:
         cropped = _crop_to_square(path)
         if cropped is not None:
@@ -234,7 +237,7 @@ def build_warband_pdf(wb: dict) -> bytes:
     # --- Wizard ---
     _next_section("Wizard")
     y0 = pdf.get_y()
-    _draw_portrait(pdf, wiz.get("portrait"), pdf.l_margin, y0, wiz_size)
+    _draw_portrait(pdf, wiz.get("portrait"), pdf.l_margin, y0, wiz_size, "wizard")
     left = pdf.l_margin + wiz_size + portrait_gap
     pdf.set_xy(left, y0)
     pdf.set_font("Helvetica", "B", 12)
@@ -273,7 +276,7 @@ def build_warband_pdf(wb: dict) -> bytes:
     if ap:
         _next_section("Apprentice")
         y0 = pdf.get_y()
-        _draw_portrait(pdf, ap.get("portrait"), pdf.l_margin, y0, wiz_size)
+        _draw_portrait(pdf, ap.get("portrait"), pdf.l_margin, y0, wiz_size, "apprentice")
         left = pdf.l_margin + wiz_size + portrait_gap
         pdf.set_xy(left, y0)
         pdf.set_font("Helvetica", "B", 12)
@@ -355,7 +358,7 @@ def build_warband_pdf(wb: dict) -> bytes:
         cap_slots_n = int(homerules.get(cap_slot_key, 6))
         _next_section("Captain")
         y0 = pdf.get_y()
-        _draw_portrait(pdf, cap.get("portrait"), pdf.l_margin, y0, wiz_size)
+        _draw_portrait(pdf, cap.get("portrait"), pdf.l_margin, y0, wiz_size, "soldier", cap.get("type_key"))
         left = pdf.l_margin + wiz_size + portrait_gap
         pdf.set_xy(left, y0)
         pdf.set_font("Helvetica", "B", 12)
@@ -410,7 +413,7 @@ def build_warband_pdf(wb: dict) -> bytes:
             if pdf.get_y() > 250:
                 pdf.add_page()
             y0 = pdf.get_y()
-            _draw_portrait(pdf, s.get("portrait"), pdf.l_margin, y0, sol_size)
+            _draw_portrait(pdf, s.get("portrait"), pdf.l_margin, y0, sol_size, "soldier", s.get("type_key"))
             left = pdf.l_margin + sol_size + portrait_gap
             pdf.set_xy(left, y0)
             pdf.set_font("Helvetica", "B", 10)
