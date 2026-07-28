@@ -6,8 +6,7 @@
     <p>
       Rules from Frostgrave 2e core: start with
       <span class="gold">{{ STARTING_GOLD }} gc</span>,
-      apprentice costs <span class="gold">{{ APPRENTICE_COST }} gc</span>,
-      max {{ MAX_SOLDIERS }} soldiers ({{ MAX_SPECIALISTS }} specialists).
+      apprentice costs <span class="gold">{{ APPRENTICE_COST }} gc</span>.
       Spells: <strong>{{ OWN_SCHOOL_SPELLS }} own</strong>,
       <strong>1 from each aligned</strong>,
       <strong>{{ NEUTRAL_SPELLS }} from different neutrals</strong>,
@@ -51,32 +50,6 @@
       </div>
       <p class="muted">Starting wizard stats: Move 6 · Fight +2 · Shoot +0 · Armour 10 · Will +4 · Health 14</p>
     </div>
-
-    <details class="ref-panel card" style="margin-bottom:1.15rem">
-      <summary>Standard arms &amp; armour (open list)</summary>
-      <p class="muted" style="font-size:0.88rem">General Arms and Armour List (2e). Spellcasters may not wear armour or carry shields.</p>
-      <div class="item-list-detail">
-        <div class="item-list-head" aria-hidden="true">
-          <span class="col-name">Item</span>
-          <span class="col-cat">Category</span>
-          <span class="col-summary">Summary</span>
-          <span class="col-info"></span>
-        </div>
-        {% for it in standard_items %}
-          <div class="item-row">
-            <details class="item-desc">
-              <summary class="item-row-main">
-                <span class="col-name"><strong>{{ it.name }}</strong></span>
-                <span class="col-cat"><span class="badge">{{ it.category }}</span></span>
-                <span class="col-summary muted">{{ it.summary }}</span>
-                <span class="col-info item-desc-toggle">Info</span>
-              </summary>
-              <p class="item-desc-body">{{ it.description }}</p>
-            </details>
-          </div>
-        {% endfor %}
-      </div>
-    </details>
 
     <div class="card">
       <h2>2. Spells
@@ -196,54 +169,16 @@
     </div>
 
     <div class="card">
-      <h2>4. Recruit soldiers</h2>
-      <div class="limit-bar">
-        <div class="limit" id="sol-count">Soldiers: 0 / {{ MAX_SOLDIERS }}</div>
-        <div class="limit" id="spec-count">Specialists: 0 / {{ MAX_SPECIALISTS }}</div>
-        <div class="limit">Treasury: <span class="gold" id="gold-display">{{ STARTING_GOLD }}</span> gc</div>
-      </div>
-      <p class="muted" id="hire-status">Add soldiers now or leave empty and hire later.</p>
-
-      <div id="soldier-rows" class="stack-sm" style="margin:1rem 0"></div>
-      <button type="button" class="btn secondary" id="add-soldier-btn">+ Add soldier</button>
-
-      <template id="soldier-row-tpl">
-        <div class="soldier-row form-row inline">
-          <div style="flex:2">
-            <label>Type</label>
-            <select class="sol-type">
-              <option value="" data-cost="0" selected>— Choose a soldier —</option>
-              {% for c in catalog if c.source == 'Core Rules' %}
-                <option value="{{ c.key }}" data-cost="{{ c.cost }}" data-cat="{{ c.category }}">
-                  {{ c.name }} — {{ c.cost }} gc ({{ c.category }})
-                  · Move {{ c.move }} · Fight {{ format_stat(c.fight) }} · Shoot {{ format_stat(c.shoot) }} · Armour {{ c.armour }} · Will {{ format_stat(c.will) }} · Health {{ c.health }}
-                </option>
-              {% endfor %}
-            </select>
-          </div>
-          <div>
-            <label>Name</label>
-            <input type="text" class="sol-name" placeholder="Optional" />
-          </div>
-          <div>
-            <label>Picture</label>
-            <input type="file" class="sol-pic" accept="image/*" />
-          </div>
-          <div>
-            <label>&nbsp;</label>
-            <button type="button" class="btn danger small sol-remove">Remove</button>
-          </div>
-        </div>
-      </template>
-    </div>
-
-    <div class="card">
-      <h2>5. Confirm</h2>
+      <h2>4. Confirm</h2>
+      <p class="muted" style="margin:0 0 0.75rem">
+        Soldiers aren't hired here — create the warband first, then recruit from the full roster
+        on the warband page (that's also where supplement mercenaries live).
+      </p>
       <div class="actions">
         <button class="btn" type="submit" id="submit-btn" disabled>Create warband</button>
         <a class="btn secondary" href="{{ url_for('home') }}">Cancel</a>
       </div>
-      <p class="muted" id="submit-hint" style="margin-top:0.5rem">Complete spell selection (and stay within gold/limits) to enable create.</p>
+      <p class="muted" id="submit-hint" style="margin-top:0.5rem">Complete spell selection to enable create.</p>
     </div>
   </form>
 
@@ -256,18 +191,12 @@
     const NEED = {{ STARTING_SPELL_COUNT }};
     const OWN_N = {{ OWN_SCHOOL_SPELLS }};
     const NEU_N = {{ NEUTRAL_SPELLS }};
-    const MAX_SOL = {{ MAX_SOLDIERS }};
-    const MAX_SPEC = {{ MAX_SPECIALISTS }};
-    const START_GOLD = {{ STARTING_GOLD }};
-    const APP_COST = {{ APPRENTICE_COST }};
 
     const selectedList = document.getElementById('selected-list');
     const spellOrder = document.getElementById('spell_order');
     const submitBtn = document.getElementById('submit-btn');
     const spellStatus = document.getElementById('spell-status');
-    const withAp = document.getElementById('with_apprentice');
     let order = []; // spell ids in display order
-    let soldierIdx = 0;
 
     function boxes() { return [...document.querySelectorAll('.spell-cb')]; }
 
@@ -471,84 +400,13 @@
       refreshSpellUI();
     }));
 
-    // --- Soldiers / gold ---
-    const rowsEl = document.getElementById('soldier-rows');
-    const tpl = document.getElementById('soldier-row-tpl');
-
-    function goldSpent() {
-      let g = 0;
-      if (withAp.checked) g += APP_COST;
-      rowsEl.querySelectorAll('.soldier-row').forEach(row => {
-        const opt = row.querySelector('.sol-type').selectedOptions[0];
-        if (!opt || !opt.value) return;   // placeholder: nothing chosen yet
-        g += parseInt(opt.dataset.cost, 10) || 0;
-      });
-      return g;
-    }
-
-    function soldierStats() {
-      let n = 0, sp = 0;
-      rowsEl.querySelectorAll('.soldier-row').forEach(row => {
-        const opt = row.querySelector('.sol-type').selectedOptions[0];
-        if (!opt || !opt.value) return;   // placeholder: not a hired soldier yet
-        n++;
-        if (opt.dataset.cat === 'specialist') sp++;
-      });
-      return { n, sp };
-    }
-
-    function reindexSoldiers() {
-      [...rowsEl.querySelectorAll('.soldier-row')].forEach((row, i) => {
-        row.querySelector('.sol-type').name = 'soldier_type_' + i;
-        row.querySelector('.sol-name').name = 'soldier_name_' + i;
-        row.querySelector('.sol-pic').name = 'soldier_portrait_' + i;
-      });
-    }
-
-    function refreshGoldUI() {
-      const spent = goldSpent();
-      const left = START_GOLD - spent;
-      const { n, sp } = soldierStats();
-      document.getElementById('gold-display').textContent = left;
-      document.getElementById('sol-count').textContent = 'Soldiers: ' + n + ' / ' + MAX_SOL;
-      document.getElementById('spec-count').textContent = 'Specialists: ' + sp + ' / ' + MAX_SPEC;
-      document.getElementById('sol-count').classList.toggle('bad', n > MAX_SOL);
-      document.getElementById('spec-count').classList.toggle('bad', sp > MAX_SPEC);
-      const ok = left >= 0 && n <= MAX_SOL && sp <= MAX_SPEC;
-      document.getElementById('hire-status').textContent = ok
-        ? ('Cost so far: ' + spent + ' gc · Remaining: ' + left + ' gc')
-        : 'Over gold budget or unit limits!';
-      document.getElementById('hire-status').style.color = ok ? 'var(--muted)' : 'var(--error)';
-      updateSubmit();
-    }
-
-    function addSoldierRow() {
-      if (soldierStats().n >= MAX_SOL) return;
-      const node = tpl.content.cloneNode(true);
-      const row = node.querySelector('.soldier-row');
-      row.querySelector('.sol-type').addEventListener('change', refreshGoldUI);
-      row.querySelector('.sol-remove').addEventListener('click', () => {
-        row.remove();
-        reindexSoldiers();
-        refreshGoldUI();
-      });
-      rowsEl.appendChild(node);
-      reindexSoldiers();
-      refreshGoldUI();
-    }
-
-    document.getElementById('add-soldier-btn').addEventListener('click', addSoldierRow);
-    withAp.addEventListener('change', refreshGoldUI);
-
+    // --- Submit gating (spells only; soldiers are hired later on the warband page) ---
     function updateSubmit() {
-      const c = counts();
-      const spent = goldSpent();
-      const { n, sp } = soldierStats();
-      const ok = spellsValid(c) && spent <= START_GOLD && n <= MAX_SOL && sp <= MAX_SPEC;
+      const ok = spellsValid(counts());
       submitBtn.disabled = !ok;
       document.getElementById('submit-hint').textContent = ok
         ? 'Ready to create.'
-        : 'Complete spell selection and stay within gold / unit limits.';
+        : 'Complete spell selection to enable create.';
     }
 
     document.getElementById('create-form').addEventListener('submit', e => {
@@ -557,7 +415,6 @@
     });
 
     refreshSpellUI();
-    refreshGoldUI();
   })();
   </script>
 {% endblock %}

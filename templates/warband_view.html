@@ -63,7 +63,7 @@
         <summary>Source books</summary>
         <p class="muted" style="font-size:0.85rem">
           Switch on the supplements you play with. Enabled books add their mercenaries to the Hire soldier
-          list. Every creature is always browsable on the <a href="{{ url_for('reference') }}">Reference</a> page.
+          list. Every creature is always browsable in the <a href="{{ url_for('reference') }}">Frostgrave Lexicon</a>.
         </p>
         <div class="stat-row">
           {% for book in source_books %}
@@ -478,32 +478,6 @@
         <button class="btn danger small" type="submit" onclick="return confirm('Dismiss apprentice?');">Dismiss apprentice</button>
       </form>
     {% endif %}
-  </details>
-
-  <details class="ref-panel card">
-    <summary>Standard arms &amp; armour (open list)</summary>
-    <p class="muted" style="font-size:0.88rem">General Arms and Armour List (2e). Spellcasters may not wear armour or carry shields.</p>
-    <div class="item-list-detail">
-      <div class="item-list-head" aria-hidden="true">
-        <span class="col-name">Item</span>
-        <span class="col-cat">Category</span>
-        <span class="col-summary">Summary</span>
-        <span class="col-info"></span>
-      </div>
-      {% for it in full_standard_items %}
-        <div class="item-row">
-          <details class="item-desc">
-            <summary class="item-row-main">
-              <span class="col-name"><strong>{{ it.name }}</strong></span>
-              <span class="col-cat"><span class="badge">{{ it.category }}</span></span>
-              <span class="col-summary muted">{{ it.summary }}</span>
-              <span class="col-info item-desc-toggle">Info</span>
-            </summary>
-            <p class="item-desc-body">{{ it.description }}</p>
-          </details>
-        </div>
-      {% endfor %}
-    </div>
   </details>
 
   {# ---- Spells ---- #}
