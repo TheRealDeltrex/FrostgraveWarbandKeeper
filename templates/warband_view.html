@@ -66,7 +66,11 @@
           Switch on the supplements you play with. Enabled books add their mercenaries to the Hire soldier
           list. Every creature is always browsable in the <a href="{{ url_for('reference') }}">Frostgrave Lexicon</a>.
         </p>
-        <div class="stat-row">
+        <div class="actions" style="margin-bottom:0.5rem">
+          <button class="btn small secondary" type="button" data-toggle-sources="on">Enable all</button>
+          <button class="btn small secondary" type="button" data-toggle-sources="off">Disable all</button>
+        </div>
+        <div class="stat-row" id="source-books">
           {% for book in source_books %}
             <label class="checkbox-row" style="margin:0.2rem 0">
               <input name="source_enabled_{{ book.slug }}" type="checkbox" {% if hr.enabled_sources.get(book.name) %}checked{% endif %} />
@@ -74,6 +78,18 @@
             </label>
           {% endfor %}
         </div>
+        <script>
+          // Tick/untick every source book at once. Still just changes the
+          // checkboxes — the surrounding form's Save button commits it.
+          document.querySelectorAll("[data-toggle-sources]").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+              var on = btn.dataset.toggleSources === "on";
+              document
+                .querySelectorAll('#source-books input[type="checkbox"]')
+                .forEach(function (box) { box.checked = on; });
+            });
+          });
+        </script>
       </details>
 
       <div class="form-row">
@@ -107,7 +123,7 @@
             <label>&nbsp;</label>
             <div class="checkbox-row">
               <input id="captain_bonus_choice_enabled" name="captain_bonus_choice_enabled" type="checkbox" {% if hr.captain_bonus_choice_enabled %}checked{% endif %} />
-              <label for="captain_bonus_choice_enabled" style="margin:0">Offer a +1-to-any-stat bonus at hire</label>
+              <label for="captain_bonus_choice_enabled" style="margin:0">Offer a +1-to-any-stat bonus at hire (+2 if spent on Health)</label>
             </div>
           </div>
           <div class="form-row">
@@ -143,6 +159,46 @@
       </details>
 
       <details class="ref-panel">
+        <summary>Promote Captain</summary>
+        <p class="muted" style="font-size:0.85rem">
+          Enabled via the Captain mode select above ("Promote only" or "Hire or promote"). Settings below apply whenever promotion is allowed.
+        </p>
+        <div class="grid-2">
+          <div class="form-row">
+            <label for="promote_captain_cost">Promotion cost (gc)</label>
+            <input id="promote_captain_cost" name="promote_captain_cost" type="number" min="0" value="{{ hr.promote_captain_cost }}" />
+          </div>
+          <div class="form-row">
+            <label for="promote_captain_item_slots">Item slots</label>
+            <input id="promote_captain_item_slots" name="promote_captain_item_slots" type="number" min="1" value="{{ hr.promote_captain_item_slots }}" />
+          </div>
+          <div class="form-row">
+            <label for="promote_captain_tricks">Tricks on promotion</label>
+            <input id="promote_captain_tricks" name="promote_captain_tricks" type="number" min="0" max="{{ CAPTAIN_TRICKS|length }}" value="{{ hr.promote_captain_tricks }}" />
+          </div>
+          <div class="form-row">
+            <label>&nbsp;</label>
+            <div class="checkbox-row">
+              <input id="promote_captain_bonus_choice_enabled" name="promote_captain_bonus_choice_enabled" type="checkbox" {% if hr.promote_captain_bonus_choice_enabled %}checked{% endif %} />
+              <label for="promote_captain_bonus_choice_enabled" style="margin:0">Let the player pick a +1 bonus stat (+2 if spent on Health)</label>
+            </div>
+          </div>
+        </div>
+        <p class="muted" style="font-size:0.85rem;margin-top:0.5rem">
+          Flat promotion bonus — always applied in full, on top of the pick above. Zero by default,
+          so a promotion is worth just the single chosen bonus.
+        </p>
+        <div class="stat-row">
+          {% for stat in LEVELUP_STATS %}
+            <div class="form-row">
+              <label for="promote_bonus_{{ stat }}">+{{ stat|capitalize }}</label>
+              <input id="promote_bonus_{{ stat }}" name="promote_bonus_{{ stat }}" type="number" min="0" value="{{ hr.promote_captain_bonus[stat] }}" />
+            </div>
+          {% endfor %}
+        </div>
+      </details>
+
+      <details class="ref-panel">
         <summary>Soldier Leveling</summary>
         <div class="checkbox-row">
           <input id="soldier_leveling_enabled" name="soldier_leveling_enabled" type="checkbox" {% if hr.soldier_leveling_enabled %}checked{% endif %} />
@@ -166,41 +222,8 @@
         </div>
       </details>
 
-      <details class="ref-panel">
-        <summary>Promote Captain</summary>
-        <p class="muted" style="font-size:0.85rem">
-          Enabled via the Captain mode select above ("Promote only" or "Hire or promote"). Settings below apply whenever promotion is allowed.
-        </p>
-        <div class="grid-2">
-          <div class="form-row">
-            <label for="promote_captain_cost">Promotion cost (gc)</label>
-            <input id="promote_captain_cost" name="promote_captain_cost" type="number" min="0" value="{{ hr.promote_captain_cost }}" />
-          </div>
-          <div class="form-row">
-            <label for="promote_captain_item_slots">Item slots</label>
-            <input id="promote_captain_item_slots" name="promote_captain_item_slots" type="number" min="1" value="{{ hr.promote_captain_item_slots }}" />
-          </div>
-          <div class="form-row">
-            <label>&nbsp;</label>
-            <div class="checkbox-row">
-              <input id="promote_captain_bonus_choice_enabled" name="promote_captain_bonus_choice_enabled" type="checkbox" {% if hr.promote_captain_bonus_choice_enabled %}checked{% endif %} />
-              <label for="promote_captain_bonus_choice_enabled" style="margin:0">Let the player pick an extra +1 bonus stat</label>
-            </div>
-          </div>
-        </div>
-        <p class="muted" style="font-size:0.85rem;margin-top:0.5rem">Promotion bonus — always applied in full, not selectable at promotion</p>
-        <div class="stat-row">
-          {% for stat in LEVELUP_STATS %}
-            <div class="form-row">
-              <label for="promote_bonus_{{ stat }}">+{{ stat|capitalize }}</label>
-              <input id="promote_bonus_{{ stat }}" name="promote_bonus_{{ stat }}" type="number" min="0" value="{{ hr.promote_captain_bonus[stat] }}" />
-            </div>
-          {% endfor %}
-        </div>
-      </details>
-
       <div class="actions">
-        <button class="btn" type="submit">Save homerules</button>
+        <button class="btn" type="submit">Save Rules</button>
       </div>
     </form>
   </details>
@@ -578,7 +601,7 @@
         {% set cap_dismiss_cost = hr.promote_captain_cost if cap.origin == 'promoted' else hr.captain_hiring_cost %}
         {% set cap_eff = captain_effective_stats(cap) %}
         <div class="char-block">
-          {% set cap_src = portrait_src(cap.portrait, 'soldier', cap.type_key) %}
+          {% set cap_src = portrait_src(cap.portrait, 'captain', cap.type_key) %}
           {% if cap_src %}
             <img class="portrait-md" src="{{ cap_src }}" alt="" />
           {% else %}
@@ -609,7 +632,7 @@
               <p class="muted" style="font-size:0.85rem">
                 {{ 'Promoted from the ranks' if cap.origin == 'promoted' else 'Hired' }} · Level {{ cap.level }}/{{ hr.captain_max_level }} · XP {{ cap.xp }}
                 {% if cap.bonus_extra_stat %}
-                  · Starting bonus: +1 {{ cap.bonus_extra_stat|capitalize }}
+                  · Starting bonus: +{{ bonus_choice_amount(cap.bonus_extra_stat) }} {{ cap.bonus_extra_stat|capitalize }}
                 {% endif %}
                 {% if hr.captain_mind_control != 'none' %}
                   · {{ CAPTAIN_MIND_CONTROL_LABELS[hr.captain_mind_control] }} (homerule note — not simulated)
@@ -735,10 +758,10 @@
               </div>
               {% if hr.captain_bonus_choice_enabled %}
                 <div>
-                  <label for="captain_extra_stat">+1 bonus to</label>
+                  <label for="captain_extra_stat">Starting bonus</label>
                   <select id="captain_extra_stat" name="captain_extra_stat">
                     {% for stat in LEVELUP_STATS %}
-                      <option value="{{ stat }}">{{ stat|capitalize }}</option>
+                      <option value="{{ stat }}">+{{ bonus_choice_amount(stat) }} {{ stat|capitalize }}</option>
                     {% endfor %}
                   </select>
                 </div>
@@ -838,7 +861,7 @@
                     <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
                       <input type="hidden" name="action" value="soldier_status" />
                       <input type="hidden" name="soldier_id" value="{{ s.id }}" />
-                      <select name="status" onchange="this.form.submit()">
+                      <select name="status" data-autosubmit>
                         {% for st in ['active', 'injured', 'dead'] %}
                           <option value="{{ st }}" {% if s.status == st %}selected{% endif %}>{{ st }}</option>
                         {% endfor %}
@@ -903,24 +926,27 @@
                         <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="stack-sm" style="margin-top:0.4rem" onsubmit="return confirm('Promote {{ s.name }} to Captain for {{ hr.promote_captain_cost }} gc?');">
                           <input type="hidden" name="action" value="promote_soldier" />
                           <input type="hidden" name="soldier_id" value="{{ s.id }}" />
-                          <p class="muted" style="font-size:0.8rem;margin:0">
-                            Grants +{{ hr.promote_captain_bonus.fight }} Fight, +{{ hr.promote_captain_bonus.shoot }} Shoot,
-                            +{{ hr.promote_captain_bonus.will }} Will, +{{ hr.promote_captain_bonus.health }} Health (set in Homerules).
-                          </p>
+                          {# Skip the flat-bonus blurb entirely when it's all zeroes (the default). #}
+                          {% if hr.promote_captain_bonus.values() | select | list %}
+                            <p class="muted" style="font-size:0.8rem;margin:0">
+                              Grants +{{ hr.promote_captain_bonus.fight }} Fight, +{{ hr.promote_captain_bonus.shoot }} Shoot,
+                              +{{ hr.promote_captain_bonus.will }} Will, +{{ hr.promote_captain_bonus.health }} Health (set in Homerules).
+                            </p>
+                          {% endif %}
                           {% if hr.promote_captain_bonus_choice_enabled %}
                             <label style="font-size:0.8rem">
-                              Extra +1 bonus to
+                              Starting bonus
                               <select name="extra_stat">
                                 {% for stat in LEVELUP_STATS %}
-                                  <option value="{{ stat }}">{{ stat|capitalize }}</option>
+                                  <option value="{{ stat }}">+{{ bonus_choice_amount(stat) }} {{ stat|capitalize }}</option>
                                 {% endfor %}
                               </select>
                             </label>
                           {% endif %}
-                          {% if hr.captain_starting_tricks > 0 %}
-                            <details class="trick-picker" data-required="{{ hr.captain_starting_tricks }}">
+                          {% if hr.promote_captain_tricks > 0 %}
+                            <details class="trick-picker" data-required="{{ hr.promote_captain_tricks }}">
                               <summary class="muted" style="cursor:pointer;font-size:0.8rem">
-                                Pick {{ hr.captain_starting_tricks }} starting tricks (<span class="trick-count">0</span>/{{ hr.captain_starting_tricks }} selected)
+                                Pick {{ hr.promote_captain_tricks }} tricks (<span class="trick-count">0</span>/{{ hr.promote_captain_tricks }} selected)
                               </summary>
                               <div class="stack-sm">
                                 {% for trick in CAPTAIN_TRICKS %}
@@ -1028,7 +1054,9 @@
             </tr>
           </thead>
           <tbody>
-            {% for c in catalog if (c.source == 'Core Rules' or hr.enabled_sources.get(c.source)) and (not c.requires_spell or c.requires_spell in known_spell_names) %}
+            {% for group in catalog_groups %}
+              <tr class="group-row"><th colspan="12">{{ group.label }}</th></tr>
+              {% for c in group.soldiers %}
               {% set can_afford = wb.gold >= c.cost %}
               {% set within_soldiers = limits.soldiers < limits.max_soldiers %}
               {% set within_specialists = c.category != 'specialist' or limits.specialists < limits.max_specialists %}
@@ -1054,6 +1082,7 @@
                   </form>
                 </td>
               </tr>
+              {% endfor %}
             {% endfor %}
           </tbody>
         </table>

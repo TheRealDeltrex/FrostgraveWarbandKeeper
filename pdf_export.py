@@ -358,7 +358,7 @@ def build_warband_pdf(wb: dict) -> bytes:
         cap_slots_n = int(homerules.get(cap_slot_key, 6))
         _next_section("Captain")
         y0 = pdf.get_y()
-        _draw_portrait(pdf, cap.get("portrait"), pdf.l_margin, y0, wiz_size, "soldier", cap.get("type_key"))
+        _draw_portrait(pdf, cap.get("portrait"), pdf.l_margin, y0, wiz_size, "captain", cap.get("type_key"))
         left = pdf.l_margin + wiz_size + portrait_gap
         pdf.set_xy(left, y0)
         pdf.set_font("Helvetica", "B", 12)

@@ -141,21 +141,38 @@
           });
         }
 
+        function saveViewState() {
+          try {
+            sessionStorage.setItem(scrollKey, String(window.scrollY));
+          } catch (err) {
+            /* sessionStorage unavailable (private mode etc.) — ignore */
+          }
+          saveDetailsState();
+        }
+
         document.addEventListener(
           "submit",
           function (e) {
             var form = e.target;
             if (form && form.tagName === "FORM" && (form.method || "get").toLowerCase() === "post") {
-              try {
-                sessionStorage.setItem(scrollKey, String(window.scrollY));
-              } catch (err) {
-                /* sessionStorage unavailable (private mode etc.) — ignore */
-              }
-              saveDetailsState();
+              saveViewState();
             }
           },
           true
         );
+
+        // Controls that submit themselves the moment they change (the soldier
+        // status dropdown). These go through here instead of an inline
+        // this.form.submit() because that call does NOT fire the 'submit'
+        // event above — so the scroll position and open cards would be lost
+        // and the page would snap back to the top after saving.
+        document.addEventListener("change", function (e) {
+          var el = e.target;
+          if (el && el.hasAttribute && el.hasAttribute("data-autosubmit") && el.form) {
+            saveViewState();
+            el.form.submit();
+          }
+        });
 
         // Runs immediately (this script is at the end of <body>, so the DOM —
         // including every <details> — already exists) to avoid a visible flash

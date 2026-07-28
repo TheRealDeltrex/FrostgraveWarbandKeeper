@@ -127,7 +127,9 @@
           </tr>
         </thead>
         <tbody>
-          {% for s in soldiers %}
+          {% for group in soldier_groups %}
+            <tr class="group-row"><th colspan="11">{{ group.label }} ({{ group.soldiers|length }})</th></tr>
+            {% for s in group.soldiers %}
             <tr>
               <td><strong>{{ s.name }}</strong></td>
               <td><span class="badge {{ s.category }}">{{ s.category }}</span></td>
@@ -141,6 +143,7 @@
               <td>{{ s.health }}</td>
               <td class="muted">{{ s.gear }}</td>
             </tr>
+            {% endfor %}
           {% endfor %}
         </tbody>
       </table>

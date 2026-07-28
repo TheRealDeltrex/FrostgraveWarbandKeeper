@@ -41,6 +41,7 @@ from frostgrave_data import (
     PROMOTE_CAPTAIN_BONUS,
     PROMOTE_CAPTAIN_COST,
     PROMOTE_CAPTAIN_ITEM_SLOTS,
+    PROMOTE_CAPTAIN_TRICKS,
     SCHOOL_ALIGNED,
     SCHOOL_NEUTRAL,
     SCHOOL_OPPOSED,
@@ -56,6 +57,7 @@ from frostgrave_data import (
     WIZARD_BASE,
     WIZARD_ITEM_SLOTS,
     animal_companion_type_keys,
+    bonus_choice_amount,
     cn_penalty,
     effective_cn,
     find_spell,
@@ -83,13 +85,22 @@ DEFAULT_PORTRAIT_DIR = paths.bundle_dir() / "static" / "portraits"
 
 def default_portrait_name(kind: str, type_key: str | None = None) -> str | None:
     """Filename under static/portraits/ for a character with no custom picture,
-    or None if nothing suitable ships with the app (e.g. a hired Captain, which
-    has no artwork of its own)."""
-    stem = type_key if kind == "soldier" else kind
-    if not stem:
-        return None
-    name = f"{stem}.png"
-    return name if (DEFAULT_PORTRAIT_DIR / name).is_file() else None
+    or None if nothing suitable ships with the app."""
+    if kind == "soldier":
+        stems = [type_key]
+    elif kind == "captain":
+        # A promoted captain keeps the look of the soldier they were promoted
+        # from; a hired one falls back to the generic captain artwork.
+        stems = [type_key, "captain"]
+    else:
+        stems = [kind]
+    for stem in stems:
+        if not stem:
+            continue
+        name = f"{stem}.png"
+        if (DEFAULT_PORTRAIT_DIR / name).is_file():
+            return name
+    return None
 
 
 def _now() -> str:
@@ -143,7 +154,7 @@ def empty_wizard(name: str = "", school: str = "Elementalist") -> dict:
         "xp": 0,
         "stats": stats,
         "item_slots": empty_slots(WIZARD_ITEM_SLOTS),
-        "has_dagger": False,  # free slot (2e: first dagger takes no slot)
+        "has_dagger": True,  # free slot (2e: first dagger takes no slot), so on by default
         "items": [],  # legacy
         "spells": [],
         "notes": "",
@@ -159,7 +170,7 @@ def empty_apprentice(name: str = "") -> dict:
         "level": 0,
         "stats": stats,
         "item_slots": empty_slots(APPRENTICE_ITEM_SLOTS),
-        "has_dagger": False,
+        "has_dagger": True,
         "items": [],
         "notes": "",
         "portrait": None,
@@ -183,8 +194,9 @@ def default_homerules() -> dict:
         "soldier_stat_caps": deepcopy(SOLDIER_STAT_CAPS),
         "promote_captain_cost": PROMOTE_CAPTAIN_COST,
         "promote_captain_bonus": deepcopy(PROMOTE_CAPTAIN_BONUS),
-        "promote_captain_bonus_choice_enabled": False,
+        "promote_captain_bonus_choice_enabled": True,
         "promote_captain_item_slots": PROMOTE_CAPTAIN_ITEM_SLOTS,
+        "promote_captain_tricks": PROMOTE_CAPTAIN_TRICKS,
         # Per-source-book content toggles (soldiers/creatures/rules from the
         # supplements). Off by default, like every other homerule here.
         "enabled_sources": {book: False for book in SOURCE_BOOKS},
@@ -216,7 +228,7 @@ def empty_captain(name: str = "", homerules: dict | None = None, origin: str = "
         "stats": stats,
         "bonus_extra_stat": None,  # one of LEVELUP_STATS | None (hire/promote +1 pick)
         "item_slots": empty_slots(n),
-        "has_dagger": False,
+        "has_dagger": True,
         "notes": "",
         "portrait": None,
         "xp": 0,
@@ -258,7 +270,7 @@ def sync_apprentice(wb: dict) -> None:
     }
     ap["stats"] = ap_stats
     ap["level"] = int(wiz.get("level", 0)) // 2
-    ap.setdefault("has_dagger", False)
+    ap.setdefault("has_dagger", True)
     ap["item_slots"] = normalize_item_slots(
         ap.get("item_slots", ap.get("items")), APPRENTICE_ITEM_SLOTS
     )
@@ -521,7 +533,7 @@ def load_warband(warband_id: str) -> dict | None:
         wstats["health"] = 14
     wstats.setdefault("health", 14)
     wiz.pop("health_current", None)
-    wiz.setdefault("has_dagger", False)
+    wiz.setdefault("has_dagger", True)
     # Migrate items -> item_slots
     if "item_slots" not in wiz or not isinstance(wiz.get("item_slots"), list):
         wiz["item_slots"] = normalize_item_slots(wiz.get("items"), WIZARD_ITEM_SLOTS)
@@ -550,7 +562,7 @@ def load_warband(warband_id: str) -> dict | None:
         ]
     if wb.get("apprentice"):
         ap = wb["apprentice"]
-        ap.setdefault("has_dagger", False)
+        ap.setdefault("has_dagger", True)
         ap.pop("health_current", None)
         if "item_slots" not in ap or not isinstance(ap.get("item_slots"), list):
             ap["item_slots"] = normalize_item_slots(ap.get("items"), APPRENTICE_ITEM_SLOTS)
@@ -596,7 +608,7 @@ def load_warband(warband_id: str) -> dict | None:
         cap.setdefault("bonus_extra_stat", None)
         cap.setdefault("xp", 0)
         cap.setdefault("level_history", [])
-        cap.setdefault("has_dagger", False)
+        cap.setdefault("has_dagger", True)
         cap.setdefault("notes", "")
         cap.setdefault("portrait", None)
         cap.setdefault("origin", "hired")
@@ -1072,6 +1084,10 @@ def update_homerules(wb: dict, form) -> tuple[bool, str]:
             "promote_captain_item_slots": int(
                 form.get("promote_captain_item_slots") or hr["promote_captain_item_slots"]
             ),
+            "promote_captain_tricks": int(
+                form.get("promote_captain_tricks")
+                or hr.get("promote_captain_tricks", PROMOTE_CAPTAIN_TRICKS)
+            ),
             "enabled_sources": {
                 book: form.get(f"source_enabled_{slug}") == "on"
                 for slug, book in SOURCE_BOOK_BY_SLUG.items()
@@ -1091,6 +1107,10 @@ def update_homerules(wb: dict, form) -> tuple[bool, str]:
         return False, "Captain starting tricks cannot be negative."
     if new_hr["captain_starting_tricks"] > len(CAPTAIN_TRICKS):
         return False, f"Captain starting tricks cannot exceed {len(CAPTAIN_TRICKS)} (the number of known tricks)."
+    if new_hr["promote_captain_tricks"] < 0:
+        return False, "Tricks on promotion cannot be negative."
+    if new_hr["promote_captain_tricks"] > len(CAPTAIN_TRICKS):
+        return False, f"Tricks on promotion cannot exceed {len(CAPTAIN_TRICKS)} (the number of known tricks)."
     wb["homerules"] = new_hr
     if wb.get("captain"):
         cap = wb["captain"]
@@ -1126,7 +1146,7 @@ def hire_captain(
     cap = empty_captain(name or "Captain", hr)
     cap["known_tricks"] = list(tricks or [])
     if hr.get("captain_bonus_choice_enabled") and extra_stat in LEVELUP_STATS:
-        cap["stats"][extra_stat] = int(cap["stats"].get(extra_stat, 0)) + 1
+        cap["stats"][extra_stat] = int(cap["stats"].get(extra_stat, 0)) + bonus_choice_amount(extra_stat)
         cap["bonus_extra_stat"] = extra_stat
     wb["captain"] = cap
     text = f"Hired captain for {cost} gc (starting equipment free)."
@@ -1347,7 +1367,8 @@ def promote_soldier_to_captain(
         return False, "Promoting a captain is not enabled for this warband (see Homerules)."
     if wb.get("captain"):
         return False, "Warband already has a captain."
-    n_tricks = int(hr.get("captain_starting_tricks", CAPTAIN_STARTING_TRICKS))
+    # Promotion has its own trick allowance, separate from hiring's.
+    n_tricks = int(hr.get("promote_captain_tricks", PROMOTE_CAPTAIN_TRICKS))
     ok, msg = _validate_tricks(tricks, n_tricks)
     if not ok:
         return False, msg
@@ -1383,7 +1404,7 @@ def promote_soldier_to_captain(
         stats[stat] = stats.get(stat, 0) + int(bonus.get(stat, 0))
     applied_extra_stat = None
     if hr.get("promote_captain_bonus_choice_enabled") and extra_stat in LEVELUP_STATS:
-        stats[extra_stat] = stats.get(extra_stat, 0) + 1
+        stats[extra_stat] = stats.get(extra_stat, 0) + bonus_choice_amount(extra_stat)
         applied_extra_stat = extra_stat
 
     wb["gold"] = int(wb.get("gold", 0)) - cost
@@ -1394,7 +1415,7 @@ def promote_soldier_to_captain(
         "stats": stats,
         "bonus_extra_stat": applied_extra_stat,
         "item_slots": normalize_item_slots(soldier.get("items"), n),
-        "has_dagger": False,
+        "has_dagger": True,
         "notes": soldier.get("notes", ""),
         "portrait": soldier.get("portrait"),
         # Kept so a promoted captain who never uploaded a picture keeps showing
