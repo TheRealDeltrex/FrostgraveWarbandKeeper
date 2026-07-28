@@ -7,6 +7,7 @@ matching at runtime:
 
     static/portraits/wizard.png
     static/portraits/apprentice.png
+    static/portraits/captain.png
     static/portraits/<soldier type_key>.png      e.g. thug.png, companion_bear.png
 
 256px covers the largest on-screen use (96px, so still crisp at 2x) and the PDF
@@ -37,6 +38,7 @@ SIZE = 256
 ALIASES = {
     "wizard": "wizard",
     "wizard_s_apprentice": "apprentice",
+    "captain": "captain",
     "construct_small": "small_construct",
     "construct_medium": "medium_construct",
     "construct_large": "large_construct",
@@ -95,7 +97,7 @@ def main() -> int:
         written[key] = normalize(src, OUT_DIR / f"{key}.png")
 
     missing = sorted(k for k in SOLDIERS if k not in written)
-    for role in ("wizard", "apprentice"):
+    for role in ("wizard", "apprentice", "captain"):
         if role not in written:
             missing.append(role)
 

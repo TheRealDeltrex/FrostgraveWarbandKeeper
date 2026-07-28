@@ -32,6 +32,7 @@ from frostgrave_data import (
     APPRENTICE_ITEM_SLOTS,
     BASE_LOCATIONS,
     BASE_RESOURCES,
+    bonus_choice_amount,
     CAPTAIN_MIND_CONTROL_LABELS,
     CAPTAIN_MIND_CONTROL_OPTIONS,
     CAPTAIN_MODE_LABELS,
@@ -58,6 +59,7 @@ from frostgrave_data import (
     cn_penalty,
     format_stat,
     level_from_xp,
+    group_soldiers_by_source,
     soldier_list_for_ui,
     spell_id,
     spells_for_wizard_ui,
@@ -100,6 +102,7 @@ from warband_store import (
     dismiss_apprentice,
     dismiss_captain,
     duplicate_warband,
+    enabled_sources,
     enrich_soldier,
     export_warband_json,
     hire_apprentice,
@@ -157,6 +160,7 @@ def portrait_src(portrait: str | None, kind: str, type_key: str | None = None) -
 
 app.jinja_env.globals.update(
     portrait_src=portrait_src,
+    bonus_choice_amount=bonus_choice_amount,
     format_stat=format_stat,
     STARTING_GOLD=STARTING_GOLD,
     APPRENTICE_COST=APPRENTICE_COST,
@@ -216,9 +220,11 @@ def reference():
         ]
         for school, splist in SPELLS.items()
     }
+    all_soldiers = soldier_list_for_ui()
     return render_template(
         "reference.html",
-        soldiers=soldier_list_for_ui(),
+        soldiers=all_soldiers,
+        soldier_groups=group_soldiers_by_source(all_soldiers),
         schools=SCHOOLS,
         spells=spells_with_desc,
         opposed=SCHOOL_OPPOSED,
@@ -360,13 +366,25 @@ def warband_view(warband_id: str):
         if name and name not in seen:
             seen.add(name)
             vault_names.append(name)
+    # Only what this warband can actually hire: books it has switched on, plus
+    # any spell-summoned members its wizard knows the spell for. Filtering here
+    # rather than in the template keeps empty source groups from rendering a
+    # heading with nothing under it.
+    wb_sources = enabled_sources(wb)
+    wb_spells = known_spell_names(wb)
+    hireable = [
+        c
+        for c in soldier_list_for_ui()
+        if c["source"] in wb_sources
+        and (not c.get("requires_spell") or c["requires_spell"] in wb_spells)
+    ]
     return render_template(
         "warband_view.html",
         wb=wb,
         soldiers=soldiers,
         limits=limits,
-        catalog=soldier_list_for_ui(),
-        known_spell_names=known_spell_names(wb),
+        catalog_groups=group_soldiers_by_source(hireable),
+        known_spell_names=wb_spells,
         has_animal_companion=has_animal_companion(wb),
         animal_companion_limit=animal_companion_limit(wb),
         schools=SCHOOLS,

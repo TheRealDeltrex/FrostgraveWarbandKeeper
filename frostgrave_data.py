@@ -35,13 +35,24 @@ CAPTAIN_HIRING_COST = 125
 CAPTAIN_ITEM_SLOTS = 6
 CAPTAIN_BASE = {
     "move": 6,
-    "fight": 4,
-    "shoot": 0,
-    "armour": 12,
-    "will": 1,
-    "health": 14,
+    "fight": 2,
+    "shoot": 1,
+    "armour": 10,
+    "will": 3,
+    "health": 12,
 }
 CAPTAIN_MAX_LEVEL = 10
+
+# The single "+1 to a stat of your choice" a captain gets at hire or promotion.
+# Health moves in larger steps than the other stats everywhere else in the game,
+# so spending the pick on Health is worth +2. Applies to hired and promoted
+# captains alike.
+BONUS_CHOICE_AMOUNTS = {"health": 2}
+
+
+def bonus_choice_amount(stat: str) -> int:
+    """How much the captain's chosen +1 bonus is actually worth for `stat`."""
+    return BONUS_CHOICE_AMOUNTS.get(stat, 1)
 
 # The 4 stats that can ever be raised via a flat-XP level-up (Wizard, Captain,
 # Soldier all share this set — matches the stat subset in LEVEL_UP_OPTIONS).
@@ -112,8 +123,14 @@ SOLDIER_STAT_CAPS = {
 # --- Promote Captain (homerule, not core 2e) --------------------------------
 # Whether promotion (vs. hiring) is available is governed by CAPTAIN_MODE_* above.
 PROMOTE_CAPTAIN_COST = 150
-PROMOTE_CAPTAIN_BONUS = {"fight": 1, "shoot": 1, "will": 1, "health": 2}
+# No automatic across-the-board bonus by default — a promoted captain's gain is
+# the player-chosen +1 instead (promote_captain_bonus_choice_enabled, on by
+# default). Still editable per warband for groups who want a flat package.
+PROMOTE_CAPTAIN_BONUS = {"fight": 0, "shoot": 0, "will": 0, "health": 0}
 PROMOTE_CAPTAIN_ITEM_SLOTS = 6
+# Tricks a soldier learns on being promoted. Separate from CAPTAIN_STARTING_TRICKS
+# so a group can make promotion more or less rewarding than hiring.
+PROMOTE_CAPTAIN_TRICKS = 2
 
 # Establishing a Base (2e core p.106–107)
 BASE_LOCATIONS: dict[str, dict] = {
@@ -970,18 +987,78 @@ SOURCE_BOOK_BY_SLUG = {source_slug(b): b for b in SOURCE_BOOKS}
 
 def soldier_list_for_ui() -> list[dict]:
     rows = [{"key": k, "source": "Core Rules", **v} for k, v in SOLDIERS.items()]
-    # Core soldiers first, then spell-gated summons (constructs / animal
-    # companions), then the supplement books; each group by category, cost, name.
-    rows.sort(
-        key=lambda r: (
-            r["source"] != "Core Rules",
-            bool(r.get("requires_spell")),
-            r["category"] != "standard",
-            r["cost"],
-            r["name"],
-        )
-    )
+    rows.sort(key=_ui_sort_key)
     return rows
+
+
+# Heading the spell-summoned members are listed under, instead of their nominal
+# "Core Rules" source — they're gated by a spell, not by a source book.
+SUMMONED_GROUP_LABEL = "Summoned by spell"
+
+
+def soldier_group_label(row: dict) -> str:
+    return SUMMONED_GROUP_LABEL if row.get("requires_spell") else row["source"]
+
+
+def group_soldiers_by_source(rows: list[dict]) -> list[dict]:
+    """Split an already-sorted soldier list into the headed sections the UI
+    shows: Core Rules, the spell-summoned members, then one section per
+    supplement book. Returns [{"label": str, "soldiers": [...]}, ...].
+
+    Relies on _ui_sort_key having put each group's rows together, so callers
+    may filter rows out beforehand (the hire list drops books that aren't
+    switched on) without breaking the grouping.
+    """
+    groups: list[dict] = []
+    for row in rows:
+        label = soldier_group_label(row)
+        if not groups or groups[-1]["label"] != label:
+            groups.append({"label": label, "soldiers": []})
+        groups[-1]["soldiers"].append(row)
+    return groups
+
+
+# Order the spell-summoned members appear in: the animal companions as one
+# group, then the constructs from small to large. Anything not listed sorts
+# after these, by name.
+SUMMONED_ORDER = [
+    "companion_bear",
+    "companion_ice_toad",
+    "companion_snow_leopard",
+    "companion_wolf",
+    "small_construct",
+    "medium_construct",
+    "large_construct",
+]
+
+
+def _source_rank(source: str) -> int:
+    """Core Rules first, then the supplement books in release order."""
+    if source == "Core Rules":
+        return 0
+    return SOURCE_BOOKS.index(source) + 1 if source in SOURCE_BOOKS else len(SOURCE_BOOKS) + 1
+
+
+def _ui_sort_key(r: dict) -> tuple:
+    """Hire-list ordering: soldiers grouped by the book they come from — Core
+    Rules, then each supplement in release order — with the spell-gated summons
+    as their own group after the core soldiers.
+
+    Ordinary soldiers sort within their book by category (standard before
+    specialist), cost, name. The summons instead keep their own fixed grouping —
+    sorting them by category would strand the Large Construct at the end for
+    being a specialist, away from the two smaller constructs it belongs with.
+    """
+    if r.get("requires_spell"):
+        rank = SUMMONED_ORDER.index(r["key"]) if r["key"] in SUMMONED_ORDER else len(SUMMONED_ORDER)
+        return (_source_rank(r["source"]), 1, rank, 0, r["name"])
+    return (
+        _source_rank(r["source"]),
+        0,
+        1 if r["category"] != "standard" else 0,
+        r["cost"],
+        r["name"],
+    )
 
 
 def animal_companion_type_keys() -> set[str]:

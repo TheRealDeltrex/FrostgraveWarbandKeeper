@@ -197,8 +197,10 @@ def sanitize(html: str, *, other_preview: str, page_label: str) -> str:
     html = re.sub(r'\s*onsubmit="return confirm\([^"]*\);"', "", html)
     html = re.sub(r'\s*onclick="return confirm\([^"]*\);"', "", html)
 
-    # form.submit() bypasses the 'submit' event; neutralize the one caller directly too.
-    html = html.replace('onchange="this.form.submit()"', 'onchange="return false;"')
+    # Self-submitting controls (the soldier status dropdown) call form.submit()
+    # from base.html, which bypasses the 'submit' event PREVIEW_SCRIPT blocks —
+    # so drop the marker attribute and let it behave as an inert dropdown.
+    html = html.replace(" data-autosubmit", "")
 
     html = html.replace("</body>", PREVIEW_SCRIPT + "</body>")
     return html
