@@ -1,0 +1,642 @@
+[
+ {
+  "name": "Amulet of Constancy",
+  "source": "Forgotten Pacts",
+  "effect": "Immune to Decaying Touch/Time Decay/Decay spell; +1 vs Petrify & Slow; costs the wearer experience."
+ },
+ {
+  "name": "Amulet of the Stone Heart",
+  "source": "Forgotten Pacts",
+  "effect": "Never Wounded, immune to poison, but cannot cast; -1 survival roll at 0 Health."
+ },
+ {
+  "name": "Arrow of Demon Slaying",
+  "source": "Forgotten Pacts",
+  "effect": "+5 elemental damage to demons on hit."
+ },
+ {
+  "name": "Arrow of Piercing",
+  "source": "Forgotten Pacts",
+  "effect": "Single shot hits up to 3 figures in a line."
+ },
+ {
+  "name": "Blade of Feasting",
+  "source": "Forgotten Pacts",
+  "effect": "+2 Fight vs demons; +1 to next Summon Demon roll after damaging one. (Carries Tiszirain's True Name.)"
+ },
+ {
+  "name": "Crossbow of Force",
+  "source": "Forgotten Pacts",
+  "effect": "Any hit pushes the target back 1\"."
+ },
+ {
+  "name": "Executioner's Blade",
+  "source": "Forgotten Pacts",
+  "effect": "Extra action on a natural 20 attack roll."
+ },
+ {
+  "name": "Giant Slayer Blade",
+  "source": "Forgotten Pacts",
+  "effect": "+2 Fight vs Large creatures."
+ },
+ {
+  "name": "Golem Flesh",
+  "source": "Forgotten Pacts",
+  "effect": "Permanently +1 Move/Fight/Armour to a construct (one use)."
+ },
+ {
+  "name": "Magic Ammunition (roll)",
+  "source": "Forgotten Pacts",
+  "effect": "One-use arrow/bolt: Wraith Arrow, Arrow of Demon Slaying, Stunning Arrow, Arrow of Piercing, or Soulseeker Arrow."
+ },
+ {
+  "name": "Null Blade",
+  "source": "Forgotten Pacts",
+  "effect": "On damage, cancels ongoing spell effects on the target."
+ },
+ {
+  "name": "Piercing Stiletto",
+  "source": "Forgotten Pacts",
+  "effect": "Treats non-Large opponents as Armour 10 (dagger only, no off-hand)."
+ },
+ {
+  "name": "Ring of Focus",
+  "source": "Forgotten Pacts",
+  "effect": "Spend all actions in an activation for +1 Casting Roll."
+ },
+ {
+  "name": "Ring of Restoration",
+  "source": "Forgotten Pacts",
+  "effect": "+2 Health if the spellcaster doesn't cast that activation."
+ },
+ {
+  "name": "Ring of Transference",
+  "source": "Forgotten Pacts",
+  "effect": "Transfer own Health to a warband member within 6\"."
+ },
+ {
+  "name": "Robes of Faith",
+  "source": "Forgotten Pacts",
+  "effect": "Once/game, Armour becomes 10+Will vs one hit."
+ },
+ {
+  "name": "Shroud of Foresight",
+  "source": "Forgotten Pacts",
+  "effect": "Natural 20 for initiative grants an extra action (max 3)."
+ },
+ {
+  "name": "Silver Star Pendant",
+  "source": "Forgotten Pacts",
+  "effect": "+2 Health on a natural 20 Casting Roll."
+ },
+ {
+  "name": "Smoke Bomb",
+  "source": "Forgotten Pacts",
+  "effect": "One-use 3\" smoke cloud blocking line of sight."
+ },
+ {
+  "name": "Soul Shield Pendant",
+  "source": "Forgotten Pacts",
+  "effect": "Discard to survive at 1 Health instead of 0; -40 XP."
+ },
+ {
+  "name": "Soulseeker Arrow",
+  "source": "Forgotten Pacts",
+  "effect": "Target rolls Will instead of Fight; treats Armour>12 as 12."
+ },
+ {
+  "name": "Spell Shield",
+  "source": "Forgotten Pacts",
+  "effect": "+3 to the initial Will roll resisting a spell."
+ },
+ {
+  "name": "Stunning Arrow",
+  "source": "Forgotten Pacts",
+  "effect": "Will TN20 or lose next activation."
+ },
+ {
+  "name": "Trapmaster Gloves",
+  "source": "Forgotten Pacts",
+  "effect": "+3 vs Trap Numbers."
+ },
+ {
+  "name": "True Name",
+  "source": "Forgotten Pacts",
+  "effect": "Fragment of a major demon's life-force; used to Forge a Pact."
+ },
+ {
+  "name": "Vampiric Staff",
+  "source": "Forgotten Pacts",
+  "effect": "+2 to next Casting Roll after damaging a foe in melee."
+ },
+ {
+  "name": "Wraith Arrow",
+  "source": "Forgotten Pacts",
+  "effect": "Ignores terrain penalty & target's cover bonus."
+ },
+ {
+  "name": "Armour of Elemental Absorption",
+  "source": "Into the Breeding Pits",
+  "effect": "Ignores first 3 damage from elemental attacks."
+ },
+ {
+  "name": "Armour of Righteousness",
+  "source": "Into the Breeding Pits",
+  "effect": "Thaumaturge-only; +2 Armour but blocks Necromancer/Elementalist/Summoner spells."
+ },
+ {
+  "name": "Bear Armour",
+  "source": "Into the Breeding Pits",
+  "effect": "Bear-only; +2 Armour, -1 Move."
+ },
+ {
+  "name": "Book of the Beastcrafter",
+  "source": "Into the Breeding Pits",
+  "effect": "Required in the vault to brew the Elixir of the Beastcrafter."
+ },
+ {
+  "name": "Book of the Bone Binder",
+  "source": "Into the Breeding Pits",
+  "effect": "Raise Zombie (Out of Game) creates a permanent undead outside the normal warband limit."
+ },
+ {
+  "name": "Bottle of Time",
+  "source": "Into the Breeding Pits",
+  "effect": "One-use; grants two extra actions this activation."
+ },
+ {
+  "name": "Circlet of the Time Walker",
+  "source": "Into the Breeding Pits",
+  "effect": "Extra action when Time Walk is cast (risk: destroyed on a 1–2)."
+ },
+ {
+  "name": "Flute of Fleeting Images",
+  "source": "Into the Breeding Pits",
+  "effect": "+1 to cast Illusionary Soldier (vault item, no need to carry)."
+ },
+ {
+  "name": "Gloves of Runecasting",
+  "source": "Into the Breeding Pits",
+  "effect": "Explosive Rune can be placed within 3\" and LoS instead of on self."
+ },
+ {
+  "name": "Iron Collar",
+  "source": "Into the Breeding Pits",
+  "effect": "Warhound/wolf companion only; +2 Fight, +2 Armour, +1 Will."
+ },
+ {
+  "name": "Mirror of Foresight",
+  "source": "Into the Breeding Pits",
+  "effect": "Lets Awareness be attempted Out of Game before a game."
+ },
+ {
+  "name": "Scroll of Nightmare",
+  "source": "Into the Breeding Pits",
+  "effect": "Contains the extinct Spiritualist spell Nightmare."
+ },
+ {
+  "name": "Seeing Stone",
+  "source": "Into the Breeding Pits",
+  "effect": "Awareness grants +3 initiative instead of +1 while worn."
+ },
+ {
+  "name": "Spectral Blade",
+  "source": "Into the Breeding Pits",
+  "effect": "Treats non-magic-armoured foes as Armour 10."
+ },
+ {
+  "name": "Staff of Defence",
+  "source": "Into the Breeding Pits",
+  "effect": "-2 damage modifier to enemy melee attacks."
+ },
+ {
+  "name": "Thunderstrike Javelin",
+  "source": "Into the Breeding Pits",
+  "effect": "Javelineer-only; once/game +3 Shoot or +3 Fight javelin attack."
+ },
+ {
+  "name": "Wand of Mending",
+  "source": "Into the Breeding Pits",
+  "effect": "Lets Heal be cast as a 12\" Line of Sight spell."
+ },
+ {
+  "name": "Amulet of the Ghoul King",
+  "source": "Thaw of the Lich Lord",
+  "effect": "Scenario-unique; +1 Will, +2 casting Control Undead on ghouls, Raise Zombie can produce a ghoul instead."
+ },
+ {
+  "name": "Book of Bones",
+  "source": "Thaw of the Lich Lord",
+  "effect": "Raise Zombie produces a skeleton instead (armoured for +30gc Out of Game)."
+ },
+ {
+  "name": "Book of the Rangifer",
+  "source": "Thaw of the Lich Lord",
+  "effect": "Lets a wizard field a rangifer as a soldier (100gc) — but it will leave if any undead join the warband."
+ },
+ {
+  "name": "Boots of Leaping",
+  "source": "Thaw of the Lich Lord",
+  "effect": "Action to leap up to full available movement, ignoring rough terrain; no fall-damage exemption on landing."
+ },
+ {
+  "name": "Club of Battering",
+  "source": "Thaw of the Lich Lord",
+  "effect": "Two-handed; +1 Fight, push-back on a win becomes 3\"."
+ },
+ {
+  "name": "Crystal Rose",
+  "source": "Thaw of the Lich Lord",
+  "effect": "Re-roll a survival roll once (must keep the second result), then is destroyed."
+ },
+ {
+  "name": "Dark Cauldron",
+  "source": "Thaw of the Lich Lord",
+  "effect": "Base item; +1 to Create Zombie and Revenant casts Out of Game."
+ },
+ {
+  "name": "Eyes of Amoto",
+  "source": "Thaw of the Lich Lord",
+  "effect": "Paired amulets; once/game, a spellcaster can draw LoS through the other wearer."
+ },
+ {
+  "name": "Fire Heart Gemstone",
+  "source": "Thaw of the Lich Lord",
+  "effect": "Scenario-unique; transfers up to 3 damage/hit onto the gem (destroyed at 5+ transferred in one game)."
+ },
+ {
+  "name": "Grimoire of the Homunculus / Lichdom / Revenant",
+  "source": "Thaw of the Lich Lord",
+  "effect": "Teaches the matching spell; can't be purchased, only found. A Grimoire of Lichdom can be destroyed for +50 XP instead."
+ },
+ {
+  "name": "Horn of Hellfire",
+  "source": "Thaw of the Lich Lord",
+  "effect": "Once/game, +5 magic shooting attack at 24\"/LoS."
+ },
+ {
+  "name": "Ivory Scroll",
+  "source": "Thaw of the Lich Lord",
+  "effect": "Random spell scroll, reusable each game unless a 19–20 breaks it."
+ },
+ {
+  "name": "Magic Spectacles",
+  "source": "Thaw of the Lich Lord",
+  "effect": "See and target Invisible figures; destroyed if the wearer rolls Lost Eye."
+ },
+ {
+  "name": "Quiver of the Soul Seeker",
+  "source": "Thaw of the Lich Lord",
+  "effect": "Bow/crossbow attacks count as magic."
+ },
+ {
+  "name": "Ring of Life",
+  "source": "Thaw of the Lich Lord",
+  "effect": "+1 Fight/+1 Armour vs. undead; melee attacks vs. undead count as magic."
+ },
+ {
+  "name": "Scarf of Obscurance",
+  "source": "Thaw of the Lich Lord",
+  "effect": "+1 Fight rolls made to resist shooting attacks."
+ },
+ {
+  "name": "Sword of Undead Slaying",
+  "source": "Thaw of the Lich Lord",
+  "effect": "+3 Fight vs. undead; counts as a magic weapon."
+ },
+ {
+  "name": "Unbreakable Orb",
+  "source": "Thaw of the Lich Lord",
+  "effect": "Free activation-time shield: untouchable and unable to act until next activation; works even mid-combat."
+ },
+ {
+  "name": "Vampire Blade",
+  "source": "Thaw of the Lich Lord",
+  "effect": "No Fight/damage bonus, but heals 2 Health whenever it damages a living foe."
+ },
+ {
+  "name": "Vial of Starlight",
+  "source": "Thaw of the Lich Lord",
+  "effect": "10 charges to empower Thaumaturge spells, including Out of Game."
+ },
+ {
+  "name": "Wraithbottle",
+  "source": "Thaw of the Lich Lord",
+  "effect": "Thrown 10\"; releases a wraith on impact (one-use)."
+ },
+ {
+  "name": "Amulet of True Paths",
+  "source": "The Maze of Malcor",
+  "effect": "Tunnel Fighter treats a 17–18 initiative roll as 19 for secret passages."
+ },
+ {
+  "name": "Arrow Magnet",
+  "source": "The Maze of Malcor",
+  "effect": "Free action; -4 to all non-magic shooting attacks until next activation."
+ },
+ {
+  "name": "Backpack of Hefty Haulage",
+  "source": "The Maze of Malcor",
+  "effect": "Pack mule only; +1 Move/Fight, +2 Armour, no item slot cost."
+ },
+ {
+  "name": "Bearclaw Pendant",
+  "source": "The Maze of Malcor",
+  "effect": "Tracker only; +2 Fight/+2 Shoot vs animals."
+ },
+ {
+  "name": "Belt of Blade-breaking",
+  "source": "The Maze of Malcor",
+  "effect": "12+ on a die destroys the enemy's melee weapon on a hit taken."
+ },
+ {
+  "name": "Black Pipe",
+  "source": "The Maze of Malcor",
+  "effect": "Spellcaster only; -1 Will, +1 Fight vs shooting while smoking."
+ },
+ {
+  "name": "Bladed Staff of Fire",
+  "source": "The Maze of Malcor",
+  "effect": "Monk only; +2 extra damage on the bladed staff."
+ },
+ {
+  "name": "Bloodstone Amulet",
+  "source": "The Maze of Malcor",
+  "effect": "+1 Health; 15+ save on reaching 0 Health or it's destroyed."
+ },
+ {
+  "name": "Book of Charity",
+  "source": "The Maze of Malcor",
+  "effect": "Thaumaturge caster; +5 XP for donating 20gc pre-game (exclusive w/ Book of Murders)."
+ },
+ {
+  "name": "Book of Murders",
+  "source": "The Maze of Malcor",
+  "effect": "Necromancer caster; start at -1 Health for +5 XP (exclusive w/ Book of Charity)."
+ },
+ {
+  "name": "Book of the Pentangle",
+  "source": "The Maze of Malcor",
+  "effect": "Lost Magic scroll Casting Roll treated as 13, not 12; +10gc selling such scrolls."
+ },
+ {
+  "name": "Boots of Standfirm",
+  "source": "The Maze of Malcor",
+  "effect": "Once/game, ignore a push-back or Push spell."
+ },
+ {
+  "name": "Bracers of True Flight",
+  "source": "The Maze of Malcor",
+  "effect": "Javelineer only; +1 Fight/Shoot/Move."
+ },
+ {
+  "name": "Construct Crossbow",
+  "source": "The Maze of Malcor",
+  "effect": "Construct upgrade (not an item); one +2/24\" shooting attack per game."
+ },
+ {
+  "name": "Construct Varnish",
+  "source": "The Maze of Malcor",
+  "effect": "One-use; permanent Elemental Resistance 2 for a construct."
+ },
+ {
+  "name": "Eye of Malcor",
+  "source": "The Maze of Malcor",
+  "effect": "Cures the Lost Eye injury, +1 Shoot, but -1 Health per game."
+ },
+ {
+  "name": "Firehelm",
+  "source": "The Maze of Malcor",
+  "effect": "Mail-capable figure; +1 Health."
+ },
+ {
+  "name": "Flicker Stone",
+  "source": "The Maze of Malcor",
+  "effect": "Once/game, force combat on anyone moving within 3\"."
+ },
+ {
+  "name": "Gem Hammer",
+  "source": "The Maze of Malcor",
+  "effect": "Carried by a thief who survives the game; +20gc for the warband."
+ },
+ {
+  "name": "Gloves of the Paladin",
+  "source": "The Maze of Malcor",
+  "effect": "Hand weapon counts as magic vs weapon-immune creatures."
+ },
+ {
+  "name": "Gondola Repair Shop",
+  "source": "The Maze of Malcor",
+  "effect": "Base resource (500gc); repairs 5 damage to an owned sky gondola per game."
+ },
+ {
+  "name": "Invisible Wire",
+  "source": "The Maze of Malcor",
+  "effect": "Trap Expert treats a 2–4 initiative roll as 1 for springing traps."
+ },
+ {
+  "name": "Karmic Belt",
+  "source": "The Maze of Malcor",
+  "effect": "Mystic Warrior only; +1 Move."
+ },
+ {
+  "name": "Leash Arrow",
+  "source": "The Maze of Malcor",
+  "effect": "On hit, Fight TN18 or pulled 8\" toward the shooter."
+ },
+ {
+  "name": "Lycanthrope Serum",
+  "source": "The Maze of Malcor",
+  "effect": "Drinker becomes a werewolf for the game (can't hold treasure/items); reverts after."
+ },
+ {
+  "name": "Mind Lock Ring",
+  "source": "The Maze of Malcor",
+  "effect": "Immune to Mind Control (not undead/demons)."
+ },
+ {
+  "name": "Miracle Stone",
+  "source": "The Maze of Malcor",
+  "effect": "Natural 20 on a damage roll: stone absorbs it all, then breaks."
+ },
+ {
+  "name": "Partially Gnawed Grimoire",
+  "source": "The Maze of Malcor",
+  "effect": "Roll 4x on Random Spell Table and choose — risk of destruction/injury on duplicate rolls."
+ },
+ {
+  "name": "Porter Control Rod",
+  "source": "The Maze of Malcor",
+  "effect": "Lets a controlled Collegium Porter join the warband after a game."
+ },
+ {
+  "name": "Potion Bag",
+  "source": "The Maze of Malcor",
+  "effect": "One item slot holds two potions."
+ },
+ {
+  "name": "Ring Chain",
+  "source": "The Maze of Malcor",
+  "effect": "Wear two magic rings instead of one (blocks wearing an amulet)."
+ },
+ {
+  "name": "Ring of Fog Form",
+  "source": "The Maze of Malcor",
+  "effect": "Once/game, ignore terrain and can't be forced into combat for the rest of the activation."
+ },
+ {
+  "name": "Sandalwood Brace",
+  "source": "The Maze of Malcor",
+  "effect": "Negates the Smashed Leg permanent injury (and its penalty if already held)."
+ },
+ {
+  "name": "Scroll Case",
+  "source": "The Maze of Malcor",
+  "effect": "One item slot holds two scrolls."
+ },
+ {
+  "name": "Sickle of the Crowmaster",
+  "source": "The Maze of Malcor",
+  "effect": "Crow master only; +1 Fight hand weapon (bypasses the no-items rule)."
+ },
+ {
+  "name": "Sky Gondola",
+  "source": "The Maze of Malcor",
+  "effect": "Full vehicle; see Core Rule Updates above."
+ },
+ {
+  "name": "Tatakaka (bird/feather)",
+  "source": "The Maze of Malcor",
+  "effect": "Vault creature; feathers grant +1 to an Out of Game Casting Roll."
+ },
+ {
+  "name": "Timelash Ring",
+  "source": "The Maze of Malcor",
+  "effect": "Once/game auto-cast Whiplash; 1-in-20 chance the ring explodes (Lost Fingers injury)."
+ },
+ {
+  "name": "Tookroot (x5 doses)",
+  "source": "The Maze of Malcor",
+  "effect": "Negates Will penalties from the Psychological Scars injury."
+ },
+ {
+  "name": "Troll Shackles",
+  "source": "The Maze of Malcor",
+  "effect": "Captures a troll dropped to 0 Health as a future warband soldier."
+ },
+ {
+  "name": "Wand of Casting",
+  "source": "The Maze of Malcor",
+  "effect": "10 points of power to empower one random spell (max 2/casting)."
+ },
+ {
+  "name": "Wand of Lost Magic",
+  "source": "The Maze of Malcor",
+  "effect": "Functions as a Scroll of Lost Magic, reusable 3 times."
+ },
+ {
+  "name": "Bane Weapon",
+  "source": "The Perilous Dark",
+  "effect": "Hand or two-handed weapon that does double damage to one randomly determined creature type (wraiths, vampires, frost giants, giant worms, snow trolls, or werewolves); a plain magic weapon vs. everything else."
+ },
+ {
+  "name": "Barbarian's Blade",
+  "source": "The Perilous Dark",
+  "effect": "Two-handed, +1 Fight; if fighting alone (no allies within 8\"), also +1 Armour, +2 Will, +1 damage."
+ },
+ {
+  "name": "Book of the Werewolf",
+  "source": "The Perilous Dark",
+  "effect": "Hire a single werewolf as a soldier (200gc, 100gc with a Beastcrafter trait); needs 20gc/game upkeep or it leaves; carries no items."
+ },
+ {
+  "name": "Circlet of the Serpent",
+  "source": "The Perilous Dark",
+  "effect": "Will TN14 to shrug off being poisoned (can be poisoned again later)."
+ },
+ {
+  "name": "Dancing Blade",
+  "source": "The Perilous Dark",
+  "effect": "+1 Fight; enemies only get +1 per supporting figure against the wielder instead of +2."
+ },
+ {
+  "name": "Glitter Gloves",
+  "source": "The Perilous Dark",
+  "effect": "Action to apply a Glow-spell effect to a figure within 4\"."
+ },
+ {
+  "name": "Ground Manaworm Teeth",
+  "source": "The Perilous Dark",
+  "effect": "One-use; ingest to instantly dispel all spells currently active on you."
+ },
+ {
+  "name": "Horned Helmet",
+  "source": "The Perilous Dark",
+  "effect": "-1 Will; charge-and-attack in the same activation to fight with +2 Fight (magic) instead of your weapon, at the cost of +2 damage taken if you lose."
+ },
+ {
+  "name": "Magic Staff Ring",
+  "source": "The Perilous Dark",
+  "effect": "Makes any staff count as a magic weapon in melee; staff+ring still only one item slot."
+ },
+ {
+  "name": "Mindstone (4)",
+  "source": "The Perilous Dark",
+  "effect": "An Orb of Power usable only for Soothsayer spells; rechargeable via an Orb Plinth."
+ },
+ {
+  "name": "Nimblewalk Boots",
+  "source": "The Perilous Dark",
+  "effect": "+4 to Move Rolls against a Target Number."
+ },
+ {
+  "name": "Orb Plinth",
+  "source": "The Perilous Dark",
+  "effect": "Vault item; recharges a low-charge Orb of Power between games (1-in-20 chance it cracks, most rolls do nothing, better rolls add 1 charge)."
+ },
+ {
+  "name": "Potion of Persistence",
+  "source": "The Perilous Dark",
+  "effect": "Free action on hitting 0 Health: stay in play for 3 more turns (or until damaged again) before finally going down."
+ },
+ {
+  "name": "Rat Flute",
+  "source": "The Perilous Dark",
+  "effect": "Action; all giant rats in LoS Will TN16 or lose their next activation (natural 20 instead enrages one rat to charge the piper)."
+ },
+ {
+  "name": "Reaver's Sword",
+  "source": "The Perilous Dark",
+  "effect": "Unique, scenario-found; +2 damage, +1 Move while wearing mail (cap 7). Can't be bought, sells for 250gc."
+ },
+ {
+  "name": "Ring of Command",
+  "source": "The Perilous Dark",
+  "effect": "Wizard/apprentice only; once/game, activate an extra soldier within 12\" alongside your own activation."
+ },
+ {
+  "name": "Spellcatcher Glove",
+  "source": "The Perilous Dark",
+  "effect": "Will TN20 (or 22 if the target was within 2\") to \"catch\" an incoming spell-shooting-attack and negate it; once/game."
+ },
+ {
+  "name": "Sword of Wounding and Healing",
+  "source": "The Perilous Dark",
+  "effect": "+1 damage; action to drink its built-in potion for up to 2 Health, rechargeable between games by sacrificing a healing potion."
+ },
+ {
+  "name": "Tyco's Magic Block",
+  "source": "The Perilous Dark",
+  "effect": "One-use; instantly conjures a Wall-spell wall in contact with the figure that activated it."
+ },
+ {
+  "name": "Vampiric Crossbow",
+  "source": "The Perilous Dark",
+  "effect": "Sacrifice 2 Health to empower a shot into a magic attack for +1 extra damage (+3 total over base)."
+ },
+ {
+  "name": "Whitestar Diamond",
+  "source": "The Perilous Dark",
+  "effect": "One-use; treat any Will roll as the minimum needed to succeed (or as a 16 with no Target Number), then it's destroyed."
+ }
+]

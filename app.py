@@ -50,6 +50,8 @@ from frostgrave_data import (
     SCHOOL_OPPOSED,
     SCHOOL_RELATIONS,
     SCHOOLS,
+    PENTANGLE_SCHOOLS,
+    SOURCE_BOOK_BY_SLUG,
     SOURCE_BOOK_OPTIONS,
     SPELLS,
     STARTING_GOLD,
@@ -66,7 +68,12 @@ from frostgrave_data import (
 )
 from game_content import (
     enrich_spells_with_descriptions,
+    group_magic_items,
     load_bestiary,
+    load_expansion_rules,
+    load_ghost_archipelago,
+    load_magic_items,
+    magic_items_for_sources,
     load_potion_choices,
     load_potion_choices_detailed,
     load_spell_descriptions,
@@ -75,12 +82,14 @@ from game_content import (
     load_standard_items,
     spell_description,
 )
+import expansions
 from idle_watchdog import note_closing, note_heartbeat
 from warband_store import (
     PORTRAIT_DIR,
     WARBAND_DIR,
     add_captain_xp,
     add_history,
+    add_pact_tier,
     add_soldier,
     add_soldier_xp,
     add_vault_item,
@@ -90,6 +99,8 @@ from warband_store import (
     apply_captain_trick,
     apply_level_up,
     apply_soldier_level_up,
+    advance_beastcrafter,
+    break_wizard_pact,
     reverse_last_captain_level_up,
     reverse_last_level_up,
     reverse_last_soldier_level_up,
@@ -117,6 +128,7 @@ from warband_store import (
     load_warband,
     normalize_item_slots,
     promote_soldier_to_captain,
+    raise_revenant,
     recompute_spell_cns,
     record_game_loot,
     recruit_preview,
@@ -127,8 +139,10 @@ from warband_store import (
     save_portrait,
     save_warband,
     sell_or_remove_base_resource,
+    set_animal_feature,
     set_base_location,
     set_soldier_status,
+    set_wizard_state,
     update_homerules,
     warband_limits,
 )
@@ -184,7 +198,35 @@ app.jinja_env.globals.update(
     captain_effective_stats=captain_effective_stats,
     IS_FROZEN=paths.is_frozen(),
     BROWSER_MODE=BROWSER_MODE,
+    # Wizard states (Lich / Beastcrafter / Demonic Pact).
+    STATE_LABELS=expansions.STATE_LABELS,
+    STATE_SOURCE=expansions.STATE_SOURCE,
+    STATE_NONE=expansions.STATE_NONE,
+    STATE_LICH=expansions.STATE_LICH,
+    STATE_BEASTCRAFTER=expansions.STATE_BEASTCRAFTER,
+    STATE_PACT=expansions.STATE_PACT,
+    LICH_FAILURE_TABLE=expansions.LICH_FAILURE_TABLE,
+    LICH_NOTES=expansions.LICH_NOTES,
+    LICH_XP_PER_LEVEL=expansions.LICH_XP_PER_LEVEL,
+    LICH_STAT_CAPS=expansions.LICH_STAT_CAPS,
+    BEASTCRAFTER_TIERS=expansions.BEASTCRAFTER_TIERS,
+    ANIMAL_FEATURES=expansions.ANIMAL_FEATURES,
+    ANIMAL_FEATURE_BY_ID=expansions.ANIMAL_FEATURE_BY_ID,
+    PACT_SACRIFICES=expansions.PACT_SACRIFICES,
+    PACT_BOONS=expansions.PACT_BOONS,
+    PACT_SACRIFICE_BY_ID=expansions.PACT_SACRIFICE_BY_ID,
+    PACT_BOON_BY_ID=expansions.PACT_BOON_BY_ID,
+    PACT_TIER_LEVELS=expansions.PACT_TIER_LEVELS,
+    PACT_MAX_TIERS=expansions.PACT_MAX_TIERS,
 )
+
+
+def _stats_with_state_bonus(wb: dict) -> dict:
+    """The wizard's stats as they play, with any wizard-state bonus folded in."""
+    stats = dict((wb.get("wizard") or {}).get("stats") or {})
+    for stat, amount in expansions.wizard_state_stat_bonus(wb).items():
+        stats[stat] = int(stats.get(stat, 0)) + amount
+    return stats
 
 
 def _require_warband(warband_id: str) -> dict:
@@ -215,7 +257,11 @@ def reference():
     descs = load_spell_descriptions()
     spells_with_desc = {
         school: [
-            {**sp, "description": descs.get(sp["name"], "") or "No description available."}
+            {
+                **sp,
+                "source": sp.get("source", "Core Rules"),
+                "description": descs.get(sp["name"], "") or "No description available.",
+            }
             for sp in splist
         ]
         for school, splist in SPELLS.items()
@@ -236,6 +282,12 @@ def reference():
         potions_detailed=load_potion_choices_detailed(),
         bestiary=load_bestiary(),
         spell_names=load_spell_names(),
+        # The Lexicon is a browsable reference, so unlike the warband page none
+        # of this is filtered by source toggles — same as the bestiary already is.
+        magic_item_groups=group_magic_items(load_magic_items()),
+        magic_item_count=len(load_magic_items()),
+        expansion_rules=load_expansion_rules(),
+        ghost=load_ghost_archipelago(),
     )
 
 
@@ -273,7 +325,8 @@ def warband_new():
         name = (request.form.get("warband_name") or "").strip()
         wizard = (request.form.get("wizard_name") or "").strip()
         school = request.form.get("school") or SCHOOLS[0]
-        if school not in SCHOOLS:
+        pentangle = request.form.get("pentangle_schools_playable") == "on"
+        if school not in _new_schools(_posted_sources(request.form), pentangle):
             school = SCHOOLS[0]
         # Order preserved from hidden field if present
         order_raw = (request.form.get("spell_order") or "").strip()
@@ -283,10 +336,12 @@ def warband_new():
             spell_keys = request.form.getlist("spells")
         with_apprentice = request.form.get("with_apprentice") == "on"
         apprentice_name = (request.form.get("apprentice_name") or "").strip()
+        sources = _posted_sources(request.form)
 
         if not name or not wizard:
             flash("Warband name and wizard name are required.", "error")
-            return _render_new(school=school, selected=spell_keys)
+            return _render_new(school=school, selected=spell_keys, sources=sources,
+                               pentangle=pentangle)
 
         # Soldiers are not hired at creation — they're recruited later on the
         # warband page (from the full roster, including supplement mercenaries).
@@ -297,10 +352,13 @@ def warband_new():
             spell_keys,
             with_apprentice,
             apprentice_name,
+            enabled_sources_map=sources,
+            pentangle_playable=pentangle,
         )
         if not wb:
             flash(msg, "error")
-            return _render_new(school=school, selected=spell_keys)
+            return _render_new(school=school, selected=spell_keys, sources=sources,
+                               pentangle=pentangle)
 
         try:
             wiz_file = request.files.get("wizard_portrait")
@@ -320,16 +378,57 @@ def warband_new():
         return redirect(url_for("warband_view", warband_id=wb["id"]))
 
     school = request.args.get("school") or SCHOOLS[0]
-    return _render_new(school=school)
+    # Source toggles survive the school-change round-trip via the query string,
+    # so switching school doesn't silently untick the books already chosen.
+    return _render_new(
+        school=school,
+        sources=_posted_sources(request.args),
+        pentangle=request.args.get("pentangle_schools_playable") == "on",
+    )
 
 
-def _render_new(school: str = "Elementalist", selected: list | None = None):
-    school = school if school in SCHOOLS else SCHOOLS[0]
+def _new_schools(sources: dict, pentangle: bool) -> list[str]:
+    """Schools offered on the creation page for these toggles."""
+    if pentangle and sources.get("The Maze of Malcor"):
+        return list(SCHOOLS) + list(PENTANGLE_SCHOOLS)
+    return list(SCHOOLS)
+
+
+def _posted_sources(form) -> dict:
+    """{book name: bool} from the source_enabled_<slug> checkboxes, in whichever
+    form or query string they arrived."""
+    return {
+        book: form.get(f"source_enabled_{slug}") == "on"
+        for slug, book in SOURCE_BOOK_BY_SLUG.items()
+    }
+
+
+def _render_new(
+    school: str = "Elementalist",
+    selected: list | None = None,
+    sources: dict | None = None,
+    pentangle: bool = False,
+):
+    sources = sources or {}
+    schools = _new_schools(sources, pentangle)
+    school = school if school in schools else SCHOOLS[0]
     rel = SCHOOL_RELATIONS[school]
-    spells_ui = enrich_spells_with_descriptions(spells_for_wizard_ui(school))
+    # A Pentangle school has two aligned schools where a core school has three,
+    # so the leftover neutral picks differ. Derived the same way
+    # validate_starting_spells derives it, so the counter can't drift from the
+    # rule it is counting towards.
+    neutral_needed = (
+        STARTING_SPELL_COUNT - OWN_SCHOOL_SPELLS - len(rel["aligned"]) * ALIGNED_SCHOOL_SPELLS
+    )
+    picked = {"Core Rules"} | {book for book, on in sources.items() if on}
+    # Starting spells come only from books the player has switched on here. The
+    # spell-only schools (Beastcrafter) never appear: they aren't in any wizard's
+    # own/aligned/neutral set, which the picker is already built from.
+    spells_ui = [sp for sp in spells_for_wizard_ui(school) if sp["source"] in picked]
+    spells_ui = enrich_spells_with_descriptions(spells_ui)
     return render_template(
         "warband_new.html",
-        schools=SCHOOLS,
+        schools=schools,
         school=school,
         spells_for_wizard=spells_ui,
         spells_by_school=SPELLS,
@@ -338,6 +437,11 @@ def _render_new(school: str = "Elementalist", selected: list | None = None):
         neutral=SCHOOL_NEUTRAL,
         relations=rel,
         selected=selected or [],
+        source_books=SOURCE_BOOK_OPTIONS,
+        enabled_sources_map=sources,
+        pentangle_playable=pentangle,
+        PENTANGLE_SCHOOLS=PENTANGLE_SCHOOLS,
+        neutral_needed=neutral_needed,
     )
 
 
@@ -351,10 +455,15 @@ def warband_view(warband_id: str):
     limits = warband_limits(wb)
     known = known_spell_ids(wb)
     wschool = (wb.get("wizard") or {}).get("school") or "Elementalist"
+    wb_sources = enabled_sources(wb)
+    # Only spells this warband could actually learn: its books are on and the
+    # wizard's state allows them. Spells already known are excluded here but are
+    # never hidden from the wizard's own list, even if their book is later
+    # switched off — that would read as the app deleting a learned spell.
     learnable = [
         {**s, "effective_cn": s["cn"] + cn_penalty(wschool, s["school"])}
         for s in all_spells_flat()
-        if s["id"] not in known
+        if s["id"] not in known and expansions.spell_available(wb, s, wb_sources)
     ]
     wiz_spells = (wb.get("wizard") or {}).get("spells") or []
     wiz_spells = enrich_spells_with_descriptions(wiz_spells)
@@ -366,17 +475,17 @@ def warband_view(warband_id: str):
         if name and name not in seen:
             seen.add(name)
             vault_names.append(name)
-    # Only what this warband can actually hire: books it has switched on, plus
-    # any spell-summoned members its wizard knows the spell for. Filtering here
-    # rather than in the template keeps empty source groups from rendering a
-    # heading with nothing under it.
-    wb_sources = enabled_sources(wb)
+    # Only what this warband can actually hire: books it has switched on, the
+    # spell-summoned members its wizard knows the spell for, and nothing its
+    # wizard's state forbids. Filtering here rather than in the template keeps
+    # empty source groups from rendering a heading with nothing under it.
     wb_spells = known_spell_names(wb)
     hireable = [
         c
         for c in soldier_list_for_ui()
         if c["source"] in wb_sources
         and (not c.get("requires_spell") or c["requires_spell"] in wb_spells)
+        and expansions.soldier_state_block(wb, c["key"]) is None
     ]
     return render_template(
         "warband_view.html",
@@ -393,14 +502,55 @@ def warband_view(warband_id: str):
         relations=SCHOOL_RELATIONS.get(wschool, {}),
         base=base_summary(wb),
         base_locations=BASE_LOCATIONS,
-        base_resources=BASE_RESOURCES,
+        # Supplement resources (Crow Roost, Gondola Repair Shop) only appear once
+        # their book is on. Anything already owned stays listed regardless, so a
+        # book switched off later never hides something the warband paid for.
+        base_resources={
+            key: info
+            for key, info in BASE_RESOURCES.items()
+            if info.get("source", "Core Rules") in wb_sources
+            or key in ((wb.get("base") or {}).get("resources") or [])
+        },
         standard_items=load_spellcaster_items(),  # no armour for wizard/apprentice UI
         full_standard_items=load_standard_items(),  # includes armour/shield: captain picker + reference list
         wizard_spells_ui=wiz_spells,
         vault_names=vault_names,
         potion_choices=load_potion_choices(),
-        spell_names=load_spell_names(),
+        # Scroll / Grimoire item slots list spell names, so they follow the same
+        # source gating as everything else — a warband with a book off should not
+        # be offered a Scroll of Lichdom.
+        spell_names=sorted(
+            {s["name"] for s in all_spells_flat() if s["source"] in wb_sources}, key=str.lower
+        ),
         source_books=SOURCE_BOOK_OPTIONS,
+        enabled_source_names=wb_sources,
+        wizard_state=expansions.wizard_state(wb),
+        wizard_state_kind=expansions.state_kind(wb),
+        # The Beastcrafter III Animal Feature (Fast / Scales) is a real stat
+        # change, so the wizard card shows the boosted value. The stored stats
+        # stay clean — the feature is reversible by picking another one.
+        wizard_display_stats=_stats_with_state_bonus(wb),
+        wizard_state_bonus=expansions.wizard_state_stat_bonus(wb),
+        beastcrafter_tier=expansions.beastcrafter_tier(wb),
+        pact_tiers=expansions.pact_tiers(wb),
+        has_true_name=expansions.has_true_name(wb),
+        can_advance_beastcrafter=expansions.can_advance_beastcrafter(wb),
+        can_add_pact_tier=expansions.can_add_pact_tier(wb),
+        pact_break_penalty=expansions.pact_break_penalty(wb),
+        wizard_level_up_options=expansions.level_up_options(wb),
+        # Treasure from the enabled books, offered as suggestions on the vault's
+        # "Add item" field. It stays a free-text box — this only saves typing.
+        magic_item_names=sorted(
+            {it["name"] for it in magic_items_for_sources(wb_sources)}, key=str.lower
+        ),
+        # In-game table rules (traps, demonic attributes, Malcor's optional core
+        # rules...), shown per enabled book. Never simulated.
+        expansion_rules={
+            book: sections
+            for book, sections in load_expansion_rules().items()
+            if book in wb_sources
+        },
+        knows_revenant=expansions.REVENANT_SPELL in wb_spells,
     )
 
 
@@ -483,6 +633,47 @@ def warband_update(warband_id: str):
 
         elif action == "update_homerules":
             ok, msg = update_homerules(wb, request.form)
+            flash(msg, "success" if ok else "error")
+            if ok:
+                save_warband(wb)
+
+        elif action == "set_wizard_state":
+            ok, msg = set_wizard_state(wb, request.form.get("state_kind") or "")
+            flash(msg, "success" if ok else "error")
+            if ok:
+                save_warband(wb)
+
+        elif action == "advance_beastcrafter":
+            ok, msg = advance_beastcrafter(wb)
+            flash(msg, "success" if ok else "error")
+            if ok:
+                save_warband(wb)
+
+        elif action == "set_animal_feature":
+            ok, msg = set_animal_feature(wb, request.form.get("feature") or "")
+            flash(msg, "success" if ok else "error")
+            if ok:
+                save_warband(wb)
+
+        elif action == "add_pact_tier":
+            ok, msg = add_pact_tier(
+                wb,
+                request.form.get("sacrifice") or "",
+                request.form.get("boon") or "",
+                (request.form.get("demon") or "").strip(),
+            )
+            flash(msg, "success" if ok else "error")
+            if ok:
+                save_warband(wb)
+
+        elif action == "break_pact":
+            ok, msg = break_wizard_pact(wb)
+            flash(msg, "success" if ok else "error")
+            if ok:
+                save_warband(wb)
+
+        elif action == "raise_revenant":
+            ok, msg = raise_revenant(wb, request.form.get("soldier_id") or "")
             flash(msg, "success" if ok else "error")
             if ok:
                 save_warband(wb)

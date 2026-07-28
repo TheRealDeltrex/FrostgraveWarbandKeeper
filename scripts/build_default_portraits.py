@@ -34,6 +34,11 @@ DEFAULT_SOURCE = Path(r"E:/ClaudeCodeFolder/Default Profile Pictures")
 OUT_DIR = REPO_ROOT / "static" / "portraits"
 SIZE = 256
 
+# Source art arrives in whatever format it was drawn/exported in; everything is
+# re-encoded to PNG below regardless, so the input extension only decides what
+# we pick up off disk.
+SOURCE_EXTS = ("*.png", "*.jpg", "*.jpeg", "*.webp")
+
 # Source files whose name doesn't slugify straight onto a soldier name.
 ALIASES = {
     "wizard": "wizard",
@@ -87,13 +92,25 @@ def main() -> int:
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     written: dict[str, int] = {}
+    source_of: dict[str, str] = {}
     unmatched: list[str] = []
+    clashes: list[str] = []
 
-    for src in sorted(source.glob("*.png")):
+    files = sorted(
+        (p for pattern in SOURCE_EXTS for p in source.glob(pattern)),
+        key=lambda p: p.name.lower(),
+    )
+    for src in files:
         key = target_key(src.stem)
         if not key:
             unmatched.append(src.name)
             continue
+        # Two source files claiming the same character (say boar.png and
+        # boar.jpg) would silently leave whichever sorted last. Say so instead.
+        if key in source_of:
+            clashes.append(f"{key}: {source_of[key]} vs {src.name}")
+            continue
+        source_of[key] = src.name
         written[key] = normalize(src, OUT_DIR / f"{key}.png")
 
     missing = sorted(k for k in SOLDIERS if k not in written)
@@ -105,6 +122,8 @@ def main() -> int:
     print(f"wrote {len(written)} portraits to {OUT_DIR} ({total / 1024:.0f} KiB total)")
     if unmatched:
         print("  source files with no matching character: " + ", ".join(unmatched))
+    if clashes:
+        print("  more than one source file for the same character: " + "; ".join(clashes))
     if missing:
         print("  characters left without a default picture: " + ", ".join(missing))
     return 0

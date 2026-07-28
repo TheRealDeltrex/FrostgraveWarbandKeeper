@@ -78,6 +78,15 @@
             </label>
           {% endfor %}
         </div>
+        <label class="checkbox-row" style="margin-top:0.6rem">
+          <input name="pentangle_schools_playable" type="checkbox" {% if hr.pentangle_schools_playable %}checked{% endif %} />
+          Pentangle schools playable
+        </label>
+        <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0">
+          Needs The Maze of Malcor. Its five lost schools are scroll-only by the book; this is the
+          optional rule for running them as real schools. Only affects newly created warbands —
+          a wizard's own school is fixed once chosen.
+        </p>
         <script>
           // Tick/untick every source book at once. Still just changes the
           // checkboxes — the surrounding form's Save button commits it.
@@ -228,6 +237,250 @@
     </form>
   </details>
 
+  {# ---- Wizard states -------------------------------------------------------
+     Its own card rather than a panel inside the homerules form: each control
+     posts its own action, and forms cannot be nested. Only shown when at least
+     one of the three books that introduce a state is switched on. #}
+  {% set available_states = [] %}
+  {% for kind in [STATE_LICH, STATE_BEASTCRAFTER, STATE_PACT] %}
+    {% if STATE_SOURCE[kind] in enabled_source_names %}{% set _ = available_states.append(kind) %}{% endif %}
+  {% endfor %}
+  {% if available_states %}
+  <details class="card" id="wizard-state" {% if wizard_state_kind != STATE_NONE %}open{% endif %}>
+    <summary><h2>Wizard state <span class="badge">{{ STATE_LABELS[wizard_state_kind] }}</span></h2></summary>
+    <p class="muted" style="font-size:0.85rem">
+      Lichdom, the Beastcrafter track and a Demonic Pact are long-term states a wizard can enter.
+      They are mutually exclusive — taking one ends any other. The app records the outcome and
+      applies the ongoing effects; it does not roll the casts that get you there.
+    </p>
+
+    {# --- Pick a state --- #}
+    <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
+      <input type="hidden" name="action" value="set_wizard_state" />
+      <div class="form-row inline">
+        <div>
+          <label for="state_kind">State</label>
+          <select id="state_kind" name="state_kind">
+            <option value="{{ STATE_NONE }}" {% if wizard_state_kind == STATE_NONE %}selected{% endif %}>{{ STATE_LABELS[STATE_NONE] }}</option>
+            {% for kind in available_states %}
+              <option value="{{ kind }}" {% if wizard_state_kind == kind %}selected{% endif %}>
+                {{ STATE_LABELS[kind] }} — {{ STATE_SOURCE[kind] }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label>&nbsp;</label>
+          <button class="btn secondary" type="submit">Set state</button>
+        </div>
+      </div>
+    </form>
+
+    {# --- Lich --- #}
+    {% if wizard_state_kind == STATE_LICH %}
+      <details class="ref-panel" open>
+        <summary>Lich — ongoing rules</summary>
+        <p class="muted" style="font-size:0.85rem">
+          Each level now costs <strong>{{ LICH_XP_PER_LEVEL }} XP</strong>. Fight and Shoot can never be
+          raised on level-up; Will caps at +{{ LICH_STAT_CAPS.will }} and Health at {{ LICH_STAT_CAPS.health }}.
+          A Rangifer will not join the warband.
+        </p>
+        <ul class="list-plain">
+          {% for note in LICH_NOTES %}<li class="muted">{{ note }}</li>{% endfor %}
+        </ul>
+      </details>
+    {% elif STATE_SOURCE[STATE_LICH] in enabled_source_names and wizard_state_kind == STATE_NONE %}
+      <details class="ref-panel">
+        <summary>Lichdom — failing the cast</summary>
+        <p class="muted" style="font-size:0.85rem">
+          Lichdom is Necromancer / CN 20 / Out of Game. On a failure, apply the penalty below using the
+          XP and level-reversal controls on the wizard card.
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Missed by</th><th>Penalty</th></tr></thead>
+            <tbody>
+              {% for row in LICH_FAILURE_TABLE %}
+                <tr><td><strong>{{ row.missed_by }}</strong></td><td class="muted">{{ row.penalty }}</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </details>
+    {% endif %}
+
+    {# --- Beastcrafter --- #}
+    {% if wizard_state_kind == STATE_BEASTCRAFTER %}
+      <details class="ref-panel" open>
+        <summary>Beastcrafter — tier {{ beastcrafter_tier }} of {{ BEASTCRAFTER_TIERS|length }}</summary>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th></th><th>Tier</th><th>Needs level</th><th>Effect</th></tr></thead>
+            <tbody>
+              {% for t in BEASTCRAFTER_TIERS %}
+                <tr>
+                  <td>{% if beastcrafter_tier >= t.tier %}✓{% endif %}</td>
+                  <td><strong>{{ t.name }}</strong></td>
+                  <td class="muted">{{ t.min_level }}</td>
+                  <td class="muted">{{ t.summary }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% if beastcrafter_tier < BEASTCRAFTER_TIERS|length %}
+          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:0.5rem">
+            <input type="hidden" name="action" value="advance_beastcrafter" />
+            <button class="btn secondary small" type="submit" {% if not can_advance_beastcrafter[0] %}disabled{% endif %}>
+              Advance to {{ BEASTCRAFTER_TIERS[beastcrafter_tier].name }}
+            </button>
+            {% if not can_advance_beastcrafter[0] %}
+              <span class="muted" style="font-size:0.85rem"> — {{ can_advance_beastcrafter[1] }}</span>
+            {% endif %}
+          </form>
+        {% endif %}
+        {% if beastcrafter_tier >= 3 %}
+          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:0.75rem">
+            <input type="hidden" name="action" value="set_animal_feature" />
+            <div class="form-row inline">
+              <div>
+                <label for="feature">Animal Feature (permanent, pick one)</label>
+                <select id="feature" name="feature">
+                  {% for f in ANIMAL_FEATURES %}
+                    <option value="{{ f.id }}" {% if wizard_state.feature == f.id %}selected{% endif %}>
+                      {{ f.name }} — {{ f.effect }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div>
+                <label>&nbsp;</label>
+                <button class="btn secondary" type="submit">Set feature</button>
+              </div>
+            </div>
+          </form>
+        {% endif %}
+      </details>
+    {% endif %}
+
+    {# --- Demonic Pact --- #}
+    {% if wizard_state_kind == STATE_PACT %}
+      <details class="ref-panel" open>
+        <summary>Demonic Pact — {{ pact_tiers|length }} of {{ PACT_MAX_TIERS }} held</summary>
+        {% if wizard_state.demon %}
+          <p class="muted" style="font-size:0.85rem">Patron: <strong>{{ wizard_state.demon }}</strong></p>
+        {% endif %}
+        {% if pact_tiers %}
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Sacrifice</th><th>Paid every game</th><th>Boon</th><th>Effect</th></tr></thead>
+              <tbody>
+                {% for p in pact_tiers %}
+                  <tr>
+                    <td><strong>{{ PACT_SACRIFICE_BY_ID[p.sacrifice].name }}</strong></td>
+                    <td class="muted">{{ PACT_SACRIFICE_BY_ID[p.sacrifice].cost }}</td>
+                    <td><strong>{{ PACT_BOON_BY_ID[p.boon].name }}</strong></td>
+                    <td class="muted">{{ PACT_BOON_BY_ID[p.boon].effect }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% endif %}
+
+        {% if can_add_pact_tier[0] %}
+          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:0.75rem">
+            <input type="hidden" name="action" value="add_pact_tier" />
+            <div class="grid-2">
+              <div class="form-row">
+                <label for="sacrifice">Sacrifice</label>
+                <select id="sacrifice" name="sacrifice">
+                  {% for s in PACT_SACRIFICES %}
+                    <option value="{{ s.id }}">{{ s.name }} — {{ s.cost }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="form-row">
+                <label for="boon">Boon</label>
+                <select id="boon" name="boon">
+                  {% for b in PACT_BOONS %}
+                    <option value="{{ b.id }}">{{ b.name }} — {{ b.effect }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="form-row">
+                <label for="demon">Patron demon (optional)</label>
+                <input id="demon" name="demon" type="text" value="{{ wizard_state.demon }}" placeholder="Tiszirain" />
+              </div>
+              <div class="form-row">
+                <label>&nbsp;</label>
+                <button class="btn secondary" type="submit">Forge pact</button>
+              </div>
+            </div>
+          </form>
+        {% else %}
+          <p class="muted" style="font-size:0.85rem;margin-top:0.5rem">{{ can_add_pact_tier[1] }}</p>
+        {% endif %}
+
+        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:0.75rem">
+          <input type="hidden" name="action" value="break_pact" />
+          <button class="btn danger small" type="submit">
+            Break pact (−{{ pact_break_penalty.levels }} level{{ '' if pact_break_penalty.levels == 1 else 's' }},
+            −{{ pact_break_penalty.health }} Health)
+          </button>
+        </form>
+      </details>
+    {% elif STATE_SOURCE[STATE_PACT] in enabled_source_names and wizard_state_kind == STATE_NONE %}
+      <p class="muted" style="font-size:0.85rem">
+        Forging a pact needs a level {{ PACT_TIER_LEVELS[0] }} wizard and a demon's <strong>True Name</strong>
+        in the vault (found as treasure, never bought).
+        {% if not has_true_name %}<em>No True Name is in the vault yet.</em>{% endif %}
+      </p>
+    {% endif %}
+  </details>
+  {% endif %}
+
+  {# ---- Expansion rules ------------------------------------------------------
+     The in-game table rules each enabled book adds: traps, demonic attributes,
+     Malcor's optional core-rule updates, the solo/co-op toolkit. These are
+     reference only — they govern play at the table, not warband state, so the
+     app shows them and tracks nothing. #}
+  {% if expansion_rules %}
+  <details class="card" id="expansion-rules">
+    <summary><h2>Expansion rules</h2></summary>
+    <p class="muted" style="font-size:0.85rem">
+      Table rules from the books you have switched on. Reference only — the app doesn't track these.
+      Every book is browsable in the <a href="{{ url_for('reference') }}">Frostgrave Lexicon</a>,
+      switched on or not.
+    </p>
+    {% for book, sections in expansion_rules.items() %}
+      {% for sec in sections %}
+        <details class="ref-panel">
+          <summary>{{ book }} — {{ sec.title }}</summary>
+          {% if sec.blurb %}<p class="muted" style="font-size:0.85rem">{{ sec.blurb }}</p>{% endif %}
+          {% if sec.rows %}
+            <div class="table-wrap">
+              <table>
+                <tbody>
+                  {% for row in sec.rows %}
+                    <tr><td><strong>{{ row.name }}</strong></td><td class="muted">{{ row.text }}</td></tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% endif %}
+          {% for e in sec.entries %}
+            <p style="margin:0.4rem 0">
+              <strong>{{ e.name }}</strong>{% if e.tag %} <span class="badge">{{ e.tag }}</span>{% endif %}
+              {% if e.text %}<br /><span class="muted">{{ e.text }}</span>{% endif %}
+            </p>
+          {% endfor %}
+        </details>
+      {% endfor %}
+    {% endfor %}
+  </details>
+  {% endif %}
+
   {# ---- Post-game loot ---- #}
   <details class="card" id="post-game">
     <summary><h2>After the game — gold &amp; items</h2></summary>
@@ -297,12 +550,14 @@
               </div>
             </div>
             <div class="stat-row">
-              <div class="stat-pill"><span class="label">Move</span><span class="value">{{ wiz.stats.move }}</span></div>
-              <div class="stat-pill"><span class="label">Fight</span><span class="value">{{ format_stat(wiz.stats.fight) }}</span></div>
-              <div class="stat-pill"><span class="label">Shoot</span><span class="value">{{ format_stat(wiz.stats.shoot) }}</span></div>
-              <div class="stat-pill"><span class="label">Armour</span><span class="value">{{ wiz.stats.armour }}</span></div>
-              <div class="stat-pill"><span class="label">Will</span><span class="value">{{ format_stat(wiz.stats.will) }}</span></div>
-              <div class="stat-pill"><span class="label">Health</span><span class="value">{{ wiz.stats.health }}</span></div>
+              {# wizard_display_stats, not wiz.stats: a Beastcrafter III's Animal
+                 Feature (Fast / Scales) is folded in, marked with a * below. #}
+              <div class="stat-pill"><span class="label">Move</span><span class="value">{{ wizard_display_stats.move }}{% if wizard_state_bonus.move %}*{% endif %}</span></div>
+              <div class="stat-pill"><span class="label">Fight</span><span class="value">{{ format_stat(wizard_display_stats.fight) }}</span></div>
+              <div class="stat-pill"><span class="label">Shoot</span><span class="value">{{ format_stat(wizard_display_stats.shoot) }}</span></div>
+              <div class="stat-pill"><span class="label">Armour</span><span class="value">{{ wizard_display_stats.armour }}{% if wizard_state_bonus.armour %}*{% endif %}</span></div>
+              <div class="stat-pill"><span class="label">Will</span><span class="value">{{ format_stat(wizard_display_stats.will) }}</span></div>
+              <div class="stat-pill"><span class="label">Health</span><span class="value">{{ wizard_display_stats.health }}</span></div>
             </div>
             <h3>Wizard items ({{ WIZARD_ITEM_SLOTS }} slots)</h3>
             <p class="muted" style="font-size:0.85rem">
@@ -408,8 +663,9 @@
           <input type="hidden" name="action" value="level_up" />
           <div class="form-row">
             <label>Choose improvement ({{ pending_levels }} available)</label>
+            {# Not LEVEL_UP_OPTIONS: a Lich may never raise Fight or Shoot. #}
             <select name="choice" id="level-choice" required>
-              {% for opt in LEVEL_UP_OPTIONS %}
+              {% for opt in wizard_level_up_options %}
                 <option value="{{ opt.id }}">{{ opt.label }}</option>
               {% endfor %}
             </select>
@@ -418,7 +674,9 @@
             <label for="learn_spell">New spell</label>
             <select id="learn_spell" name="learn_spell">
               {% for sp in learnable %}
-                <option value="{{ sp.id }}" title="{{ sp.description }}">{{ sp.name }} ({{ sp.school }}, your CN {{ sp.effective_cn }})</option>
+                <option value="{{ sp.id }}" title="{{ sp.description }}">
+                  {{ sp.name }} ({{ sp.school }}, your CN {{ sp.effective_cn }}){% if sp.source != 'Core Rules' %} · {{ sp.source }}{% endif %}
+                </option>
               {% endfor %}
             </select>
           </div>
@@ -846,7 +1104,10 @@
                 <td><strong>{{ s.name }}</strong>{% if hr.soldier_leveling_enabled and s.level %} <span class="muted">(Lv {{ s.level }})</span>{% endif %}</td>
                 <td>
                   {{ s.type_name }}
-                  <div><span class="badge {{ s.category }}">{{ s.category }}</span></div>
+                  <div>
+                    <span class="badge {{ s.category }}">{{ s.category }}</span>
+                    {% if s.revenant %}<span class="badge" title="Reanimated with the Revenant spell">revenant</span>{% endif %}
+                  </div>
                 </td>
                 <td><span class="badge {{ s.status }}">{{ s.status }}</span></td>
                 <td>{{ s.move }}</td>
@@ -867,7 +1128,25 @@
                         {% endfor %}
                       </select>
                     </form>
+                    {# Revenant (Thaw of the Lich Lord): reanimate a casualty. It
+                       keeps its own stats, so this acts on the dead soldier
+                       rather than hiring a "revenant" type. #}
+                    {% if knows_revenant and s.status == 'dead' %}
+                      <form class="inline-form" method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
+                        <input type="hidden" name="action" value="raise_revenant" />
+                        <input type="hidden" name="soldier_id" value="{{ s.id }}" />
+                        <button class="btn secondary small" type="submit" title="Reanimate with the Revenant spell; Will becomes +0">
+                          Raise as revenant
+                        </button>
+                      </form>
+                    {% endif %}
                     <div class="actions" style="align-items:flex-start;margin-top:0">
+                    {% if s.description %}
+                      <details>
+                        <summary class="muted" style="cursor:pointer;font-size:0.85rem">Info</summary>
+                        <p class="muted" style="font-size:0.85rem;margin:0.4rem 0 0;max-width:32rem">{{ s.description }}</p>
+                      </details>
+                    {% endif %}
                     <details>
                       <summary class="muted" style="cursor:pointer;font-size:0.85rem">Edit / picture</summary>
                       <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" enctype="multipart/form-data" class="stack-sm" style="margin-top:0.4rem">
@@ -1050,19 +1329,19 @@
             <tr>
               <th>Type</th><th>Cat</th><th>Source</th><th>Cost</th>
               <th>Move</th><th>Fight</th><th>Shoot</th><th>Armour</th><th>Will</th><th>Health</th><th>Gear</th>
-              <th></th>
+              <th></th><th></th>
             </tr>
           </thead>
           <tbody>
             {% for group in catalog_groups %}
-              <tr class="group-row"><th colspan="12">{{ group.label }}</th></tr>
+              <tr class="group-row"><th colspan="13">{{ group.label }}</th></tr>
               {% for c in group.soldiers %}
               {% set can_afford = wb.gold >= c.cost %}
               {% set within_soldiers = limits.soldiers < limits.max_soldiers %}
               {% set within_specialists = c.category != 'specialist' or limits.specialists < limits.max_specialists %}
               {% set companion_blocked = c.requires_spell == 'Animal Companion' and has_animal_companion %}
               {% set can_hire = can_afford and within_soldiers and within_specialists and not companion_blocked %}
-              <tr {% if not can_hire %}style="opacity:0.5"{% endif %}>
+              <tr class="catalog-row" {% if not can_hire %}style="opacity:0.5"{% endif %}>
                 <td><strong>{{ c.name }}</strong></td>
                 <td><span class="badge {{ c.category }}">{{ c.category }}</span></td>
                 <td class="muted">{% if c.requires_spell %}<span class="badge">via {{ c.requires_spell }}</span>{% elif c.source != 'Core Rules' %}<span class="badge">{{ c.source }}</span>{% else %}—{% endif %}</td>
@@ -1075,6 +1354,13 @@
                 <td>{{ c.health }}</td>
                 <td class="muted">{{ c.gear }}</td>
                 <td>
+                  {% if c.description %}
+                    <details class="info-toggle-details">
+                      <summary class="info-toggle">Info</summary>
+                    </details>
+                  {% endif %}
+                </td>
+                <td>
                   <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
                     <input type="hidden" name="action" value="hire_soldier" />
                     <input type="hidden" name="type_key" value="{{ c.key }}" />
@@ -1082,6 +1368,9 @@
                   </form>
                 </td>
               </tr>
+              {% if c.description %}
+                <tr class="info-desc-row"><td colspan="13">{{ c.description }}</td></tr>
+              {% endif %}
               {% endfor %}
             {% endfor %}
           </tbody>
@@ -1133,7 +1422,13 @@
         <div class="form-row inline">
           <div>
             <label for="item_name">Add item</label>
-            <input id="item_name" name="item_name" type="text" required />
+            {# Suggestions only — still a free-text box, so anything can be banked. #}
+            <input id="item_name" name="item_name" type="text" required list="magic-item-names" />
+            {% if magic_item_names %}
+              <datalist id="magic-item-names">
+                {% for name in magic_item_names %}<option value="{{ name }}"></option>{% endfor %}
+              </datalist>
+            {% endif %}
           </div>
           <div>
             <label>&nbsp;</label>

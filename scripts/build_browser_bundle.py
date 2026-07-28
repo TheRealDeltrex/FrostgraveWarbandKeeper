@@ -31,6 +31,7 @@ PY_MODULES = [
     "paths.py",
     "frostgrave_data.py",
     "game_content.py",
+    "expansions.py",
     "warband_store.py",
     "idle_watchdog.py",
     "pdf_export.py",
@@ -43,6 +44,9 @@ DATA_FILES = [
     "data/potions.json",
     "data/potion_descriptions.json",
     "data/standard_items.json",
+    "data/magic_items.json",
+    "data/expansion_rules.json",
+    "data/ghost_archipelago.json",
 ]
 
 # Loaded once and inlined into every rendered page by the shell (the in-browser
