@@ -18,8 +18,8 @@
   <form method="post" action="{{ url_for('warband_new') }}" enctype="multipart/form-data" id="create-form">
     <input type="hidden" name="spell_order" id="spell_order" value="" />
 
-    <div class="card">
-      <h2>1. Warband &amp; wizard</h2>
+    <details class="card" open>
+      <summary><h2>1. Warband &amp; wizard</h2></summary>
       <div class="grid-2">
         <div class="form-row">
           <label for="warband_name">Warband name</label>
@@ -49,14 +49,34 @@
         </div>
       </div>
       <p class="muted">Starting wizard stats: Move 6 · Fight +2 · Shoot +0 · Armour 10 · Will +4 · Health 14</p>
-    </div>
 
-    <div class="card">
-      <h2>2. Spells
+      <h3 style="margin-top:1.35rem">Apprentice (optional)</h3>
+      <p class="muted">
+        Name + picture only. Stats auto: Move same, Fight −2, Shoot same, Armour 10, Will −2, Health −2 from wizard.
+        Same spells (cast with −2 to the roll). Cost: <span class="gold">{{ APPRENTICE_COST }} gc</span>.
+      </p>
+      <div class="checkbox-row">
+        <input id="with_apprentice" name="with_apprentice" type="checkbox" />
+        <label for="with_apprentice" style="margin:0">Hire apprentice (−{{ APPRENTICE_COST }} gc)</label>
+      </div>
+      <div class="grid-2">
+        <div class="form-row">
+          <label for="apprentice_name">Apprentice name</label>
+          <input id="apprentice_name" name="apprentice_name" type="text" placeholder="Sable" />
+        </div>
+        <div class="form-row">
+          <label for="apprentice_portrait">Apprentice picture</label>
+          <input id="apprentice_portrait" name="apprentice_portrait" type="file" accept="image/*" />
+        </div>
+      </div>
+    </details>
+
+    <details class="card" open>
+      <summary><h2>2. Spells
         <span class="muted" style="font-weight:500;font-size:0.9rem">
           — <span id="spell-count">0</span> / {{ STARTING_SPELL_COUNT }}
         </span>
-      </h2>
+      </h2></summary>
       <p class="muted" style="font-size:0.88rem">Click <strong>Info</strong> on a spell line for its description (not on PDF).</p>
 
       <div class="limit-bar" id="spell-limits">
@@ -127,9 +147,9 @@
                       </label>
                       <details class="spell-desc">
                         <summary class="spell-desc-toggle col-info">Info</summary>
-                        <p class="spell-desc-body">{{ sp.description }}</p>
                       </details>
                     </div>
+                    <p class="spell-desc-body">{{ sp.description }}</p>
                   </div>
                 {% endfor %}
               </div>
@@ -144,32 +164,10 @@
         <ol id="selected-list" class="selected-spells"></ol>
         <p id="spell-status" class="empty"></p>
       </div>
-    </div>
+    </details>
 
-    <div class="card">
-      <h2>3. Apprentice (optional)</h2>
-      <p class="muted">
-        Name + picture only. Stats auto: Move same, Fight −2, Shoot same, Armour 10, Will −2, Health −2 from wizard.
-        Same spells (cast with −2 to the roll). Cost: <span class="gold">{{ APPRENTICE_COST }} gc</span>.
-      </p>
-      <div class="checkbox-row">
-        <input id="with_apprentice" name="with_apprentice" type="checkbox" />
-        <label for="with_apprentice" style="margin:0">Hire apprentice (−{{ APPRENTICE_COST }} gc)</label>
-      </div>
-      <div class="grid-2">
-        <div class="form-row">
-          <label for="apprentice_name">Apprentice name</label>
-          <input id="apprentice_name" name="apprentice_name" type="text" placeholder="Sable" />
-        </div>
-        <div class="form-row">
-          <label for="apprentice_portrait">Apprentice picture</label>
-          <input id="apprentice_portrait" name="apprentice_portrait" type="file" accept="image/*" />
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>4. Confirm</h2>
+    <details class="card" open>
+      <summary><h2>3. Confirm</h2></summary>
       <p class="muted" style="margin:0 0 0.75rem">
         Soldiers aren't hired here — create the warband first, then recruit from the full roster
         on the warband page (that's also where supplement mercenaries live).
@@ -179,7 +177,7 @@
         <a class="btn secondary" href="{{ url_for('home') }}">Cancel</a>
       </div>
       <p class="muted" id="submit-hint" style="margin-top:0.5rem">Complete spell selection to enable create.</p>
-    </div>
+    </details>
   </form>
 
   <script>
