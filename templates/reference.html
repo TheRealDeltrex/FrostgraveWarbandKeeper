@@ -115,7 +115,9 @@
   <details class="card">
     <summary><h2>Soldiers ({{ soldiers|length }})</h2></summary>
     <p class="muted">Core tables plus every supplement soldier. Supplement soldiers must have their source
-      book switched on under a warband's Additional Rules and Homerules before they can be hired.</p>
+      book switched on under a warband's Additional Rules and Homerules before they can be hired.
+      Entries marked <em>via &lt;spell&gt;</em> are summoned for free and only become hireable when your
+      wizard knows that spell (Animate Construct, Animal Companion).</p>
     <div class="table-wrap">
       <table>
         <thead>
@@ -129,7 +131,7 @@
             <tr>
               <td><strong>{{ s.name }}</strong></td>
               <td><span class="badge {{ s.category }}">{{ s.category }}</span></td>
-              <td class="muted">{% if s.source != 'Core Rules' %}<span class="badge">{{ s.source }}</span>{% else %}Core Rules{% endif %}</td>
+              <td class="muted">{% if s.requires_spell %}<span class="badge">via {{ s.requires_spell }}</span>{% elif s.source != 'Core Rules' %}<span class="badge">{{ s.source }}</span>{% else %}Core Rules{% endif %}</td>
               <td class="gold">{% if s.cost == 0 %}Free{% else %}{{ s.cost }}{% endif %}</td>
               <td>{{ s.move }}</td>
               <td>{{ format_stat(s.fight) }}</td>

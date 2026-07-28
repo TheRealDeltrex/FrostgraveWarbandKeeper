@@ -55,6 +55,7 @@ from frostgrave_data import (
     STARTING_SPELL_COUNT,
     WIZARD_BASE,
     WIZARD_ITEM_SLOTS,
+    animal_companion_type_keys,
     cn_penalty,
     effective_cn,
     find_spell,
@@ -875,6 +876,12 @@ def add_soldier(wb: dict, type_key: str, name: str = "") -> tuple[bool, str]:
     src = info.get("source", "Core Rules")
     if src not in enabled_sources(wb):
         return False, f"{info['name']} is from {src}; enable that source under Additional Rules and Homerules first."
+    req_spell = info.get("requires_spell")
+    if req_spell:
+        if req_spell not in known_spell_names(wb):
+            return False, f"{info['name']} can only be summoned with the {req_spell} spell — your wizard doesn't know it."
+        if req_spell == "Animal Companion" and has_animal_companion(wb):
+            return False, "You may only have one Animal Companion at a time."
     active = active_soldiers(wb)
     if len(active) >= MAX_SOLDIERS:
         return False, f"Soldier limit reached ({MAX_SOLDIERS})."
@@ -1698,6 +1705,20 @@ def add_wizard_xp(wb: dict, amount: int) -> tuple[bool, str]:
 
 def known_spell_ids(wb: dict) -> set[str]:
     return {s.get("id") for s in (wb.get("wizard") or {}).get("spells") or []}
+
+
+def known_spell_names(wb: dict) -> set[str]:
+    """Spell names the wizard knows — used to gate spell-summoned hires."""
+    return {s.get("name") for s in (wb.get("wizard") or {}).get("spells") or [] if s.get("name")}
+
+
+def has_animal_companion(wb: dict) -> bool:
+    """True if the warband already fields an Animal Companion (dead ones don't count)."""
+    companion_keys = animal_companion_type_keys()
+    return any(
+        s.get("type_key") in companion_keys and s.get("status") != "dead"
+        for s in wb.get("soldiers") or []
+    )
 
 
 def set_base_location(wb: dict, location_key: str) -> tuple[bool, str]:
