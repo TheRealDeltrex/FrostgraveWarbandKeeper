@@ -242,6 +242,20 @@ BASE_RESOURCES: dict[str, dict] = {
             "pays 10gc less for Niggling Injuries."
         ),
     },
+    # --- Supplement resources (gated by the per-warband source-book toggles) ---
+    # A missing "source" means Core Rules, so everything above is unaffected.
+    "crow_roost": {
+        "name": "Crow Roost",
+        "cost": 100,
+        "source": "Thaw of the Lich Lord",
+        "effects": "Required to hire a Crow Master. One roost per Crow Master.",
+    },
+    "gondola_repair_shop": {
+        "name": "Gondola Repair Shop",
+        "cost": 500,
+        "source": "The Maze of Malcor",
+        "effects": "Repairs 5 damage to an owned sky gondola after each game.",
+    },
 }
 
 # Casting number penalties by school relationship (p.18–24 tables)
@@ -480,7 +494,162 @@ SPELLS: dict[str, list[dict]] = {
         {"name": "Mud", "cn": 10, "type": "Line of Sight"},
         {"name": "Poison Dart", "cn": 10, "type": "Line of Sight"},
     ],
+    # Beastcrafter is not a school any wizard may pick — its two spells are
+    # unlocked by the Beastcrafter state (see expansions.BEASTCRAFTER_SPELLS).
+    "Beastcrafter": [
+        {
+            "name": "Animal Manipulation",
+            "cn": 10,
+            "type": "Line of Sight",
+            "source": "Into the Breeding Pits",
+        },
+        {
+            "name": "Animal Mutation",
+            "cn": 14,
+            "type": "Out of Game",
+            "source": "Into the Breeding Pits",
+        },
+    ],
 }
+
+# Supplement spells, folded into SPELLS above by school. Kept as a separate table
+# so the additions stay visible and reviewable against the source books, rather
+# than being scattered through 80 core entries.
+SUPPLEMENT_SPELLS: dict[str, list[dict]] = {
+    # --- Thaw of the Lich Lord ---
+    "Witch": [
+        {
+            "name": "Homunculus",
+            "cn": 14,
+            "type": "Out of Game",
+            "source": "Thaw of the Lich Lord",
+        },
+    ],
+    "Necromancer": [
+        {"name": "Lichdom", "cn": 20, "type": "Out of Game", "source": "Thaw of the Lich Lord"},
+        {"name": "Revenant", "cn": 14, "type": "Out of Game", "source": "Thaw of the Lich Lord"},
+    ],
+    # --- Into the Breeding Pits (Reaction spells are a new category) ---
+    "Sigilist": [
+        {
+            "name": "Capture Incantation",
+            "cn": 12,
+            "type": "Reaction",
+            "source": "Into the Breeding Pits",
+        },
+        {"name": "Mystic Brand", "cn": 12, "type": "Out of Game", "source": "Forgotten Pacts"},
+    ],
+    "Soothsayer": [
+        {"name": "Deflect", "cn": 12, "type": "Reaction", "source": "Into the Breeding Pits"},
+    ],
+    "Elementalist": [
+        {"name": "Elemental Lash", "cn": 12, "type": "Reaction", "source": "Into the Breeding Pits"},
+    ],
+    "Illusionist": [
+        {"name": "Flash", "cn": 8, "type": "Reaction", "source": "Into the Breeding Pits"},
+    ],
+    "Chronomancer": [
+        {
+            "name": "Slowfall",
+            "cn": 8,
+            "type": "Reaction / Line of Sight",
+            "source": "Into the Breeding Pits",
+        },
+    ],
+    # --- Forgotten Pacts ---
+    "Summoner": [
+        {
+            "name": "Demonic Servant",
+            "cn": 10,
+            "type": "Out of Game",
+            "source": "Forgotten Pacts",
+        },
+    ],
+}
+
+for _school, _extra in SUPPLEMENT_SPELLS.items():
+    SPELLS.setdefault(_school, []).extend(_extra)
+    SPELLS[_school].sort(key=lambda sp: sp["name"])
+del _school, _extra
+
+# --- The Pentangle (The Maze of Malcor) ------------------------------------
+#
+# Five schools taught at the Collegium and lost with it. The book is explicit
+# that they "can never be learned, and a wizard will never find a grimoire
+# containing them" — they exist only on scrolls. It then includes rules for
+# running them as full schools if a group agrees, which the
+# "pentangle_schools_playable" homerule switches on.
+#
+# Casting numbers and ranges are extracted from the Lost Spells chapter of the
+# book itself (scripts/extract_pentangle_spells.py), not guessed.
+PENTANGLE_SCHOOLS = ["Astromancer", "Distortionist", "Fatecaster", "Sonancer", "Spiritualist"]
+
+# Each combines two existing schools and is aligned with both. The book gives no
+# opposed school for them.
+PENTANGLE_RELATIONS = {
+    "Astromancer": {"combines": ["Sigilist", "Elementalist"], "aligned": ["Elementalist", "Sigilist"]},
+    "Distortionist": {"combines": ["Illusionist", "Summoner"], "aligned": ["Illusionist", "Summoner"]},
+    "Fatecaster": {"combines": ["Soothsayer", "Witch"], "aligned": ["Soothsayer", "Witch"]},
+    "Sonancer": {"combines": ["Chronomancer", "Enchanter"], "aligned": ["Chronomancer", "Enchanter"]},
+    "Spiritualist": {"combines": ["Necromancer", "Thaumaturge"], "aligned": ["Necromancer", "Thaumaturge"]},
+}
+
+LOST_SPELLS: dict[str, list[dict]] = {
+    "Astromancer": [
+        {"name": "Alignment", "cn": 12, "type": "Self Only"},
+        {"name": "Meteor Strike", "cn": 14, "type": "Line of Sight"},
+        {"name": "Misalignment", "cn": 10, "type": "Area Effect"},
+        {"name": "Shape Starfire Elemental", "cn": 12, "type": "Line of Sight"},
+        {"name": "Starfall", "cn": 12, "type": "Area Effect"},
+        {"name": "Starfire Bolt", "cn": 14, "type": "Line of Sight"},
+    ],
+    "Distortionist": [
+        {"name": "Break Armour", "cn": 10, "type": "Line of Sight"},
+        {"name": "Collapse", "cn": 8, "type": "Line of Sight"},
+        {"name": "Fracture", "cn": 12, "type": "Self Only"},
+        {"name": "Implode / Explode", "cn": 12, "type": "Line of Sight"},
+        {"name": "Misstep", "cn": 10, "type": "Out of Game"},
+        {"name": "Whiplash", "cn": 12, "type": "Self Only"},
+    ],
+    "Fatecaster": [
+        {"name": "Blood Wager", "cn": 10, "type": "Self Only"},
+        {"name": "Fickle Finger", "cn": 12, "type": "Line of Sight"},
+        {"name": "Mischance", "cn": 8, "type": "Line of Sight"},
+        {"name": "Scatter", "cn": 8, "type": "Line of Sight"},
+        {"name": "Serendipity", "cn": 8, "type": "Line of Sight"},
+        {"name": "True Gold", "cn": 10, "type": "Out of Game"},
+    ],
+    "Sonancer": [
+        {"name": "Charm", "cn": 8, "type": "Area Effect"},
+        {"name": "Humming Blade", "cn": 8, "type": "Line of Sight"},
+        {"name": "Imbue Instrument", "cn": 10, "type": "Self Only & Out of Game"},
+        {"name": "Sound Cloud", "cn": 10, "type": "Self Only"},
+        {"name": "Sound Wave", "cn": 12, "type": "Line of Sight"},
+        {"name": "Steal Voice", "cn": 12, "type": "Line of Sight"},
+    ],
+    "Spiritualist": [
+        {"name": "Call Wraith", "cn": 12, "type": "Line of Sight"},
+        {"name": "Command Ethereal", "cn": 12, "type": "Line of Sight"},
+        {"name": "Ethereal Form", "cn": 10, "type": "Self Only"},
+        {"name": "Inhabit", "cn": 8, "type": "Line of Sight"},
+        {"name": "Nightmare", "cn": 12, "type": "Out of Game"},
+        {"name": "Speak with the Dead", "cn": 12, "type": "Out of Game"},
+    ],
+}
+
+for _school, _spells in LOST_SPELLS.items():
+    SPELLS[_school] = [{**sp, "source": "The Maze of Malcor"} for sp in _spells]
+    SCHOOL_RELATIONS[_school] = {
+        "aligned": PENTANGLE_RELATIONS[_school]["aligned"],
+        "neutral": [s for s in SCHOOLS if s not in PENTANGLE_RELATIONS[_school]["aligned"]],
+        "opposed": "",
+    }
+del _school, _spells
+
+# Schools that carry spells but that no wizard may choose at creation. They are
+# reachable only through a wizard state (Beastcrafter) or, for the Pentangle,
+# the "Pentangle schools playable" homerule.
+EXTRA_SPELL_SCHOOLS = ["Beastcrafter"] + PENTANGLE_SCHOOLS
 
 LEVEL_UP_OPTIONS = [
     {"id": "fight", "label": "+1 Fight", "stat": "fight"},
@@ -505,6 +674,7 @@ SOLDIERS: dict[str, dict] = {
         "health": 10,
         "gear": "Hand weapon",
         "notes": "Free standard soldier.",
+        "description": 'A common laborer or petty criminal turned muscle-for-hire — no training, just a hand weapon and a willingness to fight. No special rules beyond their listed gear.',
     },
     "thief": {
         "name": "Thief",
@@ -518,6 +688,7 @@ SOLDIERS: dict[str, dict] = {
         "health": 10,
         "gear": "Dagger",
         "notes": "Free standard soldier.",
+        "description": 'Fast and light-fingered, trained to slip in, grab treasure, and slip out again rather than stand and fight. Free to hire, armed only with a dagger. No special rules beyond their listed gear.',
     },
     "war_hound": {
         "name": "War Hound",
@@ -531,6 +702,7 @@ SOLDIERS: dict[str, dict] = {
         "health": 8,
         "gear": "—",
         "notes": "Animal; no treasure, no item slots.",
+        "description": 'A trained hunting dog, useful for harrying an enemy rather than holding a line. Animal: cannot pick up treasure tokens and has no item slot.',
     },
     "infantryman": {
         "name": "Infantryman",
@@ -544,6 +716,7 @@ SOLDIERS: dict[str, dict] = {
         "health": 10,
         "gear": "Two-handed weapon, light armour",
         "notes": "Standard soldier.",
+        "description": 'A basic melee soldier, competent with a two-handed weapon and equipped with light armour. No special rules beyond their listed gear.',
     },
     "man_at_arms": {
         "name": "Man-at-Arms",
@@ -557,6 +730,7 @@ SOLDIERS: dict[str, dict] = {
         "health": 12,
         "gear": "Hand weapon, shield, light armour",
         "notes": "Standard soldier.",
+        "description": "A disciplined hand-weapon-and-shield fighter in light armour, sturdier than an infantryman thanks to the shield's extra protection. No special rules beyond their listed gear.",
     },
     "apothecary": {
         "name": "Apothecary",
@@ -570,6 +744,7 @@ SOLDIERS: dict[str, dict] = {
         "health": 12,
         "gear": "Staff, healing potion",
         "notes": "Standard. Starts with potion of healing each game.",
+        "description": 'A battlefield healer who starts every game already carrying a potion of healing. May spend an action to hand any potion they carry — not just the free one — to a warband member within 1" who isn\'t in combat; that figure counts as having drunk it immediately, with the effects applied right away.',
     },
     "archer": {
         "name": "Archer",
@@ -583,6 +758,7 @@ SOLDIERS: dict[str, dict] = {
         "health": 10,
         "gear": "Bow, quiver, dagger, light armour",
         "notes": "Specialist.",
+        "description": 'A trained bowman. A bow loads and fires as a single action, so an archer can move and shoot within the same activation.',
     },
     "crossbowman": {
         "name": "Crossbowman",
@@ -596,6 +772,7 @@ SOLDIERS: dict[str, dict] = {
         "health": 10,
         "gear": "Crossbow, quiver, dagger, light armour",
         "notes": "Specialist.",
+        "description": 'A marksman with a heavier, harder-hitting weapon. A crossbow deals +2 damage but must be loaded and fired as two separate actions, so a crossbowman cannot move and shoot in the same activation.',
     },
     "treasure_hunter": {
         "name": "Treasure Hunter",
@@ -609,6 +786,7 @@ SOLDIERS: dict[str, dict] = {
         "health": 12,
         "gear": "Hand weapon, dagger, light armour",
         "notes": "Specialist.",
+        "description": 'A scrappy adventurer built for grabbing loot and getting out alive, with solid Fight and Will for a mid-cost specialist. No special rules beyond their listed gear.',
     },
     "tracker": {
         "name": "Tracker",
@@ -622,6 +800,7 @@ SOLDIERS: dict[str, dict] = {
         "health": 12,
         "gear": "Staff, bow, quiver, light armour",
         "notes": "Specialist.",
+        "description": 'A woodsman equally comfortable at range or in melee, carrying both a staff and a bow. Like all bows, theirs loads and fires as a single action, so they can move and shoot in the same activation.',
     },
     "knight": {
         "name": "Knight",
@@ -635,6 +814,7 @@ SOLDIERS: dict[str, dict] = {
         "health": 12,
         "gear": "Hand weapon, dagger, shield, heavy armour",
         "notes": "Specialist.",
+        "description": 'A heavily armoured melee specialist with a hand weapon, dagger, and shield. No special rules beyond their listed gear.',
     },
     "templar": {
         "name": "Templar",
@@ -648,6 +828,7 @@ SOLDIERS: dict[str, dict] = {
         "health": 12,
         "gear": "Two-handed weapon, heavy armour",
         "notes": "Specialist.",
+        "description": "A heavily armoured warrior who trades the knight's shield for a two-handed weapon, giving up some defense for extra damage. No special rules beyond their listed gear.",
     },
     "ranger": {
         "name": "Ranger",
@@ -661,6 +842,7 @@ SOLDIERS: dict[str, dict] = {
         "health": 12,
         "gear": "Bow, quiver, hand weapon, light armour",
         "notes": "Specialist.",
+        "description": 'A versatile fighter carrying both a bow and a hand weapon, able to switch between ranged and melee as a fight develops. Like all bows, theirs loads and fires as a single action.',
     },
     "barbarian": {
         "name": "Barbarian",
@@ -674,6 +856,7 @@ SOLDIERS: dict[str, dict] = {
         "health": 14,
         "gear": "Two-handed weapon, dagger",
         "notes": "Specialist.",
+        "description": 'A savage two-handed fighter with the highest Health of any specialist, built to wade into combat and keep swinging. No special rules beyond their listed gear.',
     },
     "marksman": {
         "name": "Marksman",
@@ -687,6 +870,7 @@ SOLDIERS: dict[str, dict] = {
         "health": 12,
         "gear": "Crossbow, quiver, hand weapon, heavy armour",
         "notes": "Specialist.",
+        "description": 'An elite crossbowman in heavy armour, backing up their hard-hitting shot with a hand weapon for when an enemy closes the distance. Like all crossbows, theirs must be loaded and fired as two separate actions, so a marksman cannot move and shoot in the same activation.',
     },
     # --- Supplement soldiers (gated by the per-warband source-book toggles) ---
     # Categorisation (standard/specialist) follows the Supplemental Soldier
@@ -704,6 +888,7 @@ SOLDIERS: dict[str, dict] = {
         "health": 10,
         "gear": "Javelins",
         "notes": "Javelins are hand weapons in melee and may be thrown up to 10\" as a shooting attack.",
+        "description": 'A skirmisher who fights with a bundle of javelins — a hand weapon in melee, or a 10" thrown shooting attack, drawn from a functionally unlimited supply.',
     },
     "pack_mule": {
         "name": "Pack Mule",
@@ -718,6 +903,7 @@ SOLDIERS: dict[str, dict] = {
         "health": 10,
         "gear": "Dagger",
         "notes": "May carry up to three items and hand them to nearby warband members (3 item slots).",
+        "description": 'A hired hand whose whole job is logistics: they carry three items and can hand any of them off to (or take one from) a warband member within 1", freeing up other soldiers\' single item slot for something more useful in a fight.',
     },
     "bard": {
         "name": "Bard",
@@ -732,6 +918,7 @@ SOLDIERS: dict[str, dict] = {
         "health": 12,
         "gear": "Hand weapon, leather armour",
         "notes": "Soldiers within 6\" and line of sight gain +1 to Will rolls (once per warband).",
+        "description": 'A traveling performer whose music steadies nerves in the field. Warband members within 6" and line of sight of a bard get +1 to Will rolls; this bonus doesn\'t stack with a second bard and never applies to the bard themself.',
     },
     "crow_master": {
         "name": "Crow Master",
@@ -746,6 +933,7 @@ SOLDIERS: dict[str, dict] = {
         "health": 10,
         "gear": "Hand weapon, leather armour",
         "notes": "Requires a Crow Roost base upgrade (100gc). Brings one blood crow; may carry treasure but no items.",
+        "description": "A handler bonded to a trained blood crow. Requires a Crow Roost base upgrade (100gc) before one can be hired. Comes with one blood crow that acts independently and is replaced free of charge if it's killed; the crow master may carry treasure but has no item slots of their own.",
     },
     "rangifer": {
         "name": "Rangifer",
@@ -760,6 +948,25 @@ SOLDIERS: dict[str, dict] = {
         "health": 12,
         "gear": "Hand weapon",
         "notes": "Reindeer-man hybrid. Hate Undead: +1 Fight and magic attacks when fighting undead.",
+        "description": 'A reindeer-human hybrid from the far north with a deep-seated hatred of the walking dead. Hate Undead: gains +1 Fight and all its attacks count as magic when fighting undead creatures. Will refuse to join, or leave, a warband that fields any undead member.',
+    },
+    "collegium_porter": {
+        "name": "Collegium Porter",
+        "cost": 0,
+        "category": "standard",
+        "source": "The Maze of Malcor",
+        "move": 5,
+        "fight": 4,
+        "shoot": 0,
+        "armour": 13,
+        "will": 3,
+        "health": 14,
+        "gear": "—",
+        "notes": (
+            "Joins via the Porter Control Rod (treasure), not purchased. Construct; "
+            "never attacks spellcasters; gains 3 potion/scroll item slots once recruited."
+        ),
+        "description": 'Constructs unique to the Collegium that once served as door guards, message carriers, and low-level security — mostly resembling fancy furniture with short legs and long arms, now feral with no staff to command them. Joins only via a Porter Control Rod (treasure, not purchased). Construct: immune to poison, never counts as wounded, may carry treasure but has no item slots. Never forces combat with a spellcaster; gains 3 potion/scroll-only item slots once recruited.',
     },
     "trap_expert": {
         "name": "Trap Expert",
@@ -774,6 +981,7 @@ SOLDIERS: dict[str, dict] = {
         "health": 12,
         "gear": "Two daggers, leather armour",
         "notes": "Once per game, may treat the first initiative roll of 2 as a 1 for the purpose of springing a trap.",
+        "description": "Someone who has survived the city's traps often enough to read the warning signs. Once per game, treats the first initiative roll of 2 as a 1 for the purpose of springing a trap, giving the party one extra chance to avoid it.",
     },
     "tunnel_fighter": {
         "name": "Tunnel Fighter",
@@ -788,6 +996,7 @@ SOLDIERS: dict[str, dict] = {
         "health": 12,
         "gear": "Two hand weapons, leather armour",
         "notes": "With the Secret Passages rules, an initiative roll of 19 lets one tunnel fighter discover a secret passage.",
+        "description": "A specialist trained for the city's collapsed passages and hidden shortcuts. Under the Secret Passages rules, an initiative roll of 19 lets a tunnel fighter (and only a tunnel fighter) discover and use a secret passage that game.",
     },
     "assassin": {
         "name": "Assassin",
@@ -802,6 +1011,7 @@ SOLDIERS: dict[str, dict] = {
         "health": 12,
         "gear": "Hand weapon",
         "notes": "Attacks poison (target reduced to one action). +2 Fight when already supported; never counts as a supporting figure.",
+        "description": 'A killer for hire who works best from the shadows of a crowd rather than alone. Attacks are poisoned, reducing the target to one action. Gains +2 Fight whenever already supported by another figure, but never counts as a supporting figure themself.',
     },
     "demonic_servant": {
         "name": "Demonic Servant",
@@ -815,7 +1025,25 @@ SOLDIERS: dict[str, dict] = {
         "will": 4,
         "health": 10,
         "gear": "—",
-        "notes": "Normally only joins via the Demonic Servant spell (not purchased). Demon; one minor demonic attribute; aids Summon Demon rolls.",
+        "requires_spell": "Demonic Servant",
+        "notes": "Joins via the Demonic Servant spell (never purchased). Demon; one minor demonic attribute; aids Summon Demon rolls.",
+        "description": "A minor demon bound into service, joining a warband only through the Demonic Servant spell (Forgotten Pacts) rather than being purchased. Demon: immune to poison, all its attacks count as magic, and it may carry treasure tokens but has no item slots. Rolls one Minor Demonic Attribute on arrival and improves the wizard's future Summon Demon rolls.",
+    },
+    # Joins through a pact boon rather than a spell — gated in expansions.py.
+    "chilopendra": {
+        "name": "Chilopendra",
+        "cost": 0,
+        "category": "standard",
+        "source": "Forgotten Pacts",
+        "move": 6,
+        "fight": 4,
+        "shoot": 0,
+        "armour": 12,
+        "will": 4,
+        "health": 14,
+        "gear": "—",
+        "notes": "Requires the Chilopendra Soldier pact boon (Tiszirain). Demon; Horns; Poisonous.",
+        "description": 'Demon/human hybrids created when a human sacrifices himself to the demon lord Tiszirain; human from the waist up, with the lower body of a great centipede, fighting just as readily with sharp horns and envenomed legs as with a weapon. Joins only through the Chilopendra Soldier pact boon (Forgotten Pacts, Tiszirain pact only). Demon: immune to poison, all its attacks count as magic, may carry treasure tokens but has no item slots. Horns: +2 Fight when it charges into combat and fights in the same activation. Poisonous: its own attacks deal poison damage.',
     },
     "demon_hunter": {
         "name": "Demon Hunter",
@@ -830,6 +1058,7 @@ SOLDIERS: dict[str, dict] = {
         "health": 12,
         "gear": "Two-handed weapon, crossbow, leather armour",
         "notes": "+1 Fight and +1 damage vs demons. Variable cost: base 100gc (+25gc if the wizard knows Summon Demon/Imp/Possess, +25gc if a Summoner, +50gc if the base has a summoning circle).",
+        "description": 'A specialist trained specifically to fight demons, dealing +1 Fight and +1 damage against them. Cost is variable rather than fixed: base 100gc, +25gc if the wizard knows Summon Demon, Imp, or Possess, a further +25gc if the wizard is a Summoner, and +50gc if the base owns a Summoning Circle — the more demon-adjacent the warband already is, the more this specialist costs to bring in.',
     },
     "monk": {
         "name": "Monk",
@@ -844,6 +1073,7 @@ SOLDIERS: dict[str, dict] = {
         "health": 12,
         "gear": "Bladed staff",
         "notes": "Bladed staff: +1 Fight and -1 to the enemy's hand-to-hand attacks.",
+        "description": "A disciplined martial artist who fights with a bladed staff — a quarterstaff with a blade lashed to one end. It grants +1 Fight and reduces the enemy's hand-to-hand damage against the monk by 1.",
     },
     "mystic_warrior": {
         "name": "Mystic Warrior",
@@ -858,6 +1088,7 @@ SOLDIERS: dict[str, dict] = {
         "health": 12,
         "gear": "Unarmed (gauntlets / vambraces)",
         "notes": "Never suffers unarmed penalties; all hand-to-hand attacks count as magic attacks.",
+        "description": 'A warrior who has trained the body itself into a weapon. Fights unarmed with no penalty, and every hand-to-hand attack they make counts as a magic attack — able to hurt creatures that are otherwise immune to normal weapons.',
     },
     # --- Spell-summoned members: only hireable (free) when the wizard knows the
     # listed spell. Gated by "requires_spell", not a source book. ---
@@ -874,6 +1105,7 @@ SOLDIERS: dict[str, dict] = {
         "health": 10,
         "gear": "Unarmed",
         "notes": "Construct: immune to poison, never counts as wounded; carries treasure but has no item slots. Animated by the Animate Construct spell (small, -0 to cast).",
+        "description": 'A crude animated figure summoned by the Animate Construct spell at its easiest casting tier. Construct: immune to poison, never counts as wounded, and may carry treasure tokens but has no item slots (though some items may be permanently grafted to it instead of carried).',
     },
     "medium_construct": {
         "name": "Medium Construct",
@@ -888,6 +1120,7 @@ SOLDIERS: dict[str, dict] = {
         "health": 12,
         "gear": "Unarmed",
         "notes": "Construct: immune to poison, never wounded; carries treasure but has no item slots. Animated by the Animate Construct spell (medium, -3 to cast).",
+        "description": 'A sturdier animated figure summoned by the Animate Construct spell at its middle casting tier. Construct: immune to poison, never counts as wounded, and may carry treasure tokens but has no item slots (though some items may be permanently grafted to it instead of carried).',
     },
     "large_construct": {
         "name": "Large Construct",
@@ -902,6 +1135,7 @@ SOLDIERS: dict[str, dict] = {
         "health": 14,
         "gear": "Unarmed",
         "notes": "Construct; Large (-2 Large Target vs shooting); Strong (+2 damage). Counts as a specialist. Animated by the Animate Construct spell (large, -6 to cast).",
+        "description": 'A hulking animated figure summoned by the Animate Construct spell at its hardest casting tier. Large: suffers the -2 Large Target penalty against shooting attacks. Strong: deals +2 damage. Also has the standard Construct traits: immune to poison, never counts as wounded, and may carry treasure tokens but has no item slots. Counts as a specialist.',
     },
     "companion_bear": {
         "name": "Bear",
@@ -916,6 +1150,7 @@ SOLDIERS: dict[str, dict] = {
         "health": 14,
         "gear": "Unarmed",
         "notes": "Animal Companion; Animal; Large; Strong (+2 damage). Will includes the +3 Animal Companion bonus.",
+        "description": 'A wilderness companion bonded via the Animal Companion spell. Large: suffers the -2 Large Target penalty against shooting attacks. Strong: deals +2 damage. Animal: cannot pick up treasure tokens and has no item slot. Will shown already includes the +3 Animal Companion bonus.',
     },
     "companion_ice_toad": {
         "name": "Ice Toad",
@@ -930,6 +1165,7 @@ SOLDIERS: dict[str, dict] = {
         "health": 5,
         "gear": "Unarmed",
         "notes": "Animal Companion; Animal; Amphibious; Powerful (double damage). Will includes the +3 Animal Companion bonus.",
+        "description": 'A wilderness companion bonded via the Animal Companion spell. Amphibious: automatically passes Swimming Rolls, treats water as normal ground instead of rough terrain, and suffers no Fight penalty while in water. Powerful: damage it deals is doubled. Animal: cannot pick up treasure tokens and has no item slot. Will shown already includes the +3 Animal Companion bonus.',
     },
     "companion_snow_leopard": {
         "name": "Snow Leopard",
@@ -944,6 +1180,7 @@ SOLDIERS: dict[str, dict] = {
         "health": 10,
         "gear": "Unarmed",
         "notes": "Animal Companion; Animal; Expert Climber. Will includes the +3 Animal Companion bonus.",
+        "description": 'A wilderness companion bonded via the Animal Companion spell. Expert Climber: suffers no movement penalty for climbing. Animal: cannot pick up treasure tokens and has no item slot. Will shown already includes the +3 Animal Companion bonus.',
     },
     "companion_wolf": {
         "name": "Wolf",
@@ -958,6 +1195,48 @@ SOLDIERS: dict[str, dict] = {
         "health": 6,
         "gear": "Unarmed",
         "notes": "Animal Companion; Animal; Pack Hunter. Will includes the +3 Animal Companion bonus.",
+        "description": 'A wilderness companion bonded via the Animal Companion spell. Pack Hunter: if more than one wolf is fielded, they act together — all activate and move as one whenever any of them is activated, following whichever is rolled as pack leader. Animal: cannot pick up treasure tokens and has no item slot. Will shown already includes the +3 Animal Companion bonus.',
+    },
+    # Beastcrafter I adds these two to the Animal Companion options. Base stats
+    # are the core-rules creatures; Will includes the +3 companion bonus, same
+    # convention as the four above.
+    "companion_boar": {
+        "name": "Boar",
+        "cost": 0,
+        "category": "standard",
+        "source": "Into the Breeding Pits",
+        "requires_spell": "Animal Companion",
+        "move": 6,
+        "fight": 2,
+        "shoot": 0,
+        "armour": 12,
+        "will": 5,
+        "health": 8,
+        "gear": "Unarmed",
+        "notes": (
+            "Animal Companion; Animal. Requires a Beastcrafter I wizard. "
+            "Will includes the +3 Animal Companion bonus."
+        ),
+        "description": 'A wilderness companion available only to a Beastcrafter I wizard (Into the Breeding Pits), bonded via the Animal Companion spell like the core companions. Animal: cannot pick up treasure tokens and has no item slot. Will shown already includes the +3 Animal Companion bonus.',
+    },
+    "companion_ice_spider": {
+        "name": "Ice Spider",
+        "cost": 0,
+        "category": "standard",
+        "source": "Into the Breeding Pits",
+        "requires_spell": "Animal Companion",
+        "move": 6,
+        "fight": 1,
+        "shoot": 0,
+        "armour": 8,
+        "will": 3,
+        "health": 4,
+        "gear": "Unarmed",
+        "notes": (
+            "Animal Companion; Animal; Poison. Requires a Beastcrafter I wizard. "
+            "Will includes the +3 Animal Companion bonus."
+        ),
+        "description": 'A wilderness companion available only to a Beastcrafter I wizard (Into the Breeding Pits), bonded via the Animal Companion spell. Poison: its attacks deal poison damage. Animal: cannot pick up treasure tokens and has no item slot. Will shown already includes the +3 Animal Companion bonus.',
     },
 }
 
@@ -1023,12 +1302,15 @@ def group_soldiers_by_source(rows: list[dict]) -> list[dict]:
 # after these, by name.
 SUMMONED_ORDER = [
     "companion_bear",
+    "companion_boar",
+    "companion_ice_spider",
     "companion_ice_toad",
     "companion_snow_leopard",
     "companion_wolf",
     "small_construct",
     "medium_construct",
     "large_construct",
+    "demonic_servant",
 ]
 
 
@@ -1048,10 +1330,16 @@ def _ui_sort_key(r: dict) -> tuple:
     specialist), cost, name. The summons instead keep their own fixed grouping —
     sorting them by category would strand the Large Construct at the end for
     being a specialist, away from the two smaller constructs it belongs with.
+
+    Summons ignore their source book entirely and all sort as one block right
+    after the core soldiers. They are grouped under "Summoned by spell" rather
+    than under a book, so letting a supplement companion (the Beastcrafter's boar
+    and ice spider) sort into its own book's position would emit that heading a
+    second time further down the list.
     """
     if r.get("requires_spell"):
         rank = SUMMONED_ORDER.index(r["key"]) if r["key"] in SUMMONED_ORDER else len(SUMMONED_ORDER)
-        return (_source_rank(r["source"]), 1, rank, 0, r["name"])
+        return (0, 1, rank, 0, r["name"])
     return (
         _source_rank(r["source"]),
         0,
@@ -1083,7 +1371,16 @@ def all_spells_flat() -> list[dict]:
     out = []
     for school, spells in SPELLS.items():
         for sp in spells:
-            out.append({**sp, "school": school, "id": spell_id(school, sp["name"])})
+            out.append(
+                {
+                    **sp,
+                    "school": school,
+                    "id": spell_id(school, sp["name"]),
+                    # Normalised here so every consumer can rely on it being set;
+                    # core spells carry no "source" key of their own.
+                    "source": sp.get("source", "Core Rules"),
+                }
+            )
     return out
 
 
@@ -1097,7 +1394,12 @@ def find_spell(spell_key: str) -> dict | None:
     school, name = spell_key.split("::", 1)
     for sp in SPELLS.get(school, []):
         if sp["name"] == name:
-            return {**sp, "school": school, "id": spell_key}
+            return {
+                **sp,
+                "school": school,
+                "id": spell_key,
+                "source": sp.get("source", "Core Rules"),
+            }
     return None
 
 
@@ -1118,13 +1420,16 @@ def spells_for_wizard_ui(wizard_school: str) -> list[dict]:
     return out
 
 
-def xp_for_level(level: int) -> int:
-    return max(0, int(level)) * XP_PER_LEVEL
+# The XP helpers take the cost of a level rather than a warband, so they stay
+# pure and every existing caller keeps working. A Lich levels at 150 XP instead
+# of 100 — see expansions.xp_per_level().
+def xp_for_level(level: int, per_level: int = XP_PER_LEVEL) -> int:
+    return max(0, int(level)) * int(per_level or XP_PER_LEVEL)
 
 
-def level_from_xp(xp: int) -> int:
-    return min(MAX_WIZARD_LEVEL, max(0, int(xp) // XP_PER_LEVEL))
+def level_from_xp(xp: int, per_level: int = XP_PER_LEVEL) -> int:
+    return min(MAX_WIZARD_LEVEL, max(0, int(xp) // int(per_level or XP_PER_LEVEL)))
 
 
-def xp_to_next_level(xp: int, level: int) -> int:
-    return max(0, xp_for_level(level + 1) - int(xp))
+def xp_to_next_level(xp: int, level: int, per_level: int = XP_PER_LEVEL) -> int:
+    return max(0, xp_for_level(level + 1, per_level) - int(xp))

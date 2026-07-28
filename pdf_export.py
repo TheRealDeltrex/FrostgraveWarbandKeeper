@@ -7,6 +7,8 @@ from pathlib import Path
 
 from fpdf import FPDF
 
+import expansions
+
 try:
     from PIL import Image
 except Exception:  # pragma: no cover - Pillow is absent in the in-browser build
@@ -243,12 +245,25 @@ def build_warband_pdf(wb: dict) -> bytes:
     pdf.set_font("Helvetica", "B", 12)
     wstats = wiz.get("stats") or {}
     school = wiz.get("school", "")
+    # Lich / Beastcrafter / pact-holder, if any — it changes how the wizard levels
+    # and what they may field, so it belongs on the printed sheet.
+    state_kind = expansions.state_kind(wb)
+    state_note = ""
+    if state_kind != expansions.STATE_NONE:
+        state_note = f"  -  {expansions.STATE_LABELS[state_kind]}"
+        if state_kind == expansions.STATE_BEASTCRAFTER:
+            tier = expansions.beastcrafter_tier(wb)
+            if tier:
+                state_note = f"  -  {expansions.BEASTCRAFTER_TIER_BY_N[tier]['name']}"
+        elif state_kind == expansions.STATE_PACT:
+            held = len(expansions.pact_tiers(wb))
+            state_note += f" ({held} pact{'' if held == 1 else 's'})"
     pdf.cell(
         0,
         6,
         _t(
             f"{wiz.get('name', 'Wizard')}  -  {school}  -  "
-            f"Level {wiz.get('level', 0)}  -  XP {wiz.get('xp', 0)}"
+            f"Level {wiz.get('level', 0)}  -  XP {wiz.get('xp', 0)}{state_note}"
         ),
         new_x="LMARGIN",
         new_y="NEXT",

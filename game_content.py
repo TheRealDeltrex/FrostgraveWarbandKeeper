@@ -68,6 +68,59 @@ def load_bestiary() -> list[dict]:
 
 
 @lru_cache(maxsize=1)
+def load_magic_items() -> list[dict]:
+    """Supplement treasure, {name, source, effect}. Built by
+    scripts/extract_expansion_content.py from the local reference documents."""
+    path = DATA / "magic_items.json"
+    if not path.is_file():
+        return []
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def magic_items_for_sources(sources) -> list[dict]:
+    """Treasure from the books this warband has switched on."""
+    return [it for it in load_magic_items() if it.get("source") in sources]
+
+
+def group_magic_items(items: list[dict]) -> list[dict]:
+    """[{"source": ..., "rows": [...]}] in SOURCE_BOOKS order, for the Lexicon.
+
+    The list is keyed "rows", not "items": in Jinja `group.items` resolves to
+    dict.items, the method, so a template would silently get something unusable.
+    """
+    from frostgrave_data import SOURCE_BOOKS
+
+    order = {book: i for i, book in enumerate(SOURCE_BOOKS)}
+    groups: dict[str, list[dict]] = {}
+    for it in items:
+        groups.setdefault(it.get("source", ""), []).append(it)
+    return [
+        {"source": src, "rows": sorted(rows, key=lambda r: r["name"].lower())}
+        for src, rows in sorted(groups.items(), key=lambda kv: order.get(kv[0], len(order)))
+    ]
+
+
+@lru_cache(maxsize=1)
+def load_expansion_rules() -> dict:
+    """In-game table rules per source book (traps, demonic attributes, the
+    optional Malcor core-rule updates...). Shown, not simulated."""
+    path = DATA / "expansion_rules.json"
+    if not path.is_file():
+        return {}
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+@lru_cache(maxsize=1)
+def load_ghost_archipelago() -> dict:
+    """Ghost Archipelago: a separate Osprey ruleset, carried for reference only.
+    No source toggle, nothing hireable — see the Lexicon."""
+    path = DATA / "ghost_archipelago.json"
+    if not path.is_file():
+        return {}
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+@lru_cache(maxsize=1)
 def load_spell_names() -> list[str]:
     try:
         from frostgrave_data import SPELLS

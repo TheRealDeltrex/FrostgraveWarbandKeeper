@@ -10,6 +10,7 @@ from copy import deepcopy
 from datetime import datetime, timezone
 from pathlib import Path
 
+import expansions
 import paths
 from game_content import equipment_bonuses
 from frostgrave_data import (
@@ -49,6 +50,7 @@ from frostgrave_data import (
     SCHOOLS,
     SOLDIER_MAX_LEVELS,
     SOLDIER_STAT_CAPS,
+    PENTANGLE_SCHOOLS,
     SOLDIERS,
     SOURCE_BOOKS,
     SOURCE_BOOK_BY_SLUG,
@@ -56,6 +58,7 @@ from frostgrave_data import (
     STARTING_SPELL_COUNT,
     WIZARD_BASE,
     WIZARD_ITEM_SLOTS,
+    XP_PER_LEVEL,
     animal_companion_type_keys,
     bonus_choice_amount,
     cn_penalty,
@@ -160,6 +163,8 @@ def empty_wizard(name: str = "", school: str = "Elementalist") -> dict:
         "notes": "",
         "portrait": None,
         "level_history": [],
+        # Lich / Beastcrafter / pact-holder. See expansions.py.
+        "state": expansions.default_wizard_state(),
     }
 
 
@@ -200,7 +205,22 @@ def default_homerules() -> dict:
         # Per-source-book content toggles (soldiers/creatures/rules from the
         # supplements). Off by default, like every other homerule here.
         "enabled_sources": {book: False for book in SOURCE_BOOKS},
+        # The Maze of Malcor says the Pentangle schools are scroll-only, then
+        # gives rules for playing them properly "if a group agrees". Off by
+        # default; needs The Maze of Malcor switched on to have any effect.
+        "pentangle_schools_playable": False,
     }
+
+
+def playable_schools(wb: dict | None = None) -> list[str]:
+    """Schools a wizard may actually be. The five Pentangle schools join the ten
+    core ones only when The Maze of Malcor is on and the group has agreed to the
+    homerule that makes them playable."""
+    hr = (wb or {}).get("homerules") or {}
+    es = hr.get("enabled_sources") or {}
+    if hr.get("pentangle_schools_playable") and es.get("The Maze of Malcor"):
+        return list(SCHOOLS) + list(PENTANGLE_SCHOOLS)
+    return list(SCHOOLS)
 
 
 def enabled_sources(wb: dict) -> set[str]:
@@ -316,8 +336,16 @@ def recompute_spell_cns(wb: dict) -> None:
         s["cn"] = max(5, base + pen - improve)
 
 
-def validate_starting_spells(school: str, spell_keys: list[str]) -> tuple[bool, str]:
-    """2e Choosing Spells p.24: 3 own, 1 each aligned, 2 neutral (diff schools), no opposed."""
+def validate_starting_spells(
+    school: str, spell_keys: list[str], sources: set[str] | None = None
+) -> tuple[bool, str]:
+    """2e Choosing Spells p.24: 3 own, 1 each aligned, 2 neutral (diff schools), no opposed.
+
+    `sources` is the set of source books switched on for the warband being created;
+    supplement spells from a book that is off cannot be taken. Defaults to Core
+    Rules only. Spell-only schools (Beastcrafter) are excluded automatically by the
+    own/aligned/neutral check further down.
+    """
     if len(spell_keys) != STARTING_SPELL_COUNT:
         return False, f"Pick exactly {STARTING_SPELL_COUNT} spells (got {len(spell_keys)})."
     if len(set(spell_keys)) != len(spell_keys):
@@ -327,11 +355,16 @@ def validate_starting_spells(school: str, spell_keys: list[str]) -> tuple[bool, 
     if not rel:
         return False, "Invalid school."
 
+    allowed_sources = sources or {"Core Rules"}
     by_school: dict[str, int] = {}
     for key in spell_keys:
         sp = find_spell(key)
         if not sp:
             return False, f"Unknown spell: {key}"
+        if sp["source"] not in allowed_sources:
+            return False, (
+                f"{sp['name']} is from {sp['source']}; switch that source book on to take it."
+            )
         by_school[sp["school"]] = by_school.get(sp["school"], 0) + 1
 
     # No opposed
@@ -350,15 +383,17 @@ def validate_starting_spells(school: str, spell_keys: list[str]) -> tuple[bool, 
         if n != ALIGNED_SCHOOL_SPELLS:
             return False, f"Need exactly 1 spell from aligned school {al} (have {n})."
 
-    # Neutrals: exactly 2 spells from two different neutral schools (1 each)
+    # Neutrals: whatever is left of the 8, one each from different schools.
+    # Derived rather than hardcoded to NEUTRAL_SPELLS because a Pentangle school
+    # has two aligned schools where a core school has three — so playing one
+    # leaves three neutral picks instead of two, still totalling 8.
+    n_neutral = STARTING_SPELL_COUNT - OWN_SCHOOL_SPELLS - len(rel["aligned"]) * ALIGNED_SCHOOL_SPELLS
     neutral_picks = {s: n for s, n in by_school.items() if s in rel["neutral"]}
     total_neutral = sum(neutral_picks.values())
-    if total_neutral != NEUTRAL_SPELLS:
-        return False, f"Need exactly {NEUTRAL_SPELLS} spells from neutral schools (have {total_neutral})."
-    if any(n != 1 for n in neutral_picks.values()):
-        return False, "The two neutral spells must each come from a different school."
-    if len(neutral_picks) != NEUTRAL_SPELLS:
-        return False, "Pick neutral spells from two different neutral schools."
+    if total_neutral != n_neutral:
+        return False, f"Need exactly {n_neutral} spells from neutral schools (have {total_neutral})."
+    if any(n != 1 for n in neutral_picks.values()) or len(neutral_picks) != n_neutral:
+        return False, f"Pick the {n_neutral} neutral spells from {n_neutral} different neutral schools."
 
     # No extras
     allowed = {school, *rel["aligned"], *rel["neutral"]}
@@ -377,13 +412,33 @@ def create_warband(
     with_apprentice: bool = False,
     apprentice_name: str = "",
     soldiers: list[dict] | None = None,
+    enabled_sources_map: dict | None = None,
+    pentangle_playable: bool = False,
 ) -> tuple[dict | None, str]:
     """
     soldiers: optional list of {type_key, name} hired at creation (costs deducted).
+    enabled_sources_map: {book name: bool} source books to switch on for the new
+        warband, so supplement spells and soldiers can be picked at creation.
+    pentangle_playable: allow one of the five Pentangle schools as the wizard's
+        own school (needs The Maze of Malcor switched on).
     """
-    if school not in SCHOOLS:
+    homerules = default_homerules()
+    if enabled_sources_map:
+        homerules["enabled_sources"] = {
+            book: bool(enabled_sources_map.get(book)) for book in SOURCE_BOOKS
+        }
+    homerules["pentangle_schools_playable"] = bool(pentangle_playable)
+    if school not in playable_schools({"homerules": homerules}):
+        if school in PENTANGLE_SCHOOLS:
+            return None, (
+                f"{school} is a Pentangle school — switch on The Maze of Malcor and the "
+                "'Pentangle schools playable' homerule to use it."
+            )
         return None, "Invalid school."
-    ok, msg = validate_starting_spells(school, spell_keys)
+    picked_sources = {"Core Rules"} | {
+        book for book, on in homerules["enabled_sources"].items() if on
+    }
+    ok, msg = validate_starting_spells(school, spell_keys, picked_sources)
     if not ok:
         return None, msg
 
@@ -406,6 +461,9 @@ def create_warband(
             info = get_soldier(type_key)
             if not info:
                 return None, f"Unknown soldier type: {type_key}"
+            src = info.get("source", "Core Rules")
+            if src not in picked_sources:
+                return None, f"{info['name']} is from {src}; switch that source book on to hire it."
             if info["category"] == "specialist":
                 specs += 1
                 if specs > MAX_SPECIALISTS:
@@ -437,7 +495,7 @@ def create_warband(
         "wizard": empty_wizard(wizard_name.strip() or "Wizard", school),
         "apprentice": apprentice,
         "captain": None,
-        "homerules": default_homerules(),
+        "homerules": homerules,
         "soldiers": hired,
         "vault_items": [],
         "base": empty_base(),
@@ -534,6 +592,15 @@ def load_warband(warband_id: str) -> dict | None:
     wstats.setdefault("health", 14)
     wiz.pop("health_current", None)
     wiz.setdefault("has_dagger", True)
+    # Wizard state (Lich / Beastcrafter / pact). Backfilled per-key so a warband
+    # saved before this existed loads as an ordinary wizard.
+    state = wiz.setdefault("state", expansions.default_wizard_state())
+    if not isinstance(state, dict):
+        state = wiz["state"] = expansions.default_wizard_state()
+    for key, value in expansions.default_wizard_state().items():
+        state.setdefault(key, value)
+    if state.get("kind") not in expansions.WIZARD_STATES:
+        state["kind"] = expansions.STATE_NONE
     # Migrate items -> item_slots
     if "item_slots" not in wiz or not isinstance(wiz.get("item_slots"), list):
         wiz["item_slots"] = normalize_item_slots(wiz.get("items"), WIZARD_ITEM_SLOTS)
@@ -852,16 +919,18 @@ def warband_limits(wb: dict) -> dict:
         spent += int((wb.get("homerules") or {}).get("captain_hiring_cost", CAPTAIN_HIRING_COST))
     for s in soldiers:
         info = SOLDIERS.get(s.get("type_key", ""), {})
-        spent += int(info.get("cost", 0))
+        spent += expansions.soldier_cost(wb, info)
     wiz = wb.get("wizard") or {}
     xp = int(wiz.get("xp", 0))
     level = int(wiz.get("level", 0))
+    per_level = expansions.xp_per_level(wb)
+    cap = expansions.max_soldiers(wb)
     return {
         "soldiers": len(soldiers),
-        "max_soldiers": MAX_SOLDIERS,
+        "max_soldiers": cap,
         "specialists": specs,
         "max_specialists": MAX_SPECIALISTS,
-        "soldiers_ok": len(soldiers) <= MAX_SOLDIERS,
+        "soldiers_ok": len(soldiers) <= cap,
         "specialists_ok": specs <= MAX_SPECIALISTS,
         "has_apprentice": wb.get("apprentice") is not None,
         "apprentice_cost": APPRENTICE_COST,
@@ -870,8 +939,9 @@ def warband_limits(wb: dict) -> dict:
         "roster_cost_estimate": spent,
         "xp": xp,
         "level": level,
-        "xp_to_next": xp_to_next_level(xp, level),
-        "pending_levels": max(0, level_from_xp(xp) - level),
+        "xp_per_level": per_level,
+        "xp_to_next": xp_to_next_level(xp, level, per_level),
+        "pending_levels": max(0, level_from_xp(xp, per_level) - level),
     }
 
 
@@ -917,6 +987,9 @@ def add_soldier(wb: dict, type_key: str, name: str = "") -> tuple[bool, str]:
     src = info.get("source", "Core Rules")
     if src not in enabled_sources(wb):
         return False, f"{info['name']} is from {src}; enable that source under Additional Rules and Homerules first."
+    blocked = expansions.soldier_state_block(wb, type_key)
+    if blocked:
+        return False, blocked
     req_spell = info.get("requires_spell")
     if req_spell:
         if req_spell not in known_spell_names(wb):
@@ -930,11 +1003,12 @@ def add_soldier(wb: dict, type_key: str, name: str = "") -> tuple[bool, str]:
                 )
             return False, f"You may only have {limit} Animal Companions at a time (one per spellcaster)."
     active = active_soldiers(wb)
-    if len(active) >= MAX_SOLDIERS:
-        return False, f"Soldier limit reached ({MAX_SOLDIERS})."
+    cap = expansions.max_soldiers(wb)
+    if len(active) >= cap:
+        return False, f"Soldier limit reached ({cap})."
     if info["category"] == "specialist" and count_specialists(wb) >= MAX_SPECIALISTS:
         return False, f"Specialist limit reached ({MAX_SPECIALISTS})."
-    cost = info["cost"]
+    cost = expansions.soldier_cost(wb, info)
     if wb.get("gold", 0) < cost:
         return False, f"Not enough gold (need {cost} gc, have {wb.get('gold', 0)} gc)."
 
@@ -984,6 +1058,34 @@ def set_soldier_status(wb: dict, soldier_id: str, status: str) -> tuple[bool, st
             text = f"{s.get('name', 'Soldier')} marked {status}."
             wb.setdefault("history", []).append({"when": _now(), "text": text})
             return True, text
+    return False, "Soldier not found."
+
+
+def raise_revenant(wb: dict, soldier_id: str) -> tuple[bool, str]:
+    """Reanimate a dead soldier with the Revenant spell (Thaw of the Lich Lord).
+
+    The soldier keeps their own stats — which is why this is an action on an
+    existing casualty rather than a soldier type you hire. Only Will changes,
+    dropping to +0. There is no limit on how many revenants a warband may field,
+    and a revenant that dies again can be raised once more.
+    """
+    if expansions.REVENANT_SPELL not in known_spell_names(wb):
+        return False, "Your wizard doesn't know the Revenant spell."
+    for s in wb.get("soldiers") or []:
+        if s.get("id") != soldier_id:
+            continue
+        if s.get("status") != "dead":
+            return False, "Revenant only works on a soldier who died."
+        active = len(active_soldiers(wb))
+        cap = expansions.max_soldiers(wb)
+        if active >= cap:
+            return False, f"Soldier limit reached ({cap}); the revenant has nowhere to stand."
+        s["status"] = "active"
+        s["revenant"] = True
+        s["will"] = expansions.REVENANT_WILL
+        text = f"{s.get('name', 'Soldier')} was raised as a revenant (Will +0)."
+        add_history(wb, text)
+        return True, text
     return False, "Soldier not found."
 
 
@@ -1092,6 +1194,7 @@ def update_homerules(wb: dict, form) -> tuple[bool, str]:
                 book: form.get(f"source_enabled_{slug}") == "on"
                 for slug, book in SOURCE_BOOK_BY_SLUG.items()
             },
+            "pentangle_schools_playable": form.get("pentangle_schools_playable") == "on",
         }
     except (TypeError, ValueError):
         return False, "Invalid homerule value."
@@ -1179,12 +1282,16 @@ def _apply_xp_delta(
     reverse_one_level,
     overall_max: int | None,
     label: str,
+    per_level: int = XP_PER_LEVEL,
 ) -> tuple[bool, str]:
     """Shared XP add/remove logic for Wizard, Captain, and Soldier. A negative amount
     removes XP (clamped so the total never drops below 0). If that leaves the recorded
     level higher than what the new XP total actually earns, auto-reverses the most
     recent level-up(s) — via `reverse_one_level` (each call also logs its own history
-    entry) — until the level catches back up."""
+    entry) — until the level catches back up.
+
+    `per_level` is the XP a level costs; only the wizard ever varies it (a Lich
+    levels at 150 instead of 100). Captains and soldiers keep the default."""
     if amount == 0:
         return False, "Enter a non-zero XP amount."
     old_xp = int(entity.get("xp", 0))
@@ -1194,7 +1301,7 @@ def _apply_xp_delta(
     sign = "+" if actual >= 0 else ""
     msg = f"{label} {sign}{actual} XP (total {new_xp})."
 
-    earned = level_from_xp(new_xp)
+    earned = level_from_xp(new_xp, per_level)
     if overall_max is not None:
         earned = min(earned, overall_max)
     lost = 0
@@ -1208,11 +1315,13 @@ def _apply_xp_delta(
     return True, msg
 
 
-def _pending_level_check(entity: dict, overall_max: int | None, label: str) -> tuple[bool, str]:
+def _pending_level_check(
+    entity: dict, overall_max: int | None, label: str, per_level: int = XP_PER_LEVEL
+) -> tuple[bool, str]:
     """Shared earned-XP / max-level guard for any level-up spend (stat or trick)."""
     xp = int(entity.get("xp", 0))
     level = int(entity.get("level", 0))
-    earned = level_from_xp(xp)
+    earned = level_from_xp(xp, per_level)
     if level >= earned:
         return False, f"No pending level-ups (level {level}, XP {xp}). Earn more XP first."
     if overall_max is not None and level >= overall_max:
@@ -1569,16 +1678,29 @@ def apply_level_up(
     wiz = wb.setdefault("wizard", {})
     xp = int(wiz.get("xp", 0))
     level = int(wiz.get("level", 0))
-    earned = level_from_xp(xp)
+    earned = level_from_xp(xp, expansions.xp_per_level(wb))
     if level >= earned:
         return False, f"No pending level-ups (level {level}, XP {xp}). Earn more XP first."
 
     stats = wiz.setdefault("stats", deepcopy(WIZARD_BASE))
     detail = ""
     meta: dict = {"choice": choice}
+    allowed = {o["id"] for o in expansions.level_up_options(wb)}
+    if choice not in allowed:
+        # The only way to get here is a hand-crafted POST or a stale page: a Lich
+        # may never raise Fight or Shoot.
+        return False, f"A {expansions.STATE_LABELS[expansions.state_kind(wb)]} cannot choose that."
 
     if choice in ("fight", "shoot", "will", "health"):
-        stats[choice] = int(stats.get(choice, 0)) + 1
+        caps = expansions.wizard_stat_caps(wb)
+        cap = caps.get(choice)
+        current = int(stats.get(choice, 0))
+        if cap is not None and current >= cap:
+            return False, (
+                f"{choice.capitalize()} is capped at {cap} for a "
+                f"{expansions.STATE_LABELS[expansions.state_kind(wb)]} (currently {current})."
+            )
+        stats[choice] = current + 1
         detail = f"+1 {choice.capitalize()}"
         meta["stat"] = choice
     elif choice == "learn_spell":
@@ -1587,6 +1709,14 @@ def apply_level_up(
         sp = find_spell(spell_key)
         if not sp:
             return False, "Unknown spell."
+        if sp["source"] not in enabled_sources(wb):
+            return False, (
+                f"{sp['name']} is from {sp['source']}; enable that source under "
+                "Additional Rules and Homerules first."
+            )
+        blocked = expansions.spell_state_block(wb, sp)
+        if blocked:
+            return False, blocked
         known_ids = {s.get("id") for s in wiz.get("spells") or []}
         if sp["id"] in known_ids:
             return False, "Spell already known."
@@ -1756,7 +1886,14 @@ def reverse_last_level_up(wb: dict) -> tuple[bool, str]:
 
 def add_wizard_xp(wb: dict, amount: int) -> tuple[bool, str]:
     wiz = wb.setdefault("wizard", {})
-    ok, msg = _apply_xp_delta(wiz, amount, lambda: reverse_last_level_up(wb), None, "Wizard")
+    ok, msg = _apply_xp_delta(
+        wiz,
+        amount,
+        lambda: reverse_last_level_up(wb),
+        None,
+        "Wizard",
+        expansions.xp_per_level(wb),
+    )
     if ok:
         add_history(wb, msg)
     return ok, msg
@@ -1782,14 +1919,142 @@ def count_animal_companions(wb: dict) -> int:
 
 
 def animal_companion_limit(wb: dict) -> int:
-    """Animal Companions allowed at once — one per spellcaster (the wizard, plus the
-    apprentice if the warband has one), since each can cast the spell."""
-    return 2 if wb.get("apprentice") else 1
+    """Animal Companions allowed at once — normally one per spellcaster (the wizard,
+    plus the apprentice if the warband has one), since each can cast the spell.
+    A Beastcrafter II wizard raises the per-caster allowance to two."""
+    casters = 2 if wb.get("apprentice") else 1
+    return casters * expansions.companions_per_caster(wb)
 
 
 def has_animal_companion(wb: dict) -> bool:
     """True if the warband is at its Animal Companion limit already."""
     return count_animal_companions(wb) >= animal_companion_limit(wb)
+
+
+# --- Wizard states (Lich / Beastcrafter / Demonic Pact) ---------------------
+#
+# expansions.py holds the rules and the validation; these apply the result and
+# write the campaign log.
+
+
+def set_wizard_state(wb: dict, kind: str) -> tuple[bool, str]:
+    """Put the wizard into a state, replacing whatever they were in before.
+
+    The three states are mutually exclusive by the rules, so this is a plain
+    assignment rather than an accumulation — taking one clears the others, which
+    is exactly what Forgotten Pacts describes happening to an existing pact.
+    """
+    ok, msg = expansions.can_enter_state(wb, kind, enabled_sources(wb))
+    if not ok:
+        return False, msg
+    wiz = wb.setdefault("wizard", {})
+    was = expansions.state_kind(wb)
+    if was == kind:
+        return False, f"Your wizard is already {expansions.STATE_LABELS[kind].lower()}."
+    state = expansions.default_wizard_state()
+    state["kind"] = kind
+    if kind == expansions.STATE_BEASTCRAFTER:
+        state["tier"] = 1
+    wiz["state"] = state
+
+    label = expansions.STATE_LABELS[kind]
+    if kind == expansions.STATE_NONE:
+        text = f"{wiz.get('name', 'The wizard')} is no longer {expansions.STATE_LABELS[was].lower()}."
+    elif was == expansions.STATE_NONE:
+        text = f"{wiz.get('name', 'The wizard')} became {label}."
+    else:
+        text = (
+            f"{wiz.get('name', 'The wizard')} became {label}, "
+            f"ending their time as {expansions.STATE_LABELS[was].lower()}."
+        )
+    add_history(wb, text)
+    return True, text
+
+
+def break_wizard_pact(wb: dict) -> tuple[bool, str]:
+    """End a demonic pact, paying the 1 level + 1 Health per Sacrifice held.
+
+    Levels come off through the normal reversal path so the wizard's level
+    history stays truthful; the Health loss is a permanent stat reduction.
+    """
+    if expansions.state_kind(wb) != expansions.STATE_PACT:
+        return False, "Your wizard holds no pact."
+    penalty = expansions.pact_break_penalty(wb)
+    wiz = wb.setdefault("wizard", {})
+    lost = 0
+    for _ in range(penalty["levels"]):
+        ok, _msg = reverse_last_level_up(wb)
+        if not ok:
+            break
+        lost += 1
+    if penalty["health"]:
+        stats = wiz.setdefault("stats", deepcopy(WIZARD_BASE))
+        stats["health"] = max(1, int(stats.get("health", 14)) - penalty["health"])
+    wiz["state"] = expansions.default_wizard_state()
+    text = (
+        f"{wiz.get('name', 'The wizard')} broke their pact: "
+        f"−{lost} level{'s' if lost != 1 else ''}, −{penalty['health']} Health."
+    )
+    add_history(wb, text)
+    return True, text
+
+
+def advance_beastcrafter(wb: dict) -> tuple[bool, str]:
+    """Take the next Beastcrafter tier."""
+    ok, msg = expansions.can_advance_beastcrafter(wb)
+    if not ok:
+        return False, msg
+    wiz = wb.setdefault("wizard", {})
+    state = wiz.setdefault("state", expansions.default_wizard_state())
+    state["tier"] = int(state.get("tier") or 0) + 1
+    name = expansions.BEASTCRAFTER_TIER_BY_N[state["tier"]]["name"]
+    text = f"{wiz.get('name', 'The wizard')} advanced to {name}."
+    add_history(wb, text)
+    return True, text
+
+
+def set_animal_feature(wb: dict, feature_id: str) -> tuple[bool, str]:
+    """Pick the permanent Animal Feature a Beastcrafter III gains."""
+    if expansions.beastcrafter_tier(wb) < 3:
+        return False, "Only a Beastcrafter III may pick an Animal Feature."
+    if feature_id not in expansions.ANIMAL_FEATURE_IDS:
+        return False, "Unknown Animal Feature."
+    wiz = wb.setdefault("wizard", {})
+    state = wiz.setdefault("state", expansions.default_wizard_state())
+    if state.get("feature") == feature_id:
+        return False, "That feature is already chosen."
+    state["feature"] = feature_id
+    name = expansions.ANIMAL_FEATURE_BY_ID[feature_id]["name"]
+    text = f"{wiz.get('name', 'The wizard')} gained the {name} Animal Feature."
+    add_history(wb, text)
+    return True, text
+
+
+def add_pact_tier(wb: dict, sacrifice: str, boon: str, demon: str = "") -> tuple[bool, str]:
+    """Forge another pact tier: one Sacrifice paired with one Boon."""
+    ok, msg = expansions.can_add_pact_tier(wb)
+    if not ok:
+        return False, msg
+    if sacrifice not in expansions.PACT_SACRIFICE_IDS:
+        return False, "Unknown Sacrifice."
+    if boon not in expansions.PACT_BOON_IDS:
+        return False, "Unknown Boon."
+    wiz = wb.setdefault("wizard", {})
+    state = wiz.setdefault("state", expansions.default_wizard_state())
+    held = state.setdefault("pacts", [])
+    if any(p.get("sacrifice") == sacrifice for p in held):
+        return False, "That Sacrifice is already being paid."
+    if any(p.get("boon") == boon for p in held):
+        return False, "That Boon is already held."
+    held.append({"sacrifice": sacrifice, "boon": boon})
+    state["tier"] = len(held)
+    if demon.strip():
+        state["demon"] = demon.strip()
+    s_name = expansions.PACT_SACRIFICE_BY_ID[sacrifice]["name"]
+    b_name = expansions.PACT_BOON_BY_ID[boon]["name"]
+    text = f"{wiz.get('name', 'The wizard')} forged a pact: {s_name} for {b_name}."
+    add_history(wb, text)
+    return True, text
 
 
 def set_base_location(wb: dict, location_key: str) -> tuple[bool, str]:
@@ -1822,6 +2087,12 @@ def buy_base_resource(wb: dict, resource_key: str) -> tuple[bool, str]:
     info = BASE_RESOURCES.get(resource_key)
     if not info:
         return False, "Unknown base resource."
+    src = info.get("source", "Core Rules")
+    if src not in enabled_sources(wb):
+        return False, (
+            f"{info['name']} is from {src}; enable that source under "
+            "Additional Rules and Homerules first."
+        )
     base = wb.setdefault("base", empty_base())
     if base.get("location", "none") == "none":
         return False, "Establish a base location first (free)."
@@ -1876,7 +2147,7 @@ def base_summary(wb: dict) -> dict:
 def recruit_preview(wb: dict, type_key: str) -> dict:
     """Info for hire UI: cost, whether affordable, limit warnings."""
     info = get_soldier(type_key) or {}
-    cost = int(info.get("cost", 0))
+    cost = expansions.soldier_cost(wb, info)
     active = len(active_soldiers(wb))
     specs = count_specialists(wb)
     is_spec = info.get("category") == "specialist"
@@ -1887,7 +2158,7 @@ def recruit_preview(wb: dict, type_key: str) -> dict:
         "gold_after": gold - cost,
         "soldiers_after": active + 1,
         "specialists_after": specs + (1 if is_spec else 0),
-        "hits_soldier_limit": active >= MAX_SOLDIERS,
+        "hits_soldier_limit": active >= expansions.max_soldiers(wb),
         "hits_specialist_limit": is_spec and specs >= MAX_SPECIALISTS,
         "category": info.get("category", "standard"),
         "name": info.get("name", type_key),

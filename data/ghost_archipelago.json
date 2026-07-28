@@ -1,0 +1,564 @@
+{
+ "intro": "This one arrived as scanned image pages with no text layer, so it was run through a local OCR pipeline (tesseract) page-by-page to extract it. It's also technically a related but separate Osprey ruleset — a Heritor (caster) and Warden (nature-magic specialist) lead a Crew across a chain of islands instead of a Wizard leading a Warband — so nearly everything below is structurally new relative to the Frostgrave rulebook, even where the mechanics closely parallel it. A few stat-block cells were unrecoverable from the scan (flagged with \"?\").",
+ "sections": [
+  {
+   "title": "New core mechanics",
+   "blurb": "Turn order is Heritor phase → Warden phase → Crew phase → Creature phase (3-step AI: fight if engaged, shoot/close on the nearest visible foe, else random move). Combat/shooting math mirrors core Frostgrave closely (Fight/Shoot rolls, cover, push-back), with an optional Critical Hit rule (natural 20 auto-wins and doubles damage) and an optional Wounded rule (≤4 Health = 1 action & -2 to all rolls).",
+   "entries": [
+    {
+     "name": "Crew composition",
+     "tag": "",
+     "text": "Max 10: 1 Heritor + 1 Warden (mandatory, only one ever per crew) + up to 8 crewmen (max 4 paid Specialists). All rolls use d20."
+    },
+    {
+     "name": "Building a Heritor",
+     "tag": "",
+     "text": "Picks 5 of 30 shared Abilities (one at Utilization Number 3, four at UN5); may raise one non-Armour stat by +1; 5 item slots."
+    },
+    {
+     "name": "Utilization Rolls & Blood Burn (signature new subsystem)",
+     "tag": "",
+     "text": "Using a Heritor Ability costs 1 self-damage (\"Blood Burn\") to attempt, +2 more on a failed d20-vs-UN roll. Extra attempts the same turn stack a penalty to the UN: +0/+3/+6/+9/+12/+15 for the 1st–6th attempt — a practical cap of ~6/turn."
+    },
+    {
+     "name": "Building a Warden",
+     "tag": "",
+     "text": "Base M6 F+1 S+0 A10 W+4 H14; picks a Branch (below); learns 4 starting spells (3 in-Branch, 1 out-of-Branch at +4 Casting Number); 3 item slots; can never wear armour or a shield."
+    },
+    {
+     "name": "Split Stats",
+     "tag": "",
+     "text": "Notation like \"+2/+3\": first number is the true/base stat for leveling, second is the current effective stat for rolls."
+    },
+    {
+     "name": "Empowering & resisting spells",
+     "tag": "",
+     "text": "A Warden can empower a cast (or her own resistance roll) by trading Health 1-for-1, even to the point of a killing cast. Targets resist vs. the higher of the final Casting Roll or 14."
+    },
+    {
+     "name": "Swimming Rolls",
+     "tag": "",
+     "text": "Activating in deep water needs a Will roll (TN5, modified by armour/shield/treasure); fail = no activation + damage. Amphibious/Aquatic traits bypass it entirely."
+    },
+    {
+     "name": "Small Boats",
+     "tag": "",
+     "text": "Capacity 6, moves 2\"+1\"/rider (max 6\"), -1 Fight/Shoot aboard, boarding needs a Fight roll; can be attacked (Fight+0/Armour14/Health30)."
+    },
+    {
+     "name": "Map Stones (campaign win condition)",
+     "tag": "",
+     "text": "10 unique, unsellable clue-items toward the legendary Crystal Pool; +20 XP each; collecting all 10 is the stated campaign endgame."
+    },
+    {
+     "name": "New Recruits",
+     "tag": "",
+     "text": "If only the Heritor dies, the Warden's level sets the replacement (capped gains); if only the Warden dies, it's the Heritor's level ÷3. Both dying disbands the crew."
+    }
+   ],
+   "rows": []
+  },
+  {
+   "title": "Heritor Abilities",
+   "blurb": "Every Heritor is built à la carte from this same list — there's no archetype/class system the way Frostgrave has ten wizard schools.",
+   "entries": [],
+   "rows": [
+    {
+     "name": "Backswing",
+     "text": "Utilized when… Wins a fight, still in combat · Effect Free extra fight action against an engaged foe."
+    },
+    {
+     "name": "Burning Eyes",
+     "text": "Utilized when… Enemy tries to move into combat · Effect Target Will TN16 or its move stops 1\" short."
+    },
+    {
+     "name": "Catch Missile",
+     "text": "Utilized when… Targeted by a bow/crossbow 6\"+ away · Effect Shot automatically fails."
+    },
+    {
+     "name": "Crushing Blow",
+     "text": "Utilized when… Wins hand-to-hand combat · Effect +3 extra damage."
+    },
+    {
+     "name": "Daze",
+     "text": "Utilized when… During own activation · Effect Target within 6\" Will TN16 or loses next activation."
+    },
+    {
+     "name": "Deadeye",
+     "text": "Utilized when… Hits with a ranged weapon on natural 18–19 · Effect Counts as a critical hit."
+    },
+    {
+     "name": "Death Strike",
+     "text": "Utilized when… Wins combat on natural 18–19 · Effect Counts as a critical hit."
+    },
+    {
+     "name": "Disarm",
+     "text": "Utilized when… Wins hand-to-hand combat · Effect No damage; strips one of the foe's weapons for the game."
+    },
+    {
+     "name": "Evade",
+     "text": "Utilized when… Activated while in combat · Effect Free 1\" reposition move before other actions."
+    },
+    {
+     "name": "Fling",
+     "text": "Utilized when… Wins hand-to-hand combat · Effect +1 damage; may push the loser up to 4\", even into another combat."
+    },
+    {
+     "name": "Hurl",
+     "text": "Utilized when… During own activation · Effect 8\" thrown-debris shooting attack using Shoot; +3 damage."
+    },
+    {
+     "name": "Intuition",
+     "text": "Utilized when… Start of turn · Effect Automatically wins Initiative."
+    },
+    {
+     "name": "Ironskin",
+     "text": "Utilized when… Takes damage · Effect Reduce it by 4 (can zero secondary effects like poison too)."
+    },
+    {
+     "name": "Leap",
+     "text": "Utilized when… Own activation, not in combat · Effect Full-Move leap in a straight line, including upward; both actions gives a 1.5× leap."
+    },
+    {
+     "name": "Lunge",
+     "text": "Utilized when… A figure moves within 3\"+LoS · Effect May force combat with it at range."
+    },
+    {
+     "name": "Mightly Strength",
+     "text": "Utilized when… After a Fight roll or combat win · Effect +5 to that roll, or +1 damage on a win."
+    },
+    {
+     "name": "Mindcloud",
+     "text": "Utilized when… Own activation · Effect No one may force combat with the Heritor this activation."
+    },
+    {
+     "name": "Mitigation",
+     "text": "Utilized when… Suffers 5+ damage from one source · Effect Reduce it to 5."
+    },
+    {
+     "name": "Mystic Energy",
+     "text": "Utilized when… Start of own activation · Effect Counts as wielding a +2 Fight magic weapon for the turn."
+    },
+    {
+     "name": "Regrowth",
+     "text": "Utilized when… Before a game · Effect Heal one permanent injury or ignore a Badly Wounded/Niggling penalty."
+    },
+    {
+     "name": "Shadowfold",
+     "text": "Utilized when… Targeted by a shot while in/near cover · Effect Shot auto-misses, no roll made."
+    },
+    {
+     "name": "Spark of Life",
+     "text": "Utilized when… Own activation · Effect Heal up to 5 damage on an ally within 1\"+LoS."
+    },
+    {
+     "name": "Spellshield",
+     "text": "Utilized when… Named target of a spell · Effect Spell auto-fails; caster loses the action."
+    },
+    {
+     "name": "Sprint",
+     "text": "Utilized when… Own activation · Effect +2 Move for the rest of the activation."
+    },
+    {
+     "name": "Stand Firm",
+     "text": "Utilized when… Would be forcibly moved · Effect Choose not to move, or move less."
+    },
+    {
+     "name": "Steelheart",
+     "text": "Utilized when… After any Will roll · Effect +5 to that roll."
+    },
+    {
+     "name": "Surge",
+     "text": "Utilized when… Own activation · Effect Extra non-movement action (max 3 total)."
+    },
+    {
+     "name": "Trickshot",
+     "text": "Utilized when… Declares a shooting action · Effect Ignores cover/terrain modifiers (still needs LoS)."
+    },
+    {
+     "name": "Waterlung",
+     "text": "Utilized when… Own activation / before a Swimming Roll · Effect Counts as amphibious for the game."
+    },
+    {
+     "name": "Wraithwalk",
+     "text": "Utilized when… Own activation · Effect Moves through terrain/rough ground/water as if not there."
+    }
+   ]
+  },
+  {
+   "title": "Warden branches & spells",
+   "blurb": "",
+   "entries": [
+    {
+     "name": "Beast Cry / Beast Strength / Command Creature / Control Animal / Envenom / Summon Animal",
+     "tag": "Beast",
+     "text": "Random-encounter trigger, +1 Fight buff, forced action on an uncontrolled animal, animal recruitment, weapon poison, and a summoned animal ally."
+    },
+    {
+     "name": "Earth Blood / Earth Wave / Earthen Wall / Parapet / Pit / Projectile",
+     "tag": "Earth",
+     "text": "+2 Health buff, treasure-token shove, destructible earth wall, permanent stone cover, a collapsing pit trap, and a +3 magic shooting attack."
+    },
+    {
+     "name": "Cloud Cover / Dust Devil / Lightning Strike / True Flight / Wind Blast / Wind Walk",
+     "tag": "Storm",
+     "text": "Battlefield-wide LoS reduction, a temporary whirlwind creature, a delayed +6 strike, a ranged-attack buff, a forced 4\" shove, and free flight-like movement."
+    },
+    {
+     "name": "Bark / Brambles / Ladder / Plant Walk / Snare / Warp Weapon",
+     "tag": "Vine",
+     "text": "+1 Armour buff, a climb-penalizing hedge, a permanent free ladder, moving a terrain piece, an escalating root-snare, and a weapon-damaging curse."
+    },
+    {
+     "name": "Amphibious / Current / Mist / Pool / Water of Life / Wrath of the Waves",
+     "tag": "Wave",
+     "text": "Amphibious buff, water-borne push, a cover-granting mist cloud, a conjured sinkhole pool, a 3-Health heal, and a +5 attack near water."
+    }
+   ],
+   "rows": [
+    {
+     "name": "Beast Warden",
+     "text": "Focus Animal study & companionship · Mechanical hook Summoning, controlling, empowering animals."
+    },
+    {
+     "name": "Earth Warden",
+     "text": "Focus Rock and earth as a living whole · Mechanical hook Shaping/moving earth & stone (walls, pits, projectiles)."
+    },
+    {
+     "name": "Storm Warden",
+     "text": "Focus Wind, rain, lightning · Mechanical hook Weather manipulation, ranged lightning, movement denial."
+    },
+    {
+     "name": "Vine Warden",
+     "text": "Focus Plants and flora · Mechanical hook Manipulating and communicating with vegetation."
+    },
+    {
+     "name": "Wave Warden",
+     "text": "Focus Water as Nature's purest expression · Mechanical hook Tides, water-based movement/attacks, amphibious buffs."
+    }
+   ]
+  },
+  {
+   "title": "Crew types & gear",
+   "blurb": "General equipment classes: Throwing Knife/Dagger/Hand Weapon/Two-Handed Weapon/Staff/Bow/Crossbow/Unarmed/Shield/Light Armour/Heavy Armour, functioning much like their core-rulebook equivalents; Armour is capped at 14 regardless of stacking.",
+   "entries": [],
+   "rows": [
+    {
+     "name": "Standard Crewman",
+     "text": "M 6 · F +2 · S +0 · A 10 · W ? · H ? · Cost Free · Notes Hand Weapon/Two-Hander/Staff/Hand+Shield; 1 magic-only item slot."
+    },
+    {
+     "name": "Archer",
+     "text": "M 6 · F +2 · S +2 · A 11 · W +0 · H 10 · Cost 50gc · Notes Bow, Quiver, Dagger, Light Armour."
+    },
+    {
+     "name": "Crossbowman",
+     "text": "M 6 · F +2 · S +2 · A 11 · W +0 · H 10 · Cost 50gc · Notes Crossbow, Quiver, Dagger, Light Armour."
+    },
+    {
+     "name": "Infantryman",
+     "text": "M 6 · F +3 · S +0 · A 11 · W +1 · H 12 · Cost 50gc · Notes Two-Handed Weapon, Light Armour."
+    },
+    {
+     "name": "Man-at-Arms",
+     "text": "M 6 · F +3 · S +0 · A 12 · W +1 · H 12 · Cost 50gc · Notes Hand Weapon, Shield, Light Armour."
+    },
+    {
+     "name": "Pearl Diver",
+     "text": "M 6 · F +3 · S +0 · A 10? · W +0 · H 12 · Cost 50gc · Notes Hand Weapon, Amphibious."
+    },
+    {
+     "name": "Guide",
+     "text": "M 7 · F +2 · S +2 · A 11 · W +1 · H 10 · Cost 75gc · Notes Staff, Bow, Quiver, Light Armour."
+    },
+    {
+     "name": "Tomb Robber",
+     "text": "M 7 · F +3 · S +0 · A 11 · W +2 · H 12 · Cost 75gc · Notes Hand Weapon, Dagger, Light Armour."
+    },
+    {
+     "name": "Freebooter",
+     "text": "M 5 · F +4 · S +0 · A 13 · W +2 · H 12 · Cost 100gc · Notes Hand Weapon, Shield, Heavy Armour."
+    },
+    {
+     "name": "Mercenary",
+     "text": "M 5 · F +4 · S +0 · A 12 · W +2 · H 12 · Cost 100gc · Notes Two-Handed Weapon, Heavy Armour."
+    },
+    {
+     "name": "Scout",
+     "text": "M 7 · F +2 · S +2 · A 11 · W +2 · H 12 · Cost 100gc · Notes Bow, Quiver, Hand Weapon, Light Armour."
+    },
+    {
+     "name": "Savage",
+     "text": "M 6 · F +4 · S +0 · A 10 · W +0? · H 14 · Cost 100gc · Notes Two-Handed Weapon."
+    },
+    {
+     "name": "Crackshot",
+     "text": "M 5 · F +2 · S +3 · A 12 · W +1 · H 12 · Cost 100gc · Notes Crossbow, Quiver, Hand Weapon, Heavy Armour."
+    },
+    {
+     "name": "Herbalist",
+     "text": "M 6 · F +1 · S +0 · A 11 · W +3 · H 12 · Cost 100gc · Notes Hand Weapon, Light Armour, 3 item slots (2 herb/potion-only); can dose an ally within 1\"."
+    },
+    {
+     "name": "Hunter",
+     "text": "M 6 · F +2 · S +2 · A 11 · W +3 · H 12 · Cost 100gc · Notes Two-Handed Weapon, Bow, Quiver, Light Armour, +2 Fight vs. Animals."
+    },
+    {
+     "name": "Warhound",
+     "text": "M ~8 · F ~+1 · S +0 · A 10? · W ? · H ? · Cost 250gc (ship upgrade) · Notes Doesn't count vs. crew limit; can't carry treasure."
+    }
+   ]
+  },
+  {
+   "title": "Treasure",
+   "blurb": "Treasure Table results run gold → Herb/Potion → Weapon/Armour → Magic Item → Map Stone as the roll climbs (1–22, with +2 possible for central treasure). Plus a full Weapons & Armour enchantment table (Superior/Magic variants of every weapon class, a Bright Shield, three tiers of Magic Light Armour, a Ring of Protection) and 10 unique, unsellable Map Stones (Arkliss, Breenlin, Cortavious, Dyrenten, Eccorient, Foqueth, Gaelbys, Huventh, Indruline, Jancis) driving the campaign's endgame.",
+   "entries": [],
+   "rows": [
+    {
+     "name": "Water of Life",
+     "text": "Restores 3 Health; cures Poison."
+    },
+    {
+     "name": "Fury Leaves",
+     "text": "-2 Will; +1 extra damage on combat wins."
+    },
+    {
+     "name": "Smoke Glass",
+     "text": "Thrown 6\": 2\"×2\" smoke cloud blocks all LoS."
+    },
+    {
+     "name": "Quickbeam Root",
+     "text": "+2 Move, -2 Will."
+    },
+    {
+     "name": "Poison",
+     "text": "Coats a weapon; next damaging hit poisons the victim."
+    },
+    {
+     "name": "Stinkwort",
+     "text": "Uncontrolled animals ignore this figure for movement if a crewmate is within 10\"."
+    },
+    {
+     "name": "Fireheart Green",
+     "text": "+1 action next activation (max 3); user takes 2 damage."
+    },
+    {
+     "name": "Ironbark Powder",
+     "text": "+1 Armour, -2 Will."
+    },
+    {
+     "name": "Nightnock",
+     "text": "Cures a disease that would force missing a game."
+    },
+    {
+     "name": "Deloean Root",
+     "text": "Repels giant wasps/jungle ticks."
+    },
+    {
+     "name": "Dremlocke Weed",
+     "text": "+2 to all Will rolls for the game."
+    },
+    {
+     "name": "Scalegrass",
+     "text": "Repels large snakes/anacondas."
+    },
+    {
+     "name": "Farlight Leaf",
+     "text": "+1 Shoot, -1 Fight, -1 Will."
+    },
+    {
+     "name": "Gillivourt",
+     "text": "Auto-passes all Swimming Rolls this game."
+    },
+    {
+     "name": "Potion of Free Fall",
+     "text": "No falling damage regardless of distance."
+    },
+    {
+     "name": "Traikwheat",
+     "text": "Saurians get -1 Fight vs. this figure."
+    },
+    {
+     "name": "Riproot",
+     "text": "Weapon coating; next hit does +6 damage vs. snake-men."
+    },
+    {
+     "name": "Philtre of Fairy Fire",
+     "text": "Warden only: +1 to all Casting Rolls, -3 Will."
+    },
+    {
+     "name": "Potion of Regeneration",
+     "text": "Ship-stored; ignore a permanent injury after a game."
+    },
+    {
+     "name": "Lingle Berries",
+     "text": "Ship-stored; d20 15+ revives a killed figure."
+    },
+    {
+     "name": "Divining Rods",
+     "text": "Pre-Initiative, d20 12+ moves a non-central treasure token up to 3\"."
+    },
+    {
+     "name": "Ring of Will",
+     "text": "+1 Will."
+    },
+    {
+     "name": "Necklace of Life",
+     "text": "+1 Fight, +1 Armour vs. undead."
+    },
+    {
+     "name": "Armlet of Strength",
+     "text": "+1 damage on hand-to-hand wins."
+    },
+    {
+     "name": "Golden Snake",
+     "text": "Discard to instantly cure Poisoned."
+    },
+    {
+     "name": "Boots of Swimming",
+     "text": "+3 to Swimming Rolls."
+    },
+    {
+     "name": "Ring of Slow Fall",
+     "text": "Never takes falling damage."
+    },
+    {
+     "name": "Cloak of Shadows",
+     "text": "No one can draw LoS to wearer beyond 18\"."
+    },
+    {
+     "name": "Magic Beans",
+     "text": "Discard to place a 4\" vegetation band blocking LoS."
+    },
+    {
+     "name": "Idol of Power (2)",
+     "text": "Warden only: 2 power points/game usable like Health to empower."
+    },
+    {
+     "name": "Fireflask",
+     "text": "Discard, thrown 6\": clears vegetation in a 2\" diameter."
+    },
+    {
+     "name": "Piscian Helmet",
+     "text": "Wearer counts as amphibious."
+    },
+    {
+     "name": "Blood Doll",
+     "text": "Discard on taking damage to reduce it by up to 2."
+    },
+    {
+     "name": "Gloves of Climbing",
+     "text": "Once/game: no climbing penalty for the rest of the turn."
+    },
+    {
+     "name": "Eyestone",
+     "text": "Heritor's crew treats Initiative as +2."
+    },
+    {
+     "name": "Gemstone of Casting",
+     "text": "Warden only: once/game +3 to a Casting Roll."
+    },
+    {
+     "name": "Bag of Holding",
+     "text": "Treasure-carrying penalty becomes only -2 Move."
+    },
+    {
+     "name": "Jade Figurine",
+     "text": "Discard to summon a random animal ally for the game (once/game)."
+    },
+    {
+     "name": "Hearthstone Amulet",
+     "text": "Discard+action to safely remove a figure from play, drops treasure, returns full-health next game."
+    },
+    {
+     "name": "Fate Stone",
+     "text": "Once/game re-roll any die, keep either result."
+    }
+   ]
+  },
+  {
+   "title": "Bestiary",
+   "blurb": "",
+   "entries": [
+    {
+     "name": "Animals 13 types",
+     "tag": "",
+     "text": "Anaconda (Crushing Attack, Coils) · Blood-drinker Bat (Flying) · Crocodile (Amphibious, Powerful) · Giant Wasp (Flying, Poison) · Gorilla · Ground Sloth (Large, Powerful, Poor Senses) · Jungle Tick (Latch On, Disease) · Large Lizard (Poison) · Large Snake (Poison) · Mountain Goat (Horns) · Screamer Monkey (Attract Predators, Expert Climber) · Snapping Turtle (Amphibious, Powerful) · Soldier Crab (Amphibious, Never Wounded) · Tiger (Camouflage, Powerful) · Tree Spider (Poison, Expert Climber) · Warhound."
+    },
+    {
+     "name": "Saurians 4 types",
+     "tag": "",
+     "text": "Monarch (M6 F+8 A12 W+5 H28): Large, Powerful, Terrifying, Roar (AoE stun on a kill); killing it is worth a +30 XP bonus. Razorbeak: Large, Flying, flees when hurt. Sailback: Large, Powerful. Stalker: Flank Attack (first supporter gives +4 instead of +2)."
+    },
+    {
+     "name": "Sentient Races 7 types",
+     "tag": "",
+     "text": "Drichean Warrior & Archer · Eritherean (Large, Non-Aggressive if Unhurt, Never Unarmed) · Island Troll (Large) · Snake-Man Warrior (Poison) · Tribal Warrior & Tribal Hunter (Poison)."
+    },
+    {
+     "name": "Undead 6 types",
+     "tag": "",
+     "text": "Dust Devil (temporary summon) · Ghoul · Island Shade (Ethereal) · Skeleton · Spirit Warrior (Semi-Ethereal) · Swamp Zombie (Amphibious)."
+    },
+    {
+     "name": "Aquatics 4 types",
+     "tag": "",
+     "text": "Needlefish · Octopike (Ensnare) · Sea Serpent (Large, Massive Jaws ×3 damage, Long Reach) · Shark (Large, Powerful, Attract Sharks — can chain-spawn up to 4 on the table)."
+    },
+    {
+     "name": "Demons 3 types",
+     "tag": "",
+     "text": "Cortiki: Amphibious, immune to non-magic weapons. Gorgon: Poisoned attacks (incl. shooting), Stone Gaze (Will-roll aura that can outright petrify a figure at 12\"/LoS), immune to critical hits, never forces combat. Souldweller: fights with Will instead of Fight, immune to non-magic weapons; winning a fight possesses the loser's body (Heritors/Wardens immune)."
+    }
+   ],
+   "rows": []
+  },
+  {
+   "title": "Ships & campaign systems",
+   "blurb": "Injury/Death: crewmen roll d20 (1–4 dead / 5–8 miss a game / 9+ fine); Heritor/Warden use a dedicated Survival Table plus a 10-entry Permanent Injury Table (split-stat penalties). Experience: Heritor and Warden level up on fully separate tracks (100 XP/level each), each choosing between a stat increase, a lower Utilization/Casting Number, or a new ability/spell (gated to roughly one new one per 4–5 levels). Buying items requires a d20 12+ availability roll at 2× sell price, once per item per mainland trip (200gc round trip, 175gc with Swift Sails).",
+   "entries": [],
+   "rows": [
+    {
+     "name": "Kennel",
+     "text": "Cost 250gc · Effect Adds a Warhound crew slot outside the normal limit."
+    },
+    {
+     "name": "Launch",
+     "text": "Cost 300gc · Effect One small boat gets +1\" move (max 7\")."
+    },
+    {
+     "name": "Magnetic Compass",
+     "text": "Cost 200gc · Effect Roll 2 dice for table-edge priority, keep either."
+    },
+    {
+     "name": "Herb Chest",
+     "text": "Cost 100gc · Effect +5gc whenever selling a herb/potion."
+    },
+    {
+     "name": "Swift Sails",
+     "text": "Cost 120gc · Effect Mainland trip costs 175gc instead of 200gc."
+    },
+    {
+     "name": "Chart Room",
+     "text": "Cost 400gc · Effect Heritor +10 XP after each game."
+    },
+    {
+     "name": "Recovery Room",
+     "text": "Cost 600gc · Effect Requires a Herbalist; re-roll one crewman's survival roll/game."
+    },
+    {
+     "name": "Warden's Workshop",
+     "text": "Cost 300gc · Effect Warden +5 XP after each game."
+    },
+    {
+     "name": "Extra Quarters",
+     "text": "Cost 1,000gc · Effect Allows 5 Specialists instead of 4."
+    },
+    {
+     "name": "Weapons Locker",
+     "text": "Cost 600gc · Effect One standard crewman gets a free Superior Hand Weapon each game."
+    }
+   ]
+  }
+ ]
+}

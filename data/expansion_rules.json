@@ -1,0 +1,427 @@
+{
+ "Forgotten Pacts": [
+  {
+   "title": "Demonic Attributes",
+   "blurb": "Modular traits rolled for summoned/encountered demons — 20 Minor, 20 Major. Each may only appear once per demon.",
+   "entries": [
+    {
+     "name": "Minor (20)",
+     "tag": "",
+     "text": "Armoured Hide (+1 Armour) · Backstabber (breaks binding on 17+) · Chameleonic (LoS only within 12\") · Demonic Strength (counts as 2-handed) · Extra Arms (+1 Fight) · Extra Legs (+1 Move) · Explosive Demise (+3 elemental blast on death) · Horns (+2 Fight charging) · Horrific (Will TN10 to approach) · Levitation (ignores rough ground) · Magic Attack · Magic Vulnerability (-2 Armour vs magic) · Numbing Touch (-1 Fight on loss) · Poisonous · Teleport (random moves become teleports) · Tentacles (free +0 shot at 2\") · True Sight (immune to Beauty/Invisibility/Monstrous Form) · Two Heads (fewer supporting-figure bonuses vs it) · Vampiric (heals 2 on hit) · Vestigial Wings (no fall damage)"
+    },
+    {
+     "name": "Major (20)",
+     "tag": "",
+     "text": "Acidic Blood (Will roll or 3 dmg + weapon destroyed) · Beautiful (Will TN15 to attack) · Blinding Aura (Will TN12 within 6\" or blinded) · Celerity (activates twice/turn) · Discorporate (splits into 2 minor demons, then imps, on death) · Elemental Absorption (ignores first 5 elemental dmg) · Insubstantial Movement (moves through terrain/dead space) · Invisible · Invulnerability (immune to normal weapons) · Life Bane (Will TN20 within 3\" or 2 dmg) · Maelstrom (-2 to shoot it) · Magic Sink (-2 Casting within 12\") · Mind Lock (+2 Will, immune to Mind Control) · Mind Wipe (Will TN18 or -2 Will + lost spell) · Petrifying Stare (Petrify-12 aura) · Regenerate (+3 Health/turn) · Serendipitous (all its rolls +1) · Swirling Darkness (+4 Fight vs shooting) · Thousand Young (spawns imps on 1-4 initiative) · Uncontrollable (Will TN20 or breaks control)"
+    }
+   ]
+  },
+  {
+   "title": "Mystic Brands",
+   "blurb": "Mystic Brands take an item slot and count as ongoing spells (cancellable by Dispel/Spelleater/null energy). Burning Marks: rolling a natural 1 on a Will roll sends the bearer temporarily insane; may be sacrificed for +1 damage in a strike (at the cost of 2 damage to self). Devotional Marks: +1 to all Will rolls; may be sacrificed for a one-off +3 Will roll.",
+   "entries": [
+    {
+     "name": "Mark of Rage",
+     "tag": "Burning",
+     "text": "+2 Move if the move ends in combat."
+    },
+    {
+     "name": "Mark of the Berserker",
+     "tag": "Burning",
+     "text": "+2 Fight vs multiple foes."
+    },
+    {
+     "name": "Mark of the Blood",
+     "tag": "Burning",
+     "text": "+2 damage (+3 with a two-hander)."
+    },
+    {
+     "name": "Mark of the Chain",
+     "tag": "Burning",
+     "text": "+3 Will resisting/breaking spells."
+    },
+    {
+     "name": "Mark of the Fang",
+     "tag": "Burning",
+     "text": "+1 Fight."
+    },
+    {
+     "name": "Mark of Endurance",
+     "tag": "Devotional",
+     "text": "Never Wounded; immune to poison."
+    },
+    {
+     "name": "Mark of Life",
+     "tag": "Devotional",
+     "text": "+2 Fight, +1 Armour vs undead."
+    },
+    {
+     "name": "Mark of Protection",
+     "tag": "Devotional",
+     "text": "Sacrifice to prevent up to 3 damage."
+    },
+    {
+     "name": "Mark of Sight",
+     "tag": "Devotional",
+     "text": "Immune to Invisibility/Beauty/Monstrous Form."
+    },
+    {
+     "name": "Mark of the Shield",
+     "tag": "Devotional",
+     "text": "+1 Armour."
+    }
+   ]
+  }
+ ],
+ "Into the Breeding Pits": [
+  {
+   "title": "Underground exploration",
+   "blurb": "",
+   "entries": [
+    {
+     "name": "Standard vs Dungeon Set-Up",
+     "tag": "",
+     "text": "Two table-building modes; Dungeon Set-Up adds \"dead space\" only Immaterial/Burrowing figures can cross."
+    },
+    {
+     "name": "Spells altered underground",
+     "tag": "",
+     "text": "Crumble (no effect on dead space) · Leap (can't cross dead space) · Mud (only 1.5\" radius on stone floors) · Plane Walk (can cross dead space, can't end there) · Wall (collapses on 15+, attackable: Fight roll 12+ destroys it)."
+    },
+    {
+     "name": "Doors & Ceilings",
+     "tag": "",
+     "text": "Doors cost 1 action/2\" to open, block LoS, can't be locked. Ceilings cap vertical movement (10\" typical)."
+    },
+    {
+     "name": "Lighting",
+     "tag": "",
+     "text": "Max line of sight 20\" (or 16\" in deep dark) unless under a Glow spell (24\")."
+    },
+    {
+     "name": "Treasure placement (underground)",
+     "tag": "",
+     "text": "One player places all tokens; others may move one, pass, or veto the whole layout."
+    },
+    {
+     "name": "Random Encounters (underground)",
+     "tag": "",
+     "text": "On a treasure's first pickup, roll a die — 14+ spawns a random creature, placed by whoever beats their level in an opposed roll."
+    },
+    {
+     "name": "Burrowing (new ability)",
+     "tag": "",
+     "text": "Can move through terrain and dead space on random moves as if not there."
+    }
+   ]
+  },
+  {
+   "title": "Traps & secret passages",
+   "blurb": "Rolling a natural 1 for initiative springs a trap on any figure the roller chooses; roll the Trap Table below. Trap Experts/Apprentices/Captains/Thieves/Tunnel Fighters get a bonus vs the Trap Number. Secret Passages: rolling a natural 20 for initiative lets that figure (and its activation group) pass straight through vertical terrain, once, on activation.",
+   "rows": [
+    {
+     "name": "Caltrops",
+     "text": "Move TN14 or -2 Move until healed."
+    },
+    {
+     "name": "Cement Spray",
+     "text": "Move TN14 or can't pick up/drop treasure all game."
+    },
+    {
+     "name": "Death From Above",
+     "text": "Drops a Level 1 Encounter creature onto the target."
+    },
+    {
+     "name": "Disease",
+     "text": "Fight TN14 or miss the next game."
+    },
+    {
+     "name": "Explosive Rune",
+     "text": "+5 magic shooting attack on target & everyone within 2\"."
+    },
+    {
+     "name": "Mind Maze",
+     "text": "Will TN12 or lose the activation; spreads to anyone entering combat with the target."
+    },
+    {
+     "name": "Nullwave",
+     "text": "Cancels all spells in play (incl. binds); Will TN14 or 1 damage."
+    },
+    {
+     "name": "Personal Demon",
+     "text": "Spawns a Will+10 minor demon fixated only on the target."
+    },
+    {
+     "name": "Phosphorescent Spray",
+     "text": "Move TN16 or glow — shooters get +3, visible to 24\" all game."
+    },
+    {
+     "name": "Pick Pocket",
+     "text": "Fight TN12 or lose held treasure/an item."
+    },
+    {
+     "name": "Pit Trap",
+     "text": "Move TN14 or fall into a 4\" pit."
+    },
+    {
+     "name": "Poison Dart",
+     "text": "+5 shooting attack; on a hit, one action per activation until healed."
+    },
+    {
+     "name": "Siren",
+     "text": "Pulls all uncontrolled creatures 6\" toward the target."
+    },
+    {
+     "name": "Smoke Bomb",
+     "text": "2\" smoke cloud; Will TN12 or lose the coming turn."
+    },
+    {
+     "name": "Spring-loaded Axe",
+     "text": "+3 attack, +2 damage on a win."
+    },
+    {
+     "name": "Teleport Pad",
+     "text": "Random teleport d20+5\" away."
+    },
+    {
+     "name": "Time Slip",
+     "text": "Will TN12 or vanish from the board until a later TN8 Will roll succeeds."
+    },
+    {
+     "name": "Wall of Force",
+     "text": "Will TN14 or +0 attack & thrown 5\"."
+    },
+    {
+     "name": "Whispers",
+     "text": "Will TN14 or an opponent moves you up to 6\"."
+    },
+    {
+     "name": "Willsap",
+     "text": "Will TN14 or Will drops to +0 (or -1) for the game."
+    }
+   ]
+  }
+ ],
+ "The Maze of Malcor": [
+  {
+   "title": "Optional core rule updates",
+   "blurb": "The 12-scenario campaign also introduces full Sky Gondola vehicle rules (movement, boarding up to 5 figures, combat, Fight+0/Armour14/Health30 as a target, 500–1000gc buy/sell) and an alternate \"Forces of Malcor\" mode where one player runs Malcor and his monsters as a intelligent opponent instead of uncontrolled creatures.",
+   "entries": [
+    {
+     "name": "Treasure Placement II",
+     "tag": "",
+     "text": "One central token, then one per player within 8\" of it, then one more anywhere 9\"+ from any edge."
+    },
+    {
+     "name": "Securing Treasure",
+     "tag": "",
+     "text": "Unclaimed tokens at game-end: 15+ on a die secures them for a player with figures still on table."
+    },
+    {
+     "name": "Auto Success/Failure",
+     "tag": "",
+     "text": "Natural 20 on any Target Number roll auto-succeeds (even Will rolls vs spells); natural 1 auto-fails."
+    },
+    {
+     "name": "Experience Table II",
+     "tag": "",
+     "text": "+5 failed cast w/ damage · +10 successful cast (Casting No. >6) · +40 per game played · +50 per treasure secured · +5 per uncontrolled kill (cap 50). Game cap 300 XP."
+    },
+    {
+     "name": "Casting Roll floor",
+     "tag": "",
+     "text": "A successful Casting Roll is treated as the actual roll or 14, whichever is higher."
+    },
+    {
+     "name": "Scrolls rework",
+     "tag": "",
+     "text": "Cast an unknown spell, or insure a known one against failure — either way treat the Casting Roll as exactly 12."
+    },
+    {
+     "name": "Uncontrolled Creature Actions II",
+     "tag": "",
+     "text": "Adds a ranged-attack priority step before \"move toward closest figure.\""
+    },
+    {
+     "name": "Balancing Scenarios",
+     "tag": "",
+     "text": "6+ level gap between wizards spawns a random creature controlled by the lower-level player."
+    },
+    {
+     "name": "Black Market Contacts",
+     "tag": "",
+     "text": "Purchasing options are limited to 4 rolls on the Treasure Table (ignoring gold) after each game."
+    },
+    {
+     "name": "Creating Experienced Wizards",
+     "tag": "",
+     "text": "Formal step-by-step process to build a wizard above level 0 for a mid-campaign join or one-off."
+    }
+   ]
+  },
+  {
+   "title": "The Pentangle — five lost schools",
+   "blurb": "Not intended as playable wizard schools — their spells exist only on scrolls found in the Collegium — but rules are included for using them as full schools if a group agrees.",
+   "rows": [
+    {
+     "name": "Astromancer",
+     "text": "Combines Sigilist + Elementalist · Aligned with Elementalist, Sigilist"
+    },
+    {
+     "name": "Distortionist",
+     "text": "Combines Illusionist + Summoner · Aligned with Illusionist, Summoner"
+    },
+    {
+     "name": "Fatecaster",
+     "text": "Combines Soothsayer + Witch · Aligned with Soothsayer, Witch"
+    },
+    {
+     "name": "Sonancer",
+     "text": "Combines Chronomancer + Enchanter · Aligned with Chronomancer, Enchanter"
+    },
+    {
+     "name": "Spiritualist",
+     "text": "Combines Necromancer + Thaumaturge · Aligned with Necromancer, Thaumaturge"
+    }
+   ]
+  },
+  {
+   "title": "Lost Spells",
+   "blurb": "",
+   "entries": [
+    {
+     "name": "Alignment / Meteor Strike / Misalignment / Shape Starfire Elemental / Starfall / Starfire Bolt",
+     "tag": "Astromancer",
+     "text": "Health-on-cast synergy, a +7 shooting blast, self-damaging spellstorm, summonable elemental, area mines, and a +4 elemental bolt."
+    },
+    {
+     "name": "Break Armour / Collapse / Fracture / Implode-Explode / Misstep / Whiplash",
+     "tag": "Distortionist",
+     "text": "Armour destruction, a +4 terrain-based blast, a combat-only free attack, mass pull/push, pre-game enemy reposition, and a movement teleport."
+    },
+    {
+     "name": "Blood Wager / Fickle Finger / Mischance / Scatter / Serendipity / True Gold",
+     "tag": "Fatecaster",
+     "text": "Coin-flip full heal or half-Health loss, action-count randomizer, forced disadvantage/advantage rolls, treasure-token shove, and a treasure reroll."
+    },
+    {
+     "name": "Charm / Imbue Instrument / Humming Blade / Steal Voice / Sound Cloud / Sound Wave",
+     "tag": "Sonancer",
+     "text": "Animal pacify, an instrument that can become a permanent +2 Will item, armour-shredding weapon buff, spellcaster silence, melee debuff aura, and a knockback shot."
+    },
+    {
+     "name": "Call Wraith / Command Ethereal / Ethereal Form / Inhabit / Nightmare / Speak with the Dead",
+     "tag": "Spiritualist",
+     "text": "Summons a wraith, puppeteers ethereal undead, grants temporary ethereal form, possesses a construct/undead, curses a rival's XP long-term, and boosts a future Out of Game cast."
+    }
+   ]
+  }
+ ],
+ "Thaw of the Lich Lord": [
+  {
+   "title": "Lichdom — failing the cast",
+   "blurb": "Lichdom — Necromancer / 20 / Out of Game. Only a wizard may cast it, tearing his soul from his body to animate his own corpse. Success makes him a Lich outright; failure is punishing and scales with how badly the roll was missed: A successful Lich is subject to a distinct rules package for the rest of the campaign — effectively a third alongside Demonic Pacts and Beastcrafter as a mutually-flavored \"wizard state\":",
+   "rows": [
+    {
+     "name": "1–5",
+     "text": "-1 level, -1 Health stat."
+    },
+    {
+     "name": "6–10",
+     "text": "-3 levels, -2 Health, -1 Will, 1 random permanent injury."
+    },
+    {
+     "name": "11–15",
+     "text": "-5 levels, -3 Health, -2 Will, 2 random permanent injuries."
+    },
+    {
+     "name": "16–20",
+     "text": "-8 levels, -6 Health, -2 Will, 3 random permanent injuries."
+    },
+    {
+     "name": "21+",
+     "text": "The wizard's soul is lost — unrecoverable by any means."
+    }
+   ]
+  }
+ ],
+ "The Perilous Dark": [
+  {
+   "title": "Solo & co-op toolkit",
+   "blurb": "Also codifies house style for \"boss monsters\" (make them multi-step puzzles, not just high stat-lines — and make them immune to Mind Control) and gives explicit guidance that solo/co-op tables should run less crowded than a normal Frostgrave table, since the simple creature AI can't exploit terrain the way a player can.",
+   "entries": [
+    {
+     "name": "Warband building",
+     "tag": "",
+     "text": "Solo: build a warband as normal. Co-op: each player's wizard gets only 200gc and a max of 4 soldiers, so two players together land close to a solo warband's power."
+    },
+    {
+     "name": "Objectives over treasure",
+     "tag": "",
+     "text": "Place only 2 treasure tokens solo (3 co-op) in hard-to-reach spots, and shift most of the XP budget onto scenario-specific goals (e.g. \"+80 XP if the statue is destroyed\") to keep games from becoming a pure gold-count."
+    },
+    {
+     "name": "New turn sequence",
+     "tag": "",
+     "text": "Wizard Phase → Creature Phase I (creatures with Fight +5 or Health 20+) → Apprentice Phase → Creature Phase II (everyone else) → Soldier Phase — lets dangerous monsters act before the party's own soldiers."
+    },
+    {
+     "name": "Updated creature AI",
+     "tag": "",
+     "text": "Creatures activate in current-Health order, always move to engage the highest-level spellcaster if one move can do it, never intentionally pick a multi-combat, and all creatures get a flat +2 Will."
+    },
+    {
+     "name": "Limited Duration spells",
+     "tag": "",
+     "text": "Circle of Protection, Invisibility, Monstrous Form, and Wall: roll a die at the end of any turn they're active — on a 1–10 the spell ends early (replaces Wall's normal end-of-turn roll)."
+    },
+    {
+     "name": "Target Points",
+     "tag": "",
+     "text": "Instead of random movement, uncontrolled creatures head for a designer-nominated point (usually the objective) — makes the AI feel purposeful instead of aimless."
+    },
+    {
+     "name": "Monster spawning",
+     "tag": "",
+     "text": "Bespoke per-scenario spawn tables (not the core random-encounter table) tied to numbered spawn points, so the designer controls both what shows up and where."
+    },
+    {
+     "name": "Clue Markers",
+     "tag": "",
+     "text": "Treasure-token-like markers that reward investigation (an action + a roll on a scenario-specific clue table) — the game's investigation/mystery layer."
+    },
+    {
+     "name": "Room Cards",
+     "tag": "",
+     "text": "Draw a card to set up the next room only when a door is opened, so players never see the whole table at once; can also define room shape/doorway count for a lightweight dungeon crawl."
+    },
+    {
+     "name": "Closely Connected Scenarios",
+     "tag": "",
+     "text": "Rules for chaining scenarios back-to-back without a return to base: partial healing (+6 or half Health), no buying/selling/hiring, one Out of Game spell each."
+    }
+   ]
+  },
+  {
+   "title": "Dungeon crawl systems",
+   "blurb": "Two full worked examples ship with the book: The Vaults (a fixed 10-card dungeon deck with two objective rooms — a treasure hoard and a stairway down) and Dungeons Deep (the fully randomly-generated version, with its own room/encounter/treasure tables and the Gateway Home rule in action).",
+   "entries": [
+    {
+     "name": "Dungeon Cards",
+     "tag": "",
+     "text": "Like Room Cards but smaller and more numerous (10–12 sections instead of 3–5 rooms); the deck is split into a \"multi-exit\" pile and an \"objective room\" pile, then interleaved so objectives can't appear too early."
+    },
+    {
+     "name": "Randomly Generated Dungeon",
+     "tag": "",
+     "text": "Each new room triggers three rolls — a room table, an encounter table, and a treasure/clue table — for a fully improvised dungeon; includes a Will TN20 \"search for a secret door\" rule to rescue dead-ended layouts."
+    },
+    {
+     "name": "Gateway Room / Home",
+     "tag": "",
+     "text": "The randomly generated dungeon's designated exit: only spawns once 6+ rooms are revealed, guarded by a double encounter roll, and is the sole way off the table."
+    }
+   ]
+  }
+ ]
+}

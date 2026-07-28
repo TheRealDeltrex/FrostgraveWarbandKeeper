@@ -47,7 +47,7 @@
           <div class="spell-row">
             <details class="spell-desc">
               <summary class="spell-row-main spell-row-main-ref">
-                <span class="col-name"><strong>{{ sp.name }}</strong></span>
+                <span class="col-name"><strong>{{ sp.name }}</strong>{% if sp.source != 'Core Rules' %} <span class="badge">{{ sp.source }}</span>{% endif %}</span>
                 <span class="col-cn gold"><strong>{{ sp.cn }}</strong></span>
                 <span class="col-type muted">{{ sp.type }}</span>
                 <span class="col-info spell-desc-toggle">Info</span>
@@ -124,13 +124,14 @@
           <tr>
             <th>Type</th><th>Cat</th><th>Source</th><th>Cost</th>
             <th>Move</th><th>Fight</th><th>Shoot</th><th>Armour</th><th>Will</th><th>Health</th><th>Gear</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
           {% for group in soldier_groups %}
-            <tr class="group-row"><th colspan="11">{{ group.label }} ({{ group.soldiers|length }})</th></tr>
+            <tr class="group-row"><th colspan="12">{{ group.label }} ({{ group.soldiers|length }})</th></tr>
             {% for s in group.soldiers %}
-            <tr>
+            <tr class="catalog-row">
               <td><strong>{{ s.name }}</strong></td>
               <td><span class="badge {{ s.category }}">{{ s.category }}</span></td>
               <td class="muted">{% if s.requires_spell %}<span class="badge">via {{ s.requires_spell }}</span>{% elif s.source != 'Core Rules' %}<span class="badge">{{ s.source }}</span>{% else %}Core Rules{% endif %}</td>
@@ -142,13 +143,110 @@
               <td>{{ format_stat(s.will) }}</td>
               <td>{{ s.health }}</td>
               <td class="muted">{{ s.gear }}</td>
+              <td>
+                {% if s.description %}
+                  <details class="info-toggle-details">
+                    <summary class="info-toggle">Info</summary>
+                  </details>
+                {% endif %}
+              </td>
             </tr>
+            {% if s.description %}
+              <tr class="info-desc-row"><td colspan="12">{{ s.description }}</td></tr>
+            {% endif %}
             {% endfor %}
           {% endfor %}
         </tbody>
       </table>
     </div>
   </details>
+
+  <details class="card">
+    <summary><h2>Magic items &amp; treasure ({{ magic_item_count }})</h2></summary>
+    <p class="muted">Treasure from the five supplements. A book's items only become suggestions in a
+      warband's vault once that book is switched on under its Additional Rules and Homerules —
+      but everything is browsable here.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Item</th><th>Effect</th></tr></thead>
+        <tbody>
+          {% for group in magic_item_groups %}
+            <tr class="group-row"><th colspan="2">{{ group.source }} ({{ group.rows|length }})</th></tr>
+            {% for it in group.rows %}
+              <tr><td><strong>{{ it.name }}</strong></td><td class="muted">{{ it.effect }}</td></tr>
+            {% endfor %}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </details>
+
+  <details class="card">
+    <summary><h2>Expansion rules</h2></summary>
+    <p class="muted">The table rules each supplement adds beyond its soldiers, spells and creatures —
+      traps, demonic attributes, underground play, the optional core-rule updates, the solo/co-op
+      toolkit. Reference only: these govern play at the table, so the app shows them rather than
+      tracking them.</p>
+    {% for book, sections in expansion_rules.items() %}
+      <h3>{{ book }}</h3>
+      {% for sec in sections %}
+        <details class="ref-panel">
+          <summary>{{ sec.title }}</summary>
+          {% if sec.blurb %}<p class="muted" style="font-size:0.85rem">{{ sec.blurb }}</p>{% endif %}
+          {% if sec.rows %}
+            <div class="table-wrap">
+              <table>
+                <tbody>
+                  {% for row in sec.rows %}
+                    <tr><td><strong>{{ row.name }}</strong></td><td class="muted">{{ row.text }}</td></tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% endif %}
+          {% for e in sec.entries %}
+            <p style="margin:0.4rem 0">
+              <strong>{{ e.name }}</strong>{% if e.tag %} <span class="badge">{{ e.tag }}</span>{% endif %}
+              {% if e.text %}<br /><span class="muted">{{ e.text }}</span>{% endif %}
+            </p>
+          {% endfor %}
+        </details>
+      {% endfor %}
+    {% endfor %}
+  </details>
+
+  {% if ghost and ghost.sections %}
+  <details class="card">
+    <summary><h2>Ghost Archipelago</h2></summary>
+    <p class="muted">A separate Osprey ruleset, not a Frostgrave supplement — a Heritor and a Warden
+      lead a Crew across the Lost Isles instead of a Wizard leading a Warband. Nothing here is
+      hireable and it has no source-book toggle; it is carried purely for reference.</p>
+    {% if ghost.intro %}<p class="muted">{{ ghost.intro }}</p>{% endif %}
+    {% for sec in ghost.sections %}
+      <details class="ref-panel">
+        <summary>{{ sec.title }}</summary>
+        {% if sec.blurb %}<p class="muted" style="font-size:0.85rem">{{ sec.blurb }}</p>{% endif %}
+        {% if sec.rows %}
+          <div class="table-wrap">
+            <table>
+              <tbody>
+                {% for row in sec.rows %}
+                  <tr><td><strong>{{ row.name }}</strong></td><td class="muted">{{ row.text }}</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% endif %}
+        {% for e in sec.entries %}
+          <p style="margin:0.4rem 0">
+            <strong>{{ e.name }}</strong>{% if e.tag %} <span class="badge">{{ e.tag }}</span>{% endif %}
+            {% if e.text %}<br /><span class="muted">{{ e.text }}</span>{% endif %}
+          </p>
+        {% endfor %}
+      </details>
+    {% endfor %}
+  </details>
+  {% endif %}
 
   <details class="card">
     <summary><h2>Bestiary ({{ bestiary|length }})</h2></summary>

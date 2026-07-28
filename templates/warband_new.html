@@ -9,7 +9,7 @@
       apprentice costs <span class="gold">{{ APPRENTICE_COST }} gc</span>.
       Spells: <strong>{{ OWN_SCHOOL_SPELLS }} own</strong>,
       <strong>1 from each aligned</strong>,
-      <strong>{{ NEUTRAL_SPELLS }} from different neutrals</strong>,
+      <strong>{{ neutral_needed }} from different neutrals</strong>,
       <strong>none from opposed</strong>.
       Casting numbers include school penalties (own +0 / aligned +2 / neutral +4 / opposed +6).
     </p>
@@ -31,7 +31,10 @@
         </div>
         <div class="form-row">
           <label for="school">School of magic</label>
-          <select id="school" name="school" onchange="(window.fgNavigate||function(u){location.href=u})('{{ url_for('warband_new') }}?school='+encodeURIComponent(this.value))">
+          {# fgNewReload is defined by the Source books card below; it rebuilds the
+             URL with both the school and the ticked books, so changing one never
+             discards the other. #}
+          <select id="school" name="school" onchange="window.fgNewReload()">
             {% for s in schools %}
               <option value="{{ s }}" {% if s == school %}selected{% endif %}>{{ s }}</option>
             {% endfor %}
@@ -71,6 +74,57 @@
       </div>
     </details>
 
+    {# Source books, so supplement spells can be taken as starting spells. The
+       same toggles live on the warband's rules tab afterwards and can be changed
+       there at any time; these just decide what the spell picker below offers. #}
+    <details class="card" id="source-books-card" {% if enabled_sources_map and enabled_sources_map.values()|select|list %}open{% endif %}>
+      <summary><h2>Source books <span class="muted" style="font-weight:500;font-size:0.9rem">— optional</span></h2></summary>
+      <p class="muted" style="font-size:0.88rem">
+        Switch on the supplements you play with. Their spells become available below, and their
+        mercenaries become hireable once the warband exists. You can change this later under
+        <strong>Additional Rules and Homerules</strong>.
+      </p>
+      <div class="stat-row" id="source-books">
+        {% for book in source_books %}
+          <label class="checkbox-row" style="margin:0.2rem 0">
+            <input name="source_enabled_{{ book.slug }}" type="checkbox"
+                   data-source-toggle
+                   {% if enabled_sources_map and enabled_sources_map.get(book.name) %}checked{% endif %} />
+            {{ book.name }}
+          </label>
+        {% endfor %}
+      </div>
+      {# The Maze of Malcor says the Pentangle schools are scroll-only, then gives
+         rules for playing them if a group agrees — hence the extra opt-in. #}
+      <label class="checkbox-row" style="margin-top:0.6rem" id="pentangle-row">
+        <input name="pentangle_schools_playable" type="checkbox" data-source-toggle
+               {% if pentangle_playable %}checked{% endif %} />
+        Pentangle schools playable ({{ PENTANGLE_SCHOOLS|join(', ') }})
+      </label>
+      <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0">
+        Needs The Maze of Malcor above. Their spells are scroll-only by the book; this is the
+        optional rule for running them as real schools. A Pentangle wizard has two aligned schools
+        instead of three, so they start with three neutral spells instead of two.
+      </p>
+
+      <script>
+        // Ticking a book has to re-render the spell picker, which is built
+        // server-side — same round-trip the school dropdown already uses. The
+        // ticked books ride along in the query string so the reload keeps them.
+        window.fgNewReload = function () {
+          var params = new URLSearchParams();
+          params.set("school", document.getElementById("school").value);
+          document.querySelectorAll("#source-books-card input[data-source-toggle]").forEach(function (box) {
+            if (box.checked) { params.set(box.name, "on"); }
+          });
+          var url = "{{ url_for('warband_new') }}?" + params.toString();
+          (window.fgNavigate || function (u) { location.href = u; })(url);
+        };
+        document.querySelectorAll("#source-books-card input[data-source-toggle]")
+          .forEach(function (box) { box.addEventListener("change", window.fgNewReload); });
+      </script>
+    </details>
+
     <details class="card" open>
       <summary><h2>2. Spells
         <span class="muted" style="font-weight:500;font-size:0.9rem">
@@ -84,7 +138,7 @@
         {% for al in relations.aligned %}
           <div class="limit" data-aligned="{{ al }}">Aligned {{ al }}: <span class="al-count">0</span> / 1</div>
         {% endfor %}
-        <div class="limit" id="lim-neutral">Neutral (diff. schools): <span id="neu-count">0</span> / {{ NEUTRAL_SPELLS }}</div>
+        <div class="limit" id="lim-neutral">Neutral (diff. schools): <span id="neu-count">0</span> / {{ neutral_needed }}</div>
         <div class="limit bad">Opposed {{ relations.opposed }}: locked</div>
       </div>
 
@@ -188,7 +242,7 @@
     const OPPOSED = {{ relations.opposed|tojson }};
     const NEED = {{ STARTING_SPELL_COUNT }};
     const OWN_N = {{ OWN_SCHOOL_SPELLS }};
-    const NEU_N = {{ NEUTRAL_SPELLS }};
+    const NEU_N = {{ neutral_needed }};  // 2 for a core school, 3 for a Pentangle one
 
     const selectedList = document.getElementById('selected-list');
     const spellOrder = document.getElementById('spell_order');

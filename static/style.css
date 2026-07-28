@@ -429,6 +429,34 @@ tr.group-row:not(:first-child) th {
   padding-top: 1.1rem;
 }
 
+/* Soldier "Info" toggle (hire list + Lexicon): a <details> in the row's own
+   Info cell reveals a full-width colspan row directly below it, so the
+   description never has to squeeze into one narrow stat column.
+   ("catalog-row", not "soldier-row" — that class already names an unrelated
+   div-based layout elsewhere in this stylesheet.) */
+summary.info-toggle {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 0.8rem;
+  list-style: none;
+}
+summary.info-toggle::-webkit-details-marker {
+  display: none;
+}
+tr.info-desc-row {
+  display: none;
+}
+tr.catalog-row:has(> td > details.info-toggle-details[open]) + tr.info-desc-row {
+  display: table-row;
+}
+tr.info-desc-row td {
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  white-space: normal;
+}
+
 tr.status-injured {
   background: rgba(224, 160, 78, 0.06);
 }

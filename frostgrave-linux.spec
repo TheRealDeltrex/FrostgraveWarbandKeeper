@@ -26,6 +26,9 @@ datas = [
     ("data/spell_descriptions.json", "data"),
     ("data/standard_items.json", "data"),
     ("data/bestiary.json", "data"),
+    ("data/magic_items.json", "data"),
+    ("data/expansion_rules.json", "data"),
+    ("data/ghost_archipelago.json", "data"),
 ]
 
 a = Analysis(
