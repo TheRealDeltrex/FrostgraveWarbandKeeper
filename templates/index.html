@@ -23,8 +23,9 @@
           <li class="warband-list-item">
             <a class="card-link" href="{{ url_for('warband_view', warband_id=w.id) }}">
               <div class="warband-row">
-                {% if w.portrait %}
-                  <img class="portrait-sm" src="{{ url_for('portrait_file', relpath=w.portrait) }}" alt="" />
+                {% set src = portrait_src(w.portrait, 'wizard') %}
+                {% if src %}
+                  <img class="portrait-sm" src="{{ src }}" alt="" />
                 {% else %}
                   <span class="portrait-placeholder">❄</span>
                 {% endif %}

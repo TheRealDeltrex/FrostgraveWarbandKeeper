@@ -148,6 +148,10 @@ BANNER_STYLE = """
 """
 
 
+# Default portrait filenames referenced by the generated pages, filled in by sanitize().
+used_portraits: set[str] = set()
+
+
 def sanitize(html: str, *, other_preview: str, page_label: str) -> str:
     html = strip_block(html, r'<ul class="flashes">', "</ul>")
     html = strip_block(html, r'<nav class="nav">', "</nav>")
@@ -166,6 +170,11 @@ def sanitize(html: str, *, other_preview: str, page_label: str) -> str:
                   '<link rel="stylesheet" href="static/style.css" />', html)
     html = re.sub(r'<script src="[^"]*item_slots\.js"[^>]*></script>',
                   '<script src="static/item_slots.js" defer></script>', html)
+
+    # Default character artwork: same absolute -> relative rewrite. The names are
+    # collected so only the pictures these pages actually use get copied into docs/.
+    used_portraits.update(re.findall(r'src="/static/portraits/([^"]+)"', html))
+    html = html.replace('src="/static/portraits/', 'src="static/portraits/')
 
     # Hero action row (warband page only) — PDF/export don't exist statically.
     html = re.sub(
@@ -214,10 +223,21 @@ def main():
     shutil.copyfile(REPO_ROOT / "static" / "style.css", docs / "static" / "style.css")
     shutil.copyfile(REPO_ROOT / "static" / "item_slots.js", docs / "static" / "item_slots.js")
 
+    # Only the default portraits these pages reference — shipping all 36 would put
+    # a couple of MB on the Pages site for pictures nothing links to.
+    portraits_out = docs / "static" / "portraits"
+    if portraits_out.exists():
+        shutil.rmtree(portraits_out)
+    if used_portraits:
+        portraits_out.mkdir(parents=True, exist_ok=True)
+        for name in sorted(used_portraits):
+            shutil.copyfile(REPO_ROOT / "static" / "portraits" / name, portraits_out / name)
+
     print(f"Sample warband id: {warband_id}")
     for f in ["preview-warband.html", "preview-reference.html", "static/style.css", "static/item_slots.js"]:
         p = docs / f
         print(f"  wrote {p} ({p.stat().st_size} bytes)")
+    print(f"  wrote {len(used_portraits)} default portraits to {portraits_out}")
 
 
 if __name__ == "__main__":

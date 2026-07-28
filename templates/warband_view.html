@@ -8,8 +8,9 @@
 
   <section class="hero">
     <div class="hero-with-portrait">
-      {% if wiz.portrait %}
-        <img class="portrait-lg" src="{{ url_for('portrait_file', relpath=wiz.portrait) }}" alt="{{ wiz.name }}" />
+      {% set wiz_src = portrait_src(wiz.portrait, 'wizard') %}
+      {% if wiz_src %}
+        <img class="portrait-lg" src="{{ wiz_src }}" alt="{{ wiz.name }}" />
       {% endif %}
       <div>
         <h1>{{ wb.name }}</h1>
@@ -246,8 +247,8 @@
       <details class="ref-panel" open>
         <summary>Wizard — {{ wiz.name }} · {{ wiz.school }}</summary>
         <div class="char-block">
-          {% if wiz.portrait %}
-            <img class="portrait-md" src="{{ url_for('portrait_file', relpath=wiz.portrait) }}" alt="" />
+          {% if wiz_src %}
+            <img class="portrait-md" src="{{ wiz_src }}" alt="" />
           {% endif %}
           <div class="char-body">
             <div class="grid-2">
@@ -306,8 +307,9 @@
         <details class="ref-panel" open>
           <summary>Apprentice — {{ ap.name }} · {{ wiz.school }}</summary>
           <div class="char-block">
-            {% if ap.portrait %}
-              <img class="portrait-md" src="{{ url_for('portrait_file', relpath=ap.portrait) }}" alt="" />
+            {% set ap_src = portrait_src(ap.portrait, 'apprentice') %}
+            {% if ap_src %}
+              <img class="portrait-md" src="{{ ap_src }}" alt="" />
             {% else %}
               <span class="portrait-placeholder portrait-md-ph">?</span>
             {% endif %}
@@ -576,8 +578,9 @@
         {% set cap_dismiss_cost = hr.promote_captain_cost if cap.origin == 'promoted' else hr.captain_hiring_cost %}
         {% set cap_eff = captain_effective_stats(cap) %}
         <div class="char-block">
-          {% if cap.portrait %}
-            <img class="portrait-md" src="{{ url_for('portrait_file', relpath=cap.portrait) }}" alt="" />
+          {% set cap_src = portrait_src(cap.portrait, 'soldier', cap.type_key) %}
+          {% if cap_src %}
+            <img class="portrait-md" src="{{ cap_src }}" alt="" />
           {% else %}
             <span class="portrait-placeholder portrait-md-ph">?</span>
           {% endif %}
@@ -810,8 +813,9 @@
                   <input type="radio" name="soldier-select" aria-label="Select {{ s.name }} to reorder" />
                 </td>
                 <td>
-                  {% if s.portrait %}
-                    <img class="portrait-sm" src="{{ url_for('portrait_file', relpath=s.portrait) }}" alt="" />
+                  {% set s_src = portrait_src(s.portrait, 'soldier', s.type_key) %}
+                  {% if s_src %}
+                    <img class="portrait-sm" src="{{ s_src }}" alt="" />
                   {% else %}
                     <span class="portrait-placeholder">?</span>
                   {% endif %}
