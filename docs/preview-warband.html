@@ -71,15 +71,13 @@
           
         </div>
         <div class="section-actions">
-          
-            <a class="btn" href="#" onclick="return false;" title="Not available in this static preview.">Download PDF roster</a>
-          
+          <a class="btn" href="#" onclick="return false;" title="Not available in this static preview.">Download PDF roster</a>
           <a class="btn secondary" href="#" onclick="return false;" title="Not available in this static preview.">Export warband</a>
-          <form class="inline-form" method="post" action="/warband/the-icebound-circle-79394600/duplicate">
+          <form class="inline-form" method="post" action="/warband/the-icebound-circle-415ed4f8/duplicate">
             <button class="btn secondary" type="submit">Duplicate</button>
           </form>
           <a class="btn secondary" href="index.html">All warbands</a>
-          <form class="inline-form" method="post" action="/warband/the-icebound-circle-79394600/delete">
+          <form class="inline-form" method="post" action="/warband/the-icebound-circle-415ed4f8/delete">
             <button class="btn danger" type="submit">Delete</button>
           </form>
         </div>
@@ -95,14 +93,14 @@
       book to make its soldiers available to this warband; the captain / soldier-leveling options below are
       adapted from the FG1E Sellswords supplement — tune these to match your group's own version.
     </p>
-    <form method="post" action="/warband/the-icebound-circle-79394600/update">
+    <form method="post" action="/warband/the-icebound-circle-415ed4f8/update">
       <input type="hidden" name="action" value="update_homerules" />
 
       <details class="ref-panel" open>
         <summary>Source books</summary>
         <p class="muted" style="font-size:0.85rem">
           Switch on the supplements you play with. Enabled books add their mercenaries to the Hire soldier
-          list. Every creature is always browsable on the <a href="/reference">Reference</a> page.
+          list. Every creature is always browsable in the <a href="/reference">Frostgrave Lexicon</a>.
         </p>
         <div class="stat-row">
           
@@ -340,7 +338,7 @@
   <details class="card" id="post-game">
     <summary><h2>After the game — gold &amp; items</h2></summary>
     <p class="muted">Enter treasure gold, XP, and items found so they appear in the treasury and vault.</p>
-    <form method="post" action="/warband/the-icebound-circle-79394600/update">
+    <form method="post" action="/warband/the-icebound-circle-415ed4f8/update">
       <input type="hidden" name="action" value="post_game" />
       <div class="grid-2">
         <div class="form-row">
@@ -373,7 +371,7 @@
   
   <details class="card">
     <summary><h2>Wizard &amp; apprentice</h2></summary>
-    <form method="post" action="/warband/the-icebound-circle-79394600/update" enctype="multipart/form-data">
+    <form method="post" action="/warband/the-icebound-circle-415ed4f8/update" enctype="multipart/form-data">
       <input type="hidden" name="action" value="details" />
       <details class="ref-panel" open>
         <summary>Wizard — Mireille Voss · Elementalist</summary>
@@ -2787,7 +2785,7 @@
         Enter a negative number to remove XP; if that drops below the level you're at, the most
         recent level-up(s) are automatically reversed.
       </p>
-      <form method="post" action="/warband/the-icebound-circle-79394600/update" class="form-row inline">
+      <form method="post" action="/warband/the-icebound-circle-415ed4f8/update" class="form-row inline">
         <input type="hidden" name="action" value="add_xp" />
         <div>
           <label for="xp">Add/remove XP</label>
@@ -2800,7 +2798,7 @@
       </form>
 
       
-        <form method="post" action="/warband/the-icebound-circle-79394600/update" style="margin-top:1rem">
+        <form method="post" action="/warband/the-icebound-circle-415ed4f8/update" style="margin-top:1rem">
           <input type="hidden" name="action" value="level_up" />
           <div class="form-row">
             <label>Choose improvement (1 available)</label>
@@ -3026,7 +3024,7 @@
         </ul>
         <form
           method="post"
-          action="/warband/the-icebound-circle-79394600/update"
+          action="/warband/the-icebound-circle-415ed4f8/update"
           style="margin-top:0.75rem"
         >
           <input type="hidden" name="action" value="reverse_level_up" />
@@ -3040,7 +3038,7 @@
     </details>
 
     
-      <form method="post" action="/warband/the-icebound-circle-79394600/update" class="actions" style="margin-top:0.75rem">
+      <form method="post" action="/warband/the-icebound-circle-415ed4f8/update" class="actions" style="margin-top:0.75rem">
         <input type="hidden" name="action" value="dismiss_apprentice" />
         <label class="checkbox-row" style="margin:0">
           <input type="checkbox" name="refund" /> Refund 100 gc
@@ -3048,176 +3046,6 @@
         <button class="btn danger small" type="submit">Dismiss apprentice</button>
       </form>
     
-  </details>
-
-  <details class="ref-panel card">
-    <summary>Standard arms &amp; armour (open list)</summary>
-    <p class="muted" style="font-size:0.88rem">General Arms and Armour List (2e). Spellcasters may not wear armour or carry shields.</p>
-    <div class="item-list-detail">
-      <div class="item-list-head" aria-hidden="true">
-        <span class="col-name">Item</span>
-        <span class="col-cat">Category</span>
-        <span class="col-summary">Summary</span>
-        <span class="col-info"></span>
-      </div>
-      
-        <div class="item-row">
-          <details class="item-desc">
-            <summary class="item-row-main">
-              <span class="col-name"><strong>Dagger</strong></span>
-              <span class="col-cat"><span class="badge">Weapon</span></span>
-              <span class="col-summary muted">−1 damage. First dagger does not take an item slot.</span>
-              <span class="col-info item-desc-toggle">Info</span>
-            </summary>
-            <p class="item-desc-body">A knife or other small weapon such as a light club. Daggers have a −1 damage modifier. The first dagger carried by a figure does not take up an item slot.</p>
-          </details>
-        </div>
-      
-        <div class="item-row">
-          <details class="item-desc">
-            <summary class="item-row-main">
-              <span class="col-name"><strong>Hand Weapon</strong></span>
-              <span class="col-cat"><span class="badge">Weapon</span></span>
-              <span class="col-summary muted">No combat modifiers. One item slot.</span>
-              <span class="col-info item-desc-toggle">Info</span>
-            </summary>
-            <p class="item-desc-body">Swords, scimitars, hand axes, maces, light spears, etc. No modifiers in combat.</p>
-          </details>
-        </div>
-      
-        <div class="item-row">
-          <details class="item-desc">
-            <summary class="item-row-main">
-              <span class="col-name"><strong>Two-Handed Weapon</strong></span>
-              <span class="col-cat"><span class="badge">Weapon</span></span>
-              <span class="col-summary muted">+2 damage. Takes two item slots.</span>
-              <span class="col-info item-desc-toggle">Info</span>
-            </summary>
-            <p class="item-desc-body">Two-handed swords, battle-axes, polearms, large flails, heavy spears. +2 damage. Takes two item slots.</p>
-          </details>
-        </div>
-      
-        <div class="item-row">
-          <details class="item-desc">
-            <summary class="item-row-main">
-              <span class="col-name"><strong>Staff</strong></span>
-              <span class="col-cat"><span class="badge">Weapon</span></span>
-              <span class="col-summary muted">−1 damage; opponent −1 damage in hand-to-hand.</span>
-              <span class="col-info item-desc-toggle">Info</span>
-            </summary>
-            <p class="item-desc-body">Staffs do −1 damage and give the opponent −1 damage in hand-to-hand. Cannot be combined with a shield.</p>
-          </details>
-        </div>
-      
-        <div class="item-row">
-          <details class="item-desc">
-            <summary class="item-row-main">
-              <span class="col-name"><strong>Bow</strong></span>
-              <span class="col-cat"><span class="badge">Missile</span></span>
-              <span class="col-summary muted">Range 24&#34;. Load and fire as one action. Needs a quiver.</span>
-              <span class="col-info item-desc-toggle">Info</span>
-            </summary>
-            <p class="item-desc-body">Load and fire as a single action. Maximum range 24&#34;. Requires a quiver.</p>
-          </details>
-        </div>
-      
-        <div class="item-row">
-          <details class="item-desc">
-            <summary class="item-row-main">
-              <span class="col-name"><strong>Crossbow</strong></span>
-              <span class="col-cat"><span class="badge">Missile</span></span>
-              <span class="col-summary muted">+2 damage, range 24&#34;. Separate load and fire. Needs a quiver.</span>
-              <span class="col-info item-desc-toggle">Info</span>
-            </summary>
-            <p class="item-desc-body">One action to load and one to fire. +2 damage, range 24&#34;. Requires a quiver.</p>
-          </details>
-        </div>
-      
-        <div class="item-row">
-          <details class="item-desc">
-            <summary class="item-row-main">
-              <span class="col-name"><strong>Quiver</strong></span>
-              <span class="col-cat"><span class="badge">Gear</span></span>
-              <span class="col-summary muted">Required for bow/crossbow. One free magic ammo slot.</span>
-              <span class="col-info item-desc-toggle">Info</span>
-            </summary>
-            <p class="item-desc-body">Required to shoot a bow or crossbow. May carry one magic ammunition without an extra slot.</p>
-          </details>
-        </div>
-      
-        <div class="item-row">
-          <details class="item-desc">
-            <summary class="item-row-main">
-              <span class="col-name"><strong>Shield</strong></span>
-              <span class="col-cat"><span class="badge">Armour</span></span>
-              <span class="col-summary muted">+1 Armour. Not with two-handed weapon or staff. No spellcasters.</span>
-              <span class="col-info item-desc-toggle">Info</span>
-            </summary>
-            <p class="item-desc-body">+1 Armour. Cannot be carried with a two-handed weapon or staff. Spellcasters may not carry shields.</p>
-          </details>
-        </div>
-      
-        <div class="item-row">
-          <details class="item-desc">
-            <summary class="item-row-main">
-              <span class="col-name"><strong>Light Armour</strong></span>
-              <span class="col-cat"><span class="badge">Armour</span></span>
-              <span class="col-summary muted">+1 Armour. No spellcasters.</span>
-              <span class="col-info item-desc-toggle">Info</span>
-            </summary>
-            <p class="item-desc-body">+1 Armour. Spellcasters may not wear light armour.</p>
-          </details>
-        </div>
-      
-        <div class="item-row">
-          <details class="item-desc">
-            <summary class="item-row-main">
-              <span class="col-name"><strong>Heavy Armour</strong></span>
-              <span class="col-cat"><span class="badge">Armour</span></span>
-              <span class="col-summary muted">+2 Armour, −1 Move. No spellcasters.</span>
-              <span class="col-info item-desc-toggle">Info</span>
-            </summary>
-            <p class="item-desc-body">+2 Armour but −1 Move. Spellcasters may not wear heavy armour.</p>
-          </details>
-        </div>
-      
-        <div class="item-row">
-          <details class="item-desc">
-            <summary class="item-row-main">
-              <span class="col-name"><strong>Potion</strong></span>
-              <span class="col-cat"><span class="badge">Consumable</span></span>
-              <span class="col-summary muted">Pick a specific potion in the second field.</span>
-              <span class="col-info item-desc-toggle">Info</span>
-            </summary>
-            <p class="item-desc-body">Potions take one item slot. Choose the specific potion type after selecting this.</p>
-          </details>
-        </div>
-      
-        <div class="item-row">
-          <details class="item-desc">
-            <summary class="item-row-main">
-              <span class="col-name"><strong>Scroll</strong></span>
-              <span class="col-cat"><span class="badge">Consumable</span></span>
-              <span class="col-summary muted">Pick which spell is on the scroll in the second field.</span>
-              <span class="col-info item-desc-toggle">Info</span>
-            </summary>
-            <p class="item-desc-body">One-use spell scroll. Cannot be used to learn a new spell. Sale value typically 30gc.</p>
-          </details>
-        </div>
-      
-        <div class="item-row">
-          <details class="item-desc">
-            <summary class="item-row-main">
-              <span class="col-name"><strong>Grimoire</strong></span>
-              <span class="col-cat"><span class="badge">Consumable</span></span>
-              <span class="col-summary muted">Pick which spell the grimoire teaches in the second field.</span>
-              <span class="col-info item-desc-toggle">Info</span>
-            </summary>
-            <p class="item-desc-body">Used to learn a new spell. After learning, remove from the sheet. Sale 200gc if already known.</p>
-          </details>
-        </div>
-      
-    </div>
   </details>
 
   
@@ -3362,7 +3190,7 @@
           </div>
         
       </div>
-      <form method="post" action="/warband/the-icebound-circle-79394600/update" id="reorder-form" style="margin-top:0.75rem">
+      <form method="post" action="/warband/the-icebound-circle-415ed4f8/update" id="reorder-form" style="margin-top:0.75rem">
         <input type="hidden" name="action" value="reorder_spells" />
         <input type="hidden" name="spell_order" id="view-spell-order" value="Elementalist::Wall|Elementalist::Elemental Bolt|Elementalist::Elemental Shield|Chronomancer::Fast Act|Enchanter::Enchant Weapon|Summoner::Leap|Necromancer::Bone Dart|Thaumaturge::Heal" />
         <div class="actions">
@@ -3423,7 +3251,7 @@
             <span class="portrait-placeholder portrait-md-ph">?</span>
           
           <div class="char-body">
-            <form method="post" action="/warband/the-icebound-circle-79394600/update" enctype="multipart/form-data">
+            <form method="post" action="/warband/the-icebound-circle-415ed4f8/update" enctype="multipart/form-data">
               <input type="hidden" name="action" value="captain_edit" />
               <div class="grid-2">
                 <div class="form-row">
@@ -5111,7 +4939,7 @@
             Enter a negative number to remove XP; if that drops below the level you're at, the
             most recent level-up(s) are automatically reversed.
           </p>
-          <form method="post" action="/warband/the-icebound-circle-79394600/update" class="form-row inline">
+          <form method="post" action="/warband/the-icebound-circle-415ed4f8/update" class="form-row inline">
             <input type="hidden" name="action" value="captain_add_xp" />
             <div>
               <label for="captain_xp_amount">Add/remove XP</label>
@@ -5134,14 +4962,14 @@
                 <li>Level 1: +1 Fight <span class="muted">(latest)</span></li>
               
             </ul>
-            <form method="post" action="/warband/the-icebound-circle-79394600/update" style="margin-top:0.5rem">
+            <form method="post" action="/warband/the-icebound-circle-415ed4f8/update" style="margin-top:0.5rem">
               <input type="hidden" name="action" value="reverse_captain_level_up" />
               <button class="btn danger small" type="submit">Reverse last level-up</button>
             </form>
           
         </details>
 
-        <form method="post" action="/warband/the-icebound-circle-79394600/update" class="actions" style="margin-top:0.75rem">
+        <form method="post" action="/warband/the-icebound-circle-415ed4f8/update" class="actions" style="margin-top:0.75rem">
           <input type="hidden" name="action" value="dismiss_captain" />
           <label class="checkbox-row" style="margin:0">
             <input type="checkbox" name="refund" /> Refund 125 gc
@@ -5183,7 +5011,7 @@
           </thead>
           <tbody id="soldier-order-body">
             
-              <tr class="status-active" data-soldier-id="99443f76d4">
+              <tr class="status-active" data-soldier-id="45e9734308">
                 <td class="muted">1</td>
                 <td>
                   <input type="radio" name="soldier-select" aria-label="Select Garrik to reorder" />
@@ -5208,9 +5036,9 @@
                 <td class="gold">0</td>
                 <td>
                   <div class="stack-sm">
-                    <form method="post" action="/warband/the-icebound-circle-79394600/update">
+                    <form method="post" action="/warband/the-icebound-circle-415ed4f8/update">
                       <input type="hidden" name="action" value="soldier_status" />
-                      <input type="hidden" name="soldier_id" value="99443f76d4" />
+                      <input type="hidden" name="soldier_id" value="45e9734308" />
                       <select name="status" onchange="return false;">
                         
                           <option value="active" selected>active</option>
@@ -5224,9 +5052,9 @@
                     <div class="actions" style="align-items:flex-start;margin-top:0">
                     <details>
                       <summary class="muted" style="cursor:pointer;font-size:0.85rem">Edit / picture</summary>
-                      <form method="post" action="/warband/the-icebound-circle-79394600/update" enctype="multipart/form-data" class="stack-sm" style="margin-top:0.4rem">
+                      <form method="post" action="/warband/the-icebound-circle-415ed4f8/update" enctype="multipart/form-data" class="stack-sm" style="margin-top:0.4rem">
                         <input type="hidden" name="action" value="soldier_edit" />
-                        <input type="hidden" name="soldier_id" value="99443f76d4" />
+                        <input type="hidden" name="soldier_id" value="45e9734308" />
                         <input name="soldier_name" type="text" value="Garrik" />
                         <input name="soldier_portrait" type="file" accept="image/*" />
                         <input name="notes" type="text" value="" placeholder="Notes" />
@@ -5238,9 +5066,9 @@
                       <details>
                         <summary class="muted" style="cursor:pointer;font-size:0.85rem">Level up </summary>
                         <div class="stack-sm" style="margin-top:0.4rem">
-                          <form method="post" action="/warband/the-icebound-circle-79394600/update" class="inline-form">
+                          <form method="post" action="/warband/the-icebound-circle-415ed4f8/update" class="inline-form">
                             <input type="hidden" name="action" value="soldier_add_xp" />
-                            <input type="hidden" name="soldier_id" value="99443f76d4" />
+                            <input type="hidden" name="soldier_id" value="45e9734308" />
                             <input name="amount" type="text" inputmode="numeric" pattern="[+-]?[0-9]+" value="50" style="width:5rem" title="Negative removes XP (reverses a level-up if it drops below the current level)" />
                             <button class="btn secondary small" type="submit">Add/remove XP</button>
                           </form>
@@ -5251,9 +5079,9 @@
                       </details>
                     
                     
-                    <form method="post" action="/warband/the-icebound-circle-79394600/update">
+                    <form method="post" action="/warband/the-icebound-circle-415ed4f8/update">
                       <input type="hidden" name="action" value="remove_soldier" />
-                      <input type="hidden" name="soldier_id" value="99443f76d4" />
+                      <input type="hidden" name="soldier_id" value="45e9734308" />
                       <label class="checkbox-row" style="margin:0;font-size:0.8rem">
                         <input type="checkbox" name="refund" /> refund 0 gc
                       </label>
@@ -5264,7 +5092,7 @@
                 </td>
               </tr>
             
-              <tr class="status-active" data-soldier-id="89540947f6">
+              <tr class="status-active" data-soldier-id="e794aded56">
                 <td class="muted">2</td>
                 <td>
                   <input type="radio" name="soldier-select" aria-label="Select Nissa to reorder" />
@@ -5289,9 +5117,9 @@
                 <td class="gold">0</td>
                 <td>
                   <div class="stack-sm">
-                    <form method="post" action="/warband/the-icebound-circle-79394600/update">
+                    <form method="post" action="/warband/the-icebound-circle-415ed4f8/update">
                       <input type="hidden" name="action" value="soldier_status" />
-                      <input type="hidden" name="soldier_id" value="89540947f6" />
+                      <input type="hidden" name="soldier_id" value="e794aded56" />
                       <select name="status" onchange="return false;">
                         
                           <option value="active" selected>active</option>
@@ -5305,9 +5133,9 @@
                     <div class="actions" style="align-items:flex-start;margin-top:0">
                     <details>
                       <summary class="muted" style="cursor:pointer;font-size:0.85rem">Edit / picture</summary>
-                      <form method="post" action="/warband/the-icebound-circle-79394600/update" enctype="multipart/form-data" class="stack-sm" style="margin-top:0.4rem">
+                      <form method="post" action="/warband/the-icebound-circle-415ed4f8/update" enctype="multipart/form-data" class="stack-sm" style="margin-top:0.4rem">
                         <input type="hidden" name="action" value="soldier_edit" />
-                        <input type="hidden" name="soldier_id" value="89540947f6" />
+                        <input type="hidden" name="soldier_id" value="e794aded56" />
                         <input name="soldier_name" type="text" value="Nissa" />
                         <input name="soldier_portrait" type="file" accept="image/*" />
                         <input name="notes" type="text" value="" placeholder="Notes" />
@@ -5319,9 +5147,9 @@
                       <details>
                         <summary class="muted" style="cursor:pointer;font-size:0.85rem">Level up </summary>
                         <div class="stack-sm" style="margin-top:0.4rem">
-                          <form method="post" action="/warband/the-icebound-circle-79394600/update" class="inline-form">
+                          <form method="post" action="/warband/the-icebound-circle-415ed4f8/update" class="inline-form">
                             <input type="hidden" name="action" value="soldier_add_xp" />
-                            <input type="hidden" name="soldier_id" value="89540947f6" />
+                            <input type="hidden" name="soldier_id" value="e794aded56" />
                             <input name="amount" type="text" inputmode="numeric" pattern="[+-]?[0-9]+" value="50" style="width:5rem" title="Negative removes XP (reverses a level-up if it drops below the current level)" />
                             <button class="btn secondary small" type="submit">Add/remove XP</button>
                           </form>
@@ -5332,9 +5160,9 @@
                       </details>
                     
                     
-                    <form method="post" action="/warband/the-icebound-circle-79394600/update">
+                    <form method="post" action="/warband/the-icebound-circle-415ed4f8/update">
                       <input type="hidden" name="action" value="remove_soldier" />
-                      <input type="hidden" name="soldier_id" value="89540947f6" />
+                      <input type="hidden" name="soldier_id" value="e794aded56" />
                       <label class="checkbox-row" style="margin:0;font-size:0.8rem">
                         <input type="checkbox" name="refund" /> refund 0 gc
                       </label>
@@ -5345,7 +5173,7 @@
                 </td>
               </tr>
             
-              <tr class="status-active" data-soldier-id="a529c08b92">
+              <tr class="status-active" data-soldier-id="b0a7c2436e">
                 <td class="muted">3</td>
                 <td>
                   <input type="radio" name="soldier-select" aria-label="Select Wren to reorder" />
@@ -5370,9 +5198,9 @@
                 <td class="gold">75</td>
                 <td>
                   <div class="stack-sm">
-                    <form method="post" action="/warband/the-icebound-circle-79394600/update">
+                    <form method="post" action="/warband/the-icebound-circle-415ed4f8/update">
                       <input type="hidden" name="action" value="soldier_status" />
-                      <input type="hidden" name="soldier_id" value="a529c08b92" />
+                      <input type="hidden" name="soldier_id" value="b0a7c2436e" />
                       <select name="status" onchange="return false;">
                         
                           <option value="active" selected>active</option>
@@ -5386,9 +5214,9 @@
                     <div class="actions" style="align-items:flex-start;margin-top:0">
                     <details>
                       <summary class="muted" style="cursor:pointer;font-size:0.85rem">Edit / picture</summary>
-                      <form method="post" action="/warband/the-icebound-circle-79394600/update" enctype="multipart/form-data" class="stack-sm" style="margin-top:0.4rem">
+                      <form method="post" action="/warband/the-icebound-circle-415ed4f8/update" enctype="multipart/form-data" class="stack-sm" style="margin-top:0.4rem">
                         <input type="hidden" name="action" value="soldier_edit" />
-                        <input type="hidden" name="soldier_id" value="a529c08b92" />
+                        <input type="hidden" name="soldier_id" value="b0a7c2436e" />
                         <input name="soldier_name" type="text" value="Wren" />
                         <input name="soldier_portrait" type="file" accept="image/*" />
                         <input name="notes" type="text" value="" placeholder="Notes" />
@@ -5400,9 +5228,9 @@
                       <details>
                         <summary class="muted" style="cursor:pointer;font-size:0.85rem">Level up </summary>
                         <div class="stack-sm" style="margin-top:0.4rem">
-                          <form method="post" action="/warband/the-icebound-circle-79394600/update" class="inline-form">
+                          <form method="post" action="/warband/the-icebound-circle-415ed4f8/update" class="inline-form">
                             <input type="hidden" name="action" value="soldier_add_xp" />
-                            <input type="hidden" name="soldier_id" value="a529c08b92" />
+                            <input type="hidden" name="soldier_id" value="b0a7c2436e" />
                             <input name="amount" type="text" inputmode="numeric" pattern="[+-]?[0-9]+" value="50" style="width:5rem" title="Negative removes XP (reverses a level-up if it drops below the current level)" />
                             <button class="btn secondary small" type="submit">Add/remove XP</button>
                           </form>
@@ -5413,9 +5241,9 @@
                       </details>
                     
                     
-                    <form method="post" action="/warband/the-icebound-circle-79394600/update">
+                    <form method="post" action="/warband/the-icebound-circle-415ed4f8/update">
                       <input type="hidden" name="action" value="remove_soldier" />
-                      <input type="hidden" name="soldier_id" value="a529c08b92" />
+                      <input type="hidden" name="soldier_id" value="b0a7c2436e" />
                       <label class="checkbox-row" style="margin:0;font-size:0.8rem">
                         <input type="checkbox" name="refund" /> refund 75 gc
                       </label>
@@ -5429,9 +5257,9 @@
           </tbody>
         </table>
       </div>
-      <form method="post" action="/warband/the-icebound-circle-79394600/update" id="soldier-reorder-form" style="margin-top:0.75rem">
+      <form method="post" action="/warband/the-icebound-circle-415ed4f8/update" id="soldier-reorder-form" style="margin-top:0.75rem">
         <input type="hidden" name="action" value="reorder_soldiers" />
-        <input type="hidden" name="soldier_order" id="view-soldier-order" value="99443f76d4|89540947f6|a529c08b92" />
+        <input type="hidden" name="soldier_order" id="view-soldier-order" value="45e9734308|e794aded56|b0a7c2436e" />
         <div class="actions">
           <button type="button" class="btn secondary small" id="soldier-up">Move selected ↑</button>
           <button type="button" class="btn secondary small" id="soldier-down">Move selected ↓</button>
@@ -5519,7 +5347,7 @@
                 <td>10</td>
                 <td class="muted">Dagger</td>
                 <td>
-                  <form method="post" action="/warband/the-icebound-circle-79394600/update">
+                  <form method="post" action="/warband/the-icebound-circle-415ed4f8/update">
                     <input type="hidden" name="action" value="hire_soldier" />
                     <input type="hidden" name="type_key" value="thief" />
                     <button class="btn small" type="submit" >Hire</button>
@@ -5544,7 +5372,7 @@
                 <td>10</td>
                 <td class="muted">Hand weapon</td>
                 <td>
-                  <form method="post" action="/warband/the-icebound-circle-79394600/update">
+                  <form method="post" action="/warband/the-icebound-circle-415ed4f8/update">
                     <input type="hidden" name="action" value="hire_soldier" />
                     <input type="hidden" name="type_key" value="thug" />
                     <button class="btn small" type="submit" >Hire</button>
@@ -5569,7 +5397,7 @@
                 <td>8</td>
                 <td class="muted">—</td>
                 <td>
-                  <form method="post" action="/warband/the-icebound-circle-79394600/update">
+                  <form method="post" action="/warband/the-icebound-circle-415ed4f8/update">
                     <input type="hidden" name="action" value="hire_soldier" />
                     <input type="hidden" name="type_key" value="war_hound" />
                     <button class="btn small" type="submit" >Hire</button>
@@ -5594,7 +5422,7 @@
                 <td>10</td>
                 <td class="muted">Two-handed weapon, light armour</td>
                 <td>
-                  <form method="post" action="/warband/the-icebound-circle-79394600/update">
+                  <form method="post" action="/warband/the-icebound-circle-415ed4f8/update">
                     <input type="hidden" name="action" value="hire_soldier" />
                     <input type="hidden" name="type_key" value="infantryman" />
                     <button class="btn small" type="submit" >Hire</button>
@@ -5619,7 +5447,7 @@
                 <td>12</td>
                 <td class="muted">Staff, healing potion</td>
                 <td>
-                  <form method="post" action="/warband/the-icebound-circle-79394600/update">
+                  <form method="post" action="/warband/the-icebound-circle-415ed4f8/update">
                     <input type="hidden" name="action" value="hire_soldier" />
                     <input type="hidden" name="type_key" value="apothecary" />
                     <button class="btn small" type="submit" >Hire</button>
@@ -5644,7 +5472,7 @@
                 <td>12</td>
                 <td class="muted">Hand weapon, shield, light armour</td>
                 <td>
-                  <form method="post" action="/warband/the-icebound-circle-79394600/update">
+                  <form method="post" action="/warband/the-icebound-circle-415ed4f8/update">
                     <input type="hidden" name="action" value="hire_soldier" />
                     <input type="hidden" name="type_key" value="man_at_arms" />
                     <button class="btn small" type="submit" >Hire</button>
@@ -5669,7 +5497,7 @@
                 <td>10</td>
                 <td class="muted">Bow, quiver, dagger, light armour</td>
                 <td>
-                  <form method="post" action="/warband/the-icebound-circle-79394600/update">
+                  <form method="post" action="/warband/the-icebound-circle-415ed4f8/update">
                     <input type="hidden" name="action" value="hire_soldier" />
                     <input type="hidden" name="type_key" value="archer" />
                     <button class="btn small" type="submit" >Hire</button>
@@ -5694,7 +5522,7 @@
                 <td>10</td>
                 <td class="muted">Crossbow, quiver, dagger, light armour</td>
                 <td>
-                  <form method="post" action="/warband/the-icebound-circle-79394600/update">
+                  <form method="post" action="/warband/the-icebound-circle-415ed4f8/update">
                     <input type="hidden" name="action" value="hire_soldier" />
                     <input type="hidden" name="type_key" value="crossbowman" />
                     <button class="btn small" type="submit" >Hire</button>
@@ -5719,7 +5547,7 @@
                 <td>12</td>
                 <td class="muted">Staff, bow, quiver, light armour</td>
                 <td>
-                  <form method="post" action="/warband/the-icebound-circle-79394600/update">
+                  <form method="post" action="/warband/the-icebound-circle-415ed4f8/update">
                     <input type="hidden" name="action" value="hire_soldier" />
                     <input type="hidden" name="type_key" value="tracker" />
                     <button class="btn small" type="submit" >Hire</button>
@@ -5744,7 +5572,7 @@
                 <td>12</td>
                 <td class="muted">Hand weapon, dagger, light armour</td>
                 <td>
-                  <form method="post" action="/warband/the-icebound-circle-79394600/update">
+                  <form method="post" action="/warband/the-icebound-circle-415ed4f8/update">
                     <input type="hidden" name="action" value="hire_soldier" />
                     <input type="hidden" name="type_key" value="treasure_hunter" />
                     <button class="btn small" type="submit" >Hire</button>
@@ -5769,7 +5597,7 @@
                 <td>14</td>
                 <td class="muted">Two-handed weapon, dagger</td>
                 <td>
-                  <form method="post" action="/warband/the-icebound-circle-79394600/update">
+                  <form method="post" action="/warband/the-icebound-circle-415ed4f8/update">
                     <input type="hidden" name="action" value="hire_soldier" />
                     <input type="hidden" name="type_key" value="barbarian" />
                     <button class="btn small" type="submit" >Hire</button>
@@ -5794,7 +5622,7 @@
                 <td>12</td>
                 <td class="muted">Hand weapon, dagger, shield, heavy armour</td>
                 <td>
-                  <form method="post" action="/warband/the-icebound-circle-79394600/update">
+                  <form method="post" action="/warband/the-icebound-circle-415ed4f8/update">
                     <input type="hidden" name="action" value="hire_soldier" />
                     <input type="hidden" name="type_key" value="knight" />
                     <button class="btn small" type="submit" >Hire</button>
@@ -5819,7 +5647,7 @@
                 <td>12</td>
                 <td class="muted">Crossbow, quiver, hand weapon, heavy armour</td>
                 <td>
-                  <form method="post" action="/warband/the-icebound-circle-79394600/update">
+                  <form method="post" action="/warband/the-icebound-circle-415ed4f8/update">
                     <input type="hidden" name="action" value="hire_soldier" />
                     <input type="hidden" name="type_key" value="marksman" />
                     <button class="btn small" type="submit" >Hire</button>
@@ -5844,7 +5672,7 @@
                 <td>12</td>
                 <td class="muted">Bow, quiver, hand weapon, light armour</td>
                 <td>
-                  <form method="post" action="/warband/the-icebound-circle-79394600/update">
+                  <form method="post" action="/warband/the-icebound-circle-415ed4f8/update">
                     <input type="hidden" name="action" value="hire_soldier" />
                     <input type="hidden" name="type_key" value="ranger" />
                     <button class="btn small" type="submit" >Hire</button>
@@ -5869,7 +5697,7 @@
                 <td>12</td>
                 <td class="muted">Two-handed weapon, heavy armour</td>
                 <td>
-                  <form method="post" action="/warband/the-icebound-circle-79394600/update">
+                  <form method="post" action="/warband/the-icebound-circle-415ed4f8/update">
                     <input type="hidden" name="action" value="hire_soldier" />
                     <input type="hidden" name="type_key" value="templar" />
                     <button class="btn small" type="submit" >Hire</button>
@@ -5887,7 +5715,7 @@
   <div class="grid-2">
     <details class="card">
       <summary><h2>Treasury <span class="gold">150 gc</span></h2></summary>
-      <form method="post" action="/warband/the-icebound-circle-79394600/update">
+      <form method="post" action="/warband/the-icebound-circle-415ed4f8/update">
         <input type="hidden" name="action" value="adjust_gold" />
         <div class="form-row inline">
           <div>
@@ -5910,9 +5738,9 @@
             <li>
               <strong>Potion of Healing</strong>
               <span class="muted"> — Found in game</span>
-              <form class="inline-form" method="post" action="/warband/the-icebound-circle-79394600/update">
+              <form class="inline-form" method="post" action="/warband/the-icebound-circle-415ed4f8/update">
                 <input type="hidden" name="action" value="remove_vault_item" />
-                <input type="hidden" name="item_id" value="e6a870f8" />
+                <input type="hidden" name="item_id" value="bf4029b8" />
                 <button class="btn danger small" type="submit">×</button>
               </form>
             </li>
@@ -5920,16 +5748,16 @@
             <li>
               <strong>Scroll of Wall</strong>
               <span class="muted"> — Found in game</span>
-              <form class="inline-form" method="post" action="/warband/the-icebound-circle-79394600/update">
+              <form class="inline-form" method="post" action="/warband/the-icebound-circle-415ed4f8/update">
                 <input type="hidden" name="action" value="remove_vault_item" />
-                <input type="hidden" name="item_id" value="c76e5066" />
+                <input type="hidden" name="item_id" value="25609c2c" />
                 <button class="btn danger small" type="submit">×</button>
               </form>
             </li>
           
         </ul>
       
-      <form method="post" action="/warband/the-icebound-circle-79394600/update" style="margin-top:0.75rem">
+      <form method="post" action="/warband/the-icebound-circle-415ed4f8/update" style="margin-top:0.75rem">
         <input type="hidden" name="action" value="add_vault_item" />
         <div class="form-row inline">
           <div>
@@ -5960,7 +5788,7 @@
       <p class="muted" style="margin-top:0.5rem">May keep one extra soldier (can be specialist) who stays at base and cannot be used in a game. Still max 8 soldiers / 4 specialists in play.</p>
     
 
-    <form method="post" action="/warband/the-icebound-circle-79394600/update" style="margin-top:1rem">
+    <form method="post" action="/warband/the-icebound-circle-415ed4f8/update" style="margin-top:1rem">
       <input type="hidden" name="action" value="set_base_location" />
       <div class="form-row">
         <label for="location">Base location</label>
@@ -6033,7 +5861,7 @@
                 <td class="muted">May bring one war hound or wolf (Animal Companion) above normal soldier limit.</td>
                 <td>
                   
-                    <form method="post" action="/warband/the-icebound-circle-79394600/update">
+                    <form method="post" action="/warband/the-icebound-circle-415ed4f8/update">
                       <input type="hidden" name="action" value="buy_base_resource" />
                       <input type="hidden" name="resource" value="kennel" />
                       <button class="btn small gold" type="submit" disabled>Buy</button>
@@ -6049,7 +5877,7 @@
                 <td class="muted">+1 Casting Rolls for Brew Potion.</td>
                 <td>
                   
-                    <form method="post" action="/warband/the-icebound-circle-79394600/update">
+                    <form method="post" action="/warband/the-icebound-circle-415ed4f8/update">
                       <input type="hidden" name="action" value="buy_base_resource" />
                       <input type="hidden" name="resource" value="giant_cauldron" />
                       <button class="btn small gold" type="submit" disabled>Buy</button>
@@ -6065,7 +5893,7 @@
                 <td class="muted">+1 Casting Rolls for Animate Construct and Embed Enchantment.</td>
                 <td>
                   
-                    <form method="post" action="/warband/the-icebound-circle-79394600/update">
+                    <form method="post" action="/warband/the-icebound-circle-415ed4f8/update">
                       <input type="hidden" name="action" value="buy_base_resource" />
                       <input type="hidden" name="resource" value="enchanters_workshop" />
                       <button class="btn small gold" type="submit" disabled>Buy</button>
@@ -6081,7 +5909,7 @@
                 <td class="muted">+1 Casting Rolls for Reveal Secret.</td>
                 <td>
                   
-                    <form method="post" action="/warband/the-icebound-circle-79394600/update">
+                    <form method="post" action="/warband/the-icebound-circle-415ed4f8/update">
                       <input type="hidden" name="action" value="buy_base_resource" />
                       <input type="hidden" name="resource" value="crystal_ball" />
                       <button class="btn small gold" type="submit" disabled>Buy</button>
@@ -6097,7 +5925,7 @@
                 <td class="muted">+1 Casting Rolls for Write Scroll.</td>
                 <td>
                   
-                    <form method="post" action="/warband/the-icebound-circle-79394600/update">
+                    <form method="post" action="/warband/the-icebound-circle-415ed4f8/update">
                       <input type="hidden" name="action" value="buy_base_resource" />
                       <input type="hidden" name="resource" value="scriptorium" />
                       <button class="btn small gold" type="submit" disabled>Buy</button>
@@ -6113,7 +5941,7 @@
                 <td class="muted">Once per game, before rolling, add +5 to an Initiative Roll.</td>
                 <td>
                   
-                    <form method="post" action="/warband/the-icebound-circle-79394600/update">
+                    <form method="post" action="/warband/the-icebound-circle-415ed4f8/update">
                       <input type="hidden" name="action" value="buy_base_resource" />
                       <input type="hidden" name="resource" value="celestial_telescope" />
                       <button class="btn small gold" type="submit" disabled>Buy</button>
@@ -6129,7 +5957,7 @@
                 <td class="muted">Out of Game: attempt Summon Demon then Control Demon; success adds a temporary demon not counting toward max warband size.</td>
                 <td>
                   
-                    <form method="post" action="/warband/the-icebound-circle-79394600/update">
+                    <form method="post" action="/warband/the-icebound-circle-415ed4f8/update">
                       <input type="hidden" name="action" value="buy_base_resource" />
                       <input type="hidden" name="resource" value="summoning_circle" />
                       <button class="btn small gold" type="submit" disabled>Buy</button>
@@ -6145,7 +5973,7 @@
                 <td class="muted">Soldiers hired cost 10gc less.</td>
                 <td>
                   
-                    <form method="post" action="/warband/the-icebound-circle-79394600/update">
+                    <form method="post" action="/warband/the-icebound-circle-415ed4f8/update">
                       <input type="hidden" name="action" value="buy_base_resource" />
                       <input type="hidden" name="resource" value="carrier_pigeons" />
                       <button class="btn small gold" type="submit" >Buy</button>
@@ -6161,7 +5989,7 @@
                 <td class="muted">+1 Casting Rolls for Control Demon cast Out of Game.</td>
                 <td>
                   
-                    <form method="post" action="/warband/the-icebound-circle-79394600/update">
+                    <form method="post" action="/warband/the-icebound-circle-415ed4f8/update">
                       <input type="hidden" name="action" value="buy_base_resource" />
                       <input type="hidden" name="resource" value="arcane_candle" />
                       <button class="btn small gold" type="submit" >Buy</button>
@@ -6177,7 +6005,7 @@
                 <td class="muted">+1 Casting Rolls for Summon Demon cast Out of Game.</td>
                 <td>
                   
-                    <form method="post" action="/warband/the-icebound-circle-79394600/update">
+                    <form method="post" action="/warband/the-icebound-circle-415ed4f8/update">
                       <input type="hidden" name="action" value="buy_base_resource" />
                       <input type="hidden" name="resource" value="summoning_candle" />
                       <button class="btn small gold" type="submit" >Buy</button>
@@ -6193,7 +6021,7 @@
                 <td class="muted">Wizard does not miss a game or pay a fee when Badly Wounded; pays 10gc less for Niggling Injuries.</td>
                 <td>
                   
-                    <form method="post" action="/warband/the-icebound-circle-79394600/update">
+                    <form method="post" action="/warband/the-icebound-circle-415ed4f8/update">
                       <input type="hidden" name="action" value="buy_base_resource" />
                       <input type="hidden" name="resource" value="sarcophagus_of_healing" />
                       <button class="btn small gold" type="submit" disabled>Buy</button>
