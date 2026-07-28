@@ -854,8 +854,16 @@ code {
   justify-self: end;
 }
 
-.spell-option-line > .spell-desc > .spell-desc-body {
-  grid-column: 1 / -1;
+/* The spell description sits OUTSIDE the grid row (a direct child of
+   .spell-option-wrap) so it always spans the full card width. Relying on
+   display:contents to promote a <details>'s <p> into the grid is unreliable
+   (Chromium historically ignores display:contents on <details>), which left
+   the description trapped in the narrow "Info" column — one word per line. */
+.spell-option-wrap > .spell-desc-body {
+  display: none;
+}
+.spell-option-wrap:has(.spell-desc[open]) > .spell-desc-body {
+  display: block;
 }
 
 .spell-option-wrap.disabled,
