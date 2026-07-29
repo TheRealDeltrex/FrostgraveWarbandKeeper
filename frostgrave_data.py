@@ -68,17 +68,31 @@ CAPTAIN_STAT_CAPS = {
     "health": {"limit": 2, "unlimited": False},
 }
 
+# Absolute ceiling on a captain's actual stat value, applied once at hire/
+# promotion time — distinct from CAPTAIN_STAT_CAPS above, which limits how many
+# +1s can be *spent* over subsequent level-ups. A stat already above its limit
+# (e.g. carried over from a promoted soldier's own prior leveling) is never
+# reduced — only further increases (the fixed promotion bonus, then the chosen
+# +1) are blocked once at or over the limit.
+CAPTAIN_STAT_ABSOLUTE_LIMITS = {
+    "move": 7,
+    "fight": 5,
+    "shoot": 4,
+    "will": 6,
+    "health": 20,
+}
+
 # Mind Control resistance flavor note (not simulated), per-warband selectable.
 CAPTAIN_MIND_CONTROL_OPTIONS = ["immune", "resistant", "none"]
 CAPTAIN_MIND_CONTROL_LABELS = {
     "immune": "Immune to Mind Control",
-    "resistant": "Resistant to Mind Control",
-    "none": "None",
+    "resistant": "No tricks while mind controlled",
+    "none": "No bonus",
 }
-CAPTAIN_MIND_CONTROL_DEFAULT = "immune"
+CAPTAIN_MIND_CONTROL_DEFAULT = "none"
 
 # How a warband can get a Captain at all: hiring, promoting an existing soldier,
-# both, or neither (off — the default, like every other homerule here).
+# both, or neither (off).
 CAPTAIN_MODE_OPTIONS = ["off", "hire", "promote", "both"]
 CAPTAIN_MODE_LABELS = {
     "off": "Off (no captain homerule)",
@@ -86,7 +100,7 @@ CAPTAIN_MODE_LABELS = {
     "promote": "Promote only",
     "both": "Hire or promote",
 }
-CAPTAIN_MODE_DEFAULT = "off"
+CAPTAIN_MODE_DEFAULT = "hire"
 
 # "Tricks of the Trade" (FG1E Sellswords supplement, p.20) — purely descriptive,
 # not mechanically simulated (the player applies these at the table, same as
@@ -122,7 +136,7 @@ SOLDIER_STAT_CAPS = {
 
 # --- Promote Captain (homerule, not core 2e) --------------------------------
 # Whether promotion (vs. hiring) is available is governed by CAPTAIN_MODE_* above.
-PROMOTE_CAPTAIN_COST = 150
+PROMOTE_CAPTAIN_COST = 125
 # No automatic across-the-board bonus by default — a promoted captain's gain is
 # the player-chosen +1 instead (promote_captain_bonus_choice_enabled, on by
 # default). Still editable per warband for groups who want a flat package.
@@ -979,9 +993,9 @@ SOLDIERS: dict[str, dict] = {
         "armour": 11,
         "will": 1,
         "health": 12,
-        "gear": "Two daggers, leather armour",
-        "notes": "Once per game, may treat the first initiative roll of 2 as a 1 for the purpose of springing a trap.",
-        "description": "Someone who has survived the city's traps often enough to read the warning signs. Once per game, treats the first initiative roll of 2 as a 1 for the purpose of springing a trap, giving the party one extra chance to avoid it.",
+        "gear": "Hand weapon, dagger, light armour",
+        "notes": "Once per game, may treat the first initiative roll of 1 as a 2 for the purpose of springing a trap.",
+        "description": "Someone who has survived the city's traps often enough to read the warning signs. Once per game, treats the first initiative roll of 1 as a 2 for the purpose of springing a trap, giving the party one extra chance to avoid it.",
     },
     "tunnel_fighter": {
         "name": "Tunnel Fighter",
@@ -1056,7 +1070,7 @@ SOLDIERS: dict[str, dict] = {
         "armour": 11,
         "will": 2,
         "health": 12,
-        "gear": "Two-handed weapon, crossbow, leather armour",
+        "gear": "Two-handed weapon, crossbow, quiver, leather armour",
         "notes": "+1 Fight and +1 damage vs demons. Variable cost: base 100gc (+25gc if the wizard knows Summon Demon/Imp/Possess, +25gc if a Summoner, +50gc if the base has a summoning circle).",
         "description": 'A specialist trained specifically to fight demons, dealing +1 Fight and +1 damage against them. Cost is variable rather than fixed: base 100gc, +25gc if the wizard knows Summon Demon, Imp, or Possess, a further +25gc if the wizard is a Summoner, and +50gc if the base owns a Summoning Circle — the more demon-adjacent the warband already is, the more this specialist costs to bring in.',
     },

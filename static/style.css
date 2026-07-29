@@ -457,6 +457,13 @@ tr.info-desc-row td {
   white-space: normal;
 }
 
+/* Compact roster: hidden by default, revealed by the "Show actions" toggle in
+   the Actions column header (static/js in warband_view.html toggles the class
+   on #roster-table and remembers the choice in localStorage). */
+table#roster-table:not(.show-actions) td.actions-cell > * {
+  display: none;
+}
+
 tr.status-injured {
   background: rgba(224, 160, 78, 0.06);
 }

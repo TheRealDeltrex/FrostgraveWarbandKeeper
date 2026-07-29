@@ -1,0 +1,39 @@
+{# Reusable "rulebook -> item -> power level/spell" cascading loot picker.
+   Shared by the After the Game card (multi-row, composes into a hidden field
+   consumed by post_game) and the Vault's Add item field (single row, autofills
+   the existing free-text item_name input rather than replacing it). #}
+{% macro loot_picker_row(mode, target_id="") %}
+  <div class="loot-picker-row" data-mode="{{ mode }}" {% if target_id %}data-target="{{ target_id }}"{% endif %}>
+    <div class="stat-row">
+      <div class="form-row">
+        <label>Rulebook</label>
+        <select class="loot-book">
+          <option value="">— pick a book —</option>
+          {% for book in loot_picker_books %}
+            <option value="{{ book }}">{{ book }}</option>
+          {% endfor %}
+          <option value="__other__">Other / write-in</option>
+        </select>
+      </div>
+      <div class="form-row loot-item-cell">
+        <label>Item</label>
+        <select class="loot-item" disabled>
+          <option value="">— pick a book first —</option>
+        </select>
+        <input type="text" class="loot-item-text" placeholder="Item name" style="display:none" />
+      </div>
+      <div class="form-row loot-variant-cell" style="display:none">
+        <label class="loot-variant-label">Spell</label>
+        <select class="loot-variant"></select>
+      </div>
+      {% if mode == 'postgame' %}
+        <div class="form-row" style="align-self:flex-end">
+          <button type="button" class="btn small secondary loot-add-row">+ Add another item</button>
+        </div>
+      {% endif %}
+    </div>
+    {% if mode == 'postgame' %}
+      <input type="hidden" name="loot_structured_items" class="loot-composed" value="" />
+    {% endif %}
+  </div>
+{% endmacro %}

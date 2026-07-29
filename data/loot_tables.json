@@ -1,0 +1,574 @@
+{
+  "Core Rules": [
+    {
+      "title": "Treasure Table",
+      "blurb": "One roll per treasure token your warband got off the table. Recovering the central treasure lets you re-roll your first result, but you must accept the second roll. \"Magic Weapon/Armour\", \"Magic Item\" and \"Grimoire\" results are then looked up in Magic items & treasure above.",
+      "rows": [
+        {
+          "name": "1",
+          "text": "50gc"
+        },
+        {
+          "name": "2",
+          "text": "d20 × 10gc"
+        },
+        {
+          "name": "3",
+          "text": "d20 × 20gc"
+        },
+        {
+          "name": "4",
+          "text": "20gc, Potions (3)"
+        },
+        {
+          "name": "5",
+          "text": "40gc, Potions (2)"
+        },
+        {
+          "name": "6",
+          "text": "20gc, Scroll (1)"
+        },
+        {
+          "name": "7",
+          "text": "40gc, Scrolls (2)"
+        },
+        {
+          "name": "8",
+          "text": "Magic Weapon/Armour"
+        },
+        {
+          "name": "9",
+          "text": "20gc, Magic Weapon/Armour"
+        },
+        {
+          "name": "10",
+          "text": "40gc, Magic Weapon/Armour"
+        },
+        {
+          "name": "11",
+          "text": "Magic Item"
+        },
+        {
+          "name": "12",
+          "text": "20gc, Magic Item"
+        },
+        {
+          "name": "13",
+          "text": "40gc, Magic Item"
+        },
+        {
+          "name": "14",
+          "text": "Grimoire"
+        },
+        {
+          "name": "15",
+          "text": "20gc, Grimoire"
+        },
+        {
+          "name": "16",
+          "text": "40gc, Grimoire"
+        },
+        {
+          "name": "17",
+          "text": "60gc, Grimoire"
+        },
+        {
+          "name": "18",
+          "text": "80gc, Grimoire"
+        },
+        {
+          "name": "19",
+          "text": "100gc, Grimoire"
+        },
+        {
+          "name": "20",
+          "text": "120gc, Grimoire"
+        }
+      ]
+    }
+  ],
+  "Forgotten Pacts": [
+    {
+      "title": "Forgotten Pacts Treasure Table",
+      "blurb": "After a game set in The Hallowed, one treasure roll may be exchanged for a roll on this table instead (max once per game unless a scenario says otherwise).",
+      "rows": [
+        {
+          "name": "1",
+          "text": "Shroud of Foresight — 500gc"
+        },
+        {
+          "name": "2",
+          "text": "Ring of Restoration — 300gc"
+        },
+        {
+          "name": "3",
+          "text": "Robes of Faith — 400gc"
+        },
+        {
+          "name": "4",
+          "text": "Spell Shield — 400gc"
+        },
+        {
+          "name": "5",
+          "text": "Giant Slayer Blade — 300gc"
+        },
+        {
+          "name": "6",
+          "text": "Smoke Bomb — 100gc"
+        },
+        {
+          "name": "7",
+          "text": "Null Blade — 250gc"
+        },
+        {
+          "name": "8",
+          "text": "Piercing Stiletto — 300gc"
+        },
+        {
+          "name": "9",
+          "text": "Silver Star Pendant — 350gc"
+        },
+        {
+          "name": "10",
+          "text": "Executioner's Blade — 400gc"
+        },
+        {
+          "name": "11",
+          "text": "Golem Flesh — 200gc"
+        },
+        {
+          "name": "12",
+          "text": "Ring of Focus — 200gc"
+        },
+        {
+          "name": "13",
+          "text": "Ring of Transference — 300gc"
+        },
+        {
+          "name": "14",
+          "text": "Crossbow of Force — 200gc"
+        },
+        {
+          "name": "15",
+          "text": "Trapmaster Gloves — 200gc"
+        },
+        {
+          "name": "16",
+          "text": "Soul Shield Pendant — 300gc"
+        },
+        {
+          "name": "17",
+          "text": "Vampiric Staff — 300gc"
+        },
+        {
+          "name": "18",
+          "text": "True Name — not for sale"
+        },
+        {
+          "name": "19",
+          "text": "Amulet of the Stone Heart — 600gc"
+        },
+        {
+          "name": "20",
+          "text": "Magic Ammunition — roll on the Magic Ammunition Table"
+        }
+      ]
+    },
+    {
+      "title": "Magic Ammunition Table",
+      "blurb": "Rolled when the Treasure Table above gives Magic Ammunition. The finder chooses arrow or crossbow bolt; either way it's a one-use item taking one item slot.",
+      "rows": [
+        {
+          "name": "1–4",
+          "text": "Wraith Arrow — 100gc"
+        },
+        {
+          "name": "5–8",
+          "text": "Arrow of Demon Slaying — 100gc"
+        },
+        {
+          "name": "9–12",
+          "text": "Stunning Arrow — 100gc"
+        },
+        {
+          "name": "13–16",
+          "text": "Arrow of Piercing — 100gc"
+        },
+        {
+          "name": "17–20",
+          "text": "Soulseeker Arrow — 100gc"
+        }
+      ]
+    }
+  ],
+  "Into the Breeding Pits": [
+    {
+      "title": "Breeding Pits Treasure Table",
+      "blurb": "After a game set beneath the city, one treasure roll may be exchanged for a roll on this table instead (max once per game unless a scenario says otherwise).",
+      "rows": [
+        {
+          "name": "1",
+          "text": "The Iron Collar — 400gc"
+        },
+        {
+          "name": "2",
+          "text": "Bear Armour — 250gc"
+        },
+        {
+          "name": "3",
+          "text": "Wand of Mending — 300gc"
+        },
+        {
+          "name": "4",
+          "text": "Flute of Fleeting Images — 200gc"
+        },
+        {
+          "name": "5",
+          "text": "Armour of Elemental Absorption — 400gc"
+        },
+        {
+          "name": "6",
+          "text": "Armour of Righteousness — 600gc"
+        },
+        {
+          "name": "7",
+          "text": "Bottle of Time — 500gc"
+        },
+        {
+          "name": "8",
+          "text": "Gloves of Runecasting — 500gc"
+        },
+        {
+          "name": "9",
+          "text": "Spectral Blade — 400gc"
+        },
+        {
+          "name": "10",
+          "text": "Scroll of Nightmare — 300gc"
+        },
+        {
+          "name": "11",
+          "text": "Book of the Beastcrafter — 500gc"
+        },
+        {
+          "name": "12",
+          "text": "Seeing Stone — 300gc"
+        },
+        {
+          "name": "13",
+          "text": "Mirror of Foresight — 250gc"
+        },
+        {
+          "name": "14",
+          "text": "Circlet of the Time Walker — 600gc"
+        },
+        {
+          "name": "15",
+          "text": "Book of the Bone Binder — 250gc"
+        },
+        {
+          "name": "16",
+          "text": "Staff of Defence — 300gc"
+        },
+        {
+          "name": "17",
+          "text": "Thunderstrike Javelin — 300gc"
+        },
+        {
+          "name": "18–20",
+          "text": "Grimoire — roll on the Breeding Pits Grimoire Table"
+        }
+      ]
+    },
+    {
+      "title": "Breeding Pits Grimoire Table",
+      "blurb": "Rolled when the Treasure Table above gives a Grimoire.",
+      "rows": [
+        {
+          "name": "1–3",
+          "text": "Elemental Lash"
+        },
+        {
+          "name": "4–6",
+          "text": "Deflect"
+        },
+        {
+          "name": "7–9",
+          "text": "Slowfall"
+        },
+        {
+          "name": "10–12",
+          "text": "Flash"
+        },
+        {
+          "name": "13–15",
+          "text": "Capture Incantation"
+        },
+        {
+          "name": "16–18",
+          "text": "Animal Manipulation"
+        },
+        {
+          "name": "19–20",
+          "text": "Animal Mutation"
+        }
+      ]
+    }
+  ],
+  "The Maze of Malcor": [
+    {
+      "title": "Maze of Malcor Treasure Table",
+      "blurb": "After a game set in the Collegium of Artistry, up to two treasure rolls may be exchanged for an equal number of rolls on this table. Each roll also grants one roll on the Scrolls of Lost Magic Table below — one treasure and one scroll per roll. Roll a d20: 1–10 needs a second d10 roll to find the result; 11–20 is a direct result.",
+      "rows": [
+        {
+          "name": "1–10, then 1",
+          "text": "Scroll Case — 150gc"
+        },
+        {
+          "name": "1–10, then 2",
+          "text": "Potion Bag — 150gc"
+        },
+        {
+          "name": "1–10, then 3",
+          "text": "Wand of Casting (10) — 400gc"
+        },
+        {
+          "name": "1–10, then 4",
+          "text": "Firehelm — 400gc"
+        },
+        {
+          "name": "1–10, then 5",
+          "text": "Construct Crossbow — 250gc"
+        },
+        {
+          "name": "1–10, then 6",
+          "text": "Wand of Lost Magic (3) — 400gc"
+        },
+        {
+          "name": "1–10, then 7",
+          "text": "Mind Lock Ring — 500gc"
+        },
+        {
+          "name": "1–10, then 8",
+          "text": "Timelash Ring — 400gc"
+        },
+        {
+          "name": "1–10, then 9",
+          "text": "Miracle Stone — 500gc"
+        },
+        {
+          "name": "1–10, then 10",
+          "text": "Lycanthrope Serum — 400gc"
+        },
+        {
+          "name": "1–10, then 11",
+          "text": "Arrow Magnet — 100gc"
+        },
+        {
+          "name": "1–10, then 12",
+          "text": "Belt of Blade-breaking — 300gc"
+        },
+        {
+          "name": "1–10, then 13",
+          "text": "Gem Hammer — 100gc"
+        },
+        {
+          "name": "1–10, then 14",
+          "text": "Eye of Malcor — 300gc"
+        },
+        {
+          "name": "1–10, then 15",
+          "text": "Invisible Wire — 200gc"
+        },
+        {
+          "name": "1–10, then 16",
+          "text": "Troll Shackles — 500gc"
+        },
+        {
+          "name": "1–10, then 17",
+          "text": "Bearclaw Pendant — 250gc"
+        },
+        {
+          "name": "1–10, then 18",
+          "text": "Ring of Fog Form — 350gc"
+        },
+        {
+          "name": "1–10, then 19",
+          "text": "Boots of Standfirm — 300gc"
+        },
+        {
+          "name": "1–10, then 20",
+          "text": "Sky Gondola — 1000gc"
+        },
+        {
+          "name": "11–20, then 1",
+          "text": "Bloodstone Amulet — 100gc"
+        },
+        {
+          "name": "11–20, then 2",
+          "text": "Sickle of the Crowmaster — 300gc"
+        },
+        {
+          "name": "11–20, then 3",
+          "text": "Construct Varnish — 250gc"
+        },
+        {
+          "name": "11–20, then 4",
+          "text": "Karmic Belt — 250gc"
+        },
+        {
+          "name": "11–20, then 5",
+          "text": "Leash Arrow — 100gc"
+        },
+        {
+          "name": "11–20, then 6",
+          "text": "Bracers of True Flight — 300gc"
+        },
+        {
+          "name": "11–20, then 7",
+          "text": "Black Pipe — 250gc"
+        },
+        {
+          "name": "11–20, then 8",
+          "text": "Sandalwood Brace — 200gc"
+        },
+        {
+          "name": "11–20, then 9",
+          "text": "Gloves of the Paladin — 200gc"
+        },
+        {
+          "name": "11–20, then 10",
+          "text": "Backpack of Hefty Haulage — 300gc"
+        },
+        {
+          "name": "11–20, then 11",
+          "text": "Porter Control Rod — 300gc"
+        },
+        {
+          "name": "11–20, then 12",
+          "text": "Ring Chain — 250gc"
+        },
+        {
+          "name": "11–20, then 13",
+          "text": "Amulet of True Paths — 300gc"
+        },
+        {
+          "name": "11–20, then 14",
+          "text": "Partially Gnawed Grimoire — 300gc"
+        },
+        {
+          "name": "11–20, then 15",
+          "text": "Tookroot (5) — 100gc"
+        },
+        {
+          "name": "11–20, then 16",
+          "text": "Bladed Staff of Fire — 350gc"
+        },
+        {
+          "name": "11–20, then 17",
+          "text": "Book of Murders — 350gc"
+        },
+        {
+          "name": "11–20, then 18",
+          "text": "Flicker Stone — 400gc"
+        },
+        {
+          "name": "11–20, then 19",
+          "text": "Book of Charity — 350gc"
+        },
+        {
+          "name": "11–20, then 20",
+          "text": "Book of the Pentangle — 1000gc"
+        }
+      ]
+    }
+  ],
+  "The Perilous Dark": [
+    {
+      "title": "Perilous Dark Treasure Table",
+      "blurb": "After any Perilous Dark scenario, one roll on the regular Treasure Table may be exchanged for a roll on this table instead. None of these items can be purchased.",
+      "rows": [
+        {
+          "name": "1",
+          "text": "Orb Plinth — 500gc"
+        },
+        {
+          "name": "2",
+          "text": "Bane Weapon — 500gc"
+        },
+        {
+          "name": "3",
+          "text": "Rat Flute — 350gc"
+        },
+        {
+          "name": "4",
+          "text": "Sword of Wounding and Healing — 400gc"
+        },
+        {
+          "name": "5",
+          "text": "Circlet of the Serpent — 250gc"
+        },
+        {
+          "name": "6",
+          "text": "Glitter Gloves — 300gc"
+        },
+        {
+          "name": "7",
+          "text": "Horned Helmet — 300gc"
+        },
+        {
+          "name": "8",
+          "text": "Dancing Blade — 500gc"
+        },
+        {
+          "name": "9",
+          "text": "Vampiric Crossbow — 300gc"
+        },
+        {
+          "name": "10",
+          "text": "Potion of Persistence — 350gc"
+        },
+        {
+          "name": "11",
+          "text": "Mindstone (4) — 250gc"
+        },
+        {
+          "name": "12",
+          "text": "Ground Manaworm Teeth — 300gc"
+        },
+        {
+          "name": "13",
+          "text": "Spellcatcher Glove — 400gc"
+        },
+        {
+          "name": "14",
+          "text": "Whitestar Diamond — 250gc"
+        },
+        {
+          "name": "15",
+          "text": "Ring of Command — 400gc"
+        },
+        {
+          "name": "16",
+          "text": "Nimblewalk Boots — 200gc"
+        },
+        {
+          "name": "17",
+          "text": "Barbarian's Blade — 400gc"
+        },
+        {
+          "name": "18",
+          "text": "Tyco's Magic Block — 150gc"
+        },
+        {
+          "name": "19",
+          "text": "Magic Staff Ring — 300gc"
+        },
+        {
+          "name": "20",
+          "text": "Book of the Werewolf — 500gc"
+        }
+      ]
+    }
+  ]
+}

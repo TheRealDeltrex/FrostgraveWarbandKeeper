@@ -149,6 +149,10 @@
           }
           saveDetailsState();
         }
+        // Exposed so page-specific scripts (e.g. the drag-free reorder
+        // controls on the warband page) can trigger the same scroll/open-card
+        // save before submitting a form programmatically.
+        window.fgSaveViewState = saveViewState;
 
         document.addEventListener(
           "submit",
@@ -172,6 +176,23 @@
             saveViewState();
             el.form.submit();
           }
+        });
+
+        // Whole-form autosave: any field inside a form[data-autosave] submits
+        // the entire form the moment that field changes, so editing a name,
+        // toggling a checkbox, or picking a file saves immediately without a
+        // separate "Save" click. Only plain field-edit forms carry this
+        // attribute — forms for one-shot game actions (hire, promote, level
+        // up, buy/sell, etc.) do not, since those should stay deliberate.
+        document.addEventListener("change", function (e) {
+          var el = e.target;
+          if (!el || !el.form) return;
+          var form = el.form;
+          if (!form.hasAttribute("data-autosave")) return;
+          if (el.hasAttribute("data-autosubmit")) return; // already handled above
+          saveViewState();
+          if (form.requestSubmit) form.requestSubmit();
+          else form.submit();
         });
 
         // Runs immediately (this script is at the end of <body>, so the DOM —
