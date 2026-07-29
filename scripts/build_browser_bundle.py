@@ -88,6 +88,16 @@ def collect() -> dict[str, str]:
     for rel in STATIC_FILES:
         files[rel] = (ROOT / rel).read_text(encoding="utf-8")
 
+    # Empty placeholders, NOT the real image bytes (see PORTRAITS_SRC/PORTRAITS_OUT
+    # above) — warband_store.default_portrait_name() decides whether a character
+    # has default art by checking the file exists on disk (Path.is_file()), so
+    # without a same-named stand-in here that check always fails in Pyodide's
+    # MEMFS and every character would show the "no picture" placeholder instead
+    # of default art, even though the real PNG is right there being served to the
+    # outer page from docs/app/static/portraits/.
+    for png in sorted(PORTRAITS_SRC.glob("*.png")):
+        files[f"static/portraits/{png.name}"] = ""
+
     return files
 
 
