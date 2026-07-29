@@ -570,5 +570,471 @@
         }
       ]
     }
+  ],
+  "The Frostgrave Folio": [
+    {
+      "title": "Hunt for the Golem Treasure Table",
+      "blurb": "Rolled per treasure token recovered during a Hunt for the Golem scenario (or any scenario built around the Granite Golem).",
+      "rows": [
+        {
+          "name": "1–4",
+          "text": "Construct Hammer — 200gc"
+        },
+        {
+          "name": "5–8",
+          "text": "Construct Oil — 300gc"
+        },
+        {
+          "name": "9–12",
+          "text": "Mind Wrench — 250gc"
+        },
+        {
+          "name": "13–16",
+          "text": "Truestroke Chisel — 250gc"
+        },
+        {
+          "name": "17–20",
+          "text": "Book of the Construct — 250gc"
+        }
+      ]
+    },
+    {
+      "title": "Dark Alchemy Treasure Table",
+      "blurb": "Rolled per treasure token recovered during the Dark Alchemy campaign. Scroll / Magic Weapon-Armour / Magic Item / Grimoire results are then looked up on the normal tables; Potion results are rolled on the Lesser Potion Table.",
+      "rows": [
+        {
+          "name": "1",
+          "text": "15gc"
+        },
+        {
+          "name": "2",
+          "text": "20gc"
+        },
+        {
+          "name": "3",
+          "text": "25gc"
+        },
+        {
+          "name": "4",
+          "text": "30gc"
+        },
+        {
+          "name": "5",
+          "text": "40gc"
+        },
+        {
+          "name": "6",
+          "text": "15gc, Potion"
+        },
+        {
+          "name": "7",
+          "text": "25gc, Potion"
+        },
+        {
+          "name": "8",
+          "text": "35gc, Potion"
+        },
+        {
+          "name": "9",
+          "text": "10gc, Scroll"
+        },
+        {
+          "name": "10",
+          "text": "20gc, Scroll"
+        },
+        {
+          "name": "11",
+          "text": "30gc, Scroll"
+        },
+        {
+          "name": "12",
+          "text": "10gc, Potions (2)"
+        },
+        {
+          "name": "13",
+          "text": "20gc, Potions (2)"
+        },
+        {
+          "name": "14",
+          "text": "30gc, Potions (2)"
+        },
+        {
+          "name": "15",
+          "text": "Potions (3)"
+        },
+        {
+          "name": "16",
+          "text": "Magic Weapon/Armour"
+        },
+        {
+          "name": "17",
+          "text": "Magic Item"
+        },
+        {
+          "name": "18",
+          "text": "Grimoire"
+        },
+        {
+          "name": "19",
+          "text": "Grimoire"
+        },
+        {
+          "name": "20",
+          "text": "Grimoire"
+        }
+      ]
+    }
+  ],
+  "Blood Legacy": [
+    {
+      "title": "Blood Legacy Treasure Table",
+      "blurb": "After any scenario in this book where a wizard secured at least one treasure token, trade up to one token for a roll here (or a Black Market Contacts roll, if using that optional rule).",
+      "rows": [
+        {
+          "name": "1",
+          "text": "Misticene Quiver — 350gc"
+        },
+        {
+          "name": "2",
+          "text": "Dancing Dagger — 500gc"
+        },
+        {
+          "name": "3",
+          "text": "Ring of Foresight — 500gc"
+        },
+        {
+          "name": "4",
+          "text": "Planebreaker Hammer — 500gc"
+        },
+        {
+          "name": "5",
+          "text": "Magic Dog Whistle — 300gc"
+        },
+        {
+          "name": "6",
+          "text": "Balancing Staff — 200gc"
+        },
+        {
+          "name": "7",
+          "text": "Shield of the Paladin — 400gc"
+        },
+        {
+          "name": "8",
+          "text": "Ring of Recall — 450gc"
+        },
+        {
+          "name": "9",
+          "text": "Ring Sabre — 550gc"
+        },
+        {
+          "name": "10",
+          "text": "Spitfire Wand — 400gc"
+        },
+        {
+          "name": "11",
+          "text": "Firefairy — 200gc"
+        },
+        {
+          "name": "12",
+          "text": "Living Quill — 400gc"
+        },
+        {
+          "name": "13",
+          "text": "Obliteration Orb — 400gc"
+        },
+        {
+          "name": "14",
+          "text": "Demonic Vessel — 500gc"
+        },
+        {
+          "name": "15",
+          "text": "Shielding Pendant — 300gc"
+        },
+        {
+          "name": "16",
+          "text": "Staff of Radiance — 400gc"
+        },
+        {
+          "name": "17",
+          "text": "Winged Bracelet — 300gc"
+        },
+        {
+          "name": "18",
+          "text": "Two-Headed Wand — 300gc"
+        },
+        {
+          "name": "19",
+          "text": "Falconeye Mask — 300gc"
+        },
+        {
+          "name": "20",
+          "text": "Devouring Skull Ring — 400gc"
+        }
+      ]
+    }
+  ],
+  "Fireheart": [
+    {
+      "title": "Fireheart Treasure Table",
+      "blurb": "After a scenario set within The Construct Palace, trade one normal Treasure Table roll for a roll here (max once per game unless a scenario says otherwise; Black Market rolls may also be spent here). Doubles as the Construct Modification Table for parts, per Chapter One.",
+      "rows": [
+        {
+          "name": "1",
+          "text": "Hammer Talisman — 200gc"
+        },
+        {
+          "name": "2",
+          "text": "Heartsapper — 250gc"
+        },
+        {
+          "name": "3",
+          "text": "Staff of Turmoil — 500gc"
+        },
+        {
+          "name": "4",
+          "text": "Quiver of Free Will — 300gc"
+        },
+        {
+          "name": "5",
+          "text": "Jumping Beans (5) — 200gc"
+        },
+        {
+          "name": "6",
+          "text": "Construct Battery — 360gc"
+        },
+        {
+          "name": "7",
+          "text": "Orb of Mystic Fire — 300gc"
+        },
+        {
+          "name": "8",
+          "text": "Scattershot Comb — 300gc"
+        },
+        {
+          "name": "9",
+          "text": "Endless Tea Flask — 300gc"
+        },
+        {
+          "name": "10",
+          "text": "Invisibility Cloak — 600gc"
+        },
+        {
+          "name": "11",
+          "text": "Sword of Power (1) — 400gc"
+        },
+        {
+          "name": "12",
+          "text": "Construct Key — 450gc"
+        },
+        {
+          "name": "13",
+          "text": "Wallbreaker — 300gc"
+        },
+        {
+          "name": "14",
+          "text": "Bloodfeast Sword — 500gc"
+        },
+        {
+          "name": "15",
+          "text": "Treasure Cloak — 400gc"
+        },
+        {
+          "name": "16",
+          "text": "Thundershaker — 450gc"
+        },
+        {
+          "name": "17",
+          "text": "Necklace of Protection — 300gc"
+        },
+        {
+          "name": "18",
+          "text": "Construct Patch (2) — 150gc"
+        },
+        {
+          "name": "19",
+          "text": "Apotropaic Charm — 300gc"
+        },
+        {
+          "name": "20",
+          "text": "Book of the Construct — 300gc"
+        }
+      ]
+    }
+  ],
+  "The Wildwoods": [
+    {
+      "title": "Wildwoods Treasure Table",
+      "blurb": "Wildwoods games use this table instead of the core rulebook's Treasure Table. \"Xsp\" results grant that many Supply Points — the Wildwoods supply-point economy itself is reference-only in this app (see Expansion rules).",
+      "rows": [
+        {
+          "name": "1",
+          "text": "30gc, 20sp"
+        },
+        {
+          "name": "2",
+          "text": "60gc, d20sp"
+        },
+        {
+          "name": "3",
+          "text": "100gc, 2 Potions"
+        },
+        {
+          "name": "4",
+          "text": "100gc, 2 Scrolls"
+        },
+        {
+          "name": "5",
+          "text": "20gc, d20 × 2sp, Magic Weapon/Armour"
+        },
+        {
+          "name": "6",
+          "text": "20sp, Magic Weapon/Armour"
+        },
+        {
+          "name": "7",
+          "text": "60gc, Magic Weapon/Armour"
+        },
+        {
+          "name": "8",
+          "text": "10sp, Wildwoods Magic Weapon/Armour"
+        },
+        {
+          "name": "9",
+          "text": "60gc, Wildwoods Magic Weapon/Armour"
+        },
+        {
+          "name": "10",
+          "text": "100gc, Wildwoods Magic Weapon/Armour"
+        },
+        {
+          "name": "11",
+          "text": "10sp, Magic Item"
+        },
+        {
+          "name": "12",
+          "text": "60gc, Magic Item"
+        },
+        {
+          "name": "13",
+          "text": "40gc, 20sp, Magic Item"
+        },
+        {
+          "name": "14",
+          "text": "30gc, Wildwoods Magic Item"
+        },
+        {
+          "name": "15",
+          "text": "50gc, Wildwoods Magic Item"
+        },
+        {
+          "name": "16",
+          "text": "75gc, Wildwoods Magic Item"
+        },
+        {
+          "name": "17",
+          "text": "40gc, Grimoire"
+        },
+        {
+          "name": "18",
+          "text": "60gc, Grimoire"
+        },
+        {
+          "name": "19",
+          "text": "80gc, Grimoire"
+        },
+        {
+          "name": "20",
+          "text": "120gc, Grimoire"
+        }
+      ]
+    }
+  ],
+  "Spellcaster Magazine": [
+    {
+      "title": "Rangifer Treasure Table",
+      "blurb": "Used instead of the normal Treasure Table when a Rangifer Shaman's hide (Issue 3 — the Shaman's own hide mechanic is reference-only in this app) recovers treasure tokens.",
+      "rows": [
+        {
+          "name": "1",
+          "text": "30gc"
+        },
+        {
+          "name": "2",
+          "text": "50gc"
+        },
+        {
+          "name": "3",
+          "text": "d20 × 5gc"
+        },
+        {
+          "name": "4",
+          "text": "d20 × 10gc"
+        },
+        {
+          "name": "5",
+          "text": "Potion"
+        },
+        {
+          "name": "6",
+          "text": "Potion"
+        },
+        {
+          "name": "7",
+          "text": "Superior Flint Hand Weapon (+1 Damage) — 80gc"
+        },
+        {
+          "name": "8",
+          "text": "Superior Flint Hand Weapon (+1 Fight) — 120gc"
+        },
+        {
+          "name": "9",
+          "text": "Superior Flint Two-Handed Weapon (+1 Damage) — 80gc"
+        },
+        {
+          "name": "10",
+          "text": "Superior Flint Two-Handed Weapon (+1 Fight) — 120gc"
+        },
+        {
+          "name": "11",
+          "text": "Superior Flint Throwing Spear (+1 Damage) — 80gc"
+        },
+        {
+          "name": "12",
+          "text": "Staff of Power (1) — 200gc"
+        },
+        {
+          "name": "13",
+          "text": "Staff of Power (2) — 350gc"
+        },
+        {
+          "name": "14",
+          "text": "Staff of Power (3) — 500gc"
+        },
+        {
+          "name": "15",
+          "text": "Talisman of Will — 300gc"
+        },
+        {
+          "name": "16",
+          "text": "Amulet of Resistance — 300gc"
+        },
+        {
+          "name": "17",
+          "text": "Blessed Charms — 150gc"
+        },
+        {
+          "name": "18",
+          "text": "Iron Cauldron — 100gc"
+        },
+        {
+          "name": "19",
+          "text": "Crystal Pendant — 150gc"
+        },
+        {
+          "name": "20",
+          "text": "Life Ward — 300gc"
+        }
+      ]
+    }
   ]
 }

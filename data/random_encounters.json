@@ -892,5 +892,1119 @@
         }
       ]
     }
+  ],
+  "Fireheart": [
+    {
+      "title": "Fireheart Random Encounter Table",
+      "blurb": "Designed for the scenarios in this book, or any game set within The Construct Palace or another area with a heavy concentration of constructs.",
+      "rows": [
+        {
+          "name": "1",
+          "text": "Small Construct"
+        },
+        {
+          "name": "2",
+          "text": "Gnawgrubs"
+        },
+        {
+          "name": "3",
+          "text": "Medium Construct"
+        },
+        {
+          "name": "4",
+          "text": "Rat Swarm"
+        },
+        {
+          "name": "5",
+          "text": "Large Construct"
+        },
+        {
+          "name": "6",
+          "text": "White Gorilla"
+        },
+        {
+          "name": "7",
+          "text": "Candle-Jack"
+        },
+        {
+          "name": "8",
+          "text": "Giant Rats (2)"
+        },
+        {
+          "name": "9",
+          "text": "Blade-Dog"
+        },
+        {
+          "name": "10",
+          "text": "Gnawgrubs"
+        },
+        {
+          "name": "11",
+          "text": "Demonic Prison"
+        },
+        {
+          "name": "12",
+          "text": "Minor Demon"
+        },
+        {
+          "name": "13",
+          "text": "Construct of Burden"
+        },
+        {
+          "name": "14",
+          "text": "Imp"
+        },
+        {
+          "name": "15",
+          "text": "Glass Man"
+        },
+        {
+          "name": "16",
+          "text": "Werewolf"
+        },
+        {
+          "name": "17",
+          "text": "Gnawgrubs"
+        },
+        {
+          "name": "18",
+          "text": "Rat Swarm"
+        },
+        {
+          "name": "19",
+          "text": "Wraith"
+        },
+        {
+          "name": "20",
+          "text": "Giant Worm"
+        }
+      ]
+    }
+  ],
+  "The Wildwoods": [
+    {
+      "title": "Forest Random Encounter Table — Level 1 (first roll 1–12)",
+      "blurb": "Wildwoods games use a terrain-specific table instead of the core rulebook's — roll this one when the dominant terrain type on the table is forest. Urban tables still use the core Encounter Tables.",
+      "rows": [
+        {
+          "name": "1",
+          "text": "Boar"
+        },
+        {
+          "name": "2",
+          "text": "Wolf"
+        },
+        {
+          "name": "3",
+          "text": "Clingers (2)"
+        },
+        {
+          "name": "4",
+          "text": "Wolverine"
+        },
+        {
+          "name": "5",
+          "text": "Firekeeper"
+        },
+        {
+          "name": "6",
+          "text": "Moose"
+        },
+        {
+          "name": "7",
+          "text": "Skeleton"
+        },
+        {
+          "name": "8",
+          "text": "Zombie"
+        },
+        {
+          "name": "9",
+          "text": "Boar"
+        },
+        {
+          "name": "10",
+          "text": "Wolverine"
+        },
+        {
+          "name": "11",
+          "text": "Barbarian"
+        },
+        {
+          "name": "12",
+          "text": "Ghoul"
+        },
+        {
+          "name": "13",
+          "text": "Moose"
+        },
+        {
+          "name": "14",
+          "text": "Imp"
+        },
+        {
+          "name": "15",
+          "text": "Petrified Man"
+        },
+        {
+          "name": "16",
+          "text": "Rangifer"
+        },
+        {
+          "name": "17",
+          "text": "Small Construct"
+        },
+        {
+          "name": "18",
+          "text": "Snow Leopard"
+        },
+        {
+          "name": "19",
+          "text": "Bear"
+        },
+        {
+          "name": "20",
+          "text": "Woolly Rhinoceros"
+        }
+      ]
+    },
+    {
+      "title": "Forest Random Encounter Table — Level 2 (first roll 13–18)",
+      "rows": [
+        {
+          "name": "1",
+          "text": "Armoured Skeleton"
+        },
+        {
+          "name": "2",
+          "text": "Clingers (4)"
+        },
+        {
+          "name": "3",
+          "text": "Barbarians (2)"
+        },
+        {
+          "name": "4",
+          "text": "Boar"
+        },
+        {
+          "name": "5",
+          "text": "Moose"
+        },
+        {
+          "name": "6",
+          "text": "Rangifer & Rangifer Hurler"
+        },
+        {
+          "name": "7",
+          "text": "Snow Leopard"
+        },
+        {
+          "name": "8",
+          "text": "White Gorilla"
+        },
+        {
+          "name": "9",
+          "text": "Snow Troll"
+        },
+        {
+          "name": "10",
+          "text": "Rangifer & Rangifer Charger"
+        },
+        {
+          "name": "11",
+          "text": "Prontolis"
+        },
+        {
+          "name": "12",
+          "text": "Minor Demon"
+        },
+        {
+          "name": "13",
+          "text": "Wind Demon"
+        },
+        {
+          "name": "14",
+          "text": "Ice Spiders (2)"
+        },
+        {
+          "name": "15",
+          "text": "Snow Troll"
+        },
+        {
+          "name": "16",
+          "text": "Large Construct"
+        },
+        {
+          "name": "17",
+          "text": "Woolly Rhinoceros"
+        },
+        {
+          "name": "18",
+          "text": "Bear"
+        },
+        {
+          "name": "19",
+          "text": "Foulhorn"
+        },
+        {
+          "name": "20",
+          "text": "Werewolf"
+        }
+      ]
+    },
+    {
+      "title": "Forest Random Encounter Table — Level 3 (first roll 19–20)",
+      "rows": [
+        {
+          "name": "1",
+          "text": "Foulhorn"
+        },
+        {
+          "name": "2",
+          "text": "Rangifer (3)"
+        },
+        {
+          "name": "3",
+          "text": "Giant Snowy Owl"
+        },
+        {
+          "name": "4",
+          "text": "Barbarians (4)"
+        },
+        {
+          "name": "5",
+          "text": "Sabretooth"
+        },
+        {
+          "name": "6",
+          "text": "White Gorilla"
+        },
+        {
+          "name": "7",
+          "text": "Frost Giant"
+        },
+        {
+          "name": "8",
+          "text": "Rangifer (2), Rangifer Chargers (2) & Rangifer Shaman"
+        },
+        {
+          "name": "9",
+          "text": "Snow Trolls (2)"
+        },
+        {
+          "name": "10",
+          "text": "Wind Demon"
+        },
+        {
+          "name": "11",
+          "text": "Frost Giant"
+        },
+        {
+          "name": "12",
+          "text": "Vampire"
+        },
+        {
+          "name": "13",
+          "text": "Barbarians (4)"
+        },
+        {
+          "name": "14",
+          "text": "Wind Demon"
+        },
+        {
+          "name": "15",
+          "text": "Wraith"
+        },
+        {
+          "name": "16",
+          "text": "White Gorillas (2)"
+        },
+        {
+          "name": "17",
+          "text": "Mammut"
+        },
+        {
+          "name": "18",
+          "text": "Giant Worm"
+        },
+        {
+          "name": "19",
+          "text": "Ravenous"
+        },
+        {
+          "name": "20",
+          "text": "Rangifer (2), Rangifer Hurlers (2), Rangifer Chargers (2), Rangifer Shaman"
+        }
+      ]
+    },
+    {
+      "title": "Bog Random Encounter Table — Level 1 (first roll 1–12)",
+      "blurb": "Wildwoods games use a terrain-specific table instead of the core rulebook's — roll this one when the dominant terrain type on the table is bog. Urban tables still use the core Encounter Tables.",
+      "rows": [
+        {
+          "name": "1",
+          "text": "Giant Mosquito"
+        },
+        {
+          "name": "2",
+          "text": "Ice Leech"
+        },
+        {
+          "name": "3",
+          "text": "Bog Man"
+        },
+        {
+          "name": "4",
+          "text": "Boar"
+        },
+        {
+          "name": "5",
+          "text": "Giant Rat"
+        },
+        {
+          "name": "6",
+          "text": "Imp"
+        },
+        {
+          "name": "7",
+          "text": "Skeleton"
+        },
+        {
+          "name": "8",
+          "text": "Zombie"
+        },
+        {
+          "name": "9",
+          "text": "Ice Leeches (2)"
+        },
+        {
+          "name": "10",
+          "text": "Wolf"
+        },
+        {
+          "name": "11",
+          "text": "Bog Man"
+        },
+        {
+          "name": "12",
+          "text": "Giant Mosquitos (2)"
+        },
+        {
+          "name": "13",
+          "text": "Ghoul"
+        },
+        {
+          "name": "14",
+          "text": "Rangifer Hurler"
+        },
+        {
+          "name": "15",
+          "text": "Ice Toad"
+        },
+        {
+          "name": "16",
+          "text": "Firekeeper"
+        },
+        {
+          "name": "17",
+          "text": "Barbarian"
+        },
+        {
+          "name": "18",
+          "text": "Petrified Man"
+        },
+        {
+          "name": "19",
+          "text": "Moose"
+        },
+        {
+          "name": "20",
+          "text": "Prontolis"
+        }
+      ]
+    },
+    {
+      "title": "Bog Random Encounter Table — Level 2 (first roll 13–18)",
+      "rows": [
+        {
+          "name": "1",
+          "text": "Ice Leeches (2)"
+        },
+        {
+          "name": "2",
+          "text": "Rangifer Charger"
+        },
+        {
+          "name": "3",
+          "text": "Barbarians (2)"
+        },
+        {
+          "name": "4",
+          "text": "Giant Mosquitos (4)"
+        },
+        {
+          "name": "5",
+          "text": "Ice Toad"
+        },
+        {
+          "name": "6",
+          "text": "Moose"
+        },
+        {
+          "name": "7",
+          "text": "Bear"
+        },
+        {
+          "name": "8",
+          "text": "Snow Leopard"
+        },
+        {
+          "name": "9",
+          "text": "Prontolis"
+        },
+        {
+          "name": "10",
+          "text": "Snow Leopard"
+        },
+        {
+          "name": "11",
+          "text": "Giant Snowy Owl"
+        },
+        {
+          "name": "12",
+          "text": "Medium Construct"
+        },
+        {
+          "name": "13",
+          "text": "Petrified Men (2)"
+        },
+        {
+          "name": "14",
+          "text": "Moose"
+        },
+        {
+          "name": "15",
+          "text": "Woolly Rhinoceros"
+        },
+        {
+          "name": "16",
+          "text": "Boar (2)"
+        },
+        {
+          "name": "17",
+          "text": "Ice Toads (2)"
+        },
+        {
+          "name": "18",
+          "text": "Prontolis (2)"
+        },
+        {
+          "name": "19",
+          "text": "Snow Troll"
+        },
+        {
+          "name": "20",
+          "text": "Prontolis"
+        }
+      ]
+    },
+    {
+      "title": "Bog Random Encounter Table — Level 3 (first roll 19–20)",
+      "rows": [
+        {
+          "name": "1",
+          "text": "Prontolis"
+        },
+        {
+          "name": "2",
+          "text": "Woolly Rhinoceros (2)"
+        },
+        {
+          "name": "3",
+          "text": "Bear"
+        },
+        {
+          "name": "4",
+          "text": "Prontolis"
+        },
+        {
+          "name": "5",
+          "text": "Werewolf"
+        },
+        {
+          "name": "6",
+          "text": "Moose"
+        },
+        {
+          "name": "7",
+          "text": "Ice Toads (4)"
+        },
+        {
+          "name": "8",
+          "text": "Wind Demon"
+        },
+        {
+          "name": "9",
+          "text": "Snow Trolls (2)"
+        },
+        {
+          "name": "10",
+          "text": "Woolly Rhinoceros"
+        },
+        {
+          "name": "11",
+          "text": "Sabretooth"
+        },
+        {
+          "name": "12",
+          "text": "Giant Snowy Owl"
+        },
+        {
+          "name": "13",
+          "text": "Wraith"
+        },
+        {
+          "name": "14",
+          "text": "Wind Demon"
+        },
+        {
+          "name": "15",
+          "text": "White Gorilla"
+        },
+        {
+          "name": "16",
+          "text": "Ravenous"
+        },
+        {
+          "name": "17",
+          "text": "Frost Giant"
+        },
+        {
+          "name": "18",
+          "text": "Major Demon"
+        },
+        {
+          "name": "19",
+          "text": "Mammut"
+        },
+        {
+          "name": "20",
+          "text": "Giant Worm"
+        }
+      ]
+    },
+    {
+      "title": "Ice Random Encounter Table — Level 1 (first roll 1–12)",
+      "blurb": "Wildwoods games use a terrain-specific table instead of the core rulebook's — roll this one when the dominant terrain type on the table is ice. Urban tables still use the core Encounter Tables.",
+      "rows": [
+        {
+          "name": "1",
+          "text": "Barbarian"
+        },
+        {
+          "name": "2",
+          "text": "Ice Spider"
+        },
+        {
+          "name": "3",
+          "text": "Petrified Man"
+        },
+        {
+          "name": "4",
+          "text": "Clingers (2)"
+        },
+        {
+          "name": "5",
+          "text": "Ice Toad"
+        },
+        {
+          "name": "6",
+          "text": "Firekeeper"
+        },
+        {
+          "name": "7",
+          "text": "Rangifer"
+        },
+        {
+          "name": "8",
+          "text": "Wolf"
+        },
+        {
+          "name": "9",
+          "text": "Small Construct"
+        },
+        {
+          "name": "10",
+          "text": "Imp"
+        },
+        {
+          "name": "11",
+          "text": "Minor Demon"
+        },
+        {
+          "name": "12",
+          "text": "Skeleton"
+        },
+        {
+          "name": "13",
+          "text": "Moose"
+        },
+        {
+          "name": "14",
+          "text": "Zombie"
+        },
+        {
+          "name": "15",
+          "text": "Rangifer Hurler"
+        },
+        {
+          "name": "16",
+          "text": "Medium Construct"
+        },
+        {
+          "name": "17",
+          "text": "Rangifer Hurler"
+        },
+        {
+          "name": "18",
+          "text": "Animated Skull"
+        },
+        {
+          "name": "19",
+          "text": "Ghoul"
+        },
+        {
+          "name": "20",
+          "text": "Woolly Rhinoceros"
+        }
+      ]
+    },
+    {
+      "title": "Ice Random Encounter Table — Level 2 (first roll 13–18)",
+      "rows": [
+        {
+          "name": "1",
+          "text": "Prontolis"
+        },
+        {
+          "name": "2",
+          "text": "Barbarians (2)"
+        },
+        {
+          "name": "3",
+          "text": "Snow Leopard"
+        },
+        {
+          "name": "4",
+          "text": "Woolly Rhinoceros (2)"
+        },
+        {
+          "name": "5",
+          "text": "White Gorilla"
+        },
+        {
+          "name": "6",
+          "text": "Rangifer Hurlers (2)"
+        },
+        {
+          "name": "7",
+          "text": "Firekeepers (2)"
+        },
+        {
+          "name": "8",
+          "text": "Moose"
+        },
+        {
+          "name": "9",
+          "text": "Ice Spiders (2)"
+        },
+        {
+          "name": "10",
+          "text": "Petrified Men (2)"
+        },
+        {
+          "name": "11",
+          "text": "Snow Troll"
+        },
+        {
+          "name": "12",
+          "text": "Prontolis (2)"
+        },
+        {
+          "name": "13",
+          "text": "Large Construct"
+        },
+        {
+          "name": "14",
+          "text": "Werewolf"
+        },
+        {
+          "name": "15",
+          "text": "Giant Snowy Owl"
+        },
+        {
+          "name": "16",
+          "text": "Bear"
+        },
+        {
+          "name": "17",
+          "text": "Wind Demon"
+        },
+        {
+          "name": "18",
+          "text": "Frost Giant"
+        },
+        {
+          "name": "19",
+          "text": "Giant Snowy Owl"
+        },
+        {
+          "name": "20",
+          "text": "Snow Trolls (2)"
+        }
+      ]
+    },
+    {
+      "title": "Ice Random Encounter Table — Level 3 (first roll 19–20)",
+      "rows": [
+        {
+          "name": "1",
+          "text": "Barbarians (4)"
+        },
+        {
+          "name": "2",
+          "text": "Giant Snowy Owl"
+        },
+        {
+          "name": "3",
+          "text": "Vampire"
+        },
+        {
+          "name": "4",
+          "text": "Major Demon"
+        },
+        {
+          "name": "5",
+          "text": "Snow Trolls (2)"
+        },
+        {
+          "name": "6",
+          "text": "Sabretooth"
+        },
+        {
+          "name": "7",
+          "text": "Major Demon & Imps (2)"
+        },
+        {
+          "name": "8",
+          "text": "White Gorillas (2)"
+        },
+        {
+          "name": "9",
+          "text": "Rangifer Hurlers (2) & Rangifer Chargers (2)"
+        },
+        {
+          "name": "10",
+          "text": "Giant Snowy Owls (2)"
+        },
+        {
+          "name": "11",
+          "text": "Ravenous"
+        },
+        {
+          "name": "12",
+          "text": "Mammut"
+        },
+        {
+          "name": "13",
+          "text": "Bears (2)"
+        },
+        {
+          "name": "14",
+          "text": "White Gorillas (2)"
+        },
+        {
+          "name": "15",
+          "text": "Ravenous"
+        },
+        {
+          "name": "16",
+          "text": "Mammut"
+        },
+        {
+          "name": "17",
+          "text": "Wraith"
+        },
+        {
+          "name": "18",
+          "text": "Wind Demon"
+        },
+        {
+          "name": "19",
+          "text": "Frost Giant"
+        },
+        {
+          "name": "20",
+          "text": "Giant Worm"
+        }
+      ]
+    },
+    {
+      "title": "Mountain Random Encounter Table — Level 1 (first roll 1–12)",
+      "blurb": "Wildwoods games use a terrain-specific table instead of the core rulebook's — roll this one when the dominant terrain type on the table is mountain. Urban tables still use the core Encounter Tables.",
+      "rows": [
+        {
+          "name": "1",
+          "text": "Mountain Goat"
+        },
+        {
+          "name": "2",
+          "text": "Clingers (2)"
+        },
+        {
+          "name": "3",
+          "text": "Rangifer"
+        },
+        {
+          "name": "4",
+          "text": "Barbarian"
+        },
+        {
+          "name": "5",
+          "text": "Petrified Man"
+        },
+        {
+          "name": "6",
+          "text": "Firekeeper"
+        },
+        {
+          "name": "7",
+          "text": "Mountain Goats (2)"
+        },
+        {
+          "name": "8",
+          "text": "Wolf"
+        },
+        {
+          "name": "9",
+          "text": "Ice Spider"
+        },
+        {
+          "name": "10",
+          "text": "Barbarian"
+        },
+        {
+          "name": "11",
+          "text": "Ice Toad"
+        },
+        {
+          "name": "12",
+          "text": "Medium Construct"
+        },
+        {
+          "name": "13",
+          "text": "Clingers (3)"
+        },
+        {
+          "name": "14",
+          "text": "Firekeepers (3)"
+        },
+        {
+          "name": "15",
+          "text": "Rangifer Hurler"
+        },
+        {
+          "name": "16",
+          "text": "Imp"
+        },
+        {
+          "name": "17",
+          "text": "Snow Leopard"
+        },
+        {
+          "name": "18",
+          "text": "Woolly Rhinoceros"
+        },
+        {
+          "name": "19",
+          "text": "Bear"
+        },
+        {
+          "name": "20",
+          "text": "Foulhorn"
+        }
+      ]
+    },
+    {
+      "title": "Mountain Random Encounter Table — Level 2 (first roll 13–18)",
+      "rows": [
+        {
+          "name": "1",
+          "text": "Rangifer Hurlers (2)"
+        },
+        {
+          "name": "2",
+          "text": "White Gorilla"
+        },
+        {
+          "name": "3",
+          "text": "Barbarians (2)"
+        },
+        {
+          "name": "4",
+          "text": "Clingers (4)"
+        },
+        {
+          "name": "5",
+          "text": "Petrified Men (2)"
+        },
+        {
+          "name": "6",
+          "text": "Firekeepers (3)"
+        },
+        {
+          "name": "7",
+          "text": "Giant Snowy Owl"
+        },
+        {
+          "name": "8",
+          "text": "Large Construct"
+        },
+        {
+          "name": "9",
+          "text": "Rangifer Hurlers (2) & Rangifer Charger"
+        },
+        {
+          "name": "10",
+          "text": "Minor Demon"
+        },
+        {
+          "name": "11",
+          "text": "Woolly Rhinoceros (2)"
+        },
+        {
+          "name": "12",
+          "text": "Snow Troll"
+        },
+        {
+          "name": "13",
+          "text": "Barbarians (3)"
+        },
+        {
+          "name": "14",
+          "text": "Foulhorn"
+        },
+        {
+          "name": "15",
+          "text": "Clingers (5)"
+        },
+        {
+          "name": "16",
+          "text": "Wind Demon"
+        },
+        {
+          "name": "17",
+          "text": "Giant Snowy Owl"
+        },
+        {
+          "name": "18",
+          "text": "Bears (2)"
+        },
+        {
+          "name": "19",
+          "text": "Firekeepers (5)"
+        },
+        {
+          "name": "20",
+          "text": "Mammut"
+        }
+      ]
+    },
+    {
+      "title": "Mountain Random Encounter Table — Level 3 (first roll 19–20)",
+      "rows": [
+        {
+          "name": "1",
+          "text": "Snow Trolls (2)"
+        },
+        {
+          "name": "2",
+          "text": "Wind Demon"
+        },
+        {
+          "name": "3",
+          "text": "Vampire"
+        },
+        {
+          "name": "4",
+          "text": "Major Demon"
+        },
+        {
+          "name": "5",
+          "text": "Rangifer Hurlers (2) & Rangifer Chargers (2)"
+        },
+        {
+          "name": "6",
+          "text": "Wind Demon"
+        },
+        {
+          "name": "7",
+          "text": "Barbarians (6)"
+        },
+        {
+          "name": "8",
+          "text": "Wraith"
+        },
+        {
+          "name": "9",
+          "text": "Ravenous"
+        },
+        {
+          "name": "10",
+          "text": "Giant Snowy Owl"
+        },
+        {
+          "name": "11",
+          "text": "Minor Demons (3)"
+        },
+        {
+          "name": "12",
+          "text": "Giant Worm"
+        },
+        {
+          "name": "13",
+          "text": "Snow Trolls (2)"
+        },
+        {
+          "name": "14",
+          "text": "Mammut"
+        },
+        {
+          "name": "15",
+          "text": "Ravenous"
+        },
+        {
+          "name": "16",
+          "text": "Frost Giant"
+        },
+        {
+          "name": "17",
+          "text": "Giant Snowy Owl"
+        },
+        {
+          "name": "18",
+          "text": "Frost Giants (2)"
+        },
+        {
+          "name": "19",
+          "text": "Mammut"
+        },
+        {
+          "name": "20",
+          "text": "Rangifer (2), Rangifer Hurlers (2), Rangifer Chargers (2), Rangifer Shaman"
+        }
+      ]
+    }
   ]
 }

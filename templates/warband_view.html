@@ -1269,6 +1269,118 @@
       <p class="empty">No soldiers yet. Thugs and thieves cost 0 gc.</p>
     {% endif %}
 
+    <details class="ref-panel" id="temporary-members-panel" {% if temporary_members %}open{% endif %}>
+      <summary>Temporary members ({{ temporary_members|length }})</summary>
+      <p class="muted" style="font-size:0.85rem">
+        Raised or summoned mid-game (Raise Zombie, Summon Demon) rather than permanently hired — they don't
+        count against the soldier or specialist limit above, and each group (zombie / summoned demon) only
+        allows one member on the table at a time. Hire them from the panel below once your wizard knows the spell.
+      </p>
+      {% if temporary_members %}
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th><th>Type</th><th>Status</th>
+                <th>Move</th><th>Fight</th><th>Shoot</th><th>Armour</th><th>Will</th><th>Health</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for s in temporary_members %}
+                <tr class="status-{{ s.status }}">
+                  <td><strong>{{ s.name }}</strong></td>
+                  <td>{{ s.type_name }}</td>
+                  <td>
+                    <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
+                      <input type="hidden" name="action" value="soldier_status" />
+                      <input type="hidden" name="soldier_id" value="{{ s.id }}" />
+                      <select name="status" data-autosubmit>
+                        {% for st in ['active', 'injured', 'dead'] %}
+                          <option value="{{ st }}" {% if s.status == st %}selected{% endif %}>{{ st }}</option>
+                        {% endfor %}
+                      </select>
+                    </form>
+                  </td>
+                  <td>{{ s.move }}</td>
+                  <td>{{ format_stat(s.fight) }}</td>
+                  <td>{{ format_stat(s.shoot) }}</td>
+                  <td>{{ s.armour }}</td>
+                  <td>{{ format_stat(s.will) }}</td>
+                  <td>{{ s.health }}</td>
+                  <td>
+                    <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" onsubmit="return confirm('Remove {{ s.name }}?');">
+                      <input type="hidden" name="action" value="remove_soldier" />
+                      <input type="hidden" name="soldier_id" value="{{ s.id }}" />
+                      <button class="btn danger small" type="submit">Remove</button>
+                    </form>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="empty">None on the table right now.</p>
+      {% endif %}
+    </details>
+
+    <details class="ref-panel" id="hire-temporary-member-panel">
+      <summary>Hire temporary member</summary>
+      <p class="muted" style="font-size:0.85rem">
+        A temporary member only appears here once your wizard knows the spell that summons it. Free to
+        add (the spell itself is the cost); one raised zombie and one summoned demon at a time.
+      </p>
+      {% if temporary_catalog %}
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Type</th><th>Via spell</th>
+                <th>Move</th><th>Fight</th><th>Shoot</th><th>Armour</th><th>Will</th><th>Health</th>
+                <th></th><th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for c in temporary_catalog %}
+                {% set group_occupied = c.temporary_group in temporary_groups_occupied %}
+                {% set within_soldiers = limits.soldiers < limits.max_soldiers %}
+                <tr class="catalog-row" {% if group_occupied %}style="opacity:0.5"{% endif %}>
+                  <td><strong>{{ c.name }}</strong></td>
+                  <td class="muted"><span class="badge">via {{ c.requires_spell }}</span></td>
+                  <td>{{ c.move }}</td>
+                  <td>{{ format_stat(c.fight) }}</td>
+                  <td>{{ format_stat(c.shoot) }}</td>
+                  <td>{{ c.armour }}</td>
+                  <td>{{ format_stat(c.will) }}</td>
+                  <td>{{ c.health }}</td>
+                  <td>
+                    {% if c.description %}
+                      <details class="info-toggle-details">
+                        <summary class="info-toggle">Info</summary>
+                      </details>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
+                      <input type="hidden" name="action" value="hire_soldier" />
+                      <input type="hidden" name="type_key" value="{{ c.key }}" />
+                      <button class="btn small" type="submit" {% if group_occupied %}disabled title="Only one {{ 'raised zombie' if c.temporary_group == 'zombie' else 'summoned demon' }} at a time."{% endif %}>Hire</button>
+                    </form>
+                  </td>
+                </tr>
+                {% if c.description %}
+                  <tr class="info-desc-row"><td colspan="10">{{ c.description }}</td></tr>
+                {% endif %}
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="empty">Your wizard doesn't know Raise Zombie or Summon Demon yet.</p>
+      {% endif %}
+    </details>
+
     <details class="ref-panel" id="hire-soldier-panel">
       <summary>Hire soldier</summary>
       <p class="muted" style="font-size:0.85rem">

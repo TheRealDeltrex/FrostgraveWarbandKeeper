@@ -271,7 +271,7 @@
  },
  {
   "name": "Ring of Transference",
-  "source": "Forgotten Pacts",
+  "source": "Core Rules",
   "effect": "Transfer own Health to a warband member within 6\"."
  },
  {
@@ -1173,5 +1173,100 @@
   "name": "Warming Blade",
   "source": "The Wildwoods",
   "effect": "Hand/two-handed/staff (fixed); +1 damage; immune to hypothermia and cold-related Will Rolls."
+ },
+ {
+  "name": "Staff of Power (1)",
+  "source": "Core Rules",
+  "effect": "Item of Power: a pool of 1 point that can empower a Casting Roll or Will Roll instead of spending the caster's own Health. Recharges between games."
+ },
+ {
+  "name": "Staff of Power (2)",
+  "source": "Core Rules",
+  "effect": "Item of Power: a pool of 2 points that can empower a Casting Roll or Will Roll instead of spending the caster's own Health. Recharges between games."
+ },
+ {
+  "name": "Staff of Power (3)",
+  "source": "Core Rules",
+  "effect": "Item of Power: a pool of 3 points that can empower a Casting Roll or Will Roll instead of spending the caster's own Health. Recharges between games."
+ },
+ {
+  "name": "Ring of Power (1)",
+  "source": "Core Rules",
+  "effect": "Item of Power: a pool of 1 point that can empower a Casting Roll or Will Roll instead of spending the caster's own Health. Recharges between games."
+ },
+ {
+  "name": "Orb of Power (6)",
+  "source": "Core Rules",
+  "effect": "Item of Power: a one-time pool of 6 points that can empower a Casting Roll or Will Roll instead of spending the caster's own Health. Does not recharge — once drained it's empty and can't be sold."
+ },
+ {
+  "name": "Wand of Power (1)",
+  "source": "Core Rules",
+  "effect": "Item of Power: a pool of 1 point that can empower a Casting Roll or Will Roll instead of spending the caster's own Health. Recharges between games."
+ },
+ {
+  "name": "Staff of Casting",
+  "source": "Core Rules",
+  "effect": "Roll on the Random Spell Table to identify a spell when found; grants +1 to the Casting Roll for that specific spell."
+ },
+ {
+  "name": "Boots of Speed",
+  "source": "Core Rules",
+  "effect": "+1 Move."
+ },
+ {
+  "name": "Ring of Slow Fall",
+  "source": "Core Rules",
+  "effect": "Immune to falling damage, regardless of the distance fallen."
+ },
+ {
+  "name": "Ring of Will",
+  "source": "Core Rules",
+  "effect": "+1 Will."
+ },
+ {
+  "name": "Ring of Teleportation",
+  "source": "Core Rules",
+  "effect": "Once per game, spend an action to teleport up to 8\" anywhere in line of sight (not off the table); cannot be used to move into or out of combat."
+ },
+ {
+  "name": "Gloves of Strength",
+  "source": "Core Rules",
+  "effect": "+1 damage modifier on all successful hand-to-hand attacks."
+ },
+ {
+  "name": "Robes of Arrow Turning",
+  "source": "Core Rules",
+  "effect": "+4 Armour against bow and crossbow attacks."
+ },
+ {
+  "name": "Amulet of Resistance",
+  "source": "Core Rules",
+  "effect": "Once per game, add +4 to a Will Roll to resist a spell; may be used after the die is rolled."
+ },
+ {
+  "name": "Gloves of Casting",
+  "source": "Core Rules",
+  "effect": "Once per game, a spellcaster gains +5 to one Casting Roll; must be declared before the roll is made."
+ },
+ {
+  "name": "Wand of Light",
+  "source": "Core Rules",
+  "effect": "Once per game, roll two dice when attempting to cast a spell and choose which result to use."
+ },
+ {
+  "name": "Horn of Destruction",
+  "source": "Core Rules",
+  "effect": "Once per game, spend an action to blow the horn; treat as a successfully cast Crumble spell."
+ },
+ {
+  "name": "Fate Stone",
+  "source": "Core Rules",
+  "effect": "Once per game, re-roll any one Casting Roll, Stat Roll, Combat Roll, or Shooting Roll."
+ },
+ {
+  "name": "Construct Hammer",
+  "source": "Core Rules",
+  "effect": "Fits a medium/large construct before or after a game; the construct counts as carrying a magic weapon with an additional +1 damage modifier. One per construct."
  }
 ]

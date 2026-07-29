@@ -492,6 +492,11 @@ tr.status-dead {
   border-color: var(--border);
 }
 
+.badge.temporary {
+  border-color: rgba(200, 148, 224, 0.45);
+  color: #c894e0;
+}
+
 .badge.active {
   color: var(--success);
   border-color: rgba(79, 209, 165, 0.4);

@@ -133,8 +133,8 @@
     "category": "Weapon",
     "kind": "simple",
     "source": "Ghost Archipelago",
-    "summary": "A Ghost Archipelago general-equipment class; no core Frostgrave equivalent.",
-    "description": "One of Ghost Archipelago's general equipment classes (alongside Dagger, Hand Weapon, Two-Handed Weapon, Staff, Bow, Crossbow, Unarmed, Shield, Light Armour, Heavy Armour), functioning much like its core-rulebook counterparts. No numeric stats are given in the source material beyond that — Ghost Archipelago is carried for reference only and isn't tracked by this app.",
+    "summary": "8\" shooting attack at -1 damage; -2 damage in hand-to-hand.",
+    "description": "8\" shooting attack at -1 damage; -2 damage in hand-to-hand.",
     "slot_cost": 1
   }
 ]

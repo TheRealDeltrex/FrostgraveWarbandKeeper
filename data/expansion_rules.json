@@ -448,7 +448,7 @@
  ],
  "Grave Mutations": [
   {
-   "title": "The Grave Mutations Table (d1000)",
+   "title": "The Grave Mutations Table (d1000) — 1–100",
    "blurb": "Roll three differently-coloured d10s and read them as hundreds/tens/units (a result of “000” is read as 1000) to get a number 1–1000, then apply the matching permanent mutation below. Meant to be drawn on generically for magical mishaps, mutation events, or campaign mechanics (starting rolls, sorcerer-purchased mutations, quick monster generation). Unless an entry says otherwise, a mutation never grants spellcasting.",
    "rows": [
     {
@@ -850,7 +850,12 @@
     {
      "name": "100. Beak",
      "text": "This figure has a beak instead of a mouth and nose. It is always counted as armed with a dagger."
-    },
+    }
+   ]
+  },
+  {
+   "title": "The Grave Mutations Table (d1000) — 101–200",
+   "rows": [
     {
      "name": "101. Frightening Appearance",
      "text": "Any figure that wishes to move into combat with this figure must first pass a Will Roll (TN6). If it fails, the figure may not move into combat, but may still use the action for another purpose."
@@ -1250,7 +1255,12 @@
     {
      "name": "200. Snake Arms",
      "text": "This figure has snakes for arms. It may not carry any weapons or shields of any type. However, it always counts as armed with a poisonous hand weapon."
-    },
+    }
+   ]
+  },
+  {
+   "title": "The Grave Mutations Table (d1000) — 201–300",
+   "rows": [
     {
      "name": "201. Hole in Chest",
      "text": "This figure has a large hole in its chest. Whenever it rolls a natural \"1\" when rolling against an incoming shooting attack that would hit, that shot passes straight through the hole, causing no damage of any type."
@@ -1650,7 +1660,12 @@
     {
      "name": "300. No Shock Absorption",
      "text": "This figure lacks the means to mitigate damage from a fall. It suffers double damage from falls."
-    },
+    }
+   ]
+  },
+  {
+   "title": "The Grave Mutations Table (d1000) — 301–400",
+   "rows": [
     {
      "name": "301. Motivated by Fear",
      "text": "Whenever this figure uses the \"Run For It\" action it may move 5\" instead of the normal 3\"."
@@ -2050,7 +2065,12 @@
     {
      "name": "400. Incredible Smell",
      "text": "This figure counts as having True Sight with a maximum range of 16\"."
-    },
+    }
+   ]
+  },
+  {
+   "title": "The Grave Mutations Table (d1000) — 401–500",
+   "rows": [
     {
      "name": "401. Double Hump",
      "text": "This figure has two large humps like a camel. Before each game, this figure can drink one or two potions and store them in its humps. The figure may consume either potion to gain its effect whenever it activates without spending an action. If not consumed, these potions can be stored in the hump between games."
@@ -2450,7 +2470,12 @@
     {
      "name": "500. Electrically Powered",
      "text": "This figure has electricity running through its veins. Any figure that causes damage to this figure in melee combat immediately suffers a +1 elemental magic attack (increase to +2 if it is wearing heavy armour)."
-    },
+    }
+   ]
+  },
+  {
+   "title": "The Grave Mutations Table (d1000) — 501–600",
+   "rows": [
     {
      "name": "501. Web Spinner",
      "text": "Twice per game, this figure may spend an action to create a web. This web can be up to 6\" long, must be anchored at both ends on terrain and some portion of the web must be adjacent to the figure. The web does not block line of sight; however, no figure may move through or climb over a web. The web can be destroyed by a melee attack, or a shooting attack that covers an area. Treat the web as having Fight +0, Armour 14, Health 1. Unless destroyed, the web remains until the end of the game."
@@ -2850,7 +2875,12 @@
     {
      "name": "600. Limited Teleportation",
      "text": "Once per game, this figure may spend an action to teleport anywhere within 6\" and line of sight. This action can replace a move action and can be done while in combat."
-    },
+    }
+   ]
+  },
+  {
+   "title": "The Grave Mutations Table (d1000) — 601–700",
+   "rows": [
     {
      "name": "601. Covered in Quills",
      "text": "Most of this figure's body is covered in quills or spines. It cannot wear any type of Armour. Whenever a figure in melee combat with this figure rolls a natural \"1 - 5\" on its Combat Roll, it suffers 2 points of damage in addition to whatever damage it takes if it loses the combat."
@@ -3250,7 +3280,12 @@
     {
      "name": "700. Four Arms/No Legs",
      "text": "This figure has four arms, but no legs. It suffers -2 Move but gains the Expert Climber trait."
-    },
+    }
+   ]
+  },
+  {
+   "title": "The Grave Mutations Table (d1000) — 701–800",
+   "rows": [
     {
      "name": "701. Demonic Oubliette",
      "text": "Any time a demon moves into contact with this figure, or activates while in contact with this figure, it must make a Will Roll (TN16) or be imprisoned within the figure. This figure may only imprison one demon at a time, so if it already has one imprisoned, this rule does not apply. A figure may release a demon at any time by spending an action and must place that demon within 3\". Alternatively, the demon can be released after the game in which case it runs off."
@@ -3650,7 +3685,12 @@
     {
      "name": "800. Soul Bargain",
      "text": "The first time this figure rolls a \"Dead\" result on the Survival Table, it may treat the roll as \"Full Recovery\" instead, but it immediately gains the Demon trait."
-    },
+    }
+   ]
+  },
+  {
+   "title": "The Grave Mutations Table (d1000) — 801–900",
+   "rows": [
     {
      "name": "801. Mystic Sinkhole",
      "text": "All figures within 2\" of this figure suffer -2 to all Casting Rolls."
@@ -4050,7 +4090,12 @@
     {
      "name": "900. Self-Reanimation",
      "text": "The first time this figure rolls a \"Dead\" result on the survival table, it may treat the roll as \"Full Recovery\" instead, and the figure gains the Undead trait. The next time the figure rolls a \"Dead\" result, it is actually dead."
-    },
+    }
+   ]
+  },
+  {
+   "title": "The Grave Mutations Table (d1000) — 901–1000",
+   "rows": [
     {
      "name": "901. Uncontrollable Push",
      "text": "If the controlling player ever rolls a natural \"1\" for their Initiative Roll, this figure immediately makes a \"Push\" attack (as per the spell) at the closest figure, friend or foe, even if the figure is in combat. This does not apply on the first turn of the game."
