@@ -1,5 +1,205 @@
 [
  {
+  "name": "Balancing Staff",
+  "source": "Blood Legacy",
+  "effect": "+8 to Move Stat Rolls."
+ },
+ {
+  "name": "Dancing Dagger",
+  "source": "Blood Legacy",
+  "effect": "+1 damage; doesn't use a dagger-carrying soldier's item slot."
+ },
+ {
+  "name": "Demonic Vessel",
+  "source": "Blood Legacy",
+  "effect": "Activated (action) to mark a spot; a demon activating/moving within 3\" rolls Will TN14 or is imprisoned (killed for scenario purposes), consuming the vessel."
+ },
+ {
+  "name": "Devouring Skull Ring",
+  "source": "Blood Legacy",
+  "effect": "No self-damage from successfully casting Spelleater."
+ },
+ {
+  "name": "Falconeye Mask",
+  "source": "Blood Legacy",
+  "effect": "+1 damage on bow/crossbow/javelin attacks; -3 Combat Roll vs. shooting attacks."
+ },
+ {
+  "name": "Firefairy",
+  "source": "Blood Legacy",
+  "effect": "One-use: destroys an enemy's scroll (and its attempted spell) in line of sight."
+ },
+ {
+  "name": "Living Quill",
+  "source": "Blood Legacy",
+  "effect": "Casting Furious Quill may instead animate it as an Animated Skull-statted Construct; once/game; risk of destruction if reduced to 0 Health."
+ },
+ {
+  "name": "Magic Dog Whistle",
+  "source": "Blood Legacy",
+  "effect": "Lets an apprentice/wizard activate a warhound/wolf within 12\" without line of sight/range limits; or lets a soldier group-activate with one."
+ },
+ {
+  "name": "Misticene Quiver",
+  "source": "Blood Legacy",
+  "effect": "Bow/crossbow attacks count as magic; a natural 1 empties it for the game."
+ },
+ {
+  "name": "Obliteration Orb",
+  "source": "Blood Legacy",
+  "effect": "Once/game, cast Destructive Sphere while in combat; natural 1 destroys the orb and hits the caster with +5 elemental. May be affixed to a staff for 300gc (no item slot; staff destroyed if orb is)."
+ },
+ {
+  "name": "Planebreaker Hammer",
+  "source": "Blood Legacy",
+  "effect": "+1 damage (hand or two-handed, chosen on find); +1 Fight vs. demons; damaging a demon forces a Will TN6 (penalized by damage dealt) or it's banished (auto-success at Will+10)."
+ },
+ {
+  "name": "Ring of Foresight",
+  "source": "Blood Legacy",
+  "effect": "Spellcaster only; once/scenario, +8 to an Initiative Roll (comparison only, not trigger effects)."
+ },
+ {
+  "name": "Ring of Recall",
+  "source": "Blood Legacy",
+  "effect": "Action (even in combat) to leave the table safely with any carried treasure dropped in place; 16+ on a die destroys it after use."
+ },
+ {
+  "name": "Ring Sabre",
+  "source": "Blood Legacy",
+  "effect": "+1 Fight hand weapon with a ring socket, letting the wielder carry a 2nd copy of that ring type."
+ },
+ {
+  "name": "Shield of the Paladin",
+  "source": "Blood Legacy",
+  "effect": "+2 Will resisting/breaking spells; regains 1 Health whenever targeted by a non-shooting spell."
+ },
+ {
+  "name": "Shielding Pendant",
+  "source": "Blood Legacy",
+  "effect": "Lets Elemental Shield be cast on the wearer despite being \"Self Only,\" within 12\"/LoS of the caster."
+ },
+ {
+  "name": "Spitfire Wand",
+  "source": "Blood Legacy",
+  "effect": "Spellcaster-only +1 elemental shooting attack at 16\"; also grants Elemental Resistance (1)."
+ },
+ {
+  "name": "Staff of Radiance",
+  "source": "Blood Legacy",
+  "effect": "+1 damage; Destroy Undead can hit 2 adjacent undead instead of one."
+ },
+ {
+  "name": "Two-Headed Wand",
+  "source": "Blood Legacy",
+  "effect": "Casts Transpose between two figures in LoS of the caster and within 16\" of each other."
+ },
+ {
+  "name": "Winged Bracelet",
+  "source": "Blood Legacy",
+  "effect": "An Imp gained from Summon Demon also gains Flying."
+ },
+ {
+  "name": "Apotropaic Charm",
+  "source": "Fireheart",
+  "effect": "Immune to Curse spells."
+ },
+ {
+  "name": "Bloodfeast Sword",
+  "source": "Fireheart",
+  "effect": "+1 Fight/+1 Will (hand or two-handed, fixed on find); -2 Will (cumulative) each time it kills."
+ },
+ {
+  "name": "Book of the Construct",
+  "source": "Fireheart",
+  "effect": "Teaches Animate Construct to build one specific pre-modified bestiary construct type (rolled on a sub-table: Blade-Dog, Glass Man, Candle-Jack, Demonic Prison, Construct of Burden); no size penalty."
+ },
+ {
+  "name": "Construct Battery",
+  "source": "Fireheart",
+  "effect": "6 power points spendable on any Animate Construct casting, like empowering with Health; non-renewable."
+ },
+ {
+  "name": "Construct Key",
+  "source": "Fireheart",
+  "effect": "Spellcaster-only; +4 to Control Construct within 4\"."
+ },
+ {
+  "name": "Construct Patch (2)",
+  "source": "Fireheart",
+  "effect": "Action to heal an adjacent friendly construct up to 6 Health; comes as 2 uses."
+ },
+ {
+  "name": "Endless Tea Flask",
+  "source": "Fireheart",
+  "effect": "Action to heal 1 + grant +2 Will until next activation; once per activation."
+ },
+ {
+  "name": "Hammer Talisman",
+  "source": "Fireheart",
+  "effect": "Lets Elemental Hammer target an unarmed construct."
+ },
+ {
+  "name": "Heartsapper",
+  "source": "Fireheart",
+  "effect": "All constructs within 3\" suffer -1 Move/Fight/Will, -2 melee damage (non-stacking)."
+ },
+ {
+  "name": "Invisibility Cloak",
+  "source": "Fireheart",
+  "effect": "Once/game, free-action Invisibility on self, auto-cancelled next activation."
+ },
+ {
+  "name": "Jumping Beans (5)",
+  "source": "Fireheart",
+  "effect": "Free-action bean grants a jump-based move (halved carrying treasure); no fall damage if it reaches the ground; unusable by constructs/undead/animals/demons."
+ },
+ {
+  "name": "Necklace of Protection",
+  "source": "Fireheart",
+  "effect": "Once/game, action to create Circle of Protection; 1–7 cancels it each subsequent turn (no roll turn one)."
+ },
+ {
+  "name": "Orb of Mystic Fire",
+  "source": "Fireheart",
+  "effect": "Once/game, throw 8\" as a +3 elemental attack, leaving a Magical Fire token at impact."
+ },
+ {
+  "name": "Quiver of Free Will",
+  "source": "Fireheart",
+  "effect": "Damaging a controlled (temporary) figure cancels the control spell on it."
+ },
+ {
+  "name": "Scattershot Comb",
+  "source": "Fireheart",
+  "effect": "One-use Scattershot effect for a non-spellcaster."
+ },
+ {
+  "name": "Staff of Turmoil",
+  "source": "Fireheart",
+  "effect": "Spellcaster: +1 Casting Roll at the cost of -1 Will (cumulative) and 1 damage on a failed cast; stops working once Will is negative."
+ },
+ {
+  "name": "Sword of Power (1)",
+  "source": "Fireheart",
+  "effect": "+1 damage hand weapon carrying 1 power point."
+ },
+ {
+  "name": "Thundershaker",
+  "source": "Fireheart",
+  "effect": "Once/game: activates -1 to all missile attacks for the rest of the game (non-stacking with Call Storm), then optionally +1 elemental shooting at 8\" (natural 1 backfires for 5/8 damage)."
+ },
+ {
+  "name": "Treasure Cloak",
+  "source": "Fireheart",
+  "effect": "Once/scenario: secures a carried treasure token at the table edge while the wearer stays on table."
+ },
+ {
+  "name": "Wallbreaker",
+  "source": "Fireheart",
+  "effect": "Once/game: walks straight through and removes a Wall spell."
+ },
+ {
   "name": "Amulet of Constancy",
   "source": "Forgotten Pacts",
   "effect": "Immune to Decaying Touch/Time Decay/Decay spell; +1 vs Petrify & Slow; costs the wearer experience."
@@ -220,6 +420,121 @@
   "effect": "Lets Heal be cast as a 12\" Line of Sight spell."
  },
  {
+  "name": "Amulet of Repelling",
+  "source": "Spellcaster Magazine",
+  "effect": "Once/game, In Combat: action forces a Will Roll TN18 on one opponent or they're pushed back 1\"; wearer exits combat."
+ },
+ {
+  "name": "Arrow of Crumbling",
+  "source": "Spellcaster Magazine",
+  "effect": "Targets a spot; Shoot Roll TN10. Success treats the terrain as hit by Crumble."
+ },
+ {
+  "name": "Arrow of Force",
+  "source": "Spellcaster Magazine",
+  "effect": "On a hit (damage or not), target is moved 10\" directly away; stops at terrain over ½\" tall."
+ },
+ {
+  "name": "Arrow of Undead Slaying",
+  "source": "Spellcaster Magazine",
+  "effect": "Any damage against an undead creature instantly reduces it to 0 Health."
+ },
+ {
+  "name": "Blessed Charms",
+  "source": "Spellcaster Magazine",
+  "effect": "Worn on antlers, no item slot; +1 Fight vs. demons and can harm demons immune to non-magic weapons."
+ },
+ {
+  "name": "Crystal Pendant",
+  "source": "Spellcaster Magazine",
+  "effect": "Wearer can see invisible creatures."
+ },
+ {
+  "name": "Deafening Crossbow",
+  "source": "Spellcaster Magazine",
+  "effect": "On firing, all within 6\" of the shooter (not the shooter) make a Will Roll TN13 or take 2 damage."
+ },
+ {
+  "name": "Dreadstone of the Fallen Mind",
+  "source": "Spellcaster Magazine",
+  "effect": "Wizard/apprentice only; opposed Will Rolls vs. a target — win and the target can't approach the bearer for the rest of the game."
+ },
+ {
+  "name": "Earthquake Staff",
+  "source": "Spellcaster Magazine",
+  "effect": "Once/game action: +3 attack to everyone within 8\"; anyone within 4\" that's damaged is also knocked down."
+ },
+ {
+  "name": "Explosive Arrow",
+  "source": "Spellcaster Magazine",
+  "effect": "Targets a spot; Shoot Roll TN10. Success treats the spot as a successful Grenade."
+ },
+ {
+  "name": "Giantsbane Weapon",
+  "source": "Spellcaster Magazine",
+  "effect": "Hand weapon; +3 Fight vs. giants."
+ },
+ {
+  "name": "Giantslayer Weapon",
+  "source": "Spellcaster Magazine",
+  "effect": "Two-handed weapon; +6 damage vs. frost giants."
+ },
+ {
+  "name": "Ice Staff",
+  "source": "Spellcaster Magazine",
+  "effect": "Wizard/apprentice only; action creates a 3\"-diameter ice circle that punishes movement in/out with a Move Roll or 2 damage."
+ },
+ {
+  "name": "Iron Cauldron",
+  "source": "Spellcaster Magazine",
+  "effect": "+1 to a shaman's Casting Roll when casting Fire Spice."
+ },
+ {
+  "name": "Life Ward",
+  "source": "Spellcaster Magazine",
+  "effect": "Wearer is immune to Strike Dead."
+ },
+ {
+  "name": "Potion of Regeneration",
+  "source": "Spellcaster Magazine",
+  "effect": "200gc. Bought and used in contact with a Healing Well: revives a fallen warband member, placed adjacent, inactive that turn, with a permanent -2 Health penalty (cumulative). Still counts as \"dead\" for the post-game survival roll, but that roll may be rerolled once (must keep the second result)."
+ },
+ {
+  "name": "Quiver of Giant Hunter Arrows",
+  "source": "Spellcaster Magazine",
+  "effect": "+3 Shoot vs. frost giant targets."
+ },
+ {
+  "name": "Quiver of the Huntress",
+  "source": "Spellcaster Magazine",
+  "effect": "Holds up to ten magic arrows plus unlimited mundane ones; counts as a single item."
+ },
+ {
+  "name": "Superior Flint Weapons",
+  "source": "Spellcaster Magazine",
+  "effect": "Bonus as normal, but only shatter on a natural 1 if the opponent also rolled 16+."
+ },
+ {
+  "name": "Talisman of Will",
+  "source": "Spellcaster Magazine",
+  "effect": "Treat as a Ring of Will."
+ },
+ {
+  "name": "Wand of Fireballs",
+  "source": "Spellcaster Magazine",
+  "effect": "Spellcaster only; casts Elemental Bolt (CV5) ignoring giant elemental resistance. Useless after 5 uses."
+ },
+ {
+  "name": "Wandering Stones",
+  "source": "Spellcaster Magazine",
+  "effect": "Paired items; once/game, swap places with the other stone's bearer (treasure carriers teleport randomly instead)."
+ },
+ {
+  "name": "Webcaster Arrow",
+  "source": "Spellcaster Magazine",
+  "effect": "On a hit, wraps target in sticky goo — next activation needs a Fight Roll TN18 or it gets no actions."
+ },
+ {
   "name": "Amulet of the Ghoul King",
   "source": "Thaw of the Lich Lord",
   "effect": "Scenario-unique; +1 Will, +2 casting Control Undead on ghouls, Raise Zombie can produce a ghoul instead."
@@ -323,6 +638,46 @@
   "name": "Wraithbottle",
   "source": "Thaw of the Lich Lord",
   "effect": "Thrown 10\"; releases a wraith on impact (one-use)."
+ },
+ {
+  "name": "Book of the Construct",
+  "source": "The Frostgrave Folio",
+  "effect": "Lets a wizard cast Enchant Weapon on a construct as if it were a carried weapon (not embeddable). Vault-storable."
+ },
+ {
+  "name": "Construct Hammer",
+  "source": "The Frostgrave Folio",
+  "effect": "Fits a medium/large construct after a successful Animate Construct; the construct counts as wielding a magic two-handed weapon. One per construct."
+ },
+ {
+  "name": "Construct Oil",
+  "source": "The Frostgrave Folio",
+  "effect": "Applied after a successful Animate Construct for a permanent +1 Move; 3 applications per barrel, one per construct."
+ },
+ {
+  "name": "Mind Wrench",
+  "source": "The Frostgrave Folio",
+  "effect": "+1 to cast Control Construct."
+ },
+ {
+  "name": "Script of the Golem",
+  "source": "The Frostgrave Folio",
+  "effect": "Every successful Animate Construct produces a construct with +2 Health. Vault-storable, wizard-only."
+ },
+ {
+  "name": "Scroll of Shape Starfire Elemental",
+  "source": "The Frostgrave Folio",
+  "effect": "Contains the lost Astromancer spell above. 300gc."
+ },
+ {
+  "name": "The Book of Null",
+  "source": "The Frostgrave Folio",
+  "effect": "After each game, roll a die: on a 1 the wizard temporarily forgets a random known spell for the next game; otherwise +10 experience. Only one copy possible; never tradeable."
+ },
+ {
+  "name": "Truestroke Chisel",
+  "source": "The Frostgrave Folio",
+  "effect": "+1 to cast Animate Construct; vault-storable; max +1 regardless of copies owned."
  },
  {
   "name": "Amulet of True Paths",
@@ -640,203 +995,183 @@
   "effect": "One-use; treat any Will roll as the minimum needed to succeed (or as a 16 with no Target Number), then it's destroyed."
  },
  {
-  "name": "Amulet of Resistance",
-  "source": "Core Rules",
-  "effect": "Once per game, +4 to a Will Roll to resist a spell; the decision can be made after the die is rolled."
+  "name": "Animal Mind Leash",
+  "source": "The Wildwoods",
+  "effect": "Winning a fight vs. an uncontrolled animal (Fight/Will <+5) lets it join the warband temporarily; once/game."
  },
  {
-  "name": "Boots of Speed",
-  "source": "Core Rules",
-  "effect": "+1 Move."
+  "name": "Animal Whistle",
+  "source": "The Wildwoods",
+  "effect": "Action: animals within 12\" roll Will TN16 or flee 6\" (natural 20 charges instead + immunity for the game); once/turn."
  },
  {
-  "name": "Construct Hammer",
-  "source": "Core Rules",
-  "effect": "Fitted to a medium or large construct; counts as carrying a magic weapon with +1 damage modifier. A construct may only ever be fitted with one."
+  "name": "Bag of Snacks",
+  "source": "The Wildwoods",
+  "effect": "Counts as having consumed 1sp automatically after every game."
  },
  {
-  "name": "Fate Stone",
-  "source": "Core Rules",
-  "effect": "Once per game, the bearer may re-roll any one Casting Roll, Stat Roll, Combat Roll, or Shooting Roll."
+  "name": "Beartooth Talisman",
+  "source": "The Wildwoods",
+  "effect": "Spellcaster-only: +2 to Control Animal, controls 2 animals at once."
  },
  {
-  "name": "Gloves of Casting",
-  "source": "Core Rules",
-  "effect": "Once per game, a spellcaster gains +5 to one Casting Roll, declared before the roll is made."
+  "name": "Beastslayer Blade",
+  "source": "The Wildwoods",
+  "effect": "+1 Fight/+2 damage vs. animals (hand or two-handed); animals always attack it in multi-combat; +1 to random-encounter rolls while its carrier is present at a token pickup."
  },
  {
-  "name": "Gloves of Strength",
-  "source": "Core Rules",
-  "effect": "+1 damage modifier on all successful hand-to-hand attacks."
+  "name": "Book of Charts",
+  "source": "The Wildwoods",
+  "effect": "+4 to the roll for first pick of deployment edge."
  },
  {
-  "name": "Horn of Destruction",
-  "source": "Core Rules",
-  "effect": "Once per game, use an action to blow the horn: treat as a successfully cast Crumble spell."
+  "name": "Construct Cook",
+  "source": "The Wildwoods",
+  "effect": "Construct modification: +10sp transport capacity, +2sp post-game; no modification penalty under Fireheart rules."
  },
  {
-  "name": "Ring of Slow Fall",
-  "source": "Core Rules",
-  "effect": "The wearer never suffers falling damage, no matter the distance."
+  "name": "Demonic Talisman",
+  "source": "The Wildwoods",
+  "effect": "Spellcaster-only: +2 to Control Demon, controls 2 demons at once."
  },
  {
-  "name": "Ring of Teleportation",
-  "source": "Core Rules",
-  "effect": "Once per game, spend an action to teleport up to 8\" within line of sight (not off the table, and not into or out of combat)."
+  "name": "Elemental Bear Trap",
+  "source": "The Wildwoods",
+  "effect": "Placed token; contact = +6 elemental attack (flying/levitating immune); returns to owner post-game."
  },
  {
-  "name": "Ring of Transference",
-  "source": "Core Rules",
-  "effect": "Spellcaster only. Once per game, spend an action to transfer up to 5 Health (1-for-1) to a warband member in line of sight, not above their starting Health."
+  "name": "Elemental Whip",
+  "source": "The Wildwoods",
+  "effect": "Magic hand weapon; 2\" shooting attack capped at 5 elemental damage, uncapped in melee."
  },
  {
-  "name": "Ring of Will",
-  "source": "Core Rules",
-  "effect": "+1 Will."
+  "name": "Gleaming Trident",
+  "source": "The Wildwoods",
+  "effect": "Hand or two-handed; +2 damage vs. animals; grants Amphibious."
  },
  {
-  "name": "Robes of Arrow Turning",
-  "source": "Core Rules",
-  "effect": "+4 Armour against all bow and crossbow attacks."
+  "name": "Glitter Dust",
+  "source": "The Wildwoods",
+  "effect": "Free-action 1\" dust cloud blocking LoS; inside it, +10 Fight vs. shooting; dissipates next activation."
  },
  {
-  "name": "Staff of Casting",
-  "source": "Core Rules",
-  "effect": "On finding, roll on the Random Spell Table to identify a spell; the staff gives +1 to the Casting Roll for that spell specifically."
+  "name": "Golden Mead",
+  "source": "The Wildwoods",
+  "effect": "Whole-warband +1 Will for the game if consumed pre-game; costs everyone 1sp."
  },
  {
-  "name": "Wand of Light",
-  "source": "Core Rules",
-  "effect": "Once per game, when casting a spell, roll two dice and choose which one to use."
+  "name": "Golden Wings",
+  "source": "The Wildwoods",
+  "effect": "Once/game free action: Flying for the rest of the turn."
  },
  {
-  "name": "Ring of Power (1)",
-  "source": "Core Rules",
-  "effect": "Item of power: a 1-point pool a spellcaster can draw on to empower a Casting Roll or Will Roll, alongside their own Health. Recharges between games."
+  "name": "Heartseeker Bow",
+  "source": "The Wildwoods",
+  "effect": "Bow or crossbow (fixed on find); +1 damage vs. animals."
  },
  {
-  "name": "Orb of Power (6)",
-  "source": "Core Rules",
-  "effect": "Item of power: a 6-point pool a spellcaster can draw on to empower a Casting Roll or Will Roll. Does not recharge — once its 6 points are spent it is empty and can't be sold."
+  "name": "Heartshield Amulet",
+  "source": "The Wildwoods",
+  "effect": "On a suffered critical hit: 11+ negates the damage and destroys the amulet."
  },
  {
-  "name": "Wand of Power (1)",
-  "source": "Core Rules",
-  "effect": "Item of power: a 1-point pool a spellcaster can draw on to empower a Casting Roll or Will Roll, alongside their own Health. Recharges between games."
+  "name": "Horn Quiver",
+  "source": "The Wildwoods",
+  "effect": "No move + a shot = automatically poisoned; or spend an action to coat the next shot."
  },
  {
-  "name": "Staff of Power (1)",
-  "source": "Core Rules",
-  "effect": "Item of power: a 1-point pool a spellcaster can draw on to empower a Casting Roll or Will Roll. Also counts as a magic weapon (Staff). Recharges between games."
+  "name": "Ice Axe",
+  "source": "The Wildwoods",
+  "effect": "+1 damage magic hand weapon; +3 to all terrain-effect rolls."
  },
  {
-  "name": "Staff of Power (2)",
-  "source": "Core Rules",
-  "effect": "Item of power: a 2-point pool a spellcaster can draw on to empower a Casting Roll or Will Roll. Also counts as a magic weapon (Staff). Recharges between games."
+  "name": "Locket of Broken Promises",
+  "source": "The Wildwoods",
+  "effect": "Once/game: auto-pass a required Will Roll; 1–5 destroys it after use."
  },
  {
-  "name": "Staff of Power (3)",
-  "source": "Core Rules",
-  "effect": "Item of power: a 3-point pool a spellcaster can draw on to empower a Casting Roll or Will Roll. Also counts as a magic weapon (Staff). Recharges between games."
+  "name": "Magical Rope Ladder",
+  "source": "The Wildwoods",
+  "effect": "Carrier gets Expert Climber; or place it as a free action for anyone to climb."
  },
  {
-  "name": "Hand Weapon +1 damage",
-  "source": "Core Rules",
-  "effect": "Magic Weapon/Armour Table result: hand weapon with +1 damage modifier on top of its mundane profile."
+  "name": "Mystically-honed Armour",
+  "source": "The Wildwoods",
+  "effect": "+4 Will resisting/overcoming spells."
  },
  {
-  "name": "Hand Weapon +1 Fight",
-  "source": "Core Rules",
-  "effect": "Magic Weapon/Armour Table result: hand weapon granting +1 Fight."
+  "name": "Parrying Dagger",
+  "source": "The Wildwoods",
+  "effect": "-1 melee damage taken, if not also carrying a two-hander/staff/shield."
  },
  {
-  "name": "Hand Weapon +2 Will",
-  "source": "Core Rules",
-  "effect": "Magic Weapon/Armour Table result: hand weapon granting +2 Will."
+  "name": "Polished Shield",
+  "source": "The Wildwoods",
+  "effect": "+2 Fight vs. shooting; negates an opponent's Latch On."
  },
  {
-  "name": "Two-Handed Weapon +1 damage",
-  "source": "Core Rules",
-  "effect": "Magic Weapon/Armour Table result: two-handed weapon with +1 damage modifier on top of its mundane profile."
+  "name": "Potion Bandolier",
+  "source": "The Wildwoods",
+  "effect": "2 extra potions fit in 1 item slot."
  },
  {
-  "name": "Two-Handed Weapon +1 Fight",
-  "source": "Core Rules",
-  "effect": "Magic Weapon/Armour Table result: two-handed weapon granting +1 Fight."
+  "name": "Quiver of the Wind Goddess",
+  "source": "The Wildwoods",
+  "effect": "Ignores wind shooting penalties (incl. Call Storm); once/game, declare one shot magical."
  },
  {
-  "name": "Two-Handed Weapon +2 Will",
-  "source": "Core Rules",
-  "effect": "Magic Weapon/Armour Table result: two-handed weapon granting +2 Will."
+  "name": "Ring of Stoneskin",
+  "source": "The Wildwoods",
+  "effect": "Not with heavy armour; +1 Armour + Rock-hard Skin."
  },
  {
-  "name": "Bow +1 damage",
-  "source": "Core Rules",
-  "effect": "Magic Weapon/Armour Table result: bow with +1 damage modifier on top of its mundane profile."
+  "name": "Sealskin Armour",
+  "source": "The Wildwoods",
+  "effect": "Light Armour + Amphibious."
  },
  {
-  "name": "Bow +1 Shoot",
-  "source": "Core Rules",
-  "effect": "Magic Weapon/Armour Table result: bow granting +1 Shoot."
+  "name": "Snake Staff",
+  "source": "The Wildwoods",
+  "effect": "+1 Fight; all its attacks are poisoned."
  },
  {
-  "name": "Crossbow +1 damage",
-  "source": "Core Rules",
-  "effect": "Magic Weapon/Armour Table result: crossbow with +1 damage modifier on top of its mundane profile."
+  "name": "Spiced Arrows",
+  "source": "The Wildwoods",
+  "effect": "-2 damage but marks the target so uncontrolled animals within 12\"/LoS preferentially attack it."
  },
  {
-  "name": "Crossbow +1 Shoot",
-  "source": "Core Rules",
-  "effect": "Magic Weapon/Armour Table result: crossbow granting +1 Shoot."
+  "name": "Stinkweed Extract (4)",
+  "source": "The Wildwoods",
+  "effect": "Applied figure is ignored by uncontrolled animals (-1 Fight/retreat if forced to fight anyway); 4 doses/slot."
  },
  {
-  "name": "Dagger +1 Fight",
-  "source": "Core Rules",
-  "effect": "Magic Weapon/Armour Table result: dagger granting +1 Fight."
+  "name": "Talisman of Undead",
+  "source": "The Wildwoods",
+  "effect": "Spellcaster-only: +2 to Control Undead, controls 2 undead at once."
  },
  {
-  "name": "Dagger +1 damage",
-  "source": "Core Rules",
-  "effect": "Magic Weapon/Armour Table result: dagger with +1 damage modifier on top of its mundane profile."
+  "name": "Teleportation Collar",
+  "source": "The Wildwoods",
+  "effect": "Worn by an animal companion; wizard may teleport adjacent to it once/game (with treasure)."
  },
  {
-  "name": "Dagger +2 damage",
-  "source": "Core Rules",
-  "effect": "Magic Weapon/Armour Table result: dagger with +2 damage modifier on top of its mundane profile."
+  "name": "Toughened Armour/Robes",
+  "source": "The Wildwoods",
+  "effect": "+1 starting Health (lost first, unrecoverable in-game); robes are caster/unarmoured-only."
  },
  {
-  "name": "Light Armour +1 Armour",
-  "source": "Core Rules",
-  "effect": "Magic Weapon/Armour Table result: light armour granting a further +1 Armour."
+  "name": "True Sight Arrow",
+  "source": "The Wildwoods",
+  "effect": "+1 Shoot/+2 damage; can target invisible figures in LoS; recovered after the game."
  },
  {
-  "name": "Heavy Armour (Elemental Absorption)",
-  "source": "Core Rules",
-  "effect": "Magic Weapon/Armour Table result: heavy armour that halves (round up) any elemental damage taken."
+  "name": "Utility Boots",
+  "source": "The Wildwoods",
+  "effect": "No rough-ground penalty; +4 to all terrain-effect rolls."
  },
  {
-  "name": "Ring of Protection",
-  "source": "Core Rules",
-  "effect": "Magic Weapon/Armour Table result: +1 Armour."
- },
- {
-  "name": "Cloak of Protection",
-  "source": "Core Rules",
-  "effect": "Magic Weapon/Armour Table result: +1 Armour."
- },
- {
-  "name": "Cloak of Night",
-  "source": "Core Rules",
-  "effect": "Magic Weapon/Armour Table result: halves (round up) any elemental damage taken."
- },
- {
-  "name": "Staff +1 Fight",
-  "source": "Core Rules",
-  "effect": "Magic Weapon/Armour Table result: staff granting +1 Fight (in addition to its usual -1 damage / opponent -1 damage in hand-to-hand)."
- },
- {
-  "name": "Shield +1 Armour",
-  "source": "Core Rules",
-  "effect": "Magic Weapon/Armour Table result: shield granting a further +1 Armour."
+  "name": "Warming Blade",
+  "source": "The Wildwoods",
+  "effect": "Hand/two-handed/staff (fixed); +1 damage; immune to hypothermia and cold-related Will Rolls."
  }
 ]

@@ -1283,6 +1283,8 @@ def hire_captain(
     hr = wb.setdefault("homerules", default_homerules())
     if hr.get("captain_mode") not in ("hire", "both"):
         return False, "Hiring a captain is not enabled for this warband (see Homerules)."
+    if "The Frostgrave Folio" not in enabled_sources(wb):
+        return False, "The Captain is from The Frostgrave Folio; enable that source under Additional Rules and Homerules first."
     if wb.get("captain"):
         return False, "Warband already has a captain."
     n_tricks = int(hr.get("captain_starting_tricks", CAPTAIN_STARTING_TRICKS))
@@ -1545,6 +1547,8 @@ def promote_soldier_to_captain(
     hr = wb.setdefault("homerules", default_homerules())
     if hr.get("captain_mode") not in ("promote", "both"):
         return False, "Promoting a captain is not enabled for this warband (see Homerules)."
+    if "The Frostgrave Folio" not in enabled_sources(wb):
+        return False, "The Captain is from The Frostgrave Folio; enable that source under Additional Rules and Homerules first."
     if wb.get("captain"):
         return False, "Warband already has a captain."
     # Promotion has its own trick allowance, separate from hiring's.
