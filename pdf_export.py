@@ -11,9 +11,12 @@ import expansions
 
 try:
     from PIL import Image
-except Exception:  # pragma: no cover - Pillow is absent in the in-browser build
-    # Portraits aren't used in the online (Pyodide) build, so PDF export must
-    # still work without Pillow. _crop_to_square guards on Image being None.
+except Exception:  # pragma: no cover - only hit if Pillow genuinely isn't installed
+    # fpdf2 itself hard-requires Pillow to embed any image (see _draw_portrait),
+    # so this is a hard requirement, not an optional nicety. The in-browser
+    # (Pyodide) build loads Pillow as a native Pyodide package (not a PyPI/
+    # micropip install — Pillow has C extensions with no plain wheel Pyodide
+    # can build from source) specifically so this import succeeds there too.
     Image = None
 
 from frostgrave_data import (
@@ -140,6 +143,10 @@ def _draw_portrait(
     path = resolve_portrait_path(rel, kind, type_key)
     if path:
         cropped = _crop_to_square(path)
+        # fpdf2 itself hard-requires Pillow to embed any image at all (it raises
+        # OSError otherwise, regardless of input type) — there is no Pillow-free
+        # fallback here. The in-browser build loads Pyodide's native Pillow
+        # package for exactly this reason (see docs/app/index.html's boot()).
         if cropped is not None:
             try:
                 inset = 1.0

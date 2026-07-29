@@ -19,11 +19,6 @@
           line-height: 1.4;
         }
         .session-warning a { color: #ffd479; }
-        /* Portrait uploads don't persist in a session-only browser build, so
-           hide those pickers — but keep the Import page's file input (name="file"). */
-        .form-row:has(input[type="file"]:not([name="file"])),
-        .soldier-row > div:has(input[type="file"]) { display: none !important; }
-        input[type="file"]:not([name="file"]) { display: none !important; }
       </style>
     {% endif %}
   </head>
