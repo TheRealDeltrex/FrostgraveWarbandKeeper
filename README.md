@@ -5,15 +5,23 @@ warbands are saved as plain files on your own machine.
 
 Not affiliated with Osprey Games / Joseph A. McCullough.
 
-## Download
+## Play online or download
 
+Two ways to use it — pick whichever suits you:
+
+- **▶ [Play online — no install](https://therealdeltrex.github.io/FrostgraveWarbandKeeper/app/)** —
+  the whole app runs right in your browser tab. Nothing is stored, so it's session-only: **export a
+  warband to a file to keep it**, and import it again next time. Everything works normally, including
+  custom pictures — they just won't survive a refresh or come back on import, so re-upload them if you
+  reload one. Great for a quick try or a one-off game. (First load fetches a runtime, so give it a few
+  seconds.)
 - **💾 [Download page](https://therealdeltrex.github.io/FrostgraveWarbandKeeper/)** — packaged
   Windows and Linux builds, one click each, that save your warbands as files on your own machine.
 
 This is the **distribution branch** — it just contains this README plus the
-[download site](https://therealdeltrex.github.io/FrostgraveWarbandKeeper/). You can also grab a
-packaged build directly from the [Releases page](../../releases/latest). No Python install needed on
-either platform.
+[download / online site](https://therealdeltrex.github.io/FrostgraveWarbandKeeper/). You can also
+grab a packaged build directly from the [Releases page](../../releases/latest). No Python install
+needed on either platform.
 
 ### Windows
 
@@ -55,7 +63,7 @@ folder.
 - **Home base**: set a base location and buy base resources, per the 2e core rules.
 - **Frostgrave Lexicon**: the full spell list per school (including the Lost Schools from The Maze of Malcor) with casting numbers and descriptions, the school relationship table, arms/armour/consumables, a full bestiary, random encounter tables, per-book loot tables, and a collapsible magic items & treasure reference — every entry tagged with its source book.
 - **PDF roster export**: a clean, printable warband sheet.
-- **Import/export**: warbands are saved as `.warbands` files (plain JSON) that can be exported, shared, and re-imported.
+- **Import/export**: warbands are saved as `.warbands` files (plain JSON) that can be exported, shared, and re-imported. (In the online version, this is how you save.)
 
 ## Want to modify the code?
 
