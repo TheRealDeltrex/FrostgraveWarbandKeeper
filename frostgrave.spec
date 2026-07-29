@@ -25,6 +25,8 @@ datas = [
     ("data/magic_items.json", "data"),
     ("data/expansion_rules.json", "data"),
     ("data/ghost_archipelago.json", "data"),
+    ("data/loot_tables.json", "data"),
+    ("data/random_encounters.json", "data"),
 ]
 
 a = Analysis(
