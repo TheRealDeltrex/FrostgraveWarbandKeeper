@@ -125,6 +125,7 @@ from warband_store import (
     import_warband_json,
     animal_companion_limit,
     default_portrait_name,
+    portrait_filesystem_path,
     has_animal_companion,
     known_spell_ids,
     known_spell_names,
@@ -170,8 +171,13 @@ BROWSER_MODE = os.environ.get("FWK_BROWSER") == "1"
 def portrait_src(portrait: str | None, kind: str, type_key: str | None = None) -> str | None:
     """URL of the picture to show for a character: their uploaded one, else the
     default artwork shipped with the app. None means neither exists, and the
-    template should fall back to its "?" placeholder."""
-    if portrait:
+    template should fall back to its "?" placeholder.
+
+    Checks the file actually exists (same as resolve_portrait_path(), used for
+    the PDF) rather than trusting the stored path blindly — a warband can carry
+    a portrait reference to a file that's no longer there (e.g. an imported
+    .warbands file, since portrait bytes are never included in the export)."""
+    if portrait and portrait_filesystem_path(portrait):
         return url_for("portrait_file", relpath=portrait)
     name = default_portrait_name(kind, type_key)
     return url_for("static", filename=f"portraits/{name}") if name else None
