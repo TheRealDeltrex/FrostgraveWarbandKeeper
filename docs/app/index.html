@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Frostgrave Warband Keeper — Online</title>
+  <style>
+    :root { color-scheme: dark; }
+    html, body { margin: 0; height: 100%; }
+    body {
+      background: #0e1420;
+      color: #e8eef7;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    #app-frame { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; display: none; background: #0e1420; }
+    #loading {
+      position: fixed; inset: 0; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; text-align: center; padding: 1.5rem;
+    }
+    #loading h1 { font-size: 1.5rem; margin: 1rem 0 0.4rem; color: #cfe4ff; }
+    #loading .sub { color: #9fb2c8; max-width: 32rem; line-height: 1.5; margin: 0.2rem 0; }
+    #loading-msg { color: #ffd479; font-weight: 600; margin-top: 1rem; min-height: 1.4em; }
+    .spinner {
+      width: 46px; height: 46px; border-radius: 50%;
+      border: 4px solid rgba(224,169,58,0.25); border-top-color: #e0a93a;
+      animation: spin 0.9s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #err { display: none; max-width: 34rem; color: #ffb3b3; line-height: 1.5; }
+    #err code { color: #ffd479; }
+    #toast {
+      position: fixed; left: 50%; bottom: 1.2rem; transform: translateX(-50%) translateY(2rem);
+      background: #1b2740; color: #f0d9a6; border: 1px solid #b8862b; border-left: 4px solid #e0a93a;
+      padding: 0.7rem 1rem; border-radius: 8px; font-size: 0.9rem; max-width: 90vw;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4); opacity: 0; pointer-events: none;
+      transition: opacity 0.25s, transform 0.25s; z-index: 9999;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+  <div id="loading">
+    <div class="spinner"></div>
+    <h1>Frostgrave Warband Keeper</h1>
+    <p class="sub">The full app, running entirely in your browser — nothing is uploaded, nothing is stored.</p>
+    <p class="sub">Your warband lives only in this tab. <strong>Export it to a file to keep it.</strong></p>
+    <p id="loading-msg">Starting…</p>
+    <div id="err">
+      <p>Sorry — the app couldn't start. This build needs a modern desktop browser (Chrome, Edge, Firefox or Safari) with WebAssembly enabled.</p>
+      <p id="err-detail" class="sub"></p>
+    </div>
+  </div>
+
+  <iframe id="app-frame" title="Frostgrave Warband Keeper"></iframe>
+  <div id="toast" role="status"></div>
+
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+  <script>
+  (function () {
+    "use strict";
+
+    var PYODIDE_INDEX = "https://cdn.jsdelivr.net/pyodide/v0.26.4/full/";
+    var frame = document.getElementById("app-frame");
+    var loading = document.getElementById("loading");
+    var loadingMsg = document.getElementById("loading-msg");
+
+    var pyodide = null;
+    var navigatePy = null;
+    var STYLE_CSS = "";
+    var ITEM_SLOTS_JS = "";
+    var sessionDirty = false;      // a mutation happened since the last export
+    var remindedThisSession = false;
+
+    function setMsg(m) { loadingMsg.textContent = m; }
+
+    function fail(detail) {
+      document.querySelector(".spinner").style.display = "none";
+      loadingMsg.style.display = "none";
+      var err = document.getElementById("err");
+      err.style.display = "block";
+      document.getElementById("err-detail").textContent = detail || "";
+    }
+
+    // ---- Python bootstrap: unpack the bundle into an in-memory FS, then drive
+    // the real Flask app through its test client. -----------------------------
+    var BOOTSTRAP_PY = [
+      "import os, sys, json",
+      "b = json.loads(BUNDLE_JSON)",
+      "os.makedirs('/app', exist_ok=True)",
+      "for _path, _content in b['files'].items():",
+      "    _full = '/app/' + _path",
+      "    _d = os.path.dirname(_full)",
+      "    if _d:",
+      "        os.makedirs(_d, exist_ok=True)",
+      "    with open(_full, 'w', encoding='utf-8') as _f:",
+      "        _f.write(_content)",
+      "os.environ['FWK_BROWSER'] = '1'",
+      "os.environ['FWK_DATA_DIR'] = '/data'",
+      "os.makedirs('/data', exist_ok=True)",
+      "os.chdir('/app')",
+      "sys.path.insert(0, '/app')",
+      "import app as _appmod",
+      "_client = _appmod.app.test_client()",
+      "from urllib.parse import urlencode",
+      "import base64, io",
+      "from werkzeug.datastructures import FileStorage",
+      "def navigate(path, method='GET', pairs_json='[]', files_json='[]'):",
+      "    pairs = json.loads(pairs_json)",
+      "    files = json.loads(files_json or '[]')",
+      "    method = (method or 'GET').upper()",
+      "    if method == 'GET':",
+      "        if pairs:",
+      "            sep = '&' if '?' in path else '?'",
+      "            path = path + sep + urlencode([(p[0], p[1]) for p in pairs])",
+      "        resp = _client.open(path, method='GET', follow_redirects=True)",
+      "    elif files:",
+      "        data = {}",
+      "        for k, v in pairs:",
+      "            if k in data:",
+      "                if isinstance(data[k], list):",
+      "                    data[k].append(v)",
+      "                else:",
+      "                    data[k] = [data[k], v]",
+      "            else:",
+      "                data[k] = v",
+      "        for f in files:",
+      "            stream = io.BytesIO(base64.b64decode(f['base64']))",
+      "            data[f['field']] = FileStorage(",
+      "                stream=stream, filename=f['filename'],",
+      "                content_type=f.get('contentType') or 'application/octet-stream',",
+      "            )",
+      "        # A dict `data` with any file-like value makes werkzeug's test client",
+      "        # switch to multipart/form-data automatically — no explicit content_type.",
+      "        resp = _client.open(path, method=method, data=data, follow_redirects=True)",
+      "    else:",
+      "        body = urlencode([(p[0], p[1]) for p in pairs])",
+      "        resp = _client.open(path, method=method, data=body,",
+      "                            content_type='application/x-www-form-urlencoded',",
+      "                            follow_redirects=True)",
+      "    ctype = resp.headers.get('Content-Type', '')",
+      "    is_text = (ctype == '' or ctype.startswith('text/') or 'html' in ctype",
+      "               or 'json' in ctype or 'xml' in ctype or 'javascript' in ctype)",
+      "    raw = resp.get_data(as_text=False)",
+      "    if is_text:",
+      "        body = raw.decode('utf-8', 'replace')",
+      "    else:",
+      "        body = base64.b64encode(raw).decode('ascii')",
+      "    return json.dumps({",
+      "        'status': resp.status_code,",
+      "        'content_type': ctype,",
+      "        'content_disposition': resp.headers.get('Content-Disposition', ''),",
+      "        'is_binary': (not is_text),",
+      "        'body': body,",
+      "    })",
+      ""
+    ].join("\n");
+
+    // ---- Interceptor injected into every rendered page (runs in the iframe).
+    // Turns internal link clicks and form submits into postMessage() calls to
+    // this parent window, which routes them through the Python test client. ---
+    var INTERCEPTOR_JS = [
+      "(function(){",
+      "  function send(m){ try { parent.postMessage(m, '*'); } catch(e){} }",
+      "  // Exposed so template code that must navigate programmatically (e.g. the",
+      "  // new-warband school <select>) routes through the driver instead of",
+      "  // assigning location.href, which would break out of the in-browser app.",
+      "  window.fgNavigate = function(path, method, pairs){ send({fg:1, path:path, method:(method||'GET'), pairs:pairs||[]}); };",
+      "  // A promise-based GET bridge for in-page code that needs the response body",
+      "  // back as a value (e.g. the creation page's partial-reload fetch()) rather",
+      "  // than a full page swap. Round-trips through the parent via postMessage",
+      "  // since a raw fetch() here has no real network target inside this srcdoc.",
+      "  var _fgSeq = 0, _fgPending = {};",
+      "  window.fgFetch = function(url){",
+      "    return new Promise(function(resolve){",
+      "      var id = ++_fgSeq;",
+      "      _fgPending[id] = resolve;",
+      "      send({fg:1, kind:'fetch', id:id, path:url, method:'GET', pairs:[]});",
+      "    });",
+      "  };",
+      "  window.addEventListener('message', function(e){",
+      "    var d = e.data;",
+      "    if(!d || d.fgReply !== 1) return;",
+      "    var resolve = _fgPending[d.id];",
+      "    if(resolve){ delete _fgPending[d.id]; resolve({ text: function(){ return Promise.resolve(d.body); } }); }",
+      "  });",
+      "  function pairsFrom(form, cb){",
+      "    var pairs = [], files = [], reads = [];",
+      "    var els = form.elements;",
+      "    for (var i=0;i<els.length;i++){",
+      "      var el = els[i];",
+      "      if(!el.name || el.disabled) continue;",
+      "      var tag = (el.tagName||'').toLowerCase();",
+      "      var type = (el.type||'').toLowerCase();",
+      "      if(type==='file'){",
+      "        if(!el.files || !el.files.length) continue;",
+      "        var f = el.files[0], fieldName = el.name;",
+      "        if(fieldName==='file'){",
+      "          // The Import page's warband-file picker: read as text, forwarded",
+      "          // as the json_text field. The page's \"Or paste JSON\" textarea",
+      "          // shares that same name — when both are present (textarea left",
+      "          // empty, a file chosen), the file must win: its value only lands",
+      "          // in `pairs` once this async read finishes, AFTER the textarea's",
+      "          // empty value was already pushed by the synchronous loop below, so",
+      "          // any earlier json_text entry has to be dropped here or the empty",
+      "          // one — being first — would be what the server sees.",
+      "          (function(ff){ reads.push(new Promise(function(res){",
+      "            var fr=new FileReader();",
+      "            fr.onload=function(){",
+      "              for (var i = pairs.length - 1; i >= 0; i--) { if (pairs[i][0] === 'json_text') pairs.splice(i, 1); }",
+      "              pairs.push(['json_text', String(fr.result)]);",
+      "              res();",
+      "            };",
+      "            fr.onerror=function(){ res(); };",
+      "            fr.readAsText(ff);",
+      "          })); })(f);",
+      "        } else {",
+      "          // Any other file input (portrait uploads): read as bytes so the",
+      "          // Python side can rebuild a real FileStorage for request.files.",
+      "          (function(ff, name){ reads.push(new Promise(function(res){",
+      "            var fr=new FileReader();",
+      "            fr.onload=function(){",
+      "              var s = String(fr.result);",
+      "              var comma = s.indexOf(',');",
+      "              files.push({",
+      "                field: name, filename: ff.name,",
+      "                contentType: ff.type || 'application/octet-stream',",
+      "                base64: comma>=0 ? s.slice(comma+1) : s,",
+      "              });",
+      "              res();",
+      "            };",
+      "            fr.onerror=function(){ res(); };",
+      "            fr.readAsDataURL(ff);",
+      "          })); })(f, fieldName);",
+      "        }",
+      "        continue;",
+      "      }",
+      "      if((type==='checkbox'||type==='radio') && !el.checked) continue;",
+      "      if(type==='submit'||type==='button') continue;",
+      "      if(tag==='select' && el.multiple){",
+      "        for(var j=0;j<el.options.length;j++){ if(el.options[j].selected) pairs.push([el.name, el.options[j].value]); }",
+      "        continue;",
+      "      }",
+      "      pairs.push([el.name, el.value]);",
+      "    }",
+      "    if(reads.length){ Promise.all(reads).then(function(){ cb(pairs, files); }); } else { cb(pairs, files); }",
+      "  }",
+      "  function submitForm(form){",
+      "    var method = (form.getAttribute('method')||'GET').toUpperCase();",
+      "    var action = form.getAttribute('action') || location.pathname;",
+      "    pairsFrom(form, function(pairs, files){ send({fg:1, path:action, method:method, pairs:pairs, files:files}); });",
+      "  }",
+      "  document.addEventListener('click', function(e){",
+      "    var a = e.target && e.target.closest ? e.target.closest('a[href]') : null;",
+      "    if(!a) return;",
+      "    var href = a.getAttribute('href');",
+      "    if(!href) return;",
+      "    if(a.target==='_blank' || a.hasAttribute('download')) return;",
+      "    if(/^(https?:|mailto:|tel:|#|javascript:)/i.test(href)) return;",
+      "    e.preventDefault();",
+      "    send({fg:1, path:href, method:'GET', pairs:[]});",
+      "  }, true);",
+      "  // Bubbling (not capturing) + defaultPrevented so that a form runs its",
+      "  // onsubmit=return confirm(...) FIRST: if the user cancels, the event is",
+      "  // already defaultPrevented and we must not dispatch the action.",
+      "  document.addEventListener('submit', function(e){",
+      "    var form = e.target;",
+      "    if(!form || form.tagName!=='FORM') return;",
+      "    if(e.defaultPrevented) return;",
+      "    e.preventDefault();",
+      "    submitForm(form);",
+      "  }, false);",
+      "  // Some controls call form.submit() directly (e.g. the soldier-status",
+      "  // dropdown's onchange) which does NOT fire the submit event — override it.",
+      "  var _native = HTMLFormElement.prototype.submit;",
+      "  HTMLFormElement.prototype.submit = function(){ try { submitForm(this); } catch(e){ _native.call(this); } };",
+      "})();",
+      ""
+    ].join("\n");
+
+    // Default character art ships as real files next to this page (docs/app/static/
+    // portraits/) — a cheap relative rewrite, no Python round-trip needed. Must stay
+    // relative (no leading "/"): GitHub Pages serves this at a subpath, not the
+    // domain root, so an absolute path would 404 in production.
+    // Uploaded portraits only exist as real bytes in Pyodide's in-memory /data dir —
+    // those have to come from the Python side, once per unique src, inlined as a
+    // data: URI (the same base64 mechanism that already powers PDF downloads).
+    function inlinePortraits(html) {
+      html = html.split('src="/static/portraits/').join('src="static/portraits/');
+      var seen = {}, srcs = [], m;
+      var re = /<img\b[^>]*?src="(\/portraits\/[^"]+)"/g;
+      while ((m = re.exec(html))) {
+        if (!seen[m[1]]) { seen[m[1]] = true; srcs.push(m[1]); }
+      }
+      srcs.forEach(function (src) {
+        try {
+          var res = JSON.parse(navigatePy(src, "GET", "[]", "[]"));
+          // is_binary guards against navigate()'s follow_redirects=True quietly
+          // resolving a missing portrait (404 -> the app's own error handler ->
+          // a real HTML page) into "status 200" — that's text, not image bytes,
+          // and must not be wrapped as one. Leave the original src in that case;
+          // portrait_src() (app.py) already prefers the default art whenever the
+          // file doesn't actually exist, so this path is a rare fallback.
+          if (res.status === 200 && res.is_binary) {
+            var uri = "data:" + (res.content_type || "application/octet-stream") + ";base64," + res.body;
+            html = html.split('src="' + src + '"').join('src="' + uri + '"');
+          }
+        } catch (e) { /* leave the original src — worst case, a broken image */ }
+      });
+      return html;
+    }
+
+    function renderPage(html) {
+      html = html.replace(/<link[^>]*href="[^"]*style\.css"[^>]*>/i, function () {
+        return "<style>" + STYLE_CSS + "</style>";
+      });
+      var itemJs = ITEM_SLOTS_JS.replace(/<\/script>/gi, "<\\/script>");
+      html = html.replace(/<script[^>]*src="[^"]*item_slots\.js"[^>]*><\/script>/i, function () {
+        return "<script>" + itemJs + "<\/script>";
+      });
+      html = inlinePortraits(html);
+      html = html.replace(/<\/body>/i, function () {
+        return "<script>" + INTERCEPTOR_JS + "<\/script></body>";
+      });
+      frame.srcdoc = html;
+    }
+
+    function downloadText(text, filename, type) {
+      var blob = new Blob([text], { type: type || "application/octet-stream" });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url; a.download = filename || "warband.warbands";
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
+    }
+
+    function downloadBinary(b64, filename, type) {
+      var bin = atob(b64);
+      var bytes = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      var blob = new Blob([bytes], { type: type || "application/octet-stream" });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url; a.download = filename || "roster.pdf";
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
+    }
+
+    var toastEl = document.getElementById("toast");
+    var toastTimer = null;
+    function showToast(msg, ms) {
+      toastEl.textContent = msg;
+      toastEl.classList.add("show");
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(function () { toastEl.classList.remove("show"); }, ms || 4200);
+    }
+
+    function go(path, method, pairs, files) {
+      var resJson;
+      try {
+        resJson = navigatePy(path, method || "GET", JSON.stringify(pairs || []), JSON.stringify(files || []));
+      } catch (e) {
+        renderPage("<!doctype html><meta charset=utf-8><body style='font-family:sans-serif;color:#e8eef7;background:#0e1420;padding:2rem'><h2>Something went wrong</h2><pre style='white-space:pre-wrap;color:#ffb3b3'>" +
+          String(e).replace(/[<&]/g, function (c) { return c === "<" ? "&lt;" : "&amp;"; }) + "</pre><p><a href='/' style='color:#ffd479'>Back to warbands</a></p></body>");
+        return;
+      }
+      var res = JSON.parse(resJson);
+      var cd = res.content_disposition || "";
+      if (/attachment/i.test(cd)) {
+        var m = /filename\*?=(?:UTF-8'')?"?([^";]+)"?/i.exec(cd);
+        var fname = m ? decodeURIComponent(m[1]) : "warband.warbands";
+        if (res.is_binary) {
+          // e.g. the PDF roster — body is base64-encoded bytes, not text.
+          downloadBinary(res.body, fname, res.content_type || "application/octet-stream");
+          showToast("Downloaded “" + fname + "”.");
+        } else {
+          downloadText(res.body, fname, res.content_type || "application/json");
+          sessionDirty = false;
+          showToast("Exported “" + fname + "”. Keep that file safe — it's the only copy.");
+        }
+        return;
+      }
+      renderPage(res.body);
+    }
+
+    window.addEventListener("message", function (e) {
+      var d = e.data;
+      if (!d || d.fg !== 1) return;
+      if (d.kind === "fetch") {
+        // window.fgFetch's bridge: answer via the same Python navigate() call,
+        // reply directly to the iframe (no sessionDirty/toast — it's a read).
+        var res;
+        try {
+          res = JSON.parse(navigatePy(d.path, d.method || "GET", "[]", "[]"));
+        } catch (e2) {
+          return;
+        }
+        frame.contentWindow.postMessage({ fgReply: 1, id: d.id, status: res.status, body: res.body }, "*");
+        return;
+      }
+      if ((d.method || "GET").toUpperCase() === "POST") {
+        sessionDirty = true;
+        if (!remindedThisSession) {
+          remindedThisSession = true;
+          showToast("Heads up: changes live only in this tab. Use “Export warband” to save them to a file.", 6000);
+        }
+      }
+      go(d.path, d.method, d.pairs, d.files);
+    });
+
+    // Warn before leaving if there are unsaved changes this session.
+    window.addEventListener("beforeunload", function (e) {
+      if (sessionDirty) { e.preventDefault(); e.returnValue = ""; return ""; }
+    });
+
+    async function boot() {
+      try {
+        setMsg("Starting the Python runtime… (first load downloads it, ~10 MB)");
+        pyodide = await loadPyodide({ indexURL: PYODIDE_INDEX });
+
+        setMsg("Installing Flask…");
+        await pyodide.loadPackage("micropip");
+        var micropip = pyodide.pyimport("micropip");
+        await micropip.install("flask");
+
+        setMsg("Enabling PDF export…");
+        try {
+          // Pillow is a native (precompiled WASM) Pyodide package, not a plain
+          // PyPI wheel micropip can build — and fpdf2 hard-requires it to embed
+          // ANY image (portraits included; there's no Pillow-free fallback in
+          // fpdf2 itself). Must load before fpdf2 is ever imported — pdf_export.py
+          // imports it lazily on the first PDF export, so this only needs to run
+          // before that, but doing it here at boot keeps the ordering simple.
+          await pyodide.loadPackage("Pillow");
+          await micropip.install("fpdf2");
+        } catch (pdfErr) {
+          // Non-fatal: the app still runs; PDF export may error or omit portraits.
+          console.warn("PDF export could not be fully enabled:", pdfErr);
+        }
+
+        setMsg("Loading the warband keeper…");
+        var resp = await fetch("bundle.json?v=" + Date.now());
+        if (!resp.ok) throw new Error("Could not fetch bundle.json (" + resp.status + ")");
+        var bundle = await resp.json();
+        STYLE_CSS = bundle.files["static/style.css"] || "";
+        ITEM_SLOTS_JS = bundle.files["static/item_slots.js"] || "";
+
+        pyodide.globals.set("BUNDLE_JSON", JSON.stringify(bundle));
+        await pyodide.runPythonAsync(BOOTSTRAP_PY);
+        navigatePy = pyodide.globals.get("navigate");
+
+        go("/", "GET", []);
+        loading.style.display = "none";
+        frame.style.display = "block";
+      } catch (e) {
+        console.error(e);
+        fail(String(e));
+      }
+    }
+
+    boot();
+  })();
+  </script>
+</body>
+</html>
