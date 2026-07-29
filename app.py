@@ -53,10 +53,12 @@ from frostgrave_data import (
     PENTANGLE_SCHOOLS,
     SOURCE_BOOK_BY_SLUG,
     SOURCE_BOOK_OPTIONS,
+    SOURCE_BOOKS,
     SPELLS,
     STARTING_GOLD,
     STARTING_SPELL_COUNT,
     WIZARD_ITEM_SLOTS,
+    XP_PER_LEVEL,
     all_spells_flat,
     cn_penalty,
     format_stat,
@@ -74,8 +76,10 @@ from game_content import (
     load_ghost_archipelago,
     load_magic_items,
     magic_items_for_sources,
+    load_loot_tables,
     load_potion_choices,
     load_potion_choices_detailed,
+    load_random_encounters,
     load_spell_descriptions,
     load_spell_names,
     load_spellcaster_items,
@@ -181,6 +185,7 @@ app.jinja_env.globals.update(
     MAX_SOLDIERS=MAX_SOLDIERS,
     MAX_SPECIALISTS=MAX_SPECIALISTS,
     STARTING_SPELL_COUNT=STARTING_SPELL_COUNT,
+    XP_PER_LEVEL=XP_PER_LEVEL,
     OWN_SCHOOL_SPELLS=OWN_SCHOOL_SPELLS,
     ALIGNED_SCHOOL_SPELLS=ALIGNED_SCHOOL_SPELLS,
     NEUTRAL_SPELLS=NEUTRAL_SPELLS,
@@ -209,6 +214,8 @@ app.jinja_env.globals.update(
     LICH_NOTES=expansions.LICH_NOTES,
     LICH_XP_PER_LEVEL=expansions.LICH_XP_PER_LEVEL,
     LICH_STAT_CAPS=expansions.LICH_STAT_CAPS,
+    LICH_FORBIDDEN_LEVELUP=expansions.LICH_FORBIDDEN_LEVELUP,
+    LICH_FORBIDDEN_SPELLS=expansions.LICH_FORBIDDEN_SPELLS,
     BEASTCRAFTER_TIERS=expansions.BEASTCRAFTER_TIERS,
     ANIMAL_FEATURES=expansions.ANIMAL_FEATURES,
     ANIMAL_FEATURE_BY_ID=expansions.ANIMAL_FEATURE_BY_ID,
@@ -272,6 +279,7 @@ def reference():
         soldiers=all_soldiers,
         soldier_groups=group_soldiers_by_source(all_soldiers),
         schools=SCHOOLS,
+        pentangle_schools=PENTANGLE_SCHOOLS,
         spells=spells_with_desc,
         opposed=SCHOOL_OPPOSED,
         aligned=SCHOOL_ALIGNED,
@@ -287,6 +295,8 @@ def reference():
         magic_item_groups=group_magic_items(load_magic_items()),
         magic_item_count=len(load_magic_items()),
         expansion_rules=load_expansion_rules(),
+        random_encounters=load_random_encounters(),
+        loot_tables=load_loot_tables(),
         ghost=load_ghost_archipelago(),
     )
 
@@ -451,7 +461,7 @@ def _render_new(
 def warband_view(warband_id: str):
     wb = _require_warband(warband_id)
     recompute_spell_cns(wb)
-    soldiers = [enrich_soldier(s) for s in wb.get("soldiers") or []]
+    soldiers = [enrich_soldier(wb, s) for s in wb.get("soldiers") or []]
     limits = warband_limits(wb)
     known = known_spell_ids(wb)
     wschool = (wb.get("wizard") or {}).get("school") or "Elementalist"
@@ -481,7 +491,7 @@ def warband_view(warband_id: str):
     # empty source groups from rendering a heading with nothing under it.
     wb_spells = known_spell_names(wb)
     hireable = [
-        c
+        {**c, "cost": expansions.soldier_cost(wb, c, c["key"])}
         for c in soldier_list_for_ui()
         if c["source"] in wb_sources
         and (not c.get("requires_spell") or c["requires_spell"] in wb_spells)
@@ -533,7 +543,6 @@ def warband_view(warband_id: str):
         wizard_state_bonus=expansions.wizard_state_stat_bonus(wb),
         beastcrafter_tier=expansions.beastcrafter_tier(wb),
         pact_tiers=expansions.pact_tiers(wb),
-        has_true_name=expansions.has_true_name(wb),
         can_advance_beastcrafter=expansions.can_advance_beastcrafter(wb),
         can_add_pact_tier=expansions.can_add_pact_tier(wb),
         pact_break_penalty=expansions.pact_break_penalty(wb),
@@ -543,14 +552,25 @@ def warband_view(warband_id: str):
         magic_item_names=sorted(
             {it["name"] for it in magic_items_for_sources(wb_sources)}, key=str.lower
         ),
-        # In-game table rules (traps, demonic attributes, Malcor's optional core
-        # rules...), shown per enabled book. Never simulated.
-        expansion_rules={
-            book: sections
-            for book, sections in load_expansion_rules().items()
-            if book in wb_sources
-        },
         knows_revenant=expansions.REVENANT_SPELL in wb_spells,
+        # Rulebook -> item -> power level/spell cascading picker, shared by the
+        # After the Game card and the Vault's Add item field. Scoped to this
+        # warband's enabled sources, same as magic_item_names above and the
+        # learnable-spell list — a book that's off shouldn't leak its content
+        # into the page even inside a picker; "Other / write-in" is the escape
+        # hatch for anything else actually found at the table.
+        loot_picker_books=sorted(wb_sources, key=lambda b: (b != "Core Rules", b)),
+        loot_picker_data={
+            "items_by_book": {
+                book: sorted(
+                    {it["name"] for it in magic_items_for_sources({book})}, key=str.lower
+                )
+                for book in wb_sources
+            },
+            "spell_names": sorted(
+                {s["name"] for s in all_spells_flat() if s["source"] in wb_sources}, key=str.lower
+            ),
+        },
     )
 
 
@@ -564,6 +584,11 @@ def warband_update(warband_id: str):
             _update_details(wb)
             save_warband(wb)
             flash("Details saved.", "success")
+
+        elif action == "set_notes":
+            wb["notes"] = request.form.get("notes") or ""
+            save_warband(wb)
+            flash("Notes saved.", "success")
 
         elif action == "hire_soldier":
             ok, msg = add_soldier(
@@ -853,6 +878,8 @@ def warband_update(warband_id: str):
             # also support comma-separated single line
             if len(items) == 1 and "," in items[0]:
                 items = [x.strip() for x in items[0].split(",") if x.strip()]
+            # Rows from the rulebook -> item -> spell picker, alongside the freeform textarea.
+            items += [x.strip() for x in request.form.getlist("loot_structured_items") if x.strip()]
             summary = record_game_loot(wb, gold, items, xp, notes, captain_xp)
             save_warband(wb)
             flash(summary, "success")
@@ -946,7 +973,6 @@ def warband_update(warband_id: str):
 
 def _update_details(wb: dict) -> None:
     wb["name"] = (request.form.get("warband_name") or wb["name"]).strip()
-    wb["notes"] = request.form.get("notes") or ""
     wiz = wb.setdefault("wizard", {})
     wiz["name"] = (request.form.get("wizard_name") or wiz.get("name", "")).strip()
     school = request.form.get("school") or wiz.get("school")

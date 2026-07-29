@@ -30,6 +30,7 @@ from frostgrave_data import (
     CAPTAIN_MODE_DEFAULT,
     CAPTAIN_MODE_OPTIONS,
     CAPTAIN_STARTING_TRICKS,
+    CAPTAIN_STAT_ABSOLUTE_LIMITS,
     CAPTAIN_STAT_CAPS,
     CAPTAIN_TRICK_BY_ID,
     CAPTAIN_TRICK_IDS,
@@ -123,9 +124,23 @@ def empty_slots(n: int) -> list[str]:
     return [""] * n
 
 
+def _default_item_slots(defaults: list[str], n: int) -> list[str]:
+    """`defaults` filled into the first slots, padded with blanks to length n
+    (or truncated if there are more defaults than slots)."""
+    slots = list(defaults[:n])
+    slots += [""] * (n - len(slots))
+    return slots
+
+
+# Starting gear for a freshly created wizard/apprentice/hired captain. Still
+# fully editable afterward via the normal item-slot inputs.
+WIZARD_DEFAULT_GEAR = ["Staff", "Hand Weapon"]
+CAPTAIN_DEFAULT_GEAR = ["Light Armour", "Shield", "Hand Weapon", "Crossbow", "Quiver"]
+
+
 def empty_base() -> dict:
     return {
-        "location": "none",  # key in BASE_LOCATIONS
+        "location": "laboratory",  # key in BASE_LOCATIONS — still changeable any time
         "resources": [],  # list of BASE_RESOURCES keys
         "notes": "",
     }
@@ -156,7 +171,7 @@ def empty_wizard(name: str = "", school: str = "Elementalist") -> dict:
         "level": 0,
         "xp": 0,
         "stats": stats,
-        "item_slots": empty_slots(WIZARD_ITEM_SLOTS),
+        "item_slots": _default_item_slots(WIZARD_DEFAULT_GEAR, WIZARD_ITEM_SLOTS),
         "has_dagger": True,  # free slot (2e: first dagger takes no slot), so on by default
         "items": [],  # legacy
         "spells": [],
@@ -174,7 +189,7 @@ def empty_apprentice(name: str = "") -> dict:
         "name": name,
         "level": 0,
         "stats": stats,
-        "item_slots": empty_slots(APPRENTICE_ITEM_SLOTS),
+        "item_slots": _default_item_slots(WIZARD_DEFAULT_GEAR, APPRENTICE_ITEM_SLOTS),
         "has_dagger": True,
         "items": [],
         "notes": "",
@@ -191,6 +206,7 @@ def default_homerules() -> dict:
         "captain_base_stats": deepcopy(CAPTAIN_BASE),
         "captain_bonus_choice_enabled": True,
         "captain_stat_caps": deepcopy(CAPTAIN_STAT_CAPS),
+        "captain_stat_absolute_limits": deepcopy(CAPTAIN_STAT_ABSOLUTE_LIMITS),
         "captain_max_level": CAPTAIN_MAX_LEVEL,
         "captain_mind_control": CAPTAIN_MIND_CONTROL_DEFAULT,
         "captain_starting_tricks": CAPTAIN_STARTING_TRICKS,
@@ -209,6 +225,10 @@ def default_homerules() -> dict:
         # gives rules for playing them properly "if a group agrees". Off by
         # default; needs The Maze of Malcor switched on to have any effect.
         "pentangle_schools_playable": False,
+        # House correction for six supplement soldiers costed closer to 1st
+        # edition than the rest of the 2e tables. On by default; see
+        # expansions.EDITION_2_SOLDIER_COSTS.
+        "edition2_soldier_costs": True,
     }
 
 
@@ -247,7 +267,7 @@ def empty_captain(name: str = "", homerules: dict | None = None, origin: str = "
         "name": name,
         "stats": stats,
         "bonus_extra_stat": None,  # one of LEVELUP_STATS | None (hire/promote +1 pick)
-        "item_slots": empty_slots(n),
+        "item_slots": _default_item_slots(CAPTAIN_DEFAULT_GEAR, n),
         "has_dagger": True,
         "notes": "",
         "portrait": None,
@@ -918,8 +938,9 @@ def warband_limits(wb: dict) -> dict:
     if wb.get("captain"):
         spent += int((wb.get("homerules") or {}).get("captain_hiring_cost", CAPTAIN_HIRING_COST))
     for s in soldiers:
-        info = SOLDIERS.get(s.get("type_key", ""), {})
-        spent += expansions.soldier_cost(wb, info)
+        type_key = s.get("type_key", "")
+        info = SOLDIERS.get(type_key, {})
+        spent += expansions.soldier_cost(wb, info, type_key)
     wiz = wb.get("wizard") or {}
     xp = int(wiz.get("xp", 0))
     level = int(wiz.get("level", 0))
@@ -945,12 +966,17 @@ def warband_limits(wb: dict) -> dict:
     }
 
 
-def enrich_soldier(s: dict) -> dict:
-    cat = get_soldier(s.get("type_key", "")) or {}
+def enrich_soldier(wb: dict, s: dict) -> dict:
+    type_key = s.get("type_key", "")
+    cat = get_soldier(type_key) or {}
     out = {**cat, **s}
-    out["type_name"] = cat.get("name", s.get("type_key", "?"))
+    out["type_name"] = cat.get("name", type_key or "?")
     out["category"] = cat.get("category", "standard")
-    out["cost"] = cat.get("cost", s.get("cost", 0))
+    # Live cost, not what was paid at hire time — same rule as everywhere else
+    # cost is computed (hireable list, warband_limits): homerule adjustments
+    # (Edition 2 toggle, Beastcrafter surcharge, base discount) always apply
+    # to the current settings, not a value frozen at hire time.
+    out["cost"] = expansions.soldier_cost(wb, cat, type_key) if cat else s.get("cost", 0)
     return out
 
 
@@ -1008,7 +1034,7 @@ def add_soldier(wb: dict, type_key: str, name: str = "") -> tuple[bool, str]:
         return False, f"Soldier limit reached ({cap})."
     if info["category"] == "specialist" and count_specialists(wb) >= MAX_SPECIALISTS:
         return False, f"Specialist limit reached ({MAX_SPECIALISTS})."
-    cost = expansions.soldier_cost(wb, info)
+    cost = expansions.soldier_cost(wb, info, type_key)
     if wb.get("gold", 0) < cost:
         return False, f"Not enough gold (need {cost} gc, have {wb.get('gold', 0)} gc)."
 
@@ -1034,8 +1060,9 @@ def remove_soldier(wb: dict, soldier_id: str, refund: bool = False) -> tuple[boo
     soldiers = wb.get("soldiers") or []
     for i, s in enumerate(soldiers):
         if s.get("id") == soldier_id:
-            info = get_soldier(s.get("type_key", "")) or {}
-            cost = int(info.get("cost", 0))
+            type_key = s.get("type_key", "")
+            info = get_soldier(type_key) or {}
+            cost = expansions.soldier_cost(wb, info, type_key)
             name = s.get("name", "Soldier")
             if refund and cost:
                 wb["gold"] = int(wb.get("gold", 0)) + cost
@@ -1161,6 +1188,13 @@ def update_homerules(wb: dict, form) -> tuple[bool, str]:
             },
             "captain_bonus_choice_enabled": form.get("captain_bonus_choice_enabled") == "on",
             "captain_stat_caps": _parse_stat_caps(form, "captain", hr["captain_stat_caps"]),
+            "captain_stat_absolute_limits": {
+                stat: int(
+                    form.get(f"captain_absolute_limit_{stat}")
+                    or hr.get("captain_stat_absolute_limits", CAPTAIN_STAT_ABSOLUTE_LIMITS)[stat]
+                )
+                for stat in ("move", "fight", "shoot", "will", "health")
+            },
             "captain_max_level": int(form.get("captain_max_level") or hr["captain_max_level"]),
             "captain_mind_control": (
                 form.get("captain_mind_control")
@@ -1195,6 +1229,7 @@ def update_homerules(wb: dict, form) -> tuple[bool, str]:
                 for slug, book in SOURCE_BOOK_BY_SLUG.items()
             },
             "pentangle_schools_playable": form.get("pentangle_schools_playable") == "on",
+            "edition2_soldier_costs": form.get("edition2_soldier_costs") == "on",
         }
     except (TypeError, ValueError):
         return False, "Invalid homerule value."
@@ -1249,8 +1284,12 @@ def hire_captain(
     cap = empty_captain(name or "Captain", hr)
     cap["known_tricks"] = list(tricks or [])
     if hr.get("captain_bonus_choice_enabled") and extra_stat in LEVELUP_STATS:
-        cap["stats"][extra_stat] = int(cap["stats"].get(extra_stat, 0)) + bonus_choice_amount(extra_stat)
-        cap["bonus_extra_stat"] = extra_stat
+        limits = hr.get("captain_stat_absolute_limits") or CAPTAIN_STAT_ABSOLUTE_LIMITS
+        current = int(cap["stats"].get(extra_stat, 0))
+        limit = limits.get(extra_stat)
+        if limit is None or current < limit:
+            cap["stats"][extra_stat] = _apply_stat_absolute_limit(current, bonus_choice_amount(extra_stat), limit)
+            cap["bonus_extra_stat"] = extra_stat
     wb["captain"] = cap
     text = f"Hired captain for {cost} gc (starting equipment free)."
     add_history(wb, text)
@@ -1327,6 +1366,18 @@ def _pending_level_check(
     if overall_max is not None and level >= overall_max:
         return False, f"{label} has reached the max level ({overall_max})."
     return True, ""
+
+
+def _apply_stat_absolute_limit(current: int, bonus: int, limit: int | None) -> int:
+    """Add `bonus` to `current`, clamped so the result never exceeds `limit`. If
+    `current` is already at or over the limit, the bonus contributes nothing —
+    an existing higher value (e.g. from a promoted soldier's own prior leveling,
+    or the class base stats) is never reduced, only further increases blocked."""
+    if limit is None:
+        return current + bonus
+    if current >= limit:
+        return current
+    return min(current + bonus, limit)
 
 
 def _spend_stat_level_up(
@@ -1508,13 +1559,20 @@ def promote_soldier_to_captain(
     # The promotion bonus package is always applied in full — it's defined by
     # the homerule, not a per-promotion player choice. Only the optional extra
     # +1 (gated by promote_captain_bonus_choice_enabled) is player-selectable.
+    # Both are capped by the absolute stat limits, fixed bonus first, then the
+    # chosen +1 — a stat already at/over its limit (e.g. from the soldier's own
+    # prior leveling) keeps its higher value rather than being reduced.
+    limits = hr.get("captain_stat_absolute_limits") or CAPTAIN_STAT_ABSOLUTE_LIMITS
     bonus = hr.get("promote_captain_bonus") or PROMOTE_CAPTAIN_BONUS
     for stat in LEVELUP_STATS:
-        stats[stat] = stats.get(stat, 0) + int(bonus.get(stat, 0))
+        stats[stat] = _apply_stat_absolute_limit(stats.get(stat, 0), int(bonus.get(stat, 0)), limits.get(stat))
     applied_extra_stat = None
     if hr.get("promote_captain_bonus_choice_enabled") and extra_stat in LEVELUP_STATS:
-        stats[extra_stat] = stats.get(extra_stat, 0) + bonus_choice_amount(extra_stat)
-        applied_extra_stat = extra_stat
+        current = stats.get(extra_stat, 0)
+        limit = limits.get(extra_stat)
+        if limit is None or current < limit:
+            stats[extra_stat] = _apply_stat_absolute_limit(current, bonus_choice_amount(extra_stat), limit)
+            applied_extra_stat = extra_stat
 
     wb["gold"] = int(wb.get("gold", 0)) - cost
     n = int(hr.get("promote_captain_item_slots", PROMOTE_CAPTAIN_ITEM_SLOTS))
@@ -2147,7 +2205,7 @@ def base_summary(wb: dict) -> dict:
 def recruit_preview(wb: dict, type_key: str) -> dict:
     """Info for hire UI: cost, whether affordable, limit warnings."""
     info = get_soldier(type_key) or {}
-    cost = expansions.soldier_cost(wb, info)
+    cost = expansions.soldier_cost(wb, info, type_key)
     active = len(active_soldiers(wb))
     specs = count_specialists(wb)
     is_spec = info.get("category") == "specialist"

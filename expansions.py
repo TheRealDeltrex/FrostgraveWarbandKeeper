@@ -321,13 +321,33 @@ def soldier_discount(wb: dict) -> int:
     return 10 if "carrier_pigeons" in owned else 0
 
 
-def soldier_cost(wb: dict, info: dict) -> int:
-    """What hiring this soldier type actually costs this warband, after the
-    Beastcrafter surcharge and any base-resource discount. Never negative, and
-    free soldiers (thug, thief, summoned members) stay free."""
+# A homerule, on by default: several supplement soldiers (Into the Breeding
+# Pits, The Maze of Malcor, Forgotten Pacts) read as costed closer to 1st
+# edition than the rest of the 2e soldier tables. This bumps them to the
+# house-corrected 2e-consistent prices. Trap Expert also gains a dagger and a
+# hand weapon under this toggle. Off, the documented catalog costs/gear apply.
+EDITION_2_SOLDIER_COSTS = {
+    "assassin": 100,
+    "demon_hunter": 125,
+    "monk": 125,
+    "mystic_warrior": 125,
+}
+
+
+def edition2_enabled(wb: dict) -> bool:
+    return bool((wb.get("homerules") or {}).get("edition2_soldier_costs", True))
+
+
+def soldier_cost(wb: dict, info: dict, type_key: str = "") -> int:
+    """What hiring this soldier type actually costs this warband, after any
+    Edition 2 cost adjustment, the Beastcrafter surcharge, and any base-
+    resource discount. Never negative, and free soldiers (thug, thief,
+    summoned members) stay free."""
     base = int(info.get("cost", 0))
     if base <= 0:
         return 0
+    if type_key and edition2_enabled(wb) and type_key in EDITION_2_SOLDIER_COSTS:
+        base = EDITION_2_SOLDIER_COSTS[type_key]
     return max(0, base + soldier_surcharge(wb) - soldier_discount(wb))
 
 
@@ -443,11 +463,8 @@ def can_enter_state(wb: dict, kind: str, sources: set[str]) -> tuple[bool, str]:
             return False, (
                 f"Forging a pact needs a level {PACT_TIER_LEVELS[0]} wizard (yours is level {level})."
             )
-        if not has_true_name(wb):
-            return False, (
-                "Forging a pact needs a demon's True Name in the vault — it is found as "
-                "treasure and can never be bought."
-            )
+        # No True Name check here: item requirements are optional to track in the
+        # app and can be handled at the gaming table instead.
     return True, ""
 
 

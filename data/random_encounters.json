@@ -1,0 +1,896 @@
+{
+  "Core Rules": [
+    {
+      "title": "Level Difference Encounter Table",
+      "blurb": "Optional rule for balancing mismatched wizards at the start of a two-player game. If the level difference is 7 or less, play as written; otherwise consult this table for which tier of the Random Encounter Table to roll on.",
+      "rows": [
+        {
+          "name": "8–10",
+          "text": "Level 1 encounter"
+        },
+        {
+          "name": "11–14",
+          "text": "Level 2 encounter"
+        },
+        {
+          "name": "15+",
+          "text": "Level 3 encounter"
+        }
+      ]
+    },
+    {
+      "title": "Random Encounter Table — Level 1 (first roll 1–12)",
+      "blurb": "Optional rule: when a treasure token is picked up for the first time, roll a die — on a 10+ a random creature wanders on, rolled on this table.",
+      "rows": [
+        {
+          "name": "1",
+          "text": "Skeleton"
+        },
+        {
+          "name": "2",
+          "text": "Skeletons (2)"
+        },
+        {
+          "name": "3",
+          "text": "Armoured Skeleton"
+        },
+        {
+          "name": "4",
+          "text": "Zombie"
+        },
+        {
+          "name": "5",
+          "text": "Zombies (2)"
+        },
+        {
+          "name": "6",
+          "text": "Ghoul"
+        },
+        {
+          "name": "7",
+          "text": "Bear"
+        },
+        {
+          "name": "8",
+          "text": "Boar"
+        },
+        {
+          "name": "9",
+          "text": "Giant Rat"
+        },
+        {
+          "name": "10",
+          "text": "Giant Rats (2)"
+        },
+        {
+          "name": "11",
+          "text": "Giant Rats (4)"
+        },
+        {
+          "name": "12",
+          "text": "Ice Spider"
+        },
+        {
+          "name": "13",
+          "text": "Snow Leopard"
+        },
+        {
+          "name": "14",
+          "text": "Wild Dog"
+        },
+        {
+          "name": "15",
+          "text": "Wild Dogs (2)"
+        },
+        {
+          "name": "16",
+          "text": "Wolf"
+        },
+        {
+          "name": "17",
+          "text": "Wolves (2)"
+        },
+        {
+          "name": "18",
+          "text": "Small Construct"
+        },
+        {
+          "name": "19",
+          "text": "Imp"
+        },
+        {
+          "name": "20",
+          "text": "Ice Toad"
+        }
+      ]
+    },
+    {
+      "title": "Random Encounter Table — Level 2 (first roll 13–18)",
+      "rows": [
+        {
+          "name": "1",
+          "text": "Armoured Skeleton (2)"
+        },
+        {
+          "name": "2",
+          "text": "Ghoul"
+        },
+        {
+          "name": "3",
+          "text": "Ghouls (2)"
+        },
+        {
+          "name": "4",
+          "text": "Wraith"
+        },
+        {
+          "name": "5",
+          "text": "Bear"
+        },
+        {
+          "name": "6",
+          "text": "Bear"
+        },
+        {
+          "name": "7",
+          "text": "Boar"
+        },
+        {
+          "name": "8",
+          "text": "Boar"
+        },
+        {
+          "name": "9",
+          "text": "Ice Spiders"
+        },
+        {
+          "name": "10",
+          "text": "Ice Spiders (2)"
+        },
+        {
+          "name": "11",
+          "text": "Snow Leopard"
+        },
+        {
+          "name": "12",
+          "text": "White Gorilla"
+        },
+        {
+          "name": "13",
+          "text": "Wolves (2)"
+        },
+        {
+          "name": "14",
+          "text": "Medium Construct"
+        },
+        {
+          "name": "15",
+          "text": "Minor Demon"
+        },
+        {
+          "name": "16",
+          "text": "Ice Toad"
+        },
+        {
+          "name": "17",
+          "text": "Ice Toads (2)"
+        },
+        {
+          "name": "18",
+          "text": "Snow Troll"
+        },
+        {
+          "name": "19",
+          "text": "Worm"
+        },
+        {
+          "name": "20",
+          "text": "Werewolf"
+        }
+      ]
+    },
+    {
+      "title": "Random Encounter Table — Level 3 (first roll 19–20)",
+      "rows": [
+        {
+          "name": "1",
+          "text": "Armoured Skeletons (3)"
+        },
+        {
+          "name": "2",
+          "text": "Ghoul"
+        },
+        {
+          "name": "3",
+          "text": "Ghouls (2)"
+        },
+        {
+          "name": "4",
+          "text": "Ghouls (2)"
+        },
+        {
+          "name": "5",
+          "text": "Wraith"
+        },
+        {
+          "name": "6",
+          "text": "Wraith"
+        },
+        {
+          "name": "7",
+          "text": "Vampire"
+        },
+        {
+          "name": "8",
+          "text": "White Gorilla"
+        },
+        {
+          "name": "9",
+          "text": "White Gorilla"
+        },
+        {
+          "name": "10",
+          "text": "Large Construct"
+        },
+        {
+          "name": "11",
+          "text": "Large Construct"
+        },
+        {
+          "name": "12",
+          "text": "Minor Demon"
+        },
+        {
+          "name": "13",
+          "text": "Minor Demon"
+        },
+        {
+          "name": "14",
+          "text": "Frost Giant"
+        },
+        {
+          "name": "15",
+          "text": "Snow Troll"
+        },
+        {
+          "name": "16",
+          "text": "Snow Troll"
+        },
+        {
+          "name": "17",
+          "text": "Snow Trolls (2)"
+        },
+        {
+          "name": "18",
+          "text": "Werewolf"
+        },
+        {
+          "name": "19",
+          "text": "Worm"
+        },
+        {
+          "name": "20",
+          "text": "Worm"
+        }
+      ]
+    }
+  ],
+  "Thaw of the Lich Lord": [
+    {
+      "title": "Lich Lord Random Encounter Table — Level 1 (first roll 1–12)",
+      "blurb": "Replaces the core table for scenarios set during the Lich Lord campaign. A footnote in the book also allows a one-off \"The Lich Lord & retinue\" result at the table's discretion.",
+      "rows": [
+        {
+          "name": "1",
+          "text": "Skeleton"
+        },
+        {
+          "name": "2",
+          "text": "Skeletons (2)"
+        },
+        {
+          "name": "3",
+          "text": "Armoured Skeletons (2)"
+        },
+        {
+          "name": "4",
+          "text": "Zombies (2)"
+        },
+        {
+          "name": "5",
+          "text": "Zombies (3)"
+        },
+        {
+          "name": "6",
+          "text": "Ghouls (3)"
+        },
+        {
+          "name": "7",
+          "text": "Frost Wraith"
+        },
+        {
+          "name": "8",
+          "text": "Boar"
+        },
+        {
+          "name": "9",
+          "text": "Giant Rat"
+        },
+        {
+          "name": "10",
+          "text": "Giant Rats (2)"
+        },
+        {
+          "name": "11",
+          "text": "Rangifer"
+        },
+        {
+          "name": "12",
+          "text": "Ice Spider"
+        },
+        {
+          "name": "13",
+          "text": "Snow Leopard"
+        },
+        {
+          "name": "14",
+          "text": "Zombie Troll"
+        },
+        {
+          "name": "15",
+          "text": "Wild Dogs (2)"
+        },
+        {
+          "name": "16",
+          "text": "Wolf"
+        },
+        {
+          "name": "17",
+          "text": "Wraith"
+        },
+        {
+          "name": "18",
+          "text": "Small Construct"
+        },
+        {
+          "name": "19",
+          "text": "Imp"
+        },
+        {
+          "name": "20",
+          "text": "Wraith Knight"
+        }
+      ]
+    },
+    {
+      "title": "Lich Lord Random Encounter Table — Level 2 (first roll 13–18)",
+      "rows": [
+        {
+          "name": "1",
+          "text": "Armoured Skeletons (2)"
+        },
+        {
+          "name": "2",
+          "text": "Ghoul"
+        },
+        {
+          "name": "3",
+          "text": "Ghouls (2)"
+        },
+        {
+          "name": "4",
+          "text": "Frost Wraith"
+        },
+        {
+          "name": "5",
+          "text": "Wraith"
+        },
+        {
+          "name": "6",
+          "text": "Bear"
+        },
+        {
+          "name": "7",
+          "text": "Spectre"
+        },
+        {
+          "name": "8",
+          "text": "Boar"
+        },
+        {
+          "name": "9",
+          "text": "Ice Spider"
+        },
+        {
+          "name": "10",
+          "text": "Death Cultists (4)"
+        },
+        {
+          "name": "11",
+          "text": "Snow Leopard"
+        },
+        {
+          "name": "12",
+          "text": "Rangifers (2)"
+        },
+        {
+          "name": "13",
+          "text": "Banshee"
+        },
+        {
+          "name": "14",
+          "text": "Medium Construct"
+        },
+        {
+          "name": "15",
+          "text": "Minor Demon"
+        },
+        {
+          "name": "16",
+          "text": "Ice Toad"
+        },
+        {
+          "name": "17",
+          "text": "Wraith Knight"
+        },
+        {
+          "name": "18",
+          "text": "Zombie Troll"
+        },
+        {
+          "name": "19",
+          "text": "Worm"
+        },
+        {
+          "name": "20",
+          "text": "The Ghoul King & Ghouls (4)"
+        }
+      ]
+    },
+    {
+      "title": "Lich Lord Random Encounter Table — Level 3 (first roll 19–20)",
+      "rows": [
+        {
+          "name": "1",
+          "text": "Armoured Skeletons (3)"
+        },
+        {
+          "name": "2",
+          "text": "Death Cultists (4)"
+        },
+        {
+          "name": "3",
+          "text": "Ghouls (3)"
+        },
+        {
+          "name": "4",
+          "text": "Ghouls (3)"
+        },
+        {
+          "name": "5",
+          "text": "Rangifers (3)"
+        },
+        {
+          "name": "6",
+          "text": "Wraith"
+        },
+        {
+          "name": "7",
+          "text": "Vampire"
+        },
+        {
+          "name": "8",
+          "text": "Zombie Troll"
+        },
+        {
+          "name": "9",
+          "text": "White Gorilla"
+        },
+        {
+          "name": "10",
+          "text": "Spectre"
+        },
+        {
+          "name": "11",
+          "text": "Large Construct"
+        },
+        {
+          "name": "12",
+          "text": "Minor Demon"
+        },
+        {
+          "name": "13",
+          "text": "Frost Wraiths (2)"
+        },
+        {
+          "name": "14",
+          "text": "Banshee"
+        },
+        {
+          "name": "15",
+          "text": "Snow Troll"
+        },
+        {
+          "name": "16",
+          "text": "Wraith Knight"
+        },
+        {
+          "name": "17",
+          "text": "Snow Trolls (2)"
+        },
+        {
+          "name": "18",
+          "text": "Werewolf"
+        },
+        {
+          "name": "19",
+          "text": "The Ghoul King & Ghouls (4)"
+        },
+        {
+          "name": "20",
+          "text": "The Lich Lord & retinue (see p.60)"
+        }
+      ]
+    }
+  ],
+  "Forgotten Pacts": [
+    {
+      "title": "Forgotten Pacts Random Encounter Table — Level 1 (first roll 1–12)",
+      "blurb": "Used for scenarios set in the northern temple district. A \"Barbarians\" result sends you to the Barbarian Encounter Table below.",
+      "rows": [
+        {
+          "name": "1",
+          "text": "Wild Dog"
+        },
+        {
+          "name": "2",
+          "text": "Skeleton"
+        },
+        {
+          "name": "3",
+          "text": "Ice Spider"
+        },
+        {
+          "name": "4",
+          "text": "Imp"
+        },
+        {
+          "name": "5",
+          "text": "Zombie"
+        },
+        {
+          "name": "6",
+          "text": "Ghoul"
+        },
+        {
+          "name": "7",
+          "text": "Imp"
+        },
+        {
+          "name": "8",
+          "text": "Snow Leopard"
+        },
+        {
+          "name": "9",
+          "text": "Boar"
+        },
+        {
+          "name": "10",
+          "text": "Small Construct"
+        },
+        {
+          "name": "11",
+          "text": "Armoured Skeleton"
+        },
+        {
+          "name": "12",
+          "text": "Bile Hound"
+        },
+        {
+          "name": "13",
+          "text": "Ghoul"
+        },
+        {
+          "name": "14",
+          "text": "Ice Toads (2)"
+        },
+        {
+          "name": "15",
+          "text": "Minor Demon"
+        },
+        {
+          "name": "16",
+          "text": "Barbarians (roll on the Barbarian Table)"
+        },
+        {
+          "name": "17",
+          "text": "Barbarians (roll on the Barbarian Table)"
+        },
+        {
+          "name": "18",
+          "text": "Small Construct"
+        },
+        {
+          "name": "19",
+          "text": "Wolf"
+        },
+        {
+          "name": "20",
+          "text": "White Gorilla"
+        }
+      ]
+    },
+    {
+      "title": "Forgotten Pacts Random Encounter Table — Level 2 (first roll 13–18)",
+      "rows": [
+        {
+          "name": "1",
+          "text": "Barbarians (+2 on the Barbarian Table)"
+        },
+        {
+          "name": "2",
+          "text": "Barbarians (+2 on the Barbarian Table)"
+        },
+        {
+          "name": "3",
+          "text": "Medium Construct"
+        },
+        {
+          "name": "4",
+          "text": "Bile Hound"
+        },
+        {
+          "name": "5",
+          "text": "Giant Worm"
+        },
+        {
+          "name": "6",
+          "text": "Skeletons (2)"
+        },
+        {
+          "name": "7",
+          "text": "Bile Hounds (2)"
+        },
+        {
+          "name": "8",
+          "text": "Kaylakid"
+        },
+        {
+          "name": "9",
+          "text": "Kaylakid"
+        },
+        {
+          "name": "10",
+          "text": "Ice Spiders (2)"
+        },
+        {
+          "name": "11",
+          "text": "Toravor"
+        },
+        {
+          "name": "12",
+          "text": "White Gorilla"
+        },
+        {
+          "name": "13",
+          "text": "Toravor"
+        },
+        {
+          "name": "14",
+          "text": "Medium Construct"
+        },
+        {
+          "name": "15",
+          "text": "Grakyura"
+        },
+        {
+          "name": "16",
+          "text": "Ice Toad"
+        },
+        {
+          "name": "17",
+          "text": "Failing Wretches (2)"
+        },
+        {
+          "name": "18",
+          "text": "Snow Troll"
+        },
+        {
+          "name": "19",
+          "text": "Giant Worm"
+        },
+        {
+          "name": "20",
+          "text": "Frost Giant"
+        }
+      ]
+    },
+    {
+      "title": "Forgotten Pacts Random Encounter Table — Level 3 (first roll 19–20)",
+      "rows": [
+        {
+          "name": "1",
+          "text": "Barbarians (+4 on the Barbarian Table)"
+        },
+        {
+          "name": "2",
+          "text": "Barbarians (+4 on the Barbarian Table)"
+        },
+        {
+          "name": "3",
+          "text": "Barbarians (+4 on the Barbarian Table)"
+        },
+        {
+          "name": "4",
+          "text": "Snow Troll"
+        },
+        {
+          "name": "5",
+          "text": "Werewolf"
+        },
+        {
+          "name": "6",
+          "text": "Wraith"
+        },
+        {
+          "name": "7",
+          "text": "Vampire"
+        },
+        {
+          "name": "8",
+          "text": "Grakyura (2)"
+        },
+        {
+          "name": "9",
+          "text": "Kaylakids (3)"
+        },
+        {
+          "name": "10",
+          "text": "Large Construct"
+        },
+        {
+          "name": "11",
+          "text": "Minor Demons (2)"
+        },
+        {
+          "name": "12",
+          "text": "Chilopendra"
+        },
+        {
+          "name": "13",
+          "text": "Chilopendra (2)"
+        },
+        {
+          "name": "14",
+          "text": "Snow Troll"
+        },
+        {
+          "name": "15",
+          "text": "Frost Giant"
+        },
+        {
+          "name": "16",
+          "text": "Major Demon"
+        },
+        {
+          "name": "17",
+          "text": "Werewolf"
+        },
+        {
+          "name": "18",
+          "text": "Major Demon & Minor Demons (2)"
+        },
+        {
+          "name": "19",
+          "text": "Ambronnax"
+        },
+        {
+          "name": "20",
+          "text": "Tiszirain"
+        }
+      ]
+    },
+    {
+      "title": "Barbarian Encounter Table",
+      "blurb": "Rolled whenever the Random Encounter Table above gives a \"Barbarians\" result. Add +2 to the roll for a Level 2 result, +4 for a Level 3 result.",
+      "rows": [
+        {
+          "name": "1",
+          "text": "Barbarian Thug"
+        },
+        {
+          "name": "2",
+          "text": "Barbarian Thug"
+        },
+        {
+          "name": "3",
+          "text": "Barbarian Thief"
+        },
+        {
+          "name": "4",
+          "text": "Barbarian Thief"
+        },
+        {
+          "name": "5",
+          "text": "Barbarian Infantryman"
+        },
+        {
+          "name": "6",
+          "text": "Barbarian Infantryman & Wolf"
+        },
+        {
+          "name": "7",
+          "text": "Barbarian Man-at-Arms"
+        },
+        {
+          "name": "8",
+          "text": "Barbarian Man-at-Arms"
+        },
+        {
+          "name": "9",
+          "text": "Barbarian Treasure Hunter & Barbarian Thief"
+        },
+        {
+          "name": "10",
+          "text": "Barbarian Berserker"
+        },
+        {
+          "name": "11",
+          "text": "Barbarian Berserker & Barbarian Thug"
+        },
+        {
+          "name": "12",
+          "text": "Barbarian Knight"
+        },
+        {
+          "name": "13",
+          "text": "Barbarian Templar"
+        },
+        {
+          "name": "14",
+          "text": "Barbarian Berserker & Wild Dog"
+        },
+        {
+          "name": "15",
+          "text": "Barbarian Berserker & Barbarian Thugs (2)"
+        },
+        {
+          "name": "16",
+          "text": "Barbarian Berserker & Barbarian Thugs (2)"
+        },
+        {
+          "name": "17",
+          "text": "Barbarian Knight & Barbarian Templar"
+        },
+        {
+          "name": "18",
+          "text": "Barbarian Berserkers (2) & Barbarian Men-at-Arms (2)"
+        },
+        {
+          "name": "19",
+          "text": "Barbarian Knights (2) & Barbarian Templars (2)"
+        },
+        {
+          "name": "20",
+          "text": "Barbarian Berserker & Snow Troll"
+        },
+        {
+          "name": "21",
+          "text": "Barbarian Berserkers (2) & Frost Giant"
+        },
+        {
+          "name": "22",
+          "text": "Barbarian Berserkers (2) & Werewolf"
+        },
+        {
+          "name": "23",
+          "text": "Balkren & Chilopendras (2)"
+        },
+        {
+          "name": "24",
+          "text": "Kornovik, Barbarian Berserkers (2) & Barbarian Thugs (4)"
+        }
+      ]
+    }
+  ]
+}

@@ -1,8 +1,10 @@
 {% extends "base.html" %}
+{% from "_loot_picker.html" import loot_picker_row with context %}
 {% block title %}{{ wb.name }} · Frostgrave{% endblock %}
 {% block content %}
   {% set wiz = wb.wizard %}
   {% set ap = wb.apprentice %}
+  <script type="application/json" id="loot-picker-data">{{ loot_picker_data | tojson }}</script>
   {% set cap = wb.captain %}
   {% set hr = wb.homerules %}
 
@@ -57,7 +59,7 @@
       book to make its soldiers available to this warband; the captain / soldier-leveling options below are
       adapted from the FG1E Sellswords supplement — tune these to match your group's own version.
     </p>
-    <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
+    <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" data-autosave>
       <input type="hidden" name="action" value="update_homerules" />
 
       <details class="ref-panel" open>
@@ -87,15 +89,24 @@
           optional rule for running them as real schools. Only affects newly created warbands —
           a wizard's own school is fixed once chosen.
         </p>
+        <label class="checkbox-row" style="margin-top:0.6rem">
+          <input name="edition2_soldier_costs" type="checkbox" {% if hr.edition2_soldier_costs %}checked{% endif %} />
+          Adjust soldiers to edition 2
+        </label>
+        <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0">
+          Assassin, Demon Hunter, Monk and Mystic Warrior read as costed closer to 1st edition than
+          the rest of the 2e tables. On by default, this bumps their hiring cost (Assassin 100gc,
+          Demon Hunter/Monk/Mystic Warrior 125gc). Applies to future hires only.
+        </p>
         <script>
-          // Tick/untick every source book at once. Still just changes the
-          // checkboxes — the surrounding form's Save button commits it.
+          // Tick/untick every source book at once, then save immediately —
+          // same as ticking each checkbox by hand on this autosaving form.
           document.querySelectorAll("[data-toggle-sources]").forEach(function (btn) {
             btn.addEventListener("click", function () {
               var on = btn.dataset.toggleSources === "on";
-              document
-                .querySelectorAll('#source-books input[type="checkbox"]')
-                .forEach(function (box) { box.checked = on; });
+              var boxes = document.querySelectorAll('#source-books input[type="checkbox"]');
+              boxes.forEach(function (box) { box.checked = on; });
+              if (boxes.length) boxes[0].dispatchEvent(new Event("change", { bubbles: true }));
             });
           });
         </script>
@@ -165,6 +176,20 @@
             </div>
           {% endfor %}
         </div>
+        <p class="muted" style="font-size:0.85rem;margin-top:0.5rem">
+          Absolute stat limits — a hard ceiling on the captain's actual stat value, applied once at
+          hire or promotion (separate from the level-up limits above, which cap how many +1s can be
+          spent over time). A stat already above its limit (e.g. carried over from a promoted
+          soldier's own prior leveling) is never reduced — only further increases are blocked.
+        </p>
+        <div class="stat-row">
+          {% for stat in ['move', 'fight', 'shoot', 'will', 'health'] %}
+            <div class="form-row">
+              <label for="captain_absolute_limit_{{ stat }}">{{ stat|capitalize }} limit</label>
+              <input id="captain_absolute_limit_{{ stat }}" name="captain_absolute_limit_{{ stat }}" type="number" min="0" value="{{ hr.captain_stat_absolute_limits[stat] }}" />
+            </div>
+          {% endfor %}
+        </div>
       </details>
 
       <details class="ref-panel">
@@ -209,6 +234,10 @@
 
       <details class="ref-panel">
         <summary>Soldier Leveling</summary>
+        <p class="muted" style="font-size:0.85rem">
+          Soldiers get 20xp for participating in a match and 20xp for surviving a match without
+          being reduced to 0hp.
+        </p>
         <div class="checkbox-row">
           <input id="soldier_leveling_enabled" name="soldier_leveling_enabled" type="checkbox" {% if hr.soldier_leveling_enabled %}checked{% endif %} />
           <label for="soldier_leveling_enabled" style="margin:0">Enable Soldier Leveling</label>
@@ -231,255 +260,8 @@
         </div>
       </details>
 
-      <div class="actions">
-        <button class="btn" type="submit">Save Rules</button>
-      </div>
     </form>
   </details>
-
-  {# ---- Wizard states -------------------------------------------------------
-     Its own card rather than a panel inside the homerules form: each control
-     posts its own action, and forms cannot be nested. Only shown when at least
-     one of the three books that introduce a state is switched on. #}
-  {% set available_states = [] %}
-  {% for kind in [STATE_LICH, STATE_BEASTCRAFTER, STATE_PACT] %}
-    {% if STATE_SOURCE[kind] in enabled_source_names %}{% set _ = available_states.append(kind) %}{% endif %}
-  {% endfor %}
-  {% if available_states %}
-  <details class="card" id="wizard-state" {% if wizard_state_kind != STATE_NONE %}open{% endif %}>
-    <summary><h2>Wizard state <span class="badge">{{ STATE_LABELS[wizard_state_kind] }}</span></h2></summary>
-    <p class="muted" style="font-size:0.85rem">
-      Lichdom, the Beastcrafter track and a Demonic Pact are long-term states a wizard can enter.
-      They are mutually exclusive — taking one ends any other. The app records the outcome and
-      applies the ongoing effects; it does not roll the casts that get you there.
-    </p>
-
-    {# --- Pick a state --- #}
-    <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
-      <input type="hidden" name="action" value="set_wizard_state" />
-      <div class="form-row inline">
-        <div>
-          <label for="state_kind">State</label>
-          <select id="state_kind" name="state_kind">
-            <option value="{{ STATE_NONE }}" {% if wizard_state_kind == STATE_NONE %}selected{% endif %}>{{ STATE_LABELS[STATE_NONE] }}</option>
-            {% for kind in available_states %}
-              <option value="{{ kind }}" {% if wizard_state_kind == kind %}selected{% endif %}>
-                {{ STATE_LABELS[kind] }} — {{ STATE_SOURCE[kind] }}
-              </option>
-            {% endfor %}
-          </select>
-        </div>
-        <div>
-          <label>&nbsp;</label>
-          <button class="btn secondary" type="submit">Set state</button>
-        </div>
-      </div>
-    </form>
-
-    {# --- Lich --- #}
-    {% if wizard_state_kind == STATE_LICH %}
-      <details class="ref-panel" open>
-        <summary>Lich — ongoing rules</summary>
-        <p class="muted" style="font-size:0.85rem">
-          Each level now costs <strong>{{ LICH_XP_PER_LEVEL }} XP</strong>. Fight and Shoot can never be
-          raised on level-up; Will caps at +{{ LICH_STAT_CAPS.will }} and Health at {{ LICH_STAT_CAPS.health }}.
-          A Rangifer will not join the warband.
-        </p>
-        <ul class="list-plain">
-          {% for note in LICH_NOTES %}<li class="muted">{{ note }}</li>{% endfor %}
-        </ul>
-      </details>
-    {% elif STATE_SOURCE[STATE_LICH] in enabled_source_names and wizard_state_kind == STATE_NONE %}
-      <details class="ref-panel">
-        <summary>Lichdom — failing the cast</summary>
-        <p class="muted" style="font-size:0.85rem">
-          Lichdom is Necromancer / CN 20 / Out of Game. On a failure, apply the penalty below using the
-          XP and level-reversal controls on the wizard card.
-        </p>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Missed by</th><th>Penalty</th></tr></thead>
-            <tbody>
-              {% for row in LICH_FAILURE_TABLE %}
-                <tr><td><strong>{{ row.missed_by }}</strong></td><td class="muted">{{ row.penalty }}</td></tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      </details>
-    {% endif %}
-
-    {# --- Beastcrafter --- #}
-    {% if wizard_state_kind == STATE_BEASTCRAFTER %}
-      <details class="ref-panel" open>
-        <summary>Beastcrafter — tier {{ beastcrafter_tier }} of {{ BEASTCRAFTER_TIERS|length }}</summary>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th></th><th>Tier</th><th>Needs level</th><th>Effect</th></tr></thead>
-            <tbody>
-              {% for t in BEASTCRAFTER_TIERS %}
-                <tr>
-                  <td>{% if beastcrafter_tier >= t.tier %}✓{% endif %}</td>
-                  <td><strong>{{ t.name }}</strong></td>
-                  <td class="muted">{{ t.min_level }}</td>
-                  <td class="muted">{{ t.summary }}</td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-        {% if beastcrafter_tier < BEASTCRAFTER_TIERS|length %}
-          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:0.5rem">
-            <input type="hidden" name="action" value="advance_beastcrafter" />
-            <button class="btn secondary small" type="submit" {% if not can_advance_beastcrafter[0] %}disabled{% endif %}>
-              Advance to {{ BEASTCRAFTER_TIERS[beastcrafter_tier].name }}
-            </button>
-            {% if not can_advance_beastcrafter[0] %}
-              <span class="muted" style="font-size:0.85rem"> — {{ can_advance_beastcrafter[1] }}</span>
-            {% endif %}
-          </form>
-        {% endif %}
-        {% if beastcrafter_tier >= 3 %}
-          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:0.75rem">
-            <input type="hidden" name="action" value="set_animal_feature" />
-            <div class="form-row inline">
-              <div>
-                <label for="feature">Animal Feature (permanent, pick one)</label>
-                <select id="feature" name="feature">
-                  {% for f in ANIMAL_FEATURES %}
-                    <option value="{{ f.id }}" {% if wizard_state.feature == f.id %}selected{% endif %}>
-                      {{ f.name }} — {{ f.effect }}
-                    </option>
-                  {% endfor %}
-                </select>
-              </div>
-              <div>
-                <label>&nbsp;</label>
-                <button class="btn secondary" type="submit">Set feature</button>
-              </div>
-            </div>
-          </form>
-        {% endif %}
-      </details>
-    {% endif %}
-
-    {# --- Demonic Pact --- #}
-    {% if wizard_state_kind == STATE_PACT %}
-      <details class="ref-panel" open>
-        <summary>Demonic Pact — {{ pact_tiers|length }} of {{ PACT_MAX_TIERS }} held</summary>
-        {% if wizard_state.demon %}
-          <p class="muted" style="font-size:0.85rem">Patron: <strong>{{ wizard_state.demon }}</strong></p>
-        {% endif %}
-        {% if pact_tiers %}
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>Sacrifice</th><th>Paid every game</th><th>Boon</th><th>Effect</th></tr></thead>
-              <tbody>
-                {% for p in pact_tiers %}
-                  <tr>
-                    <td><strong>{{ PACT_SACRIFICE_BY_ID[p.sacrifice].name }}</strong></td>
-                    <td class="muted">{{ PACT_SACRIFICE_BY_ID[p.sacrifice].cost }}</td>
-                    <td><strong>{{ PACT_BOON_BY_ID[p.boon].name }}</strong></td>
-                    <td class="muted">{{ PACT_BOON_BY_ID[p.boon].effect }}</td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-        {% endif %}
-
-        {% if can_add_pact_tier[0] %}
-          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:0.75rem">
-            <input type="hidden" name="action" value="add_pact_tier" />
-            <div class="grid-2">
-              <div class="form-row">
-                <label for="sacrifice">Sacrifice</label>
-                <select id="sacrifice" name="sacrifice">
-                  {% for s in PACT_SACRIFICES %}
-                    <option value="{{ s.id }}">{{ s.name }} — {{ s.cost }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-              <div class="form-row">
-                <label for="boon">Boon</label>
-                <select id="boon" name="boon">
-                  {% for b in PACT_BOONS %}
-                    <option value="{{ b.id }}">{{ b.name }} — {{ b.effect }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-              <div class="form-row">
-                <label for="demon">Patron demon (optional)</label>
-                <input id="demon" name="demon" type="text" value="{{ wizard_state.demon }}" placeholder="Tiszirain" />
-              </div>
-              <div class="form-row">
-                <label>&nbsp;</label>
-                <button class="btn secondary" type="submit">Forge pact</button>
-              </div>
-            </div>
-          </form>
-        {% else %}
-          <p class="muted" style="font-size:0.85rem;margin-top:0.5rem">{{ can_add_pact_tier[1] }}</p>
-        {% endif %}
-
-        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:0.75rem">
-          <input type="hidden" name="action" value="break_pact" />
-          <button class="btn danger small" type="submit">
-            Break pact (−{{ pact_break_penalty.levels }} level{{ '' if pact_break_penalty.levels == 1 else 's' }},
-            −{{ pact_break_penalty.health }} Health)
-          </button>
-        </form>
-      </details>
-    {% elif STATE_SOURCE[STATE_PACT] in enabled_source_names and wizard_state_kind == STATE_NONE %}
-      <p class="muted" style="font-size:0.85rem">
-        Forging a pact needs a level {{ PACT_TIER_LEVELS[0] }} wizard and a demon's <strong>True Name</strong>
-        in the vault (found as treasure, never bought).
-        {% if not has_true_name %}<em>No True Name is in the vault yet.</em>{% endif %}
-      </p>
-    {% endif %}
-  </details>
-  {% endif %}
-
-  {# ---- Expansion rules ------------------------------------------------------
-     The in-game table rules each enabled book adds: traps, demonic attributes,
-     Malcor's optional core-rule updates, the solo/co-op toolkit. These are
-     reference only — they govern play at the table, not warband state, so the
-     app shows them and tracks nothing. #}
-  {% if expansion_rules %}
-  <details class="card" id="expansion-rules">
-    <summary><h2>Expansion rules</h2></summary>
-    <p class="muted" style="font-size:0.85rem">
-      Table rules from the books you have switched on. Reference only — the app doesn't track these.
-      Every book is browsable in the <a href="{{ url_for('reference') }}">Frostgrave Lexicon</a>,
-      switched on or not.
-    </p>
-    {% for book, sections in expansion_rules.items() %}
-      {% for sec in sections %}
-        <details class="ref-panel">
-          <summary>{{ book }} — {{ sec.title }}</summary>
-          {% if sec.blurb %}<p class="muted" style="font-size:0.85rem">{{ sec.blurb }}</p>{% endif %}
-          {% if sec.rows %}
-            <div class="table-wrap">
-              <table>
-                <tbody>
-                  {% for row in sec.rows %}
-                    <tr><td><strong>{{ row.name }}</strong></td><td class="muted">{{ row.text }}</td></tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            </div>
-          {% endif %}
-          {% for e in sec.entries %}
-            <p style="margin:0.4rem 0">
-              <strong>{{ e.name }}</strong>{% if e.tag %} <span class="badge">{{ e.tag }}</span>{% endif %}
-              {% if e.text %}<br /><span class="muted">{{ e.text }}</span>{% endif %}
-            </p>
-          {% endfor %}
-        </details>
-      {% endfor %}
-    {% endfor %}
-  </details>
-  {% endif %}
 
   {# ---- Post-game loot ---- #}
   <details class="card" id="post-game">
@@ -503,7 +285,13 @@
           </div>
         {% endif %}
         <div class="form-row">
-          <label for="loot_items">Items found (one per line)</label>
+          <label>Items found — pick from a rulebook</label>
+          <div class="loot-picker" id="postgame-loot-picker">
+            {{ loot_picker_row('postgame') }}
+          </div>
+        </div>
+        <div class="form-row">
+          <label for="loot_items">Items found (one per line — freeform, in addition to the picker above)</label>
           <textarea id="loot_items" name="loot_items" placeholder="Grimoire: Bone Dart&#10;Potion of Healing&#10;Magic dagger"></textarea>
         </div>
         <div class="form-row">
@@ -518,7 +306,7 @@
   {# ---- Wizard & apprentice details ---- #}
   <details class="card">
     <summary><h2>Wizard &amp; apprentice</h2></summary>
-    <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" enctype="multipart/form-data">
+    <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" enctype="multipart/form-data" data-autosave>
       <input type="hidden" name="action" value="details" />
       <details class="ref-panel" open>
         <summary>Wizard — {{ wiz.name }} · {{ wiz.school }}</summary>
@@ -629,14 +417,121 @@
         </details>
       {% endif %}
 
-      <div class="form-row">
-        <label for="notes">Warband notes</label>
-        <textarea id="notes" name="notes">{{ wb.notes }}</textarea>
-      </div>
-      <div class="actions">
-        <button class="btn" type="submit">Save details</button>
-      </div>
     </form>
+
+    {# ---- Wizard state -----------------------------------------------------
+       Its own panel rather than nested in the form above: each control posts
+       its own action, and forms cannot be nested. Only shown when at least
+       one of the three books that introduce a state is switched on. Details
+       of what each state does live in the Lexicon, not here. #}
+    {% set available_states = [] %}
+    {% for kind in [STATE_LICH, STATE_BEASTCRAFTER, STATE_PACT] %}
+      {% if STATE_SOURCE[kind] in enabled_source_names %}{% set _ = available_states.append(kind) %}{% endif %}
+    {% endfor %}
+    {% if available_states %}
+      <details class="ref-panel" {% if wizard_state_kind != STATE_NONE %}open{% endif %}>
+        <summary>Wizard state — {{ STATE_LABELS[wizard_state_kind] }}</summary>
+        <p class="muted" style="font-size:0.85rem">Check lexicon for details.</p>
+
+        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
+          <input type="hidden" name="action" value="set_wizard_state" />
+          <div class="form-row inline">
+            <div>
+              <label for="state_kind">State</label>
+              <select id="state_kind" name="state_kind">
+                <option value="{{ STATE_NONE }}" {% if wizard_state_kind == STATE_NONE %}selected{% endif %}>{{ STATE_LABELS[STATE_NONE] }}</option>
+                {% for kind in available_states %}
+                  <option value="{{ kind }}" {% if wizard_state_kind == kind %}selected{% endif %}>
+                    {{ STATE_LABELS[kind] }} — {{ STATE_SOURCE[kind] }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div>
+              <label>&nbsp;</label>
+              <button class="btn secondary" type="submit">Set state</button>
+            </div>
+          </div>
+        </form>
+
+        {% if wizard_state_kind == STATE_BEASTCRAFTER %}
+          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:0.5rem">
+            <input type="hidden" name="action" value="advance_beastcrafter" />
+            <button class="btn secondary small" type="submit" {% if not can_advance_beastcrafter[0] %}disabled{% endif %}>
+              Advance tier ({{ beastcrafter_tier }} of {{ BEASTCRAFTER_TIERS|length }})
+            </button>
+            {% if not can_advance_beastcrafter[0] %}
+              <span class="muted" style="font-size:0.85rem"> — {{ can_advance_beastcrafter[1] }}</span>
+            {% endif %}
+          </form>
+          {% if beastcrafter_tier >= 3 %}
+            <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:0.75rem">
+              <input type="hidden" name="action" value="set_animal_feature" />
+              <div class="form-row inline">
+                <div>
+                  <label for="feature">Animal Feature</label>
+                  <select id="feature" name="feature">
+                    {% for f in ANIMAL_FEATURES %}
+                      <option value="{{ f.id }}" {% if wizard_state.feature == f.id %}selected{% endif %}>{{ f.name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div>
+                  <label>&nbsp;</label>
+                  <button class="btn secondary" type="submit">Set feature</button>
+                </div>
+              </div>
+            </form>
+          {% endif %}
+        {% endif %}
+
+        {% if wizard_state_kind == STATE_PACT %}
+          <p class="muted" style="font-size:0.85rem">
+            {{ pact_tiers|length }} of {{ PACT_MAX_TIERS }} held{% if wizard_state.demon %} — Patron: <strong>{{ wizard_state.demon }}</strong>{% endif %}
+            {% if pact_tiers %}
+              —
+              {% for p in pact_tiers %}{{ PACT_SACRIFICE_BY_ID[p.sacrifice].name }}/{{ PACT_BOON_BY_ID[p.boon].name }}{% if not loop.last %}, {% endif %}{% endfor %}
+            {% endif %}
+          </p>
+          {% if can_add_pact_tier[0] %}
+            <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:0.5rem">
+              <input type="hidden" name="action" value="add_pact_tier" />
+              <div class="grid-2">
+                <div class="form-row">
+                  <label for="sacrifice">Sacrifice</label>
+                  <select id="sacrifice" name="sacrifice">
+                    {% for s in PACT_SACRIFICES %}<option value="{{ s.id }}">{{ s.name }}</option>{% endfor %}
+                  </select>
+                </div>
+                <div class="form-row">
+                  <label for="boon">Boon</label>
+                  <select id="boon" name="boon">
+                    {% for b in PACT_BOONS %}<option value="{{ b.id }}">{{ b.name }}</option>{% endfor %}
+                  </select>
+                </div>
+                <div class="form-row">
+                  <label for="demon">Patron demon (optional)</label>
+                  <input id="demon" name="demon" type="text" value="{{ wizard_state.demon }}" placeholder="Tiszirain" />
+                </div>
+                <div class="form-row">
+                  <label>&nbsp;</label>
+                  <button class="btn secondary" type="submit">Forge pact</button>
+                </div>
+              </div>
+            </form>
+          {% else %}
+            <p class="muted" style="font-size:0.85rem;margin-top:0.5rem">{{ can_add_pact_tier[1] }}</p>
+          {% endif %}
+          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:0.75rem">
+            <input type="hidden" name="action" value="break_pact" />
+            <button class="btn danger small" type="submit">
+              Break pact (−{{ pact_break_penalty.levels }} level{{ '' if pact_break_penalty.levels == 1 else 's' }},
+              −{{ pact_break_penalty.health }} Health)
+            </button>
+          </form>
+        {% endif %}
+      </details>
+    {% endif %}
 
     <details class="ref-panel">
       <summary>Level up wizard {% if pending_levels %}({{ pending_levels }} ready){% endif %}</summary>
@@ -650,7 +545,7 @@
         <input type="hidden" name="action" value="add_xp" />
         <div>
           <label for="xp">Add/remove XP</label>
-          <input id="xp" name="xp" type="text" inputmode="numeric" pattern="[+-]?[0-9]+" value="50" />
+          <input id="xp" name="xp" type="text" inputmode="numeric" pattern="[+-]?[0-9]+" value="20" />
         </div>
         <div>
           <label>&nbsp;</label>
@@ -806,7 +701,6 @@
         <div class="actions">
           <button type="button" class="btn secondary small" id="spell-up">Move selected ↑</button>
           <button type="button" class="btn secondary small" id="spell-down">Move selected ↓</button>
-          <button class="btn small" type="submit">Save spell order</button>
         </div>
         <p class="muted" style="font-size:0.85rem;margin-top:0.4rem">Click a spell row to select it (use Info to open text), then reorder.</p>
       </form>
@@ -814,25 +708,49 @@
         (function () {
           const body = document.getElementById('spell-order-body');
           const input = document.getElementById('view-spell-order');
+          const selKey = 'selspell:' + location.pathname;
           let selected = null;
           function rows() { return [...body.querySelectorAll('.spell-row')]; }
+          function select(row) {
+            rows().forEach(x => x.classList.remove('selected'));
+            selected = row;
+            if (row) {
+              row.classList.add('selected');
+              try { sessionStorage.setItem(selKey, row.dataset.spellId); } catch (err) { /* ignore */ }
+            }
+          }
           function sync() {
             rows().forEach((r, i) => {
               const idx = r.querySelector('.spell-idx');
               if (idx) idx.textContent = (i + 1) + '.';
             });
             input.value = rows().map(r => r.dataset.spellId).join('|');
+            if (selected) {
+              try { sessionStorage.setItem(selKey, selected.dataset.spellId); } catch (err) { /* ignore */ }
+            }
+            if (window.fgSaveViewState) window.fgSaveViewState();
+            const form = input.form;
+            if (form.requestSubmit) form.requestSubmit();
+            else form.submit();
           }
           rows().forEach(r => {
             r.addEventListener('click', (e) => {
               if (e.target.closest('.spell-desc-toggle') || e.target.closest('summary')) {
                 // allow details toggle; still select row
               }
-              rows().forEach(x => x.classList.remove('selected'));
-              selected = r;
-              r.classList.add('selected');
+              select(r);
             });
           });
+          // Re-select whichever spell was selected before the last reorder-
+          // triggered reload, so a run of "Move up" clicks doesn't require
+          // re-picking the row every time.
+          try {
+            const savedId = sessionStorage.getItem(selKey);
+            if (savedId) {
+              const match = rows().find(r => r.dataset.spellId === savedId);
+              if (match) select(match);
+            }
+          } catch (err) { /* ignore */ }
           document.getElementById('spell-up').onclick = () => {
             if (!selected || !selected.previousElementSibling) return;
             body.insertBefore(selected, selected.previousElementSibling);
@@ -866,7 +784,7 @@
             <span class="portrait-placeholder portrait-md-ph">?</span>
           {% endif %}
           <div class="char-body">
-            <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" enctype="multipart/form-data">
+            <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" enctype="multipart/form-data" data-autosave>
               <input type="hidden" name="action" value="captain_edit" />
               <div class="grid-2">
                 <div class="form-row">
@@ -924,9 +842,6 @@
                 <label for="captain_notes">Notes</label>
                 <textarea id="captain_notes" name="captain_notes">{{ cap.notes }}</textarea>
               </div>
-              <div class="actions">
-                <button class="btn" type="submit">Save captain</button>
-              </div>
             </form>
           </div>
         </div>
@@ -943,7 +858,7 @@
             <input type="hidden" name="action" value="captain_add_xp" />
             <div>
               <label for="captain_xp_amount">Add/remove XP</label>
-              <input id="captain_xp_amount" name="amount" type="text" inputmode="numeric" pattern="[+-]?[0-9]+" value="50" />
+              <input id="captain_xp_amount" name="amount" type="text" inputmode="numeric" pattern="[+-]?[0-9]+" value="20" />
             </div>
             <div>
               <label>&nbsp;</label>
@@ -1019,7 +934,12 @@
                   <label for="captain_extra_stat">Starting bonus</label>
                   <select id="captain_extra_stat" name="captain_extra_stat">
                     {% for stat in LEVELUP_STATS %}
-                      <option value="{{ stat }}">+{{ bonus_choice_amount(stat) }} {{ stat|capitalize }}</option>
+                      {% set base_val = (hr.captain_base_stats or {}).get(stat, 0) %}
+                      {% set limit = (hr.captain_stat_absolute_limits or {}).get(stat) %}
+                      <option value="{{ stat }}" {% if limit is not none and base_val >= limit %}disabled{% endif %}>
+                        +{{ bonus_choice_amount(stat) }} {{ stat|capitalize }}
+                        {% if limit is not none and base_val >= limit %} (at {{ limit }} limit){% endif %}
+                      </option>
                     {% endfor %}
                   </select>
                 </div>
@@ -1072,7 +992,7 @@
 
     {% if soldiers %}
       <div class="table-wrap">
-        <table>
+        <table id="roster-table">
           <thead>
             <tr>
               <th>#</th>
@@ -1083,7 +1003,10 @@
               <th>Status</th>
               <th>Move</th><th>Fight</th><th>Shoot</th><th>Armour</th><th>Will</th><th>Health</th>
               <th>Cost</th>
-              <th>Actions</th>
+              <th>
+                Actions
+                <button type="button" class="btn small secondary" id="toggle-actions-btn">Show actions</button>
+              </th>
             </tr>
           </thead>
           <tbody id="soldier-order-body">
@@ -1117,7 +1040,7 @@
                 <td>{{ format_stat(s.will) }}</td>
                 <td>{{ s.health }}</td>
                 <td class="gold">{{ s.cost }}</td>
-                <td>
+                <td class="actions-cell">
                   <div class="stack-sm">
                     <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
                       <input type="hidden" name="action" value="soldier_status" />
@@ -1149,13 +1072,12 @@
                     {% endif %}
                     <details>
                       <summary class="muted" style="cursor:pointer;font-size:0.85rem">Edit / picture</summary>
-                      <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" enctype="multipart/form-data" class="stack-sm" style="margin-top:0.4rem">
+                      <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" enctype="multipart/form-data" class="stack-sm" style="margin-top:0.4rem" data-autosave>
                         <input type="hidden" name="action" value="soldier_edit" />
                         <input type="hidden" name="soldier_id" value="{{ s.id }}" />
                         <input name="soldier_name" type="text" value="{{ s.name }}" />
                         <input name="soldier_portrait" type="file" accept="image/*" />
                         <input name="notes" type="text" value="{{ s.notes }}" placeholder="Notes" />
-                        <button class="btn small" type="submit">Update</button>
                       </form>
                     </details>
                     {% if hr.soldier_leveling_enabled %}
@@ -1166,7 +1088,7 @@
                           <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
                             <input type="hidden" name="action" value="soldier_add_xp" />
                             <input type="hidden" name="soldier_id" value="{{ s.id }}" />
-                            <input name="amount" type="text" inputmode="numeric" pattern="[+-]?[0-9]+" value="50" style="width:5rem" title="Negative removes XP (reverses a level-up if it drops below the current level)" />
+                            <input name="amount" type="text" inputmode="numeric" pattern="[+-]?[0-9]+" value="20" style="width:5rem" title="Negative removes XP (reverses a level-up if it drops below the current level)" />
                             <button class="btn secondary small" type="submit">Add/remove XP</button>
                           </form>
                           <p class="muted" style="font-size:0.8rem;margin:0">XP {{ s.xp }} · Level {{ s.level }}/{{ hr.soldier_max_levels }}</p>
@@ -1217,7 +1139,15 @@
                               Starting bonus
                               <select name="extra_stat">
                                 {% for stat in LEVELUP_STATS %}
-                                  <option value="{{ stat }}">+{{ bonus_choice_amount(stat) }} {{ stat|capitalize }}</option>
+                                  {% set base_val = s.get(stat, 0) %}
+                                  {% set fixed = hr.promote_captain_bonus.get(stat, 0) %}
+                                  {% set limit = (hr.captain_stat_absolute_limits or {}).get(stat) %}
+                                  {% set at_limit = limit is not none and base_val >= limit %}
+                                  {% set after_fixed = base_val if at_limit else (([base_val + fixed, limit] | min) if limit is not none else (base_val + fixed)) %}
+                                  <option value="{{ stat }}" {% if limit is not none and after_fixed >= limit %}disabled{% endif %}>
+                                    +{{ bonus_choice_amount(stat) }} {{ stat|capitalize }}
+                                    {% if limit is not none and after_fixed >= limit %} (at {{ limit }} limit){% endif %}
+                                  </option>
                                 {% endfor %}
                               </select>
                             </label>
@@ -1263,7 +1193,6 @@
         <div class="actions">
           <button type="button" class="btn secondary small" id="soldier-up">Move selected ↑</button>
           <button type="button" class="btn secondary small" id="soldier-down">Move selected ↓</button>
-          <button class="btn small" type="submit">Save soldier order</button>
         </div>
         <p class="muted" style="font-size:0.85rem;margin-top:0.4rem">Pick the "Sel." radio on a soldier row, then reorder. Order is used on the PDF roster.</p>
       </form>
@@ -1272,6 +1201,7 @@
           const body = document.getElementById('soldier-order-body');
           if (!body) return;
           const input = document.getElementById('view-soldier-order');
+          const selKey = 'selsoldier:' + location.pathname;
           function rows() { return [...body.querySelectorAll('tr')]; }
           function radios() { return [...body.querySelectorAll('input[name="soldier-select"]')]; }
           function selectedRow() {
@@ -1281,11 +1211,18 @@
           function refreshHighlight() {
             rows().forEach((r) => { r.style.outline = ''; });
             const sel = selectedRow();
-            if (sel) sel.style.outline = '2px solid var(--accent)';
+            if (sel) {
+              sel.style.outline = '2px solid var(--accent)';
+              try { sessionStorage.setItem(selKey, sel.dataset.soldierId); } catch (err) { /* ignore */ }
+            }
           }
           function sync() {
             rows().forEach((r, i) => { r.cells[0].textContent = i + 1; });
             input.value = rows().map(r => r.dataset.soldierId).join('|');
+            if (window.fgSaveViewState) window.fgSaveViewState();
+            const form = input.form;
+            if (form.requestSubmit) form.requestSubmit();
+            else form.submit();
           }
           radios().forEach((radio) => radio.addEventListener('change', refreshHighlight));
           rows().forEach(r => r.addEventListener('click', (e) => {
@@ -1296,6 +1233,20 @@
               refreshHighlight();
             }
           }));
+          // Re-select whichever soldier was selected before the last
+          // reorder-triggered reload, so a run of "Move up" clicks doesn't
+          // require re-picking the row every time.
+          try {
+            const savedId = sessionStorage.getItem(selKey);
+            if (savedId) {
+              const match = rows().find(r => r.dataset.soldierId === savedId);
+              const radio = match ? match.querySelector('input[name="soldier-select"]') : null;
+              if (radio) {
+                radio.checked = true;
+                refreshHighlight();
+              }
+            }
+          } catch (err) { /* ignore */ }
           document.getElementById('soldier-up').onclick = () => {
             const sel = selectedRow();
             if (!sel || !sel.previousElementSibling) return;
@@ -1314,7 +1265,7 @@
       <p class="empty">No soldiers yet. Thugs and thieves cost 0 gc.</p>
     {% endif %}
 
-    <details class="ref-panel">
+    <details class="ref-panel" id="hire-soldier-panel">
       <summary>Hire soldier</summary>
       <p class="muted" style="font-size:0.85rem">
         Default name is the type plus a number (e.g. “Archer 1”). Rename and add a picture afterward via Edit / picture.
@@ -1345,7 +1296,7 @@
                 <td><strong>{{ c.name }}</strong></td>
                 <td><span class="badge {{ c.category }}">{{ c.category }}</span></td>
                 <td class="muted">{% if c.requires_spell %}<span class="badge">via {{ c.requires_spell }}</span>{% elif c.source != 'Core Rules' %}<span class="badge">{{ c.source }}</span>{% else %}—{% endif %}</td>
-                <td class="gold">{% if c.cost == 0 %}Free{% else %}{{ c.cost }}{% endif %}</td>
+                <td class="gold">{% if c.cost == 0 %}{{ 'Spell' if c.requires_spell else 'Free' }}{% else %}{{ c.cost }}{% endif %}</td>
                 <td>{{ c.move }}</td>
                 <td>{{ format_stat(c.fight) }}</td>
                 <td>{{ format_stat(c.shoot) }}</td>
@@ -1378,66 +1329,6 @@
       </div>
     </details>
   </details>
-
-  {# ---- Vault & treasury ---- #}
-  <div class="grid-2">
-    <details class="card">
-      <summary><h2>Treasury <span class="gold">{{ wb.gold }} gc</span></h2></summary>
-      <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
-        <input type="hidden" name="action" value="adjust_gold" />
-        <div class="form-row inline">
-          <div>
-            <label for="delta">Change (+/−)</label>
-            <input id="delta" name="delta" type="text" inputmode="numeric" pattern="[+-]?[0-9]+" required />
-          </div>
-          <div>
-            <label for="reason">Reason</label>
-            <input id="reason" name="reason" type="text" />
-          </div>
-        </div>
-        <button class="btn gold" type="submit">Apply</button>
-      </form>
-    </details>
-    <details class="card">
-      <summary><h2>Vault items</h2></summary>
-      {% if wb["vault_items"] %}
-        <ul class="list-plain">
-          {% for it in wb["vault_items"] %}
-            <li>
-              <strong>{{ it.name }}</strong>
-              {% if it.notes %}<span class="muted"> — {{ it.notes }}</span>{% endif %}
-              <form class="inline-form" method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
-                <input type="hidden" name="action" value="remove_vault_item" />
-                <input type="hidden" name="item_id" value="{{ it.id }}" />
-                <button class="btn danger small" type="submit">×</button>
-              </form>
-            </li>
-          {% endfor %}
-        </ul>
-      {% else %}
-        <p class="empty">No vault items yet. Add via post-game loot.</p>
-      {% endif %}
-      <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:0.75rem">
-        <input type="hidden" name="action" value="add_vault_item" />
-        <div class="form-row inline">
-          <div>
-            <label for="item_name">Add item</label>
-            {# Suggestions only — still a free-text box, so anything can be banked. #}
-            <input id="item_name" name="item_name" type="text" required list="magic-item-names" />
-            {% if magic_item_names %}
-              <datalist id="magic-item-names">
-                {% for name in magic_item_names %}<option value="{{ name }}"></option>{% endfor %}
-              </datalist>
-            {% endif %}
-          </div>
-          <div>
-            <label>&nbsp;</label>
-            <button class="btn secondary" type="submit">Add</button>
-          </div>
-        </div>
-      </form>
-    </details>
-  </div>
 
   {# ---- Base ---- #}
   <details class="card" id="base">
@@ -1529,6 +1420,83 @@
     {% endif %}
   </details>
 
+  {# ---- Treasury & vault ---- #}
+  <details class="card" id="treasury-vault">
+    <summary><h2>Treasury and Vault <span class="gold">{{ wb.gold }} gc</span></h2></summary>
+    <div class="grid-2">
+      <div>
+        <h3>Treasury</h3>
+        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
+          <input type="hidden" name="action" value="adjust_gold" />
+          <div class="form-row inline">
+            <div>
+              <label for="delta">Change (+/−)</label>
+              <input id="delta" name="delta" type="text" inputmode="numeric" pattern="[+-]?[0-9]+" required />
+            </div>
+            <div>
+              <label for="reason">Reason</label>
+              <input id="reason" name="reason" type="text" />
+            </div>
+          </div>
+          <button class="btn gold" type="submit">Apply</button>
+        </form>
+      </div>
+      <div>
+        <h3>Vault items</h3>
+        {% if wb["vault_items"] %}
+          <ul class="list-plain">
+            {% for it in wb["vault_items"] %}
+              <li>
+                <strong>{{ it.name }}</strong>
+                {% if it.notes %}<span class="muted"> — {{ it.notes }}</span>{% endif %}
+                <form class="inline-form" method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
+                  <input type="hidden" name="action" value="remove_vault_item" />
+                  <input type="hidden" name="item_id" value="{{ it.id }}" />
+                  <button class="btn danger small" type="submit">×</button>
+                </form>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="empty">No vault items yet. Add via post-game loot.</p>
+        {% endif %}
+        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:0.75rem">
+          <input type="hidden" name="action" value="add_vault_item" />
+          <div class="form-row">
+            <label>Pick from a rulebook (fills the field below — still editable)</label>
+            <div class="loot-picker">
+              {{ loot_picker_row('vault', target_id='item_name') }}
+            </div>
+          </div>
+          <div class="form-row inline">
+            <div>
+              <label for="item_name">Add item</label>
+              {# Suggestions only — still a free-text box, so anything can be banked. #}
+              <input id="item_name" name="item_name" type="text" required list="magic-item-names" />
+              {% if magic_item_names %}
+                <datalist id="magic-item-names">
+                  {% for name in magic_item_names %}<option value="{{ name }}"></option>{% endfor %}
+                </datalist>
+              {% endif %}
+            </div>
+            <div>
+              <label>&nbsp;</label>
+              <button class="btn secondary" type="submit">Add</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+    <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:1rem">
+      <input type="hidden" name="action" value="set_notes" />
+      <div class="form-row">
+        <label for="notes">Warband notes</label>
+        <textarea id="notes" name="notes">{{ wb.notes }}</textarea>
+      </div>
+      <button class="btn" type="submit">Save notes</button>
+    </form>
+  </details>
+
   {# Campaign log — hidden from the UI for now, kept here in case it's wanted back later.
   <details class="card">
     <summary><h2>Campaign log</h2></summary>
@@ -1571,6 +1539,158 @@
         }
         boxes.forEach((b) => b.addEventListener('change', refresh));
         refresh();
+      });
+    })();
+  </script>
+
+  <script>
+    (function () {
+      // Rulebook -> item -> power level/spell cascading picker, shared by the
+      // After the Game card (multi-row, composes into a hidden field) and the
+      // Vault's Add item field (single row, autofills the free-text input).
+      var dataEl = document.getElementById('loot-picker-data');
+      if (!dataEl) return;
+      var LOOT_DATA = JSON.parse(dataEl.textContent);
+      var SPELL_VARIANT_ITEMS = { 'Grimoire': true, 'Scroll': true };
+
+      function opt(name) {
+        var o = document.createElement('option');
+        o.value = name;
+        o.textContent = name;
+        return o;
+      }
+
+      function populateItems(row) {
+        var book = row.querySelector('.loot-book').value;
+        var itemSel = row.querySelector('.loot-item');
+        var itemText = row.querySelector('.loot-item-text');
+        var variantCell = row.querySelector('.loot-variant-cell');
+        if (book === '__other__') {
+          itemSel.style.display = 'none';
+          itemSel.disabled = true;
+          itemText.style.display = '';
+          variantCell.style.display = 'none';
+          return;
+        }
+        itemText.style.display = 'none';
+        itemSel.style.display = '';
+        itemSel.disabled = !book;
+        itemSel.innerHTML = '';
+        itemSel.appendChild(opt(book ? '— pick an item —' : '— pick a book first —'));
+        itemSel.firstChild.value = '';
+        (LOOT_DATA.items_by_book[book] || []).forEach(function (n) { itemSel.appendChild(opt(n)); });
+        variantCell.style.display = 'none';
+      }
+
+      function populateVariant(row) {
+        var itemSel = row.querySelector('.loot-item');
+        var variantCell = row.querySelector('.loot-variant-cell');
+        var variantSel = row.querySelector('.loot-variant');
+        if (SPELL_VARIANT_ITEMS[itemSel.value]) {
+          variantSel.innerHTML = '';
+          var ph = opt('— pick a spell —'); ph.value = ''; variantSel.appendChild(ph);
+          LOOT_DATA.spell_names.forEach(function (n) { variantSel.appendChild(opt(n)); });
+          variantCell.style.display = '';
+        } else {
+          variantCell.style.display = 'none';
+        }
+      }
+
+      function composeRow(row) {
+        var book = row.querySelector('.loot-book').value;
+        var itemSel = row.querySelector('.loot-item');
+        var itemText = row.querySelector('.loot-item-text');
+        var variantSel = row.querySelector('.loot-variant');
+        var composed = '';
+        if (book === '__other__') {
+          composed = itemText.value.trim();
+        } else if (book && itemSel.value) {
+          composed = itemSel.value;
+          if (SPELL_VARIANT_ITEMS[itemSel.value] && variantSel.value) {
+            composed += ': ' + variantSel.value;
+          }
+          composed += ' (' + book + ')';
+        }
+        var hidden = row.querySelector('.loot-composed');
+        if (hidden) hidden.value = composed;
+        if (row.dataset.mode === 'vault' && row.dataset.target && composed) {
+          var target = document.getElementById(row.dataset.target);
+          if (target) target.value = composed;
+        }
+      }
+
+      function resetRow(row) {
+        row.querySelector('.loot-book').value = '';
+        row.querySelector('.loot-item-text').value = '';
+        populateItems(row);
+        composeRow(row);
+      }
+
+      function wireRow(row) {
+        row.querySelector('.loot-book').addEventListener('change', function () {
+          populateItems(row);
+          composeRow(row);
+        });
+        row.querySelector('.loot-item').addEventListener('change', function () {
+          populateVariant(row);
+          composeRow(row);
+        });
+        row.querySelector('.loot-variant').addEventListener('change', function () { composeRow(row); });
+        row.querySelector('.loot-item-text').addEventListener('input', function () { composeRow(row); });
+        var addBtn = row.querySelector('.loot-add-row');
+        if (addBtn) {
+          addBtn.addEventListener('click', function () {
+            var clone = row.cloneNode(true);
+            row.parentNode.insertBefore(clone, row.nextSibling);
+            resetRow(clone);
+            wireRow(clone);
+            // Only the last row keeps a visible "+ Add another item" button.
+            addBtn.remove();
+          });
+        }
+      }
+
+      document.querySelectorAll('.loot-picker-row').forEach(wireRow);
+    })();
+  </script>
+
+  <script>
+    (function () {
+      // Compact roster by default; "Show actions" reveals the Actions column's
+      // controls. Remembered per-browser, not per-warband — it's a personal
+      // display preference.
+      var table = document.getElementById('roster-table');
+      var btn = document.getElementById('toggle-actions-btn');
+      if (!table || !btn) return;
+      var KEY = 'fgShowActions';
+      function apply(show) {
+        table.classList.toggle('show-actions', show);
+        btn.textContent = show ? 'Hide actions' : 'Show actions';
+      }
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        var show = !table.classList.contains('show-actions');
+        apply(show);
+        try { localStorage.setItem(KEY, show ? '1' : '0'); } catch (err) { /* ignore */ }
+      });
+      var stored = null;
+      try { stored = localStorage.getItem(KEY); } catch (err) { /* ignore */ }
+      apply(stored === '1');
+    })();
+  </script>
+
+  <script>
+    (function () {
+      // Hire soldier panel starts collapsed, but once opened (e.g. to hire
+      // someone) it stays open across page reloads until manually closed.
+      var panel = document.getElementById('hire-soldier-panel');
+      if (!panel) return;
+      var KEY = 'fgHireSoldierOpen';
+      var stored = null;
+      try { stored = localStorage.getItem(KEY); } catch (err) { /* ignore */ }
+      panel.open = stored === '1';
+      panel.addEventListener('toggle', function () {
+        try { localStorage.setItem(KEY, panel.open ? '1' : '0'); } catch (err) { /* ignore */ }
       });
     })();
   </script>

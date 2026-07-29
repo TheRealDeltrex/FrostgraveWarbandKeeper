@@ -9,7 +9,7 @@
       apprentice costs <span class="gold">{{ APPRENTICE_COST }} gc</span>.
       Spells: <strong>{{ OWN_SCHOOL_SPELLS }} own</strong>,
       <strong>1 from each aligned</strong>,
-      <strong>{{ neutral_needed }} from different neutrals</strong>,
+      <strong><span id="neutral-needed-num">{{ neutral_needed }}</span> from different neutrals</strong>,
       <strong>none from opposed</strong>.
       Casting numbers include school penalties (own +0 / aligned +2 / neutral +4 / opposed +6).
     </p>
@@ -39,7 +39,7 @@
               <option value="{{ s }}" {% if s == school %}selected{% endif %}>{{ s }}</option>
             {% endfor %}
           </select>
-          <div class="limit-bar" style="margin-top:0.5rem">
+          <div class="limit-bar" id="relations-summary" style="margin-top:0.5rem">
             <div class="limit">Own (+0 CN): <strong>{{ school }}</strong></div>
             <div class="limit">Aligned (+2): {{ relations.aligned|join(', ') }}</div>
             <div class="limit">Neutral (+4): {{ relations.neutral|join(', ') }}</div>
@@ -109,8 +109,12 @@
 
       <script>
         // Ticking a book has to re-render the spell picker, which is built
-        // server-side — same round-trip the school dropdown already uses. The
-        // ticked books ride along in the query string so the reload keeps them.
+        // server-side — same route the school dropdown already used to hit via a
+        // full navigation. That reset scroll position and threw away every field
+        // that isn't in the query string (name, portraits, apprentice fields), so
+        // instead this fetches the same URL and swaps in just the three regions
+        // that actually depend on school/sources, leaving the rest of the page —
+        // and the scroll position — untouched.
         window.fgNewReload = function () {
           var params = new URLSearchParams();
           params.set("school", document.getElementById("school").value);
@@ -118,13 +122,37 @@
             if (box.checked) { params.set(box.name, "on"); }
           });
           var url = "{{ url_for('warband_new') }}?" + params.toString();
-          (window.fgNavigate || function (u) { location.href = u; })(url);
+          fetch(url)
+            .then(function (r) { return r.text(); })
+            .then(function (html) {
+              var doc = new DOMParser().parseFromString(html, "text/html");
+              ["neutral-needed-num", "relations-summary", "creation-dynamic"].forEach(function (id) {
+                var fresh = doc.getElementById(id);
+                var current = document.getElementById(id);
+                if (!fresh || !current) return;
+                current.replaceWith(fresh);
+              });
+              window.fgInitSpellPicker();
+            })
+            .catch(function () { location.href = url; });
         };
         document.querySelectorAll("#source-books-card input[data-source-toggle]")
           .forEach(function (box) { box.addEventListener("change", window.fgNewReload); });
       </script>
     </details>
 
+    <div id="creation-dynamic">
+    <script type="application/json" id="creation-dynamic-data">
+      {{ {
+        "own": school,
+        "aligned": relations.aligned,
+        "neutral": relations.neutral,
+        "opposed": relations.opposed,
+        "need": STARTING_SPELL_COUNT,
+        "ownN": OWN_SCHOOL_SPELLS,
+        "neuN": neutral_needed,
+      } | tojson }}
+    </script>
     <details class="card" open>
       <summary><h2>2. Spells
         <span class="muted" style="font-weight:500;font-size:0.9rem">
@@ -193,7 +221,7 @@
                             {% if sp.relation == 'opposed' %}disabled{% endif %}
                           />
                         </span>
-                        <span class="col-name spell-name">{{ sp.name }}</span>
+                        <span class="col-name spell-name">{{ sp.name }}{% if sp.source and sp.source != 'Core Rules' %} <span class="badge">{{ sp.source }}</span>{% endif %}</span>
                         <span class="col-cn spell-cn">
                           {{ sp.effective_cn }}{% if sp.cn_penalty %}<span class="muted"> ({{ sp.cn }}+{{ sp.cn_penalty }})</span>{% endif %}
                         </span>
@@ -219,6 +247,7 @@
         <p id="spell-status" class="empty"></p>
       </div>
     </details>
+    </div>
 
     <details class="card" open>
       <summary><h2>3. Confirm</h2></summary>
@@ -235,14 +264,19 @@
   </form>
 
   <script>
-  (function () {
-    const OWN = {{ school|tojson }};
-    const ALIGNED = {{ relations.aligned|tojson }};
-    const NEUTRAL = {{ relations.neutral|tojson }};
-    const OPPOSED = {{ relations.opposed|tojson }};
-    const NEED = {{ STARTING_SPELL_COUNT }};
-    const OWN_N = {{ OWN_SCHOOL_SPELLS }};
-    const NEU_N = {{ neutral_needed }};  // 2 for a core school, 3 for a Pentangle one
+  // Re-run after every fgNewReload() swap of #creation-dynamic, since the school/
+  // source-book-dependent constants and the spell checkboxes themselves are all
+  // replaced then. Everything is re-read/re-queried fresh on each call rather than
+  // captured once, so it's safe to call more than once per page load.
+  window.fgInitSpellPicker = function () {
+    const data = JSON.parse(document.getElementById('creation-dynamic-data').textContent);
+    const OWN = data.own;
+    const ALIGNED = data.aligned;
+    const NEUTRAL = data.neutral;
+    const OPPOSED = data.opposed;
+    const NEED = data.need;
+    const OWN_N = data.ownN;
+    const NEU_N = data.neuN;  // 2 for a core school, 3 for a Pentangle one
 
     const selectedList = document.getElementById('selected-list');
     const spellOrder = document.getElementById('spell_order');
@@ -461,12 +495,19 @@
         : 'Complete spell selection to enable create.';
     }
 
-    document.getElementById('create-form').addEventListener('submit', e => {
-      spellOrder.value = order.join('|');
-      if (submitBtn.disabled) e.preventDefault();
-    });
-
     refreshSpellUI();
-  })();
+  };
+
+  // The form itself is never replaced by fgNewReload(), so this only needs
+  // attaching once — refreshSpellUI() (called on every checkbox change and at
+  // the end of every fgInitSpellPicker() run) already keeps spell_order current.
+  if (!window.__fgSubmitGuardAttached) {
+    window.__fgSubmitGuardAttached = true;
+    document.getElementById('create-form').addEventListener('submit', function (e) {
+      if (document.getElementById('submit-btn').disabled) e.preventDefault();
+    });
+  }
+
+  window.fgInitSpellPicker();
   </script>
 {% endblock %}

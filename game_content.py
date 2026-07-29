@@ -21,6 +21,7 @@ def load_standard_items() -> list[dict]:
         it.setdefault("slot_cost", 1)
         it.setdefault("kind", "simple")
         it.setdefault("spellcaster_allowed", True)
+        it.setdefault("source", "Core Rules")
     return items
 
 
@@ -90,13 +91,14 @@ def group_magic_items(items: list[dict]) -> list[dict]:
     """
     from frostgrave_data import SOURCE_BOOKS
 
-    order = {book: i for i, book in enumerate(SOURCE_BOOKS)}
+    order = {book: i + 1 for i, book in enumerate(SOURCE_BOOKS)}
+    order["Core Rules"] = 0
     groups: dict[str, list[dict]] = {}
     for it in items:
         groups.setdefault(it.get("source", ""), []).append(it)
     return [
         {"source": src, "rows": sorted(rows, key=lambda r: r["name"].lower())}
-        for src, rows in sorted(groups.items(), key=lambda kv: order.get(kv[0], len(order)))
+        for src, rows in sorted(groups.items(), key=lambda kv: order.get(kv[0], len(order) + 1))
     ]
 
 
@@ -105,6 +107,26 @@ def load_expansion_rules() -> dict:
     """In-game table rules per source book (traps, demonic attributes, the
     optional Malcor core-rule updates...). Shown, not simulated."""
     path = DATA / "expansion_rules.json"
+    if not path.is_file():
+        return {}
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+@lru_cache(maxsize=1)
+def load_random_encounters() -> dict:
+    """Random encounter tables per source book (core + any supplement with a
+    standalone table). Reference only — the app doesn't roll these."""
+    path = DATA / "random_encounters.json"
+    if not path.is_file():
+        return {}
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+@lru_cache(maxsize=1)
+def load_loot_tables() -> dict:
+    """The top-level "roll to see what category of treasure you found" tables
+    per source book. Named magic items themselves live in load_magic_items()."""
+    path = DATA / "loot_tables.json"
     if not path.is_file():
         return {}
     return json.loads(path.read_text(encoding="utf-8"))

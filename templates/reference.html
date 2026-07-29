@@ -14,6 +14,7 @@
 
   <details class="card">
     <summary><h2>Schools</h2></summary>
+    <h3>Standard Schools</h3>
     <div class="table-wrap">
       <table>
         <thead><tr><th>School</th><th>Aligned (+2)</th><th>Neutral (+4)</th><th>Opposed (+6)</th></tr></thead>
@@ -21,9 +22,26 @@
           {% for s in schools %}
             <tr>
               <td><strong>{{ s }}</strong></td>
-              <td class="muted">{{ aligned[s]|join(', ') }}</td>
-              <td class="muted">{{ neutral[s]|join(', ') }}</td>
-              <td>{{ opposed[s] }}</td>
+              <td class="muted">{{ relations[s].aligned|join(', ') }}</td>
+              <td class="muted">{{ relations[s].neutral|join(', ') }}</td>
+              <td>{{ relations[s].opposed }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <h3>Lost Schools from Maze of Malcor</h3>
+    <p class="muted">Each combines two standard schools and is aligned with both; the book gives them no opposed school.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>School</th><th>Aligned (+2)</th><th>Neutral (+4)</th><th>Opposed (+6)</th></tr></thead>
+        <tbody>
+          {% for s in pentangle_schools %}
+            <tr>
+              <td><strong>{{ s }}</strong></td>
+              <td class="muted">{{ relations[s].aligned|join(', ') }}</td>
+              <td class="muted">{{ relations[s].neutral|join(', ') }}</td>
+              <td>{{ relations[s].opposed }}</td>
             </tr>
           {% endfor %}
         </tbody>
@@ -32,37 +50,40 @@
   </details>
 
   <details class="card">
-    <summary><h2>Spells by school (base casting number)</h2></summary>
+    <summary><h2>Spells by school</h2></summary>
     <p class="muted">Click <strong>Info</strong> on a spell line for full text.</p>
     {% for sch, splist in spells.items() %}
-      <h3>{{ sch }}</h3>
-      <div class="spell-list-detail">
-        <div class="spell-list-head spell-ref-head" aria-hidden="true">
-          <span class="col-name">Spell</span>
-          <span class="col-cn">Base CN</span>
-          <span class="col-type">Type</span>
-          <span class="col-info"></span>
-        </div>
-        {% for sp in splist %}
-          <div class="spell-row">
-            <details class="spell-desc">
-              <summary class="spell-row-main spell-row-main-ref">
-                <span class="col-name"><strong>{{ sp.name }}</strong>{% if sp.source != 'Core Rules' %} <span class="badge">{{ sp.source }}</span>{% endif %}</span>
-                <span class="col-cn gold"><strong>{{ sp.cn }}</strong></span>
-                <span class="col-type muted">{{ sp.type }}</span>
-                <span class="col-info spell-desc-toggle">Info</span>
-              </summary>
-              <p class="spell-desc-body">{{ sp.description }}</p>
-            </details>
+      <details class="ref-panel">
+        <summary>{{ sch }} ({{ splist|length }})</summary>
+        <div class="spell-list-detail">
+          <div class="spell-list-head spell-ref-head" aria-hidden="true">
+            <span class="col-name">Spell</span>
+            <span class="col-cn">Base CN</span>
+            <span class="col-type">Type</span>
+            <span class="col-info"></span>
           </div>
-        {% endfor %}
-      </div>
+          {% for sp in splist %}
+            <div class="spell-row">
+              <details class="spell-desc">
+                <summary class="spell-row-main spell-row-main-ref">
+                  <span class="col-name"><strong>{{ sp.name }}</strong>{% if sp.source != 'Core Rules' %} <span class="badge">{{ sp.source }}</span>{% endif %}</span>
+                  <span class="col-cn gold"><strong>{{ sp.cn }}</strong></span>
+                  <span class="col-type muted">{{ sp.type }}</span>
+                  <span class="col-info spell-desc-toggle">Info</span>
+                </summary>
+                <p class="spell-desc-body">{{ sp.description }}</p>
+              </details>
+            </div>
+          {% endfor %}
+        </div>
+      </details>
     {% endfor %}
   </details>
 
   <details class="card">
-    <summary><h2>Standard arms, armour &amp; consumables</h2></summary>
-    <p class="muted">General Arms and Armour List from Frostgrave 2e, plus potion / scroll / grimoire types.</p>
+    <summary><h2>Arms, armour &amp; consumables</h2></summary>
+    <p class="muted">General Arms and Armour List from Frostgrave 2e, plus a few notable supplement
+      weapons and potion / scroll / grimoire types.</p>
     <div class="item-list-detail">
       <div class="item-list-head" aria-hidden="true">
         <span class="col-name">Item</span>
@@ -74,7 +95,7 @@
         <div class="item-row">
           <details class="item-desc">
             <summary class="item-row-main">
-              <span class="col-name"><strong>{{ it.name }}</strong></span>
+              <span class="col-name"><strong>{{ it.name }}</strong>{% if it.source and it.source != 'Core Rules' %} <span class="badge">{{ it.source }}</span>{% endif %}</span>
               <span class="col-cat"><span class="badge">{{ it.category }}</span></span>
               <span class="col-summary muted">{{ it.summary }}</span>
               <span class="col-info item-desc-toggle">Info</span>
@@ -118,135 +139,50 @@
       book switched on under a warband's Additional Rules and Homerules before they can be hired.
       Entries marked <em>via &lt;spell&gt;</em> are summoned for free and only become hireable when your
       wizard knows that spell (Animate Construct, Animal Companion).</p>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Type</th><th>Cat</th><th>Source</th><th>Cost</th>
-            <th>Move</th><th>Fight</th><th>Shoot</th><th>Armour</th><th>Will</th><th>Health</th><th>Gear</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for group in soldier_groups %}
-            <tr class="group-row"><th colspan="12">{{ group.label }} ({{ group.soldiers|length }})</th></tr>
-            {% for s in group.soldiers %}
-            <tr class="catalog-row">
-              <td><strong>{{ s.name }}</strong></td>
-              <td><span class="badge {{ s.category }}">{{ s.category }}</span></td>
-              <td class="muted">{% if s.requires_spell %}<span class="badge">via {{ s.requires_spell }}</span>{% elif s.source != 'Core Rules' %}<span class="badge">{{ s.source }}</span>{% else %}Core Rules{% endif %}</td>
-              <td class="gold">{% if s.cost == 0 %}Free{% else %}{{ s.cost }}{% endif %}</td>
-              <td>{{ s.move }}</td>
-              <td>{{ format_stat(s.fight) }}</td>
-              <td>{{ format_stat(s.shoot) }}</td>
-              <td>{{ s.armour }}</td>
-              <td>{{ format_stat(s.will) }}</td>
-              <td>{{ s.health }}</td>
-              <td class="muted">{{ s.gear }}</td>
-              <td>
-                {% if s.description %}
-                  <details class="info-toggle-details">
-                    <summary class="info-toggle">Info</summary>
-                  </details>
-                {% endif %}
-              </td>
-            </tr>
-            {% if s.description %}
-              <tr class="info-desc-row"><td colspan="12">{{ s.description }}</td></tr>
-            {% endif %}
-            {% endfor %}
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  </details>
-
-  <details class="card">
-    <summary><h2>Magic items &amp; treasure ({{ magic_item_count }})</h2></summary>
-    <p class="muted">Treasure from the five supplements. A book's items only become suggestions in a
-      warband's vault once that book is switched on under its Additional Rules and Homerules —
-      but everything is browsable here.</p>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Item</th><th>Effect</th></tr></thead>
-        <tbody>
-          {% for group in magic_item_groups %}
-            <tr class="group-row"><th colspan="2">{{ group.source }} ({{ group.rows|length }})</th></tr>
-            {% for it in group.rows %}
-              <tr><td><strong>{{ it.name }}</strong></td><td class="muted">{{ it.effect }}</td></tr>
-            {% endfor %}
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  </details>
-
-  <details class="card">
-    <summary><h2>Expansion rules</h2></summary>
-    <p class="muted">The table rules each supplement adds beyond its soldiers, spells and creatures —
-      traps, demonic attributes, underground play, the optional core-rule updates, the solo/co-op
-      toolkit. Reference only: these govern play at the table, so the app shows them rather than
-      tracking them.</p>
-    {% for book, sections in expansion_rules.items() %}
-      <h3>{{ book }}</h3>
-      {% for sec in sections %}
-        <details class="ref-panel">
-          <summary>{{ sec.title }}</summary>
-          {% if sec.blurb %}<p class="muted" style="font-size:0.85rem">{{ sec.blurb }}</p>{% endif %}
-          {% if sec.rows %}
-            <div class="table-wrap">
-              <table>
-                <tbody>
-                  {% for row in sec.rows %}
-                    <tr><td><strong>{{ row.name }}</strong></td><td class="muted">{{ row.text }}</td></tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            </div>
-          {% endif %}
-          {% for e in sec.entries %}
-            <p style="margin:0.4rem 0">
-              <strong>{{ e.name }}</strong>{% if e.tag %} <span class="badge">{{ e.tag }}</span>{% endif %}
-              {% if e.text %}<br /><span class="muted">{{ e.text }}</span>{% endif %}
-            </p>
-          {% endfor %}
-        </details>
-      {% endfor %}
-    {% endfor %}
-  </details>
-
-  {% if ghost and ghost.sections %}
-  <details class="card">
-    <summary><h2>Ghost Archipelago</h2></summary>
-    <p class="muted">A separate Osprey ruleset, not a Frostgrave supplement — a Heritor and a Warden
-      lead a Crew across the Lost Isles instead of a Wizard leading a Warband. Nothing here is
-      hireable and it has no source-book toggle; it is carried purely for reference.</p>
-    {% if ghost.intro %}<p class="muted">{{ ghost.intro }}</p>{% endif %}
-    {% for sec in ghost.sections %}
+    {% for group in soldier_groups %}
       <details class="ref-panel">
-        <summary>{{ sec.title }}</summary>
-        {% if sec.blurb %}<p class="muted" style="font-size:0.85rem">{{ sec.blurb }}</p>{% endif %}
-        {% if sec.rows %}
-          <div class="table-wrap">
-            <table>
-              <tbody>
-                {% for row in sec.rows %}
-                  <tr><td><strong>{{ row.name }}</strong></td><td class="muted">{{ row.text }}</td></tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-        {% endif %}
-        {% for e in sec.entries %}
-          <p style="margin:0.4rem 0">
-            <strong>{{ e.name }}</strong>{% if e.tag %} <span class="badge">{{ e.tag }}</span>{% endif %}
-            {% if e.text %}<br /><span class="muted">{{ e.text }}</span>{% endif %}
-          </p>
-        {% endfor %}
+        <summary>{{ group.label }} ({{ group.soldiers|length }})</summary>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Type</th><th>Cat</th><th>Source</th><th>Cost</th>
+                <th>Move</th><th>Fight</th><th>Shoot</th><th>Armour</th><th>Will</th><th>Health</th><th>Gear</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for s in group.soldiers %}
+              <tr class="catalog-row">
+                <td><strong>{{ s.name }}</strong></td>
+                <td><span class="badge {{ s.category }}">{{ s.category }}</span></td>
+                <td class="muted">{% if s.requires_spell %}<span class="badge">via {{ s.requires_spell }}</span>{% elif s.source != 'Core Rules' %}<span class="badge">{{ s.source }}</span>{% else %}Core Rules{% endif %}</td>
+                <td class="gold">{% if s.cost == 0 %}{{ 'Spell' if s.requires_spell else 'Free' }}{% else %}{{ s.cost }}{% endif %}</td>
+                <td>{{ s.move }}</td>
+                <td>{{ format_stat(s.fight) }}</td>
+                <td>{{ format_stat(s.shoot) }}</td>
+                <td>{{ s.armour }}</td>
+                <td>{{ format_stat(s.will) }}</td>
+                <td>{{ s.health }}</td>
+                <td class="muted">{{ s.gear }}</td>
+                <td>
+                  {% if s.description %}
+                    <details class="info-toggle-details">
+                      <summary class="info-toggle">Info</summary>
+                    </details>
+                  {% endif %}
+                </td>
+              </tr>
+              {% if s.description %}
+                <tr class="info-desc-row"><td colspan="12">{{ s.description }}</td></tr>
+              {% endif %}
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
       </details>
     {% endfor %}
   </details>
-  {% endif %}
 
   <details class="card">
     <summary><h2>Bestiary ({{ bestiary|length }})</h2></summary>
@@ -287,4 +223,225 @@
       <p class="empty">No bestiary data loaded.</p>
     {% endif %}
   </details>
+
+  <details class="card">
+    <summary><h2>Random encounters</h2></summary>
+    <p class="muted">The optional random-encounter tables from the core rules and the supplements that
+      give one — roll when a treasure token is first picked up (core: 10+), or however your group has
+      house-ruled it. Not every supplement has a standalone table; Into the Breeding Pits' underground
+      variant is under Expansion rules below instead.</p>
+    {% for book, sections in random_encounters.items() %}
+      <h3>{{ book }}</h3>
+      {% for sec in sections %}
+        <details class="ref-panel">
+          <summary>{{ sec.title }}</summary>
+          {% if sec.blurb %}<p class="muted" style="font-size:0.85rem">{{ sec.blurb }}</p>{% endif %}
+          {% if sec.rows %}
+            <div class="table-wrap">
+              <table>
+                <tbody>
+                  {% for row in sec.rows %}
+                    <tr><td><strong>{{ row.name }}</strong></td><td class="muted">{{ row.text }}</td></tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% endif %}
+        </details>
+      {% endfor %}
+    {% endfor %}
+  </details>
+
+  <details class="card">
+    <summary><h2>Magic items &amp; treasure ({{ magic_item_count }})</h2></summary>
+    <p class="muted">Treasure from the core rules and the five supplements. A book's items only become
+      suggestions in a warband's vault once that book is switched on under its Additional Rules and
+      Homerules — but everything is browsable here.</p>
+    {% for group in magic_item_groups %}
+      <details class="ref-panel">
+        <summary>{{ group.source }} ({{ group.rows|length }})</summary>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Item</th><th>Effect</th></tr></thead>
+            <tbody>
+              {% for it in group.rows %}
+                <tr><td><strong>{{ it.name }}</strong></td><td class="muted">{{ it.effect }}</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </details>
+    {% endfor %}
+  </details>
+
+  <details class="card">
+    <summary><h2>Loot tables</h2></summary>
+    <p class="muted">The top-level "roll to see what you found" tables — how many potions, scrolls, or
+      rolls on the magic item/weapon/armour/grimoire tables a recovered treasure token is worth. The
+      items themselves are the Magic items &amp; treasure table above and the Potions sub-list under
+      Arms, armour &amp; consumables.</p>
+    {% for book, sections in loot_tables.items() %}
+      <h3>{{ book }}</h3>
+      {% for sec in sections %}
+        <details class="ref-panel">
+          <summary>{{ sec.title }}</summary>
+          {% if sec.blurb %}<p class="muted" style="font-size:0.85rem">{{ sec.blurb }}</p>{% endif %}
+          {% if sec.rows %}
+            <div class="table-wrap">
+              <table>
+                <tbody>
+                  {% for row in sec.rows %}
+                    <tr><td><strong>{{ row.name }}</strong></td><td class="muted">{{ row.text }}</td></tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% endif %}
+        </details>
+      {% endfor %}
+    {% endfor %}
+  </details>
+
+  <details class="card">
+    <summary><h2>Expansion rules</h2></summary>
+    <p class="muted">The table rules each supplement adds beyond its soldiers, spells and creatures —
+      traps, demonic attributes, underground play, the optional core-rule updates, the solo/co-op
+      toolkit. Reference only: these govern play at the table, so the app shows them rather than
+      tracking them.</p>
+    {% for book, sections in expansion_rules.items() %}
+      <h3>{{ book }}</h3>
+      {% for sec in sections %}
+        <details class="ref-panel">
+          <summary>{{ sec.title }}</summary>
+          {% if sec.blurb %}<p class="muted" style="font-size:0.85rem">{{ sec.blurb }}</p>{% endif %}
+          {% if sec.rows %}
+            <div class="table-wrap">
+              <table>
+                <tbody>
+                  {% for row in sec.rows %}
+                    <tr><td><strong>{{ row.name }}</strong></td><td class="muted">{{ row.text }}</td></tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% endif %}
+          {% for e in sec.entries %}
+            <p style="margin:0.4rem 0">
+              <strong>{{ e.name }}</strong>{% if e.tag %} <span class="badge">{{ e.tag }}</span>{% endif %}
+              {% if e.text %}<br /><span class="muted">{{ e.text }}</span>{% endif %}
+            </p>
+          {% endfor %}
+        </details>
+      {% endfor %}
+    {% endfor %}
+
+    <h3>Wizard states</h3>
+    <p class="muted" style="font-size:0.85rem">
+      Three mutually exclusive states a wizard may take on, each from its own supplement.
+      Taking one clears any other; the app tracks all of the mechanical effects below.
+    </p>
+
+    <details class="ref-panel">
+      <summary>{{ STATE_LABELS[STATE_LICH] }} ({{ STATE_SOURCE[STATE_LICH] }})</summary>
+      <p class="muted" style="font-size:0.85rem">
+        Cast by the wizard (Necromancer / CN 20 / Out of Game) to tear his soul from his body and
+        animate his own corpse. Success makes him a Lich outright; failure scales with how badly the
+        roll was missed.
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Missed by</th><th>Penalty</th></tr></thead>
+          <tbody>
+            {% for row in LICH_FAILURE_TABLE %}
+              <tr><td><strong>{{ row.missed_by }}</strong></td><td class="muted">{{ row.penalty }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <p style="margin:0.6rem 0 0.2rem"><strong>As a Lich:</strong></p>
+      <ul style="margin:0.2rem 0">
+        <li>{{ LICH_XP_PER_LEVEL }} XP per level instead of the usual {{ XP_PER_LEVEL }}.</li>
+        <li>May never spend a level-up on {{ LICH_FORBIDDEN_LEVELUP | join(' or ') | capitalize }}.</li>
+        <li>Will is capped at +{{ LICH_STAT_CAPS.will }}, Health at {{ LICH_STAT_CAPS.health }}.</li>
+        <li>May never learn {{ LICH_FORBIDDEN_SPELLS | join(' or ') }}.</li>
+        <li>The Rangifer refuses to join a warband with a Lich in it.</li>
+        {% for note in LICH_NOTES %}<li>{{ note }}</li>{% endfor %}
+      </ul>
+    </details>
+
+    <details class="ref-panel">
+      <summary>{{ STATE_LABELS[STATE_BEASTCRAFTER] }} ({{ STATE_SOURCE[STATE_BEASTCRAFTER] }})</summary>
+      <p class="muted" style="font-size:0.85rem">
+        A three-tier track, drunk in as the Elixir of the Beastcrafter converts a level-up into an
+        advancement instead of a normal stat gain. Each tier needs a minimum wizard level and adds a
+        gc surcharge to every soldier hired afterward.
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Tier</th><th>Needs level</th><th>Soldier surcharge</th><th>Grants</th></tr></thead>
+          <tbody>
+            {% for t in BEASTCRAFTER_TIERS %}
+              <tr><td><strong>{{ t.name }}</strong></td><td>{{ t.min_level }}</td><td class="gold">+{{ t.surcharge }}gc</td><td class="muted">{{ t.summary }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <p style="margin:0.6rem 0 0.2rem"><strong>Animal Feature (one, picked permanently at Tier III):</strong></p>
+      <ul style="margin:0.2rem 0">
+        {% for f in ANIMAL_FEATURES %}<li><strong>{{ f.name }}</strong> — {{ f.effect }}</li>{% endfor %}
+      </ul>
+    </details>
+
+    <details class="ref-panel">
+      <summary>{{ STATE_LABELS[STATE_PACT] }} ({{ STATE_SOURCE[STATE_PACT] }})</summary>
+      <p class="muted" style="font-size:0.85rem">
+        Forged at wizard level {{ PACT_TIER_LEVELS|join(', ') }} (max {{ PACT_MAX_TIERS }} pacts), each
+        needing a demon's True Name in the vault by the book — the app only checks the level
+        requirement, since items are optional to track and can be handled at the table. Each pact
+        pairs one Sacrifice (a recurring cost) with one Boon (a permanent benefit). Breaking a pact
+        costs 1 level and 1 Health per Sacrifice held.
+      </p>
+      <p style="margin:0.6rem 0 0.2rem"><strong>Sacrifices:</strong></p>
+      <ul style="margin:0.2rem 0">
+        {% for s in PACT_SACRIFICES %}<li><strong>{{ s.name }}</strong> — {{ s.cost }}</li>{% endfor %}
+      </ul>
+      <p style="margin:0.6rem 0 0.2rem"><strong>Boons:</strong></p>
+      <ul style="margin:0.2rem 0">
+        {% for b in PACT_BOONS %}<li><strong>{{ b.name }}</strong> — {{ b.effect }}</li>{% endfor %}
+      </ul>
+    </details>
+  </details>
+
+  {% if ghost and ghost.sections %}
+  <details class="card">
+    <summary><h2>Ghost Archipelago</h2></summary>
+    <p class="muted">A separate Osprey ruleset, not a Frostgrave supplement — a Heritor and a Warden
+      lead a Crew across the Lost Isles instead of a Wizard leading a Warband. Nothing here is
+      hireable and it has no source-book toggle; it is carried purely for reference.</p>
+    {% if ghost.intro %}<p class="muted">{{ ghost.intro }}</p>{% endif %}
+    {% for sec in ghost.sections %}
+      <details class="ref-panel">
+        <summary>{{ sec.title }}</summary>
+        {% if sec.blurb %}<p class="muted" style="font-size:0.85rem">{{ sec.blurb }}</p>{% endif %}
+        {% if sec.rows %}
+          <div class="table-wrap">
+            <table>
+              <tbody>
+                {% for row in sec.rows %}
+                  <tr><td><strong>{{ row.name }}</strong></td><td class="muted">{{ row.text }}</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% endif %}
+        {% for e in sec.entries %}
+          <p style="margin:0.4rem 0">
+            <strong>{{ e.name }}</strong>{% if e.tag %} <span class="badge">{{ e.tag }}</span>{% endif %}
+            {% if e.text %}<br /><span class="muted">{{ e.text }}</span>{% endif %}
+          </p>
+        {% endfor %}
+      </details>
+    {% endfor %}
+  </details>
+  {% endif %}
 {% endblock %}

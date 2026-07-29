@@ -23,6 +23,15 @@ from frostgrave_data import (
     format_stat,
 )
 from game_content import item_slot_cost
+
+# The on-screen trick picker uses the full rules text, but "Coup de Grâce" and
+# "Leadership" wrap onto a second line in the PDF's tighter column. Shortened
+# for print only (full effect + declare inline); the canonical rules text in
+# CAPTAIN_TRICKS is unchanged.
+PDF_TRICK_LINE_OVERRIDES = {
+    "coup_de_grace": "+2 Damage in melee attack that has dealt 1< Damage (After damage calculation)",
+    "leadership": "Group Activation allows up to three soldiers (Upon activation)",
+}
 from warband_store import (
     captain_effective_stats,
     enrich_soldier,
@@ -163,7 +172,7 @@ def _format_slots(slots: list[str], n: int, has_dagger: bool = False) -> str:
     normalized = normalize_item_slots(slots, n)
     parts = []
     if has_dagger:
-        parts.append("Dagger (free)")
+        parts.append("Dagger")
     i = 0
     while i < n:
         val = (normalized[i] or "").strip()
@@ -397,20 +406,29 @@ def build_warband_pdf(wb: dict) -> bytes:
         _write_item_block(
             pdf, left, cap_slots, cap_slots_n, bool(cap.get("has_dagger")), "Equipment"
         )
-        trick_names = [
-            CAPTAIN_TRICK_BY_ID[tid]["name"]
+        tricks = [
+            CAPTAIN_TRICK_BY_ID[tid]
             for tid in cap.get("known_tricks") or []
             if tid in CAPTAIN_TRICK_BY_ID
         ]
         pdf.set_x(left)
-        pdf.multi_cell(
-            0,
-            4.5,
-            _t(f"**Tricks:** {', '.join(trick_names) if trick_names else 'none'}"),
-            new_x="LMARGIN",
-            new_y="NEXT",
-            markdown=True,
-        )
+        if not tricks:
+            pdf.multi_cell(0, 4.5, _t("**Tricks:** none"), new_x="LMARGIN", new_y="NEXT", markdown=True)
+        else:
+            pdf.multi_cell(0, 4.5, _t("**Tricks:**"), new_x="LMARGIN", new_y="NEXT", markdown=True)
+            for trick in tricks:
+                pdf.set_x(left)
+                line = PDF_TRICK_LINE_OVERRIDES.get(
+                    trick["id"], f"{trick['effect']} ({trick['declare']})"
+                )
+                pdf.multi_cell(
+                    0,
+                    4.5,
+                    _t(f"**{trick['name']}** - {line}"),
+                    new_x="LMARGIN",
+                    new_y="NEXT",
+                    markdown=True,
+                )
         pdf.set_y(max(pdf.get_y(), y0 + wiz_size + 2))
         pdf.ln(2)
     else:
@@ -419,7 +437,7 @@ def build_warband_pdf(wb: dict) -> bytes:
 
     # --- Soldiers ---
     _next_section("Soldiers")
-    soldiers = [enrich_soldier(s) for s in wb.get("soldiers") or []]
+    soldiers = [enrich_soldier(wb, s) for s in wb.get("soldiers") or []]
     if not soldiers:
         pdf.set_font("Helvetica", "I", 10)
         pdf.cell(0, 6, _t("No soldiers hired."), new_x="LMARGIN", new_y="NEXT")
@@ -486,7 +504,7 @@ def build_warband_pdf(wb: dict) -> bytes:
             pdf.set_y(max(pdf.get_y(), y0 + sol_size + 2))
             pdf.ln(1.5)
 
-    # --- Base & Vault (only if something is set) — always the last page ---
+    # --- Base & Vault — always the last page; Vault always shown (see below) ---
     from warband_store import base_summary
 
     base = base_summary(wb)
@@ -496,8 +514,7 @@ def build_warband_pdf(wb: dict) -> bytes:
     has_base = has_location or has_resources or has_notes
     vault = wb.get("vault_items") or []
 
-    if has_base or vault:
-        pdf.add_page()
+    pdf.add_page()  # Home base + Vault always get their own last page.
 
     if has_base:
         _next_section("Home base")
@@ -533,16 +550,19 @@ def build_warband_pdf(wb: dict) -> bytes:
             pdf.set_font("Helvetica", "", 9)
             pdf.multi_cell(0, 4, _t(f"Notes: {base['notes']}"), new_x="LMARGIN", new_y="NEXT")
 
+    # Vault always shows, even with no items and 0 gold — the printed sheet
+    # doubles as a place to write treasure down by hand at the table.
+    if has_base:
+        pdf.ln(6)  # one free line between the Home base and Vault sections
+    if pdf.get_y() > 250:
+        pdf.add_page()
+    pdf.set_x(pdf.l_margin)
+    _next_section("Vault")
+    pdf.set_font("Helvetica", "B", 9)
+    pdf.cell(0, 5, _t(f"Current gold: {wb.get('gold', 0)} gc"), new_x="LMARGIN", new_y="NEXT")
+    pdf.set_x(pdf.l_margin)
+    pdf.cell(0, 5, _t("Items:"), new_x="LMARGIN", new_y="NEXT")
     if vault:
-        if has_base:
-            pdf.ln(6)  # one free line between the Home base and Vault sections
-        if pdf.get_y() > 250:
-            pdf.add_page()
-        pdf.set_x(pdf.l_margin)
-        _next_section("Vault")
-        pdf.set_font("Helvetica", "B", 9)
-        pdf.cell(0, 5, _t(f"Current gold: {wb.get('gold', 0)} gc"), new_x="LMARGIN", new_y="NEXT")
-        pdf.set_x(pdf.l_margin)
         pdf.set_font("Helvetica", "", 9)
         for it in vault:
             pdf.set_x(pdf.l_margin)

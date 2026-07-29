@@ -638,5 +638,205 @@
   "name": "Whitestar Diamond",
   "source": "The Perilous Dark",
   "effect": "One-use; treat any Will roll as the minimum needed to succeed (or as a 16 with no Target Number), then it's destroyed."
+ },
+ {
+  "name": "Amulet of Resistance",
+  "source": "Core Rules",
+  "effect": "Once per game, +4 to a Will Roll to resist a spell; the decision can be made after the die is rolled."
+ },
+ {
+  "name": "Boots of Speed",
+  "source": "Core Rules",
+  "effect": "+1 Move."
+ },
+ {
+  "name": "Construct Hammer",
+  "source": "Core Rules",
+  "effect": "Fitted to a medium or large construct; counts as carrying a magic weapon with +1 damage modifier. A construct may only ever be fitted with one."
+ },
+ {
+  "name": "Fate Stone",
+  "source": "Core Rules",
+  "effect": "Once per game, the bearer may re-roll any one Casting Roll, Stat Roll, Combat Roll, or Shooting Roll."
+ },
+ {
+  "name": "Gloves of Casting",
+  "source": "Core Rules",
+  "effect": "Once per game, a spellcaster gains +5 to one Casting Roll, declared before the roll is made."
+ },
+ {
+  "name": "Gloves of Strength",
+  "source": "Core Rules",
+  "effect": "+1 damage modifier on all successful hand-to-hand attacks."
+ },
+ {
+  "name": "Horn of Destruction",
+  "source": "Core Rules",
+  "effect": "Once per game, use an action to blow the horn: treat as a successfully cast Crumble spell."
+ },
+ {
+  "name": "Ring of Slow Fall",
+  "source": "Core Rules",
+  "effect": "The wearer never suffers falling damage, no matter the distance."
+ },
+ {
+  "name": "Ring of Teleportation",
+  "source": "Core Rules",
+  "effect": "Once per game, spend an action to teleport up to 8\" within line of sight (not off the table, and not into or out of combat)."
+ },
+ {
+  "name": "Ring of Transference",
+  "source": "Core Rules",
+  "effect": "Spellcaster only. Once per game, spend an action to transfer up to 5 Health (1-for-1) to a warband member in line of sight, not above their starting Health."
+ },
+ {
+  "name": "Ring of Will",
+  "source": "Core Rules",
+  "effect": "+1 Will."
+ },
+ {
+  "name": "Robes of Arrow Turning",
+  "source": "Core Rules",
+  "effect": "+4 Armour against all bow and crossbow attacks."
+ },
+ {
+  "name": "Staff of Casting",
+  "source": "Core Rules",
+  "effect": "On finding, roll on the Random Spell Table to identify a spell; the staff gives +1 to the Casting Roll for that spell specifically."
+ },
+ {
+  "name": "Wand of Light",
+  "source": "Core Rules",
+  "effect": "Once per game, when casting a spell, roll two dice and choose which one to use."
+ },
+ {
+  "name": "Ring of Power (1)",
+  "source": "Core Rules",
+  "effect": "Item of power: a 1-point pool a spellcaster can draw on to empower a Casting Roll or Will Roll, alongside their own Health. Recharges between games."
+ },
+ {
+  "name": "Orb of Power (6)",
+  "source": "Core Rules",
+  "effect": "Item of power: a 6-point pool a spellcaster can draw on to empower a Casting Roll or Will Roll. Does not recharge — once its 6 points are spent it is empty and can't be sold."
+ },
+ {
+  "name": "Wand of Power (1)",
+  "source": "Core Rules",
+  "effect": "Item of power: a 1-point pool a spellcaster can draw on to empower a Casting Roll or Will Roll, alongside their own Health. Recharges between games."
+ },
+ {
+  "name": "Staff of Power (1)",
+  "source": "Core Rules",
+  "effect": "Item of power: a 1-point pool a spellcaster can draw on to empower a Casting Roll or Will Roll. Also counts as a magic weapon (Staff). Recharges between games."
+ },
+ {
+  "name": "Staff of Power (2)",
+  "source": "Core Rules",
+  "effect": "Item of power: a 2-point pool a spellcaster can draw on to empower a Casting Roll or Will Roll. Also counts as a magic weapon (Staff). Recharges between games."
+ },
+ {
+  "name": "Staff of Power (3)",
+  "source": "Core Rules",
+  "effect": "Item of power: a 3-point pool a spellcaster can draw on to empower a Casting Roll or Will Roll. Also counts as a magic weapon (Staff). Recharges between games."
+ },
+ {
+  "name": "Hand Weapon +1 damage",
+  "source": "Core Rules",
+  "effect": "Magic Weapon/Armour Table result: hand weapon with +1 damage modifier on top of its mundane profile."
+ },
+ {
+  "name": "Hand Weapon +1 Fight",
+  "source": "Core Rules",
+  "effect": "Magic Weapon/Armour Table result: hand weapon granting +1 Fight."
+ },
+ {
+  "name": "Hand Weapon +2 Will",
+  "source": "Core Rules",
+  "effect": "Magic Weapon/Armour Table result: hand weapon granting +2 Will."
+ },
+ {
+  "name": "Two-Handed Weapon +1 damage",
+  "source": "Core Rules",
+  "effect": "Magic Weapon/Armour Table result: two-handed weapon with +1 damage modifier on top of its mundane profile."
+ },
+ {
+  "name": "Two-Handed Weapon +1 Fight",
+  "source": "Core Rules",
+  "effect": "Magic Weapon/Armour Table result: two-handed weapon granting +1 Fight."
+ },
+ {
+  "name": "Two-Handed Weapon +2 Will",
+  "source": "Core Rules",
+  "effect": "Magic Weapon/Armour Table result: two-handed weapon granting +2 Will."
+ },
+ {
+  "name": "Bow +1 damage",
+  "source": "Core Rules",
+  "effect": "Magic Weapon/Armour Table result: bow with +1 damage modifier on top of its mundane profile."
+ },
+ {
+  "name": "Bow +1 Shoot",
+  "source": "Core Rules",
+  "effect": "Magic Weapon/Armour Table result: bow granting +1 Shoot."
+ },
+ {
+  "name": "Crossbow +1 damage",
+  "source": "Core Rules",
+  "effect": "Magic Weapon/Armour Table result: crossbow with +1 damage modifier on top of its mundane profile."
+ },
+ {
+  "name": "Crossbow +1 Shoot",
+  "source": "Core Rules",
+  "effect": "Magic Weapon/Armour Table result: crossbow granting +1 Shoot."
+ },
+ {
+  "name": "Dagger +1 Fight",
+  "source": "Core Rules",
+  "effect": "Magic Weapon/Armour Table result: dagger granting +1 Fight."
+ },
+ {
+  "name": "Dagger +1 damage",
+  "source": "Core Rules",
+  "effect": "Magic Weapon/Armour Table result: dagger with +1 damage modifier on top of its mundane profile."
+ },
+ {
+  "name": "Dagger +2 damage",
+  "source": "Core Rules",
+  "effect": "Magic Weapon/Armour Table result: dagger with +2 damage modifier on top of its mundane profile."
+ },
+ {
+  "name": "Light Armour +1 Armour",
+  "source": "Core Rules",
+  "effect": "Magic Weapon/Armour Table result: light armour granting a further +1 Armour."
+ },
+ {
+  "name": "Heavy Armour (Elemental Absorption)",
+  "source": "Core Rules",
+  "effect": "Magic Weapon/Armour Table result: heavy armour that halves (round up) any elemental damage taken."
+ },
+ {
+  "name": "Ring of Protection",
+  "source": "Core Rules",
+  "effect": "Magic Weapon/Armour Table result: +1 Armour."
+ },
+ {
+  "name": "Cloak of Protection",
+  "source": "Core Rules",
+  "effect": "Magic Weapon/Armour Table result: +1 Armour."
+ },
+ {
+  "name": "Cloak of Night",
+  "source": "Core Rules",
+  "effect": "Magic Weapon/Armour Table result: halves (round up) any elemental damage taken."
+ },
+ {
+  "name": "Staff +1 Fight",
+  "source": "Core Rules",
+  "effect": "Magic Weapon/Armour Table result: staff granting +1 Fight (in addition to its usual -1 damage / opponent -1 damage in hand-to-hand)."
+ },
+ {
+  "name": "Shield +1 Armour",
+  "source": "Core Rules",
+  "effect": "Magic Weapon/Armour Table result: shield granting a further +1 Armour."
  }
 ]
