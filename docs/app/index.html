@@ -448,6 +448,28 @@
         await pyodide.runPythonAsync(BOOTSTRAP_PY);
         navigatePy = pyodide.globals.get("navigate");
 
+        // BOOTSTRAP_PY just wrote empty (0-byte) placeholders for every default
+        // portrait — just enough for warband_store.default_portrait_name()'s
+        // Path.is_file() check to succeed, matching what actually served images
+        // relies on for the WEB view (a plain relative-URL rewrite in
+        // inlinePortraits(), never touching these bytes at all). But the PDF
+        // export reads portraits directly through Python/Pillow from this same
+        // MEMFS path, so an empty placeholder there fails silently (caught by
+        // pdf_export.py's try/except) and default art never appears in the PDF.
+        // Fix: fetch the real bytes (same files inlinePortraits() already relies
+        // on being served from static/portraits/ next to this page) and write
+        // them over the placeholders via Pyodide's virtual FS.
+        setMsg("Loading default character art…");
+        var portraitPaths = Object.keys(bundle.files).filter(function (k) {
+          return k.indexOf("static/portraits/") === 0;
+        });
+        await Promise.all(portraitPaths.map(function (relPath) {
+          return fetch(relPath)
+            .then(function (r) { return r.arrayBuffer(); })
+            .then(function (buf) { pyodide.FS.writeFile("/app/" + relPath, new Uint8Array(buf)); })
+            .catch(function (e) { console.warn("Could not load default portrait", relPath, e); });
+        }));
+
         go("/", "GET", []);
         loading.style.display = "none";
         frame.style.display = "block";
