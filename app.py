@@ -51,6 +51,7 @@ from frostgrave_data import (
     SCHOOL_RELATIONS,
     SCHOOLS,
     PENTANGLE_SCHOOLS,
+    SOLDIERS,
     SOURCE_BOOK_BY_SLUG,
     SOURCE_BOOK_OPTIONS,
     SOURCE_BOOKS,
@@ -468,7 +469,11 @@ def _render_new(
 def warband_view(warband_id: str):
     wb = _require_warband(warband_id)
     recompute_spell_cns(wb)
-    soldiers = [enrich_soldier(wb, s) for s in wb.get("soldiers") or []]
+    all_soldiers = wb.get("soldiers") or []
+    def _is_temporary(s):
+        return bool(SOLDIERS.get(s.get("type_key", ""), {}).get("temporary"))
+    soldiers = [enrich_soldier(wb, s) for s in all_soldiers if not _is_temporary(s)]
+    temporary_members = [enrich_soldier(wb, s) for s in all_soldiers if _is_temporary(s)]
     limits = warband_limits(wb)
     known = known_spell_ids(wb)
     wschool = (wb.get("wizard") or {}).get("school") or "Elementalist"
@@ -504,12 +509,26 @@ def warband_view(warband_id: str):
         and (not c.get("requires_spell") or c["requires_spell"] in wb_spells)
         and expansions.soldier_state_block(wb, c["key"]) is None
     ]
+    # The temporary-member catalog (Raise Zombie, Summon Demon) gets its own
+    # "Hire temporary member" panel instead of living in the main hire table.
+    temporary_catalog = [c for c in hireable if c.get("temporary")]
+    hireable = [c for c in hireable if not c.get("temporary")]
+    # Groups (zombie/demon) that already have a live member on the table —
+    # disables the matching Hire button, mirroring Animal Companion's block.
+    temporary_groups_occupied = {
+        SOLDIERS[s["type_key"]]["temporary_group"]
+        for s in all_soldiers
+        if s.get("status") != "dead" and _is_temporary(s)
+    }
     return render_template(
         "warband_view.html",
         wb=wb,
         soldiers=soldiers,
+        temporary_members=temporary_members,
+        temporary_groups_occupied=temporary_groups_occupied,
         limits=limits,
         catalog_groups=group_soldiers_by_source(hireable),
+        temporary_catalog=temporary_catalog,
         known_spell_names=wb_spells,
         has_animal_companion=has_animal_companion(wb),
         animal_companion_limit=animal_companion_limit(wb),

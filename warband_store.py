@@ -928,11 +928,30 @@ def active_soldiers(wb: dict) -> list[dict]:
     return [s for s in (wb.get("soldiers") or []) if s.get("status") != "dead"]
 
 
+def active_permanent_soldiers(wb: dict) -> list[dict]:
+    """Active soldiers excluding temporary members (Raise Zombie, Summon
+    Demon) — those don't occupy a permanent roster slot."""
+    return [
+        s for s in active_soldiers(wb)
+        if not SOLDIERS.get(s.get("type_key", ""), {}).get("temporary")
+    ]
+
+
+def active_temporary_members(wb: dict) -> list[dict]:
+    """Active Raise Zombie / Summon Demon members — shown in their own section,
+    not counted against the soldier or specialist caps."""
+    return [
+        s for s in active_soldiers(wb)
+        if SOLDIERS.get(s.get("type_key", ""), {}).get("temporary")
+    ]
+
+
 def soldier_count(wb: dict) -> int:
-    """Active soldiers plus the Captain (if any) — a Captain occupies a soldier
-    slot just like any other roster member, on top of their own specialist
-    slot (see specialist_count)."""
-    return len(active_soldiers(wb)) + (1 if wb.get("captain") else 0)
+    """Permanent active soldiers plus the Captain (if any) — a Captain occupies
+    a soldier slot just like any other roster member, on top of their own
+    specialist slot (see specialist_count). Temporary members (Raise Zombie,
+    Summon Demon) don't count towards this."""
+    return len(active_permanent_soldiers(wb)) + (1 if wb.get("captain") else 0)
 
 
 def specialist_count(wb: dict) -> int:
@@ -1042,6 +1061,16 @@ def add_soldier(wb: dict, type_key: str, name: str = "") -> tuple[bool, str]:
                     "apprentice to field a second (one per spellcaster)."
                 )
             return False, f"You may only have {limit} Animal Companions at a time (one per spellcaster)."
+    temp_group = info.get("temporary_group")
+    if temp_group:
+        already = any(
+            SOLDIERS.get(s.get("type_key", ""), {}).get("temporary_group") == temp_group
+            for s in active_soldiers(wb)
+        )
+        if already:
+            if temp_group == "zombie":
+                return False, "You may only have one raised zombie at a time — Raise Zombie can be cast again once it's gone."
+            return False, "Summon Demon can't be cast again while you're already controlling a summoned demon."
     cap = expansions.max_soldiers(wb)
     if soldier_count(wb) >= cap:
         return False, f"Soldier limit reached ({cap})."

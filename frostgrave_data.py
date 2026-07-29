@@ -1244,6 +1244,80 @@ SOLDIERS: dict[str, dict] = {
         "notes": "Joins via the Demonic Servant spell (never purchased). Demon; one minor demonic attribute; aids Summon Demon rolls.",
         "description": "A minor demon bound into service, joining a warband only through the Demonic Servant spell (Forgotten Pacts) rather than being purchased. Demon: immune to poison, all its attacks count as magic, and it may carry treasure tokens but has no item slots. Rolls one Minor Demonic Attribute on arrival and improves the wizard's future Summon Demon rolls.",
     },
+    # Temporary members: Raise Zombie and Summon Demon (core rules) add a
+    # creature to the warband for the rest of the game rather than permanently
+    # — unlike demonic_servant above, these are expected to leave (killed,
+    # exits the table, or the spell lapses) and can then be re-summoned. They
+    # don't count against the soldier/specialist caps and get their own "Hire
+    # temporary member" panel instead of living in the main hire catalog.
+    "raised_zombie": {
+        "name": "Zombie",
+        "cost": 0,
+        "category": "temporary",
+        "temporary": True,
+        "temporary_group": "zombie",
+        "requires_spell": "Raise Zombie",
+        "move": 4,
+        "fight": 1,
+        "shoot": 0,
+        "armour": 12,
+        "will": 0,
+        "health": 6,
+        "gear": "Unarmed",
+        "notes": "Joins via Raise Zombie as a temporary member; only one at a time. Undead.",
+        "description": "Raised by the Raise Zombie spell as a temporary member of the warband — not a permanent hire, and doesn't count against the soldier or specialist limit. A warband may only have one raised zombie at a time; if it is killed or leaves the table, Raise Zombie can be cast again for another. Undead: immune to poison, never wounded, can carry treasure tokens but has no item slots.",
+    },
+    "summoned_imp": {
+        "name": "Imp (summoned)",
+        "cost": 0,
+        "category": "temporary",
+        "temporary": True,
+        "temporary_group": "demon",
+        "requires_spell": "Summon Demon",
+        "move": 6,
+        "fight": 1,
+        "shoot": 0,
+        "armour": 10,
+        "will": 4,
+        "health": 6,
+        "gear": "Unarmed",
+        "notes": "Joins via Summon Demon (Casting Roll succeeded by 0–5) as a temporary member; only one summoned demon at a time. Demon.",
+        "description": "Placed by the Summon Demon spell as a temporary member of the warband — not a permanent hire, and doesn't count against the soldier or specialist limit. Which demon tier arrives depends on how much the Casting Roll succeeded by: 0–5 gives this imp, 6–12 a minor demon, 13+ a major demon. Summon Demon can't be cast again while a summoned demon is already under control. Demon: immune to poison, all attacks count as magic, can carry treasure tokens but has no item slots.",
+    },
+    "summoned_minor_demon": {
+        "name": "Minor Demon (summoned)",
+        "cost": 0,
+        "category": "temporary",
+        "temporary": True,
+        "temporary_group": "demon",
+        "requires_spell": "Summon Demon",
+        "move": 6,
+        "fight": 3,
+        "shoot": 0,
+        "armour": 11,
+        "will": 4,
+        "health": 12,
+        "gear": "Unarmed",
+        "notes": "Joins via Summon Demon (Casting Roll succeeded by 6–12) as a temporary member; only one summoned demon at a time. Demon.",
+        "description": "Placed by the Summon Demon spell as a temporary member of the warband — not a permanent hire, and doesn't count against the soldier or specialist limit. Which demon tier arrives depends on how much the Casting Roll succeeded by: 0–5 an imp, 6–12 gives this minor demon, 13+ a major demon. Summon Demon can't be cast again while a summoned demon is already under control. Demon: immune to poison, all attacks count as magic, can carry treasure tokens but has no item slots.",
+    },
+    "summoned_major_demon": {
+        "name": "Major Demon (summoned)",
+        "cost": 0,
+        "category": "temporary",
+        "temporary": True,
+        "temporary_group": "demon",
+        "requires_spell": "Summon Demon",
+        "move": 6,
+        "fight": 5,
+        "shoot": 0,
+        "armour": 12,
+        "will": 6,
+        "health": 15,
+        "gear": "Unarmed",
+        "notes": "Joins via Summon Demon (Casting Roll succeeded by 13+) as a temporary member; only one summoned demon at a time. Demon; Large; Strong (+2 damage); True Sight.",
+        "description": "Placed by the Summon Demon spell as a temporary member of the warband — not a permanent hire, and doesn't count against the soldier or specialist limit. Which demon tier arrives depends on how much the Casting Roll succeeded by: 0–5 an imp, 6–12 a minor demon, 13+ gives this major demon. Summon Demon can't be cast again while a summoned demon is already under control. Demon: immune to poison, all attacks count as magic, can carry treasure tokens but has no item slots. Large: suffers the -2 Large Target penalty against shooting attacks. Strong: deals +2 damage. True Sight: ignores Beauty and Invisibility, and destroys any Illusionary Soldier it fights.",
+    },
     # Joins through a pact boon rather than a spell — gated in expansions.py.
     "chilopendra": {
         "name": "Chilopendra",
@@ -2027,8 +2101,16 @@ def soldier_list_for_ui() -> list[dict]:
 # "Core Rules" source — they're gated by a spell, not by a source book.
 SUMMONED_GROUP_LABEL = "Summoned by spell"
 
+# Heading for Raise Zombie / Summon Demon's temporary members — grouped apart
+# from the permanent summons above since they don't count against the
+# soldier/specialist caps and get their own "Hire temporary member" panel
+# rather than living in the main hire catalog (see app.py's warband_view).
+TEMPORARY_GROUP_LABEL = "Temporary members"
+
 
 def soldier_group_label(row: dict) -> str:
+    if row.get("temporary"):
+        return TEMPORARY_GROUP_LABEL
     return SUMMONED_GROUP_LABEL if row.get("requires_spell") else row["source"]
 
 
@@ -2067,6 +2149,15 @@ SUMMONED_ORDER = [
     "demonic_servant",
 ]
 
+# Order the temporary members appear in: the raised zombie, then the three
+# summoned-demon tiers from weakest to strongest.
+TEMPORARY_ORDER = [
+    "raised_zombie",
+    "summoned_imp",
+    "summoned_minor_demon",
+    "summoned_major_demon",
+]
+
 
 def _source_rank(source: str) -> int:
     """Core Rules first, then the supplement books in release order."""
@@ -2090,7 +2181,13 @@ def _ui_sort_key(r: dict) -> tuple:
     than under a book, so letting a supplement companion (the Beastcrafter's boar
     and ice spider) sort into its own book's position would emit that heading a
     second time further down the list.
+
+    Temporary members (Raise Zombie, Summon Demon) get their own block right
+    after the permanent summons, for the same reason.
     """
+    if r.get("temporary"):
+        rank = TEMPORARY_ORDER.index(r["key"]) if r["key"] in TEMPORARY_ORDER else len(TEMPORARY_ORDER)
+        return (0, 2, rank, 0, r["name"])
     if r.get("requires_spell"):
         rank = SUMMONED_ORDER.index(r["key"]) if r["key"] in SUMMONED_ORDER else len(SUMMONED_ORDER)
         return (0, 1, rank, 0, r["name"])
