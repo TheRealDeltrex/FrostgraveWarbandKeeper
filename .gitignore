@@ -13,3 +13,4 @@ data/portraits/*
 .DS_Store
 build/
 dist/
+.codesign/
