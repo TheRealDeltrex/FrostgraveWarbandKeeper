@@ -44,6 +44,7 @@
       
   
   
+  <script type="application/json" id="loot-picker-data">{"items_by_book": {"Core Rules": ["Amulet of Resistance", "Boots of Speed", "Bow +1 damage", "Bow +1 Shoot", "Cloak of Night", "Cloak of Protection", "Construct Hammer", "Crossbow +1 damage", "Crossbow +1 Shoot", "Dagger +1 damage", "Dagger +1 Fight", "Dagger +2 damage", "Fate Stone", "Gloves of Casting", "Gloves of Strength", "Hand Weapon +1 damage", "Hand Weapon +1 Fight", "Hand Weapon +2 Will", "Heavy Armour (Elemental Absorption)", "Horn of Destruction", "Light Armour +1 Armour", "Orb of Power (6)", "Ring of Power (1)", "Ring of Protection", "Ring of Slow Fall", "Ring of Teleportation", "Ring of Transference", "Ring of Will", "Robes of Arrow Turning", "Shield +1 Armour", "Staff +1 Fight", "Staff of Casting", "Staff of Power (1)", "Staff of Power (2)", "Staff of Power (3)", "Two-Handed Weapon +1 damage", "Two-Handed Weapon +1 Fight", "Two-Handed Weapon +2 Will", "Wand of Light", "Wand of Power (1)"]}, "spell_names": ["Absorb Knowledge", "Animal Companion", "Animate Construct", "Animate Skull", "Awareness", "Banish", "Beauty", "Blinding Light", "Blink", "Bone Dart", "Bones of the Earth", "Brew Potion", "Bridge", "Call Storm", "Circle of Protection", "Combat Awareness", "Control Animal", "Control Construct", "Control Demon", "Control Undead", "Crumble", "Curse", "Decay", "Destroy Undead", "Destructive Sphere", "Dispel", "Draining Word", "Elemental Ball", "Elemental Bolt", "Elemental Hammer", "Elemental Shield", "Embed Enchantment", "Enchant Armour", "Enchant Weapon", "Explosive Rune", "Familiar", "Fast Act", "Fleet Feet", "Fog", "Fool\u0027s Gold", "Furious Quill", "Glow", "Grenade", "Heal", "Illusionary Soldier", "Imp", "Invisibility", "Leap", "Mind Control", "Mind Lock", "Miraculous Cure", "Mud", "Petrify", "Plague of Insects", "Planar Tear", "Plane Walk", "Poison Dart", "Possess", "Power Word", "Push", "Raise Zombie", "Reveal Secret", "Scatter Shot", "Shield", "Slow", "Spell Eater", "Steal Health", "Strength", "Strike Dead", "Suggestion", "Summon Demon", "Telekinesis", "Teleport", "Time Store", "Time Walk", "Transpose", "True Sight", "Wall", "Wizard Eye", "Write Scroll"]}</script>
   
   
 
@@ -76,11 +77,11 @@
         <div class="section-actions">
           <a class="btn" href="#" onclick="return false;" title="Not available in this static preview.">Download PDF roster</a>
           <a class="btn secondary" href="#" onclick="return false;" title="Not available in this static preview.">Export warband</a>
-          <form class="inline-form" method="post" action="/warband/the-icebound-circle-40bf650b/duplicate">
+          <form class="inline-form" method="post" action="/warband/the-icebound-circle-1e7fbe39/duplicate">
             <button class="btn secondary" type="submit">Duplicate</button>
           </form>
           <a class="btn secondary" href="index.html">All warbands</a>
-          <form class="inline-form" method="post" action="/warband/the-icebound-circle-40bf650b/delete">
+          <form class="inline-form" method="post" action="/warband/the-icebound-circle-1e7fbe39/delete">
             <button class="btn danger" type="submit">Delete</button>
           </form>
         </div>
@@ -96,7 +97,7 @@
       book to make its soldiers available to this warband; the captain / soldier-leveling options below are
       adapted from the FG1E Sellswords supplement — tune these to match your group's own version.
     </p>
-    <form method="post" action="/warband/the-icebound-circle-40bf650b/update">
+    <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update" data-autosave>
       <input type="hidden" name="action" value="update_homerules" />
 
       <details class="ref-panel" open>
@@ -137,15 +138,33 @@
             </label>
           
         </div>
+        <label class="checkbox-row" style="margin-top:0.6rem">
+          <input name="pentangle_schools_playable" type="checkbox"  />
+          Pentangle schools playable
+        </label>
+        <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0">
+          Needs The Maze of Malcor. Its five lost schools are scroll-only by the book; this is the
+          optional rule for running them as real schools. Only affects newly created warbands —
+          a wizard's own school is fixed once chosen.
+        </p>
+        <label class="checkbox-row" style="margin-top:0.6rem">
+          <input name="edition2_soldier_costs" type="checkbox"  />
+          Adjust soldiers to edition 2
+        </label>
+        <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0">
+          Assassin, Demon Hunter, Monk and Mystic Warrior read as costed closer to 1st edition than
+          the rest of the 2e tables. On by default, this bumps their hiring cost (Assassin 100gc,
+          Demon Hunter/Monk/Mystic Warrior 125gc). Applies to future hires only.
+        </p>
         <script>
-          // Tick/untick every source book at once. Still just changes the
-          // checkboxes — the surrounding form's Save button commits it.
+          // Tick/untick every source book at once, then save immediately —
+          // same as ticking each checkbox by hand on this autosaving form.
           document.querySelectorAll("[data-toggle-sources]").forEach(function (btn) {
             btn.addEventListener("click", function () {
               var on = btn.dataset.toggleSources === "on";
-              document
-                .querySelectorAll('#source-books input[type="checkbox"]')
-                .forEach(function (box) { box.checked = on; });
+              var boxes = document.querySelectorAll('#source-books input[type="checkbox"]');
+              boxes.forEach(function (box) { box.checked = on; });
+              if (boxes.length) boxes[0].dispatchEvent(new Event("change", { bubbles: true }));
             });
           });
         </script>
@@ -195,11 +214,11 @@
             <label for="captain_mind_control">Mind Control</label>
             <select id="captain_mind_control" name="captain_mind_control">
               
-                <option value="immune" selected>Immune to Mind Control</option>
+                <option value="immune" >Immune to Mind Control</option>
               
-                <option value="resistant" >Resistant to Mind Control</option>
+                <option value="resistant" >No tricks while mind controlled</option>
               
-                <option value="none" >None</option>
+                <option value="none" selected>No bonus</option>
               
             </select>
           </div>
@@ -249,6 +268,40 @@
             </div>
           
         </div>
+        <p class="muted" style="font-size:0.85rem;margin-top:0.5rem">
+          Absolute stat limits — a hard ceiling on the captain's actual stat value, applied once at
+          hire or promotion (separate from the level-up limits above, which cap how many +1s can be
+          spent over time). A stat already above its limit (e.g. carried over from a promoted
+          soldier's own prior leveling) is never reduced — only further increases are blocked.
+        </p>
+        <div class="stat-row">
+          
+            <div class="form-row">
+              <label for="captain_absolute_limit_move">Move limit</label>
+              <input id="captain_absolute_limit_move" name="captain_absolute_limit_move" type="number" min="0" value="7" />
+            </div>
+          
+            <div class="form-row">
+              <label for="captain_absolute_limit_fight">Fight limit</label>
+              <input id="captain_absolute_limit_fight" name="captain_absolute_limit_fight" type="number" min="0" value="5" />
+            </div>
+          
+            <div class="form-row">
+              <label for="captain_absolute_limit_shoot">Shoot limit</label>
+              <input id="captain_absolute_limit_shoot" name="captain_absolute_limit_shoot" type="number" min="0" value="4" />
+            </div>
+          
+            <div class="form-row">
+              <label for="captain_absolute_limit_will">Will limit</label>
+              <input id="captain_absolute_limit_will" name="captain_absolute_limit_will" type="number" min="0" value="6" />
+            </div>
+          
+            <div class="form-row">
+              <label for="captain_absolute_limit_health">Health limit</label>
+              <input id="captain_absolute_limit_health" name="captain_absolute_limit_health" type="number" min="0" value="20" />
+            </div>
+          
+        </div>
       </details>
 
       <details class="ref-panel">
@@ -259,7 +312,7 @@
         <div class="grid-2">
           <div class="form-row">
             <label for="promote_captain_cost">Promotion cost (gc)</label>
-            <input id="promote_captain_cost" name="promote_captain_cost" type="number" min="0" value="150" />
+            <input id="promote_captain_cost" name="promote_captain_cost" type="number" min="0" value="125" />
           </div>
           <div class="form-row">
             <label for="promote_captain_item_slots">Item slots</label>
@@ -308,6 +361,10 @@
 
       <details class="ref-panel">
         <summary>Soldier Leveling</summary>
+        <p class="muted" style="font-size:0.85rem">
+          Soldiers get 20xp for participating in a match and 20xp for surviving a match without
+          being reduced to 0hp.
+        </p>
         <div class="checkbox-row">
           <input id="soldier_leveling_enabled" name="soldier_leveling_enabled" type="checkbox" checked />
           <label for="soldier_leveling_enabled" style="margin:0">Enable Soldier Leveling</label>
@@ -354,9 +411,6 @@
         </div>
       </details>
 
-      <div class="actions">
-        <button class="btn" type="submit">Save Rules</button>
-      </div>
     </form>
   </details>
 
@@ -364,7 +418,7 @@
   <details class="card" id="post-game">
     <summary><h2>After the game — gold &amp; items</h2></summary>
     <p class="muted">Enter treasure gold, XP, and items found so they appear in the treasury and vault.</p>
-    <form method="post" action="/warband/the-icebound-circle-40bf650b/update">
+    <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update">
       <input type="hidden" name="action" value="post_game" />
       <div class="grid-2">
         <div class="form-row">
@@ -382,7 +436,47 @@
           </div>
         
         <div class="form-row">
-          <label for="loot_items">Items found (one per line)</label>
+          <label>Items found — pick from a rulebook</label>
+          <div class="loot-picker" id="postgame-loot-picker">
+            
+  <div class="loot-picker-row" data-mode="postgame" >
+    <div class="stat-row">
+      <div class="form-row">
+        <label>Rulebook</label>
+        <select class="loot-book">
+          <option value="">— pick a book —</option>
+          
+            <option value="Core Rules">Core Rules</option>
+          
+          <option value="__other__">Other / write-in</option>
+        </select>
+      </div>
+      <div class="form-row loot-item-cell">
+        <label>Item</label>
+        <select class="loot-item" disabled>
+          <option value="">— pick a book first —</option>
+        </select>
+        <input type="text" class="loot-item-text" placeholder="Item name" style="display:none" />
+      </div>
+      <div class="form-row loot-variant-cell" style="display:none">
+        <label class="loot-variant-label">Spell</label>
+        <select class="loot-variant"></select>
+      </div>
+      
+        <div class="form-row" style="align-self:flex-end">
+          <button type="button" class="btn small secondary loot-add-row">+ Add another item</button>
+        </div>
+      
+    </div>
+    
+      <input type="hidden" name="loot_structured_items" class="loot-composed" value="" />
+    
+  </div>
+
+          </div>
+        </div>
+        <div class="form-row">
+          <label for="loot_items">Items found (one per line — freeform, in addition to the picker above)</label>
           <textarea id="loot_items" name="loot_items" placeholder="Grimoire: Bone Dart&#10;Potion of Healing&#10;Magic dagger"></textarea>
         </div>
         <div class="form-row">
@@ -397,7 +491,7 @@
   
   <details class="card">
     <summary><h2>Wizard &amp; apprentice</h2></summary>
-    <form method="post" action="/warband/the-icebound-circle-40bf650b/update" enctype="multipart/form-data">
+    <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update" enctype="multipart/form-data" data-autosave>
       <input type="hidden" name="action" value="details" />
       <details class="ref-panel" open>
         <summary>Wizard — Mireille Voss · Elementalist</summary>
@@ -447,6 +541,7 @@
               </div>
             </div>
             <div class="stat-row">
+              
               <div class="stat-pill"><span class="label">Move</span><span class="value">6</span></div>
               <div class="stat-pill"><span class="label">Fight</span><span class="value">+3</span></div>
               <div class="stat-pill"><span class="label">Shoot</span><span class="value">+0</span></div>
@@ -532,6 +627,36 @@
                     data-kind="simple"
                   >
                     Staff
+                  </option>
+                
+                  
+                  
+                  <option
+                    value="Javelin"
+                    data-slots="1"
+                    data-kind="simple"
+                  >
+                    Javelin
+                  </option>
+                
+                  
+                  
+                  <option
+                    value="Bladed Staff"
+                    data-slots="1"
+                    data-kind="simple"
+                  >
+                    Bladed Staff
+                  </option>
+                
+                  
+                  
+                  <option
+                    value="Throwing Knife"
+                    data-slots="1"
+                    data-kind="simple"
+                  >
+                    Throwing Knife
                   </option>
                 
               </optgroup>
@@ -650,7 +775,7 @@
           class="item-slot-text"
           name="wizard_slot_0"
           type="text"
-          value=""
+          value="Staff"
           placeholder="___ or custom item"
           data-index="0"
           list="wizard_item_suggestions"
@@ -711,6 +836,36 @@
                     data-kind="simple"
                   >
                     Staff
+                  </option>
+                
+                  
+                  
+                  <option
+                    value="Javelin"
+                    data-slots="1"
+                    data-kind="simple"
+                  >
+                    Javelin
+                  </option>
+                
+                  
+                  
+                  <option
+                    value="Bladed Staff"
+                    data-slots="1"
+                    data-kind="simple"
+                  >
+                    Bladed Staff
+                  </option>
+                
+                  
+                  
+                  <option
+                    value="Throwing Knife"
+                    data-slots="1"
+                    data-kind="simple"
+                  >
+                    Throwing Knife
                   </option>
                 
               </optgroup>
@@ -829,7 +984,7 @@
           class="item-slot-text"
           name="wizard_slot_1"
           type="text"
-          value=""
+          value="Hand Weapon"
           placeholder="___ or custom item"
           data-index="1"
           list="wizard_item_suggestions"
@@ -890,6 +1045,36 @@
                     data-kind="simple"
                   >
                     Staff
+                  </option>
+                
+                  
+                  
+                  <option
+                    value="Javelin"
+                    data-slots="1"
+                    data-kind="simple"
+                  >
+                    Javelin
+                  </option>
+                
+                  
+                  
+                  <option
+                    value="Bladed Staff"
+                    data-slots="1"
+                    data-kind="simple"
+                  >
+                    Bladed Staff
+                  </option>
+                
+                  
+                  
+                  <option
+                    value="Throwing Knife"
+                    data-slots="1"
+                    data-kind="simple"
+                  >
+                    Throwing Knife
                   </option>
                 
               </optgroup>
@@ -1071,6 +1256,36 @@
                     Staff
                   </option>
                 
+                  
+                  
+                  <option
+                    value="Javelin"
+                    data-slots="1"
+                    data-kind="simple"
+                  >
+                    Javelin
+                  </option>
+                
+                  
+                  
+                  <option
+                    value="Bladed Staff"
+                    data-slots="1"
+                    data-kind="simple"
+                  >
+                    Bladed Staff
+                  </option>
+                
+                  
+                  
+                  <option
+                    value="Throwing Knife"
+                    data-slots="1"
+                    data-kind="simple"
+                  >
+                    Throwing Knife
+                  </option>
+                
               </optgroup>
             
           
@@ -1250,6 +1465,36 @@
                     Staff
                   </option>
                 
+                  
+                  
+                  <option
+                    value="Javelin"
+                    data-slots="1"
+                    data-kind="simple"
+                  >
+                    Javelin
+                  </option>
+                
+                  
+                  
+                  <option
+                    value="Bladed Staff"
+                    data-slots="1"
+                    data-kind="simple"
+                  >
+                    Bladed Staff
+                  </option>
+                
+                  
+                  
+                  <option
+                    value="Throwing Knife"
+                    data-slots="1"
+                    data-kind="simple"
+                  >
+                    Throwing Knife
+                  </option>
+                
               </optgroup>
             
           
@@ -1389,6 +1634,12 @@
       <option value="Crossbow"></option>
     
       <option value="Quiver"></option>
+    
+      <option value="Javelin"></option>
+    
+      <option value="Bladed Staff"></option>
+    
+      <option value="Throwing Knife"></option>
     
     
       <option value="Potion of Healing"></option>
@@ -1806,6 +2057,36 @@
                     Staff
                   </option>
                 
+                  
+                  
+                  <option
+                    value="Javelin"
+                    data-slots="1"
+                    data-kind="simple"
+                  >
+                    Javelin
+                  </option>
+                
+                  
+                  
+                  <option
+                    value="Bladed Staff"
+                    data-slots="1"
+                    data-kind="simple"
+                  >
+                    Bladed Staff
+                  </option>
+                
+                  
+                  
+                  <option
+                    value="Throwing Knife"
+                    data-slots="1"
+                    data-kind="simple"
+                  >
+                    Throwing Knife
+                  </option>
+                
               </optgroup>
             
           
@@ -1922,7 +2203,7 @@
           class="item-slot-text"
           name="apprentice_slot_0"
           type="text"
-          value=""
+          value="Staff"
           placeholder="___ or custom item"
           data-index="0"
           list="apprentice_item_suggestions"
@@ -1983,6 +2264,36 @@
                     data-kind="simple"
                   >
                     Staff
+                  </option>
+                
+                  
+                  
+                  <option
+                    value="Javelin"
+                    data-slots="1"
+                    data-kind="simple"
+                  >
+                    Javelin
+                  </option>
+                
+                  
+                  
+                  <option
+                    value="Bladed Staff"
+                    data-slots="1"
+                    data-kind="simple"
+                  >
+                    Bladed Staff
+                  </option>
+                
+                  
+                  
+                  <option
+                    value="Throwing Knife"
+                    data-slots="1"
+                    data-kind="simple"
+                  >
+                    Throwing Knife
                   </option>
                 
               </optgroup>
@@ -2101,7 +2412,7 @@
           class="item-slot-text"
           name="apprentice_slot_1"
           type="text"
-          value=""
+          value="Hand Weapon"
           placeholder="___ or custom item"
           data-index="1"
           list="apprentice_item_suggestions"
@@ -2162,6 +2473,36 @@
                     data-kind="simple"
                   >
                     Staff
+                  </option>
+                
+                  
+                  
+                  <option
+                    value="Javelin"
+                    data-slots="1"
+                    data-kind="simple"
+                  >
+                    Javelin
+                  </option>
+                
+                  
+                  
+                  <option
+                    value="Bladed Staff"
+                    data-slots="1"
+                    data-kind="simple"
+                  >
+                    Bladed Staff
+                  </option>
+                
+                  
+                  
+                  <option
+                    value="Throwing Knife"
+                    data-slots="1"
+                    data-kind="simple"
+                  >
+                    Throwing Knife
                   </option>
                 
               </optgroup>
@@ -2343,6 +2684,36 @@
                     Staff
                   </option>
                 
+                  
+                  
+                  <option
+                    value="Javelin"
+                    data-slots="1"
+                    data-kind="simple"
+                  >
+                    Javelin
+                  </option>
+                
+                  
+                  
+                  <option
+                    value="Bladed Staff"
+                    data-slots="1"
+                    data-kind="simple"
+                  >
+                    Bladed Staff
+                  </option>
+                
+                  
+                  
+                  <option
+                    value="Throwing Knife"
+                    data-slots="1"
+                    data-kind="simple"
+                  >
+                    Throwing Knife
+                  </option>
+                
               </optgroup>
             
           
@@ -2482,6 +2853,12 @@
       <option value="Crossbow"></option>
     
       <option value="Quiver"></option>
+    
+      <option value="Javelin"></option>
+    
+      <option value="Bladed Staff"></option>
+    
+      <option value="Throwing Knife"></option>
     
     
       <option value="Potion of Healing"></option>
@@ -2797,14 +3174,18 @@
         </details>
       
 
-      <div class="form-row">
-        <label for="notes">Warband notes</label>
-        <textarea id="notes" name="notes"></textarea>
-      </div>
-      <div class="actions">
-        <button class="btn" type="submit">Save details</button>
-      </div>
     </form>
+
+    
+    
+    
+      
+    
+      
+    
+      
+    
+    
 
     <details class="ref-panel">
       <summary>Level up wizard (1 ready)</summary>
@@ -2814,11 +3195,11 @@
         Enter a negative number to remove XP; if that drops below the level you're at, the most
         recent level-up(s) are automatically reversed.
       </p>
-      <form method="post" action="/warband/the-icebound-circle-40bf650b/update" class="form-row inline">
+      <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update" class="form-row inline">
         <input type="hidden" name="action" value="add_xp" />
         <div>
           <label for="xp">Add/remove XP</label>
-          <input id="xp" name="xp" type="text" inputmode="numeric" pattern="[+-]?[0-9]+" value="50" />
+          <input id="xp" name="xp" type="text" inputmode="numeric" pattern="[+-]?[0-9]+" value="20" />
         </div>
         <div>
           <label>&nbsp;</label>
@@ -2827,10 +3208,11 @@
       </form>
 
       
-        <form method="post" action="/warband/the-icebound-circle-40bf650b/update" style="margin-top:1rem">
+        <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update" style="margin-top:1rem">
           <input type="hidden" name="action" value="level_up" />
           <div class="form-row">
             <label>Choose improvement (1 available)</label>
+            
             <select name="choice" id="level-choice" required>
               
                 <option value="fight">+1 Fight</option>
@@ -2851,149 +3233,293 @@
             <label for="learn_spell">New spell</label>
             <select id="learn_spell" name="learn_spell">
               
-                <option value="Chronomancer::Crumble" title="This spell can only target inanimate structures such as buildings and walls. The spellcaster rapidly speeds up the passing of time in a small area of the structure, causing it to collapse. This can create a doorway-sized hole through any wall, which should be indicated on the table somehow. The spell can also be used to collapse a section of floor beneath a figure standing on a level above the ground. In this case, the figure about to be affected must pass a Move Roll (TN22) or fall to the next level down and taking damage appropriately. If this spell is cast on a wall created by the Wall spell, the wall is completely destroyed. If it is cast on terrain holding a Wizard Eye, the Wizard Eye is cancelled.">Crumble (Chronomancer, your CN 12)</option>
-              
-                <option value="Chronomancer::Decay" title="The spellcaster selects and attacks a target’s weapon, causing it to decay and fall apart, rendering it useless for the rest of the game. This spell has no effect on magic weapons (even those only temporarily enchanted). This spell has no effect on creatures (unless they are specifically identified as being equipped with a weapon from the General Arms and Armour List).">Decay (Chronomancer, your CN 14)</option>
-              
-                <option value="Chronomancer::Fleet Feet" title="The target receives +2 Move for the rest of the game. Multiple castings of Fleet Feet on the same target have no effect.">Fleet Feet (Chronomancer, your CN 12)</option>
-              
-                <option value="Chronomancer::Petrify" title="The target figure must make an immediate Will Roll with a Target Number equal to the Casting Roll. If it fails, it receives no actions in its next activation. Furthermore, the figure suffers -3 Fight (to a minimum of +0) and may not have Leap cast upon it until after it makes its next move action. Large creatures receive +8 to their Will Roll to resist this spell.">Petrify (Chronomancer, your CN 12)</option>
-              
-                <option value="Chronomancer::Slow" title="The target is reduced to a maximum of one action per activation (which can be any action, it does not have to be movement). It may make an Will Roll verses the Casting Roll at the end of each of its activations. If successful the spell is cancelled.">Slow (Chronomancer, your CN 12)</option>
-              
-                <option value="Chronomancer::Time Store" title="The spellcaster captures a fragment of their own present to save for future use. To cast this spell, the spellcaster must be able to take two actions during their activation. They must spend the first action casting Time Store. If successful, the second action is lost. This spellcaster is now considered to have a stored ‘extra action’ that they may use in a future turn. This action can only be used during the spellcaster’s activation and can give the spellcaster three actions in one activation.">Time Store (Chronomancer, your CN 16)</option>
-              
-                <option value="Chronomancer::Time Walk" title="Wizard only. The wizard will activate again in the Apprentice phase and the Soldier phase. This is in addition to the figures that can normally activate in those phases. The wizard may not activate any additional soldiers or be part of a group activation in these phases. The wizard may perform one action in each of these two phases and may take any action – they are not limited to movement. If the wizard moved at all in a previous activation during the turn, any additional move actions are at half rate. If a wizard casts this spell in consecutive turns, they immediately suffer 8 points of damage. CHRONOMANCER">Time Walk (Chronomancer, your CN 16)</option>
-              
-                <option value="Elementalist::Call Storm" title="All bow and crossbow attacks are made with -1 Shoot for the rest of the game. This spell may be cast multiple times (and by multiple spellcasters), with each additional casting increasing the penalty by a further -1, up to a maximum of -5.">Call Storm (Elementalist, your CN 12)</option>
-              
-                <option value="Elementalist::Destructive Sphere" title="Every figure within 3” of the spellcaster (but not counting the spellcaster) suffers a +5 elemental magic attack.">Destructive Sphere (Elementalist, your CN 12)</option>
-              
-                <option value="Elementalist::Elemental Ball" title="The spellcaster selects an enemy figure within 16” and line of sight and hurls a ball of destructive elemental energy at it. The target and every figure within 1” and line of sight of the target immediately suffers a +5 elemental magic shooting attack. Roll this shooting attack separately for each figure. Treat the target figure as the origin of the attack for the purposes of determining cover or intervening terrain for all other figures suffering the attack. This spell may not target an enemy figure that is even partially obscured by another figure.">Elemental Ball (Elementalist, your CN 12)</option>
-              
-                <option value="Elementalist::Elemental Hammer" title="This spell is cast upon a weapon. The next time the figure wielding this weapon wins a round of combat and does at least 1 point of damage, this weapon inflicts an additional 5 points of elemental magic damage. If cast on a normal weapon, which is then used against a creature that is Immune to Normal Weapons, this weapon will only deal the 5 points of elemental magic damage. If cast on a bow or crossbow the spell only applies to the next attack.">Elemental Hammer (Elementalist, your CN 10)</option>
-              
-                <option value="Elementalist::Scatter Shot" title="The spellcaster makes a +0 elemental magic shooting attack against every enemy figure (either from an opposing warband or uncontrolled creature) within 12” and line of sight. This may include enemy figures in combat, although the normal rules for shooting into combat are followed in this case.">Scatter Shot (Elementalist, your CN 12)</option>
-              
-                <option value="Enchanter::Animate Construct" title="It is assumed that the spellcaster has built a construct prior to using this spell to animate it. If the spell is successfully cast, the construct immediately becomes a permanent member of the warband, taking the place of a soldier. A spellcaster must declare the size of construct they are attempting to animate (small, medium, or large – page 183 before rolling to cast the spell. The larger the construct, the harder it is to animate, so the following modifiers are applied to the Casting Roll: Small -0, Medium -3, Large -6. There is no limit to the number of constructs in a warband other than the normal limits for soldiers. Large constructs count as specialist soldiers, the others as standard soldiers.">Animate Construct (Enchanter, your CN 12)</option>
-              
-                <option value="Enchanter::Control Construct" title="The target construct must make an immediate Will Roll with a Target Number equal to the Casting Roll. If the roll fails, the construct becomes a temporary member of the spellcaster’s warband. This control lasts for the rest of the game or until the spell is cancelled. The spellcaster may spend an action to cancel this spell. A spellcaster may only control one construct at a time.">Control Construct (Enchanter, your CN 14)</option>
-              
-                <option value="Enchanter::Embed Enchantment" title="This spell causes any one Enchant Armour or Enchant Weapon spell that is still active at the end of a game to become permanent, and the weapon or armour in question to become a magic weapon or armour. The newly created magic weapon or armour takes up an item slot as normal.">Embed Enchantment (Enchanter, your CN 16)</option>
-              
-                <option value="Enchanter::Enchant Armour" title="This spell may only be cast on a figure wearing armour. The armour worn by the target now counts as magic armour and grants +1 Armour for the rest of the game. Multiple castings of this spell on the same target have no effect.">Enchant Armour (Enchanter, your CN 10)</option>
-              
-                <option value="Enchanter::Grenade" title="The spellcaster takes an object, commonly a simple rock, imbues it with magic energy and throws it at their target, whereupon it explodes into hundreds of fragments. The spellcaster picks a target point within 14”. Every figure, including allies, within 1.5” of that point immediately suffers a +3 magic shooting attack. Use the target point as the origin of the attack for working out line of sight and cover.">Grenade (Enchanter, your CN 12)</option>
-              
-                <option value="Enchanter::Strength" title="The target receives +2 Fight. Multiple Strength spells on the same target have no effect.">Strength (Enchanter, your CN 12)</option>
-              
-                <option value="Enchanter::Telekinesis" title="The spellcaster may move any treasure token within 16” by up to 6” in any direction, so long as it remains in line of sight the entire time. If the treasure moves out of line of sight, it immediately falls straight to the ground. This spell has no effect on a treasure token that has any special requirements for how and when it can be picked up, nor on one being carried by a figure. This spell may not target the central treasure, until after that treasure has been picked up for the first time. ENCHANTER">Telekinesis (Enchanter, your CN 12)</option>
-              
-                <option value="Illusionist::Beauty" title="This spell causes anyone who looks on the spellcaster to see a paragon of beauty. Any member of an opposing warband must make a Will Roll with a Target Number equal to the Casting Roll if they wish to do any of the following: move into combat with the spellcaster, make a shooting attack that could potentially hit the spellcaster (including shooting attacks generated by spells), or cast any spell that targets the spellcaster. Spellcasters may empower this Will Roll in the same way they would to resist a spell. A figure may only attempt such a Will Roll once per turn. This spell has no effect on creatures (anything found in Chapter Six: Bestiary, page 176) or war hounds.">Beauty (Illusionist, your CN 16)</option>
-              
-                <option value="Illusionist::Blink" title="This spell may target any figure within 12”. Move that figure 4” in a random direction. A figure may make a Will Roll with a Target Number equal to the Casting Roll in order to resist this spell. If successful, the figure does not move. Uncontrolled creatures will always attempt this Will Roll.">Blink (Illusionist, your CN 18)</option>
-              
-                <option value="Illusionist::Fool&#39;s Gold" title="This spell may only be cast on a figure carrying a treasure token. That figure must make an immediate Will Roll with a Target Number equal to the Casting Roll. If it fails, the spellcaster may take the treasure token from the figure and move it up to 4&#34; in any direction, provided the final spot is within line of sight of the spellcaster.">Fool&#39;s Gold (Illusionist, your CN 16)</option>
-              
-                <option value="Illusionist::Glow" title="A brightly glowing light surrounds the target figure. For the rest of the game, all shooting attacks against this figure from any source are at +3. Multiple castings of Glow on the same target have no effect.">Glow (Illusionist, your CN 16)</option>
-              
-                <option value="Illusionist::Illusionary Soldier" title="An illusionary soldier becomes a temporary member of the warband for the next battle (if cast Out of Game) or until the end of the game (if cast during a battle). This soldier can be of any type found on the Soldier Tables (pages 30 and 31) except an apothecary. This soldier cannot pick up treasure, nor can it deal damage, but will otherwise count as a regular soldier for all other the purposes – it may engage in combat, albeit dealing no damage if it wins (it would still have the option to push back its opponent, however), lend support to other figures in combat, etc. If the illusionary soldier ever suffers damage of any type, it is removed. A warband may only have one illusionary soldier at any given time. The player must reveal which mem">Illusionary Soldier (Illusionist, your CN 18)</option>
-              
-                <option value="Illusionist::Invisibility" title="The target figure becomes invisible. No figure may move into combat with the invisible figure, nor target it with any attack or spell (although it may still be affected by area effects, such as the blast radius of a Grenade spell). If the invisible figure moves into combat, casts a spell, or picks up a treasure token, the Invisibility spell is cancelled. This spell may be cast on a figure already carrying treasure, rendering both invisible. In this case, if the figure drops the treasure, the spell is cancelled.">Invisibility (Illusionist, your CN 18)</option>
-              
-                <option value="Illusionist::Teleport" title="The spellcaster immediately moves to any location within line of sight, but may take no other actions this turn after casting this spell. This spell may not be used to enter combat or to move off the table.">Teleport (Illusionist, your CN 16)</option>
-              
-                <option value="Illusionist::Transpose" title="This spell switches the position of two figures on the table. The two figures being transposed must both be within line of sight of the spellcaster and within 12” of one another. The spellcaster may cast Transpose to switch themselves with another figure. Members of opposing warbands are eligible targets for being transposed but may make a Will Roll with a Target Number equal to the Casting Roll to attempt to resist the spell. If successful, the spell is cancelled and no figures are moved. Friendly figures and uncontrolled creatures will not make such Will Rolls. ILLUSIONIST">Transpose (Illusionist, your CN 18)</option>
-              
-                <option value="Necromancer::Animate Skull" title="The spellcaster fills a skull with magic malice and throws it at an opponent. Place one animated skull (page 190) within 6” of the spellcaster. It can be placed directly into combat. This skull is an uncontrolled creature. The spellcaster may not cast this spell again until this creature is removed from the table, but may spend an action to cancel the spell, in which case the animated skull is immediately removed from the table.">Animate Skull (Necromancer, your CN 12)</option>
-              
-                <option value="Necromancer::Bones of the Earth" title="A skeletal hand reaches out of the ground and grabs the target’s ankle. The figure may not take any move actions until it escapes. Any form of magic movement, except the Leap spell, allows a figure to escape the hand; otherwise, the only way to escape is to fight the hand, which has Fight +0, Health 1. If the hand takes one point of damage, it vanishes, and the target is free. Other figures in base contact may attack the hand or give a support bonus. If the hand wins the fight, it does damage as normal. This spell may only be cast against a target that is standing on the ground. Large creatures are unaffected by this spell. The maximum range for this spell is 18”.">Bones of the Earth (Necromancer, your CN 14)</option>
-              
-                <option value="Necromancer::Control Undead" title="The target undead creature must make an immediate Will Roll with a Target Number equal to the Casting Roll. If the roll fails, the undead creature becomes a temporary member of the spellcaster’s warband. This control lasts for the rest of the game or until the spell is cancelled. The spellcaster may spend an action to cancel this spell. A spellcaster may only control one undead creature at a time.">Control Undead (Necromancer, your CN 16)</option>
-              
-                <option value="Necromancer::Raise Zombie" title="The spellcaster adds one zombie (page 193) to their warband as a temporary member. If the spell is cast before the game, the zombie can be deployed normally. If it is cast during a game, the zombie appears in base contact with the spellcaster. A warband may only have one raised zombie at any one time. If the zombie is killed or exits the table, Raise Zombie can be cast again to create another.">Raise Zombie (Necromancer, your CN 14)</option>
-              
-                <option value="Necromancer::Spell Eater" title="Casting this spell causes the spellcaster to immediately take 1 point of damage. When this spell is cast, it cancels the effects of a single casting of any one spell currently in play. This spell cannot unsummon a creature, but it can cancel the control of a creature.">Spell Eater (Necromancer, your CN 16)</option>
-              
-                <option value="Necromancer::Steal Health" title="The target must make an immediate Will Roll with a Target Number equal to the Casting Roll. If failed, the target immediately loses 3 Health and the spellcaster regains 3 Health. The spellcaster gains 3 Health, even if the target had less Health than that remaining. This may not take the spellcaster above their starting Health. This spell has no effect on undead or constructs. A spellcaster may target a member of their own warband – if they do, however, the target immediately (and permanently) leaves the warband and is treated as an uncontrolled creature for the rest of the game.">Steal Health (Necromancer, your CN 14)</option>
-              
-                <option value="Necromancer::Strike Dead" title="This spell targets a figure within 8”. The target must make a Will Roll with a Target Number equal to the Casting Roll or be immediately reduced to 0 Health. All figures may empower their Will Roll to resist this spell, even non-spellcasters. The spellcaster immediately loses 1 Health upon attempting this spell (even if it is cast successfully), in addition to any loss incurred by failure or empowerment. This spell has no effect on undead or constructs. NECROMANCER">Strike Dead (Necromancer, your CN 22)</option>
-              
-                <option value="Sigilist::Absorb Knowledge" title="Wizard only. This spell allows a wizard to absorb the knowledge from a written work without having to read it. A wizard immediately gains 40 experience points for casting this spell to represent the speed with which they can gain knowledge. This experience does not count against the maximum that can be earned in one game. This spell may only be cast after a game in which the wizard was not reduced to 0 Health.">Absorb Knowledge (Sigilist, your CN 16)</option>
-              
-                <option value="Sigilist::Bridge" title="The spellcaster uses the parchment of a long scroll to create a temporary bridge, ramp, or staircase. Place a bridge 6” long and 2” wide anywhere that is completely in the line of sight of the spellcaster. The bridge has no appreciable thickness and is essentially two-dimensional. The ends of this bridge do not have to be on the same horizontal plane, nor do the ends of the bridge need to be anchored on terrain, they may float in the air. Figures may move along this bridge at their normal movement rate, even when essentially climbing. Each spellcaster may only have one bridge in play at any time. Whenever the spellcaster activates, they may cancel this spell as a free action. Otherwise roll a die at the end of every turn: on a 1–2 the bridg">Bridge (Sigilist, your CN 14)</option>
-              
-                <option value="Sigilist::Draining Word" title="This spell draws a bright rune of power in the sky. The spellcaster may choose one spell for Draining Word to affect. All rolls to attempt to cast that particular spell are at -3 for the rest of the game. A spellcaster may only have one Draining Word spell in effect at a time. Only one Draining Word can be active for each specific target spell at one time.">Draining Word (Sigilist, your CN 18)</option>
-              
-                <option value="Sigilist::Explosive Rune" title="The spellcaster draws a bright, glowing rune of power on the ground or a wall anywhere within 4” and line of sight. A marker should be placed on the table to represent the rune. If any character or creature that was not part of the spellcaster’s warband at the start of the game moves within 1” of the rune, it explodes, and every figure, friend or foe, within 2” suffers an immediate +5 magic attack. Note that if the rune is placed within 1” of a figure, it does not explode immediately – that figure must move to set it off. A spellcaster may have up to three such runes in play at any time. At the end of any turn, they may choose to cancel any or all their runes. If the spellcaster that placed a rune is no longer on the table, roll a die for e">Explosive Rune (Sigilist, your CN 14)</option>
-              
-                <option value="Sigilist::Furious Quill" title="The target is attacked by a sharp animated quill. Although the quill does no damage, it is highly irritating and extremely distracting. While under attack, the target suffers -1 Move, -2 Fight, -4 Shoot, and -2 to all Casting Rolls. Whenever the target is activated, it may make a Will Roll with a Target Number equal to the Casting Roll – if successful, the quill is caught and destroyed. Multiple castings of Furious Quill against the same target have no effect.">Furious Quill (Sigilist, your CN 14)</option>
-              
-                <option value="Sigilist::Power Word" title="This spell draws a bright rune of power in the sky. The spellcaster may pick one spell for the Power Word to affect. All rolls to cast that particular spell are at +3 for every spellcaster for the rest of the game. A spellcaster may only have one Power Word spell in effect at a time. Only one Power Word can be active for each specific target spell at one time.">Power Word (Sigilist, your CN 18)</option>
-              
-                <option value="Sigilist::Push" title="The target suffers an immediate +10 attack. Instead of taking damage from this attack, the target is moved 1” directly away from the spellcaster for every point of damage they would have taken. If this pushes the target into the edge of the table or a piece of terrain over ½” high, they stop immediately. Other figures do not stop (or get hit by) a pushed figure – they are assumed to step out of the way. If this spell is cast from beneath a figure it will push them up. If the target is pushed up or off a height, it suffers falling damage as normal. This spell can push a figure out of combat, and as it is not a shooting attack, the target is not randomized.">Push (Sigilist, your CN 12)</option>
-              
-                <option value="Sigilist::Write Scroll" title="This spell creates one scroll. The scroll must be of a spell that the spellcaster either knows or a spell for which they own the grimoire. The scroll may be sold, given to a figure, or stored in the wizard’s vault. SIGILIST">Write Scroll (Sigilist, your CN 16)</option>
-              
-                <option value="Soothsayer::Awareness" title="If this spellcaster is on the table, its warband may add +2 to its Initiative Rolls for the purposes of determining the primary player only. This bonus stacks so, if both the wizard and the apprentice have cast this spell and are both on the table, the player may add +4 to their Initiative Rolls. The maximum possible bonus is +4. This spell counts as active on the spellcaster during the game and may be cancelled by anything that cancels spells.">Awareness (Soothsayer, your CN 16)</option>
-              
-                <option value="Soothsayer::Combat Awareness" title="This spell gives the target a magic insight into the moves their opponent will attempt in a fight. It grants the target +1 Fight and +1 Armour for the remainder of the game. Multiple castings of this spell on the same target have no effect.">Combat Awareness (Soothsayer, your CN 16)</option>
-              
-                <option value="Soothsayer::Mind Control" title="The target figure must make an immediate Will Roll with a Target Number equal to the Casting Roll. If it fails, the target temporarily joins the spellcaster’s warband, activating as normal. After the figure activates each turn, it must make another Will Roll with a Target Number equal to the Casting Roll. If successful, the spell is cancelled and the figure returns to its normal allegiance. A spellcaster may only have one active Mind Control spell at a time. A figure under Mind Control cannot purposely take any action that causes it immediate damage but can be moved into combat and may attack an enemy figure. A figure under Mind Control is not allowed to move off the table. A spellcaster may cancel an active Mind Control at the end of any t">Mind Control (Soothsayer, your CN 16)</option>
-              
-                <option value="Soothsayer::Mind Lock" title="The target of this spell becomes immune to Mind Control and Suggestion spells for the rest of the game, and any current Mind Control spells on the figure are cancelled. The figure gains +2 Will for the rest of the game.">Mind Lock (Soothsayer, your CN 16)</option>
-              
-                <option value="Soothsayer::Reveal Secret" title="This spell imparts knowledge on some lost treasure. Every successful casting of this spell before a game allows the player to make two rolls for a single treasure token (other than the central treasure, which is unaffected by this spell) after the game and choose which one to take.">Reveal Secret (Soothsayer, your CN 16)</option>
-              
-                <option value="Soothsayer::Suggestion" title="The target of this spell immediately drops any treasure tokens it is carrying. The spellcaster may move the figure up to 3” in any direction provided this does not move the figure into combat or cause it any immediate damage (e.g. falling more than 3”). The target of this spell may make a Will Roll with a Target Number equal to the Casting Roll. If successful, the spell has no effect.">Suggestion (Soothsayer, your CN 16)</option>
-              
-                <option value="Soothsayer::True Sight" title="The spellcaster, and all friendly figures within 6” of the spellcaster, can see invisible figures and are immune to the effects of the Beauty spell. Furthermore, if an invisible figure is within 6” of the spellcaster, the Invisibility spell is cancelled. If an Illusionary Soldier is within 6” of the spellcaster, it is immediately removed from the table.">True Sight (Soothsayer, your CN 14)</option>
-              
-                <option value="Soothsayer::Wizard Eye" title="This spell may be cast on any terrain feature within 12” that has a flat side, such as most ruins. Place a token on or next to the terrain feature to represent the Wizard Eye. For the rest of the game, the caster may choose to draw line of sight from the Wizard Eye instead of from the figure when casting spells. The Wizard Eye has 180-degree field of vision. A spellcaster may only maintain one Wizard Eye at a time. If the terrain piece on which the Wizard Eye is placed is damaged or destroyed (such as by a Crumble spell) the spell is cancelled. The spellcaster may cancel this spell at the end of any turn. SOOTHSAYER">Wizard Eye (Soothsayer, your CN 12)</option>
-              
-                <option value="Summoner::Control Demon" title="The target demon must make an immediate Will Roll with a Target Number equal to the Casting Roll. If it fails, it becomes a temporary member of the spellcaster’s warband. This control lasts for the rest of the game or until the spell is cancelled. The spellcaster may spend an action to cancel this spell. A spellcaster may only control one demon at a time.">Control Demon (Summoner, your CN 12)</option>
-              
-                <option value="Summoner::Imp" title="The spellcaster places an imp (page 184) on the table anywhere within the spellcaster’s line of sight, but no closer than 3” to any other figure. The imp follows the normal rules for uncontrolled creatures and will activate in the next Creature phase. If the spellcaster casts this spell a second time, the first imp immediately vanishes.">Imp (Summoner, your CN 12)</option>
-              
-                <option value="Summoner::Plague of Insects" title="The target figure is attacked by a cloud of stinging or biting insects that irritate and distract. The cloud of insects has a 1” radius centred on, and moving with, the target figure. It affects all figures, including the target figure, fully or partially within this radius. While being pestered by the insects, a figure has -4 Fight and -4 Shoot (to a minimum of +0) and -2 to Casting Rolls. After this figure activates each turn, it may make a Will Roll with a Target Number equal to the Casting Roll. If successful, the spell is cancelled. Other figures within the radius may simply move away to escape. A figure may only ever be affected by one Plague of Insects spell at a time, whether as a target or by virtue of being within the 1” radius. L">Plague of Insects (Summoner, your CN 12)</option>
-              
-                <option value="Summoner::Planar Tear" title="The spellcaster creates a small tear in the fabric of the universe. This rift is painful to humans and creatures, but lethal to demons. The spellcaster selects a target point. All figures within 2” of that point must make a Will Roll with a Target Number equal to the Casting Roll or suffer 2 points of damage. Demons that fail the Will Roll take damage equal to the Casting Roll.">Planar Tear (Summoner, your CN 14)</option>
-              
-                <option value="Summoner::Plane Walk" title="Although the spellcaster remains in the same physical location, they move briefly between planes of existence. For the rest of this turn, they can ignore all terrain when moving, thus walking through walls or across chasms. They may not be the target of any shooting attacks or spells. The spellcaster will never be considered in combat during the turn, nor can they be attacked by any figure. They may not, however, pick up treasure or in any way affect other figures or terrain on the table. If they are carrying treasure, they drop it. It is incredibly draining to move between planes of existence, so if a spellcaster attempts to cast this spell in a second consecutive turn, they suffer a -5 modifier to their Casting Roll, -10 if they attempt i">Plane Walk (Summoner, your CN 12)</option>
-              
-                <option value="Summoner::Possess" title="This spell may only be cast on a permanent or temporary member of the spellcaster’s own warband, except the wizard, apprentice, or demons. The target is possessed by a demon and gains +2 Fight, +1 Armour, and -2 Will and counts as a demon (i.e. it will be affected by Banish, Control Demon, Circle of Protection, etc.). This figure may not be part of a group activation. If removed from the game for any reason (such as being hit by a Banish spell), check for the character’s survival as normal. A spellcaster may only have one Possess spell active at a time.">Possess (Summoner, your CN 14)</option>
-              
-                <option value="Summoner::Summon Demon" title="Immediately place a demon on the table within 1” of the spellcaster. It may not be placed straight into combat. This demon is considered to be under the effects of a Control Demon spell by the same spellcaster, and thus this spell may not be cast if the spellcaster is already controlling a demon. The type of demon summoned depends on the amount by which the spellcaster succeeded on their Casting Roll: 0–5 imp, 6–12 minor demon, 13+ major demon. If a spellcaster rolls a 1 while attempting to cast this spell, they summon an uncontrolled demon and must place this demon in combat with the spellcaster. Roll a die to determine the type of demon 1–10 imp, 11–17 minor demon, 18+ major demon. A spellcaster cannot empower a roll of 1 when casting thi">Summon Demon (Summoner, your CN 14)</option>
-              
-                <option value="Thaumaturge::Banish" title="All demons within line of sight of the spellcaster must pass an immediate Will Roll with a Target Number equal to the Casting Roll. If a demon fails the roll and its current Will is +4 or less, it is immediately reduced to 0 Health and removed from the table. If its current Will is +5 or higher, it suffers damage equal to three times the amount by which it failed the Will Roll.">Banish (Thaumaturge, your CN 14)</option>
-              
-                <option value="Thaumaturge::Blinding Light" title="The target must make an immediate Will Roll with a Target Number equal to the Casting Roll. If it fails, it may not attack, shoot, or cast Line of Sight spells. Its Fight stat is reduced to +0 and its Move to 1. At the end of each turn, the figure may attempt another Will Roll with the same Target Number. If successful, the spell is cancelled.">Blinding Light (Thaumaturge, your CN 12)</option>
-              
-                <option value="Thaumaturge::Circle of Protection" title="Creates a circle with a 3” diameter which no demon or undead creature can enter or pass through. If something forces them into contact with the circle, they stop at its edge. A spellcaster may only have one active circle of protection at a time, but they do not have to remain within it. The spellcaster may cancel this spell at the end of any turn. Otherwise, roll a die at the end of every turn: on a 1–3 the spell is cancelled.">Circle of Protection (Thaumaturge, your CN 16)</option>
-              
-                <option value="Thaumaturge::Destroy Undead" title="The target undead creature must make a Will Roll with a Target Number equal to the Casting Roll. If the undead creature fails the roll and its current Will is +2 or less, it is immediately reduced to 0 Health and is removed from the table. If its current Will is +3 or higher, it suffers damage equal to three times the amount by which it failed the Will Roll.">Destroy Undead (Thaumaturge, your CN 14)</option>
-              
-                <option value="Thaumaturge::Dispel" title="Immediately cancels the ongoing effect of any one casting of any one spell. It cannot unsummon a creature, but it can cancel the control of a creature that is a temporary member of a warband.">Dispel (Thaumaturge, your CN 16)</option>
-              
-                <option value="Thaumaturge::Miraculous Cure" title="Wizard only. This spell may be used in several different ways. A successful casting of this spell will remove all permanent injuries from one figure. For example, a wizard suffering from Lost Fingers regrows all their missing digits, regardless of how many times they have suffered that particular injury. Or, it may be cast on a Badly Wounded figure – if successful, the soldier is healed and may participate in the next game with no penalty. Finally, it may be used to attempt to bring a figure back from the dead. The figure must have died in the game just played, and using the spell in this fashion incurs a -4 penalty to the Casting Roll. If successful, the figure is restored to life, and may participate in the next game with no penalty. If M">Miraculous Cure (Thaumaturge, your CN 20)</option>
-              
-                <option value="Thaumaturge::Shield" title="The target receives +2 Armour for the rest of the game. The maximum armour rule (see, p.36) still applies. Multiple castings of Shield on the same target have no effect. THAUMATURGE">Shield (Thaumaturge, your CN 14)</option>
-              
-                <option value="Witch::Animal Companion" title="The spellcaster summons an animal companion of their choice from the following options to become a permanent member of their warband: bear (page 179), ice toad (page 180), snow leopard (page 182), or wolf (page 182). All Animal Companions count as standard soldiers. Animal companions are more strong-willed than wild examples of their species and receive a permanent +3 Will. A spellcaster may only have one animal companion at any time.">Animal Companion (Witch, your CN 14)</option>
-              
-                <option value="Witch::Brew Potion" title="The spellcaster creates one Lesser Potion of their choice (page 86) that may be sold, stored in the wizard’s vault, or given to a member of the warband. A wizard (and only a wizard) may use this spell to create a Greater Potion (page 87). First, they must declare what potion they are attempting to brew and pay the listed ingredients cost. The wizard should then roll to cast Brew Potion with a -4 to the Casting Roll. If successful, the potion is created and can be immediately assigned to a figure in the warband, sold, or stored in the wizard’s vault. If unsuccessful, the potion is not created and the money spent on ingredients is lost.">Brew Potion (Witch, your CN 16)</option>
-              
-                <option value="Witch::Control Animal" title="The target animal must make an immediate Will Roll with a Target Number equal to the Casting Roll. If the roll fails, the animal becomes a temporary member of the spellcaster’s warband. This control lasts for the rest of the game or until the spell is cancelled. The spellcaster may spend an action to cancel this spell. A spellcaster may only control one animal at a time.">Control Animal (Witch, your CN 16)</option>
-              
-                <option value="Witch::Curse" title="The target suffers -2 to all die rolls. At the end of each turn, the target may make a Will Roll with the Target Number equal to the Casting Roll (at -2, of course). If successful, this spell is cancelled. Curse cannot be cast on a figure already suffering the effects of a Curse spell.">Curse (Witch, your CN 12)</option>
-              
-                <option value="Witch::Familiar" title="The spellcaster gains a familiar, which can take the form of any small creature. It is not depicted on the table, unless the player wants to include it on the spellcaster figure. A spellcaster with a familiar gains +2 Health (write as a split stat). If the spellcaster is ever reduced to 1 Health or less, the familiar is destroyed. At the start of the next game, the spellcaster reverts to their normal Health, unless another Familiar spell is successfully cast">Familiar (Witch, your CN 14)</option>
-              
-                <option value="Witch::Fog" title="Place a line of fog, 6” long, 3” high, and 1” thick anywhere on the table as long as some part of it is within line of sight of the spellcaster and all of it is within 24”. Figures can move through the fog with no penalty, but line of sight may not be drawn through it. At the start of each new turn, roll a die. On a result of 1–4 the fog dissipates and is removed from the table.">Fog (Witch, your CN 12)</option>
-              
-                <option value="Witch::Mud" title="All ground within 3” of a target point becomes rough ground.">Mud (Witch, your CN 14)</option>
-              
-                <option value="Witch::Poison Dart" title="Make an immediate plus +3 poisoned shooting attack against the target figure. This is a non-magic attack. WITCH">Poison Dart (Witch, your CN 14)</option>
+                <option value="Chronomancer::Crumble" title="This spell can only target inanimate structures such as buildings and walls. The spellcaster rapidly speeds up the passing of time in a small area of the structure, causing it to collapse. This can create a doorway-sized hole through any wall, which should be indicated on the table somehow. The spell can also be used to collapse a section of floor beneath a figure standing on a level above the ground. In this case, the figure about to be affected must pass a Move Roll (TN22) or fall to the next level down and taking damage appropriately. If this spell is cast on a wall created by the Wall spell, the wall is completely destroyed. If it is cast on terrain holding a Wizard Eye, the Wizard Eye is cancelled.">
+                  Crumble (Chronomancer, your CN 12)
+                </option>
+              
+                <option value="Chronomancer::Decay" title="The spellcaster selects and attacks a target’s weapon, causing it to decay and fall apart, rendering it useless for the rest of the game. This spell has no effect on magic weapons (even those only temporarily enchanted). This spell has no effect on creatures (unless they are specifically identified as being equipped with a weapon from the General Arms and Armour List).">
+                  Decay (Chronomancer, your CN 14)
+                </option>
+              
+                <option value="Chronomancer::Fleet Feet" title="The target receives +2 Move for the rest of the game. Multiple castings of Fleet Feet on the same target have no effect.">
+                  Fleet Feet (Chronomancer, your CN 12)
+                </option>
+              
+                <option value="Chronomancer::Petrify" title="The target figure must make an immediate Will Roll with a Target Number equal to the Casting Roll. If it fails, it receives no actions in its next activation. Furthermore, the figure suffers -3 Fight (to a minimum of +0) and may not have Leap cast upon it until after it makes its next move action. Large creatures receive +8 to their Will Roll to resist this spell.">
+                  Petrify (Chronomancer, your CN 12)
+                </option>
+              
+                <option value="Chronomancer::Slow" title="The target is reduced to a maximum of one action per activation (which can be any action, it does not have to be movement). It may make an Will Roll verses the Casting Roll at the end of each of its activations. If successful the spell is cancelled.">
+                  Slow (Chronomancer, your CN 12)
+                </option>
+              
+                <option value="Chronomancer::Time Store" title="The spellcaster captures a fragment of their own present to save for future use. To cast this spell, the spellcaster must be able to take two actions during their activation. They must spend the first action casting Time Store. If successful, the second action is lost. This spellcaster is now considered to have a stored ‘extra action’ that they may use in a future turn. This action can only be used during the spellcaster’s activation and can give the spellcaster three actions in one activation.">
+                  Time Store (Chronomancer, your CN 16)
+                </option>
+              
+                <option value="Chronomancer::Time Walk" title="Wizard only. The wizard will activate again in the Apprentice phase and the Soldier phase. This is in addition to the figures that can normally activate in those phases. The wizard may not activate any additional soldiers or be part of a group activation in these phases. The wizard may perform one action in each of these two phases and may take any action – they are not limited to movement. If the wizard moved at all in a previous activation during the turn, any additional move actions are at half rate. If a wizard casts this spell in consecutive turns, they immediately suffer 8 points of damage. CHRONOMANCER">
+                  Time Walk (Chronomancer, your CN 16)
+                </option>
+              
+                <option value="Elementalist::Call Storm" title="All bow and crossbow attacks are made with -1 Shoot for the rest of the game. This spell may be cast multiple times (and by multiple spellcasters), with each additional casting increasing the penalty by a further -1, up to a maximum of -5.">
+                  Call Storm (Elementalist, your CN 12)
+                </option>
+              
+                <option value="Elementalist::Destructive Sphere" title="Every figure within 3” of the spellcaster (but not counting the spellcaster) suffers a +5 elemental magic attack.">
+                  Destructive Sphere (Elementalist, your CN 12)
+                </option>
+              
+                <option value="Elementalist::Elemental Ball" title="The spellcaster selects an enemy figure within 16” and line of sight and hurls a ball of destructive elemental energy at it. The target and every figure within 1” and line of sight of the target immediately suffers a +5 elemental magic shooting attack. Roll this shooting attack separately for each figure. Treat the target figure as the origin of the attack for the purposes of determining cover or intervening terrain for all other figures suffering the attack. This spell may not target an enemy figure that is even partially obscured by another figure.">
+                  Elemental Ball (Elementalist, your CN 12)
+                </option>
+              
+                <option value="Elementalist::Elemental Hammer" title="This spell is cast upon a weapon. The next time the figure wielding this weapon wins a round of combat and does at least 1 point of damage, this weapon inflicts an additional 5 points of elemental magic damage. If cast on a normal weapon, which is then used against a creature that is Immune to Normal Weapons, this weapon will only deal the 5 points of elemental magic damage. If cast on a bow or crossbow the spell only applies to the next attack.">
+                  Elemental Hammer (Elementalist, your CN 10)
+                </option>
+              
+                <option value="Elementalist::Scatter Shot" title="The spellcaster makes a +0 elemental magic shooting attack against every enemy figure (either from an opposing warband or uncontrolled creature) within 12” and line of sight. This may include enemy figures in combat, although the normal rules for shooting into combat are followed in this case.">
+                  Scatter Shot (Elementalist, your CN 12)
+                </option>
+              
+                <option value="Enchanter::Animate Construct" title="It is assumed that the spellcaster has built a construct prior to using this spell to animate it. If the spell is successfully cast, the construct immediately becomes a permanent member of the warband, taking the place of a soldier. A spellcaster must declare the size of construct they are attempting to animate (small, medium, or large – page 183 before rolling to cast the spell. The larger the construct, the harder it is to animate, so the following modifiers are applied to the Casting Roll: Small -0, Medium -3, Large -6. There is no limit to the number of constructs in a warband other than the normal limits for soldiers. Large constructs count as specialist soldiers, the others as standard soldiers.">
+                  Animate Construct (Enchanter, your CN 12)
+                </option>
+              
+                <option value="Enchanter::Control Construct" title="The target construct must make an immediate Will Roll with a Target Number equal to the Casting Roll. If the roll fails, the construct becomes a temporary member of the spellcaster’s warband. This control lasts for the rest of the game or until the spell is cancelled. The spellcaster may spend an action to cancel this spell. A spellcaster may only control one construct at a time.">
+                  Control Construct (Enchanter, your CN 14)
+                </option>
+              
+                <option value="Enchanter::Embed Enchantment" title="This spell causes any one Enchant Armour or Enchant Weapon spell that is still active at the end of a game to become permanent, and the weapon or armour in question to become a magic weapon or armour. The newly created magic weapon or armour takes up an item slot as normal.">
+                  Embed Enchantment (Enchanter, your CN 16)
+                </option>
+              
+                <option value="Enchanter::Enchant Armour" title="This spell may only be cast on a figure wearing armour. The armour worn by the target now counts as magic armour and grants +1 Armour for the rest of the game. Multiple castings of this spell on the same target have no effect.">
+                  Enchant Armour (Enchanter, your CN 10)
+                </option>
+              
+                <option value="Enchanter::Grenade" title="The spellcaster takes an object, commonly a simple rock, imbues it with magic energy and throws it at their target, whereupon it explodes into hundreds of fragments. The spellcaster picks a target point within 14”. Every figure, including allies, within 1.5” of that point immediately suffers a +3 magic shooting attack. Use the target point as the origin of the attack for working out line of sight and cover.">
+                  Grenade (Enchanter, your CN 12)
+                </option>
+              
+                <option value="Enchanter::Strength" title="The target receives +2 Fight. Multiple Strength spells on the same target have no effect.">
+                  Strength (Enchanter, your CN 12)
+                </option>
+              
+                <option value="Enchanter::Telekinesis" title="The spellcaster may move any treasure token within 16” by up to 6” in any direction, so long as it remains in line of sight the entire time. If the treasure moves out of line of sight, it immediately falls straight to the ground. This spell has no effect on a treasure token that has any special requirements for how and when it can be picked up, nor on one being carried by a figure. This spell may not target the central treasure, until after that treasure has been picked up for the first time. ENCHANTER">
+                  Telekinesis (Enchanter, your CN 12)
+                </option>
+              
+                <option value="Illusionist::Beauty" title="This spell causes anyone who looks on the spellcaster to see a paragon of beauty. Any member of an opposing warband must make a Will Roll with a Target Number equal to the Casting Roll if they wish to do any of the following: move into combat with the spellcaster, make a shooting attack that could potentially hit the spellcaster (including shooting attacks generated by spells), or cast any spell that targets the spellcaster. Spellcasters may empower this Will Roll in the same way they would to resist a spell. A figure may only attempt such a Will Roll once per turn. This spell has no effect on creatures (anything found in Chapter Six: Bestiary, page 176) or war hounds.">
+                  Beauty (Illusionist, your CN 16)
+                </option>
+              
+                <option value="Illusionist::Blink" title="This spell may target any figure within 12”. Move that figure 4” in a random direction. A figure may make a Will Roll with a Target Number equal to the Casting Roll in order to resist this spell. If successful, the figure does not move. Uncontrolled creatures will always attempt this Will Roll.">
+                  Blink (Illusionist, your CN 18)
+                </option>
+              
+                <option value="Illusionist::Fool&#39;s Gold" title="This spell may only be cast on a figure carrying a treasure token. That figure must make an immediate Will Roll with a Target Number equal to the Casting Roll. If it fails, the spellcaster may take the treasure token from the figure and move it up to 4&#34; in any direction, provided the final spot is within line of sight of the spellcaster.">
+                  Fool&#39;s Gold (Illusionist, your CN 16)
+                </option>
+              
+                <option value="Illusionist::Glow" title="A brightly glowing light surrounds the target figure. For the rest of the game, all shooting attacks against this figure from any source are at +3. Multiple castings of Glow on the same target have no effect.">
+                  Glow (Illusionist, your CN 16)
+                </option>
+              
+                <option value="Illusionist::Illusionary Soldier" title="An illusionary soldier becomes a temporary member of the warband for the next battle (if cast Out of Game) or until the end of the game (if cast during a battle). This soldier can be of any type found on the Soldier Tables (pages 30 and 31) except an apothecary. This soldier cannot pick up treasure, nor can it deal damage, but will otherwise count as a regular soldier for all other the purposes – it may engage in combat, albeit dealing no damage if it wins (it would still have the option to push back its opponent, however), lend support to other figures in combat, etc. If the illusionary soldier ever suffers damage of any type, it is removed. A warband may only have one illusionary soldier at any given time. The player must reveal which mem">
+                  Illusionary Soldier (Illusionist, your CN 18)
+                </option>
+              
+                <option value="Illusionist::Invisibility" title="The target figure becomes invisible. No figure may move into combat with the invisible figure, nor target it with any attack or spell (although it may still be affected by area effects, such as the blast radius of a Grenade spell). If the invisible figure moves into combat, casts a spell, or picks up a treasure token, the Invisibility spell is cancelled. This spell may be cast on a figure already carrying treasure, rendering both invisible. In this case, if the figure drops the treasure, the spell is cancelled.">
+                  Invisibility (Illusionist, your CN 18)
+                </option>
+              
+                <option value="Illusionist::Teleport" title="The spellcaster immediately moves to any location within line of sight, but may take no other actions this turn after casting this spell. This spell may not be used to enter combat or to move off the table.">
+                  Teleport (Illusionist, your CN 16)
+                </option>
+              
+                <option value="Illusionist::Transpose" title="This spell switches the position of two figures on the table. The two figures being transposed must both be within line of sight of the spellcaster and within 12” of one another. The spellcaster may cast Transpose to switch themselves with another figure. Members of opposing warbands are eligible targets for being transposed but may make a Will Roll with a Target Number equal to the Casting Roll to attempt to resist the spell. If successful, the spell is cancelled and no figures are moved. Friendly figures and uncontrolled creatures will not make such Will Rolls. ILLUSIONIST">
+                  Transpose (Illusionist, your CN 18)
+                </option>
+              
+                <option value="Necromancer::Animate Skull" title="The spellcaster fills a skull with magic malice and throws it at an opponent. Place one animated skull (page 190) within 6” of the spellcaster. It can be placed directly into combat. This skull is an uncontrolled creature. The spellcaster may not cast this spell again until this creature is removed from the table, but may spend an action to cancel the spell, in which case the animated skull is immediately removed from the table.">
+                  Animate Skull (Necromancer, your CN 12)
+                </option>
+              
+                <option value="Necromancer::Bones of the Earth" title="A skeletal hand reaches out of the ground and grabs the target’s ankle. The figure may not take any move actions until it escapes. Any form of magic movement, except the Leap spell, allows a figure to escape the hand; otherwise, the only way to escape is to fight the hand, which has Fight +0, Health 1. If the hand takes one point of damage, it vanishes, and the target is free. Other figures in base contact may attack the hand or give a support bonus. If the hand wins the fight, it does damage as normal. This spell may only be cast against a target that is standing on the ground. Large creatures are unaffected by this spell. The maximum range for this spell is 18”.">
+                  Bones of the Earth (Necromancer, your CN 14)
+                </option>
+              
+                <option value="Necromancer::Control Undead" title="The target undead creature must make an immediate Will Roll with a Target Number equal to the Casting Roll. If the roll fails, the undead creature becomes a temporary member of the spellcaster’s warband. This control lasts for the rest of the game or until the spell is cancelled. The spellcaster may spend an action to cancel this spell. A spellcaster may only control one undead creature at a time.">
+                  Control Undead (Necromancer, your CN 16)
+                </option>
+              
+                <option value="Necromancer::Raise Zombie" title="The spellcaster adds one zombie (page 193) to their warband as a temporary member. If the spell is cast before the game, the zombie can be deployed normally. If it is cast during a game, the zombie appears in base contact with the spellcaster. A warband may only have one raised zombie at any one time. If the zombie is killed or exits the table, Raise Zombie can be cast again to create another.">
+                  Raise Zombie (Necromancer, your CN 14)
+                </option>
+              
+                <option value="Necromancer::Spell Eater" title="Casting this spell causes the spellcaster to immediately take 1 point of damage. When this spell is cast, it cancels the effects of a single casting of any one spell currently in play. This spell cannot unsummon a creature, but it can cancel the control of a creature.">
+                  Spell Eater (Necromancer, your CN 16)
+                </option>
+              
+                <option value="Necromancer::Steal Health" title="The target must make an immediate Will Roll with a Target Number equal to the Casting Roll. If failed, the target immediately loses 3 Health and the spellcaster regains 3 Health. The spellcaster gains 3 Health, even if the target had less Health than that remaining. This may not take the spellcaster above their starting Health. This spell has no effect on undead or constructs. A spellcaster may target a member of their own warband – if they do, however, the target immediately (and permanently) leaves the warband and is treated as an uncontrolled creature for the rest of the game.">
+                  Steal Health (Necromancer, your CN 14)
+                </option>
+              
+                <option value="Necromancer::Strike Dead" title="This spell targets a figure within 8”. The target must make a Will Roll with a Target Number equal to the Casting Roll or be immediately reduced to 0 Health. All figures may empower their Will Roll to resist this spell, even non-spellcasters. The spellcaster immediately loses 1 Health upon attempting this spell (even if it is cast successfully), in addition to any loss incurred by failure or empowerment. This spell has no effect on undead or constructs. NECROMANCER">
+                  Strike Dead (Necromancer, your CN 22)
+                </option>
+              
+                <option value="Sigilist::Absorb Knowledge" title="Wizard only. This spell allows a wizard to absorb the knowledge from a written work without having to read it. A wizard immediately gains 40 experience points for casting this spell to represent the speed with which they can gain knowledge. This experience does not count against the maximum that can be earned in one game. This spell may only be cast after a game in which the wizard was not reduced to 0 Health.">
+                  Absorb Knowledge (Sigilist, your CN 16)
+                </option>
+              
+                <option value="Sigilist::Bridge" title="The spellcaster uses the parchment of a long scroll to create a temporary bridge, ramp, or staircase. Place a bridge 6” long and 2” wide anywhere that is completely in the line of sight of the spellcaster. The bridge has no appreciable thickness and is essentially two-dimensional. The ends of this bridge do not have to be on the same horizontal plane, nor do the ends of the bridge need to be anchored on terrain, they may float in the air. Figures may move along this bridge at their normal movement rate, even when essentially climbing. Each spellcaster may only have one bridge in play at any time. Whenever the spellcaster activates, they may cancel this spell as a free action. Otherwise roll a die at the end of every turn: on a 1–2 the bridg">
+                  Bridge (Sigilist, your CN 14)
+                </option>
+              
+                <option value="Sigilist::Draining Word" title="This spell draws a bright rune of power in the sky. The spellcaster may choose one spell for Draining Word to affect. All rolls to attempt to cast that particular spell are at -3 for the rest of the game. A spellcaster may only have one Draining Word spell in effect at a time. Only one Draining Word can be active for each specific target spell at one time.">
+                  Draining Word (Sigilist, your CN 18)
+                </option>
+              
+                <option value="Sigilist::Explosive Rune" title="The spellcaster draws a bright, glowing rune of power on the ground or a wall anywhere within 4” and line of sight. A marker should be placed on the table to represent the rune. If any character or creature that was not part of the spellcaster’s warband at the start of the game moves within 1” of the rune, it explodes, and every figure, friend or foe, within 2” suffers an immediate +5 magic attack. Note that if the rune is placed within 1” of a figure, it does not explode immediately – that figure must move to set it off. A spellcaster may have up to three such runes in play at any time. At the end of any turn, they may choose to cancel any or all their runes. If the spellcaster that placed a rune is no longer on the table, roll a die for e">
+                  Explosive Rune (Sigilist, your CN 14)
+                </option>
+              
+                <option value="Sigilist::Furious Quill" title="The target is attacked by a sharp animated quill. Although the quill does no damage, it is highly irritating and extremely distracting. While under attack, the target suffers -1 Move, -2 Fight, -4 Shoot, and -2 to all Casting Rolls. Whenever the target is activated, it may make a Will Roll with a Target Number equal to the Casting Roll – if successful, the quill is caught and destroyed. Multiple castings of Furious Quill against the same target have no effect.">
+                  Furious Quill (Sigilist, your CN 14)
+                </option>
+              
+                <option value="Sigilist::Power Word" title="This spell draws a bright rune of power in the sky. The spellcaster may pick one spell for the Power Word to affect. All rolls to cast that particular spell are at +3 for every spellcaster for the rest of the game. A spellcaster may only have one Power Word spell in effect at a time. Only one Power Word can be active for each specific target spell at one time.">
+                  Power Word (Sigilist, your CN 18)
+                </option>
+              
+                <option value="Sigilist::Push" title="The target suffers an immediate +10 attack. Instead of taking damage from this attack, the target is moved 1” directly away from the spellcaster for every point of damage they would have taken. If this pushes the target into the edge of the table or a piece of terrain over ½” high, they stop immediately. Other figures do not stop (or get hit by) a pushed figure – they are assumed to step out of the way. If this spell is cast from beneath a figure it will push them up. If the target is pushed up or off a height, it suffers falling damage as normal. This spell can push a figure out of combat, and as it is not a shooting attack, the target is not randomized.">
+                  Push (Sigilist, your CN 12)
+                </option>
+              
+                <option value="Sigilist::Write Scroll" title="This spell creates one scroll. The scroll must be of a spell that the spellcaster either knows or a spell for which they own the grimoire. The scroll may be sold, given to a figure, or stored in the wizard’s vault. SIGILIST">
+                  Write Scroll (Sigilist, your CN 16)
+                </option>
+              
+                <option value="Soothsayer::Awareness" title="If this spellcaster is on the table, its warband may add +2 to its Initiative Rolls for the purposes of determining the primary player only. This bonus stacks so, if both the wizard and the apprentice have cast this spell and are both on the table, the player may add +4 to their Initiative Rolls. The maximum possible bonus is +4. This spell counts as active on the spellcaster during the game and may be cancelled by anything that cancels spells.">
+                  Awareness (Soothsayer, your CN 16)
+                </option>
+              
+                <option value="Soothsayer::Combat Awareness" title="This spell gives the target a magic insight into the moves their opponent will attempt in a fight. It grants the target +1 Fight and +1 Armour for the remainder of the game. Multiple castings of this spell on the same target have no effect.">
+                  Combat Awareness (Soothsayer, your CN 16)
+                </option>
+              
+                <option value="Soothsayer::Mind Control" title="The target figure must make an immediate Will Roll with a Target Number equal to the Casting Roll. If it fails, the target temporarily joins the spellcaster’s warband, activating as normal. After the figure activates each turn, it must make another Will Roll with a Target Number equal to the Casting Roll. If successful, the spell is cancelled and the figure returns to its normal allegiance. A spellcaster may only have one active Mind Control spell at a time. A figure under Mind Control cannot purposely take any action that causes it immediate damage but can be moved into combat and may attack an enemy figure. A figure under Mind Control is not allowed to move off the table. A spellcaster may cancel an active Mind Control at the end of any t">
+                  Mind Control (Soothsayer, your CN 16)
+                </option>
+              
+                <option value="Soothsayer::Mind Lock" title="The target of this spell becomes immune to Mind Control and Suggestion spells for the rest of the game, and any current Mind Control spells on the figure are cancelled. The figure gains +2 Will for the rest of the game.">
+                  Mind Lock (Soothsayer, your CN 16)
+                </option>
+              
+                <option value="Soothsayer::Reveal Secret" title="This spell imparts knowledge on some lost treasure. Every successful casting of this spell before a game allows the player to make two rolls for a single treasure token (other than the central treasure, which is unaffected by this spell) after the game and choose which one to take.">
+                  Reveal Secret (Soothsayer, your CN 16)
+                </option>
+              
+                <option value="Soothsayer::Suggestion" title="The target of this spell immediately drops any treasure tokens it is carrying. The spellcaster may move the figure up to 3” in any direction provided this does not move the figure into combat or cause it any immediate damage (e.g. falling more than 3”). The target of this spell may make a Will Roll with a Target Number equal to the Casting Roll. If successful, the spell has no effect.">
+                  Suggestion (Soothsayer, your CN 16)
+                </option>
+              
+                <option value="Soothsayer::True Sight" title="The spellcaster, and all friendly figures within 6” of the spellcaster, can see invisible figures and are immune to the effects of the Beauty spell. Furthermore, if an invisible figure is within 6” of the spellcaster, the Invisibility spell is cancelled. If an Illusionary Soldier is within 6” of the spellcaster, it is immediately removed from the table.">
+                  True Sight (Soothsayer, your CN 14)
+                </option>
+              
+                <option value="Soothsayer::Wizard Eye" title="This spell may be cast on any terrain feature within 12” that has a flat side, such as most ruins. Place a token on or next to the terrain feature to represent the Wizard Eye. For the rest of the game, the caster may choose to draw line of sight from the Wizard Eye instead of from the figure when casting spells. The Wizard Eye has 180-degree field of vision. A spellcaster may only maintain one Wizard Eye at a time. If the terrain piece on which the Wizard Eye is placed is damaged or destroyed (such as by a Crumble spell) the spell is cancelled. The spellcaster may cancel this spell at the end of any turn. SOOTHSAYER">
+                  Wizard Eye (Soothsayer, your CN 12)
+                </option>
+              
+                <option value="Summoner::Control Demon" title="The target demon must make an immediate Will Roll with a Target Number equal to the Casting Roll. If it fails, it becomes a temporary member of the spellcaster’s warband. This control lasts for the rest of the game or until the spell is cancelled. The spellcaster may spend an action to cancel this spell. A spellcaster may only control one demon at a time.">
+                  Control Demon (Summoner, your CN 12)
+                </option>
+              
+                <option value="Summoner::Imp" title="The spellcaster places an imp (page 184) on the table anywhere within the spellcaster’s line of sight, but no closer than 3” to any other figure. The imp follows the normal rules for uncontrolled creatures and will activate in the next Creature phase. If the spellcaster casts this spell a second time, the first imp immediately vanishes.">
+                  Imp (Summoner, your CN 12)
+                </option>
+              
+                <option value="Summoner::Plague of Insects" title="The target figure is attacked by a cloud of stinging or biting insects that irritate and distract. The cloud of insects has a 1” radius centred on, and moving with, the target figure. It affects all figures, including the target figure, fully or partially within this radius. While being pestered by the insects, a figure has -4 Fight and -4 Shoot (to a minimum of +0) and -2 to Casting Rolls. After this figure activates each turn, it may make a Will Roll with a Target Number equal to the Casting Roll. If successful, the spell is cancelled. Other figures within the radius may simply move away to escape. A figure may only ever be affected by one Plague of Insects spell at a time, whether as a target or by virtue of being within the 1” radius. L">
+                  Plague of Insects (Summoner, your CN 12)
+                </option>
+              
+                <option value="Summoner::Planar Tear" title="The spellcaster creates a small tear in the fabric of the universe. This rift is painful to humans and creatures, but lethal to demons. The spellcaster selects a target point. All figures within 2” of that point must make a Will Roll with a Target Number equal to the Casting Roll or suffer 2 points of damage. Demons that fail the Will Roll take damage equal to the Casting Roll.">
+                  Planar Tear (Summoner, your CN 14)
+                </option>
+              
+                <option value="Summoner::Plane Walk" title="Although the spellcaster remains in the same physical location, they move briefly between planes of existence. For the rest of this turn, they can ignore all terrain when moving, thus walking through walls or across chasms. They may not be the target of any shooting attacks or spells. The spellcaster will never be considered in combat during the turn, nor can they be attacked by any figure. They may not, however, pick up treasure or in any way affect other figures or terrain on the table. If they are carrying treasure, they drop it. It is incredibly draining to move between planes of existence, so if a spellcaster attempts to cast this spell in a second consecutive turn, they suffer a -5 modifier to their Casting Roll, -10 if they attempt i">
+                  Plane Walk (Summoner, your CN 12)
+                </option>
+              
+                <option value="Summoner::Possess" title="This spell may only be cast on a permanent or temporary member of the spellcaster’s own warband, except the wizard, apprentice, or demons. The target is possessed by a demon and gains +2 Fight, +1 Armour, and -2 Will and counts as a demon (i.e. it will be affected by Banish, Control Demon, Circle of Protection, etc.). This figure may not be part of a group activation. If removed from the game for any reason (such as being hit by a Banish spell), check for the character’s survival as normal. A spellcaster may only have one Possess spell active at a time.">
+                  Possess (Summoner, your CN 14)
+                </option>
+              
+                <option value="Summoner::Summon Demon" title="Immediately place a demon on the table within 1” of the spellcaster. It may not be placed straight into combat. This demon is considered to be under the effects of a Control Demon spell by the same spellcaster, and thus this spell may not be cast if the spellcaster is already controlling a demon. The type of demon summoned depends on the amount by which the spellcaster succeeded on their Casting Roll: 0–5 imp, 6–12 minor demon, 13+ major demon. If a spellcaster rolls a 1 while attempting to cast this spell, they summon an uncontrolled demon and must place this demon in combat with the spellcaster. Roll a die to determine the type of demon 1–10 imp, 11–17 minor demon, 18+ major demon. A spellcaster cannot empower a roll of 1 when casting thi">
+                  Summon Demon (Summoner, your CN 14)
+                </option>
+              
+                <option value="Thaumaturge::Banish" title="All demons within line of sight of the spellcaster must pass an immediate Will Roll with a Target Number equal to the Casting Roll. If a demon fails the roll and its current Will is +4 or less, it is immediately reduced to 0 Health and removed from the table. If its current Will is +5 or higher, it suffers damage equal to three times the amount by which it failed the Will Roll.">
+                  Banish (Thaumaturge, your CN 14)
+                </option>
+              
+                <option value="Thaumaturge::Blinding Light" title="The target must make an immediate Will Roll with a Target Number equal to the Casting Roll. If it fails, it may not attack, shoot, or cast Line of Sight spells. Its Fight stat is reduced to +0 and its Move to 1. At the end of each turn, the figure may attempt another Will Roll with the same Target Number. If successful, the spell is cancelled.">
+                  Blinding Light (Thaumaturge, your CN 12)
+                </option>
+              
+                <option value="Thaumaturge::Circle of Protection" title="Creates a circle with a 3” diameter which no demon or undead creature can enter or pass through. If something forces them into contact with the circle, they stop at its edge. A spellcaster may only have one active circle of protection at a time, but they do not have to remain within it. The spellcaster may cancel this spell at the end of any turn. Otherwise, roll a die at the end of every turn: on a 1–3 the spell is cancelled.">
+                  Circle of Protection (Thaumaturge, your CN 16)
+                </option>
+              
+                <option value="Thaumaturge::Destroy Undead" title="The target undead creature must make a Will Roll with a Target Number equal to the Casting Roll. If the undead creature fails the roll and its current Will is +2 or less, it is immediately reduced to 0 Health and is removed from the table. If its current Will is +3 or higher, it suffers damage equal to three times the amount by which it failed the Will Roll.">
+                  Destroy Undead (Thaumaturge, your CN 14)
+                </option>
+              
+                <option value="Thaumaturge::Dispel" title="Immediately cancels the ongoing effect of any one casting of any one spell. It cannot unsummon a creature, but it can cancel the control of a creature that is a temporary member of a warband.">
+                  Dispel (Thaumaturge, your CN 16)
+                </option>
+              
+                <option value="Thaumaturge::Miraculous Cure" title="Wizard only. This spell may be used in several different ways. A successful casting of this spell will remove all permanent injuries from one figure. For example, a wizard suffering from Lost Fingers regrows all their missing digits, regardless of how many times they have suffered that particular injury. Or, it may be cast on a Badly Wounded figure – if successful, the soldier is healed and may participate in the next game with no penalty. Finally, it may be used to attempt to bring a figure back from the dead. The figure must have died in the game just played, and using the spell in this fashion incurs a -4 penalty to the Casting Roll. If successful, the figure is restored to life, and may participate in the next game with no penalty. If M">
+                  Miraculous Cure (Thaumaturge, your CN 20)
+                </option>
+              
+                <option value="Thaumaturge::Shield" title="The target receives +2 Armour for the rest of the game. The maximum armour rule (see, p.36) still applies. Multiple castings of Shield on the same target have no effect. THAUMATURGE">
+                  Shield (Thaumaturge, your CN 14)
+                </option>
+              
+                <option value="Witch::Animal Companion" title="The spellcaster summons an animal companion of their choice from the following options to become a permanent member of their warband: bear (page 179), ice toad (page 180), snow leopard (page 182), or wolf (page 182). All Animal Companions count as standard soldiers. Animal companions are more strong-willed than wild examples of their species and receive a permanent +3 Will. A spellcaster may only have one animal companion at any time.">
+                  Animal Companion (Witch, your CN 14)
+                </option>
+              
+                <option value="Witch::Brew Potion" title="The spellcaster creates one Lesser Potion of their choice (page 86) that may be sold, stored in the wizard’s vault, or given to a member of the warband. A wizard (and only a wizard) may use this spell to create a Greater Potion (page 87). First, they must declare what potion they are attempting to brew and pay the listed ingredients cost. The wizard should then roll to cast Brew Potion with a -4 to the Casting Roll. If successful, the potion is created and can be immediately assigned to a figure in the warband, sold, or stored in the wizard’s vault. If unsuccessful, the potion is not created and the money spent on ingredients is lost.">
+                  Brew Potion (Witch, your CN 16)
+                </option>
+              
+                <option value="Witch::Control Animal" title="The target animal must make an immediate Will Roll with a Target Number equal to the Casting Roll. If the roll fails, the animal becomes a temporary member of the spellcaster’s warband. This control lasts for the rest of the game or until the spell is cancelled. The spellcaster may spend an action to cancel this spell. A spellcaster may only control one animal at a time.">
+                  Control Animal (Witch, your CN 16)
+                </option>
+              
+                <option value="Witch::Curse" title="The target suffers -2 to all die rolls. At the end of each turn, the target may make a Will Roll with the Target Number equal to the Casting Roll (at -2, of course). If successful, this spell is cancelled. Curse cannot be cast on a figure already suffering the effects of a Curse spell.">
+                  Curse (Witch, your CN 12)
+                </option>
+              
+                <option value="Witch::Familiar" title="The spellcaster gains a familiar, which can take the form of any small creature. It is not depicted on the table, unless the player wants to include it on the spellcaster figure. A spellcaster with a familiar gains +2 Health (write as a split stat). If the spellcaster is ever reduced to 1 Health or less, the familiar is destroyed. At the start of the next game, the spellcaster reverts to their normal Health, unless another Familiar spell is successfully cast">
+                  Familiar (Witch, your CN 14)
+                </option>
+              
+                <option value="Witch::Fog" title="Place a line of fog, 6” long, 3” high, and 1” thick anywhere on the table as long as some part of it is within line of sight of the spellcaster and all of it is within 24”. Figures can move through the fog with no penalty, but line of sight may not be drawn through it. At the start of each new turn, roll a die. On a result of 1–4 the fog dissipates and is removed from the table.">
+                  Fog (Witch, your CN 12)
+                </option>
+              
+                <option value="Witch::Mud" title="All ground within 3” of a target point becomes rough ground.">
+                  Mud (Witch, your CN 14)
+                </option>
+              
+                <option value="Witch::Poison Dart" title="Make an immediate plus +3 poisoned shooting attack against the target figure. This is a non-magic attack. WITCH">
+                  Poison Dart (Witch, your CN 14)
+                </option>
               
             </select>
           </div>
@@ -3053,7 +3579,7 @@
         </ul>
         <form
           method="post"
-          action="/warband/the-icebound-circle-40bf650b/update"
+          action="/warband/the-icebound-circle-1e7fbe39/update"
           style="margin-top:0.75rem"
         >
           <input type="hidden" name="action" value="reverse_level_up" />
@@ -3067,7 +3593,7 @@
     </details>
 
     
-      <form method="post" action="/warband/the-icebound-circle-40bf650b/update" class="actions" style="margin-top:0.75rem">
+      <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update" class="actions" style="margin-top:0.75rem">
         <input type="hidden" name="action" value="dismiss_apprentice" />
         <label class="checkbox-row" style="margin:0">
           <input type="checkbox" name="refund" /> Refund 100 gc
@@ -3219,13 +3745,12 @@
           </div>
         
       </div>
-      <form method="post" action="/warband/the-icebound-circle-40bf650b/update" id="reorder-form" style="margin-top:0.75rem">
+      <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update" id="reorder-form" style="margin-top:0.75rem">
         <input type="hidden" name="action" value="reorder_spells" />
         <input type="hidden" name="spell_order" id="view-spell-order" value="Elementalist::Wall|Elementalist::Elemental Bolt|Elementalist::Elemental Shield|Chronomancer::Fast Act|Enchanter::Enchant Weapon|Summoner::Leap|Necromancer::Bone Dart|Thaumaturge::Heal" />
         <div class="actions">
           <button type="button" class="btn secondary small" id="spell-up">Move selected ↑</button>
           <button type="button" class="btn secondary small" id="spell-down">Move selected ↓</button>
-          <button class="btn small" type="submit">Save spell order</button>
         </div>
         <p class="muted" style="font-size:0.85rem;margin-top:0.4rem">Click a spell row to select it (use Info to open text), then reorder.</p>
       </form>
@@ -3233,25 +3758,49 @@
         (function () {
           const body = document.getElementById('spell-order-body');
           const input = document.getElementById('view-spell-order');
+          const selKey = 'selspell:' + location.pathname;
           let selected = null;
           function rows() { return [...body.querySelectorAll('.spell-row')]; }
+          function select(row) {
+            rows().forEach(x => x.classList.remove('selected'));
+            selected = row;
+            if (row) {
+              row.classList.add('selected');
+              try { sessionStorage.setItem(selKey, row.dataset.spellId); } catch (err) { /* ignore */ }
+            }
+          }
           function sync() {
             rows().forEach((r, i) => {
               const idx = r.querySelector('.spell-idx');
               if (idx) idx.textContent = (i + 1) + '.';
             });
             input.value = rows().map(r => r.dataset.spellId).join('|');
+            if (selected) {
+              try { sessionStorage.setItem(selKey, selected.dataset.spellId); } catch (err) { /* ignore */ }
+            }
+            if (window.fgSaveViewState) window.fgSaveViewState();
+            const form = input.form;
+            if (form.requestSubmit) form.requestSubmit();
+            else form.submit();
           }
           rows().forEach(r => {
             r.addEventListener('click', (e) => {
               if (e.target.closest('.spell-desc-toggle') || e.target.closest('summary')) {
                 // allow details toggle; still select row
               }
-              rows().forEach(x => x.classList.remove('selected'));
-              selected = r;
-              r.classList.add('selected');
+              select(r);
             });
           });
+          // Re-select whichever spell was selected before the last reorder-
+          // triggered reload, so a run of "Move up" clicks doesn't require
+          // re-picking the row every time.
+          try {
+            const savedId = sessionStorage.getItem(selKey);
+            if (savedId) {
+              const match = rows().find(r => r.dataset.spellId === savedId);
+              if (match) select(match);
+            }
+          } catch (err) { /* ignore */ }
           document.getElementById('spell-up').onclick = () => {
             if (!selected || !selected.previousElementSibling) return;
             body.insertBefore(selected, selected.previousElementSibling);
@@ -3281,7 +3830,7 @@
             <img class="portrait-md" src="static/portraits/captain.png" alt="" />
           
           <div class="char-body">
-            <form method="post" action="/warband/the-icebound-circle-40bf650b/update" enctype="multipart/form-data">
+            <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update" enctype="multipart/form-data" data-autosave>
               <input type="hidden" name="action" value="captain_edit" />
               <div class="grid-2">
                 <div class="form-row">
@@ -3297,7 +3846,7 @@
                 <div class="stat-pill"><span class="label">Move</span><span class="value">6</span></div>
                 <div class="stat-pill"><span class="label">Fight</span><span class="value">+3</span></div>
                 <div class="stat-pill"><span class="label">Shoot</span><span class="value">+1</span></div>
-                <div class="stat-pill"><span class="label">Armour</span><span class="value">10</span></div>
+                <div class="stat-pill"><span class="label">Armour</span><span class="value">12</span></div>
                 <div class="stat-pill"><span class="label">Will</span><span class="value">+3</span></div>
                 <div class="stat-pill"><span class="label">Health</span><span class="value">12</span></div>
               </div>
@@ -3305,8 +3854,6 @@
               <p class="muted" style="font-size:0.85rem">
                 Hired · Level 1/10 · XP 140
                 
-                
-                  · Immune to Mind Control (homerule note — not simulated)
                 
               </p>
               <details class="ref-panel">
@@ -3398,6 +3945,36 @@
                     data-kind="simple"
                   >
                     Staff
+                  </option>
+                
+                  
+                  
+                  <option
+                    value="Javelin"
+                    data-slots="1"
+                    data-kind="simple"
+                  >
+                    Javelin
+                  </option>
+                
+                  
+                  
+                  <option
+                    value="Bladed Staff"
+                    data-slots="1"
+                    data-kind="simple"
+                  >
+                    Bladed Staff
+                  </option>
+                
+                  
+                  
+                  <option
+                    value="Throwing Knife"
+                    data-slots="1"
+                    data-kind="simple"
+                  >
+                    Throwing Knife
                   </option>
                 
               </optgroup>
@@ -3550,7 +4127,7 @@
           class="item-slot-text"
           name="captain_slot_0"
           type="text"
-          value=""
+          value="Light Armour"
           placeholder="___ or custom item"
           data-index="0"
           list="captain_item_suggestions"
@@ -3611,6 +4188,36 @@
                     data-kind="simple"
                   >
                     Staff
+                  </option>
+                
+                  
+                  
+                  <option
+                    value="Javelin"
+                    data-slots="1"
+                    data-kind="simple"
+                  >
+                    Javelin
+                  </option>
+                
+                  
+                  
+                  <option
+                    value="Bladed Staff"
+                    data-slots="1"
+                    data-kind="simple"
+                  >
+                    Bladed Staff
+                  </option>
+                
+                  
+                  
+                  <option
+                    value="Throwing Knife"
+                    data-slots="1"
+                    data-kind="simple"
+                  >
+                    Throwing Knife
                   </option>
                 
               </optgroup>
@@ -3763,7 +4370,7 @@
           class="item-slot-text"
           name="captain_slot_1"
           type="text"
-          value=""
+          value="Shield"
           placeholder="___ or custom item"
           data-index="1"
           list="captain_item_suggestions"
@@ -3824,6 +4431,36 @@
                     data-kind="simple"
                   >
                     Staff
+                  </option>
+                
+                  
+                  
+                  <option
+                    value="Javelin"
+                    data-slots="1"
+                    data-kind="simple"
+                  >
+                    Javelin
+                  </option>
+                
+                  
+                  
+                  <option
+                    value="Bladed Staff"
+                    data-slots="1"
+                    data-kind="simple"
+                  >
+                    Bladed Staff
+                  </option>
+                
+                  
+                  
+                  <option
+                    value="Throwing Knife"
+                    data-slots="1"
+                    data-kind="simple"
+                  >
+                    Throwing Knife
                   </option>
                 
               </optgroup>
@@ -3976,7 +4613,7 @@
           class="item-slot-text"
           name="captain_slot_2"
           type="text"
-          value=""
+          value="Hand Weapon"
           placeholder="___ or custom item"
           data-index="2"
           list="captain_item_suggestions"
@@ -4037,6 +4674,36 @@
                     data-kind="simple"
                   >
                     Staff
+                  </option>
+                
+                  
+                  
+                  <option
+                    value="Javelin"
+                    data-slots="1"
+                    data-kind="simple"
+                  >
+                    Javelin
+                  </option>
+                
+                  
+                  
+                  <option
+                    value="Bladed Staff"
+                    data-slots="1"
+                    data-kind="simple"
+                  >
+                    Bladed Staff
+                  </option>
+                
+                  
+                  
+                  <option
+                    value="Throwing Knife"
+                    data-slots="1"
+                    data-kind="simple"
+                  >
+                    Throwing Knife
                   </option>
                 
               </optgroup>
@@ -4189,7 +4856,7 @@
           class="item-slot-text"
           name="captain_slot_3"
           type="text"
-          value=""
+          value="Crossbow"
           placeholder="___ or custom item"
           data-index="3"
           list="captain_item_suggestions"
@@ -4250,6 +4917,36 @@
                     data-kind="simple"
                   >
                     Staff
+                  </option>
+                
+                  
+                  
+                  <option
+                    value="Javelin"
+                    data-slots="1"
+                    data-kind="simple"
+                  >
+                    Javelin
+                  </option>
+                
+                  
+                  
+                  <option
+                    value="Bladed Staff"
+                    data-slots="1"
+                    data-kind="simple"
+                  >
+                    Bladed Staff
+                  </option>
+                
+                  
+                  
+                  <option
+                    value="Throwing Knife"
+                    data-slots="1"
+                    data-kind="simple"
+                  >
+                    Throwing Knife
                   </option>
                 
               </optgroup>
@@ -4402,7 +5099,7 @@
           class="item-slot-text"
           name="captain_slot_4"
           type="text"
-          value=""
+          value="Quiver"
           placeholder="___ or custom item"
           data-index="4"
           list="captain_item_suggestions"
@@ -4463,6 +5160,36 @@
                     data-kind="simple"
                   >
                     Staff
+                  </option>
+                
+                  
+                  
+                  <option
+                    value="Javelin"
+                    data-slots="1"
+                    data-kind="simple"
+                  >
+                    Javelin
+                  </option>
+                
+                  
+                  
+                  <option
+                    value="Bladed Staff"
+                    data-slots="1"
+                    data-kind="simple"
+                  >
+                    Bladed Staff
+                  </option>
+                
+                  
+                  
+                  <option
+                    value="Throwing Knife"
+                    data-slots="1"
+                    data-kind="simple"
+                  >
+                    Throwing Knife
                   </option>
                 
               </optgroup>
@@ -4644,6 +5371,12 @@
       <option value="Light Armour"></option>
     
       <option value="Heavy Armour"></option>
+    
+      <option value="Javelin"></option>
+    
+      <option value="Bladed Staff"></option>
+    
+      <option value="Throwing Knife"></option>
     
     
       <option value="Potion of Healing"></option>
@@ -4954,9 +5687,6 @@
                 <label for="captain_notes">Notes</label>
                 <textarea id="captain_notes" name="captain_notes"></textarea>
               </div>
-              <div class="actions">
-                <button class="btn" type="submit">Save captain</button>
-              </div>
             </form>
           </div>
         </div>
@@ -4969,11 +5699,11 @@
             Enter a negative number to remove XP; if that drops below the level you're at, the
             most recent level-up(s) are automatically reversed.
           </p>
-          <form method="post" action="/warband/the-icebound-circle-40bf650b/update" class="form-row inline">
+          <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update" class="form-row inline">
             <input type="hidden" name="action" value="captain_add_xp" />
             <div>
               <label for="captain_xp_amount">Add/remove XP</label>
-              <input id="captain_xp_amount" name="amount" type="text" inputmode="numeric" pattern="[+-]?[0-9]+" value="50" />
+              <input id="captain_xp_amount" name="amount" type="text" inputmode="numeric" pattern="[+-]?[0-9]+" value="20" />
             </div>
             <div>
               <label>&nbsp;</label>
@@ -4992,14 +5722,14 @@
                 <li>Level 1: +1 Fight <span class="muted">(latest)</span></li>
               
             </ul>
-            <form method="post" action="/warband/the-icebound-circle-40bf650b/update" style="margin-top:0.5rem">
+            <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update" style="margin-top:0.5rem">
               <input type="hidden" name="action" value="reverse_captain_level_up" />
               <button class="btn danger small" type="submit">Reverse last level-up</button>
             </form>
           
         </details>
 
-        <form method="post" action="/warband/the-icebound-circle-40bf650b/update" class="actions" style="margin-top:0.75rem">
+        <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update" class="actions" style="margin-top:0.75rem">
           <input type="hidden" name="action" value="dismiss_captain" />
           <label class="checkbox-row" style="margin:0">
             <input type="checkbox" name="refund" /> Refund 125 gc
@@ -5025,7 +5755,7 @@
 
     
       <div class="table-wrap">
-        <table>
+        <table id="roster-table">
           <thead>
             <tr>
               <th>#</th>
@@ -5036,12 +5766,15 @@
               <th>Status</th>
               <th>Move</th><th>Fight</th><th>Shoot</th><th>Armour</th><th>Will</th><th>Health</th>
               <th>Cost</th>
-              <th>Actions</th>
+              <th>
+                Actions
+                <button type="button" class="btn small secondary" id="toggle-actions-btn">Show actions</button>
+              </th>
             </tr>
           </thead>
           <tbody id="soldier-order-body">
             
-              <tr class="status-active" data-soldier-id="d88030aed8">
+              <tr class="status-active" data-soldier-id="56bc1add07">
                 <td class="muted">1</td>
                 <td>
                   <input type="radio" name="soldier-select" aria-label="Select Garrik to reorder" />
@@ -5055,7 +5788,10 @@
                 <td><strong>Garrik</strong></td>
                 <td>
                   Thug
-                  <div><span class="badge standard">standard</span></div>
+                  <div>
+                    <span class="badge standard">standard</span>
+                    
+                  </div>
                 </td>
                 <td><span class="badge active">active</span></td>
                 <td>6</td>
@@ -5065,11 +5801,11 @@
                 <td>-1</td>
                 <td>10</td>
                 <td class="gold">0</td>
-                <td>
+                <td class="actions-cell">
                   <div class="stack-sm">
-                    <form method="post" action="/warband/the-icebound-circle-40bf650b/update">
+                    <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update">
                       <input type="hidden" name="action" value="soldier_status" />
-                      <input type="hidden" name="soldier_id" value="d88030aed8" />
+                      <input type="hidden" name="soldier_id" value="56bc1add07" />
                       <select name="status">
                         
                           <option value="active" selected>active</option>
@@ -5080,16 +5816,23 @@
                         
                       </select>
                     </form>
+                    
+                    
                     <div class="actions" style="align-items:flex-start;margin-top:0">
+                    
+                      <details>
+                        <summary class="muted" style="cursor:pointer;font-size:0.85rem">Info</summary>
+                        <p class="muted" style="font-size:0.85rem;margin:0.4rem 0 0;max-width:32rem">A common laborer or petty criminal turned muscle-for-hire — no training, just a hand weapon and a willingness to fight. No special rules beyond their listed gear.</p>
+                      </details>
+                    
                     <details>
                       <summary class="muted" style="cursor:pointer;font-size:0.85rem">Edit / picture</summary>
-                      <form method="post" action="/warband/the-icebound-circle-40bf650b/update" enctype="multipart/form-data" class="stack-sm" style="margin-top:0.4rem">
+                      <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update" enctype="multipart/form-data" class="stack-sm" style="margin-top:0.4rem" data-autosave>
                         <input type="hidden" name="action" value="soldier_edit" />
-                        <input type="hidden" name="soldier_id" value="d88030aed8" />
+                        <input type="hidden" name="soldier_id" value="56bc1add07" />
                         <input name="soldier_name" type="text" value="Garrik" />
                         <input name="soldier_portrait" type="file" accept="image/*" />
                         <input name="notes" type="text" value="" placeholder="Notes" />
-                        <button class="btn small" type="submit">Update</button>
                       </form>
                     </details>
                     
@@ -5097,10 +5840,10 @@
                       <details>
                         <summary class="muted" style="cursor:pointer;font-size:0.85rem">Level up </summary>
                         <div class="stack-sm" style="margin-top:0.4rem">
-                          <form method="post" action="/warband/the-icebound-circle-40bf650b/update" class="inline-form">
+                          <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update" class="inline-form">
                             <input type="hidden" name="action" value="soldier_add_xp" />
-                            <input type="hidden" name="soldier_id" value="d88030aed8" />
-                            <input name="amount" type="text" inputmode="numeric" pattern="[+-]?[0-9]+" value="50" style="width:5rem" title="Negative removes XP (reverses a level-up if it drops below the current level)" />
+                            <input type="hidden" name="soldier_id" value="56bc1add07" />
+                            <input name="amount" type="text" inputmode="numeric" pattern="[+-]?[0-9]+" value="20" style="width:5rem" title="Negative removes XP (reverses a level-up if it drops below the current level)" />
                             <button class="btn secondary small" type="submit">Add/remove XP</button>
                           </form>
                           <p class="muted" style="font-size:0.8rem;margin:0">XP 0 · Level 0/3</p>
@@ -5110,9 +5853,9 @@
                       </details>
                     
                     
-                    <form method="post" action="/warband/the-icebound-circle-40bf650b/update">
+                    <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update">
                       <input type="hidden" name="action" value="remove_soldier" />
-                      <input type="hidden" name="soldier_id" value="d88030aed8" />
+                      <input type="hidden" name="soldier_id" value="56bc1add07" />
                       <label class="checkbox-row" style="margin:0;font-size:0.8rem">
                         <input type="checkbox" name="refund" /> refund 0 gc
                       </label>
@@ -5123,7 +5866,7 @@
                 </td>
               </tr>
             
-              <tr class="status-active" data-soldier-id="39abab4806">
+              <tr class="status-active" data-soldier-id="e73cae7bf5">
                 <td class="muted">2</td>
                 <td>
                   <input type="radio" name="soldier-select" aria-label="Select Nissa to reorder" />
@@ -5137,7 +5880,10 @@
                 <td><strong>Nissa</strong></td>
                 <td>
                   Thief
-                  <div><span class="badge standard">standard</span></div>
+                  <div>
+                    <span class="badge standard">standard</span>
+                    
+                  </div>
                 </td>
                 <td><span class="badge active">active</span></td>
                 <td>7</td>
@@ -5147,11 +5893,11 @@
                 <td>+0</td>
                 <td>10</td>
                 <td class="gold">0</td>
-                <td>
+                <td class="actions-cell">
                   <div class="stack-sm">
-                    <form method="post" action="/warband/the-icebound-circle-40bf650b/update">
+                    <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update">
                       <input type="hidden" name="action" value="soldier_status" />
-                      <input type="hidden" name="soldier_id" value="39abab4806" />
+                      <input type="hidden" name="soldier_id" value="e73cae7bf5" />
                       <select name="status">
                         
                           <option value="active" selected>active</option>
@@ -5162,16 +5908,23 @@
                         
                       </select>
                     </form>
+                    
+                    
                     <div class="actions" style="align-items:flex-start;margin-top:0">
+                    
+                      <details>
+                        <summary class="muted" style="cursor:pointer;font-size:0.85rem">Info</summary>
+                        <p class="muted" style="font-size:0.85rem;margin:0.4rem 0 0;max-width:32rem">Fast and light-fingered, trained to slip in, grab treasure, and slip out again rather than stand and fight. Free to hire, armed only with a dagger. No special rules beyond their listed gear.</p>
+                      </details>
+                    
                     <details>
                       <summary class="muted" style="cursor:pointer;font-size:0.85rem">Edit / picture</summary>
-                      <form method="post" action="/warband/the-icebound-circle-40bf650b/update" enctype="multipart/form-data" class="stack-sm" style="margin-top:0.4rem">
+                      <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update" enctype="multipart/form-data" class="stack-sm" style="margin-top:0.4rem" data-autosave>
                         <input type="hidden" name="action" value="soldier_edit" />
-                        <input type="hidden" name="soldier_id" value="39abab4806" />
+                        <input type="hidden" name="soldier_id" value="e73cae7bf5" />
                         <input name="soldier_name" type="text" value="Nissa" />
                         <input name="soldier_portrait" type="file" accept="image/*" />
                         <input name="notes" type="text" value="" placeholder="Notes" />
-                        <button class="btn small" type="submit">Update</button>
                       </form>
                     </details>
                     
@@ -5179,10 +5932,10 @@
                       <details>
                         <summary class="muted" style="cursor:pointer;font-size:0.85rem">Level up </summary>
                         <div class="stack-sm" style="margin-top:0.4rem">
-                          <form method="post" action="/warband/the-icebound-circle-40bf650b/update" class="inline-form">
+                          <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update" class="inline-form">
                             <input type="hidden" name="action" value="soldier_add_xp" />
-                            <input type="hidden" name="soldier_id" value="39abab4806" />
-                            <input name="amount" type="text" inputmode="numeric" pattern="[+-]?[0-9]+" value="50" style="width:5rem" title="Negative removes XP (reverses a level-up if it drops below the current level)" />
+                            <input type="hidden" name="soldier_id" value="e73cae7bf5" />
+                            <input name="amount" type="text" inputmode="numeric" pattern="[+-]?[0-9]+" value="20" style="width:5rem" title="Negative removes XP (reverses a level-up if it drops below the current level)" />
                             <button class="btn secondary small" type="submit">Add/remove XP</button>
                           </form>
                           <p class="muted" style="font-size:0.8rem;margin:0">XP 0 · Level 0/3</p>
@@ -5192,9 +5945,9 @@
                       </details>
                     
                     
-                    <form method="post" action="/warband/the-icebound-circle-40bf650b/update">
+                    <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update">
                       <input type="hidden" name="action" value="remove_soldier" />
-                      <input type="hidden" name="soldier_id" value="39abab4806" />
+                      <input type="hidden" name="soldier_id" value="e73cae7bf5" />
                       <label class="checkbox-row" style="margin:0;font-size:0.8rem">
                         <input type="checkbox" name="refund" /> refund 0 gc
                       </label>
@@ -5205,7 +5958,7 @@
                 </td>
               </tr>
             
-              <tr class="status-active" data-soldier-id="6a8af81957">
+              <tr class="status-active" data-soldier-id="2e2151943f">
                 <td class="muted">3</td>
                 <td>
                   <input type="radio" name="soldier-select" aria-label="Select Wren to reorder" />
@@ -5219,7 +5972,10 @@
                 <td><strong>Wren</strong></td>
                 <td>
                   Archer
-                  <div><span class="badge specialist">specialist</span></div>
+                  <div>
+                    <span class="badge specialist">specialist</span>
+                    
+                  </div>
                 </td>
                 <td><span class="badge active">active</span></td>
                 <td>6</td>
@@ -5229,11 +5985,11 @@
                 <td>+0</td>
                 <td>10</td>
                 <td class="gold">75</td>
-                <td>
+                <td class="actions-cell">
                   <div class="stack-sm">
-                    <form method="post" action="/warband/the-icebound-circle-40bf650b/update">
+                    <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update">
                       <input type="hidden" name="action" value="soldier_status" />
-                      <input type="hidden" name="soldier_id" value="6a8af81957" />
+                      <input type="hidden" name="soldier_id" value="2e2151943f" />
                       <select name="status">
                         
                           <option value="active" selected>active</option>
@@ -5244,16 +6000,23 @@
                         
                       </select>
                     </form>
+                    
+                    
                     <div class="actions" style="align-items:flex-start;margin-top:0">
+                    
+                      <details>
+                        <summary class="muted" style="cursor:pointer;font-size:0.85rem">Info</summary>
+                        <p class="muted" style="font-size:0.85rem;margin:0.4rem 0 0;max-width:32rem">A trained bowman. A bow loads and fires as a single action, so an archer can move and shoot within the same activation.</p>
+                      </details>
+                    
                     <details>
                       <summary class="muted" style="cursor:pointer;font-size:0.85rem">Edit / picture</summary>
-                      <form method="post" action="/warband/the-icebound-circle-40bf650b/update" enctype="multipart/form-data" class="stack-sm" style="margin-top:0.4rem">
+                      <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update" enctype="multipart/form-data" class="stack-sm" style="margin-top:0.4rem" data-autosave>
                         <input type="hidden" name="action" value="soldier_edit" />
-                        <input type="hidden" name="soldier_id" value="6a8af81957" />
+                        <input type="hidden" name="soldier_id" value="2e2151943f" />
                         <input name="soldier_name" type="text" value="Wren" />
                         <input name="soldier_portrait" type="file" accept="image/*" />
                         <input name="notes" type="text" value="" placeholder="Notes" />
-                        <button class="btn small" type="submit">Update</button>
                       </form>
                     </details>
                     
@@ -5261,10 +6024,10 @@
                       <details>
                         <summary class="muted" style="cursor:pointer;font-size:0.85rem">Level up </summary>
                         <div class="stack-sm" style="margin-top:0.4rem">
-                          <form method="post" action="/warband/the-icebound-circle-40bf650b/update" class="inline-form">
+                          <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update" class="inline-form">
                             <input type="hidden" name="action" value="soldier_add_xp" />
-                            <input type="hidden" name="soldier_id" value="6a8af81957" />
-                            <input name="amount" type="text" inputmode="numeric" pattern="[+-]?[0-9]+" value="50" style="width:5rem" title="Negative removes XP (reverses a level-up if it drops below the current level)" />
+                            <input type="hidden" name="soldier_id" value="2e2151943f" />
+                            <input name="amount" type="text" inputmode="numeric" pattern="[+-]?[0-9]+" value="20" style="width:5rem" title="Negative removes XP (reverses a level-up if it drops below the current level)" />
                             <button class="btn secondary small" type="submit">Add/remove XP</button>
                           </form>
                           <p class="muted" style="font-size:0.8rem;margin:0">XP 50 · Level 0/3</p>
@@ -5274,9 +6037,9 @@
                       </details>
                     
                     
-                    <form method="post" action="/warband/the-icebound-circle-40bf650b/update">
+                    <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update">
                       <input type="hidden" name="action" value="remove_soldier" />
-                      <input type="hidden" name="soldier_id" value="6a8af81957" />
+                      <input type="hidden" name="soldier_id" value="2e2151943f" />
                       <label class="checkbox-row" style="margin:0;font-size:0.8rem">
                         <input type="checkbox" name="refund" /> refund 75 gc
                       </label>
@@ -5290,13 +6053,12 @@
           </tbody>
         </table>
       </div>
-      <form method="post" action="/warband/the-icebound-circle-40bf650b/update" id="soldier-reorder-form" style="margin-top:0.75rem">
+      <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update" id="soldier-reorder-form" style="margin-top:0.75rem">
         <input type="hidden" name="action" value="reorder_soldiers" />
-        <input type="hidden" name="soldier_order" id="view-soldier-order" value="d88030aed8|39abab4806|6a8af81957" />
+        <input type="hidden" name="soldier_order" id="view-soldier-order" value="56bc1add07|e73cae7bf5|2e2151943f" />
         <div class="actions">
           <button type="button" class="btn secondary small" id="soldier-up">Move selected ↑</button>
           <button type="button" class="btn secondary small" id="soldier-down">Move selected ↓</button>
-          <button class="btn small" type="submit">Save soldier order</button>
         </div>
         <p class="muted" style="font-size:0.85rem;margin-top:0.4rem">Pick the "Sel." radio on a soldier row, then reorder. Order is used on the PDF roster.</p>
       </form>
@@ -5305,6 +6067,7 @@
           const body = document.getElementById('soldier-order-body');
           if (!body) return;
           const input = document.getElementById('view-soldier-order');
+          const selKey = 'selsoldier:' + location.pathname;
           function rows() { return [...body.querySelectorAll('tr')]; }
           function radios() { return [...body.querySelectorAll('input[name="soldier-select"]')]; }
           function selectedRow() {
@@ -5314,11 +6077,18 @@
           function refreshHighlight() {
             rows().forEach((r) => { r.style.outline = ''; });
             const sel = selectedRow();
-            if (sel) sel.style.outline = '2px solid var(--accent)';
+            if (sel) {
+              sel.style.outline = '2px solid var(--accent)';
+              try { sessionStorage.setItem(selKey, sel.dataset.soldierId); } catch (err) { /* ignore */ }
+            }
           }
           function sync() {
             rows().forEach((r, i) => { r.cells[0].textContent = i + 1; });
             input.value = rows().map(r => r.dataset.soldierId).join('|');
+            if (window.fgSaveViewState) window.fgSaveViewState();
+            const form = input.form;
+            if (form.requestSubmit) form.requestSubmit();
+            else form.submit();
           }
           radios().forEach((radio) => radio.addEventListener('change', refreshHighlight));
           rows().forEach(r => r.addEventListener('click', (e) => {
@@ -5329,6 +6099,20 @@
               refreshHighlight();
             }
           }));
+          // Re-select whichever soldier was selected before the last
+          // reorder-triggered reload, so a run of "Move up" clicks doesn't
+          // require re-picking the row every time.
+          try {
+            const savedId = sessionStorage.getItem(selKey);
+            if (savedId) {
+              const match = rows().find(r => r.dataset.soldierId === savedId);
+              const radio = match ? match.querySelector('input[name="soldier-select"]') : null;
+              if (radio) {
+                radio.checked = true;
+                refreshHighlight();
+              }
+            }
+          } catch (err) { /* ignore */ }
           document.getElementById('soldier-up').onclick = () => {
             const sel = selectedRow();
             if (!sel || !sel.previousElementSibling) return;
@@ -5345,7 +6129,7 @@
       </script>
     
 
-    <details class="ref-panel">
+    <details class="ref-panel" id="hire-soldier-panel">
       <summary>Hire soldier</summary>
       <p class="muted" style="font-size:0.85rem">
         Default name is the type plus a number (e.g. “Archer 1”). Rename and add a picture afterward via Edit / picture.
@@ -5360,19 +6144,19 @@
             <tr>
               <th>Type</th><th>Cat</th><th>Source</th><th>Cost</th>
               <th>Move</th><th>Fight</th><th>Shoot</th><th>Armour</th><th>Will</th><th>Health</th><th>Gear</th>
-              <th></th>
+              <th></th><th></th>
             </tr>
           </thead>
           <tbody>
             
-              <tr class="group-row"><th colspan="12">Core Rules</th></tr>
+              <tr class="group-row"><th colspan="13">Core Rules</th></tr>
               
               
               
               
               
               
-              <tr >
+              <tr class="catalog-row" >
                 <td><strong>Thief</strong></td>
                 <td><span class="badge standard">standard</span></td>
                 <td class="muted">—</td>
@@ -5385,7 +6169,14 @@
                 <td>10</td>
                 <td class="muted">Dagger</td>
                 <td>
-                  <form method="post" action="/warband/the-icebound-circle-40bf650b/update">
+                  
+                    <details class="info-toggle-details">
+                      <summary class="info-toggle">Info</summary>
+                    </details>
+                  
+                </td>
+                <td>
+                  <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update">
                     <input type="hidden" name="action" value="hire_soldier" />
                     <input type="hidden" name="type_key" value="thief" />
                     <button class="btn small" type="submit" >Hire</button>
@@ -5393,12 +6184,15 @@
                 </td>
               </tr>
               
+                <tr class="info-desc-row"><td colspan="13">Fast and light-fingered, trained to slip in, grab treasure, and slip out again rather than stand and fight. Free to hire, armed only with a dagger. No special rules beyond their listed gear.</td></tr>
               
               
               
               
               
-              <tr >
+              
+              
+              <tr class="catalog-row" >
                 <td><strong>Thug</strong></td>
                 <td><span class="badge standard">standard</span></td>
                 <td class="muted">—</td>
@@ -5411,7 +6205,14 @@
                 <td>10</td>
                 <td class="muted">Hand weapon</td>
                 <td>
-                  <form method="post" action="/warband/the-icebound-circle-40bf650b/update">
+                  
+                    <details class="info-toggle-details">
+                      <summary class="info-toggle">Info</summary>
+                    </details>
+                  
+                </td>
+                <td>
+                  <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update">
                     <input type="hidden" name="action" value="hire_soldier" />
                     <input type="hidden" name="type_key" value="thug" />
                     <button class="btn small" type="submit" >Hire</button>
@@ -5419,12 +6220,15 @@
                 </td>
               </tr>
               
+                <tr class="info-desc-row"><td colspan="13">A common laborer or petty criminal turned muscle-for-hire — no training, just a hand weapon and a willingness to fight. No special rules beyond their listed gear.</td></tr>
               
               
               
               
               
-              <tr >
+              
+              
+              <tr class="catalog-row" >
                 <td><strong>War Hound</strong></td>
                 <td><span class="badge standard">standard</span></td>
                 <td class="muted">—</td>
@@ -5437,7 +6241,14 @@
                 <td>8</td>
                 <td class="muted">—</td>
                 <td>
-                  <form method="post" action="/warband/the-icebound-circle-40bf650b/update">
+                  
+                    <details class="info-toggle-details">
+                      <summary class="info-toggle">Info</summary>
+                    </details>
+                  
+                </td>
+                <td>
+                  <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update">
                     <input type="hidden" name="action" value="hire_soldier" />
                     <input type="hidden" name="type_key" value="war_hound" />
                     <button class="btn small" type="submit" >Hire</button>
@@ -5445,12 +6256,15 @@
                 </td>
               </tr>
               
+                <tr class="info-desc-row"><td colspan="13">A trained hunting dog, useful for harrying an enemy rather than holding a line. Animal: cannot pick up treasure tokens and has no item slot.</td></tr>
               
               
               
               
               
-              <tr >
+              
+              
+              <tr class="catalog-row" >
                 <td><strong>Infantryman</strong></td>
                 <td><span class="badge standard">standard</span></td>
                 <td class="muted">—</td>
@@ -5463,7 +6277,14 @@
                 <td>10</td>
                 <td class="muted">Two-handed weapon, light armour</td>
                 <td>
-                  <form method="post" action="/warband/the-icebound-circle-40bf650b/update">
+                  
+                    <details class="info-toggle-details">
+                      <summary class="info-toggle">Info</summary>
+                    </details>
+                  
+                </td>
+                <td>
+                  <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update">
                     <input type="hidden" name="action" value="hire_soldier" />
                     <input type="hidden" name="type_key" value="infantryman" />
                     <button class="btn small" type="submit" >Hire</button>
@@ -5471,12 +6292,15 @@
                 </td>
               </tr>
               
+                <tr class="info-desc-row"><td colspan="13">A basic melee soldier, competent with a two-handed weapon and equipped with light armour. No special rules beyond their listed gear.</td></tr>
               
               
               
               
               
-              <tr >
+              
+              
+              <tr class="catalog-row" >
                 <td><strong>Apothecary</strong></td>
                 <td><span class="badge standard">standard</span></td>
                 <td class="muted">—</td>
@@ -5489,7 +6313,14 @@
                 <td>12</td>
                 <td class="muted">Staff, healing potion</td>
                 <td>
-                  <form method="post" action="/warband/the-icebound-circle-40bf650b/update">
+                  
+                    <details class="info-toggle-details">
+                      <summary class="info-toggle">Info</summary>
+                    </details>
+                  
+                </td>
+                <td>
+                  <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update">
                     <input type="hidden" name="action" value="hire_soldier" />
                     <input type="hidden" name="type_key" value="apothecary" />
                     <button class="btn small" type="submit" >Hire</button>
@@ -5497,12 +6328,15 @@
                 </td>
               </tr>
               
+                <tr class="info-desc-row"><td colspan="13">A battlefield healer who starts every game already carrying a potion of healing. May spend an action to hand any potion they carry — not just the free one — to a warband member within 1&#34; who isn&#39;t in combat; that figure counts as having drunk it immediately, with the effects applied right away.</td></tr>
               
               
               
               
               
-              <tr >
+              
+              
+              <tr class="catalog-row" >
                 <td><strong>Man-at-Arms</strong></td>
                 <td><span class="badge standard">standard</span></td>
                 <td class="muted">—</td>
@@ -5515,7 +6349,14 @@
                 <td>12</td>
                 <td class="muted">Hand weapon, shield, light armour</td>
                 <td>
-                  <form method="post" action="/warband/the-icebound-circle-40bf650b/update">
+                  
+                    <details class="info-toggle-details">
+                      <summary class="info-toggle">Info</summary>
+                    </details>
+                  
+                </td>
+                <td>
+                  <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update">
                     <input type="hidden" name="action" value="hire_soldier" />
                     <input type="hidden" name="type_key" value="man_at_arms" />
                     <button class="btn small" type="submit" >Hire</button>
@@ -5523,12 +6364,15 @@
                 </td>
               </tr>
               
+                <tr class="info-desc-row"><td colspan="13">A disciplined hand-weapon-and-shield fighter in light armour, sturdier than an infantryman thanks to the shield&#39;s extra protection. No special rules beyond their listed gear.</td></tr>
               
               
               
               
               
-              <tr >
+              
+              
+              <tr class="catalog-row" >
                 <td><strong>Archer</strong></td>
                 <td><span class="badge specialist">specialist</span></td>
                 <td class="muted">—</td>
@@ -5541,7 +6385,14 @@
                 <td>10</td>
                 <td class="muted">Bow, quiver, dagger, light armour</td>
                 <td>
-                  <form method="post" action="/warband/the-icebound-circle-40bf650b/update">
+                  
+                    <details class="info-toggle-details">
+                      <summary class="info-toggle">Info</summary>
+                    </details>
+                  
+                </td>
+                <td>
+                  <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update">
                     <input type="hidden" name="action" value="hire_soldier" />
                     <input type="hidden" name="type_key" value="archer" />
                     <button class="btn small" type="submit" >Hire</button>
@@ -5549,12 +6400,15 @@
                 </td>
               </tr>
               
+                <tr class="info-desc-row"><td colspan="13">A trained bowman. A bow loads and fires as a single action, so an archer can move and shoot within the same activation.</td></tr>
               
               
               
               
               
-              <tr >
+              
+              
+              <tr class="catalog-row" >
                 <td><strong>Crossbowman</strong></td>
                 <td><span class="badge specialist">specialist</span></td>
                 <td class="muted">—</td>
@@ -5567,7 +6421,14 @@
                 <td>10</td>
                 <td class="muted">Crossbow, quiver, dagger, light armour</td>
                 <td>
-                  <form method="post" action="/warband/the-icebound-circle-40bf650b/update">
+                  
+                    <details class="info-toggle-details">
+                      <summary class="info-toggle">Info</summary>
+                    </details>
+                  
+                </td>
+                <td>
+                  <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update">
                     <input type="hidden" name="action" value="hire_soldier" />
                     <input type="hidden" name="type_key" value="crossbowman" />
                     <button class="btn small" type="submit" >Hire</button>
@@ -5575,12 +6436,15 @@
                 </td>
               </tr>
               
+                <tr class="info-desc-row"><td colspan="13">A marksman with a heavier, harder-hitting weapon. A crossbow deals +2 damage but must be loaded and fired as two separate actions, so a crossbowman cannot move and shoot in the same activation.</td></tr>
               
               
               
               
               
-              <tr >
+              
+              
+              <tr class="catalog-row" >
                 <td><strong>Tracker</strong></td>
                 <td><span class="badge specialist">specialist</span></td>
                 <td class="muted">—</td>
@@ -5593,7 +6457,14 @@
                 <td>12</td>
                 <td class="muted">Staff, bow, quiver, light armour</td>
                 <td>
-                  <form method="post" action="/warband/the-icebound-circle-40bf650b/update">
+                  
+                    <details class="info-toggle-details">
+                      <summary class="info-toggle">Info</summary>
+                    </details>
+                  
+                </td>
+                <td>
+                  <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update">
                     <input type="hidden" name="action" value="hire_soldier" />
                     <input type="hidden" name="type_key" value="tracker" />
                     <button class="btn small" type="submit" >Hire</button>
@@ -5601,12 +6472,15 @@
                 </td>
               </tr>
               
+                <tr class="info-desc-row"><td colspan="13">A woodsman equally comfortable at range or in melee, carrying both a staff and a bow. Like all bows, theirs loads and fires as a single action, so they can move and shoot in the same activation.</td></tr>
               
               
               
               
               
-              <tr >
+              
+              
+              <tr class="catalog-row" >
                 <td><strong>Treasure Hunter</strong></td>
                 <td><span class="badge specialist">specialist</span></td>
                 <td class="muted">—</td>
@@ -5619,7 +6493,14 @@
                 <td>12</td>
                 <td class="muted">Hand weapon, dagger, light armour</td>
                 <td>
-                  <form method="post" action="/warband/the-icebound-circle-40bf650b/update">
+                  
+                    <details class="info-toggle-details">
+                      <summary class="info-toggle">Info</summary>
+                    </details>
+                  
+                </td>
+                <td>
+                  <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update">
                     <input type="hidden" name="action" value="hire_soldier" />
                     <input type="hidden" name="type_key" value="treasure_hunter" />
                     <button class="btn small" type="submit" >Hire</button>
@@ -5627,12 +6508,15 @@
                 </td>
               </tr>
               
+                <tr class="info-desc-row"><td colspan="13">A scrappy adventurer built for grabbing loot and getting out alive, with solid Fight and Will for a mid-cost specialist. No special rules beyond their listed gear.</td></tr>
               
               
               
               
               
-              <tr >
+              
+              
+              <tr class="catalog-row" >
                 <td><strong>Barbarian</strong></td>
                 <td><span class="badge specialist">specialist</span></td>
                 <td class="muted">—</td>
@@ -5645,7 +6529,14 @@
                 <td>14</td>
                 <td class="muted">Two-handed weapon, dagger</td>
                 <td>
-                  <form method="post" action="/warband/the-icebound-circle-40bf650b/update">
+                  
+                    <details class="info-toggle-details">
+                      <summary class="info-toggle">Info</summary>
+                    </details>
+                  
+                </td>
+                <td>
+                  <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update">
                     <input type="hidden" name="action" value="hire_soldier" />
                     <input type="hidden" name="type_key" value="barbarian" />
                     <button class="btn small" type="submit" >Hire</button>
@@ -5653,12 +6544,15 @@
                 </td>
               </tr>
               
+                <tr class="info-desc-row"><td colspan="13">A savage two-handed fighter with the highest Health of any specialist, built to wade into combat and keep swinging. No special rules beyond their listed gear.</td></tr>
               
               
               
               
               
-              <tr >
+              
+              
+              <tr class="catalog-row" >
                 <td><strong>Knight</strong></td>
                 <td><span class="badge specialist">specialist</span></td>
                 <td class="muted">—</td>
@@ -5671,7 +6565,14 @@
                 <td>12</td>
                 <td class="muted">Hand weapon, dagger, shield, heavy armour</td>
                 <td>
-                  <form method="post" action="/warband/the-icebound-circle-40bf650b/update">
+                  
+                    <details class="info-toggle-details">
+                      <summary class="info-toggle">Info</summary>
+                    </details>
+                  
+                </td>
+                <td>
+                  <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update">
                     <input type="hidden" name="action" value="hire_soldier" />
                     <input type="hidden" name="type_key" value="knight" />
                     <button class="btn small" type="submit" >Hire</button>
@@ -5679,12 +6580,15 @@
                 </td>
               </tr>
               
+                <tr class="info-desc-row"><td colspan="13">A heavily armoured melee specialist with a hand weapon, dagger, and shield. No special rules beyond their listed gear.</td></tr>
               
               
               
               
               
-              <tr >
+              
+              
+              <tr class="catalog-row" >
                 <td><strong>Marksman</strong></td>
                 <td><span class="badge specialist">specialist</span></td>
                 <td class="muted">—</td>
@@ -5697,7 +6601,14 @@
                 <td>12</td>
                 <td class="muted">Crossbow, quiver, hand weapon, heavy armour</td>
                 <td>
-                  <form method="post" action="/warband/the-icebound-circle-40bf650b/update">
+                  
+                    <details class="info-toggle-details">
+                      <summary class="info-toggle">Info</summary>
+                    </details>
+                  
+                </td>
+                <td>
+                  <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update">
                     <input type="hidden" name="action" value="hire_soldier" />
                     <input type="hidden" name="type_key" value="marksman" />
                     <button class="btn small" type="submit" >Hire</button>
@@ -5705,12 +6616,15 @@
                 </td>
               </tr>
               
+                <tr class="info-desc-row"><td colspan="13">An elite crossbowman in heavy armour, backing up their hard-hitting shot with a hand weapon for when an enemy closes the distance. Like all crossbows, theirs must be loaded and fired as two separate actions, so a marksman cannot move and shoot in the same activation.</td></tr>
               
               
               
               
               
-              <tr >
+              
+              
+              <tr class="catalog-row" >
                 <td><strong>Ranger</strong></td>
                 <td><span class="badge specialist">specialist</span></td>
                 <td class="muted">—</td>
@@ -5723,7 +6637,14 @@
                 <td>12</td>
                 <td class="muted">Bow, quiver, hand weapon, light armour</td>
                 <td>
-                  <form method="post" action="/warband/the-icebound-circle-40bf650b/update">
+                  
+                    <details class="info-toggle-details">
+                      <summary class="info-toggle">Info</summary>
+                    </details>
+                  
+                </td>
+                <td>
+                  <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update">
                     <input type="hidden" name="action" value="hire_soldier" />
                     <input type="hidden" name="type_key" value="ranger" />
                     <button class="btn small" type="submit" >Hire</button>
@@ -5731,12 +6652,15 @@
                 </td>
               </tr>
               
+                <tr class="info-desc-row"><td colspan="13">A versatile fighter carrying both a bow and a hand weapon, able to switch between ranged and melee as a fight develops. Like all bows, theirs loads and fires as a single action.</td></tr>
               
               
               
               
               
-              <tr >
+              
+              
+              <tr class="catalog-row" >
                 <td><strong>Templar</strong></td>
                 <td><span class="badge specialist">specialist</span></td>
                 <td class="muted">—</td>
@@ -5749,7 +6673,14 @@
                 <td>12</td>
                 <td class="muted">Two-handed weapon, heavy armour</td>
                 <td>
-                  <form method="post" action="/warband/the-icebound-circle-40bf650b/update">
+                  
+                    <details class="info-toggle-details">
+                      <summary class="info-toggle">Info</summary>
+                    </details>
+                  
+                </td>
+                <td>
+                  <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update">
                     <input type="hidden" name="action" value="hire_soldier" />
                     <input type="hidden" name="type_key" value="templar" />
                     <button class="btn small" type="submit" >Hire</button>
@@ -5757,74 +6688,15 @@
                 </td>
               </tr>
               
+                <tr class="info-desc-row"><td colspan="13">A heavily armoured warrior who trades the knight&#39;s shield for a two-handed weapon, giving up some defense for extra damage. No special rules beyond their listed gear.</td></tr>
+              
+              
             
           </tbody>
         </table>
       </div>
     </details>
   </details>
-
-  
-  <div class="grid-2">
-    <details class="card">
-      <summary><h2>Treasury <span class="gold">150 gc</span></h2></summary>
-      <form method="post" action="/warband/the-icebound-circle-40bf650b/update">
-        <input type="hidden" name="action" value="adjust_gold" />
-        <div class="form-row inline">
-          <div>
-            <label for="delta">Change (+/−)</label>
-            <input id="delta" name="delta" type="text" inputmode="numeric" pattern="[+-]?[0-9]+" required />
-          </div>
-          <div>
-            <label for="reason">Reason</label>
-            <input id="reason" name="reason" type="text" />
-          </div>
-        </div>
-        <button class="btn gold" type="submit">Apply</button>
-      </form>
-    </details>
-    <details class="card">
-      <summary><h2>Vault items</h2></summary>
-      
-        <ul class="list-plain">
-          
-            <li>
-              <strong>Potion of Healing</strong>
-              <span class="muted"> — Found in game</span>
-              <form class="inline-form" method="post" action="/warband/the-icebound-circle-40bf650b/update">
-                <input type="hidden" name="action" value="remove_vault_item" />
-                <input type="hidden" name="item_id" value="31673467" />
-                <button class="btn danger small" type="submit">×</button>
-              </form>
-            </li>
-          
-            <li>
-              <strong>Scroll of Wall</strong>
-              <span class="muted"> — Found in game</span>
-              <form class="inline-form" method="post" action="/warband/the-icebound-circle-40bf650b/update">
-                <input type="hidden" name="action" value="remove_vault_item" />
-                <input type="hidden" name="item_id" value="9d855ef3" />
-                <button class="btn danger small" type="submit">×</button>
-              </form>
-            </li>
-          
-        </ul>
-      
-      <form method="post" action="/warband/the-icebound-circle-40bf650b/update" style="margin-top:0.75rem">
-        <input type="hidden" name="action" value="add_vault_item" />
-        <div class="form-row inline">
-          <div>
-            <label for="item_name">Add item</label>
-            <input id="item_name" name="item_name" type="text" required />
-          </div>
-          <div>
-            <label>&nbsp;</label>
-            <button class="btn secondary" type="submit">Add</button>
-          </div>
-        </div>
-      </form>
-    </details>
-  </div>
 
   
   <details class="card" id="base">
@@ -5841,7 +6713,7 @@
       <p class="muted" style="margin-top:0.5rem">May keep one extra soldier (can be specialist) who stays at base and cannot be used in a game. Still max 8 soldiers / 4 specialists in play.</p>
     
 
-    <form method="post" action="/warband/the-icebound-circle-40bf650b/update" style="margin-top:1rem">
+    <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update" style="margin-top:1rem">
       <input type="hidden" name="action" value="set_base_location" />
       <div class="form-row">
         <label for="location">Base location</label>
@@ -5914,7 +6786,7 @@
                 <td class="muted">May bring one war hound or wolf (Animal Companion) above normal soldier limit.</td>
                 <td>
                   
-                    <form method="post" action="/warband/the-icebound-circle-40bf650b/update">
+                    <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update">
                       <input type="hidden" name="action" value="buy_base_resource" />
                       <input type="hidden" name="resource" value="kennel" />
                       <button class="btn small gold" type="submit" disabled>Buy</button>
@@ -5930,7 +6802,7 @@
                 <td class="muted">+1 Casting Rolls for Brew Potion.</td>
                 <td>
                   
-                    <form method="post" action="/warband/the-icebound-circle-40bf650b/update">
+                    <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update">
                       <input type="hidden" name="action" value="buy_base_resource" />
                       <input type="hidden" name="resource" value="giant_cauldron" />
                       <button class="btn small gold" type="submit" disabled>Buy</button>
@@ -5946,7 +6818,7 @@
                 <td class="muted">+1 Casting Rolls for Animate Construct and Embed Enchantment.</td>
                 <td>
                   
-                    <form method="post" action="/warband/the-icebound-circle-40bf650b/update">
+                    <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update">
                       <input type="hidden" name="action" value="buy_base_resource" />
                       <input type="hidden" name="resource" value="enchanters_workshop" />
                       <button class="btn small gold" type="submit" disabled>Buy</button>
@@ -5962,7 +6834,7 @@
                 <td class="muted">+1 Casting Rolls for Reveal Secret.</td>
                 <td>
                   
-                    <form method="post" action="/warband/the-icebound-circle-40bf650b/update">
+                    <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update">
                       <input type="hidden" name="action" value="buy_base_resource" />
                       <input type="hidden" name="resource" value="crystal_ball" />
                       <button class="btn small gold" type="submit" disabled>Buy</button>
@@ -5978,7 +6850,7 @@
                 <td class="muted">+1 Casting Rolls for Write Scroll.</td>
                 <td>
                   
-                    <form method="post" action="/warband/the-icebound-circle-40bf650b/update">
+                    <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update">
                       <input type="hidden" name="action" value="buy_base_resource" />
                       <input type="hidden" name="resource" value="scriptorium" />
                       <button class="btn small gold" type="submit" disabled>Buy</button>
@@ -5994,7 +6866,7 @@
                 <td class="muted">Once per game, before rolling, add +5 to an Initiative Roll.</td>
                 <td>
                   
-                    <form method="post" action="/warband/the-icebound-circle-40bf650b/update">
+                    <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update">
                       <input type="hidden" name="action" value="buy_base_resource" />
                       <input type="hidden" name="resource" value="celestial_telescope" />
                       <button class="btn small gold" type="submit" disabled>Buy</button>
@@ -6010,7 +6882,7 @@
                 <td class="muted">Out of Game: attempt Summon Demon then Control Demon; success adds a temporary demon not counting toward max warband size.</td>
                 <td>
                   
-                    <form method="post" action="/warband/the-icebound-circle-40bf650b/update">
+                    <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update">
                       <input type="hidden" name="action" value="buy_base_resource" />
                       <input type="hidden" name="resource" value="summoning_circle" />
                       <button class="btn small gold" type="submit" disabled>Buy</button>
@@ -6026,7 +6898,7 @@
                 <td class="muted">Soldiers hired cost 10gc less.</td>
                 <td>
                   
-                    <form method="post" action="/warband/the-icebound-circle-40bf650b/update">
+                    <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update">
                       <input type="hidden" name="action" value="buy_base_resource" />
                       <input type="hidden" name="resource" value="carrier_pigeons" />
                       <button class="btn small gold" type="submit" >Buy</button>
@@ -6042,7 +6914,7 @@
                 <td class="muted">+1 Casting Rolls for Control Demon cast Out of Game.</td>
                 <td>
                   
-                    <form method="post" action="/warband/the-icebound-circle-40bf650b/update">
+                    <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update">
                       <input type="hidden" name="action" value="buy_base_resource" />
                       <input type="hidden" name="resource" value="arcane_candle" />
                       <button class="btn small gold" type="submit" >Buy</button>
@@ -6058,7 +6930,7 @@
                 <td class="muted">+1 Casting Rolls for Summon Demon cast Out of Game.</td>
                 <td>
                   
-                    <form method="post" action="/warband/the-icebound-circle-40bf650b/update">
+                    <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update">
                       <input type="hidden" name="action" value="buy_base_resource" />
                       <input type="hidden" name="resource" value="summoning_candle" />
                       <button class="btn small gold" type="submit" >Buy</button>
@@ -6074,7 +6946,7 @@
                 <td class="muted">Wizard does not miss a game or pay a fee when Badly Wounded; pays 10gc less for Niggling Injuries.</td>
                 <td>
                   
-                    <form method="post" action="/warband/the-icebound-circle-40bf650b/update">
+                    <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update">
                       <input type="hidden" name="action" value="buy_base_resource" />
                       <input type="hidden" name="resource" value="sarcophagus_of_healing" />
                       <button class="btn small gold" type="submit" disabled>Buy</button>
@@ -6087,6 +6959,119 @@
         </table>
       </div>
     
+  </details>
+
+  
+  <details class="card" id="treasury-vault">
+    <summary><h2>Treasury and Vault <span class="gold">150 gc</span></h2></summary>
+    <div class="grid-2">
+      <div>
+        <h3>Treasury</h3>
+        <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update">
+          <input type="hidden" name="action" value="adjust_gold" />
+          <div class="form-row inline">
+            <div>
+              <label for="delta">Change (+/−)</label>
+              <input id="delta" name="delta" type="text" inputmode="numeric" pattern="[+-]?[0-9]+" required />
+            </div>
+            <div>
+              <label for="reason">Reason</label>
+              <input id="reason" name="reason" type="text" />
+            </div>
+          </div>
+          <button class="btn gold" type="submit">Apply</button>
+        </form>
+      </div>
+      <div>
+        <h3>Vault items</h3>
+        
+          <ul class="list-plain">
+            
+              <li>
+                <strong>Potion of Healing</strong>
+                <span class="muted"> — Found in game</span>
+                <form class="inline-form" method="post" action="/warband/the-icebound-circle-1e7fbe39/update">
+                  <input type="hidden" name="action" value="remove_vault_item" />
+                  <input type="hidden" name="item_id" value="298d899b" />
+                  <button class="btn danger small" type="submit">×</button>
+                </form>
+              </li>
+            
+              <li>
+                <strong>Scroll of Wall</strong>
+                <span class="muted"> — Found in game</span>
+                <form class="inline-form" method="post" action="/warband/the-icebound-circle-1e7fbe39/update">
+                  <input type="hidden" name="action" value="remove_vault_item" />
+                  <input type="hidden" name="item_id" value="77414893" />
+                  <button class="btn danger small" type="submit">×</button>
+                </form>
+              </li>
+            
+          </ul>
+        
+        <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update" style="margin-top:0.75rem">
+          <input type="hidden" name="action" value="add_vault_item" />
+          <div class="form-row">
+            <label>Pick from a rulebook (fills the field below — still editable)</label>
+            <div class="loot-picker">
+              
+  <div class="loot-picker-row" data-mode="vault" data-target="item_name">
+    <div class="stat-row">
+      <div class="form-row">
+        <label>Rulebook</label>
+        <select class="loot-book">
+          <option value="">— pick a book —</option>
+          
+            <option value="Core Rules">Core Rules</option>
+          
+          <option value="__other__">Other / write-in</option>
+        </select>
+      </div>
+      <div class="form-row loot-item-cell">
+        <label>Item</label>
+        <select class="loot-item" disabled>
+          <option value="">— pick a book first —</option>
+        </select>
+        <input type="text" class="loot-item-text" placeholder="Item name" style="display:none" />
+      </div>
+      <div class="form-row loot-variant-cell" style="display:none">
+        <label class="loot-variant-label">Spell</label>
+        <select class="loot-variant"></select>
+      </div>
+      
+    </div>
+    
+  </div>
+
+            </div>
+          </div>
+          <div class="form-row inline">
+            <div>
+              <label for="item_name">Add item</label>
+              
+              <input id="item_name" name="item_name" type="text" required list="magic-item-names" />
+              
+                <datalist id="magic-item-names">
+                  <option value="Amulet of Resistance"></option><option value="Boots of Speed"></option><option value="Bow +1 damage"></option><option value="Bow +1 Shoot"></option><option value="Cloak of Night"></option><option value="Cloak of Protection"></option><option value="Construct Hammer"></option><option value="Crossbow +1 damage"></option><option value="Crossbow +1 Shoot"></option><option value="Dagger +1 damage"></option><option value="Dagger +1 Fight"></option><option value="Dagger +2 damage"></option><option value="Fate Stone"></option><option value="Gloves of Casting"></option><option value="Gloves of Strength"></option><option value="Hand Weapon +1 damage"></option><option value="Hand Weapon +1 Fight"></option><option value="Hand Weapon +2 Will"></option><option value="Heavy Armour (Elemental Absorption)"></option><option value="Horn of Destruction"></option><option value="Light Armour +1 Armour"></option><option value="Orb of Power (6)"></option><option value="Ring of Power (1)"></option><option value="Ring of Protection"></option><option value="Ring of Slow Fall"></option><option value="Ring of Teleportation"></option><option value="Ring of Transference"></option><option value="Ring of Will"></option><option value="Robes of Arrow Turning"></option><option value="Shield +1 Armour"></option><option value="Staff +1 Fight"></option><option value="Staff of Casting"></option><option value="Staff of Power (1)"></option><option value="Staff of Power (2)"></option><option value="Staff of Power (3)"></option><option value="Two-Handed Weapon +1 damage"></option><option value="Two-Handed Weapon +1 Fight"></option><option value="Two-Handed Weapon +2 Will"></option><option value="Wand of Light"></option><option value="Wand of Power (1)"></option>
+                </datalist>
+              
+            </div>
+            <div>
+              <label>&nbsp;</label>
+              <button class="btn secondary" type="submit">Add</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+    <form method="post" action="/warband/the-icebound-circle-1e7fbe39/update" style="margin-top:1rem">
+      <input type="hidden" name="action" value="set_notes" />
+      <div class="form-row">
+        <label for="notes">Warband notes</label>
+        <textarea id="notes" name="notes"></textarea>
+      </div>
+      <button class="btn" type="submit">Save notes</button>
+    </form>
   </details>
 
   
@@ -6107,6 +7092,158 @@
         }
         boxes.forEach((b) => b.addEventListener('change', refresh));
         refresh();
+      });
+    })();
+  </script>
+
+  <script>
+    (function () {
+      // Rulebook -> item -> power level/spell cascading picker, shared by the
+      // After the Game card (multi-row, composes into a hidden field) and the
+      // Vault's Add item field (single row, autofills the free-text input).
+      var dataEl = document.getElementById('loot-picker-data');
+      if (!dataEl) return;
+      var LOOT_DATA = JSON.parse(dataEl.textContent);
+      var SPELL_VARIANT_ITEMS = { 'Grimoire': true, 'Scroll': true };
+
+      function opt(name) {
+        var o = document.createElement('option');
+        o.value = name;
+        o.textContent = name;
+        return o;
+      }
+
+      function populateItems(row) {
+        var book = row.querySelector('.loot-book').value;
+        var itemSel = row.querySelector('.loot-item');
+        var itemText = row.querySelector('.loot-item-text');
+        var variantCell = row.querySelector('.loot-variant-cell');
+        if (book === '__other__') {
+          itemSel.style.display = 'none';
+          itemSel.disabled = true;
+          itemText.style.display = '';
+          variantCell.style.display = 'none';
+          return;
+        }
+        itemText.style.display = 'none';
+        itemSel.style.display = '';
+        itemSel.disabled = !book;
+        itemSel.innerHTML = '';
+        itemSel.appendChild(opt(book ? '— pick an item —' : '— pick a book first —'));
+        itemSel.firstChild.value = '';
+        (LOOT_DATA.items_by_book[book] || []).forEach(function (n) { itemSel.appendChild(opt(n)); });
+        variantCell.style.display = 'none';
+      }
+
+      function populateVariant(row) {
+        var itemSel = row.querySelector('.loot-item');
+        var variantCell = row.querySelector('.loot-variant-cell');
+        var variantSel = row.querySelector('.loot-variant');
+        if (SPELL_VARIANT_ITEMS[itemSel.value]) {
+          variantSel.innerHTML = '';
+          var ph = opt('— pick a spell —'); ph.value = ''; variantSel.appendChild(ph);
+          LOOT_DATA.spell_names.forEach(function (n) { variantSel.appendChild(opt(n)); });
+          variantCell.style.display = '';
+        } else {
+          variantCell.style.display = 'none';
+        }
+      }
+
+      function composeRow(row) {
+        var book = row.querySelector('.loot-book').value;
+        var itemSel = row.querySelector('.loot-item');
+        var itemText = row.querySelector('.loot-item-text');
+        var variantSel = row.querySelector('.loot-variant');
+        var composed = '';
+        if (book === '__other__') {
+          composed = itemText.value.trim();
+        } else if (book && itemSel.value) {
+          composed = itemSel.value;
+          if (SPELL_VARIANT_ITEMS[itemSel.value] && variantSel.value) {
+            composed += ': ' + variantSel.value;
+          }
+          composed += ' (' + book + ')';
+        }
+        var hidden = row.querySelector('.loot-composed');
+        if (hidden) hidden.value = composed;
+        if (row.dataset.mode === 'vault' && row.dataset.target && composed) {
+          var target = document.getElementById(row.dataset.target);
+          if (target) target.value = composed;
+        }
+      }
+
+      function resetRow(row) {
+        row.querySelector('.loot-book').value = '';
+        row.querySelector('.loot-item-text').value = '';
+        populateItems(row);
+        composeRow(row);
+      }
+
+      function wireRow(row) {
+        row.querySelector('.loot-book').addEventListener('change', function () {
+          populateItems(row);
+          composeRow(row);
+        });
+        row.querySelector('.loot-item').addEventListener('change', function () {
+          populateVariant(row);
+          composeRow(row);
+        });
+        row.querySelector('.loot-variant').addEventListener('change', function () { composeRow(row); });
+        row.querySelector('.loot-item-text').addEventListener('input', function () { composeRow(row); });
+        var addBtn = row.querySelector('.loot-add-row');
+        if (addBtn) {
+          addBtn.addEventListener('click', function () {
+            var clone = row.cloneNode(true);
+            row.parentNode.insertBefore(clone, row.nextSibling);
+            resetRow(clone);
+            wireRow(clone);
+            // Only the last row keeps a visible "+ Add another item" button.
+            addBtn.remove();
+          });
+        }
+      }
+
+      document.querySelectorAll('.loot-picker-row').forEach(wireRow);
+    })();
+  </script>
+
+  <script>
+    (function () {
+      // Compact roster by default; "Show actions" reveals the Actions column's
+      // controls. Remembered per-browser, not per-warband — it's a personal
+      // display preference.
+      var table = document.getElementById('roster-table');
+      var btn = document.getElementById('toggle-actions-btn');
+      if (!table || !btn) return;
+      var KEY = 'fgShowActions';
+      function apply(show) {
+        table.classList.toggle('show-actions', show);
+        btn.textContent = show ? 'Hide actions' : 'Show actions';
+      }
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        var show = !table.classList.contains('show-actions');
+        apply(show);
+        try { localStorage.setItem(KEY, show ? '1' : '0'); } catch (err) { /* ignore */ }
+      });
+      var stored = null;
+      try { stored = localStorage.getItem(KEY); } catch (err) { /* ignore */ }
+      apply(stored === '1');
+    })();
+  </script>
+
+  <script>
+    (function () {
+      // Hire soldier panel starts collapsed, but once opened (e.g. to hire
+      // someone) it stays open across page reloads until manually closed.
+      var panel = document.getElementById('hire-soldier-panel');
+      if (!panel) return;
+      var KEY = 'fgHireSoldierOpen';
+      var stored = null;
+      try { stored = localStorage.getItem(KEY); } catch (err) { /* ignore */ }
+      panel.open = stored === '1';
+      panel.addEventListener('toggle', function () {
+        try { localStorage.setItem(KEY, panel.open ? '1' : '0'); } catch (err) { /* ignore */ }
       });
     })();
   </script>
@@ -6183,6 +7320,10 @@
           }
           saveDetailsState();
         }
+        // Exposed so page-specific scripts (e.g. the drag-free reorder
+        // controls on the warband page) can trigger the same scroll/open-card
+        // save before submitting a form programmatically.
+        window.fgSaveViewState = saveViewState;
 
         document.addEventListener(
           "submit",
@@ -6206,6 +7347,23 @@
             saveViewState();
             el.form.submit();
           }
+        });
+
+        // Whole-form autosave: any field inside a form[data-autosave] submits
+        // the entire form the moment that field changes, so editing a name,
+        // toggling a checkbox, or picking a file saves immediately without a
+        // separate "Save" click. Only plain field-edit forms carry this
+        // attribute — forms for one-shot game actions (hire, promote, level
+        // up, buy/sell, etc.) do not, since those should stay deliberate.
+        document.addEventListener("change", function (e) {
+          var el = e.target;
+          if (!el || !el.form) return;
+          var form = el.form;
+          if (!form.hasAttribute("data-autosave")) return;
+          if (el.hasAttribute("data-autosubmit")) return; // already handled above
+          saveViewState();
+          if (form.requestSubmit) form.requestSubmit();
+          else form.submit();
         });
 
         // Runs immediately (this script is at the end of <body>, so the DOM —

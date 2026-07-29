@@ -23,8 +23,8 @@ either platform.
    automatically at `http://127.0.0.1:5000`, and adds an icon to the system tray you can use to
    reopen it or quit.
 
-Windows may show a SmartScreen warning the first time (unsigned exe) — click "More info" → "Run
-anyway".
+The exe is signed ("Deltrex"), but with a self-signed certificate rather than a paid/trusted one,
+so Windows SmartScreen may still show a warning the first time — click "More info" → "Run anyway".
 
 ### Linux
 
@@ -45,13 +45,15 @@ folder.
 ## Features
 
 - **Create a warband**: wizard (name, school, portrait), starting spells (3 own / 1 each aligned / 2 neutral, per 2e rules), and an optional apprentice. Soldiers are recruited afterwards on the warband page.
-- **Maintain between games**: level up your wizard (stat increases, learn spells, improve spells), record post-game loot (gold, XP, items), and manage the vault. XP can be added or removed (negative XP auto-reverses lost level-ups).
-- **Soldiers**: hire from the full 2e roster with correct cost/unit limits (max 8 soldiers, max 4 specialists), track status (active/injured/dead), reorder the roster, and optionally level them up.
+- **Autosave**: most fields (homerules, wizard/apprentice, captain, soldier edits, spell/soldier reordering) save the instant you change them — no Save button to remember. Scroll position, open cards and your reorder selection are all preserved across the save. "After the game", "Home base" and "Treasury and Vault" stay explicit, one-shot actions.
+- **Maintain between games**: level up your wizard (stat increases, learn spells, improve spells), record post-game loot with a rulebook → item → variant picker (or write in your own), and manage the vault from a combined **Treasury and Vault** card that also holds your warband notes. XP can be added or removed (negative XP auto-reverses lost level-ups).
+- **Soldiers**: hire from the full 2e roster with correct cost/unit limits (max 8 soldiers, max 4 specialists), track status (active/injured/dead), reorder the roster, and optionally level them up. An optional "Adjust soldiers to Edition 2" homerule corrects a handful of costs/gear to match the second-edition rulebook, and stays in sync for soldiers already hired.
+- **Captain house rule**: hire a Captain or promote an existing soldier into one, with tunable promotion cost, stat-gain caps, and absolute stat limits.
 - **Character pictures**: every wizard, apprentice, captain and soldier type comes with its own artwork, shown until you upload a picture of your own. Defaults appear on the warband page and in the PDF roster.
-- **Supplement content**: 12 extra mercenaries and 43 extra creatures from Thaw of the Lich Lord, Into the Breeding Pits, Forgotten Pacts, The Maze of Malcor and The Perilous Dark — each labelled with its source book.
-- **Additional Rules and Homerules**: a per-warband tab with a toggle for every supplement source book (its mercenaries become hireable only when switched on), plus the optional Captain house rule — hire a Captain or promote an existing soldier into one.
+- **Supplement content**: 12 extra mercenaries and 43 extra creatures from Thaw of the Lich Lord, Into the Breeding Pits, Forgotten Pacts, The Maze of Malcor and The Perilous Dark — each labelled with its source book. Wizard states (Lichdom, Beastcrafter, Demonic Pacts) are tracked right on the Wizard card.
+- **Additional Rules and Homerules**: a per-warband tab with a toggle for every supplement source book (its mercenaries become hireable only when switched on).
 - **Home base**: set a base location and buy base resources, per the 2e core rules.
-- **Frostgrave Lexicon**: full spell list per school with casting numbers and descriptions, the school relationship table (own/aligned/neutral/opposed), the standard arms & armour list, and a full bestiary — every creature with its source and rules text.
+- **Frostgrave Lexicon**: the full spell list per school (including the Lost Schools from The Maze of Malcor) with casting numbers and descriptions, the school relationship table, arms/armour/consumables, a full bestiary, random encounter tables, per-book loot tables, and a collapsible magic items & treasure reference — every entry tagged with its source book.
 - **PDF roster export**: a clean, printable warband sheet.
 - **Import/export**: warbands are saved as `.warbands` files (plain JSON) that can be exported, shared, and re-imported.
 
