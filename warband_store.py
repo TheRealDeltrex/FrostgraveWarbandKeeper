@@ -928,9 +928,23 @@ def active_soldiers(wb: dict) -> list[dict]:
     return [s for s in (wb.get("soldiers") or []) if s.get("status") != "dead"]
 
 
+def soldier_count(wb: dict) -> int:
+    """Active soldiers plus the Captain (if any) — a Captain occupies a soldier
+    slot just like any other roster member, on top of their own specialist
+    slot (see specialist_count)."""
+    return len(active_soldiers(wb)) + (1 if wb.get("captain") else 0)
+
+
+def specialist_count(wb: dict) -> int:
+    """Specialist soldiers plus the Captain (if any) — a Captain always counts
+    as a specialist, regardless of what type they were hired/promoted as."""
+    return count_specialists(wb) + (1 if wb.get("captain") else 0)
+
+
 def warband_limits(wb: dict) -> dict:
     soldiers = active_soldiers(wb)
-    specs = count_specialists(wb)
+    n_soldiers = soldier_count(wb)
+    specs = specialist_count(wb)
     spent = 0
     # Approximate gold spent on current roster from costs (not perfect for refunds)
     if wb.get("apprentice"):
@@ -947,11 +961,11 @@ def warband_limits(wb: dict) -> dict:
     per_level = expansions.xp_per_level(wb)
     cap = expansions.max_soldiers(wb)
     return {
-        "soldiers": len(soldiers),
+        "soldiers": n_soldiers,
         "max_soldiers": cap,
         "specialists": specs,
         "max_specialists": MAX_SPECIALISTS,
-        "soldiers_ok": len(soldiers) <= cap,
+        "soldiers_ok": n_soldiers <= cap,
         "specialists_ok": specs <= MAX_SPECIALISTS,
         "has_apprentice": wb.get("apprentice") is not None,
         "apprentice_cost": APPRENTICE_COST,
@@ -1028,11 +1042,10 @@ def add_soldier(wb: dict, type_key: str, name: str = "") -> tuple[bool, str]:
                     "apprentice to field a second (one per spellcaster)."
                 )
             return False, f"You may only have {limit} Animal Companions at a time (one per spellcaster)."
-    active = active_soldiers(wb)
     cap = expansions.max_soldiers(wb)
-    if len(active) >= cap:
+    if soldier_count(wb) >= cap:
         return False, f"Soldier limit reached ({cap})."
-    if info["category"] == "specialist" and count_specialists(wb) >= MAX_SPECIALISTS:
+    if info["category"] == "specialist" and specialist_count(wb) >= MAX_SPECIALISTS:
         return False, f"Specialist limit reached ({MAX_SPECIALISTS})."
     cost = expansions.soldier_cost(wb, info, type_key)
     if wb.get("gold", 0) < cost:
@@ -1103,9 +1116,8 @@ def raise_revenant(wb: dict, soldier_id: str) -> tuple[bool, str]:
             continue
         if s.get("status") != "dead":
             return False, "Revenant only works on a soldier who died."
-        active = len(active_soldiers(wb))
         cap = expansions.max_soldiers(wb)
-        if active >= cap:
+        if soldier_count(wb) >= cap:
             return False, f"Soldier limit reached ({cap}); the revenant has nowhere to stand."
         s["status"] = "active"
         s["revenant"] = True
@@ -1277,6 +1289,14 @@ def hire_captain(
     ok, msg = _validate_tricks(tricks, n_tricks)
     if not ok:
         return False, msg
+    # A Captain occupies both a soldier slot and a specialist slot, same as any
+    # specialist soldier would — check both caps before adding one (wb has no
+    # captain yet at this point, so these counts are the pre-hire baseline).
+    soldier_cap = expansions.max_soldiers(wb)
+    if soldier_count(wb) >= soldier_cap:
+        return False, f"Soldier limit reached ({soldier_cap})."
+    if specialist_count(wb) >= MAX_SPECIALISTS:
+        return False, f"Specialist limit reached ({MAX_SPECIALISTS})."
     cost = int(hr.get("captain_hiring_cost", CAPTAIN_HIRING_COST))
     if int(wb.get("gold", 0)) < cost:
         return False, f"Need {cost} gc for a captain."
@@ -1548,6 +1568,12 @@ def promote_soldier_to_captain(
         return False, f"Need {cost} gc to promote a captain."
 
     info = get_soldier(soldier.get("type_key", "")) or {}
+    # The promoted soldier leaves the roster (a wash on the soldier-count cap —
+    # one member out, the Captain in), but a Captain always counts as a
+    # specialist regardless of what they were promoted from, so promoting a
+    # non-specialist can still push the specialist count over the cap.
+    if info.get("category") != "specialist" and specialist_count(wb) >= MAX_SPECIALISTS:
+        return False, f"Specialist limit reached ({MAX_SPECIALISTS})."
     stats = {
         "move": int(info.get("move", 0)),
         "fight": int(soldier.get("fight", info.get("fight", 0)) or 0),
@@ -2206,8 +2232,8 @@ def recruit_preview(wb: dict, type_key: str) -> dict:
     """Info for hire UI: cost, whether affordable, limit warnings."""
     info = get_soldier(type_key) or {}
     cost = expansions.soldier_cost(wb, info, type_key)
-    active = len(active_soldiers(wb))
-    specs = count_specialists(wb)
+    active = soldier_count(wb)
+    specs = specialist_count(wb)
     is_spec = info.get("category") == "specialist"
     gold = int(wb.get("gold", 0))
     return {
