@@ -70,27 +70,25 @@ build — simpler to hand to someone with just `chmod +x` and run). It skips the
 Linux build can't assume are present; auto-shutdown-on-browser-close (`idle_watchdog.py`) still
 works the same as on Windows.
 
-## In-browser (online) build — currently not deployed
-
-> **Removed from the live site for now.** `docs/app/` no longer exists on `main`, so there is no
-> online version published at the moment. The tooling below stays in this branch so it can be
-> regenerated and re-published later — to bring it back, run the generator, restore/commit
-> `docs/app/index.html` (the shell) and `docs/app/bundle.json` on `main`, and re-add the
-> "Play online" link to `docs/index.html`.
+## In-browser (online) build
 
 The online build is a zero-backend build of the app that runs entirely in the browser via
 [Pyodide](https://pyodide.org/): it loads Python + Flask in the tab, unpacks the app, and drives it
 through Flask's test client. Storage is in-memory only, so it's session-only — export a warband to a
-file to keep it.
+file to keep it. Portrait uploads work normally within a session (a small Python↔JS bridge in
+`docs/app/index.html` turns file inputs into real multipart uploads against the test client, and
+inlines uploaded/default portraits as data URIs when rendering each page) — they just don't persist
+across a refresh or round-trip through export/import, same as everything else in this build.
 
-It embeds a copy of the app's Python, templates and reference data in a single bundle:
+It embeds a copy of the app's Python, templates and reference data in a single bundle, and mirrors
+the default character artwork as plain sibling files (not bundled — see the script's docstring):
 
 ```bash
-python scripts/build_browser_bundle.py   # writes docs/app/bundle.json
+python scripts/build_browser_bundle.py   # writes docs/app/bundle.json + docs/app/static/portraits/
 ```
 
-Browser-specific UI (session-only banner, no portraits/Settings) is gated behind `FWK_BROWSER=1` in
-`app.py` and the templates.
+Browser-specific UI (session-only banner, no Settings/native folder picker) is gated behind
+`FWK_BROWSER=1` in `app.py` and the templates.
 
 ## Static preview pages
 

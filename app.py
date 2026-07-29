@@ -160,9 +160,10 @@ app = Flask(
 app.secret_key = os.environ.get("SECRET_KEY", "frostgrave-dev-key")
 app.config["MAX_CONTENT_LENGTH"] = 8 * 1024 * 1024  # 8 MB uploads
 
-# Set by the in-browser (Pyodide) build. When on, the UI drops desktop-only
-# affordances (native folder picker / Settings, PDF roster, portrait uploads)
-# and shows a "session only — export to save" reminder, since nothing persists.
+# Set by the in-browser (Pyodide) build. When on, the UI drops the desktop-only
+# Settings/native-folder-picker affordance and shows a "session only — export to
+# save" reminder, since nothing persists. PDF export and portrait uploads both
+# still work — they just don't survive a refresh or round-trip through export.
 BROWSER_MODE = os.environ.get("FWK_BROWSER") == "1"
 
 
@@ -1081,6 +1082,11 @@ def warband_import():
 
 @app.route("/settings", methods=["GET", "POST"])
 def settings():
+    if BROWSER_MODE:
+        # Unreachable via the UI (no nav link in browser mode) — this is just
+        # defense-in-depth, since a real filesystem config write makes no sense
+        # against a session-only in-memory filesystem.
+        abort(404)
     if request.method == "POST":
         new_dir = (request.form.get("data_dir") or "").strip()
         if not new_dir:
@@ -1104,6 +1110,10 @@ def settings():
 def settings_browse():
     """Show a native folder picker via a short-lived subprocess — tkinter's
     dialog is not safe to call directly from a waitress worker thread."""
+    if BROWSER_MODE:
+        # Unreachable via the UI — a real subprocess/tkinter dialog is
+        # meaningless under Pyodide, which has neither.
+        abort(404)
     try:
         if paths.is_frozen():
             # Re-invoke the frozen exe itself; --pick-folder makes it just

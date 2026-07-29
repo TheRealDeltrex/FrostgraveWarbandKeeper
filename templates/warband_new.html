@@ -122,7 +122,10 @@
             if (box.checked) { params.set(box.name, "on"); }
           });
           var url = "{{ url_for('warband_new') }}?" + params.toString();
-          fetch(url)
+          // In the in-browser (Pyodide) build, a raw fetch() has no real network
+          // target inside the sandboxed srcdoc iframe — window.fgFetch, when
+          // present, bridges it through the driver's Python test client instead.
+          (window.fgFetch || fetch)(url)
             .then(function (r) { return r.text(); })
             .then(function (html) {
               var doc = new DOMParser().parseFromString(html, "text/html");
