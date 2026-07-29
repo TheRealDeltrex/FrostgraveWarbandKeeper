@@ -919,6 +919,10 @@
           </label>
           <button class="btn danger small" type="submit" onclick="return confirm('Dismiss captain?');">Dismiss captain</button>
         </form>
+      {% elif not hr.enabled_sources.get('The Frostgrave Folio') %}
+        <p class="muted" style="font-size:0.85rem">
+          The Captain is from The Frostgrave Folio — enable that source under Additional Rules and Homerules first.
+        </p>
       {% else %}
         {% if hr.captain_mode in ('hire', 'both') %}
           <h3>Hire captain</h3>

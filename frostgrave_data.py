@@ -258,6 +258,131 @@ BASE_RESOURCES: dict[str, dict] = {
     },
     # --- Supplement resources (gated by the per-warband source-book toggles) ---
     # A missing "source" means Core Rules, so everything above is unaffected.
+    # --- The Frostgrave Folio (Arcane Locations) ---
+    "alchemical_cupboard": {
+        "name": "Alchemical Cupboard",
+        "cost": 150,
+        "source": "The Frostgrave Folio",
+        "effects": "-20gc off potion component costs.",
+    },
+    "enchanted_clock": {
+        "name": "Enchanted Clock",
+        "cost": 200,
+        "source": "The Frostgrave Folio",
+        "effects": "+10 XP once per game if a Chronomancer spell is successfully cast.",
+    },
+    "homunculus_jar": {
+        "name": "Homunculus Jar",
+        "cost": 50,
+        "source": "The Frostgrave Folio",
+        "effects": "+1 Casting Rolls for all Homunculus spells.",
+    },
+    "lectern": {
+        "name": "Lectern",
+        "cost": 100,
+        "source": "The Frostgrave Folio",
+        "effects": "+1 Casting Rolls for all Absorb Knowledge spells.",
+    },
+    "protected_bookcase": {
+        "name": "Protected Bookcase",
+        "cost": 100,
+        "source": "The Frostgrave Folio",
+        "effects": "Grimoires sell for +10gc.",
+    },
+    "protected_scrollcase": {
+        "name": "Protected Scrollcase",
+        "cost": 100,
+        "source": "The Frostgrave Folio",
+        "effects": "Scrolls sell for +10gc.",
+    },
+    "recovery_room": {
+        "name": "Recovery Room",
+        "cost": 200,
+        "source": "The Frostgrave Folio",
+        "effects": (
+            "Requires an Apothecary. Lets one injured figure be temporarily replaced on "
+            "the roster (still paying full hire cost) until it recovers."
+        ),
+    },
+    "sacrificial_altar": {
+        "name": "Sacrificial Altar",
+        "cost": 200,
+        "source": "The Frostgrave Folio",
+        "effects": "+1 Casting Rolls for all Revenant spells.",
+    },
+    "shrine": {
+        "name": "Shrine",
+        "cost": 200,
+        "source": "The Frostgrave Folio",
+        "effects": "+1 Casting Rolls for all Miraculous Cure and Restore Life spells.",
+    },
+    "weapons_rack": {
+        "name": "Weapons Rack",
+        "cost": 50,
+        "source": "The Frostgrave Folio",
+        "effects": "Non-magic weapons are bought or replaced for free.",
+    },
+    # --- Fireheart ---
+    "mirror_of_preening": {
+        "name": "Mirror of Preening",
+        "cost": 150,
+        "source": "Fireheart",
+        "effects": (
+            "Cast Beauty Out of Game (A); success grants a 10% discount on one post-game "
+            "potion/item/weapon/armour purchase."
+        ),
+    },
+    "construct_repair_tools": {
+        "name": "Construct Repair Tools",
+        "cost": 300,
+        "source": "Fireheart",
+        "effects": "+2 to Animate Construct rolls repairing or reviving a construct.",
+    },
+    "construct_forge": {
+        "name": "Construct Forge",
+        "cost": 400,
+        "source": "Fireheart",
+        "effects": "One Construct Modification Table pick per game at 50% off (non-stacking).",
+    },
+    "talking_head": {
+        "name": "Talking Head",
+        "cost": 800,
+        "source": "Fireheart",
+        "effects": "+10 XP per game from consulting it (subject to the normal XP cap).",
+    },
+    "haven_box": {
+        "name": "Haven Box",
+        "cost": 600,
+        "source": "Fireheart",
+        "effects": "Protects one chosen item from being lost on a Dead/Close Call Survival roll.",
+    },
+    # --- Spellcaster Magazine ---
+    "stable": {
+        "name": "Stable",
+        "cost": 300,
+        "source": "Spellcaster Magazine",
+        "effects": (
+            "Lets the warband keep one horse (200gc, one per warband); doesn't affect the "
+            "warband size limit. The mounted-combat rules themselves are a deferred mechanic."
+        ),
+    },
+    "breeding_cages": {
+        "name": "Breeding Cages",
+        "cost": 300,
+        "source": "Spellcaster Magazine",
+        "effects": "+1 to all Animal Manipulation spells.",
+    },
+    "alchemical_workshop": {
+        "name": "Alchemical Workshop",
+        "cost": 400,
+        "source": "Spellcaster Magazine",
+        "effects": (
+            "Once per post-game, mix 2 potions (both consumed): both odd rolls wastes them; "
+            "both even takes the lower result on the Greater Potion Table and adds it to the "
+            "vault; equal rolls under 20 destroys the workshop and costs -2 Health next game; "
+            "one odd and one even returns both potions with no result."
+        ),
+    },
     "crow_roost": {
         "name": "Crow Roost",
         "cost": 100,
@@ -660,10 +785,86 @@ for _school, _spells in LOST_SPELLS.items():
     }
 del _school, _spells
 
+# --- Vampire & Fire Giant schools (Blood Legacy) ----------------------------
+#
+# The book's actual Vampire Wizard / Fire Giant Wizard progressions (no
+# apprentice, altered soldier cap, Will/Health caps, Sun Damage, the
+# Unnatural-Health economy, giant item resizing, etc.) are a deferred mechanic
+# — see the implementation plan. For now these two schools exist only so their
+# spells are learnable by an ordinary wizard (gated on Blood Legacy being
+# enabled, like any other supplement spell); playable_schools() never offers
+# either as a wizard's own school, so nobody actually becomes a vampire or a
+# fire giant through this data alone.
+BLOOD_LEGACY_SPELLS: dict[str, list[dict]] = {
+    "Vampire": [
+        {"name": "Animal Form", "cn": 10, "type": "Self Only"},
+        {"name": "Call Blood-Drinker Bat", "cn": 10, "type": "Area Effect"},
+        {"name": "Ghoul Call", "cn": 12, "type": "Area Effect"},
+        {"name": "Hypnotic Gaze", "cn": 14, "type": "Line of Sight"},
+        {"name": "Lifedrain", "cn": 10, "type": "Self Only"},
+        {"name": "Mist Form", "cn": 10, "type": "Self Only"},
+        {"name": "Psychic Leech", "cn": 10, "type": "Line of Sight"},
+        {"name": "Thralldom", "cn": 8, "type": "Out of Game (A)"},
+    ],
+    "Fire Giant": [
+        {"name": "Comet", "cn": 14, "type": "Line of Sight"},
+        {"name": "Earthquake", "cn": 12, "type": "Area Effect"},
+        {"name": "Enflame", "cn": 8, "type": "Line of Sight"},
+        {"name": "Mist Shroud", "cn": 8, "type": "Area Effect"},
+        {"name": "Magnify", "cn": 14, "type": "Out of Game (A)"},
+        {"name": "Pyre", "cn": 12, "type": "Line of Sight"},
+        {"name": "Raze", "cn": 14, "type": "Line of Sight"},
+        {"name": "Runic Stone", "cn": 16, "type": "Out of Game (B)"},
+    ],
+}
+
+BLOOD_LEGACY_SCHOOL_RELATIONS = {
+    "Vampire": {
+        "aligned": ["Chronomancer", "Necromancer", "Soothsayer"],
+        "neutral": ["Elementalist", "Enchanter", "Illusionist", "Sigilist", "Summoner", "Witch"],
+        "opposed": "Thaumaturge",
+    },
+    "Fire Giant": {
+        "aligned": ["Enchanter", "Elementalist", "Soothsayer"],
+        "neutral": ["Illusionist", "Necromancer", "Sigilist", "Summoner", "Thaumaturge", "Witch"],
+        "opposed": "Chronomancer",
+    },
+}
+
+for _school, _spells in BLOOD_LEGACY_SPELLS.items():
+    SPELLS[_school] = [{**sp, "source": "Blood Legacy"} for sp in _spells]
+    SCHOOL_RELATIONS[_school] = dict(BLOOD_LEGACY_SCHOOL_RELATIONS[_school])
+del _school, _spells
+
+# --- Rangifer school (Spellcaster Magazine, Issue 3) ------------------------
+#
+# Cast only by the Rangifer Shaman hireling in the book — a distinct spellcaster
+# type the app doesn't model (no "hireling with its own spell list" concept
+# exists yet; a deferred mechanic, see the implementation plan). The spells
+# themselves are still added here so they're learnable by an ordinary wizard
+# once Spellcaster Magazine is enabled, same deferral as Vampire/Fire Giant.
+RANGIFER_SPELLS = [
+    {"name": "Antler Shard", "cn": 10, "type": "Line of Sight"},
+    {"name": "Briar", "cn": 8, "type": "Line of Sight"},
+    {"name": "Command Soul", "cn": 12, "type": "Line of Sight"},
+    {"name": "Darkness", "cn": 12, "type": "Area Effect"},
+    {"name": "Fire Spice", "cn": 10, "type": "Out of Game"},
+    {"name": "Mend", "cn": 10, "type": "Line of Sight"},
+    {"name": "Nature's Cloak", "cn": 10, "type": "Touch"},
+    {"name": "Pyre", "cn": 12, "type": "Area Effect"},
+    {"name": "Shattering Blow", "cn": 10, "type": "Line of Sight"},
+    {"name": "Sunder", "cn": 8, "type": "Line of Sight"},
+]
+SPELLS["Rangifer"] = [{**sp, "source": "Spellcaster Magazine"} for sp in RANGIFER_SPELLS]
+SCHOOL_RELATIONS["Rangifer"] = {"aligned": [], "neutral": list(SCHOOLS), "opposed": ""}
+del RANGIFER_SPELLS
+
 # Schools that carry spells but that no wizard may choose at creation. They are
 # reachable only through a wizard state (Beastcrafter) or, for the Pentangle,
-# the "Pentangle schools playable" homerule.
-EXTRA_SPELL_SCHOOLS = ["Beastcrafter"] + PENTANGLE_SCHOOLS
+# the "Pentangle schools playable" homerule. Vampire/Fire Giant/Rangifer join
+# this list too, but with no "playable" homerule at all yet — see the comments
+# above each one.
+EXTRA_SPELL_SCHOOLS = ["Beastcrafter", "Vampire", "Fire Giant", "Rangifer"] + PENTANGLE_SCHOOLS
 
 LEVEL_UP_OPTIONS = [
     {"id": "fight", "label": "+1 Fight", "stat": "fight"},
@@ -1252,6 +1453,538 @@ SOLDIERS: dict[str, dict] = {
         ),
         "description": 'A wilderness companion available only to a Beastcrafter I wizard (Into the Breeding Pits), bonded via the Animal Companion spell. Poison: its attacks deal poison damage. Animal: cannot pick up treasure tokens and has no item slot. Will shown already includes the +3 Animal Companion bonus.',
     },
+    # --- The Wildwoods ---
+    "guide": {
+        "name": "Guide",
+        "cost": 75,
+        "category": "specialist",
+        "source": "The Wildwoods",
+        "move": 6,
+        "fight": 1,
+        "shoot": 0,
+        "armour": 11,
+        "will": 1,
+        "health": 12,
+        "gear": "Hand weapon",
+        "notes": (
+            "Picks a Terrain Expertise (Mountain/Bog/Ice/Forest); never consumes Supply "
+            "Points. In a wilderness game matching that terrain, gains Nimble and the "
+            "warband gains +2 Initiative and +2sp post-game. An Expert Guide costs 125gc "
+            "(+2 Fight/+2 Shoot in matching terrain instead of +0/+0); only one guide's "
+            "bonus applies per game even with multiple in the warband."
+        ),
+        "description": 'A wilderness scout (The Wildwoods) who knows one kind of terrain intimately. Picks a Terrain Expertise (Mountain, Bog, Ice, or Forest) at hire; never consumes Supply Points. In a wilderness game whose dominant terrain matches, gains the Nimble trait (no rough-ground movement penalty) and the whole warband gains +2 to its Initiative Roll and +2 Supply Points after the game. Costs 125gc as an "Expert" (+2 Fight/+2 Shoot instead of +0/+0 in matching terrain). Multiple Guides may be hired, but only one grants its bonus in any given game.',
+    },
+    "trapper": {
+        "name": "Trapper",
+        "cost": 50,
+        "category": "standard",
+        "source": "The Wildwoods",
+        "move": 6,
+        "fight": 2,
+        "shoot": 0,
+        "armour": 11,
+        "will": 1,
+        "health": 12,
+        "gear": "Two daggers, light armour",
+        "notes": "Wilderness Survival (no Supply Point upkeep unless reduced to 0 Health); Set Traps. House rule: max one per warband.",
+        "description": 'A wilderness specialist (The Wildwoods) who lays traps rather than springing them. Wilderness Survival: pays no Supply Point upkeep unless reduced to 0 Health. Set Traps: may place a 1" trap token (max 3 per game); a figure triggering it either takes +1 damage or rolls a Move Roll (TN20) or loses its next activation. Intended as a max-one-per-warband hire.',
+    },
+    "trophy_hunter": {
+        "name": "Trophy Hunter",
+        "cost": 125,
+        "category": "specialist",
+        "source": "The Wildwoods",
+        "move": 6,
+        "fight": 2,
+        "shoot": 2,
+        "armour": 11,
+        "will": 0,
+        "health": 12,
+        "gear": "Hand weapon",
+        "notes": (
+            "Wilderness Survival. Prize Taker: +1 Fight/Shoot vs. Horns/Antlers/Bounty "
+            "creatures, +5 XP for personally killing one (once/game). House rule: cannot "
+            "share a warband with any Horns/Antlers/Bounty creature (e.g. a hired Rangifer "
+            "or Animal Companion with that trait)."
+        ),
+        "description": 'A big-game hunter (The Wildwoods) who specializes against trophy beasts. Wilderness Survival: pays no Supply Point upkeep unless reduced to 0 Health. Prize Taker: +1 Fight and +1 Shoot against any creature with the Horns, Antlers, or Bounty trait, and +5 XP for personally landing the killing blow on one (once per game). Refuses to serve alongside any Horns/Antlers/Bounty creature already in the warband.',
+    },
+    # --- Blood Legacy ---
+    "blood_merchant": {
+        "name": "Blood Merchant",
+        "cost": 75,
+        "category": "standard",
+        "source": "Blood Legacy",
+        "move": 6,
+        "fight": 0,
+        "shoot": 0,
+        "armour": 10,
+        "will": 0,
+        "health": 12,
+        "gear": "—",
+        "notes": "Starts with a Vial of Blood. Adjacent to a vampire with no enemies within 1\", may hand it off to heal the vampire up to 5 Health.",
+        "description": 'A supplier to the undead nobility (Blood Legacy), keeping a vampire fed away from the hunt. Starts with a Vial of Blood; while adjacent to a vampire with no enemies within 1", may give it up as an action to heal that vampire up to 5 Health.',
+    },
+    "swordmaster": {
+        "name": "Swordmaster",
+        "cost": 125,
+        "category": "specialist",
+        "source": "Blood Legacy",
+        "move": 6,
+        "fight": 4,
+        "shoot": 0,
+        "armour": 11,
+        "will": 1,
+        "health": 12,
+        "gear": "Hand weapon",
+        "notes": "Supporting Figure Maximum (opponents gain at most +2 from supporting figures against it). Opponent Armour Reduction: -1 Armour to a light/heavy-armoured foe it beats in combat.",
+        "description": 'A blade specialist (Blood Legacy) who thrives against groups. Supporting Figure Maximum limits any opponent to at most +2 Fight from supporting figures when fighting the Swordmaster. Opponent Armour Reduction: a light- or heavy-armoured foe it beats in combat suffers -1 Armour.',
+    },
+    "vampire_hunter": {
+        "name": "Vampire Hunter",
+        "cost": 125,
+        "category": "specialist",
+        "source": "Blood Legacy",
+        "move": 6,
+        "fight": 3,
+        "shoot": 2,
+        "armour": 11,
+        "will": 2,
+        "health": 12,
+        "gear": "Hand weapon",
+        "notes": "Magic Attacks vs. Undead. Hunter's Will: +2 Will while a vampire is on the table. Immune to Energy Drain.",
+        "description": "A specialist (Blood Legacy) trained specifically to hunt the undead nobility. All attacks count as magic when fighting Undead. Hunter's Will: gains +2 Will for as long as a vampire is on the table. Immune to Energy Drain.",
+    },
+    # --- Fireheart ---
+    "construct_familiar": {
+        "name": "Construct Familiar",
+        "cost": 0,
+        "category": "standard",
+        "source": "Fireheart",
+        "requires_spell": "Animate Construct",
+        "move": 6,
+        "fight": 1,
+        "shoot": 0,
+        "armour": 11,
+        "will": 0,
+        "health": 2,
+        "gear": "—",
+        "notes": "Construct, Cannot Carry Treasure, Expert Climber, Construct Eye-Socket. Having one excludes a Familiar-spell familiar.",
+        "description": 'A tiny construct animated to serve as a familiar (Fireheart). Construct: immune to poison, never counts as wounded. Cannot Carry Treasure, Expert Climber, Construct Eye-Socket (any wizard may cast Wizard Eye on it). A warband may not have both a Construct Familiar and a Familiar-spell familiar.',
+    },
+    "construct_hound": {
+        "name": "Construct Hound",
+        "cost": 25,
+        "category": "standard",
+        "source": "Fireheart",
+        "move": 7,
+        "fight": 1,
+        "shoot": 0,
+        "armour": 10,
+        "will": -1,
+        "health": 10,
+        "gear": "—",
+        "notes": "Construct, Cannot Carry Treasure. Already modified; cannot be modified further. May fill a kennel's wolf/warhound slot.",
+        "description": 'A construct built to resemble and serve as a war hound (Fireheart). Construct: immune to poison, never counts as wounded. Cannot Carry Treasure. Comes pre-modified and cannot take any further Construct Modification. May be taken in place of a wolf or warhound wherever a kennel-type resource allows one.',
+    },
+    "scrounger": {
+        "name": "Scrounger",
+        "cost": 60,
+        "category": "standard",
+        "source": "Fireheart",
+        "move": 5,
+        "fight": 3,
+        "shoot": 0,
+        "armour": 11,
+        "will": 1,
+        "health": 12,
+        "gear": "Staff or hand weapon",
+        "notes": (
+            "Grants the warband one Black Market roll restricted to the Construct Modification "
+            "table (or a 20% discount on such a purchase without the Black Market rule). Only "
+            "one Scrounger's benefit applies per warband."
+        ),
+        "description": 'A construct-parts hoarder and tinkerer (Fireheart). Grants the warband one Black Market roll restricted to the Construct Modification table (or a 20% discount on such a purchase if the Black Market rule isn\'t in use); only one Scrounger\'s benefit applies even with multiple in the warband. Fights with either a staff or a hand weapon, chosen when hired.',
+    },
+    "tinkerer": {
+        "name": "Tinkerer",
+        "cost": 25,
+        "category": "standard",
+        "source": "Fireheart",
+        "move": 6,
+        "fight": 2,
+        "shoot": 0,
+        "armour": 11,
+        "will": 1,
+        "health": 10,
+        "gear": "Dagger",
+        "notes": "+1 to one Embed Enchantment or Animate Construct roll (including repair/re-animation) between games. Never counts as unarmed.",
+        "description": 'A gifted construct-and-enchantment mechanic (Fireheart). Grants +1 to one Embed Enchantment or Animate Construct roll (including repair or re-animation attempts) made between games. Always counts as carrying a dagger and so never counts as unarmed.',
+    },
+    # --- Spellcaster Magazine: Issue 1 firearms ---
+    "musketeer": {
+        "name": "Musketeer",
+        "cost": 60,
+        "category": "specialist",
+        "source": "Spellcaster Magazine",
+        "move": 6,
+        "fight": 2,
+        "shoot": 2,
+        "armour": 11,
+        "will": 1,
+        "health": 10,
+        "gear": "Musket, powder horn, leather armour, hand weapon",
+        "notes": "Specialist Soldier (2E errata). Firearm rules (range, reload, Misfire table) are a deferred mechanic.",
+        "description": 'A black-powder marksman (Spellcaster Magazine, Issue 1). Carries a Musket — a two-handed firearm, only one at a time, no shield; usable in melee as a two-handed weapon but without the usual +2 damage bonus. The full firearm subsystem (Inaccurate/Armour Piercing/Loud traits, reload actions, the Misfire table) is a deferred mechanic — see the Additional Rules reference for the full rules text.',
+    },
+    "coachman": {
+        "name": "Coachman",
+        "cost": 60,
+        "category": "specialist",
+        "source": "Spellcaster Magazine",
+        "move": 6,
+        "fight": 2,
+        "shoot": 2,
+        "armour": 11,
+        "will": 1,
+        "health": 10,
+        "gear": "Blunderbuss, powder horn, leather armour, hand weapon",
+        "notes": "Specialist Soldier (2E errata). Firearm rules (range, reload, Misfire table) are a deferred mechanic.",
+        "description": 'A shotgun-armed guard (Spellcaster Magazine, Issue 1). Carries a Blunderbuss — a two-handed firearm whose shooting attack normally hits the target and every other figure within 1" of it; usable in melee like a pistol, but without the +1 Fight combo bonus. The full firearm subsystem is a deferred mechanic — see the Additional Rules reference for the full rules text.',
+    },
+    "duellist": {
+        "name": "Duellist",
+        "cost": 100,
+        "category": "specialist",
+        "source": "Spellcaster Magazine",
+        "move": 6,
+        "fight": 3,
+        "shoot": 2,
+        "armour": 11,
+        "will": 2,
+        "health": 12,
+        "gear": "2 pistols, powder horn, leather armour, hand weapon",
+        "notes": "Specialist Soldier (2E errata). Firearm rules (range, reload, Misfire table) are a deferred mechanic.",
+        "description": 'A two-pistol gunfighter (Spellcaster Magazine, Issue 1). Carries a pair of Pistols — one-handed firearms that double as daggers (never counts as unarmed) and grant +1 Fight when paired with a hand weapon in Frostgrave. The full firearm subsystem is a deferred mechanic — see the Additional Rules reference for the full rules text.',
+    },
+    # --- Spellcaster Magazine: Issue 3 rangifer troop types ---
+    "rangifer_boar": {
+        "name": "Rangifer Boar",
+        "cost": 10,
+        "category": "standard",
+        "source": "Spellcaster Magazine",
+        "move": 6,
+        "fight": 2,
+        "shoot": 0,
+        "armour": 12,
+        "will": 2,
+        "health": 8,
+        "gear": "—",
+        "notes": "Part of a rangifer \"hide\" (Issue 3). Animal; cannot carry items or treasure.",
+        "description": 'A tamed boar from rangifer culture (Spellcaster Magazine, Issue 3), part of a hired "hide" of up to 5 rangifer troops. Animal: cannot carry items or treasure.',
+    },
+    "rangifer_ambusher": {
+        "name": "Rangifer Ambusher",
+        "cost": 20,
+        "category": "standard",
+        "source": "Spellcaster Magazine",
+        "move": 7,
+        "fight": 2,
+        "shoot": 0,
+        "armour": 12,
+        "will": 3,
+        "health": 12,
+        "gear": "2 flint daggers",
+        "notes": (
+            "Part of a rangifer \"hide\" (Issue 3). Hate Undead, Antlers, Flint Weapons "
+            "(destroyed on any natural 1 rolled in combat). All Trap Expert abilities "
+            "(Into the Breeding Pits)."
+        ),
+        "description": 'A rangifer scout skilled with traps (Spellcaster Magazine, Issue 3), part of a hired "hide" of up to 5 rangifer troops. Cultural traits shared by all rangifer: Hate Undead (+1 Fight vs. undead, magic attacks, only while armed with antlers/flint/wood), Antlers (never unarmed; -1 Fight if antlers are the only weapon), Flint Weapons (destroyed on any natural 1 rolled in combat). Also has all of a Trap Expert\'s abilities (Into the Breeding Pits).',
+    },
+    "rangifer_charger": {
+        "name": "Rangifer Charger",
+        "cost": 30,
+        "category": "standard",
+        "source": "Spellcaster Magazine",
+        "move": 7,
+        "fight": 3,
+        "shoot": 0,
+        "armour": 12,
+        "will": 4,
+        "health": 12,
+        "gear": "—",
+        "notes": "Part of a rangifer \"hide\" (Issue 3). Hate Undead, Antlers (no Fight penalty when armed only with antlers), Flint Weapons.",
+        "description": 'A rangifer shock-fighter (Spellcaster Magazine, Issue 3), part of a hired "hide" of up to 5 rangifer troops. Hate Undead, Antlers (suffers no Fight penalty when armed only with its antlers, unlike other rangifer), Flint Weapons.',
+    },
+    "rangifer_herdsman": {
+        "name": "Rangifer Herdsman",
+        "cost": 20,
+        "category": "standard",
+        "source": "Spellcaster Magazine",
+        "move": 7,
+        "fight": 2,
+        "shoot": 0,
+        "armour": 12,
+        "will": 3,
+        "health": 12,
+        "gear": "Flint hand weapon",
+        "notes": "Part of a rangifer \"hide\" (Issue 3). Hate Undead, Antlers, Flint Weapons.",
+        "description": 'A rangifer herder-warrior (Spellcaster Magazine, Issue 3), part of a hired "hide" of up to 5 rangifer troops. Hate Undead, Antlers, Flint Weapons.',
+    },
+    "rangifer_hewer": {
+        "name": "Rangifer Hewer",
+        "cost": 60,
+        "category": "standard",
+        "source": "Spellcaster Magazine",
+        "move": 7,
+        "fight": 4,
+        "shoot": 0,
+        "armour": 12,
+        "will": 4,
+        "health": 14,
+        "gear": "Flint two-handed weapon",
+        "notes": "Part of a rangifer \"hide\" (Issue 3). Hate Undead, Antlers, Flint Weapons.",
+        "description": 'A rangifer heavy fighter (Spellcaster Magazine, Issue 3), part of a hired "hide" of up to 5 rangifer troops. Hate Undead, Antlers, Flint Weapons.',
+    },
+    "rangifer_hurler": {
+        "name": "Rangifer Hurler",
+        "cost": 30,
+        "category": "standard",
+        "source": "Spellcaster Magazine",
+        "move": 7,
+        "fight": 2,
+        "shoot": 2,
+        "armour": 12,
+        "will": 3,
+        "health": 12,
+        "gear": "Flint throwing spear, flint hand weapon",
+        "notes": (
+            "Part of a rangifer \"hide\" (Issue 3). Hate Undead, Antlers, Flint Weapons. "
+            "Throwing spear: once/game, a 12\" shooting attack with no damage modifier."
+        ),
+        "description": 'A rangifer skirmisher (Spellcaster Magazine, Issue 3), part of a hired "hide" of up to 5 rangifer troops. Hate Undead, Antlers, Flint Weapons. Once per game may throw its flint spear as a 12" shooting attack with no damage modifier.',
+    },
+    "rangifer_packdeer": {
+        "name": "Rangifer Packdeer",
+        "cost": 20,
+        "category": "standard",
+        "source": "Spellcaster Magazine",
+        "move": 7,
+        "fight": 1,
+        "shoot": 0,
+        "armour": 12,
+        "will": 3,
+        "health": 12,
+        "gear": "—",
+        "notes": "Part of a rangifer \"hide\" (Issue 3). Hate Undead, Antlers, Flint Weapons. 3 item slots; all Pack Mule abilities (Thaw of the Lich Lord).",
+        "description": 'A burden-bearing rangifer (Spellcaster Magazine, Issue 3), part of a hired "hide" of up to 5 rangifer troops. Hate Undead, Antlers, Flint Weapons. Carries 3 item slots and has all of a Pack Mule\'s abilities (Thaw of the Lich Lord).',
+    },
+    "rangifer_war_leader": {
+        "name": "Rangifer War-Leader",
+        "cost": 100,
+        "category": "specialist",
+        "source": "Spellcaster Magazine",
+        "move": 7,
+        "fight": 2,
+        "shoot": 0,
+        "armour": 12,
+        "will": 3,
+        "health": 12,
+        "gear": "Flint hand weapon",
+        "notes": (
+            "Part of a rangifer \"hide\" (Issue 3). Hate Undead, Antlers, Flint Weapons. Free "
+            "flint hand weapon, no shield/armour, Move never above 7. Uses the Captain rules "
+            "(The Frostgrave Folio) in place of the warband's own Captain — the actual "
+            "Captain-replacement mechanic is deferred; hires here as a stat-block soldier."
+        ),
+        "description": 'The chieftain of a rangifer "hide" (Spellcaster Magazine, Issue 3), who leads using the Captain rules (The Frostgrave Folio) in place of a warband\'s own Captain — never carries a shield or armour, and Move never rises above 7 regardless of bonuses. The actual Captain-replacement mechanic (fielding a War-Leader instead of hiring/promoting a Captain) is a deferred feature; for now this hires as an ordinary specialist stat-block.',
+    },
+    # --- Spellcaster Magazine: Legendary Soldiers (Issues 4-5) ---
+    "bookhound": {
+        "name": "Bookhound",
+        "cost": 300,
+        "category": "specialist",
+        "source": "Spellcaster Magazine",
+        "move": 6,
+        "fight": 2,
+        "shoot": 0,
+        "armour": 10,
+        "will": 5,
+        "health": 14,
+        "gear": "—",
+        "notes": (
+            "Legendary Soldier (Issue 4) — the by-wizard-level hiring cap is a deferred "
+            "mechanic; hires here like an ordinary Specialist Soldier. Immune to Critical "
+            "Hits; caps damage from one attack at 10; never triggers Explosive Runes; may "
+            "reroll grimoire results on the Random Spell Table; sells grimoires for 270gc; "
+            "+1 to one Out of Game Casting Roll per game. 3 item slots."
+        ),
+        "description": 'A rare, expensive scholar-troop ("Legendary Soldier", Spellcaster Magazine Issue 4). Immune to Critical Hits; caps damage taken from any single attack at 10; never triggers Explosive Runes; may reroll grimoire results on the Random Spell Table; sells grimoires for 270gc; grants +1 to one Out of Game Casting Roll each game. The book\'s wizard-level-gated hiring cap for Legendary Soldiers is a deferred mechanic — this hires uncapped for now, like any Specialist Soldier.',
+    },
+    "dire_hound": {
+        "name": "Dire Hound",
+        "cost": 200,
+        "category": "specialist",
+        "source": "Spellcaster Magazine",
+        "move": 8,
+        "fight": 3,
+        "shoot": 0,
+        "armour": 12,
+        "will": 4,
+        "health": 12,
+        "gear": "—",
+        "notes": (
+            "Legendary Soldier (Issue 4) — the by-wizard-level hiring cap is a deferred "
+            "mechanic. Animal, Leap (up to 6\" of any move as a leap in any direction), "
+            "Powerful Jaws (+2 damage). Cannot carry items or treasure."
+        ),
+        "description": 'A massive hunting hound ("Legendary Soldier", Spellcaster Magazine Issue 4). Animal, Leap (up to 6" of any move may be a leap in any direction), Powerful Jaws (+2 damage); cannot carry items or treasure. The Legendary Soldier hiring cap is a deferred mechanic.',
+    },
+    "elemental_archer": {
+        "name": "Elemental Archer",
+        "cost": 300,
+        "category": "specialist",
+        "source": "Spellcaster Magazine",
+        "move": 6,
+        "fight": 2,
+        "shoot": 3,
+        "armour": 11,
+        "will": 4,
+        "health": 12,
+        "gear": "Bow, up to 3 magic arrows (free)",
+        "notes": (
+            "Legendary Soldier (Issue 4) — the by-wizard-level hiring cap is a deferred "
+            "mechanic. All shooting attacks count as magic. May \"steady aim\" (an action, "
+            "can replace the move) for -1 Fight on the target's defence if it shoots the "
+            "same activation. 2 item slots plus up to 3 free magic arrows."
+        ),
+        "description": 'An archer whose every shot is magical ("Legendary Soldier", Spellcaster Magazine Issue 4). All shooting attacks count as magic. May "steady aim" — an action that can replace its move — to impose -1 Fight on the target\'s defence if it also shoots that activation. The Legendary Soldier hiring cap is a deferred mechanic.',
+    },
+    "graverobber": {
+        "name": "Graverobber",
+        "cost": 300,
+        "category": "specialist",
+        "source": "Spellcaster Magazine",
+        "move": 6,
+        "fight": 3,
+        "shoot": 0,
+        "armour": 11,
+        "will": 4,
+        "health": 14,
+        "gear": "—",
+        "notes": (
+            "Legendary Soldier (Issue 4) — the by-wizard-level hiring cap is a deferred "
+            "mechanic. +2 Fight vs. undead, magic attacks vs. undead. Immune to Drain Life "
+            "Force, Reveal Death, Strike Dead. Raise Zombie may add a ghoul instead. +5 vs. "
+            "Trap Numbers. 2 item slots."
+        ),
+        "description": 'A tomb-raiding specialist ("Legendary Soldier", Spellcaster Magazine Issue 4). +2 Fight against undead, and its attacks count as magic against them. Immune to Drain Life Force, Reveal Death, and Strike Dead. When Raise Zombie targets the warband, a ghoul may be added instead. +5 to resist Trap Numbers. The Legendary Soldier hiring cap is a deferred mechanic.',
+    },
+    "shadow_walker": {
+        "name": "Shadow-Walker",
+        "cost": 300,
+        "category": "specialist",
+        "source": "Spellcaster Magazine",
+        "move": 7,
+        "fight": 4,
+        "shoot": 0,
+        "armour": 10,
+        "will": 5,
+        "health": 12,
+        "gear": "Poisoned weapons",
+        "notes": (
+            "Legendary Soldier (Issue 4) — the by-wizard-level hiring cap is a deferred "
+            "mechanic. Out-of-LoS activation may teleport anywhere else out of enemy line "
+            "of sight (not while carrying treasure); can't be targeted from beyond 12\". "
+            "+2 Fight when shot at. Poisoned weapons; immune to poison."
+        ),
+        "description": 'An assassin who moves between shadows ("Legendary Soldier", Spellcaster Magazine Issue 4). When activating out of enemy line of sight, may instead teleport anywhere else out of enemy line of sight (not while carrying treasure); can\'t be targeted by shooting beyond 12", and gains +2 Fight when shot at. Poisoned weapons; immune to poison. The Legendary Soldier hiring cap is a deferred mechanic.',
+    },
+    "telekinetic": {
+        "name": "Telekinetic",
+        "cost": 300,
+        "category": "specialist",
+        "source": "Spellcaster Magazine",
+        "move": 6,
+        "fight": 3,
+        "shoot": 0,
+        "armour": 11,
+        "will": 7,
+        "health": 12,
+        "gear": "—",
+        "notes": (
+            "Legendary Soldier (Issue 4) — the by-wizard-level hiring cap is a deferred "
+            "mechanic. Once per activation: move a visible treasure token 3\", or move "
+            "itself 4\" (either may replace the move action). Immune to Mind Control. "
+            "2 item slots."
+        ),
+        "description": 'A mind-over-matter specialist ("Legendary Soldier", Spellcaster Magazine Issue 4). Once per activation may move a visible treasure token 3", or move itself 4" — either can replace its move action. Immune to Mind Control. The Legendary Soldier hiring cap is a deferred mechanic.',
+    },
+    "whip_master": {
+        "name": "Whip-Master",
+        "cost": 300,
+        "category": "specialist",
+        "source": "Spellcaster Magazine",
+        "move": 6,
+        "fight": 3,
+        "shoot": 2,
+        "armour": 11,
+        "will": 3,
+        "health": 14,
+        "gear": "Whip",
+        "notes": (
+            "Legendary Soldier (Issue 4) — the by-wizard-level hiring cap is a deferred "
+            "mechanic. Whip: 3\" range shooting attack (max +2); on a hit, target drops "
+            "treasure and needs a Move Roll (TN18) or is reeled in 2\". Falling more than "
+            "3\": a Move Roll (TN16) catches terrain with the whip to soften the landing. "
+            "2 item slots."
+        ),
+        "description": 'A whip-fighting specialist ("Legendary Soldier", Spellcaster Magazine Issue 4). Its whip makes a 3" range shooting attack (max +2); on a hit the target drops any carried treasure and must pass a Move Roll (TN18) or be reeled in 2". When falling more than 3", a Move Roll (TN16) lets it catch terrain with the whip to soften the landing. The Legendary Soldier hiring cap is a deferred mechanic.',
+    },
+    "monster_hunter": {
+        "name": "Monster Hunter",
+        "cost": 300,
+        "category": "specialist",
+        "source": "Spellcaster Magazine",
+        "move": 6,
+        "fight": 3,
+        "shoot": 1,
+        "armour": 11,
+        "will": 2,
+        "health": 14,
+        "gear": "—",
+        "notes": (
+            "Legendary Soldier (Issue 5) — the by-wizard-level hiring cap is a deferred "
+            "mechanic, as is the Monster Hunting harvest-economy this soldier ties into. "
+            "+1 Fight/+1 Shoot vs. uncontrolled creatures; claims two components per kill, "
+            "+5gc extra when selling a monster prize. May place a Monster Trap within 8\" "
+            "of setup. 2 item slots."
+        ),
+        "description": 'A hunter specialized against monsters ("Legendary Soldier", Spellcaster Magazine Issue 5). +1 Fight and +1 Shoot against uncontrolled creatures. Ties into the Monster Hunting harvest economy (claims two components per kill, +5gc extra selling a monster prize) — that whole economy is a deferred mechanic, described in the Additional Rules reference. May place a Monster Trap within 8" of table setup (Deadfall, Spring-loaded Spike, or Net).',
+    },
+    "potion_master": {
+        "name": "Potion Master",
+        "cost": 300,
+        "category": "specialist",
+        "source": "Spellcaster Magazine",
+        "move": 6,
+        "fight": 2,
+        "shoot": 0,
+        "armour": 11,
+        "will": 5,
+        "health": 14,
+        "gear": "—",
+        "notes": (
+            "Legendary Soldier (Issues 5 & 6, reprinted) — the by-wizard-level hiring cap "
+            "is a deferred mechanic. Doubles the wizard's Brew Potion component bonus "
+            "(+2 casting, 50gc off). Drinks potions as a free action. 4 item slots (3 "
+            "potions only). Applies potions to nearby figures. Wizard may reroll one "
+            "potion-table roll per game."
+        ),
+        "description": 'A potion specialist ("Legendary Soldier", Spellcaster Magazine Issues 5 and 6). Doubles the wizard\'s Brew Potion component bonus (+2 to the Casting Roll, 50gc off ingredient cost). Drinks potions as a free action, and may apply a potion to a nearby figure. Carries 4 item slots, but only for potions (max 3). The wizard may reroll one potion-table roll per game while this soldier is on the roster. The Legendary Soldier hiring cap is a deferred mechanic.',
+    },
 }
 
 # Extra source books whose soldiers / creatures / rules can be toggled on per
@@ -1263,6 +1996,12 @@ SOURCE_BOOKS = [
     "Forgotten Pacts",
     "The Maze of Malcor",
     "The Perilous Dark",
+    "The Frostgrave Folio",
+    "Grave Mutations",
+    "Blood Legacy",
+    "Fireheart",
+    "The Wildwoods",
+    "Spellcaster Magazine",
 ]
 
 
@@ -1324,6 +2063,7 @@ SUMMONED_ORDER = [
     "small_construct",
     "medium_construct",
     "large_construct",
+    "construct_familiar",
     "demonic_servant",
 ]
 

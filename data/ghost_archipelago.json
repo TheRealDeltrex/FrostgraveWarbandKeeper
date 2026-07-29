@@ -1,5 +1,5 @@
 {
- "intro": "This one arrived as scanned image pages with no text layer, so it was run through a local OCR pipeline (tesseract) page-by-page to extract it. It's also technically a related but separate Osprey ruleset — a Heritor (caster) and Warden (nature-magic specialist) lead a Crew across a chain of islands instead of a Wizard leading a Warband — so nearly everything below is structurally new relative to the Frostgrave rulebook, even where the mechanics closely parallel it. A few stat-block cells were unrecoverable from the scan (flagged with \"?\").",
+ "intro": "Ghost Archipelago is a related but separate Osprey ruleset — a Heritor (caster) and Warden (nature-magic specialist) lead a Crew across a chain of islands instead of a Wizard leading a Warband — so nearly everything below is structurally new relative to the Frostgrave rulebook, even where the mechanics closely parallel it. A few stat-block values could not be confirmed and are marked with \"?\".",
  "sections": [
   {
    "title": "New core mechanics",
@@ -340,7 +340,7 @@
     },
     {
      "name": "Fireheart Green",
-     "text": "+1 action next activation (max 3); user takes 2 damage."
+     "text": "+1 action next activation (max 3); the figure takes 2 damage."
     },
     {
      "name": "Ironbark Powder",
@@ -559,6 +559,375 @@
      "text": "Cost 600gc · Effect One standard crewman gets a free Superior Hand Weapon each game."
     }
    ]
+  },
+  {
+   "title": "Traps in Ghost Archipelago (Spellcaster Issue 2)",
+   "blurb": "Mirrors the Frostgrave trap rules (Into the Breeding Pits) for Ghost Archipelago. A natural 1 on initiative springs a trap: that player picks the target (any figure, including uncontrolled creatures) and rolls the Trap List; effects resolve immediately, before other actions. Optional \"Treasure Traps\": a Random Encounter roll of 1 while picking up treasure means it was trapped.",
+   "entries": [],
+   "rows": [
+    {
+     "name": "Heritor, Trapper",
+     "text": "+5"
+    },
+    {
+     "name": "Warden, Guide, Scout",
+     "text": "+3"
+    },
+    {
+     "name": "Tomb Robber, Hunter, Savage",
+     "text": "+2"
+    },
+    {
+     "name": "1. Poison Darts",
+     "text": "+3 attack vs. target and others within 1\"; poisonous."
+    },
+    {
+     "name": "2. Pit",
+     "text": "Move TN16 or fall into a 2\" pit (3\" deep, +0 attack); becomes permanent terrain. Climb out: action + Move TN14 (+4 if a friendly figure is at the edge, no enemies within 1\")."
+    },
+    {
+     "name": "3. Spiked Pit",
+     "text": "As Pit, but +5 attack."
+    },
+    {
+     "name": "4. Cursed Monolith",
+     "text": "Will TN12 each activation or no actions, until it succeeds once; stays on the table for others to trigger. Heritor/Warden contact = +5 XP."
+    },
+    {
+     "name": "5. Diseased Mosquito",
+     "text": "Health TN14 or miss the next game (reroll if target is a Heritor)."
+    },
+    {
+     "name": "6. Death From Above",
+     "text": "Roll a Level 1 Random Encounter creature; Move TN12 determines whether it lands in combat or up to 2\" away."
+    },
+    {
+     "name": "7. Hypnotic Marsh Gas",
+     "text": "Will TN14 or an opponent may move the figure up to 4\" (can force it into combat)."
+    },
+    {
+     "name": "8. Quicksand",
+     "text": "Move TN16 or fall into a 2\"-diameter quicksand circle (deep-water rules while inside)."
+    },
+    {
+     "name": "9. Rolling Boulder",
+     "text": "An opponent draws a 12\" line; everyone under it: Move TN12 or +5 attack."
+    },
+    {
+     "name": "10. Bear Trap",
+     "text": "Move TN14 or 2 damage and immobilized until freed (action + Fight TN14 by self or an adjacent figure)."
+    },
+    {
+     "name": "11. Annoying Monkey",
+     "text": "Move TN14 or a monkey (screamer monkey stats) steals a random equipment item and flees toward the board edge."
+    },
+    {
+     "name": "12. Diamond Dart",
+     "text": "+3 attack, -2 Armour (min 10) on hit; +25gc to the crew if it hits without dropping the target."
+    },
+    {
+     "name": "13. Swarm of Bees",
+     "text": "Will TN15 or a 1\"-radius insect cloud gives -4 Fight/-4 Shoot; escape via Will TN15 each turn."
+    },
+    {
+     "name": "14. Deadfall",
+     "text": "+2 attack (+2 damage) vs. target and anyone within 1\"."
+    },
+    {
+     "name": "15. Jungle Tick",
+     "text": "Will TN18 or a jungle tick appears in combat."
+    },
+    {
+     "name": "16. Fungal Spores",
+     "text": "Will TN14 or 1 action next activation; fail by 5+ = 2 damage and no actions."
+    },
+    {
+     "name": "17. Leeches",
+     "text": "-2 Fight/-2 Will until removed (action + Fight TN14, 2 damage per failed attempt). Undead immune."
+    },
+    {
+     "name": "18. Grasping Vines",
+     "text": "Move TN14 or entangled until freed (action + Fight TN12 by self or adjacent figure)."
+    },
+    {
+     "name": "19. Geyser",
+     "text": "+3 attack, -2 Armour (min 10) on hit; leaves a 2\" pool of deep water behind."
+    },
+    {
+     "name": "20. Exploding Sap Pod",
+     "text": "Move TN16 or -2 Move for the rest of the game."
+    },
+    {
+     "name": "Trapper",
+     "text": "6 - +2 - +0 - 11 - +1 - 12 - Light Armour, Two Daggers. Once/game may treat an initiative roll of 2 as a 1 to spring a trap."
+    }
+   ]
+  },
+  {
+   "title": "Frostgrave Mech War (Spellcaster Issue 2)",
+   "blurb": "A generic mech-vs-mech variant reusing the core engine. Alternate activating one mech at a time until one side is exhausted, then the other side activates all that remain. \"Health\" is renamed \"Structure.\" A mech may fire multiple weapons in one shoot action, but each weapon fired that turn adds a cumulative -1 to all its shooting rolls that turn. For every full 5 points of damage from a single attack, the mech suffers one Critical Hit (stacking).",
+   "entries": [],
+   "rows": [
+    {
+     "name": "1–3",
+     "text": "Engine Damage: -1 Move"
+    },
+    {
+     "name": "4–6",
+     "text": "Servo Damage: -1 Fight"
+    },
+    {
+     "name": "7–9",
+     "text": "Targeting Glitch: -1 Shoot / -1 Armour"
+    },
+    {
+     "name": "10–12",
+     "text": "Cracked Armour: +5 Structure damage"
+    },
+    {
+     "name": "13–15",
+     "text": "Internal Explosion: random weapon destroyed"
+    },
+    {
+     "name": "16–18",
+     "text": "Weapon Hit: mech destroyed"
+    },
+    {
+     "name": "19",
+     "text": "Reactor Hit: pilot killed, mech destroyed"
+    },
+    {
+     "name": "20",
+     "text": "Cockpit Hit: mech destroyed"
+    }
+   ]
+  },
+  {
+   "title": "Ulterior Motives in Ghost Archipelago (Spellcaster Issue 3)",
+   "blurb": "Ports the Frostgrave \"Ulterior Motives\" card system to Ghost Archipelago. Each player secretly draws one card after table edges are set but before deployment; cards specify optional Red Herring terrain/creatures to disguise the true objective. Common terrain: Arcane Disk, Gateway, Pit, Runic Stone, Sarcophagus, Statue, Trap Door, Zombie.",
+   "entries": [
+    {
+     "name": "The Forgotten Tomb",
+     "tag": "",
+     "text": "Open a sarcophagus (Fight TN16) to trigger a Will TN14 check on everyone within 12\"; retrieve a magic weapon reward."
+    },
+    {
+     "name": "The Golden Pool",
+     "tag": "",
+     "text": "Retrieve gold from a pit; a second attempt risks summoning a golden demon."
+    },
+    {
+     "name": "The Broken Map",
+     "tag": "",
+     "text": "Standing on an arcane disk spawns 4 swamp zombies; a Will roll grants XP and a treasure-roll bonus."
+    },
+    {
+     "name": "The Ancestral Gate",
+     "tag": "",
+     "text": "Standing in a gateway risks an island shade appearing; success grants a choice of XP, treasure roll, or a free specialist."
+    },
+    {
+     "name": "Death Do Us Part",
+     "tag": "",
+     "text": "Killing a swamp zombie lets a crew member recover a ring of random nature."
+    },
+    {
+     "name": "Weapons Cache",
+     "tag": "",
+     "text": "Opening a trap door (Fight TN14) grants a Weapons and Armour Table roll, but releases two Drichean warriors."
+    },
+    {
+     "name": "The Boundary Stone",
+     "tag": "",
+     "text": "Ripping out a runic stone (Fight TN18) unleashes four island shades that head for the far table edge."
+    },
+    {
+     "name": "The Forgotten Saint",
+     "tag": "",
+     "text": "Pledge gold at a statue for a chance to heal an injury or gain XP."
+    }
+   ],
+   "rows": []
+  },
+  {
+   "title": "High-Level Heritors (Spellcaster Issue 5)",
+   "blurb": "Blood Burn still costs Health per power attempt and still damages on failure, but the damage shrinks (never to zero) as the Heritor levels. Specialist Crew caps at 4 early on, rising to 8 of 8 crew by level 40. Legendary Crew unlock at Heritor level 10, occupying a specialist slot each (a level-10 Heritor could run 5 specialists, or 1 Legendary + 4 specialists). Building a High-Level Heritor: pick a level (= total advancements) → take advancements one at a time → roll the Treasure Table once per level (reroll Map Stones) → recruit a Warden at level ÷ 3 (round up), who takes one advancement per level → hire crew up to the table's limits → distribute the accumulated treasure. Hiring Legendary Crew requires returning to the mainland; survival uses the Heritor/Warden Survival Table (main rulebook p.59) with \"Close Call\" treated as \"Full Recovery\" and \"Smashed Jaw\" rerolled.",
+   "entries": [],
+   "rows": [
+    {
+     "name": "0–4 / 5–9 / 10–14 / 15–19",
+     "text": "5 / 6 / 7 / 8"
+    },
+    {
+     "name": "20–24 / 25–29 / 30–34 / 35–39",
+     "text": "9 / 10 / 11 / 12"
+    },
+    {
+     "name": "40–44 / 45–49 / 50+",
+     "text": "13 / 14 / 15 (hard cap)"
+    },
+    {
+     "name": "Arachnid Master",
+     "text": "300gc - 6 - +3 - — - 11 - +3 - 12 - Immune to poison, poisons own weapons, +2 Fight vs. spiders. Comes with a Spider Pet (M6 F+0 A8 W+5 H4, Expert Climber, Poison) that group-activates within 3\" for a +1 support bonus; replaced free if killed. 3 item slots."
+    },
+    {
+     "name": "Boarhound",
+     "text": "200gc - 7 - +3 - — - 12 - +4 - 14 - Animal, Tusks (+2 Fight if it charges into combat), Unique Musk (any animal fighting it suffers -1 Fight). Cannot carry items/treasure."
+    },
+    {
+     "name": "Dreamweaver",
+     "text": "300gc - 6 - +3 - — - 11 - +5 - 12 - Rerolls one treasure result post-game (not Central Treasure); 11+ on a die gives +5 XP to Heritor or Warden. +3 Fight vs. shooting; anyone in base contact suffers -1 Fight."
+    },
+    {
+     "name": "Drichean Kin-slayer",
+     "text": "300gc - 5 - +4 - — - 13 - +2 - 12 - Shield, Heavy Armour, 3 Drichean Martial Disciplines (Cities of Bronze p.14). Joins on a 17+ roll after any game (no mainland trip needed); blocks hiring other Drichean soldiers; Will TN14 or the crew fails to gain Drichean kingdom favour."
+    }
+   ]
+  },
+  {
+   "title": "Ulterior Motives III (Spellcaster Issue 5)",
+   "blurb": "Eight further Ulterior Motive cards for Ghost Archipelago (the same reusable secret-objective sub-system introduced in Issue 3).",
+   "entries": [
+    {
+     "name": "Golden Teeth",
+     "tag": "",
+     "text": "Kill a zombie to reveal golden, diamond-set teeth; secure them for 220gc treated as cash."
+    },
+    {
+     "name": "The Geyser",
+     "tag": "",
+     "text": "A timed geyser eruption lets an adjacent figure bathe a weapon to make it magic (+1 Fight if mundane)."
+    },
+    {
+     "name": "Box of Snakes",
+     "tag": "",
+     "text": "Open a cursed sarcophagus (Fight TN14) to release two large snakes and two special treasure tokens exchangeable for Golden Snake items."
+    },
+    {
+     "name": "The Silver Helm",
+     "tag": "",
+     "text": "A Will Roll TN14 removes a helmet hidden on a statue, securing a Piscian Helmet."
+    },
+    {
+     "name": "Farsight",
+     "tag": "",
+     "text": "Reciting a prayer in a gateway (Will TN18) grants bonus XP by which figure succeeds."
+    },
+    {
+     "name": "Bait and Switch",
+     "tag": "",
+     "text": "Revealing at a trap door swaps the central treasure onto it, wherever it currently is."
+    },
+    {
+     "name": "The Cursed Stone",
+     "tag": "",
+     "text": "Touching a runic stone punishes enemies with a +5 attack but rewards your own figures with XP and a treasure reroll."
+    },
+    {
+     "name": "The Point of Power",
+     "tag": "",
+     "text": "A Warden casting spells atop an arcane disk gets +4 to the roll and bonus XP per cast (max +100)."
+    }
+   ],
+   "rows": []
+  },
+  {
+   "title": "Giant Tortoises (Spellcaster Issue 6)",
+   "blurb": "A full new mount/pack-animal subsystem. After any game, a Heritor may attempt a Will Roll TN20 to find a tribe selling one for 300gc; further tortoises cost 250gc in ship modifications. Don't count against crew limit (max 5 in a crew); activate only alongside an adjacent crew member (once/turn, max 4.5\" move); survival rolled as a specialist crewman if killed. As a mount: one action to mount/dismount; follows small-boat rules but moves on land, carries up to 3 riders, may make two move actions/turn (4.5\" total); never counts as In Combat itself; a rider may attack anyone in base contact with the tortoise without the usual -1 Fight penalty. Carries up to 15 items total (each rider uses 5 capacity); anyone on/adjacent may exchange a carried item. Attacking an unarmoured part costs -2 Shoot/Fight but treats Armour as 12 instead of 16. Never jumps, climbs above ~1\", or picks up treasure; may never use items.",
+   "entries": [],
+   "rows": [
+    {
+     "name": "—",
+     "text": "M 3 · F +0 · Sh — · A 16 · W +3 · H 14 · Notes Animal, Armoured Shell, may serve as mount, carrying capacity 15."
+    }
+   ]
+  },
+  {
+   "title": "Ulterior Motives (Spellcaster Issue 7)",
+   "blurb": "16 new cards, bringing the Ghost Archipelago Ulterior Motives set (Issues 3, 5, and 7 combined) to 40 cards — matching the original Frostgrave set size.",
+   "entries": [
+    {
+     "name": "Mercy Re-Killing",
+     "tag": "",
+     "text": "Killing a zombie lets a crew member recover a necklace worth a ruby (60gc)."
+    },
+    {
+     "name": "The Mirror of Antosis",
+     "tag": "",
+     "text": "Passing through a gateway (Will TN8) splits a figure in two at half Health each, merging again at game end."
+    },
+    {
+     "name": "Rise like the Phoenix",
+     "tag": "",
+     "text": "Standing on an arcane disk risks possession by a fiery demon, granting combat bonuses and Flying."
+    },
+    {
+     "name": "Sundial",
+     "tag": "",
+     "text": "Revealing on an arcane disk deals 2 damage to everyone in LoS but grants XP per figure hit."
+    },
+    {
+     "name": "Down the Pit",
+     "tag": "",
+     "text": "A crew member near a pit can pull out a rescued crewmate (Health 5) on an 11+."
+    },
+    {
+     "name": "Gateway of Nedrezzar",
+     "tag": "",
+     "text": "Speaking an incantation in a gateway (Will TN16) places a bonus special treasure token."
+    },
+    {
+     "name": "Revenge Served Cold",
+     "tag": "",
+     "text": "An opponent controls a zombie; XP swings depending on who kills it and when."
+    },
+    {
+     "name": "Summon the Worm",
+     "tag": "",
+     "text": "A ritual at a pit (Will TN18) summons a giant worm and grants a free map stone."
+    },
+    {
+     "name": "The Golden Skull",
+     "tag": "",
+     "text": "Opening a sarcophagus (Fight TN14) secures a Golden Skull treasure or an equivalent roll."
+    },
+    {
+     "name": "The Secrets of Life and Death",
+     "tag": "",
+     "text": "Copying writings at a sarcophagus (Will TN14) grants the Warden +80 XP if secured."
+    },
+    {
+     "name": "Doorway to Neverwhen",
+     "tag": "",
+     "text": "Opening a trap door (Fight/Will TN16) lets the crew exit the table through it with any carried treasure."
+    },
+    {
+     "name": "The Buried Ship",
+     "tag": "",
+     "text": "Opening a trap door (Fight TN12) lets figures search for treasure inside over several turns."
+    },
+    {
+     "name": "Statue of the Troll",
+     "tag": "",
+     "text": "Speaking words of power (Will TN16) can animate a statue into an Island Troll that may join the crew."
+    },
+    {
+     "name": "Stone of Lost Knowledge",
+     "tag": "",
+     "text": "A Warden who succeeds a Will Roll (TN14) may, after the game, forgo XP earned to instead immediately gain a level and a new spell of choice (may temporarily exceed the normal spell cap for their level; no further new spells until legal again). Red Herrings: Swamp Zombie, Sarcophagus."
+    },
+    {
+     "name": "The Siren in Stone",
+     "tag": "",
+     "text": "A singing statue (Will TN16) heals or incapacitates everyone within 12\" by their own Will roll."
+    },
+    {
+     "name": "The Rite of Fire",
+     "tag": "",
+     "text": "The Heritor may challenge a runic stone (immediate +5 attack) for a permanent Fight bonus and XP."
+    }
+   ],
+   "rows": []
   }
  ]
 }

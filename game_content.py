@@ -166,11 +166,22 @@ def spell_description(name: str) -> str:
 
 
 def enrich_spells_with_descriptions(spells: list[dict]) -> list[dict]:
+    """Attach each spell's description text, looked up by name.
+
+    A handful of supplement spells across different books happen to share a
+    core spell's name or each other's (e.g. Blood Legacy's "Pyre" and
+    Spellcaster Magazine's Rangifer "Pyre" are unrelated effects) — those are
+    stored under a "School::Name" compound key instead, checked first here,
+    falling back to the plain name lookup every other spell uses.
+    """
     descs = load_spell_descriptions()
     out = []
     for sp in spells:
         row = dict(sp)
-        row["description"] = descs.get(sp.get("name", ""), "") or "No description available."
+        name = sp.get("name", "")
+        school = sp.get("school", "")
+        text = descs.get(f"{school}::{name}") or descs.get(name, "")
+        row["description"] = text or "No description available."
         out.append(row)
     return out
 
