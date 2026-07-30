@@ -1,0 +1,110 @@
+[
+  {
+    "title": "Turn Order",
+    "entries": [
+      {"name": "Initiative", "text": "Roll to see who goes first in each of the following phases."},
+      {"name": "Wizard Phase", "text": "Each player activates their wizard plus up to 3 soldiers within 3\"."},
+      {"name": "Apprentice Phase", "text": "Each player activates their apprentice plus up to 3 soldiers within 3\"."},
+      {"name": "Soldier Phase", "text": "Each player activates all their soldiers that have not previously activated."},
+      {"name": "Creature Phase", "text": "All non-controlled creatures activate."}
+    ]
+  },
+  {
+    "title": "Activation & Actions",
+    "entries": [
+      {"name": "Actions per activation", "text": "All figures normally have 2 actions."},
+      {"name": "Move", "text": "Must use one action."},
+      {"name": "2nd Move", "tag": "half distance", "text": "A figure may take a second move action in the same activation, at half distance."},
+      {"name": "Fight", "text": "Attack a figure it is In Combat with."},
+      {"name": "Shoot", "text": "Make a ranged attack against a valid target."},
+      {"name": "Cast a spell", "text": "Attempt to cast a known spell."},
+      {"name": "Pick up / drop treasure", "text": ""},
+      {"name": "Special", "text": "Any other action specific to an item, spell, or trait."},
+      {"name": "Group Activation", "text": "All figures in a group activation must move as their first action."}
+    ]
+  },
+  {
+    "title": "Movement",
+    "entries": [
+      {"name": "Climbing or Rough Ground", "tag": "2\" per 1\"", "text": "Costs 2\" of movement for every 1\" (or partial 1\") actually moved."},
+      {"name": "Jumping", "tag": "up to 4\" horizontal", "text": "A figure can jump up to 4\" horizontally, but must have moved the same distance in a straight line first."},
+      {"name": "Combat", "text": "A figure In Combat may not move."},
+      {"name": "Forcing Combat", "text": "A figure not In Combat may intercept an enemy figure that moves within 1\" of it."},
+      {"name": "Falling", "text": "Less than 3\": no effect. Greater than 3\": take damage equal to 1.5x the distance fallen in inches."},
+      {"name": "Swimming", "tag": "Will Roll (TN5)", "text": "Modified by circumstances. Success: activates as normal. Failure: no actions this turn, and takes damage equal to the amount by which the roll failed."},
+      {"name": "Run For It", "text": "For its first action, a figure may move 3\" regardless of any movement penalties. Its activation immediately ends afterward."}
+    ]
+  },
+  {
+    "title": "Combat (Melee)",
+    "entries": [
+      {"name": "Resolving a Combat Roll", "text": "Both figures roll a die and add their Fight stat plus any other relevant modifiers (e.g. bonuses from magic or supporting figures). Highest Combat Roll wins. Add the winner's damage modifiers (e.g. +2 for a two-handed weapon, -1 for a dagger), then subtract the loser's Armour, then apply any damage multipliers. If the final total is above 0, subtract that many points from the loser's Health; 0 or negative means no damage. The winner may then remain in combat, or push either figure back 1\"."},
+      {"name": "Dagger", "tag": "-1 damage", "text": "The first dagger a figure carries does not take up an item slot."},
+      {"name": "Hand Weapon", "tag": "no modifier", "text": ""},
+      {"name": "Two-Handed Weapon", "tag": "+2 damage", "text": "Takes up two item slots."},
+      {"name": "Staff", "tag": "-1 damage to opponent", "text": "Applies to the opponent's damage modifier in hand-to-hand combat."},
+      {"name": "Bow", "tag": "24\" range", "text": "Load and fire as a single action; must have a quiver."},
+      {"name": "Crossbow", "tag": "+2 damage, 24\" range", "text": "Load and fire as separate actions; may reload in place of movement; must have a quiver."},
+      {"name": "Unarmed", "tag": "-2 damage, -2 Fight", "text": ""},
+      {"name": "Shield", "tag": "+1 Armour", "text": "May not be carried with a two-handed weapon or staff."},
+      {"name": "Light Armour", "tag": "+1 Armour", "text": ""},
+      {"name": "Heavy Armour", "tag": "+2 Armour, -1 Move", "text": ""}
+    ]
+  },
+  {
+    "title": "Multiple Combats",
+    "entries": [
+      {"name": "Supporting Figure", "tag": "+2, cumulative", "text": "Every friendly figure also in combat with the target and not in combat with another figure grants +2, cumulative (three eligible figures grant +6). Only one figure per combat may benefit from supporting figures: if both sides are eligible for the same bonus they cancel out and both fight at +0; if one is eligible for more than the other, the higher only counts the difference. A figure may never claim more than +6 from supporting figures."}
+    ]
+  },
+  {
+    "title": "Shooting",
+    "entries": [
+      {"name": "Resolving a shooting attack", "text": "The shooter checks range and line of sight, then declares a target and makes a Shooting Roll (die + Shoot stat). The target makes a Combat Roll (die + Fight stat + shooting defence modifiers). Highest wins; ties or a target win mean the attack misses. If the shooter wins, add damage modifiers (e.g. +2 for a crossbow) to the Shooting Roll, subtract the target's Armour, apply any damage multipliers, and if the total is above 0 the target loses that much Health."},
+      {"name": "Intervening Terrain", "tag": "+1, cumulative", "text": "Per piece of intervening terrain between shooter and target. A target in base contact with terrain counts as cover instead; terrain the shooter is in base contact with doesn't count (though it may still block line of sight). Other figures do count as intervening terrain."},
+      {"name": "Light Cover", "tag": "+2", "text": "The target is in contact with solid cover obscuring up to half its body, or soft cover almost completely obscuring it."},
+      {"name": "Heavy Cover", "tag": "+4", "text": "The target is in contact with solid cover that almost completely obscures its body."},
+      {"name": "Hasty Shot", "tag": "+1", "text": "The shooter moved earlier in this activation."},
+      {"name": "Large Target", "tag": "-2", "text": "The target is particularly tall or broad — normally only creatures with the Large trait."}
+    ]
+  },
+  {
+    "title": "Spell Casting",
+    "entries": [
+      {"name": "Casting Roll", "text": "Roll a die (-2 if the caster is an Apprentice). The result must equal or exceed the spell's Casting Number."},
+      {"name": "Empowering", "text": "Increase the Casting Roll by 1 for every 1 Health spent."},
+      {"name": "Failed by 1-4", "text": "No damage."},
+      {"name": "Failed by 5-9", "text": "1 damage to the caster."},
+      {"name": "Failed by 10-19", "text": "2 damage to the caster."},
+      {"name": "Failed by 20+", "text": "5 damage to the caster."}
+    ]
+  },
+  {
+    "title": "Collecting Treasure",
+    "entries": [
+      {"name": "Picking up treasure", "text": "Cannot be done if an enemy figure is within 1\"."},
+      {"name": "Carrying limit", "text": "A figure may only carry one treasure token."},
+      {"name": "Move penalty", "text": "A figure carrying treasure has its Move halved."},
+      {"name": "Encumbrance", "text": "A figure carrying treasure while armed with a shield, two-handed weapon, staff, bow, or crossbow is encumbered: -1 Fight, in addition to its Move being halved."}
+    ]
+  },
+  {
+    "title": "Uncontrolled Creature Actions",
+    "entries": [
+      {"name": "General rule", "text": "Creatures will never attack another creature, and will always force combat if possible."},
+      {"name": "1. Is it In Combat?", "text": "It fights. If it wins, it stays in combat. If in combat with more than one opponent, it attacks whichever has the lowest current Health. Otherwise, proceed to step 2."},
+      {"name": "2. Is a warband member in line of sight?", "text": "If armed with a missile weapon and a warband member is in range, it shoots the closest eligible target (no second action taken). Otherwise it moves as far as possible toward the closest visible warband member, climbing obstacles as needed, moving into combat if possible; if it moved into combat and has an action left, go back to step 1. Otherwise proceed to step 3."},
+      {"name": "3. Random movement", "text": "The creature moves its full Move in a random direction, halting at any wall or obstacle. If it still has an action left afterward, re-check step 2 — if still no target, its activation ends with no second action; otherwise proceed with step 2 as normal."}
+    ]
+  },
+  {
+    "title": "Post-Game Sequence",
+    "entries": [
+      {"name": "1. Injury and Death", "text": ""},
+      {"name": "2. Out of Game Spells", "text": ""},
+      {"name": "3. Experience and Level", "text": ""},
+      {"name": "4. Counting Treasure", "text": ""},
+      {"name": "5. Spend Treasure", "text": ""}
+    ]
+  }
+]

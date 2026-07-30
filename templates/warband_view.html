@@ -1,10 +1,12 @@
 {% extends "base.html" %}
 {% from "_loot_picker.html" import loot_picker_row with context %}
+{% from "_mutation_picker.html" import mutation_picker with context %}
 {% block title %}{{ wb.name }} · Frostgrave{% endblock %}
 {% block content %}
   {% set wiz = wb.wizard %}
   {% set ap = wb.apprentice %}
   <script type="application/json" id="loot-picker-data">{{ loot_picker_data | tojson }}</script>
+  <script type="application/json" id="mutation-picker-data">{{ mutation_picker_data | tojson }}</script>
   {% set cap = wb.captain %}
   {% set hr = wb.homerules %}
 
@@ -472,6 +474,12 @@
                 <input id="wizard_portrait" name="wizard_portrait" type="file" accept="image/*" />
               </div>
             </div>
+            {% if wiz.portrait %}
+              <div class="checkbox-row">
+                <input id="wizard_portrait_remove" name="wizard_portrait_remove" type="checkbox" />
+                <label for="wizard_portrait_remove" style="margin:0">Remove picture (revert to default)</label>
+              </div>
+            {% endif %}
             <div class="stat-row">
               {# wizard_display_stats, not wiz.stats: a Beastcrafter III's Animal
                  Feature (Fast / Scales) is folded in, marked with a * below. #}
@@ -525,6 +533,12 @@
                   <input id="apprentice_portrait" name="apprentice_portrait" type="file" accept="image/*" />
                 </div>
               </div>
+              {% if ap.portrait %}
+                <div class="checkbox-row">
+                  <input id="apprentice_portrait_remove" name="apprentice_portrait_remove" type="checkbox" />
+                  <label for="apprentice_portrait_remove" style="margin:0">Remove picture (revert to default)</label>
+                </div>
+              {% endif %}
               <p class="muted">Stats synced from wizard (starting H12 when wizard is H14)</p>
               <div class="stat-row">
                 <div class="stat-pill"><span class="label">Move</span><span class="value">{{ ap.stats.move }}</span></div>
@@ -553,6 +567,9 @@
       {% endif %}
 
     </form>
+
+    {{ mutation_picker('add_wizard_mutation', wiz.mutations) }}
+    {% if ap %}{{ mutation_picker('add_apprentice_mutation', ap.mutations) }}{% endif %}
 
     {# ---- Wizard state -----------------------------------------------------
        Its own panel rather than nested in the form above: each control posts
@@ -958,6 +975,12 @@
                   <input id="captain_portrait" name="captain_portrait" type="file" accept="image/*" />
                 </div>
               </div>
+              {% if cap.portrait %}
+                <div class="checkbox-row">
+                  <input id="captain_portrait_remove" name="captain_portrait_remove" type="checkbox" />
+                  <label for="captain_portrait_remove" style="margin:0">Remove picture (revert to default)</label>
+                </div>
+              {% endif %}
               <div class="stat-row">
                 <div class="stat-pill"><span class="label">Move</span><span class="value">{{ cap_eff.move }}</span></div>
                 <div class="stat-pill"><span class="label">Fight</span><span class="value">{{ format_stat(cap.stats.fight) }}</span></div>
@@ -1007,6 +1030,8 @@
             </form>
           </div>
         </div>
+
+        {{ mutation_picker('add_captain_mutation', cap.mutations) }}
 
         {% set cap_pending = [level_from_xp(cap.xp), hr.captain_max_level]|min - cap.level %}
         <details class="ref-panel">
@@ -1252,9 +1277,13 @@
                         <input type="hidden" name="soldier_id" value="{{ s.id }}" />
                         <input name="soldier_name" type="text" value="{{ s.name }}" />
                         <input name="soldier_portrait" type="file" accept="image/*" />
+                        {% if s.portrait %}
+                          <label class="muted" style="font-size:0.8rem"><input name="soldier_portrait_remove" type="checkbox" /> Remove picture (revert to default)</label>
+                        {% endif %}
                         <input name="notes" type="text" value="{{ s.notes }}" placeholder="Notes" />
                       </form>
                     </details>
+                    {{ mutation_picker('add_soldier_mutation', s.mutations, soldier_id=s.id) }}
                     {% if hr.soldier_leveling_enabled %}
                       {% set s_pending = level_from_xp(s.xp) - s.level %}
                       <details>
@@ -1899,6 +1928,72 @@
       }
 
       document.querySelectorAll('.loot-picker-row').forEach(wireRow);
+    })();
+  </script>
+
+  <script>
+    (function () {
+      // Grave Mutations hundred -> twenty-block -> named-entry cascade,
+      // shared by every Mutations picker on the page (wizard/apprentice/
+      // captain/each soldier) — one parsed data blob for all instances.
+      var dataEl = document.getElementById('mutation-picker-data');
+      if (!dataEl) return;
+      var MUTATION_DATA = JSON.parse(dataEl.textContent);
+
+      function opt(value, text) {
+        var o = document.createElement('option');
+        o.value = value;
+        o.textContent = text;
+        return o;
+      }
+
+      function populateHundred(form) {
+        var sel = form.querySelector('.mutation-hundred');
+        sel.innerHTML = '';
+        sel.appendChild(opt('', '— pick —'));
+        MUTATION_DATA.forEach(function (sec, i) { sel.appendChild(opt(i, sec.label)); });
+      }
+
+      function populateTwenty(form) {
+        var hIdx = form.querySelector('.mutation-hundred').value;
+        var twentySel = form.querySelector('.mutation-twenty');
+        twentySel.innerHTML = '';
+        if (hIdx === '') {
+          twentySel.appendChild(opt('', '— pick a hundred first —'));
+          twentySel.disabled = true;
+        } else {
+          twentySel.appendChild(opt('', '— pick —'));
+          MUTATION_DATA[hIdx].subsections.forEach(function (sub, i) { twentySel.appendChild(opt(i, sub.label)); });
+          twentySel.disabled = false;
+        }
+        populateNumber(form);
+      }
+
+      function populateNumber(form) {
+        var hIdx = form.querySelector('.mutation-hundred').value;
+        var tIdx = form.querySelector('.mutation-twenty').value;
+        var numberSel = form.querySelector('.mutation-number');
+        numberSel.innerHTML = '';
+        if (hIdx === '' || tIdx === '') {
+          numberSel.appendChild(opt('', '— pick a twenty-block first —'));
+          numberSel.disabled = true;
+          return;
+        }
+        numberSel.appendChild(opt('', '— pick a mutation —'));
+        MUTATION_DATA[hIdx].subsections[tIdx].rows.forEach(function (row) {
+          numberSel.appendChild(opt(row.number, row.number + '. ' + row.name));
+        });
+        numberSel.disabled = false;
+      }
+
+      function wireForm(form) {
+        populateHundred(form);
+        populateTwenty(form);
+        form.querySelector('.mutation-hundred').addEventListener('change', function () { populateTwenty(form); });
+        form.querySelector('.mutation-twenty').addEventListener('change', function () { populateNumber(form); });
+      }
+
+      document.querySelectorAll('.mutation-picker').forEach(wireForm);
     })();
   </script>
 

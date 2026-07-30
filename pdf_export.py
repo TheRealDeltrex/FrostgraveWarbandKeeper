@@ -97,6 +97,17 @@ def _health_line(max_health: object) -> str:
     return _t(f"**Health:** {max_health}")
 
 
+def _mutations_line(mutations: list[dict] | None) -> str | None:
+    """Shortened rules-reminder for each recorded mutation, joined onto one
+    line — precise enough to resolve at the table, not the full rulebook
+    prose (that stays in-app only). None if there's nothing to print, so a
+    character with no mutations gets no line at all."""
+    if not mutations:
+        return None
+    shorts = [m.get("short") or m.get("text", "") for m in mutations]
+    return _t("**Mutations:** " + "; ".join(shorts))
+
+
 def _crop_to_square(path: Path) -> BytesIO | None:
     """Center-crop to square (no stretch); cut off excess sides/top/bottom."""
     if Image is None:
@@ -298,6 +309,10 @@ def build_warband_pdf(wb: dict) -> bytes:
         bool(wiz.get("has_dagger")),
         "Equipment",
     )
+    wiz_mut_line = _mutations_line(wiz.get("mutations"))
+    if wiz_mut_line:
+        pdf.set_x(left)
+        pdf.multi_cell(0, 4.5, wiz_mut_line, new_x="LMARGIN", new_y="NEXT", markdown=True)
     pdf.set_y(max(pdf.get_y(), y0 + wiz_size + 2))
     pdf.ln(2)
 
@@ -338,6 +353,10 @@ def build_warband_pdf(wb: dict) -> bytes:
             bool(ap.get("has_dagger")),
             "Equipment",
         )
+        ap_mut_line = _mutations_line(ap.get("mutations"))
+        if ap_mut_line:
+            pdf.set_x(left)
+            pdf.multi_cell(0, 4.5, ap_mut_line, new_x="LMARGIN", new_y="NEXT", markdown=True)
         pdf.set_y(max(pdf.get_y(), y0 + wiz_size + 2))
         pdf.ln(2)
 
@@ -434,6 +453,10 @@ def build_warband_pdf(wb: dict) -> bytes:
                     new_y="NEXT",
                     markdown=True,
                 )
+        cap_mut_line = _mutations_line(cap.get("mutations"))
+        if cap_mut_line:
+            pdf.set_x(left)
+            pdf.multi_cell(0, 4.5, cap_mut_line, new_x="LMARGIN", new_y="NEXT", markdown=True)
         pdf.set_y(max(pdf.get_y(), y0 + wiz_size + 2))
         pdf.ln(2)
     else:
@@ -506,6 +529,10 @@ def build_warband_pdf(wb: dict) -> bytes:
                 new_y="NEXT",
                 markdown=True,
             )
+            s_mut_line = _mutations_line(s.get("mutations"))
+            if s_mut_line:
+                pdf.set_x(left)
+                pdf.multi_cell(0, 4.5, s_mut_line, new_x="LMARGIN", new_y="NEXT", markdown=True)
             pdf.set_y(max(pdf.get_y(), y0 + sol_size + 2))
             pdf.ln(1.5)
 

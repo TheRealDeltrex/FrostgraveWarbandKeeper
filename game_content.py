@@ -69,6 +69,28 @@ def load_bestiary() -> list[dict]:
 
 
 @lru_cache(maxsize=1)
+def load_traits() -> list[dict]:
+    """Creature traits glossary (Undead, Burrowing, Large, ...), {name, text}.
+    Transcribed from the Core Rules' "Creature Traits" appendix. Reference
+    only — not simulated."""
+    path = DATA / "traits.json"
+    if not path.is_file():
+        return []
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+@lru_cache(maxsize=1)
+def load_quick_reference() -> list[dict]:
+    """The Core Rules' own Quick Reference appendix (turn sequence, actions,
+    combat/shooting/casting procedures, post-game checklist), transcribed
+    directly. Reference only — not simulated."""
+    path = DATA / "quick_reference.json"
+    if not path.is_file():
+        return []
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+@lru_cache(maxsize=1)
 def load_magic_items() -> list[dict]:
     """Supplement treasure, {name, source, effect}. Built by
     scripts/extract_expansion_content.py from the local reference documents."""
@@ -110,6 +132,68 @@ def load_expansion_rules() -> dict:
     if not path.is_file():
         return {}
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+@lru_cache(maxsize=1)
+def load_grave_mutation_meta() -> dict[int, dict]:
+    """Authored per-mutation PDF summary + optional mechanical stat_delta,
+    keyed by mutation number. Kept separate from expansion_rules.json's
+    verbatim rulebook transcription."""
+    path = DATA / "grave_mutation_meta.json"
+    if not path.is_file():
+        return {}
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    return {int(k): v for k, v in raw.items()}
+
+
+@lru_cache(maxsize=1)
+def load_grave_mutations() -> list[dict]:
+    """The Grave Mutations d1000 table, same hundred/twenty nesting as
+    /reference, with each row's "N. Title" split into a real number + bare
+    name for the mutation-picker dropdowns."""
+    sections = load_expansion_rules().get("Grave Mutations", [])
+    out = []
+    for sec in sections:
+        if "subsections" not in sec:
+            continue  # intro prose section, no rows
+        subs = []
+        for sub in sec["subsections"]:
+            rows = []
+            for row in sub.get("rows", []):
+                name = row.get("name", "")
+                number_str, _, bare_name = name.partition(". ")
+                try:
+                    number = int(number_str)
+                except ValueError:
+                    continue
+                rows.append({"number": number, "name": bare_name, "text": row.get("text", "")})
+            subs.append({"label": sub.get("title", ""), "rows": rows})
+        out.append({"label": sec.get("title", ""), "subsections": subs})
+    return out
+
+
+@lru_cache(maxsize=1)
+def grave_mutations_by_number() -> dict[int, dict]:
+    """Every Grave Mutations row keyed by number, merged with its authored
+    PDF-summary/stat_delta metadata. Falls back to a truncated version of the
+    full text if a number is somehow missing from the meta file."""
+    meta = load_grave_mutation_meta()
+    out = {}
+    for sec in load_grave_mutations():
+        for sub in sec["subsections"]:
+            for row in sub["rows"]:
+                n = row["number"]
+                m = meta.get(n) or {}
+                fallback_text = row["text"][:80] + "…" if len(row["text"]) > 80 else row["text"]
+                short = m.get("short") or f"{row['name']}: {fallback_text}"
+                out[n] = {
+                    "number": n,
+                    "name": row["name"],
+                    "text": row["text"],
+                    "short": short,
+                    "stat_delta": m.get("stat_delta"),
+                }
+    return out
 
 
 @lru_cache(maxsize=1)
