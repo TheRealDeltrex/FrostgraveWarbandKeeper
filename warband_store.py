@@ -235,8 +235,9 @@ def default_homerules() -> dict:
         "promote_captain_item_slots": PROMOTE_CAPTAIN_ITEM_SLOTS,
         "promote_captain_tricks": PROMOTE_CAPTAIN_TRICKS,
         # Per-source-book content toggles (soldiers/creatures/rules from the
-        # supplements). Off by default, like every other homerule here.
-        "enabled_sources": {book: False for book in SOURCE_BOOKS},
+        # supplements). On by default — most groups play with everything
+        # available rather than opting in book by book.
+        "enabled_sources": {book: True for book in SOURCE_BOOKS},
         # The Maze of Malcor says the Pentangle schools are scroll-only, then
         # gives rules for playing them properly "if a group agrees". Off by
         # default; needs The Maze of Malcor switched on to have any effect.
@@ -255,14 +256,14 @@ def default_homerules() -> dict:
         "knightly_orders_enabled": True,
         # Blood Legacy's "High-Level Wizards" optional rules (Chapter Three).
         # Each needs Blood Legacy switched on in enabled_sources *and* its own
-        # toggle here — the book insists each is agreed to separately. Off by
-        # default, like every other homerule. See expansions.py's
+        # toggle here — the book insists each is agreed to separately. On by
+        # default, alongside Blood Legacy itself. See expansions.py's
         # "Blood Legacy: High-Level Wizards" section for what each one does.
-        "hlw_specialist_allowance": False,
-        "hlw_item_slots": False,
-        "hlw_max_health": False,
-        "hlw_casting_min": False,
-        "hlw_alt_xp": False,
+        "hlw_specialist_allowance": True,
+        "hlw_item_slots": True,
+        "hlw_max_health": True,
+        "hlw_casting_min": True,
+        "hlw_alt_xp": True,
         # Wizard stat limits: the hard ceilings a wizard's level-ups run into.
         # Level is unlimited by default (2e core doesn't actually cap it — the
         # 40 figure below is only the starting point if a group ticks a limit
@@ -1299,27 +1300,55 @@ def set_soldier_status(wb: dict, soldier_id: str, status: str) -> tuple[bool, st
 
 
 def raise_revenant(wb: dict, soldier_id: str) -> tuple[bool, str]:
-    """Reanimate a dead soldier with the Revenant spell (Thaw of the Lich Lord).
+    """Reanimate a soldier with the Revenant spell (Thaw of the Lich Lord).
 
     The soldier keeps their own stats — which is why this is an action on an
-    existing casualty rather than a soldier type you hire. Only Will changes,
-    dropping to +0. There is no limit on how many revenants a warband may field,
-    and a revenant that dies again can be raised once more.
+    existing roster entry rather than a soldier type you hire. Only Will
+    changes, dropping to +0. There is no limit on how many revenants a
+    warband may field, and a revenant that dies again can be raised once more.
+
+    Doesn't require the soldier to be flagged "dead" first — that status is
+    purely optional bookkeeping, and most players just remove a dead soldier
+    from the roster instead of flagging it, so gating on it would make the
+    spell nearly impossible to use in practice.
     """
     if expansions.REVENANT_SPELL not in known_spell_names(wb):
         return False, "Your wizard doesn't know the Revenant spell."
     for s in wb.get("soldiers") or []:
         if s.get("id") != soldier_id:
             continue
-        if s.get("status") != "dead":
-            return False, "Revenant only works on a soldier who died."
+        if s.get("revenant"):
+            return False, "Already a revenant."
         cap = expansions.max_soldiers(wb)
         if soldier_count(wb) >= cap:
             return False, f"Soldier limit reached ({cap}); the revenant has nowhere to stand."
+        cat = get_soldier(s.get("type_key", "")) or {}
+        # Remembered so remove_revenant() can restore it exactly, rather than
+        # falling back to the type's catalog Will (which would silently lose
+        # any Soldier Leveling bonus this soldier had before being raised).
+        s["_pre_revenant_will"] = s.get("will", cat.get("will", 0))
         s["status"] = "active"
         s["revenant"] = True
         s["will"] = expansions.REVENANT_WILL
         text = f"{s.get('name', 'Soldier')} was raised as a revenant (Will +0)."
+        add_history(wb, text)
+        return True, text
+    return False, "Soldier not found."
+
+
+def remove_revenant(wb: dict, soldier_id: str) -> tuple[bool, str]:
+    """Undoes raise_revenant(): clears the revenant tag and restores whatever
+    Will value the soldier had immediately beforehand. Leaves the soldier's
+    status and everything else untouched."""
+    for s in wb.get("soldiers") or []:
+        if s.get("id") != soldier_id:
+            continue
+        if not s.get("revenant"):
+            return False, "Not a revenant."
+        cat = get_soldier(s.get("type_key", "")) or {}
+        s["will"] = s.pop("_pre_revenant_will", cat.get("will", 0))
+        s["revenant"] = False
+        text = f"{s.get('name', 'Soldier')} is no longer a revenant."
         add_history(wb, text)
         return True, text
     return False, "Soldier not found."
@@ -1343,16 +1372,23 @@ def _pick_mutation(number: int | None) -> tuple[dict | None, str | None]:
     return row, None
 
 
-def _apply_mutation_stat_delta(get_stat, set_stat, delta: dict | None) -> str:
+def _apply_mutation_stat_delta(get_stat, set_stat, delta: dict | None) -> tuple[str, dict]:
     """Applies a mutation's stat_delta in place; returns a human-readable
-    summary suffix like " (Armour +2, Health 14 -> 7)", or "" if there's no
-    delta. Values are floored at 0; homerule stat caps don't apply here — a
-    mutation is a direct table event, not a spent level-up."""
+    summary suffix like " (Armour +2, Health 14 -> 7)" (or "" if there's no
+    delta) alongside a {stat: pre-mutation value} backup. The backup is
+    recorded on the mutation itself (see _record_mutation) so a later
+    remove_*_mutation can restore the exact prior value directly, instead of
+    trying to invert a "multiply"/"round" op (e.g. "Health halved"), which
+    isn't reliably reversible from the after-value alone. Values are floored
+    at 0; homerule stat caps don't apply here — a mutation is a direct table
+    event, not a spent level-up."""
     if not delta:
-        return ""
+        return "", {}
     parts = []
+    backup = {}
     for stat, op in delta.items():
         before = int(get_stat(stat))
+        backup[stat] = before
         if "add" in op:
             after = before + op["add"]
         elif "multiply" in op:
@@ -1372,18 +1408,30 @@ def _apply_mutation_stat_delta(get_stat, set_stat, delta: dict | None) -> str:
             parts.append(f"{stat.capitalize()} {sign}{op['add']}")
         else:
             parts.append(f"{stat.capitalize()} {before} -> {after}")
-    return " (" + ", ".join(parts) + ")"
+    return " (" + ", ".join(parts) + ")", backup
 
 
-def _record_mutation(target: dict, row: dict, stat_suffix: str, who: str) -> str:
+def _record_mutation(target: dict, row: dict, stat_suffix: str, who: str, stat_backup: dict | None = None) -> str:
     target.setdefault("mutations", []).append({
         "number": row["number"],
         "name": row["name"],
         "text": row["text"],
         "short": row["short"],
         "when": _now(),
+        "stat_backup": stat_backup or {},
     })
     return f"{who} gained a grave mutation: {row['number']}. {row['name']}{stat_suffix}."
+
+
+def _remove_mutation(mutations: list, index: int, set_stat) -> tuple[bool, dict | None]:
+    """Pops mutations[index] and restores any stats it backed up via
+    set_stat(stat, value). Returns (True, removed_dict) on success."""
+    if not (0 <= index < len(mutations)):
+        return False, None
+    m = mutations.pop(index)
+    for stat, value in (m.get("stat_backup") or {}).items():
+        set_stat(stat, value)
+    return True, m
 
 
 def add_soldier_mutation(wb: dict, soldier_id: str, number: int | None = None) -> tuple[bool, str]:
@@ -1397,12 +1445,27 @@ def add_soldier_mutation(wb: dict, soldier_id: str, number: int | None = None) -
         if err:
             return False, err
         cat = get_soldier(s.get("type_key", "")) or {}
-        stat_suffix = _apply_mutation_stat_delta(
+        stat_suffix, backup = _apply_mutation_stat_delta(
             lambda k: s.get(k, cat.get(k, 0)),
             lambda k, v: s.__setitem__(k, v),
             row["stat_delta"],
         )
-        text = _record_mutation(s, row, stat_suffix, s.get("name", "Soldier"))
+        text = _record_mutation(s, row, stat_suffix, s.get("name", "Soldier"), backup)
+        add_history(wb, text)
+        return True, text
+    return False, "Soldier not found."
+
+
+def remove_soldier_mutation(wb: dict, soldier_id: str, index: int) -> tuple[bool, str]:
+    for s in wb.get("soldiers") or []:
+        if s.get("id") != soldier_id:
+            continue
+        ok, m = _remove_mutation(
+            s.get("mutations") or [], index, lambda k, v: s.__setitem__(k, v)
+        )
+        if not ok:
+            return False, "Mutation not found."
+        text = f"Removed {s.get('name', 'Soldier')}'s mutation: {m.get('name', '?')}."
         add_history(wb, text)
         return True, text
     return False, "Soldier not found."
@@ -1417,12 +1480,25 @@ def add_wizard_mutation(wb: dict, number: int | None = None) -> tuple[bool, str]
         return False, err
     wiz = wb.setdefault("wizard", {})
     stats = wiz.setdefault("stats", deepcopy(WIZARD_BASE))
-    stat_suffix = _apply_mutation_stat_delta(
+    stat_suffix, backup = _apply_mutation_stat_delta(
         lambda k: int(stats.get(k, 0)),
         lambda k, v: stats.__setitem__(k, v),
         row["stat_delta"],
     )
-    text = _record_mutation(wiz, row, stat_suffix, wiz.get("name") or "Your wizard")
+    text = _record_mutation(wiz, row, stat_suffix, wiz.get("name") or "Your wizard", backup)
+    add_history(wb, text)
+    return True, text
+
+
+def remove_wizard_mutation(wb: dict, index: int) -> tuple[bool, str]:
+    wiz = wb.get("wizard") or {}
+    stats = wiz.setdefault("stats", deepcopy(WIZARD_BASE))
+    ok, m = _remove_mutation(
+        wiz.get("mutations") or [], index, lambda k, v: stats.__setitem__(k, v)
+    )
+    if not ok:
+        return False, "Mutation not found."
+    text = f"Removed {wiz.get('name') or 'your wizard'}'s mutation: {m.get('name', '?')}."
     add_history(wb, text)
     return True, text
 
@@ -1438,12 +1514,27 @@ def add_apprentice_mutation(wb: dict, number: int | None = None) -> tuple[bool, 
     if err:
         return False, err
     stats = ap.setdefault("stats", deepcopy(APPRENTICE_BASE))
-    stat_suffix = _apply_mutation_stat_delta(
+    stat_suffix, backup = _apply_mutation_stat_delta(
         lambda k: int(stats.get(k, 0)),
         lambda k, v: stats.__setitem__(k, v),
         row["stat_delta"],
     )
-    text = _record_mutation(ap, row, stat_suffix, ap.get("name") or "Your apprentice")
+    text = _record_mutation(ap, row, stat_suffix, ap.get("name") or "Your apprentice", backup)
+    add_history(wb, text)
+    return True, text
+
+
+def remove_apprentice_mutation(wb: dict, index: int) -> tuple[bool, str]:
+    ap = wb.get("apprentice")
+    if not ap:
+        return False, "No apprentice hired."
+    stats = ap.setdefault("stats", deepcopy(APPRENTICE_BASE))
+    ok, m = _remove_mutation(
+        ap.get("mutations") or [], index, lambda k, v: stats.__setitem__(k, v)
+    )
+    if not ok:
+        return False, "Mutation not found."
+    text = f"Removed {ap.get('name') or 'your apprentice'}'s mutation: {m.get('name', '?')}."
     add_history(wb, text)
     return True, text
 
@@ -1459,12 +1550,27 @@ def add_captain_mutation(wb: dict, number: int | None = None) -> tuple[bool, str
     if err:
         return False, err
     stats = cap.setdefault("stats", deepcopy(CAPTAIN_BASE))
-    stat_suffix = _apply_mutation_stat_delta(
+    stat_suffix, backup = _apply_mutation_stat_delta(
         lambda k: int(stats.get(k, 0)),
         lambda k, v: stats.__setitem__(k, v),
         row["stat_delta"],
     )
-    text = _record_mutation(cap, row, stat_suffix, cap.get("name") or "Your captain")
+    text = _record_mutation(cap, row, stat_suffix, cap.get("name") or "Your captain", backup)
+    add_history(wb, text)
+    return True, text
+
+
+def remove_captain_mutation(wb: dict, index: int) -> tuple[bool, str]:
+    cap = wb.get("captain")
+    if not cap:
+        return False, "No captain hired."
+    stats = cap.setdefault("stats", deepcopy(CAPTAIN_BASE))
+    ok, m = _remove_mutation(
+        cap.get("mutations") or [], index, lambda k, v: stats.__setitem__(k, v)
+    )
+    if not ok:
+        return False, "Mutation not found."
+    text = f"Removed {cap.get('name') or 'your captain'}'s mutation: {m.get('name', '?')}."
     add_history(wb, text)
     return True, text
 

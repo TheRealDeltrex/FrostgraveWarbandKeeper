@@ -1229,6 +1229,7 @@
                   <div>
                     <span class="badge {{ s.category }}">{{ s.category }}</span>
                     {% if s.revenant %}<span class="badge" title="Reanimated with the Revenant spell">revenant</span>{% endif %}
+                    {% if s.mutations %}<span class="badge" title="{{ s.mutations|length }} Grave Mutation{{ 's' if s.mutations|length != 1 }}">mutated</span>{% endif %}
                     {% if s.knightly_order_info %}<span class="badge" title="{{ s.knightly_order_info.ability }}">{{ s.knightly_order_info.name }}</span>{% endif %}
                   </div>
                 </td>
@@ -1252,14 +1253,24 @@
                       </select>
                     </form>
                     {# Revenant (Thaw of the Lich Lord): reanimate a casualty. It
-                       keeps its own stats, so this acts on the dead soldier
-                       rather than hiring a "revenant" type. #}
-                    {% if knows_revenant and s.status == 'dead' %}
+                       keeps its own stats, so this acts on the existing soldier
+                       rather than hiring a "revenant" type. Not gated on status
+                       == 'dead' — that flag is optional, and most players just
+                       remove a dead soldier instead of flagging it. #}
+                    {% if knows_revenant and not s.revenant %}
                       <form class="inline-form" method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
                         <input type="hidden" name="action" value="raise_revenant" />
                         <input type="hidden" name="soldier_id" value="{{ s.id }}" />
                         <button class="btn secondary small" type="submit" title="Reanimate with the Revenant spell; Will becomes +0">
                           Raise as revenant
+                        </button>
+                      </form>
+                    {% elif s.revenant %}
+                      <form class="inline-form" method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
+                        <input type="hidden" name="action" value="remove_revenant" />
+                        <input type="hidden" name="soldier_id" value="{{ s.id }}" />
+                        <button class="btn danger small" type="submit" title="Undo Revenant; restores its prior Will">
+                          Remove revenant
                         </button>
                       </form>
                     {% endif %}

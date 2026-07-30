@@ -146,12 +146,17 @@ from warband_store import (
     normalize_item_slots,
     promote_soldier_to_captain,
     raise_revenant,
+    remove_revenant,
     recompute_spell_cns,
     record_game_loot,
     recruit_preview,
+    remove_apprentice_mutation,
+    remove_captain_mutation,
     remove_portrait,
     remove_soldier,
+    remove_soldier_mutation,
     remove_vault_item,
+    remove_wizard_mutation,
     reorder_soldiers,
     reorder_spells,
     restore_portraits_by_name,
@@ -291,6 +296,14 @@ def _mutation_number_from_form() -> tuple[bool, int | None]:
     return True, int(raw)
 
 
+def _mutation_index_from_form() -> int:
+    """Which entry in a character's mutations list to remove — -1 (never a
+    valid list index) if the form didn't send one, so remove_*_mutation()
+    cleanly reports "not found" instead of removing the wrong entry."""
+    raw = (request.form.get("mutation_index") or "").strip()
+    return int(raw) if raw.isdigit() else -1
+
+
 @app.route("/")
 def home():
     return render_template("index.html", warbands=list_warbands())
@@ -423,13 +436,19 @@ def warband_new():
         return redirect(url_for("warband_view", warband_id=wb["id"]))
 
     school = request.args.get("school") or SCHOOLS[0]
-    # Source toggles survive the school-change round-trip via the query string,
-    # so switching school doesn't silently untick the books already chosen.
-    return _render_new(
-        school=school,
-        sources=_posted_sources(request.args),
-        pentangle=request.args.get("pentangle_schools_playable") == "on",
-    )
+    # Source toggles survive the school-change round-trip via the query string
+    # (fgNewReload always sets sources_touched), so switching school doesn't
+    # silently untick the books already chosen. On a genuine first visit (no
+    # query string at all) there's nothing to preserve, so every source book
+    # defaults to on — Pentangle stays off either way; the book's own scroll-
+    # only default needs an explicit opt-in.
+    if request.args.get("sources_touched"):
+        sources = _posted_sources(request.args)
+        pentangle = request.args.get("pentangle_schools_playable") == "on"
+    else:
+        sources = {book: True for book in SOURCE_BOOKS}
+        pentangle = False
+    return _render_new(school=school, sources=sources, pentangle=pentangle)
 
 
 def _new_schools(sources: dict, pentangle: bool) -> list[str]:
@@ -783,6 +802,12 @@ def warband_update(warband_id: str):
             if ok:
                 save_warband(wb)
 
+        elif action == "remove_revenant":
+            ok, msg = remove_revenant(wb, request.form.get("soldier_id") or "")
+            flash(msg, "success" if ok else "error")
+            if ok:
+                save_warband(wb)
+
         elif action == "hire_captain":
             ok, msg = hire_captain(
                 wb,
@@ -1062,6 +1087,14 @@ def warband_update(warband_id: str):
                 if ok:
                     save_warband(wb)
 
+        elif action == "remove_soldier_mutation":
+            ok, msg = remove_soldier_mutation(
+                wb, request.form.get("soldier_id") or "", _mutation_index_from_form()
+            )
+            flash(msg, "success" if ok else "error")
+            if ok:
+                save_warband(wb)
+
         elif action == "add_wizard_mutation":
             has_input, number = _mutation_number_from_form()
             if not has_input:
@@ -1071,6 +1104,12 @@ def warband_update(warband_id: str):
                 flash(msg, "success" if ok else "error")
                 if ok:
                     save_warband(wb)
+
+        elif action == "remove_wizard_mutation":
+            ok, msg = remove_wizard_mutation(wb, _mutation_index_from_form())
+            flash(msg, "success" if ok else "error")
+            if ok:
+                save_warband(wb)
 
         elif action == "add_apprentice_mutation":
             has_input, number = _mutation_number_from_form()
@@ -1082,6 +1121,12 @@ def warband_update(warband_id: str):
                 if ok:
                     save_warband(wb)
 
+        elif action == "remove_apprentice_mutation":
+            ok, msg = remove_apprentice_mutation(wb, _mutation_index_from_form())
+            flash(msg, "success" if ok else "error")
+            if ok:
+                save_warband(wb)
+
         elif action == "add_captain_mutation":
             has_input, number = _mutation_number_from_form()
             if not has_input:
@@ -1091,6 +1136,12 @@ def warband_update(warband_id: str):
                 flash(msg, "success" if ok else "error")
                 if ok:
                     save_warband(wb)
+
+        elif action == "remove_captain_mutation":
+            ok, msg = remove_captain_mutation(wb, _mutation_index_from_form())
+            flash(msg, "success" if ok else "error")
+            if ok:
+                save_warband(wb)
 
         else:
             flash("Unknown action.", "error")
