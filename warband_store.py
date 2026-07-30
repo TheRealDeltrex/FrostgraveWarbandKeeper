@@ -486,6 +486,15 @@ def create_warband(
         homerules["enabled_sources"] = {
             book: bool(enabled_sources_map.get(book)) for book in SOURCE_BOOKS
         }
+        if homerules["enabled_sources"].get("Blood Legacy"):
+            # Turning Blood Legacy on defaults its whole High-Level Wizards
+            # chapter on too — matches the same auto-tick the homerules page
+            # does when the book is switched on after creation.
+            for key in (
+                "hlw_specialist_allowance", "hlw_item_slots", "hlw_max_health",
+                "hlw_casting_min", "hlw_alt_xp",
+            ):
+                homerules[key] = True
     homerules["pentangle_schools_playable"] = bool(pentangle_playable)
     if school not in playable_schools({"homerules": homerules}):
         if school in PENTANGLE_SCHOOLS:

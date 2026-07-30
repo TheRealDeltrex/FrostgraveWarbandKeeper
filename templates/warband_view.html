@@ -136,43 +136,77 @@
           Needs Blood Legacy switched on above. The book treats each of these as its own optional
           rule to agree on separately, so each has its own toggle here rather than one bundled switch.
         </p>
-        <label class="checkbox-row" style="margin-top:0.4rem">
-          <input name="hlw_specialist_allowance" type="checkbox" {% if hr.hlw_specialist_allowance %}checked{% endif %} />
-          Increased Specialist Soldier Allowance
-        </label>
-        <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0.6rem">
-          +1 specialist slot per full 20 wizard levels (5 at level 20, up to 8 at level 80+).
-        </p>
-        <label class="checkbox-row">
-          <input name="hlw_item_slots" type="checkbox" {% if hr.hlw_item_slots %}checked{% endif %} />
-          Increased Item Slots
-        </label>
-        <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0.6rem">
-          Wizard and apprentice each gain +1 item slot at level 30, +1 more at level 70 (max +2).
-        </p>
-        <label class="checkbox-row">
-          <input name="hlw_max_health" type="checkbox" {% if hr.hlw_max_health %}checked{% endif %} />
-          Increased Maximum Health
-        </label>
-        <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0.6rem">
-          Wizard's maximum potential Health Stat rises +1 per full 10 levels (max +10, so 30 at level
-          100+). Stacks on top of any Health cap from another wizard state the same way.
-        </p>
-        <label class="checkbox-row">
-          <input name="hlw_casting_min" type="checkbox" {% if hr.hlw_casting_min %}checked{% endif %} />
-          Lower Casting Number Minimum
-        </label>
-        <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0.6rem">
-          A level 100+ wizard may improve a Casting Number down to 4 instead of the normal floor of 5.
-        </p>
-        <label class="checkbox-row">
-          <input name="hlw_alt_xp" type="checkbox" {% if hr.hlw_alt_xp %}checked{% endif %} />
-          Alternate Experience Point Expenditure
-        </label>
-        <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0">
-          Adds a "Spend XP" option on the Wizard card for trading banked XP for gold or a one-off bonus
-          instead of a level — no level requirement of its own, unlike the other four.
-        </p>
+        <div class="actions" style="margin-bottom:0.5rem">
+          <button class="btn small secondary" type="button" data-toggle-hlw="on">Enable all</button>
+          <button class="btn small secondary" type="button" data-toggle-hlw="off">Disable all</button>
+        </div>
+        <div id="hlw-toggles">
+          <label class="checkbox-row" style="margin-top:0.4rem">
+            <input name="hlw_specialist_allowance" type="checkbox" {% if hr.hlw_specialist_allowance %}checked{% endif %} />
+            Increased Specialist Soldier Allowance
+          </label>
+          <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0.6rem">
+            +1 specialist slot per full 20 wizard levels (5 at level 20, up to 8 at level 80+).
+          </p>
+          <label class="checkbox-row">
+            <input name="hlw_item_slots" type="checkbox" {% if hr.hlw_item_slots %}checked{% endif %} />
+            Increased Item Slots
+          </label>
+          <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0.6rem">
+            Wizard and apprentice each gain +1 item slot at level 30, +1 more at level 70 (max +2).
+          </p>
+          <label class="checkbox-row">
+            <input name="hlw_max_health" type="checkbox" {% if hr.hlw_max_health %}checked{% endif %} />
+            Increased Maximum Health
+          </label>
+          <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0.6rem">
+            Wizard's maximum potential Health Stat rises +1 per full 10 levels (max +10, so 30 at level
+            100+). Stacks on top of any Health cap from another wizard state the same way.
+          </p>
+          <label class="checkbox-row">
+            <input name="hlw_casting_min" type="checkbox" {% if hr.hlw_casting_min %}checked{% endif %} />
+            Lower Casting Number Minimum
+          </label>
+          <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0.6rem">
+            A level 100+ wizard may improve a Casting Number down to 4 instead of the normal floor of 5.
+          </p>
+          <label class="checkbox-row">
+            <input name="hlw_alt_xp" type="checkbox" {% if hr.hlw_alt_xp %}checked{% endif %} />
+            Alternate Experience Point Expenditure
+          </label>
+          <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0">
+            Adds a "Spend XP" option on the Wizard card for trading banked XP for gold or a one-off bonus
+            instead of a level — no level requirement of its own, unlike the other four.
+          </p>
+        </div>
+        <script>
+          // Tick/untick every High-Level Wizards toggle at once, then save
+          // immediately — same pattern as the source books' Enable/Disable all.
+          document.querySelectorAll('[data-toggle-hlw]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+              var on = btn.dataset.toggleHlw === 'on';
+              var boxes = document.querySelectorAll('#hlw-toggles input[type="checkbox"]');
+              boxes.forEach(function (box) { box.checked = on; });
+              if (boxes.length) boxes[0].dispatchEvent(new Event('change', { bubbles: true }));
+            });
+          });
+          // Switching Blood Legacy on defaults all five High-Level Wizards
+          // toggles on too, so turning on the book actually turns on its
+          // headline chapter instead of leaving five more boxes to tick by
+          // hand. Attached directly to the checkbox (not via document
+          // delegation) so it runs before the autosave listener submits the
+          // form. Only fires on and, not off — turning Blood Legacy back off
+          // doesn't fight the player over toggles they set by hand.
+          var bloodLegacyBox = document.querySelector('input[name="source_enabled_blood-legacy"]');
+          if (bloodLegacyBox) {
+            bloodLegacyBox.addEventListener('change', function () {
+              if (!bloodLegacyBox.checked) return;
+              document.querySelectorAll('#hlw-toggles input[type="checkbox"]').forEach(function (box) {
+                box.checked = true;
+              });
+            });
+          }
+        </script>
       </details>
 
       <div class="form-row">
@@ -1452,10 +1486,9 @@
       <p class="muted" style="font-size:0.85rem">
         Bookkeeping for Raise Zombie / Summon Demon, not a purchase — free, doesn't count against the
         soldier or specialist limit above, and joins the roster table like any other soldier (sorted to
-        the bottom). Up to {{ temporary_member_limit }} temporary members on the table at once
-        ({{ temporary_member_count }}/{{ temporary_member_limit }} now), shared across zombies and
-        demons rather than one of each — an intentionally open house rule, since the strict per-type
-        limit is really a table matter.
+        the bottom). Up to {{ temporary_member_limit }} temporary members in the Warband at once
+        ({{ temporary_member_count }}/{{ temporary_member_limit }} now) are allowed by this App,
+        rules may differ.
       </p>
       {% if temporary_catalog %}
         <div class="table-wrap">
@@ -1856,19 +1889,4 @@
     })();
   </script>
 
-  <script>
-    (function () {
-      // Hire soldier panel starts collapsed, but once opened (e.g. to hire
-      // someone) it stays open across page reloads until manually closed.
-      var panel = document.getElementById('hire-soldier-panel');
-      if (!panel) return;
-      var KEY = 'fgHireSoldierOpen';
-      var stored = null;
-      try { stored = localStorage.getItem(KEY); } catch (err) { /* ignore */ }
-      panel.open = stored === '1';
-      panel.addEventListener('toggle', function () {
-        try { localStorage.setItem(KEY, panel.open ? '1' : '0'); } catch (err) { /* ignore */ }
-      });
-    })();
-  </script>
 {% endblock %}
