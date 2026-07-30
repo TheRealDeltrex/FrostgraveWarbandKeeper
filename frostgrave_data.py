@@ -20,7 +20,15 @@ OWN_SCHOOL_SPELLS = 3  # Choosing Spells, p.24
 ALIGNED_SCHOOL_SPELLS = 1  # one from each of the three aligned schools
 NEUTRAL_SPELLS = 2  # two neutrals, each from a different school
 XP_PER_LEVEL = 100
-MAX_WIZARD_LEVEL = 40
+MAX_WIZARD_LEVEL = 40  # fallback figure when the level-cap homerule's Unlimited box is unticked
+
+# Wizard level-up hard caps (2e core "Leveling Up" rules) and the Casting
+# Number floor a spell can be improved down to — long assumed by the app but
+# never actually enforced for an ordinary wizard until the Wizard stat limits
+# homerule section exposed them as editable settings. See
+# expansions.wizard_stat_caps() / casting_number_minimum().
+WIZARD_STAT_LIMITS_DEFAULT = {"fight": 5, "shoot": 5, "will": 8, "health": 20}
+WIZARD_MIN_CASTING_NUMBER_DEFAULT = 5
 # Item slots (2e p.26): dagger does not use a slot
 WIZARD_ITEM_SLOTS = 5
 APPRENTICE_ITEM_SLOTS = 4
