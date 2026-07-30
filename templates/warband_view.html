@@ -357,6 +357,44 @@
         </div>
       </details>
 
+      <details class="ref-panel">
+        <summary>Wizard stat limits</summary>
+        <p class="muted" style="font-size:0.85rem">
+          Hard ceilings the wizard's own level-ups run into (2e core defaults below). Blood
+          Legacy's Increased Maximum Health and Lower Casting Number Minimum, if switched on
+          above, stack their bonus on top of whatever is set here rather than a fixed value.
+        </p>
+        <div class="form-row">
+          <label for="wizard_level_cap_limit">Level cap</label>
+          <input id="wizard_level_cap_limit" name="wizard_level_cap_limit" type="number" min="0" value="{{ hr.wizard_level_cap.limit }}" />
+          <label class="checkbox-row" style="margin-top:0.3rem">
+            <input name="wizard_level_cap_unlimited" type="checkbox" {% if hr.wizard_level_cap.unlimited %}checked{% endif %} /> Unlimited
+          </label>
+        </div>
+        <div class="stat-row" style="margin-top:0.5rem">
+          <div class="form-row">
+            <label for="wizard_max_fight">Max Fight</label>
+            <input id="wizard_max_fight" name="wizard_max_fight" type="number" min="1" value="{{ hr.wizard_stat_limits.fight }}" />
+          </div>
+          <div class="form-row">
+            <label for="wizard_max_shoot">Max Shoot</label>
+            <input id="wizard_max_shoot" name="wizard_max_shoot" type="number" min="1" value="{{ hr.wizard_stat_limits.shoot }}" />
+          </div>
+          <div class="form-row">
+            <label for="wizard_max_will">Max Will</label>
+            <input id="wizard_max_will" name="wizard_max_will" type="number" min="1" value="{{ hr.wizard_stat_limits.will }}" />
+          </div>
+          <div class="form-row">
+            <label for="wizard_max_health">Max Health</label>
+            <input id="wizard_max_health" name="wizard_max_health" type="number" min="1" value="{{ hr.wizard_stat_limits.health }}" />
+          </div>
+          <div class="form-row">
+            <label for="wizard_min_casting_number">Minimum Casting Number</label>
+            <input id="wizard_min_casting_number" name="wizard_min_casting_number" type="number" min="1" value="{{ hr.wizard_min_casting_number }}" />
+          </div>
+        </div>
+      </details>
+
     </form>
   </details>
 

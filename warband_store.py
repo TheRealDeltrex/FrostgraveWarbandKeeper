@@ -66,6 +66,8 @@ from frostgrave_data import (
     SOURCE_BOOK_BY_SLUG,
     STARTING_GOLD,
     TEMPORARY_MEMBER_LIMIT,
+    WIZARD_MIN_CASTING_NUMBER_DEFAULT,
+    WIZARD_STAT_LIMITS_DEFAULT,
     STARTING_SPELL_COUNT,
     WIZARD_BASE,
     WIZARD_ITEM_SLOTS,
@@ -257,6 +259,16 @@ def default_homerules() -> dict:
         "hlw_max_health": False,
         "hlw_casting_min": False,
         "hlw_alt_xp": False,
+        # Wizard stat limits: the hard ceilings a wizard's level-ups run into.
+        # Level is unlimited by default (2e core doesn't actually cap it — the
+        # 40 figure below is only the starting point if a group ticks a limit
+        # on); Fight/Shoot/Will/Health/min Casting Number default to the 2e
+        # core caps. Blood Legacy's Increased Maximum Health and Lower Casting
+        # Number Minimum stack their bonuses on top of whatever is set here —
+        # see expansions.wizard_stat_caps() / casting_number_minimum().
+        "wizard_level_cap": {"limit": MAX_WIZARD_LEVEL, "unlimited": True},
+        "wizard_stat_limits": deepcopy(WIZARD_STAT_LIMITS_DEFAULT),
+        "wizard_min_casting_number": WIZARD_MIN_CASTING_NUMBER_DEFAULT,
     }
 
 
@@ -1366,6 +1378,33 @@ def update_homerules(wb: dict, form) -> tuple[bool, str]:
             "hlw_max_health": form.get("hlw_max_health") == "on",
             "hlw_casting_min": form.get("hlw_casting_min") == "on",
             "hlw_alt_xp": form.get("hlw_alt_xp") == "on",
+            "wizard_level_cap": {
+                "limit": max(
+                    0,
+                    int(
+                        form.get("wizard_level_cap_limit")
+                        or hr.get("wizard_level_cap", {}).get("limit", MAX_WIZARD_LEVEL)
+                    ),
+                ),
+                "unlimited": form.get("wizard_level_cap_unlimited") == "on",
+            },
+            "wizard_stat_limits": {
+                stat: max(
+                    1,
+                    int(
+                        form.get(f"wizard_max_{stat}")
+                        or hr.get("wizard_stat_limits", WIZARD_STAT_LIMITS_DEFAULT)[stat]
+                    ),
+                )
+                for stat in ("fight", "shoot", "will", "health")
+            },
+            "wizard_min_casting_number": max(
+                1,
+                int(
+                    form.get("wizard_min_casting_number")
+                    or hr.get("wizard_min_casting_number", WIZARD_MIN_CASTING_NUMBER_DEFAULT)
+                ),
+            ),
         }
     except (TypeError, ValueError):
         return False, "Invalid homerule value."
@@ -1915,9 +1954,10 @@ def apply_level_up(
         cap = caps.get(choice)
         current = int(stats.get(choice, 0))
         if cap is not None and current >= cap:
+            label = expansions.STATE_LABELS[expansions.state_kind(wb)]
+            article = "an" if label[0] in "AEIOU" else "a"
             return False, (
-                f"{choice.capitalize()} is capped at {cap} for a "
-                f"{expansions.STATE_LABELS[expansions.state_kind(wb)]} (currently {current})."
+                f"{choice.capitalize()} is capped at {cap} for {article} {label} (currently {current})."
             )
         stats[choice] = current + 1
         detail = f"+1 {choice.capitalize()}"

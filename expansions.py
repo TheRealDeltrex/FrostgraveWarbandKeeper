@@ -25,8 +25,15 @@ from frostgrave_data import (
     MAX_SPECIALISTS,
     MAX_WIZARD_LEVEL,
     WIZARD_ITEM_SLOTS,
+    WIZARD_MIN_CASTING_NUMBER_DEFAULT,
+    WIZARD_STAT_LIMITS_DEFAULT,
     XP_PER_LEVEL,
 )
+
+# Internal sentinel for an "unlimited" wizard level cap — plain int rather than
+# float('inf') so it stays a normal int everywhere it flows (level_from_xp(),
+# comparisons, JSON round-tripping via save/load).
+WIZARD_LEVEL_UNCAPPED = 100_000
 
 # --- The states -------------------------------------------------------------
 
@@ -362,12 +369,18 @@ def max_soldiers(wb: dict) -> int:
 
 
 def wizard_stat_caps(wb: dict) -> dict:
-    """Hard ceilings on the wizard's stats, {stat: max}. Empty for an ordinary
-    wizard — core Frostgrave caps nothing, unless Blood Legacy's Increased
-    Maximum Health optional rule (see below) is on."""
-    caps = dict(LICH_STAT_CAPS) if is_lich(wb) else {}
+    """Hard ceilings on the wizard's stats, {stat: max}. For an ordinary
+    wizard these come from the Wizard stat limits homerule (2e core defaults:
+    Fight/Shoot 5, Will 8, Health 20); a Lich instead uses its own fixed caps
+    (Will 10, Health 25). Blood Legacy's Increased Maximum Health stacks its
+    level-based bonus on top of whichever health cap applies either way."""
+    hr = wb.get("homerules") or {}
+    if is_lich(wb):
+        caps = dict(LICH_STAT_CAPS)
+    else:
+        caps = dict(hr.get("wizard_stat_limits") or WIZARD_STAT_LIMITS_DEFAULT)
     if _hlw_active(wb, "hlw_max_health"):
-        base = caps.get("health", 20)
+        base = caps.get("health", WIZARD_STAT_LIMITS_DEFAULT["health"])
         caps["health"] = base + min(10, wizard_level(wb) // 10)
     return caps
 
@@ -419,24 +432,26 @@ def apprentice_item_slots(wb: dict) -> int:
 
 
 def casting_number_minimum(wb: dict) -> int:
-    """Floor a Casting Number can be improved down to via level-ups — 4 instead
-    of the normal 5, for a level 100+ wizard under Lower Casting Number Minimum."""
+    """Floor a Casting Number can be improved down to via level-ups —
+    configurable via the Wizard stat limits homerule (2e core default 5).
+    Blood Legacy's Lower Casting Number Minimum drops it 1 further for a
+    level 100+ wizard, on top of whatever floor is set here."""
+    hr = wb.get("homerules") or {}
+    base = int(hr.get("wizard_min_casting_number", WIZARD_MIN_CASTING_NUMBER_DEFAULT))
     if _hlw_active(wb, "hlw_casting_min") and wizard_level(wb) >= 100:
-        return 4
-    return 5
+        return max(1, base - 1)
+    return base
 
 
 def max_wizard_level(wb: dict) -> int:
-    """Level ceiling the wizard's earned-XP can convert into. Several of the
-    level-gated High-Level Wizards rules reference thresholds (70, 80, 100+)
-    well past the normal MAX_WIZARD_LEVEL ceiling, so this raises the cap
-    whenever one of those level-gated rules is switched on — otherwise the
-    higher tiers would simply be unreachable. Alternate Experience Point
-    Expenditure isn't level-gated, so it doesn't affect this."""
-    keys = ("hlw_specialist_allowance", "hlw_item_slots", "hlw_max_health", "hlw_casting_min")
-    if any(_hlw_active(wb, k) for k in keys):
-        return 999
-    return MAX_WIZARD_LEVEL
+    """Level ceiling the wizard's earned XP can convert into — the Wizard
+    stat limits homerule's Level field (unlimited by default; 2e core doesn't
+    actually cap wizard level)."""
+    hr = wb.get("homerules") or {}
+    cap_cfg = hr.get("wizard_level_cap") or {"limit": MAX_WIZARD_LEVEL, "unlimited": True}
+    if cap_cfg.get("unlimited"):
+        return WIZARD_LEVEL_UNCAPPED
+    return max(0, int(cap_cfg.get("limit", MAX_WIZARD_LEVEL)))
 
 
 def alt_xp_enabled(wb: dict) -> bool:
