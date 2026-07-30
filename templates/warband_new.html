@@ -18,8 +18,106 @@
   <form method="post" action="{{ url_for('warband_new') }}" enctype="multipart/form-data" id="create-form">
     <input type="hidden" name="spell_order" id="spell_order" value="" />
 
+    {# Source books, so supplement spells can be taken as starting spells. The
+       same toggles live on the warband's rules tab afterwards and can be changed
+       there at any time; these just decide what the spell picker below offers.
+       Placed first so rules/sources are settled before picking a school — a
+       Pentangle school only ever shows up in the dropdown once its toggle here
+       is on. #}
+    <details class="card" id="source-books-card" {% if enabled_sources_map and enabled_sources_map.values()|select|list %}open{% endif %}>
+      <summary><h2>1. Rules &amp; source books <span class="muted" style="font-weight:500;font-size:0.9rem">— optional</span></h2></summary>
+      <p class="muted" style="font-size:0.88rem">
+        Switch on the supplements you play with. Their spells become available below, and their
+        mercenaries become hireable once the warband exists. You can change this later under
+        <strong>Additional Rules and Homerules</strong>.
+      </p>
+      <div class="actions" style="margin-bottom:0.5rem">
+        <button class="btn small secondary" type="button" id="new-enable-all-sources">Enable all</button>
+        <button class="btn small secondary" type="button" id="new-disable-all-sources">Disable all</button>
+      </div>
+      <div class="stat-row" id="source-books">
+        {% for book in source_books %}
+          <label class="checkbox-row" style="margin:0.2rem 0">
+            <input name="source_enabled_{{ book.slug }}" type="checkbox"
+                   data-source-toggle
+                   {% if enabled_sources_map and enabled_sources_map.get(book.name) %}checked{% endif %} />
+            {{ book.name }}
+          </label>
+        {% endfor %}
+      </div>
+      {# The Maze of Malcor says the Pentangle schools are scroll-only, then gives
+         rules for playing them if a group agrees — hence the extra opt-in. #}
+      <label class="checkbox-row" style="margin-top:0.6rem" id="pentangle-row">
+        <input name="pentangle_schools_playable" type="checkbox" data-source-toggle
+               {% if pentangle_playable %}checked{% endif %} />
+        Pentangle schools playable ({{ PENTANGLE_SCHOOLS|join(', ') }})
+      </label>
+      <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0">
+        Needs The Maze of Malcor above. Their spells are scroll-only by the book; this is the
+        optional rule for running them as real schools. A Pentangle wizard has two aligned schools
+        instead of three, so they start with three neutral spells instead of two.
+      </p>
+
+      <script>
+        // Ticking a book has to re-render the spell picker, which is built
+        // server-side — same route the school dropdown already used to hit via a
+        // full navigation. That reset scroll position and threw away every field
+        // that isn't in the query string (name, portraits, apprentice fields), so
+        // instead this fetches the same URL and swaps in just the regions that
+        // actually depend on school/sources, leaving the rest of the page — and
+        // the scroll position — untouched.
+        window.fgNewReload = function () {
+          var params = new URLSearchParams();
+          params.set("school", document.getElementById("school").value);
+          // Tells the backend this is a follow-up request, not the first page
+          // load — so it reflects exactly the boxes ticked here (including
+          // "all unticked") instead of re-defaulting every source book to on.
+          params.set("sources_touched", "1");
+          document.querySelectorAll("#source-books-card input[data-source-toggle]").forEach(function (box) {
+            if (box.checked) { params.set(box.name, "on"); }
+          });
+          var url = "{{ url_for('warband_new') }}?" + params.toString();
+          // In the in-browser (Pyodide) build, a raw fetch() has no real network
+          // target inside the sandboxed srcdoc iframe — window.fgFetch, when
+          // present, bridges it through the driver's Python test client instead.
+          (window.fgFetch || fetch)(url)
+            .then(function (r) { return r.text(); })
+            .then(function (html) {
+              var doc = new DOMParser().parseFromString(html, "text/html");
+              // school-field carries the <select id="school"> itself, so its
+              // option list (e.g. the Pentangle schools) stays in sync with
+              // whatever sources/toggles are enabled here — not just the counts
+              // and relations text below it.
+              ["school-field", "neutral-needed-num", "creation-dynamic"].forEach(function (id) {
+                var fresh = doc.getElementById(id);
+                var current = document.getElementById(id);
+                if (!fresh || !current) return;
+                current.replaceWith(fresh);
+              });
+              window.fgInitSpellPicker();
+            })
+            .catch(function () { location.href = url; });
+        };
+        document.querySelectorAll("#source-books-card input[data-source-toggle]")
+          .forEach(function (box) { box.addEventListener("change", window.fgNewReload); });
+        // Enable/Disable all: tick every source book + Pentangle toggle in this
+        // card at once (literally everything here, no exception), then reload
+        // the same way a single checkbox change does.
+        document.getElementById("new-enable-all-sources").addEventListener("click", function () {
+          var boxes = document.querySelectorAll("#source-books-card input[data-source-toggle]");
+          boxes.forEach(function (box) { box.checked = true; });
+          if (boxes.length) boxes[0].dispatchEvent(new Event("change", { bubbles: true }));
+        });
+        document.getElementById("new-disable-all-sources").addEventListener("click", function () {
+          var boxes = document.querySelectorAll("#source-books-card input[data-source-toggle]");
+          boxes.forEach(function (box) { box.checked = false; });
+          if (boxes.length) boxes[0].dispatchEvent(new Event("change", { bubbles: true }));
+        });
+      </script>
+    </details>
+
     <details class="card" open>
-      <summary><h2>1. Warband &amp; wizard</h2></summary>
+      <summary><h2>2. Warband &amp; wizard</h2></summary>
       <div class="grid-2">
         <div class="form-row">
           <label for="warband_name">Warband name</label>
@@ -29,11 +127,13 @@
           <label for="wizard_name">Wizard name</label>
           <input id="wizard_name" name="wizard_name" type="text" required placeholder="Morvain" />
         </div>
-        <div class="form-row">
+        <div class="form-row" id="school-field">
           <label for="school">School of magic</label>
-          {# fgNewReload is defined by the Source books card below; it rebuilds the
-             URL with both the school and the ticked books, so changing one never
-             discards the other. #}
+          {# fgNewReload is defined by the Rules &amp; source books card above; it
+             rebuilds the URL with both the school and the ticked books, so
+             changing one never discards the other. This whole div (not just
+             relations-summary below) is swapped on every reload, since the
+             option list itself has to pick up newly-enabled Pentangle schools. #}
           <select id="school" name="school" onchange="window.fgNewReload()">
             {% for s in schools %}
               <option value="{{ s }}" {% if s == school %}selected{% endif %}>{{ s }}</option>
@@ -74,76 +174,6 @@
       </div>
     </details>
 
-    {# Source books, so supplement spells can be taken as starting spells. The
-       same toggles live on the warband's rules tab afterwards and can be changed
-       there at any time; these just decide what the spell picker below offers. #}
-    <details class="card" id="source-books-card" {% if enabled_sources_map and enabled_sources_map.values()|select|list %}open{% endif %}>
-      <summary><h2>Source books <span class="muted" style="font-weight:500;font-size:0.9rem">— optional</span></h2></summary>
-      <p class="muted" style="font-size:0.88rem">
-        Switch on the supplements you play with. Their spells become available below, and their
-        mercenaries become hireable once the warband exists. You can change this later under
-        <strong>Additional Rules and Homerules</strong>.
-      </p>
-      <div class="stat-row" id="source-books">
-        {% for book in source_books %}
-          <label class="checkbox-row" style="margin:0.2rem 0">
-            <input name="source_enabled_{{ book.slug }}" type="checkbox"
-                   data-source-toggle
-                   {% if enabled_sources_map and enabled_sources_map.get(book.name) %}checked{% endif %} />
-            {{ book.name }}
-          </label>
-        {% endfor %}
-      </div>
-      {# The Maze of Malcor says the Pentangle schools are scroll-only, then gives
-         rules for playing them if a group agrees — hence the extra opt-in. #}
-      <label class="checkbox-row" style="margin-top:0.6rem" id="pentangle-row">
-        <input name="pentangle_schools_playable" type="checkbox" data-source-toggle
-               {% if pentangle_playable %}checked{% endif %} />
-        Pentangle schools playable ({{ PENTANGLE_SCHOOLS|join(', ') }})
-      </label>
-      <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0">
-        Needs The Maze of Malcor above. Their spells are scroll-only by the book; this is the
-        optional rule for running them as real schools. A Pentangle wizard has two aligned schools
-        instead of three, so they start with three neutral spells instead of two.
-      </p>
-
-      <script>
-        // Ticking a book has to re-render the spell picker, which is built
-        // server-side — same route the school dropdown already used to hit via a
-        // full navigation. That reset scroll position and threw away every field
-        // that isn't in the query string (name, portraits, apprentice fields), so
-        // instead this fetches the same URL and swaps in just the three regions
-        // that actually depend on school/sources, leaving the rest of the page —
-        // and the scroll position — untouched.
-        window.fgNewReload = function () {
-          var params = new URLSearchParams();
-          params.set("school", document.getElementById("school").value);
-          document.querySelectorAll("#source-books-card input[data-source-toggle]").forEach(function (box) {
-            if (box.checked) { params.set(box.name, "on"); }
-          });
-          var url = "{{ url_for('warband_new') }}?" + params.toString();
-          // In the in-browser (Pyodide) build, a raw fetch() has no real network
-          // target inside the sandboxed srcdoc iframe — window.fgFetch, when
-          // present, bridges it through the driver's Python test client instead.
-          (window.fgFetch || fetch)(url)
-            .then(function (r) { return r.text(); })
-            .then(function (html) {
-              var doc = new DOMParser().parseFromString(html, "text/html");
-              ["neutral-needed-num", "relations-summary", "creation-dynamic"].forEach(function (id) {
-                var fresh = doc.getElementById(id);
-                var current = document.getElementById(id);
-                if (!fresh || !current) return;
-                current.replaceWith(fresh);
-              });
-              window.fgInitSpellPicker();
-            })
-            .catch(function () { location.href = url; });
-        };
-        document.querySelectorAll("#source-books-card input[data-source-toggle]")
-          .forEach(function (box) { box.addEventListener("change", window.fgNewReload); });
-      </script>
-    </details>
-
     <div id="creation-dynamic">
     <script type="application/json" id="creation-dynamic-data">
       {{ {
@@ -157,7 +187,7 @@
       } | tojson }}
     </script>
     <details class="card" open>
-      <summary><h2>2. Spells
+      <summary><h2>3. Spells
         <span class="muted" style="font-weight:500;font-size:0.9rem">
           — <span id="spell-count">0</span> / {{ STARTING_SPELL_COUNT }}
         </span>
@@ -253,7 +283,7 @@
     </div>
 
     <details class="card" open>
-      <summary><h2>3. Confirm</h2></summary>
+      <summary><h2>4. Confirm</h2></summary>
       <p class="muted" style="margin:0 0 0.75rem">
         Soldiers aren't hired here — create the warband first, then recruit from the full roster
         on the warband page (that's also where supplement mercenaries live).

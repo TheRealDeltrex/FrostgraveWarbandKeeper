@@ -233,7 +233,7 @@
         <table>
           <tbody>
             {% for t in traits %}
-              <tr><td><strong>{{ t.name }}</strong></td><td class="muted">{{ t.text }}</td></tr>
+              <tr><td><strong>{{ t.name }}</strong>{% if t.source and t.source != 'Core Rules' %} <span class="badge">{{ t.source }}</span>{% endif %}</td><td class="muted">{{ t.text }}</td></tr>
             {% endfor %}
           </tbody>
         </table>

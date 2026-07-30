@@ -2,13 +2,22 @@
    dropdowns (mirrors the Lexicon's own nesting), plus an "Add random mutation"
    escape hatch. Shared by the Wizard/Apprentice/Captain/each Soldier. #}
 {% macro mutation_picker(action, mutations, soldier_id=none) %}
+  {% set remove_action = action.replace('add_', 'remove_', 1) %}
   {% if mutations or grave_mutations_enabled %}
     <details class="ref-panel">
       <summary>Mutations ({{ mutations|length }})</summary>
       {% if mutations %}
         <ul class="list-plain">
           {% for m in mutations %}
-            <li><strong>{{ m.number }}. {{ m.name }}</strong> — {{ m.text }}</li>
+            <li>
+              <strong>{{ m.number }}. {{ m.name }}</strong> — {{ m.text }}
+              <form class="inline-form" method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
+                <input type="hidden" name="action" value="{{ remove_action }}" />
+                {% if soldier_id %}<input type="hidden" name="soldier_id" value="{{ soldier_id }}" />{% endif %}
+                <input type="hidden" name="mutation_index" value="{{ loop.index0 }}" />
+                <button class="btn danger small" type="submit" title="Remove this mutation">Remove</button>
+              </form>
+            </li>
           {% endfor %}
         </ul>
       {% else %}

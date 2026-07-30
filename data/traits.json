@@ -1,118 +1,282 @@
 [
   {
     "name": "Amphibious",
-    "text": "This creature is perfectly happy on land or in the water. It automatically passes all Swimming Rolls, treats water as normal instead of rough ground, and suffers no Fight penalties for being in the water."
+    "text": "This creature is perfectly happy on land or in the water. It automatically passes all Swimming Rolls, treats water as normal instead of rough ground, and suffers no Fight penalties for being in the water.",
+    "source": "Core Rules"
   },
   {
     "name": "Animal",
-    "text": "A natural creature with less-than-human intelligence. Even if they become a member of a warband, animals cannot pick up treasure tokens and have no item slots."
+    "text": "A natural creature with less-than-human intelligence. Even if they become a member of a warband, animals cannot pick up treasure tokens and have no item slots.",
+    "source": "Core Rules"
+  },
+  {
+    "name": "Antlers",
+    "source": "The Wildwoods",
+    "text": "This creature may fight unarmed with its antlers at -1 Fight, with no other unarmed penalty."
   },
   {
     "name": "Aquatic",
-    "text": "This creature can only live in the water and will never willingly move onto land. If forced onto land, it treats all ground as rough ground for the purposes of movement and must pass a Will Roll (TN16) every time it activates or suffer 5 points of damage. Aquatic creatures never have to make Swimming Rolls, treat water as normal instead of rough ground, and suffer no Fight penalties for being in the water."
+    "text": "This creature can only live in the water and will never willingly move onto land. If forced onto land, it treats all ground as rough ground for the purposes of movement and must pass a Will Roll (TN16) every time it activates or suffer 5 points of damage. Aquatic creatures never have to make Swimming Rolls, treat water as normal instead of rough ground, and suffer no Fight penalties for being in the water.",
+    "source": "Core Rules"
+  },
+  {
+    "name": "Awkward on Land",
+    "source": "The Wildwoods",
+    "text": "Despite being Amphibious, this creature's Move is halved while on land."
   },
   {
     "name": "Bounty (X)",
-    "text": "There is a reward of (X) awaiting the warband that kills this creature."
+    "text": "There is a reward of (X) awaiting the warband that kills this creature.",
+    "source": "Core Rules"
   },
   {
     "name": "Burrowing",
-    "text": "This creature may move through terrain as though it were not there, provided it has enough movement to reach the other side (it cannot end its movement within a solid piece of terrain). Furthermore, the creature never suffers any movement penalty for moving over rough ground."
+    "text": "This creature may move through terrain as though it were not there, provided it has enough movement to reach the other side (it cannot end its movement within a solid piece of terrain). Furthermore, the creature never suffers any movement penalty for moving over rough ground.",
+    "source": "Core Rules"
+  },
+  {
+    "name": "Carry Disease",
+    "source": "The Wildwoods",
+    "text": "A figure wounded by this creature must pass a Will Roll (TN10) or suffer -2 Health in its next game."
   },
   {
     "name": "Construct",
-    "text": "This creature is immune to poison and never counts as wounded. Constructs can pick up and carry treasure tokens but have no item slots. Although constructs may never carry items, some items may be permanently grafted to them — if available, this option will be noted in the item's description."
+    "text": "This creature is immune to poison and never counts as wounded. Constructs can pick up and carry treasure tokens but have no item slots. Although constructs may never carry items, some items may be permanently grafted to them — if available, this option will be noted in the item's description.",
+    "source": "Core Rules"
+  },
+  {
+    "name": "Damage Maximum (X)",
+    "source": "The Wildwoods",
+    "text": "Damage dealt by this creature in a single hit is capped at (X)."
   },
   {
     "name": "Demon",
-    "text": "All attacks made by this creature count as magic attacks. This creature is immune to poison. Demons can pick up and carry treasure tokens but have no item slots."
+    "text": "All attacks made by this creature count as magic attacks. This creature is immune to poison. Demons can pick up and carry treasure tokens but have no item slots.",
+    "source": "Core Rules"
   },
   {
     "name": "Elemental Resistance (X)",
-    "text": "Whenever this creature takes elemental damage, increase its armour by (X) for the purposes of determining damage from that attack."
+    "text": "Whenever this creature takes elemental damage, increase its armour by (X) for the purposes of determining damage from that attack.",
+    "source": "Core Rules"
+  },
+  {
+    "name": "Elevated View",
+    "source": "The Wildwoods",
+    "text": "This creature has line of sight to anything not directly under cover, regardless of intervening terrain height."
   },
   {
     "name": "Energy Drain",
-    "text": "This creature deals double damage in combat. Undead and constructs are immune to this extra damage and just take the standard amount."
+    "text": "This creature deals double damage in combat. Undead and constructs are immune to this extra damage and just take the standard amount.",
+    "source": "Core Rules"
   },
   {
     "name": "Ethereal",
-    "text": "This creature may move through terrain as though it were not there, provided it has enough movement to reach the other side (it cannot end its movement within a solid piece of terrain). Furthermore, the creature never suffers any movement penalty for climbing or moving over rough ground."
+    "text": "This creature may move through terrain as though it were not there, provided it has enough movement to reach the other side (it cannot end its movement within a solid piece of terrain). Furthermore, the creature never suffers any movement penalty for climbing or moving over rough ground.",
+    "source": "Core Rules"
   },
   {
     "name": "Expert Climber",
-    "text": "This creature suffers no movement penalty for climbing."
+    "text": "This creature suffers no movement penalty for climbing.",
+    "source": "Core Rules"
+  },
+  {
+    "name": "Feeder",
+    "source": "The Wildwoods",
+    "text": "This creature is removed from the table the moment it makes a kill; the slain figure's Survival Roll suffers -1."
+  },
+  {
+    "name": "Flee From Death",
+    "source": "The Wildwoods",
+    "text": "A Pack Hunter with this trait immediately flees the table if another figure in its pack is reduced to 0 Health."
   },
   {
     "name": "Flying",
-    "text": "This creature ignores all terrain and movement penalties when moving. Furthermore, it never takes damage from falling. Flying creatures automatically pass all Swimming Rolls."
+    "text": "This creature ignores all terrain and movement penalties when moving. Furthermore, it never takes damage from falling. Flying creatures automatically pass all Swimming Rolls.",
+    "source": "Core Rules"
+  },
+  {
+    "name": "Hate Undead",
+    "source": "The Wildwoods",
+    "text": "This creature gains +1 Fight, all of its attacks count as magic attacks, and it always moves toward and attacks the nearest undead figure if any are in play."
   },
   {
     "name": "Horns",
-    "text": "If this creature moves into combat and spends an action to fight as part of the same activation, it receives +2 Fight for that attack only."
-  },
-  {
-    "name": "Immune to Critical Hits",
-    "text": "This creature never suffers any extra damage from a critical hit. Its opponent still automatically wins the fight on a roll of 20, but no additional damage is inflicted."
-  },
-  {
-    "name": "Immune to Normal Weapons",
-    "text": "This creature can only be hurt by magic. This includes all damage caused by magic weapons, and any other attack specifically noted to be magic or to cause magic damage."
-  },
-  {
-    "name": "Immune to Poison",
-    "text": "This creature is never counted as poisoned."
+    "text": "If this creature moves into combat and spends an action to fight as part of the same activation, it receives +2 Fight for that attack only.",
+    "source": "Core Rules"
   },
   {
     "name": "Immune to (Spell)",
-    "text": "This creature is immune to a specific spell. Any attempts to cast that spell on the creature automatically fail."
+    "text": "This creature is immune to a specific spell. Any attempts to cast that spell on the creature automatically fail.",
+    "source": "Core Rules"
+  },
+  {
+    "name": "Immune to Critical Hits",
+    "text": "This creature never suffers any extra damage from a critical hit. Its opponent still automatically wins the fight on a roll of 20, but no additional damage is inflicted.",
+    "source": "Core Rules"
+  },
+  {
+    "name": "Immune to Normal Weapons",
+    "text": "This creature can only be hurt by magic. This includes all damage caused by magic weapons, and any other attack specifically noted to be magic or to cause magic damage.",
+    "source": "Core Rules"
+  },
+  {
+    "name": "Immune to Poison",
+    "text": "This creature is never counted as poisoned.",
+    "source": "Core Rules"
+  },
+  {
+    "name": "Inspiring",
+    "source": "Into the Breeding Pits",
+    "text": "Friendly gnolls within 6\" of this creature gain +2 Will."
+  },
+  {
+    "name": "Keen Senses",
+    "source": "The Wildwoods",
+    "text": "This creature treats everything within 6\" as being in line of sight."
   },
   {
     "name": "Large",
-    "text": "This huge creature is easier to target with shooting attacks. It suffers from the Large Target modifier (-2) when defending against shooting attacks."
+    "text": "This huge creature is easier to target with shooting attacks. It suffers from the Large Target modifier (-2) when defending against shooting attacks.",
+    "source": "Core Rules"
+  },
+  {
+    "name": "Latch On",
+    "source": "The Wildwoods",
+    "text": "A creature with this trait cannot be pushed back from combat unless it is dealt damage first."
+  },
+  {
+    "name": "Lava Splash",
+    "source": "Fireheart",
+    "text": "A foe that rolls 5 or less (before modifiers) on its Fight Roll in combat with this creature takes 2 damage."
   },
   {
     "name": "Levitate",
-    "text": "This creature never suffers any movement penalty for climbing or moving over rough ground."
+    "text": "This creature never suffers any movement penalty for climbing or moving over rough ground.",
+    "source": "Core Rules"
+  },
+  {
+    "name": "Limited Teleportation",
+    "source": "The Wildwoods",
+    "text": "Once per activation, this creature may teleport directly into combat with a treasure-carrying figure within range."
   },
   {
     "name": "Magic Attack",
-    "text": "Any attack made by this creature counts as a magic attack."
+    "text": "Any attack made by this creature counts as a magic attack.",
+    "source": "Core Rules"
   },
   {
     "name": "Mind Lock",
-    "text": "This creature is Immune to Mind Control and Immune to Suggestion."
+    "text": "This creature is Immune to Mind Control and Immune to Suggestion.",
+    "source": "Core Rules"
   },
   {
     "name": "Never Wounded",
-    "text": "This creature never counts as wounded."
+    "text": "This creature never counts as wounded.",
+    "source": "Core Rules"
+  },
+  {
+    "name": "Nimble",
+    "source": "The Wildwoods",
+    "text": "This creature suffers no movement penalty for rough ground."
   },
   {
     "name": "Pack Hunter",
-    "text": "If more than one of these creatures appears at the same time, place them in base contact. Whenever a pack hunter is activated, all other pack hunters in contact with it should be activated and moved as one. Roll randomly to see which creature is the \"pack leader\" and determine the pack's actions using that figure."
+    "text": "If more than one of these creatures appears at the same time, place them in base contact. Whenever a pack hunter is activated, all other pack hunters in contact with it should be activated and moved as one. Roll randomly to see which creature is the \"pack leader\" and determine the pack's actions using that figure.",
+    "source": "Core Rules"
   },
   {
     "name": "Poison",
-    "text": "Attacks from this creature are venomous and deal poison damage."
+    "text": "Attacks from this creature are venomous and deal poison damage.",
+    "source": "Core Rules"
+  },
+  {
+    "name": "Potential Marsh Gas Cloud",
+    "source": "The Wildwoods",
+    "text": "On a roll of 15 or higher when this creature dies, every figure within 3\" must pass a Will Roll (TN12) or take damage."
+  },
+  {
+    "name": "Potential Weapon Destruction",
+    "source": "Fireheart",
+    "text": "Damaging this creature with a non-magic weapon risks the weapon: on a roll of 1-6, it is destroyed."
   },
   {
     "name": "Powerful",
-    "text": "Damage dealt by this creature is doubled."
+    "text": "Damage dealt by this creature is doubled.",
+    "source": "Core Rules"
+  },
+  {
+    "name": "Prize Taker",
+    "source": "The Wildwoods",
+    "text": "This creature gains a bonus against figures with the Horns, Antlers, or Bounty traits, and its warband gains +5 XP for killing one."
+  },
+  {
+    "name": "Rock-hard Skin",
+    "source": "The Wildwoods",
+    "text": "A natural roll of 1 on a Fight Roll made against this creature breaks the attacker's weapon."
+  },
+  {
+    "name": "Set Traps",
+    "source": "The Wildwoods",
+    "text": "This creature may place a 1\" trap (maximum three per game); a figure that triggers one suffers +1 damage or must pass a Move Roll (TN20) or lose its next activation."
+  },
+  {
+    "name": "Sharp Teeth",
+    "source": "Fireheart",
+    "text": "This creature deals +1 damage in melee combat."
+  },
+  {
+    "name": "Shooting Attack",
+    "source": "The Wildwoods",
+    "text": "This creature has a natural ranged attack dealing +0 damage at 12\" range, unless otherwise stated."
   },
   {
     "name": "Spellcaster",
-    "text": "This creature can cast spells. Exactly which spells it can cast and how this is handled will be given in the creature's description."
+    "text": "This creature can cast spells. Exactly which spells it can cast and how this is handled will be given in the creature's description.",
+    "source": "Core Rules"
   },
   {
     "name": "Strong",
-    "text": "This creature does +2 damage."
+    "text": "This creature does +2 damage.",
+    "source": "Core Rules"
+  },
+  {
+    "name": "Surprise Attack",
+    "source": "The Wildwoods",
+    "text": "This creature gains +4 to a Fight Roll made in the same activation it moves into combat."
+  },
+  {
+    "name": "Swarm",
+    "source": "Fireheart",
+    "text": "This creature can move through any gap regardless of size and is Expert Climber by default. It always counts as having one supporting figure in melee. Shooting attacks made with a bow, crossbow, or javelin are capped at 3 damage against it, and hand-to-hand attacks are capped at 6 damage (even if magical). It never leaves an opponent \"unarmed\", and area-effect spells and attacks (Grenade, Destructive Sphere, Elemental Ball, Scatter Shot, and the like) deal triple damage to it."
+  },
+  {
+    "name": "Target Constructs",
+    "source": "Fireheart",
+    "text": "This creature always moves toward and attacks the nearest warband construct, if any are in play."
+  },
+  {
+    "name": "Terrain Expert (X)",
+    "source": "The Wildwoods",
+    "text": "This soldier picks a Terrain Expertise (Mountain, Bog, Ice, or Forest) and never consumes supplies. In a game where that terrain type is dominant, it also gains Nimble, and the warband gains +2 Initiative and +2 supply points after the game."
   },
   {
     "name": "True Sight",
-    "text": "Ignore any castings of Beauty or Invisibility when determining this creature's actions. Furthermore, if this figure is ever in combat with an Illusionary Soldier, the Illusionary Soldier is immediately removed from the table."
+    "text": "Ignore any castings of Beauty or Invisibility when determining this creature's actions. Furthermore, if this figure is ever in combat with an Illusionary Soldier, the Illusionary Soldier is immediately removed from the table.",
+    "source": "Core Rules"
+  },
+  {
+    "name": "Unaggressive Unless Startled",
+    "source": "The Wildwoods",
+    "text": "This creature moves randomly until it is wounded or an explosive spell is cast nearby, after which it acts normally."
   },
   {
     "name": "Undead",
-    "text": "This creature is immune to poison and never counts as wounded. Undead creatures can pick up and carry treasure tokens but have no item slots."
+    "text": "This creature is immune to poison and never counts as wounded. Undead creatures can pick up and carry treasure tokens but have no item slots.",
+    "source": "Core Rules"
+  },
+  {
+    "name": "Wilderness Survival",
+    "source": "The Wildwoods",
+    "text": "A soldier with this trait consumes no supply unless reduced to 0 Health."
   }
 ]
