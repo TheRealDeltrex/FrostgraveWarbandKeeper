@@ -103,16 +103,16 @@
           Spellcaster Magazine: allow its soldiers
         </label>
         <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0">
-          Needs Spellcaster Magazine switched on above. On by default; untick this if the magazine's
-          troop stat lines feel unbalanced for your group while still keeping its spells, treasure
-          and bestiary entries available.
+          Needs Spellcaster Magazine switched on above. Off by default; the magazine's troop stat
+          lines read as unbalanced to some groups — tick this to opt in to hiring them, while its
+          spells, treasure and bestiary entries stay available either way.
         </p>
         <label class="checkbox-row" style="margin-top:0.6rem">
           <input name="knightly_orders_enabled" type="checkbox" {% if hr.knightly_orders_enabled %}checked{% endif %} />
           Spellcaster Magazine: Knightly Orders
         </label>
         <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0">
-          Needs Spellcaster Magazine switched on above. Off by default. When hiring a Knight or
+          Needs Spellcaster Magazine switched on above. On by default. When hiring a Knight or
           Templar, lets you pick an Order that trades 1 point of Fight or Health for a special
           ability — adds an order picker to their row in Hire soldier below.
         </p>
@@ -1426,6 +1426,13 @@
                         {% endfor %}
                       </select>
                     {% endif %}
+                    {% if c.key == 'scrounger' %}
+                      <select name="scrounger_weapon" style="margin-bottom:0.3rem" title="Carries both; picks which to fight with each round at the table — this just sets the initial gear line.">
+                        {% for w in SCROUNGER_WEAPON_CHOICES %}
+                          <option value="{{ w.id }}">{{ w.label }}</option>
+                        {% endfor %}
+                      </select>
+                    {% endif %}
                     <button class="btn small" type="submit" {% if not can_hire %}disabled{% endif %}{% if companion_blocked %} title="{% if animal_companion_limit == 1 %}You may only have one Animal Companion at a time — hire an apprentice to field a second (one per spellcaster).{% else %}You may only have {{ animal_companion_limit }} Animal Companions at a time (one per spellcaster).{% endif %}"{% endif %}>Hire</button>
                   </form>
                 </td>
@@ -1445,7 +1452,10 @@
       <p class="muted" style="font-size:0.85rem">
         Bookkeeping for Raise Zombie / Summon Demon, not a purchase — free, doesn't count against the
         soldier or specialist limit above, and joins the roster table like any other soldier (sorted to
-        the bottom). One raised zombie and one summoned demon at a time.
+        the bottom). Up to {{ temporary_member_limit }} temporary members on the table at once
+        ({{ temporary_member_count }}/{{ temporary_member_limit }} now), shared across zombies and
+        demons rather than one of each — an intentionally open house rule, since the strict per-type
+        limit is really a table matter.
       </p>
       {% if temporary_catalog %}
         <div class="table-wrap">
@@ -1458,9 +1468,9 @@
               </tr>
             </thead>
             <tbody>
+              {% set temp_at_cap = temporary_member_count >= temporary_member_limit %}
               {% for c in temporary_catalog %}
-                {% set group_occupied = c.temporary_group in temporary_groups_occupied %}
-                <tr class="catalog-row" {% if group_occupied %}style="opacity:0.5"{% endif %}>
+                <tr class="catalog-row" {% if temp_at_cap %}style="opacity:0.5"{% endif %}>
                   <td><strong>{{ c.name }}</strong></td>
                   <td class="muted"><span class="badge">via {{ c.requires_spell }}</span></td>
                   <td>{{ c.move }}</td>
@@ -1480,7 +1490,7 @@
                     <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
                       <input type="hidden" name="action" value="hire_soldier" />
                       <input type="hidden" name="type_key" value="{{ c.key }}" />
-                      <button class="btn small" type="submit" {% if group_occupied %}disabled title="Only one {{ 'raised zombie' if c.temporary_group == 'zombie' else 'summoned demon' }} at a time."{% endif %}>Hire</button>
+                      <button class="btn small" type="submit" {% if temp_at_cap %}disabled title="{{ temporary_member_limit }} temporary members already on the table."{% endif %}>Hire</button>
                     </form>
                   </td>
                 </tr>

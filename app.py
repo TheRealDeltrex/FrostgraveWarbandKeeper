@@ -41,6 +41,7 @@ from frostgrave_data import (
     KNIGHTLY_ORDER_ELIGIBLE,
     KNIGHTLY_ORDERS,
     LEVEL_UP_OPTIONS,
+    SCROUNGER_WEAPON_CHOICES,
     LEVELUP_STATS,
     MAX_SOLDIERS,
     MAX_SPECIALISTS,
@@ -57,6 +58,7 @@ from frostgrave_data import (
     SOURCE_BOOK_OPTIONS,
     SOURCE_BOOKS,
     SPELLS,
+    TEMPORARY_MEMBER_LIMIT,
     STARTING_GOLD,
     STARTING_SPELL_COUNT,
     XP_PER_LEVEL,
@@ -210,6 +212,7 @@ app.jinja_env.globals.update(
     CAPTAIN_TRICK_BY_ID=CAPTAIN_TRICK_BY_ID,
     KNIGHTLY_ORDERS=KNIGHTLY_ORDERS,
     KNIGHTLY_ORDER_ELIGIBLE=KNIGHTLY_ORDER_ELIGIBLE,
+    SCROUNGER_WEAPON_CHOICES=SCROUNGER_WEAPON_CHOICES,
     LEVELUP_STATS=LEVELUP_STATS,
     level_from_xp=level_from_xp,
     captain_effective_stats=captain_effective_stats,
@@ -527,18 +530,18 @@ def warband_view(warband_id: str):
     # "Hire temporary member" panel instead of living in the main hire table.
     temporary_catalog = [c for c in hireable if c.get("temporary")]
     hireable = [c for c in hireable if not c.get("temporary")]
-    # Groups (zombie/demon) that already have a live member on the table —
-    # disables the matching Hire button, mirroring Animal Companion's block.
-    temporary_groups_occupied = {
-        SOLDIERS[s["type_key"]]["temporary_group"]
-        for s in all_soldiers
-        if s.get("status") != "dead" and _is_temporary(s)
-    }
+    # Total temporary members on the table right now — one shared cap across
+    # zombies and demons (no per-type sub-limit), disables every "Hire"
+    # button in that panel once reached, mirroring Animal Companion's block.
+    temporary_member_count = sum(
+        1 for s in all_soldiers if s.get("status") != "dead" and _is_temporary(s)
+    )
     return render_template(
         "warband_view.html",
         wb=wb,
         soldiers=soldiers,
-        temporary_groups_occupied=temporary_groups_occupied,
+        temporary_member_count=temporary_member_count,
+        temporary_member_limit=TEMPORARY_MEMBER_LIMIT,
         limits=limits,
         catalog_groups=group_soldiers_by_source(hireable),
         temporary_catalog=temporary_catalog,
@@ -642,6 +645,7 @@ def warband_update(warband_id: str):
                 request.form.get("type_key") or "",
                 (request.form.get("soldier_name") or "").strip(),
                 request.form.get("knightly_order") or "",
+                request.form.get("scrounger_weapon") or "",
             )
             flash(msg, "success" if ok else "error")
             if ok:

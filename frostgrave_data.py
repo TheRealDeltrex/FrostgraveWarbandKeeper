@@ -150,6 +150,18 @@ KNIGHTLY_ORDER_IDS = {o["id"] for o in KNIGHTLY_ORDERS}
 KNIGHTLY_ORDER_BY_ID = {o["id"]: o for o in KNIGHTLY_ORDERS}
 KNIGHTLY_ORDER_ELIGIBLE = {"knight", "templar"}
 
+# The Scrounger (Fireheart) carries both a staff and a hand weapon, deciding
+# which to fight with each round before the dice are rolled — the app doesn't
+# track per-round table decisions, so this is fixed to a flavour pick made
+# once at hire time instead (no stat difference between the two).
+SCROUNGER_WEAPON_CHOICES = [
+    {"id": "staff", "label": "Staff", "gear": "Staff, light armour"},
+    {"id": "hand_weapon", "label": "Hand weapon", "gear": "Hand weapon, light armour"},
+]
+SCROUNGER_WEAPON_IDS = {w["id"] for w in SCROUNGER_WEAPON_CHOICES}
+SCROUNGER_WEAPON_BY_ID = {w["id"]: w for w in SCROUNGER_WEAPON_CHOICES}
+SCROUNGER_WEAPON_DEFAULT = "staff"
+
 # --- Soldier Leveling (homerule, not core 2e) -------------------------------
 SOLDIER_LEVELING_ENABLED = False
 SOLDIER_MAX_LEVELS = 3
@@ -1294,7 +1306,7 @@ SOLDIERS: dict[str, dict] = {
         "description": "Raised by the Raise Zombie spell as a temporary member of the warband — not a permanent hire, and doesn't count against the soldier or specialist limit. A warband may only have one raised zombie at a time; if it is killed or leaves the table, Raise Zombie can be cast again for another. Undead: immune to poison, never wounded, can carry treasure tokens but has no item slots.",
     },
     "summoned_imp": {
-        "name": "Imp (summoned)",
+        "name": "Imp",
         "cost": 0,
         "category": "temporary",
         "temporary": True,
@@ -1311,7 +1323,7 @@ SOLDIERS: dict[str, dict] = {
         "description": "Placed by the Summon Demon spell as a temporary member of the warband — not a permanent hire, and doesn't count against the soldier or specialist limit. Which demon tier arrives depends on how much the Casting Roll succeeded by: 0–5 gives this imp, 6–12 a minor demon, 13+ a major demon. Summon Demon can't be cast again while a summoned demon is already under control. Demon: immune to poison, all attacks count as magic, can carry treasure tokens but has no item slots.",
     },
     "summoned_minor_demon": {
-        "name": "Minor Demon (summoned)",
+        "name": "Minor Demon",
         "cost": 0,
         "category": "temporary",
         "temporary": True,
@@ -1328,7 +1340,7 @@ SOLDIERS: dict[str, dict] = {
         "description": "Placed by the Summon Demon spell as a temporary member of the warband — not a permanent hire, and doesn't count against the soldier or specialist limit. Which demon tier arrives depends on how much the Casting Roll succeeded by: 0–5 an imp, 6–12 gives this minor demon, 13+ a major demon. Summon Demon can't be cast again while a summoned demon is already under control. Demon: immune to poison, all attacks count as magic, can carry treasure tokens but has no item slots.",
     },
     "summoned_major_demon": {
-        "name": "Major Demon (summoned)",
+        "name": "Major Demon",
         "cost": 0,
         "category": "temporary",
         "temporary": True,
@@ -2132,6 +2144,12 @@ SUMMONED_GROUP_LABEL = "Summoned by spell"
 # soldier/specialist caps and get their own "Hire temporary member" panel
 # rather than living in the main hire catalog (see app.py's warband_view).
 TEMPORARY_GROUP_LABEL = "Temporary members"
+
+# Total cap across raised zombies + summoned demons combined, no per-type
+# sub-limit — a house-rule loosening of the strict "one zombie, one demon"
+# reading, on the reasoning that the app is a bookkeeping tool and any real
+# limit is enforced at the table, not by the software.
+TEMPORARY_MEMBER_LIMIT = 10
 
 
 def soldier_group_label(row: dict) -> str:

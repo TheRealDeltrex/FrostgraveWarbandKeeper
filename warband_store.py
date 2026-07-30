@@ -40,6 +40,10 @@ from frostgrave_data import (
     KNIGHTLY_ORDER_IDS,
     KNIGHTLY_ORDERS,
     LEVELUP_STATS,
+    SCROUNGER_WEAPON_BY_ID,
+    SCROUNGER_WEAPON_CHOICES,
+    SCROUNGER_WEAPON_DEFAULT,
+    SCROUNGER_WEAPON_IDS,
     MAX_SOLDIERS,
     MAX_SPECIALISTS,
     MAX_WIZARD_LEVEL,
@@ -61,6 +65,7 @@ from frostgrave_data import (
     SOURCE_BOOKS,
     SOURCE_BOOK_BY_SLUG,
     STARTING_GOLD,
+    TEMPORARY_MEMBER_LIMIT,
     STARTING_SPELL_COUNT,
     WIZARD_BASE,
     WIZARD_ITEM_SLOTS,
@@ -234,15 +239,14 @@ def default_homerules() -> dict:
         # edition than the rest of the 2e tables. On by default; see
         # expansions.EDITION_2_SOLDIER_COSTS.
         "edition2_soldier_costs": True,
-        # Spellcaster Magazine's troop stat lines read as unbalanced to some
-        # groups; this lets a warband keep the book's spells/items/bestiary
-        # switched on while dropping just its hireable soldiers. On by default
-        # so enabling the book still behaves as it always has until turned off.
-        "spellcaster_magazine_soldiers": True,
+        # Spellcaster Magazine's troop stat lines read as unbalanced; this lets
+        # a warband keep the book's spells/items/bestiary switched on while
+        # dropping just its hireable soldiers. Off by default — a group opts
+        # in to the soldiers rather than opting out.
+        "spellcaster_magazine_soldiers": False,
         # Knightly Orders (Spellcaster Magazine, Issue 1). Needs Spellcaster
-        # Magazine switched on in enabled_sources too — off by default like
-        # every other homerule here.
-        "knightly_orders_enabled": False,
+        # Magazine switched on in enabled_sources too.
+        "knightly_orders_enabled": True,
         # Blood Legacy's "High-Level Wizards" optional rules (Chapter Three).
         # Each needs Blood Legacy switched on in enabled_sources *and* its own
         # toggle here — the book insists each is agreed to separately. Off by
@@ -1068,7 +1072,9 @@ def _new_soldier_leveling_fields(info: dict) -> dict:
     }
 
 
-def add_soldier(wb: dict, type_key: str, name: str = "", order: str = "") -> tuple[bool, str]:
+def add_soldier(
+    wb: dict, type_key: str, name: str = "", order: str = "", scrounger_weapon: str = ""
+) -> tuple[bool, str]:
     info = get_soldier(type_key)
     if not info:
         return False, "Unknown soldier type."
@@ -1086,6 +1092,10 @@ def add_soldier(wb: dict, type_key: str, name: str = "", order: str = "") -> tup
             return False, "Knightly Orders need Spellcaster Magazine and its own toggle switched on under Additional Rules and Homerules."
         if order not in KNIGHTLY_ORDER_IDS:
             return False, "Unknown Knightly Order."
+    if type_key == "scrounger":
+        scrounger_weapon = scrounger_weapon or SCROUNGER_WEAPON_DEFAULT
+        if scrounger_weapon not in SCROUNGER_WEAPON_IDS:
+            return False, "Unknown weapon choice for the Scrounger."
     blocked = expansions.soldier_state_block(wb, type_key)
     if blocked:
         return False, blocked
@@ -1105,16 +1115,13 @@ def add_soldier(wb: dict, type_key: str, name: str = "", order: str = "") -> tup
                     "apprentice to field a second (one per spellcaster)."
                 )
             return False, f"You may only have {limit} Animal Companions at a time (one per spellcaster)."
-    temp_group = info.get("temporary_group")
-    if temp_group:
-        already = any(
-            SOLDIERS.get(s.get("type_key", ""), {}).get("temporary_group") == temp_group
-            for s in active_soldiers(wb)
+    if info.get("temporary"):
+        temp_count = sum(
+            1 for s in active_soldiers(wb)
+            if SOLDIERS.get(s.get("type_key", ""), {}).get("temporary")
         )
-        if already:
-            if temp_group == "zombie":
-                return False, "You may only have one raised zombie at a time — Raise Zombie can be cast again once it's gone."
-            return False, "Summon Demon can't be cast again while you're already controlling a summoned demon."
+        if temp_count >= TEMPORARY_MEMBER_LIMIT:
+            return False, f"You may only have {TEMPORARY_MEMBER_LIMIT} temporary members (raised zombies/summoned demons combined) on the table at once."
     if not info.get("temporary"):
         cap = expansions.max_soldiers(wb)
         if soldier_count(wb) >= cap:
@@ -1145,6 +1152,9 @@ def add_soldier(wb: dict, type_key: str, name: str = "", order: str = "") -> tup
         "knightly_order": order or None,
         **leveling_fields,
     }
+    if type_key == "scrounger":
+        soldier["scrounger_weapon"] = scrounger_weapon
+        soldier["gear"] = SCROUNGER_WEAPON_BY_ID[scrounger_weapon]["gear"]
     wb["gold"] = int(wb.get("gold", 0)) - cost
     wb.setdefault("soldiers", []).append(soldier)
     wb.setdefault("history", []).append(
