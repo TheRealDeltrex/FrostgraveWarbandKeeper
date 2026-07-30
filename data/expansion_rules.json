@@ -4531,8 +4531,8 @@
    ]
   },
   {
-   "title": "High-Level Wizards (deferred mechanic — reference only)",
-   "blurb": "",
+   "title": "High-Level Wizards",
+   "blurb": "Implemented as five separate homerule toggles under a warband's Additional Rules and Homerules (needs Blood Legacy switched on), matching the book's own \"each optional rule should be considered separately\" framing. Alternate Experience Point Expenditure adds a Spend XP option on the Wizard card.",
    "rows": [
     {
      "name": "Optional rules",
@@ -5392,8 +5392,8 @@
    ]
   },
   {
-   "title": "Knightly Orders (Issue 1 — deferred mechanic, reference only)",
-   "blurb": "When hiring a knight or templar, the wizard may select an Order, altering the base stat line and granting a special ability.",
+   "title": "Knightly Orders",
+   "blurb": "Implemented as a homerule toggle under a warband's Additional Rules and Homerules (needs Spellcaster Magazine switched on); once on, hiring a Knight or Templar shows an order picker that trades 1 point of Fight or Health for a special ability. \"Custom orders\" (below) stays a DIY guideline rather than a selectable option.",
    "rows": [
     {
      "name": "Sun",

@@ -98,6 +98,24 @@
           the rest of the 2e tables. On by default, this bumps their hiring cost (Assassin 100gc,
           Demon Hunter/Monk/Mystic Warrior 125gc). Applies to future hires only.
         </p>
+        <label class="checkbox-row" style="margin-top:0.6rem">
+          <input name="spellcaster_magazine_soldiers" type="checkbox" {% if hr.spellcaster_magazine_soldiers %}checked{% endif %} />
+          Spellcaster Magazine: allow its soldiers
+        </label>
+        <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0">
+          Needs Spellcaster Magazine switched on above. On by default; untick this if the magazine's
+          troop stat lines feel unbalanced for your group while still keeping its spells, treasure
+          and bestiary entries available.
+        </p>
+        <label class="checkbox-row" style="margin-top:0.6rem">
+          <input name="knightly_orders_enabled" type="checkbox" {% if hr.knightly_orders_enabled %}checked{% endif %} />
+          Spellcaster Magazine: Knightly Orders
+        </label>
+        <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0">
+          Needs Spellcaster Magazine switched on above. Off by default. When hiring a Knight or
+          Templar, lets you pick an Order that trades 1 point of Fight or Health for a special
+          ability — adds an order picker to their row in Hire soldier below.
+        </p>
         <script>
           // Tick/untick every source book at once, then save immediately —
           // same as ticking each checkbox by hand on this autosaving form.
@@ -110,6 +128,51 @@
             });
           });
         </script>
+      </details>
+
+      <details class="ref-panel">
+        <summary>High-Level Wizards (Blood Legacy)</summary>
+        <p class="muted" style="font-size:0.85rem">
+          Needs Blood Legacy switched on above. The book treats each of these as its own optional
+          rule to agree on separately, so each has its own toggle here rather than one bundled switch.
+        </p>
+        <label class="checkbox-row" style="margin-top:0.4rem">
+          <input name="hlw_specialist_allowance" type="checkbox" {% if hr.hlw_specialist_allowance %}checked{% endif %} />
+          Increased Specialist Soldier Allowance
+        </label>
+        <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0.6rem">
+          +1 specialist slot per full 20 wizard levels (5 at level 20, up to 8 at level 80+).
+        </p>
+        <label class="checkbox-row">
+          <input name="hlw_item_slots" type="checkbox" {% if hr.hlw_item_slots %}checked{% endif %} />
+          Increased Item Slots
+        </label>
+        <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0.6rem">
+          Wizard and apprentice each gain +1 item slot at level 30, +1 more at level 70 (max +2).
+        </p>
+        <label class="checkbox-row">
+          <input name="hlw_max_health" type="checkbox" {% if hr.hlw_max_health %}checked{% endif %} />
+          Increased Maximum Health
+        </label>
+        <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0.6rem">
+          Wizard's maximum potential Health Stat rises +1 per full 10 levels (max +10, so 30 at level
+          100+). Stacks on top of any Health cap from another wizard state the same way.
+        </p>
+        <label class="checkbox-row">
+          <input name="hlw_casting_min" type="checkbox" {% if hr.hlw_casting_min %}checked{% endif %} />
+          Lower Casting Number Minimum
+        </label>
+        <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0.6rem">
+          A level 100+ wizard may improve a Casting Number down to 4 instead of the normal floor of 5.
+        </p>
+        <label class="checkbox-row">
+          <input name="hlw_alt_xp" type="checkbox" {% if hr.hlw_alt_xp %}checked{% endif %} />
+          Alternate Experience Point Expenditure
+        </label>
+        <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0">
+          Adds a "Spend XP" option on the Wizard card for trading banked XP for gold or a one-off bonus
+          instead of a level — no level requirement of its own, unlike the other four.
+        </p>
       </details>
 
       <div class="form-row">
@@ -347,7 +410,7 @@
               <div class="stat-pill"><span class="label">Will</span><span class="value">{{ format_stat(wizard_display_stats.will) }}</span></div>
               <div class="stat-pill"><span class="label">Health</span><span class="value">{{ wizard_display_stats.health }}</span></div>
             </div>
-            <h3>Wizard items ({{ WIZARD_ITEM_SLOTS }} slots)</h3>
+            <h3>Wizard items ({{ wizard_item_slots }} slots)</h3>
             <p class="muted" style="font-size:0.85rem">
               Pick a standard item or vault loot, or type a custom name.
               Two-handed weapons use two consecutive slots (shown on PDF as e.g. <code>2+3: Two-Handed Weapon</code>).
@@ -359,7 +422,7 @@
             </div>
             {% set slots = wiz.item_slots if wiz.item_slots is defined else [] %}
             {% set prefix = 'wizard' %}
-            {% set n = WIZARD_ITEM_SLOTS %}
+            {% set n = wizard_item_slots %}
             {% include '_item_slots.html' %}
             <div class="form-row">
               <label for="wizard_notes">Wizard notes</label>
@@ -399,14 +462,14 @@
                 <div class="stat-pill"><span class="label">Will</span><span class="value">{{ format_stat(ap.stats.will) }}</span></div>
                 <div class="stat-pill"><span class="label">Health</span><span class="value">{{ ap.stats.health }}</span></div>
               </div>
-              <h3>Apprentice items ({{ APPRENTICE_ITEM_SLOTS }} slots)</h3>
+              <h3>Apprentice items ({{ apprentice_item_slots }} slots)</h3>
               <div class="checkbox-row">
                 <input id="apprentice_dagger" name="apprentice_dagger" type="checkbox" {% if ap.has_dagger %}checked{% endif %} />
                 <label for="apprentice_dagger" style="margin:0">Carries a dagger (free slot)</label>
               </div>
               {% set slots = ap.item_slots if ap.item_slots is defined else [] %}
               {% set prefix = 'apprentice' %}
-              {% set n = APPRENTICE_ITEM_SLOTS %}
+              {% set n = apprentice_item_slots %}
               {% include '_item_slots.html' %}
               <div class="form-row">
                 <label for="apprentice_notes">Notes</label>
@@ -553,6 +616,33 @@
         </div>
       </form>
 
+      {% if alt_xp_enabled %}
+        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="form-row inline" style="margin-top:0.75rem">
+          <input type="hidden" name="action" value="spend_alt_xp" />
+          <div>
+            <label for="alt_xp_conversion">Spend XP (Blood Legacy, no level effect)</label>
+            <select id="alt_xp_conversion" name="conversion">
+              {% for key, conv in alt_xp_conversions.items() %}
+                <option value="{{ key }}">{{ conv.label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <label for="alt_xp_amount">XP to spend</label>
+            <input id="alt_xp_amount" name="xp_amount" type="text" inputmode="numeric" pattern="[0-9]+" value="100" />
+          </div>
+          <div>
+            <label>&nbsp;</label>
+            <button class="btn secondary" type="submit">Spend</button>
+          </div>
+        </form>
+        <p class="muted" style="font-size:0.8rem;margin-top:0.3rem">
+          Current XP: {{ wiz.xp }}. Amount must be an exact multiple of that option's XP cost. The
+          casting-roll and Black Market options just log what you earned to the campaign history —
+          neither dice roll is tracked by this app.
+        </p>
+      {% endif %}
+
       {% if pending_levels %}
         <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:1rem">
           <input type="hidden" name="action" value="level_up" />
@@ -576,7 +666,7 @@
             </select>
           </div>
           <div class="form-row" id="improve-spell-row" style="display:none">
-            <label for="improve_spell">Improve spell (−1 CN, min 5)</label>
+            <label for="improve_spell">Improve spell (−1 CN, min {{ casting_number_minimum }})</label>
             <select id="improve_spell" name="improve_spell">
               {% for sp in wiz.spells %}
                 <option value="{{ sp.id }}">{{ sp.name }} (CN {{ sp.cn }})</option>
@@ -994,6 +1084,14 @@
       <div class="limit">Treasury: <span class="gold">{{ wb.gold }} gc</span></div>
     </div>
 
+    {% set temp_on_table = soldiers | selectattr("temporary") | list %}
+    {% if temp_on_table %}
+      <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-bottom:1rem" onsubmit="return confirm('Dismiss all {{ temp_on_table|length }} temporary member(s) (raised zombie / summoned demon)?');">
+        <input type="hidden" name="action" value="dismiss_all_temporary" />
+        <button class="btn danger small" type="submit">Dismiss all temporary members ({{ temp_on_table|length }})</button>
+      </form>
+    {% endif %}
+
     {% if soldiers %}
       <div class="table-wrap">
         <table id="roster-table">
@@ -1034,6 +1132,7 @@
                   <div>
                     <span class="badge {{ s.category }}">{{ s.category }}</span>
                     {% if s.revenant %}<span class="badge" title="Reanimated with the Revenant spell">revenant</span>{% endif %}
+                    {% if s.knightly_order_info %}<span class="badge" title="{{ s.knightly_order_info.ability }}">{{ s.knightly_order_info.name }}</span>{% endif %}
                   </div>
                 </td>
                 <td><span class="badge {{ s.status }}">{{ s.status }}</span></td>
@@ -1269,118 +1368,6 @@
       <p class="empty">No soldiers yet. Thugs and thieves cost 0 gc.</p>
     {% endif %}
 
-    <details class="ref-panel" id="temporary-members-panel" {% if temporary_members %}open{% endif %}>
-      <summary>Temporary members ({{ temporary_members|length }})</summary>
-      <p class="muted" style="font-size:0.85rem">
-        Raised or summoned mid-game (Raise Zombie, Summon Demon) rather than permanently hired — they don't
-        count against the soldier or specialist limit above, and each group (zombie / summoned demon) only
-        allows one member on the table at a time. Hire them from the panel below once your wizard knows the spell.
-      </p>
-      {% if temporary_members %}
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Name</th><th>Type</th><th>Status</th>
-                <th>Move</th><th>Fight</th><th>Shoot</th><th>Armour</th><th>Will</th><th>Health</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for s in temporary_members %}
-                <tr class="status-{{ s.status }}">
-                  <td><strong>{{ s.name }}</strong></td>
-                  <td>{{ s.type_name }}</td>
-                  <td>
-                    <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
-                      <input type="hidden" name="action" value="soldier_status" />
-                      <input type="hidden" name="soldier_id" value="{{ s.id }}" />
-                      <select name="status" data-autosubmit>
-                        {% for st in ['active', 'injured', 'dead'] %}
-                          <option value="{{ st }}" {% if s.status == st %}selected{% endif %}>{{ st }}</option>
-                        {% endfor %}
-                      </select>
-                    </form>
-                  </td>
-                  <td>{{ s.move }}</td>
-                  <td>{{ format_stat(s.fight) }}</td>
-                  <td>{{ format_stat(s.shoot) }}</td>
-                  <td>{{ s.armour }}</td>
-                  <td>{{ format_stat(s.will) }}</td>
-                  <td>{{ s.health }}</td>
-                  <td>
-                    <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" onsubmit="return confirm('Remove {{ s.name }}?');">
-                      <input type="hidden" name="action" value="remove_soldier" />
-                      <input type="hidden" name="soldier_id" value="{{ s.id }}" />
-                      <button class="btn danger small" type="submit">Remove</button>
-                    </form>
-                  </td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      {% else %}
-        <p class="empty">None on the table right now.</p>
-      {% endif %}
-    </details>
-
-    <details class="ref-panel" id="hire-temporary-member-panel">
-      <summary>Hire temporary member</summary>
-      <p class="muted" style="font-size:0.85rem">
-        A temporary member only appears here once your wizard knows the spell that summons it. Free to
-        add (the spell itself is the cost); one raised zombie and one summoned demon at a time.
-      </p>
-      {% if temporary_catalog %}
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Type</th><th>Via spell</th>
-                <th>Move</th><th>Fight</th><th>Shoot</th><th>Armour</th><th>Will</th><th>Health</th>
-                <th></th><th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for c in temporary_catalog %}
-                {% set group_occupied = c.temporary_group in temporary_groups_occupied %}
-                {% set within_soldiers = limits.soldiers < limits.max_soldiers %}
-                <tr class="catalog-row" {% if group_occupied %}style="opacity:0.5"{% endif %}>
-                  <td><strong>{{ c.name }}</strong></td>
-                  <td class="muted"><span class="badge">via {{ c.requires_spell }}</span></td>
-                  <td>{{ c.move }}</td>
-                  <td>{{ format_stat(c.fight) }}</td>
-                  <td>{{ format_stat(c.shoot) }}</td>
-                  <td>{{ c.armour }}</td>
-                  <td>{{ format_stat(c.will) }}</td>
-                  <td>{{ c.health }}</td>
-                  <td>
-                    {% if c.description %}
-                      <details class="info-toggle-details">
-                        <summary class="info-toggle">Info</summary>
-                      </details>
-                    {% endif %}
-                  </td>
-                  <td>
-                    <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
-                      <input type="hidden" name="action" value="hire_soldier" />
-                      <input type="hidden" name="type_key" value="{{ c.key }}" />
-                      <button class="btn small" type="submit" {% if group_occupied %}disabled title="Only one {{ 'raised zombie' if c.temporary_group == 'zombie' else 'summoned demon' }} at a time."{% endif %}>Hire</button>
-                    </form>
-                  </td>
-                </tr>
-                {% if c.description %}
-                  <tr class="info-desc-row"><td colspan="10">{{ c.description }}</td></tr>
-                {% endif %}
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      {% else %}
-        <p class="empty">Your wizard doesn't know Raise Zombie or Summon Demon yet.</p>
-      {% endif %}
-    </details>
-
     <details class="ref-panel" id="hire-soldier-panel">
       <summary>Hire soldier</summary>
       <p class="muted" style="font-size:0.85rem">
@@ -1431,6 +1418,14 @@
                   <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
                     <input type="hidden" name="action" value="hire_soldier" />
                     <input type="hidden" name="type_key" value="{{ c.key }}" />
+                    {% if hr.knightly_orders_enabled and c.key in KNIGHTLY_ORDER_ELIGIBLE %}
+                      <select name="knightly_order" style="margin-bottom:0.3rem">
+                        <option value="">No order</option>
+                        {% for o in KNIGHTLY_ORDERS %}
+                          <option value="{{ o.id }}">{{ o.name }}</option>
+                        {% endfor %}
+                      </select>
+                    {% endif %}
                     <button class="btn small" type="submit" {% if not can_hire %}disabled{% endif %}{% if companion_blocked %} title="{% if animal_companion_limit == 1 %}You may only have one Animal Companion at a time — hire an apprentice to field a second (one per spellcaster).{% else %}You may only have {{ animal_companion_limit }} Animal Companions at a time (one per spellcaster).{% endif %}"{% endif %}>Hire</button>
                   </form>
                 </td>
@@ -1443,6 +1438,62 @@
           </tbody>
         </table>
       </div>
+    </details>
+
+    <details class="ref-panel" id="hire-temporary-member-panel">
+      <summary>Hire temporary member</summary>
+      <p class="muted" style="font-size:0.85rem">
+        Bookkeeping for Raise Zombie / Summon Demon, not a purchase — free, doesn't count against the
+        soldier or specialist limit above, and joins the roster table like any other soldier (sorted to
+        the bottom). One raised zombie and one summoned demon at a time.
+      </p>
+      {% if temporary_catalog %}
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Type</th><th>Via spell</th>
+                <th>Move</th><th>Fight</th><th>Shoot</th><th>Armour</th><th>Will</th><th>Health</th>
+                <th></th><th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for c in temporary_catalog %}
+                {% set group_occupied = c.temporary_group in temporary_groups_occupied %}
+                <tr class="catalog-row" {% if group_occupied %}style="opacity:0.5"{% endif %}>
+                  <td><strong>{{ c.name }}</strong></td>
+                  <td class="muted"><span class="badge">via {{ c.requires_spell }}</span></td>
+                  <td>{{ c.move }}</td>
+                  <td>{{ format_stat(c.fight) }}</td>
+                  <td>{{ format_stat(c.shoot) }}</td>
+                  <td>{{ c.armour }}</td>
+                  <td>{{ format_stat(c.will) }}</td>
+                  <td>{{ c.health }}</td>
+                  <td>
+                    {% if c.description %}
+                      <details class="info-toggle-details">
+                        <summary class="info-toggle">Info</summary>
+                      </details>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
+                      <input type="hidden" name="action" value="hire_soldier" />
+                      <input type="hidden" name="type_key" value="{{ c.key }}" />
+                      <button class="btn small" type="submit" {% if group_occupied %}disabled title="Only one {{ 'raised zombie' if c.temporary_group == 'zombie' else 'summoned demon' }} at a time."{% endif %}>Hire</button>
+                    </form>
+                  </td>
+                </tr>
+                {% if c.description %}
+                  <tr class="info-desc-row"><td colspan="10">{{ c.description }}</td></tr>
+                {% endif %}
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="empty">Your wizard doesn't know Raise Zombie or Summon Demon yet.</p>
+      {% endif %}
     </details>
   </details>
 
