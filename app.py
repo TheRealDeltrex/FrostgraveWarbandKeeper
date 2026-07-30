@@ -29,7 +29,6 @@ from werkzeug.utils import secure_filename
 from frostgrave_data import (
     ALIGNED_SCHOOL_SPELLS,
     APPRENTICE_COST,
-    APPRENTICE_ITEM_SLOTS,
     BASE_LOCATIONS,
     BASE_RESOURCES,
     bonus_choice_amount,
@@ -39,6 +38,8 @@ from frostgrave_data import (
     CAPTAIN_MODE_OPTIONS,
     CAPTAIN_TRICK_BY_ID,
     CAPTAIN_TRICKS,
+    KNIGHTLY_ORDER_ELIGIBLE,
+    KNIGHTLY_ORDERS,
     LEVEL_UP_OPTIONS,
     LEVELUP_STATS,
     MAX_SOLDIERS,
@@ -58,7 +59,6 @@ from frostgrave_data import (
     SPELLS,
     STARTING_GOLD,
     STARTING_SPELL_COUNT,
-    WIZARD_ITEM_SLOTS,
     XP_PER_LEVEL,
     all_spells_flat,
     cn_penalty,
@@ -115,6 +115,7 @@ from warband_store import (
     create_warband,
     default_homerules,
     delete_warband,
+    dismiss_all_temporary_members,
     dismiss_apprentice,
     dismiss_captain,
     duplicate_warband,
@@ -149,6 +150,9 @@ from warband_store import (
     set_base_location,
     set_soldier_status,
     set_wizard_state,
+    soldier_from_book_enabled,
+    spend_alt_xp,
+    ALT_XP_CONVERSIONS,
     update_homerules,
     warband_limits,
 )
@@ -198,14 +202,14 @@ app.jinja_env.globals.update(
     ALIGNED_SCHOOL_SPELLS=ALIGNED_SCHOOL_SPELLS,
     NEUTRAL_SPELLS=NEUTRAL_SPELLS,
     LEVEL_UP_OPTIONS=LEVEL_UP_OPTIONS,
-    WIZARD_ITEM_SLOTS=WIZARD_ITEM_SLOTS,
-    APPRENTICE_ITEM_SLOTS=APPRENTICE_ITEM_SLOTS,
     CAPTAIN_MIND_CONTROL_OPTIONS=CAPTAIN_MIND_CONTROL_OPTIONS,
     CAPTAIN_MIND_CONTROL_LABELS=CAPTAIN_MIND_CONTROL_LABELS,
     CAPTAIN_MODE_OPTIONS=CAPTAIN_MODE_OPTIONS,
     CAPTAIN_MODE_LABELS=CAPTAIN_MODE_LABELS,
     CAPTAIN_TRICKS=CAPTAIN_TRICKS,
     CAPTAIN_TRICK_BY_ID=CAPTAIN_TRICK_BY_ID,
+    KNIGHTLY_ORDERS=KNIGHTLY_ORDERS,
+    KNIGHTLY_ORDER_ELIGIBLE=KNIGHTLY_ORDER_ELIGIBLE,
     LEVELUP_STATS=LEVELUP_STATS,
     level_from_xp=level_from_xp,
     captain_effective_stats=captain_effective_stats,
@@ -472,8 +476,14 @@ def warband_view(warband_id: str):
     all_soldiers = wb.get("soldiers") or []
     def _is_temporary(s):
         return bool(SOLDIERS.get(s.get("type_key", ""), {}).get("temporary"))
-    soldiers = [enrich_soldier(wb, s) for s in all_soldiers if not _is_temporary(s)]
-    temporary_members = [enrich_soldier(wb, s) for s in all_soldiers if _is_temporary(s)]
+    # Temporary members (Raise Zombie, Summon Demon) show up in the same roster
+    # table as everyone else, but always sorted after the permanent soldiers —
+    # recomputed on every render so a manual reorder can't leave one stranded
+    # above a permanent soldier.
+    soldiers = [
+        enrich_soldier(wb, s)
+        for s in sorted(all_soldiers, key=lambda s: _is_temporary(s))
+    ]
     limits = warband_limits(wb)
     known = known_spell_ids(wb)
     wschool = (wb.get("wizard") or {}).get("school") or "Elementalist"
@@ -502,11 +512,15 @@ def warband_view(warband_id: str):
     # wizard's state forbids. Filtering here rather than in the template keeps
     # empty source groups from rendering a heading with nothing under it.
     wb_spells = known_spell_names(wb)
+    # Temporary members skip the known-spell check: hiring one is bookkeeping
+    # for a spell the player already cast for real, not a request the app
+    # needs to gate (see add_soldier()'s matching exemption).
     hireable = [
         {**c, "cost": expansions.soldier_cost(wb, c, c["key"])}
         for c in soldier_list_for_ui()
         if c["source"] in wb_sources
-        and (not c.get("requires_spell") or c["requires_spell"] in wb_spells)
+        and soldier_from_book_enabled(wb, c["source"])
+        and (c.get("temporary") or not c.get("requires_spell") or c["requires_spell"] in wb_spells)
         and expansions.soldier_state_block(wb, c["key"]) is None
     ]
     # The temporary-member catalog (Raise Zombie, Summon Demon) gets its own
@@ -524,7 +538,6 @@ def warband_view(warband_id: str):
         "warband_view.html",
         wb=wb,
         soldiers=soldiers,
-        temporary_members=temporary_members,
         temporary_groups_occupied=temporary_groups_occupied,
         limits=limits,
         catalog_groups=group_soldiers_by_source(hireable),
@@ -573,6 +586,13 @@ def warband_view(warband_id: str):
         can_add_pact_tier=expansions.can_add_pact_tier(wb),
         pact_break_penalty=expansions.pact_break_penalty(wb),
         wizard_level_up_options=expansions.level_up_options(wb),
+        # Blood Legacy: High-Level Wizards (per-wizard-level bonuses, each its
+        # own homerule toggle — see expansions.py).
+        wizard_item_slots=expansions.wizard_item_slots(wb),
+        apprentice_item_slots=expansions.apprentice_item_slots(wb),
+        casting_number_minimum=expansions.casting_number_minimum(wb),
+        alt_xp_enabled=expansions.alt_xp_enabled(wb),
+        alt_xp_conversions=ALT_XP_CONVERSIONS,
         # Treasure from the enabled books, offered as suggestions on the vault's
         # "Add item" field. It stays a free-text box — this only saves typing.
         magic_item_names=sorted(
@@ -621,6 +641,7 @@ def warband_update(warband_id: str):
                 wb,
                 request.form.get("type_key") or "",
                 (request.form.get("soldier_name") or "").strip(),
+                request.form.get("knightly_order") or "",
             )
             flash(msg, "success" if ok else "error")
             if ok:
@@ -638,6 +659,12 @@ def warband_update(warband_id: str):
                 request.form.get("soldier_id") or "",
                 refund=request.form.get("refund") == "on",
             )
+            flash(msg, "success" if ok else "error")
+            if ok:
+                save_warband(wb)
+
+        elif action == "dismiss_all_temporary":
+            ok, msg = dismiss_all_temporary_members(wb)
             flash(msg, "success" if ok else "error")
             if ok:
                 save_warband(wb)
@@ -894,6 +921,16 @@ def warband_update(warband_id: str):
                 else:
                     flash(msg, "error")
 
+        elif action == "spend_alt_xp":
+            ok, msg = spend_alt_xp(
+                wb,
+                request.form.get("conversion") or "",
+                request.form.get("xp_amount") or "0",
+            )
+            flash(msg, "success" if ok else "error")
+            if ok:
+                save_warband(wb)
+
         elif action == "post_game":
             gold = int(request.form.get("loot_gold") or 0)
             xp = int(request.form.get("loot_xp") or 0)
@@ -1007,11 +1044,12 @@ def _update_details(wb: dict) -> None:
     wiz["notes"] = request.form.get("wizard_notes") or ""
     wiz["has_dagger"] = request.form.get("wizard_dagger") == "on"
 
-    # Wizard item slots (fixed 5)
+    # Wizard item slots (base 5, +1/+2 under Blood Legacy's Increased Item Slots)
+    wiz_slot_n = expansions.wizard_item_slots(wb)
     wiz_slots = []
-    for i in range(WIZARD_ITEM_SLOTS):
+    for i in range(wiz_slot_n):
         wiz_slots.append((request.form.get(f"wizard_slot_{i}") or "").strip())
-    wiz["item_slots"] = normalize_item_slots(wiz_slots, WIZARD_ITEM_SLOTS)
+    wiz["item_slots"] = normalize_item_slots(wiz_slots, wiz_slot_n)
 
     f = request.files.get("wizard_portrait")
     if f and f.filename:
@@ -1022,10 +1060,11 @@ def _update_details(wb: dict) -> None:
         ap["name"] = (request.form.get("apprentice_name") or ap.get("name", "")).strip()
         ap["notes"] = request.form.get("apprentice_notes") or ""
         ap["has_dagger"] = request.form.get("apprentice_dagger") == "on"
+        ap_slot_n = expansions.apprentice_item_slots(wb)
         ap_slots = []
-        for i in range(APPRENTICE_ITEM_SLOTS):
+        for i in range(ap_slot_n):
             ap_slots.append((request.form.get(f"apprentice_slot_{i}") or "").strip())
-        ap["item_slots"] = normalize_item_slots(ap_slots, APPRENTICE_ITEM_SLOTS)
+        ap["item_slots"] = normalize_item_slots(ap_slots, ap_slot_n)
         af = request.files.get("apprentice_portrait")
         if af and af.filename:
             ap["portrait"] = save_portrait(wb["id"], "apprentice", af)

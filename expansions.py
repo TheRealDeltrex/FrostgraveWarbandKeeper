@@ -19,8 +19,12 @@ and returns values. warband_store owns the mutations and the campaign log.
 from __future__ import annotations
 
 from frostgrave_data import (
+    APPRENTICE_ITEM_SLOTS,
     LEVEL_UP_OPTIONS,
     MAX_SOLDIERS,
+    MAX_SPECIALISTS,
+    MAX_WIZARD_LEVEL,
+    WIZARD_ITEM_SLOTS,
     XP_PER_LEVEL,
 )
 
@@ -359,8 +363,88 @@ def max_soldiers(wb: dict) -> int:
 
 def wizard_stat_caps(wb: dict) -> dict:
     """Hard ceilings on the wizard's stats, {stat: max}. Empty for an ordinary
-    wizard — core Frostgrave caps nothing."""
-    return dict(LICH_STAT_CAPS) if is_lich(wb) else {}
+    wizard — core Frostgrave caps nothing, unless Blood Legacy's Increased
+    Maximum Health optional rule (see below) is on."""
+    caps = dict(LICH_STAT_CAPS) if is_lich(wb) else {}
+    if _hlw_active(wb, "hlw_max_health"):
+        base = caps.get("health", 20)
+        caps["health"] = base + min(10, wizard_level(wb) // 10)
+    return caps
+
+
+# --- Blood Legacy: High-Level Wizards ---------------------------------------
+#
+# A collection of optional rules (2e Blood Legacy, Chapter Three) that mainly
+# come into play once a wizard reaches higher levels. The book is explicit
+# that "each optional rule should be considered separately" — so each gets its
+# own homerule toggle rather than one bundled switch, and all of them also
+# need Blood Legacy itself switched on (they're that book's content).
+
+
+def _hlw_active(wb: dict, key: str) -> bool:
+    hr = wb.get("homerules") or {}
+    if not (hr.get("enabled_sources") or {}).get("Blood Legacy"):
+        return False
+    return bool(hr.get(key))
+
+
+def wizard_level(wb: dict) -> int:
+    return int((wb.get("wizard") or {}).get("level", 0))
+
+
+def max_specialists(wb: dict) -> int:
+    """Specialist-soldier cap, raised by Increased Specialist Soldier
+    Allowance: +1 per full 20 wizard levels, capped at +4 (8 total at level 80+)."""
+    extra = min(4, wizard_level(wb) // 20) if _hlw_active(wb, "hlw_specialist_allowance") else 0
+    return MAX_SPECIALISTS + extra
+
+
+def _hlw_item_slot_bonus(wb: dict) -> int:
+    if not _hlw_active(wb, "hlw_item_slots"):
+        return 0
+    level = wizard_level(wb)
+    return (1 if level >= 30 else 0) + (1 if level >= 70 else 0)
+
+
+def wizard_item_slots(wb: dict) -> int:
+    """Wizard item slots, raised by Increased Item Slots: +1 at level 30, +1
+    more at level 70 (max +2)."""
+    return WIZARD_ITEM_SLOTS + _hlw_item_slot_bonus(wb)
+
+
+def apprentice_item_slots(wb: dict) -> int:
+    """Same Increased Item Slots bonus, applied to the apprentice too — the
+    book raises both together."""
+    return APPRENTICE_ITEM_SLOTS + _hlw_item_slot_bonus(wb)
+
+
+def casting_number_minimum(wb: dict) -> int:
+    """Floor a Casting Number can be improved down to via level-ups — 4 instead
+    of the normal 5, for a level 100+ wizard under Lower Casting Number Minimum."""
+    if _hlw_active(wb, "hlw_casting_min") and wizard_level(wb) >= 100:
+        return 4
+    return 5
+
+
+def max_wizard_level(wb: dict) -> int:
+    """Level ceiling the wizard's earned-XP can convert into. Several of the
+    level-gated High-Level Wizards rules reference thresholds (70, 80, 100+)
+    well past the normal MAX_WIZARD_LEVEL ceiling, so this raises the cap
+    whenever one of those level-gated rules is switched on — otherwise the
+    higher tiers would simply be unreachable. Alternate Experience Point
+    Expenditure isn't level-gated, so it doesn't affect this."""
+    keys = ("hlw_specialist_allowance", "hlw_item_slots", "hlw_max_health", "hlw_casting_min")
+    if any(_hlw_active(wb, k) for k in keys):
+        return 999
+    return MAX_WIZARD_LEVEL
+
+
+def alt_xp_enabled(wb: dict) -> bool:
+    """Alternate Experience Point Expenditure — unlike the other High-Level
+    Wizards rules this one has no level requirement (it's about spending XP
+    that would otherwise sit unused, at any level), but it's still that book's
+    content, so it needs the same Blood Legacy + own-toggle gate."""
+    return _hlw_active(wb, "hlw_alt_xp")
 
 
 def level_up_options(wb: dict) -> list[dict]:

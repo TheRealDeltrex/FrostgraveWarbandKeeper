@@ -35,9 +35,14 @@ from frostgrave_data import (
     CAPTAIN_TRICK_BY_ID,
     CAPTAIN_TRICK_IDS,
     CAPTAIN_TRICKS,
+    KNIGHTLY_ORDER_BY_ID,
+    KNIGHTLY_ORDER_ELIGIBLE,
+    KNIGHTLY_ORDER_IDS,
+    KNIGHTLY_ORDERS,
     LEVELUP_STATS,
     MAX_SOLDIERS,
     MAX_SPECIALISTS,
+    MAX_WIZARD_LEVEL,
     NEUTRAL_SPELLS,
     OWN_SCHOOL_SPELLS,
     PROMOTE_CAPTAIN_BONUS,
@@ -229,6 +234,25 @@ def default_homerules() -> dict:
         # edition than the rest of the 2e tables. On by default; see
         # expansions.EDITION_2_SOLDIER_COSTS.
         "edition2_soldier_costs": True,
+        # Spellcaster Magazine's troop stat lines read as unbalanced to some
+        # groups; this lets a warband keep the book's spells/items/bestiary
+        # switched on while dropping just its hireable soldiers. On by default
+        # so enabling the book still behaves as it always has until turned off.
+        "spellcaster_magazine_soldiers": True,
+        # Knightly Orders (Spellcaster Magazine, Issue 1). Needs Spellcaster
+        # Magazine switched on in enabled_sources too — off by default like
+        # every other homerule here.
+        "knightly_orders_enabled": False,
+        # Blood Legacy's "High-Level Wizards" optional rules (Chapter Three).
+        # Each needs Blood Legacy switched on in enabled_sources *and* its own
+        # toggle here — the book insists each is agreed to separately. Off by
+        # default, like every other homerule. See expansions.py's
+        # "Blood Legacy: High-Level Wizards" section for what each one does.
+        "hlw_specialist_allowance": False,
+        "hlw_item_slots": False,
+        "hlw_max_health": False,
+        "hlw_casting_min": False,
+        "hlw_alt_xp": False,
     }
 
 
@@ -251,12 +275,23 @@ def enabled_sources(wb: dict) -> set[str]:
     return {"Core Rules"} | {book for book in SOURCE_BOOKS if es.get(book)}
 
 
+def soldier_from_book_enabled(wb: dict, source: str) -> bool:
+    """Whether soldiers from a source book may be hired, beyond the book
+    itself being switched on. Only Spellcaster Magazine has its own
+    soldiers-only toggle so far — see default_homerules()."""
+    if source == "Spellcaster Magazine":
+        hr = wb.get("homerules") or {}
+        return hr.get("spellcaster_magazine_soldiers", True)
+    return True
+
+
 def soldier_source_allowed(wb: dict, type_key: str) -> bool:
     """Whether a soldier type may be hired given this warband's source toggles."""
     info = get_soldier(type_key)
     if not info:
         return False
-    return info.get("source", "Core Rules") in enabled_sources(wb)
+    src = info.get("source", "Core Rules")
+    return src in enabled_sources(wb) and soldier_from_book_enabled(wb, src)
 
 
 def empty_captain(name: str = "", homerules: dict | None = None, origin: str = "hired") -> dict:
@@ -312,7 +347,7 @@ def sync_apprentice(wb: dict) -> None:
     ap["level"] = int(wiz.get("level", 0)) // 2
     ap.setdefault("has_dagger", True)
     ap["item_slots"] = normalize_item_slots(
-        ap.get("item_slots", ap.get("items")), APPRENTICE_ITEM_SLOTS
+        ap.get("item_slots", ap.get("items")), expansions.apprentice_item_slots(wb)
     )
 
 
@@ -353,7 +388,7 @@ def recompute_spell_cns(wb: dict) -> None:
         s["cn_penalty"] = pen
         s["relation"] = school_relation(school, s.get("school", school))
         s["base_cn"] = base
-        s["cn"] = max(5, base + pen - improve)
+        s["cn"] = max(expansions.casting_number_minimum(wb), base + pen - improve)
 
 
 def validate_starting_spells(
@@ -622,10 +657,11 @@ def load_warband(warband_id: str) -> dict | None:
     if state.get("kind") not in expansions.WIZARD_STATES:
         state["kind"] = expansions.STATE_NONE
     # Migrate items -> item_slots
+    wiz_slot_n = expansions.wizard_item_slots(wb)
     if "item_slots" not in wiz or not isinstance(wiz.get("item_slots"), list):
-        wiz["item_slots"] = normalize_item_slots(wiz.get("items"), WIZARD_ITEM_SLOTS)
+        wiz["item_slots"] = normalize_item_slots(wiz.get("items"), wiz_slot_n)
     else:
-        wiz["item_slots"] = normalize_item_slots(wiz["item_slots"], WIZARD_ITEM_SLOTS)
+        wiz["item_slots"] = normalize_item_slots(wiz["item_slots"], wiz_slot_n)
 
     if isinstance(wiz.get("spells"), str):
         wiz["spells"] = []
@@ -652,7 +688,7 @@ def load_warband(warband_id: str) -> dict | None:
         ap.setdefault("has_dagger", True)
         ap.pop("health_current", None)
         if "item_slots" not in ap or not isinstance(ap.get("item_slots"), list):
-            ap["item_slots"] = normalize_item_slots(ap.get("items"), APPRENTICE_ITEM_SLOTS)
+            ap["item_slots"] = normalize_item_slots(ap.get("items"), expansions.apprentice_item_slots(wb))
         sync_apprentice(wb)
     # Homerules (Captains/Soldier Leveling/Promote Captain): backfill defensively,
     # per-key, so future new fields backfill too.
@@ -937,15 +973,6 @@ def active_permanent_soldiers(wb: dict) -> list[dict]:
     ]
 
 
-def active_temporary_members(wb: dict) -> list[dict]:
-    """Active Raise Zombie / Summon Demon members — shown in their own section,
-    not counted against the soldier or specialist caps."""
-    return [
-        s for s in active_soldiers(wb)
-        if SOLDIERS.get(s.get("type_key", ""), {}).get("temporary")
-    ]
-
-
 def soldier_count(wb: dict) -> int:
     """Permanent active soldiers plus the Captain (if any) — a Captain occupies
     a soldier slot just like any other roster member, on top of their own
@@ -979,13 +1006,14 @@ def warband_limits(wb: dict) -> dict:
     level = int(wiz.get("level", 0))
     per_level = expansions.xp_per_level(wb)
     cap = expansions.max_soldiers(wb)
+    spec_cap = expansions.max_specialists(wb)
     return {
         "soldiers": n_soldiers,
         "max_soldiers": cap,
         "specialists": specs,
-        "max_specialists": MAX_SPECIALISTS,
+        "max_specialists": spec_cap,
         "soldiers_ok": n_soldiers <= cap,
-        "specialists_ok": specs <= MAX_SPECIALISTS,
+        "specialists_ok": specs <= spec_cap,
         "has_apprentice": wb.get("apprentice") is not None,
         "apprentice_cost": APPRENTICE_COST,
         "starting_gold": STARTING_GOLD,
@@ -995,7 +1023,7 @@ def warband_limits(wb: dict) -> dict:
         "level": level,
         "xp_per_level": per_level,
         "xp_to_next": xp_to_next_level(xp, level, per_level),
-        "pending_levels": max(0, level_from_xp(xp, per_level) - level),
+        "pending_levels": max(0, level_from_xp(xp, per_level, expansions.max_wizard_level(wb)) - level),
     }
 
 
@@ -1010,6 +1038,7 @@ def enrich_soldier(wb: dict, s: dict) -> dict:
     # (Edition 2 toggle, Beastcrafter surcharge, base discount) always apply
     # to the current settings, not a value frozen at hire time.
     out["cost"] = expansions.soldier_cost(wb, cat, type_key) if cat else s.get("cost", 0)
+    out["knightly_order_info"] = KNIGHTLY_ORDER_BY_ID.get(s.get("knightly_order") or "")
     return out
 
 
@@ -1039,18 +1068,33 @@ def _new_soldier_leveling_fields(info: dict) -> dict:
     }
 
 
-def add_soldier(wb: dict, type_key: str, name: str = "") -> tuple[bool, str]:
+def add_soldier(wb: dict, type_key: str, name: str = "", order: str = "") -> tuple[bool, str]:
     info = get_soldier(type_key)
     if not info:
         return False, "Unknown soldier type."
     src = info.get("source", "Core Rules")
     if src not in enabled_sources(wb):
         return False, f"{info['name']} is from {src}; enable that source under Additional Rules and Homerules first."
+    if not soldier_from_book_enabled(wb, src):
+        return False, f"{info['name']}'s soldiers are switched off for {src} under Additional Rules and Homerules (its spells/items/bestiary can stay on)."
+    order = (order or "").strip()
+    if order:
+        hr = wb.get("homerules") or {}
+        if type_key not in KNIGHTLY_ORDER_ELIGIBLE:
+            return False, "Knightly Orders can only be chosen for a Knight or Templar."
+        if "Spellcaster Magazine" not in enabled_sources(wb) or not hr.get("knightly_orders_enabled"):
+            return False, "Knightly Orders need Spellcaster Magazine and its own toggle switched on under Additional Rules and Homerules."
+        if order not in KNIGHTLY_ORDER_IDS:
+            return False, "Unknown Knightly Order."
     blocked = expansions.soldier_state_block(wb, type_key)
     if blocked:
         return False, blocked
     req_spell = info.get("requires_spell")
-    if req_spell:
+    # Temporary members (Raise Zombie, Summon Demon) are bookkeeping for what's
+    # already happened at the table — the player cast the spell for real, dice
+    # and all, so the app doesn't re-gate the add on the wizard's known-spell
+    # list the way it does for the permanent summons below.
+    if req_spell and not info.get("temporary"):
         if req_spell not in known_spell_names(wb):
             return False, f"{info['name']} can only be summoned with the {req_spell} spell — your wizard doesn't know it."
         if req_spell == "Animal Companion" and has_animal_companion(wb):
@@ -1071,14 +1115,24 @@ def add_soldier(wb: dict, type_key: str, name: str = "") -> tuple[bool, str]:
             if temp_group == "zombie":
                 return False, "You may only have one raised zombie at a time — Raise Zombie can be cast again once it's gone."
             return False, "Summon Demon can't be cast again while you're already controlling a summoned demon."
-    cap = expansions.max_soldiers(wb)
-    if soldier_count(wb) >= cap:
-        return False, f"Soldier limit reached ({cap})."
-    if info["category"] == "specialist" and specialist_count(wb) >= MAX_SPECIALISTS:
-        return False, f"Specialist limit reached ({MAX_SPECIALISTS})."
+    if not info.get("temporary"):
+        cap = expansions.max_soldiers(wb)
+        if soldier_count(wb) >= cap:
+            return False, f"Soldier limit reached ({cap})."
+        spec_cap = expansions.max_specialists(wb)
+        if info["category"] == "specialist" and specialist_count(wb) >= spec_cap:
+            return False, f"Specialist limit reached ({spec_cap})."
     cost = expansions.soldier_cost(wb, info, type_key)
     if wb.get("gold", 0) < cost:
         return False, f"Not enough gold (need {cost} gc, have {wb.get('gold', 0)} gc)."
+
+    leveling_fields = _new_soldier_leveling_fields(info)
+    order_suffix = ""
+    if order:
+        order_info = KNIGHTLY_ORDER_BY_ID[order]
+        stat = order_info["stat"]
+        leveling_fields[stat] = leveling_fields[stat] + order_info["delta"]
+        order_suffix = f", {order_info['name']}"
 
     soldier = {
         "id": uuid.uuid4().hex[:10],
@@ -1088,12 +1142,13 @@ def add_soldier(wb: dict, type_key: str, name: str = "") -> tuple[bool, str]:
         "items": [],
         "notes": "",
         "portrait": None,
-        **_new_soldier_leveling_fields(info),
+        "knightly_order": order or None,
+        **leveling_fields,
     }
     wb["gold"] = int(wb.get("gold", 0)) - cost
     wb.setdefault("soldiers", []).append(soldier)
     wb.setdefault("history", []).append(
-        {"when": _now(), "text": f"Hired {soldier['name']} ({info['name']}) for {cost} gc."}
+        {"when": _now(), "text": f"Hired {soldier['name']} ({info['name']}{order_suffix}) for {cost} gc."}
     )
     return True, f"Hired {soldier['name']} ({info['name']}) for {cost} gc. Treasury: {wb['gold']} gc."
 
@@ -1116,6 +1171,20 @@ def remove_soldier(wb: dict, soldier_id: str, refund: bool = False) -> tuple[boo
             wb.setdefault("history", []).append({"when": _now(), "text": text})
             return True, text
     return False, "Soldier not found."
+
+
+def dismiss_all_temporary_members(wb: dict) -> tuple[bool, str]:
+    """Remove every Raise Zombie / Summon Demon member at once — the "the game
+    ended, clear the table" button, rather than removing them one at a time."""
+    soldiers = wb.get("soldiers") or []
+    temp = [s for s in soldiers if SOLDIERS.get(s.get("type_key", ""), {}).get("temporary")]
+    if not temp:
+        return False, "No temporary members to dismiss."
+    wb["soldiers"] = [s for s in soldiers if not SOLDIERS.get(s.get("type_key", ""), {}).get("temporary")]
+    names = ", ".join(s.get("name", "?") for s in temp)
+    text = f"Dismissed {len(temp)} temporary member(s): {names}."
+    wb.setdefault("history", []).append({"when": _now(), "text": text})
+    return True, text
 
 
 def set_soldier_status(wb: dict, soldier_id: str, status: str) -> tuple[bool, str]:
@@ -1271,6 +1340,13 @@ def update_homerules(wb: dict, form) -> tuple[bool, str]:
             },
             "pentangle_schools_playable": form.get("pentangle_schools_playable") == "on",
             "edition2_soldier_costs": form.get("edition2_soldier_costs") == "on",
+            "spellcaster_magazine_soldiers": form.get("spellcaster_magazine_soldiers") == "on",
+            "knightly_orders_enabled": form.get("knightly_orders_enabled") == "on",
+            "hlw_specialist_allowance": form.get("hlw_specialist_allowance") == "on",
+            "hlw_item_slots": form.get("hlw_item_slots") == "on",
+            "hlw_max_health": form.get("hlw_max_health") == "on",
+            "hlw_casting_min": form.get("hlw_casting_min") == "on",
+            "hlw_alt_xp": form.get("hlw_alt_xp") == "on",
         }
     except (TypeError, ValueError):
         return False, "Invalid homerule value."
@@ -1326,8 +1402,9 @@ def hire_captain(
     soldier_cap = expansions.max_soldiers(wb)
     if soldier_count(wb) >= soldier_cap:
         return False, f"Soldier limit reached ({soldier_cap})."
-    if specialist_count(wb) >= MAX_SPECIALISTS:
-        return False, f"Specialist limit reached ({MAX_SPECIALISTS})."
+    spec_cap = expansions.max_specialists(wb)
+    if specialist_count(wb) >= spec_cap:
+        return False, f"Specialist limit reached ({spec_cap})."
     cost = int(hr.get("captain_hiring_cost", CAPTAIN_HIRING_COST))
     if int(wb.get("gold", 0)) < cost:
         return False, f"Need {cost} gc for a captain."
@@ -1373,6 +1450,7 @@ def _apply_xp_delta(
     overall_max: int | None,
     label: str,
     per_level: int = XP_PER_LEVEL,
+    xp_level_cap: int = MAX_WIZARD_LEVEL,
 ) -> tuple[bool, str]:
     """Shared XP add/remove logic for Wizard, Captain, and Soldier. A negative amount
     removes XP (clamped so the total never drops below 0). If that leaves the recorded
@@ -1381,7 +1459,11 @@ def _apply_xp_delta(
     entry) — until the level catches back up.
 
     `per_level` is the XP a level costs; only the wizard ever varies it (a Lich
-    levels at 150 instead of 100). Captains and soldiers keep the default."""
+    levels at 150 instead of 100). Captains and soldiers keep the default.
+    `xp_level_cap` is the level ceiling XP alone can earn — separate from
+    `overall_max`, which additionally clamps for Captain/Soldier's own max-level
+    homerule. Only the wizard ever raises this (Blood Legacy's High-Level
+    Wizards rules reference levels past the normal ceiling)."""
     if amount == 0:
         return False, "Enter a non-zero XP amount."
     old_xp = int(entity.get("xp", 0))
@@ -1391,7 +1473,7 @@ def _apply_xp_delta(
     sign = "+" if actual >= 0 else ""
     msg = f"{label} {sign}{actual} XP (total {new_xp})."
 
-    earned = level_from_xp(new_xp, per_level)
+    earned = level_from_xp(new_xp, per_level, xp_level_cap)
     if overall_max is not None:
         earned = min(earned, overall_max)
     lost = 0
@@ -1605,8 +1687,9 @@ def promote_soldier_to_captain(
     # one member out, the Captain in), but a Captain always counts as a
     # specialist regardless of what they were promoted from, so promoting a
     # non-specialist can still push the specialist count over the cap.
-    if info.get("category") != "specialist" and specialist_count(wb) >= MAX_SPECIALISTS:
-        return False, f"Specialist limit reached ({MAX_SPECIALISTS})."
+    spec_cap = expansions.max_specialists(wb)
+    if info.get("category") != "specialist" and specialist_count(wb) >= spec_cap:
+        return False, f"Specialist limit reached ({spec_cap})."
     stats = {
         "move": int(info.get("move", 0)),
         "fight": int(soldier.get("fight", info.get("fight", 0)) or 0),
@@ -1795,7 +1878,7 @@ def apply_level_up(
     wiz = wb.setdefault("wizard", {})
     xp = int(wiz.get("xp", 0))
     level = int(wiz.get("level", 0))
-    earned = level_from_xp(xp, expansions.xp_per_level(wb))
+    earned = level_from_xp(xp, expansions.xp_per_level(wb), expansions.max_wizard_level(wb))
     if level >= earned:
         return False, f"No pending level-ups (level {level}, XP {xp}). Earn more XP first."
 
@@ -1865,7 +1948,7 @@ def apply_level_up(
                 s["cn_improve"] = int(s.get("cn_improve", 0)) + 1
                 base = int(s.get("base_cn", s.get("cn", 10)))
                 pen = int(s.get("cn_penalty", 0))
-                s["cn"] = max(5, base + pen - int(s["cn_improve"]))
+                s["cn"] = max(expansions.casting_number_minimum(wb), base + pen - int(s["cn_improve"]))
                 detail = f"Improved {s['name']} to CN {s['cn']}"
                 meta["spell_id"] = s["id"]
                 meta["spell_name"] = s["name"]
@@ -1986,7 +2069,7 @@ def reverse_last_level_up(wb: dict) -> tuple[bool, str]:
         target["cn_improve"] = imp - 1
         base = int(target.get("base_cn", target.get("cn", 10)))
         pen = int(target.get("cn_penalty", 0))
-        target["cn"] = max(5, base + pen - int(target["cn_improve"]))
+        target["cn"] = max(expansions.casting_number_minimum(wb), base + pen - int(target["cn_improve"]))
     else:
         return False, f"Cannot reverse level-up type “{choice}” (missing undo data)."
 
@@ -2010,10 +2093,93 @@ def add_wizard_xp(wb: dict, amount: int) -> tuple[bool, str]:
         None,
         "Wizard",
         expansions.xp_per_level(wb),
+        expansions.max_wizard_level(wb),
     )
     if ok:
         add_history(wb, msg)
     return ok, msg
+
+
+# Blood Legacy's Alternate Experience Point Expenditure (Chapter Three): ways
+# to spend banked XP other than a wizard level. Two of these (casting_boost,
+# black_market) don't correspond to a stat this app tracks — Out-of-Game
+# Casting Rolls and Black Market rolls are dice the player makes at the table,
+# not something the app simulates — so they're logged to the campaign history
+# for the player's own bookkeeping rather than applied anywhere automatically.
+ALT_XP_CONVERSIONS = {
+    "gold": {
+        "label": "Gold crowns (100 XP → 100gc)",
+        "xp_per_unit": 100,
+        "value_per_unit": 100,
+        "kind": "gold",
+    },
+    "casting_boost": {
+        "label": "Out-of-Game Casting Roll boost (20 XP → +1, max +5 per casting)",
+        "xp_per_unit": 20,
+        "value_per_unit": 1,
+        "kind": "note",
+        "note": "+{amount} to one Out-of-Game Casting Roll",
+        "max_xp_per_use": 100,
+    },
+    "potion_ingredients": {
+        "label": "Potion ingredients (1 XP → 2gc)",
+        "xp_per_unit": 1,
+        "value_per_unit": 2,
+        "kind": "gold",
+        "note": "toward potion ingredients",
+    },
+    "apprentice": {
+        "label": "New apprentice (1 XP → 3gc)",
+        "xp_per_unit": 1,
+        "value_per_unit": 3,
+        "kind": "gold",
+        "note": "toward a new apprentice",
+    },
+    "black_market": {
+        "label": "Extra Black Market roll (25 XP → 1 roll, max 100 XP/scenario)",
+        "xp_per_unit": 25,
+        "value_per_unit": 1,
+        "kind": "note",
+        "note": "+{amount} extra Black Market roll(s), usable on any potion/weapon/armour/magic-item/grimoire table from any book",
+        "max_xp_per_use": 100,
+    },
+}
+
+
+def spend_alt_xp(wb: dict, conversion: str, xp_amount: int) -> tuple[bool, str]:
+    """Trade banked XP for gold or a logged one-off bonus instead of a wizard
+    level — has no effect on the wizard's level. See ALT_XP_CONVERSIONS."""
+    if not expansions.alt_xp_enabled(wb):
+        return False, "Alternate Experience Point Expenditure needs Blood Legacy and its own homerule switched on."
+    conv = ALT_XP_CONVERSIONS.get(conversion)
+    if not conv:
+        return False, "Unknown conversion."
+    try:
+        xp_amount = int(xp_amount)
+    except (TypeError, ValueError):
+        return False, "Enter a whole number of XP to spend."
+    if xp_amount <= 0:
+        return False, "Enter a positive amount of XP to spend."
+    if xp_amount % conv["xp_per_unit"] != 0:
+        return False, f"Amount must be a multiple of {conv['xp_per_unit']} XP."
+    max_use = conv.get("max_xp_per_use")
+    if max_use and xp_amount > max_use:
+        return False, f"Max {max_use} XP per use for this option."
+    wiz = wb.setdefault("wizard", {})
+    xp = int(wiz.get("xp", 0))
+    if xp < xp_amount:
+        return False, f"Not enough XP (have {xp}, need {xp_amount})."
+    units = xp_amount // conv["xp_per_unit"]
+    amount = units * conv["value_per_unit"]
+    wiz["xp"] = xp - xp_amount
+    if conv["kind"] == "gold":
+        wb["gold"] = int(wb.get("gold", 0)) + amount
+        suffix = f" {conv['note']}" if conv.get("note") else ""
+        text = f"Spent {xp_amount} XP for {amount}gc{suffix}."
+    else:
+        text = f"Spent {xp_amount} XP: {conv['note'].format(amount=amount)}."
+    wb.setdefault("history", []).append({"when": _now(), "text": text})
+    return True, text
 
 
 def known_spell_ids(wb: dict) -> set[str]:
@@ -2276,7 +2442,7 @@ def recruit_preview(wb: dict, type_key: str) -> dict:
         "soldiers_after": active + 1,
         "specialists_after": specs + (1 if is_spec else 0),
         "hits_soldier_limit": active >= expansions.max_soldiers(wb),
-        "hits_specialist_limit": is_spec and specs >= MAX_SPECIALISTS,
+        "hits_specialist_limit": is_spec and specs >= expansions.max_specialists(wb),
         "category": info.get("category", "standard"),
         "name": info.get("name", type_key),
     }

@@ -124,6 +124,32 @@ CAPTAIN_TRICK_IDS = {t["id"] for t in CAPTAIN_TRICKS}
 CAPTAIN_TRICK_BY_ID = {t["id"]: t for t in CAPTAIN_TRICKS}
 CAPTAIN_STARTING_TRICKS = 2
 
+# Knightly Orders (Spellcaster Magazine, Issue 1) — an optional pick made once,
+# at hire time, for a Knight or Templar only. Each order trades one point off
+# the type's base Fight or Health for a special ability; the ability text is
+# purely descriptive (not mechanically simulated), same as CAPTAIN_TRICKS
+# above, while the stat trade-off is applied for real via the delta below.
+# The book's own "Custom orders" entry (decrease Fight by 1 for a major
+# ability of the group's own devising, or Health by 1 for a minor one) is a
+# DIY template rather than a concrete pick, so it stays reference-only text
+# in expansion_rules.json instead of becoming a selectable option here.
+KNIGHTLY_ORDERS = [
+    {"id": "sun", "name": "Order of the Sun", "stat": "fight", "delta": -1, "ability": "+2 Fight when fighting undead or demons"},
+    {"id": "snake", "name": "Order of the Snake", "stat": "fight", "delta": -1, "ability": "All attacks count as poisonous"},
+    {"id": "hammer", "name": "Order of the Hammer", "stat": "fight", "delta": -1, "ability": "+2 Fight and +2 Damage when fighting constructs"},
+    {"id": "diamond", "name": "Order of the Diamond", "stat": "health", "delta": -1, "ability": "Never suffers the effects of being wounded"},
+    {"id": "fire", "name": "Order of Fire", "stat": "health", "delta": -1, "ability": "+4 Armour against damage from Elemental magic"},
+    {"id": "lance", "name": "Order of the Lance", "stat": "fight", "delta": -1, "ability": "Two item slots; only one may hold an Armour-boosting item"},
+    {"id": "mirror", "name": "Order of the Mirror", "stat": "fight", "delta": -1, "ability": "Immune to Beauty, Monstrous Form, and Invisibility"},
+    {"id": "river", "name": "Order of the River", "stat": "health", "delta": -1, "ability": "Once per game, may spend an action to heal 3 damage"},
+    {"id": "gauntlet", "name": "Order of the Gauntlet", "stat": "health", "delta": -1, "ability": "If activated in the soldier phase, may declare a group activation with one other soldier within 3\""},
+    {"id": "tower", "name": "Order of the Tower", "stat": "health", "delta": -1, "ability": "+1 Fight and +1 damage when fighting a creature with the Large trait"},
+    {"id": "gallows", "name": "Order of the Gallows", "stat": "health", "delta": -1, "ability": "May reroll its survival roll after the game, but must keep the reroll even if it's worse"},
+]
+KNIGHTLY_ORDER_IDS = {o["id"] for o in KNIGHTLY_ORDERS}
+KNIGHTLY_ORDER_BY_ID = {o["id"]: o for o in KNIGHTLY_ORDERS}
+KNIGHTLY_ORDER_ELIGIBLE = {"knight", "templar"}
+
 # --- Soldier Leveling (homerule, not core 2e) -------------------------------
 SOLDIER_LEVELING_ENABLED = False
 SOLDIER_MAX_LEVELS = 3
@@ -2278,8 +2304,8 @@ def xp_for_level(level: int, per_level: int = XP_PER_LEVEL) -> int:
     return max(0, int(level)) * int(per_level or XP_PER_LEVEL)
 
 
-def level_from_xp(xp: int, per_level: int = XP_PER_LEVEL) -> int:
-    return min(MAX_WIZARD_LEVEL, max(0, int(xp) // int(per_level or XP_PER_LEVEL)))
+def level_from_xp(xp: int, per_level: int = XP_PER_LEVEL, max_level: int = MAX_WIZARD_LEVEL) -> int:
+    return min(max_level, max(0, int(xp) // int(per_level or XP_PER_LEVEL)))
 
 
 def xp_to_next_level(xp: int, level: int, per_level: int = XP_PER_LEVEL) -> int:

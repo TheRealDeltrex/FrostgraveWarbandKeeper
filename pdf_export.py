@@ -20,9 +20,7 @@ except Exception:  # pragma: no cover - only hit if Pillow genuinely isn't insta
     Image = None
 
 from frostgrave_data import (
-    APPRENTICE_ITEM_SLOTS,
     CAPTAIN_TRICK_BY_ID,
-    WIZARD_ITEM_SLOTS,
     format_stat,
 )
 from game_content import item_slot_cost
@@ -296,7 +294,7 @@ def build_warband_pdf(wb: dict) -> bytes:
         pdf,
         left,
         slots,
-        WIZARD_ITEM_SLOTS,
+        expansions.wizard_item_slots(wb),
         bool(wiz.get("has_dagger")),
         "Equipment",
     )
@@ -336,7 +334,7 @@ def build_warband_pdf(wb: dict) -> bytes:
             pdf,
             left,
             ap_slots,
-            APPRENTICE_ITEM_SLOTS,
+            expansions.apprentice_item_slots(wb),
             bool(ap.get("has_dagger")),
             "Equipment",
         )
