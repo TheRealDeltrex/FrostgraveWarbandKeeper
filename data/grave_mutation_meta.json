@@ -1,0 +1,4655 @@
+{
+ "1": {
+  "short": "Crystalline Body: +2 Armour, Health halved (round up)",
+  "stat_delta": {
+   "armour": {
+    "add": 2
+   },
+   "health": {
+    "multiply": 0.5,
+    "round": "up"
+   }
+  }
+ },
+ "10": {
+  "short": "Elbow Spikes: no damage penalty for being unarmed",
+  "stat_delta": null
+ },
+ "100": {
+  "short": "Beak: always armed with a dagger",
+  "stat_delta": null
+ },
+ "1000": {
+  "short": "Three Lives: can roll \"Dead\" twice before actually dying; both times treated as Full Recovery instead",
+  "stat_delta": null
+ },
+ "101": {
+  "short": "Frightening Appearance: moving into combat with it -> Will Roll (TN6) or cannot",
+  "stat_delta": null
+ },
+ "102": {
+  "short": "Steady Heart: +1 Shoot",
+  "stat_delta": {
+   "shoot": {
+    "add": 1
+   }
+  }
+ },
+ "103": {
+  "short": "Life Drain: figures activating within 2\" (not turn 1) suffer 1 damage (not undead/constructs)",
+  "stat_delta": null
+ },
+ "104": {
+  "short": "Opportunist: natural 20 in melee on its own activation -> gains an extra action",
+  "stat_delta": null
+ },
+ "105": {
+  "short": "Mouths in Hands: always armed with a dagger; cannot cast spells or speak without a free hand",
+  "stat_delta": null
+ },
+ "106": {
+  "short": "Adrenaline Surge: once/game, free action: +3 Move for rest of the turn",
+  "stat_delta": null
+ },
+ "107": {
+  "short": "Unlife Feeder: undead/constructs activating within 2\" (not turn 1) suffer 1 damage",
+  "stat_delta": null
+ },
+ "108": {
+  "short": "Extendable Neck: LoS/spellcasting up to 1\" higher than its actual height (not for attacks)",
+  "stat_delta": null
+ },
+ "109": {
+  "short": "Giant Fighter: +1 damage vs figures with the Large trait",
+  "stat_delta": null
+ },
+ "11": {
+  "short": "Acidic Blood: damaged in melee -> all other figures in that combat suffer 1 damage",
+  "stat_delta": null
+ },
+ "110": {
+  "short": "Health Transference: action: take up to 3 damage to heal a non-combat ally within 2\" by that much",
+  "stat_delta": null
+ },
+ "111": {
+  "short": "Blood Frenzy: a Wounded figure within 12\"/LoS on activation -> must move to and attack it",
+  "stat_delta": null
+ },
+ "112": {
+  "short": "Inner Cavity: +1 item slot (1-slot items only); needs an action to retrieve before first use",
+  "stat_delta": null
+ },
+ "113": {
+  "short": "Cursed: -1 to all Stat Rolls",
+  "stat_delta": null
+ },
+ "114": {
+  "short": "Foresight: natural 20 for initiative -> gains an extra action next activation",
+  "stat_delta": null
+ },
+ "115": {
+  "short": "Concentration Leech: figures casting a spell within 3\"/LoS suffer -1 to the Casting Roll",
+  "stat_delta": null
+ },
+ "116": {
+  "short": "Glimpses of Doom: natural 20 for initiative -> gets no actions on its next activation",
+  "stat_delta": null
+ },
+ "117": {
+  "short": "Extra Heavy: suffers double damage from falls",
+  "stat_delta": null
+ },
+ "118": {
+  "short": "Poisonous Warts: damaged in melee -> other figures in that combat: Will Roll (TN10) or poisoned",
+  "stat_delta": null
+ },
+ "119": {
+  "short": "Withered Leg: Smashed Leg permanent injury",
+  "stat_delta": null
+ },
+ "12": {
+  "short": "Impact Absorbing Leg Joints: halve fall distance for fall-damage purposes",
+  "stat_delta": null
+ },
+ "120": {
+  "short": "Quills: opponent rolls natural 1-2 in melee vs it -> opponent suffers +2 damage (on top of any loss damage)",
+  "stat_delta": null
+ },
+ "121": {
+  "short": "Puncture Weakened Skin: +1 damage from non-area/non-template shooting attacks it suffers",
+  "stat_delta": null
+ },
+ "122": {
+  "short": "Vestigial Wings: needs +50gc specially fitted armour (soldier: must be paid or loses armour's benefits)",
+  "stat_delta": null
+ },
+ "123": {
+  "short": "Centaur: Move stat is 8; cannot climb ladders or other vertical terrain",
+  "stat_delta": {
+   "move": {
+    "set": 8
+   }
+  }
+ },
+ "124": {
+  "short": "Furious Attack: once/game, +3 to a Combat Roll in melee it initiates (decide before rolling)",
+  "stat_delta": null
+ },
+ "125": {
+  "short": "Painless: Never Wounded trait; -1 Armour",
+  "stat_delta": {
+   "armour": {
+    "add": -1
+   }
+  }
+ },
+ "126": {
+  "short": "Improved Smell: True Sight trait (range 4\") against all figures within 8\"",
+  "stat_delta": null
+ },
+ "127": {
+  "short": "Spatially Unstable: natural 1 on any roll -> moves 6\" in a random direction (still suffers the roll's result)",
+  "stat_delta": null
+ },
+ "128": {
+  "short": "Armoured Shell: cannot wear armour; +2 Armour",
+  "stat_delta": {
+   "armour": {
+    "add": 2
+   }
+  }
+ },
+ "129": {
+  "short": "Owl Head: +2 Will",
+  "stat_delta": {
+   "will": {
+    "add": 2
+   }
+  }
+ },
+ "13": {
+  "short": "Brittle Bones: -1 to Survival Rolls",
+  "stat_delta": null
+ },
+ "130": {
+  "short": "Magic Resistant: +1 to Will Rolls to resist/overcome spells",
+  "stat_delta": null
+ },
+ "131": {
+  "short": "Limb Rearrangement: each opponent's first melee Combat Roll vs it each game is at -1",
+  "stat_delta": null
+ },
+ "132": {
+  "short": "Magic Vulnerability: -1 to Will Rolls to resist/overcome spells",
+  "stat_delta": null
+ },
+ "133": {
+  "short": "Jittery: +1 to Combat Rolls against shooting attacks",
+  "stat_delta": null
+ },
+ "134": {
+  "short": "Emaciated: -1 Armour",
+  "stat_delta": {
+   "armour": {
+    "add": -1
+   }
+  }
+ },
+ "135": {
+  "short": "No Head: wearing armour makes it blind, mute, and deaf unless it has another means of those senses",
+  "stat_delta": null
+ },
+ "136": {
+  "short": "Death Curse: Survival Table rolls: roll three dice, take the lowest",
+  "stat_delta": null
+ },
+ "137": {
+  "short": "Covered in Fungus: uncontrolled creatures avoid it unless no other target is eligible or forced within 1\"",
+  "stat_delta": null
+ },
+ "138": {
+  "short": "Telekinetic Push: once/game, action: target within 12\"/LoS; fail Move Roll (TN20) -> pushed 3\" directly away",
+  "stat_delta": null
+ },
+ "139": {
+  "short": "Hair of Snakes: always armed with a dagger; its dagger attacks are poisonous",
+  "stat_delta": null
+ },
+ "14": {
+  "short": "Spell Sickness: casts or is targeted by a spell -> Will Roll (TN10) or 2 damage",
+  "stat_delta": null
+ },
+ "140": {
+  "short": "Wheels: +1 Move; -5 to Move Stat Rolls",
+  "stat_delta": {
+   "move": {
+    "add": 1
+   }
+  }
+ },
+ "141": {
+  "short": "Explosive Sneeze: natural 1 on Initiative (not turn 1) -> +1 shooting attack to all within 2\"",
+  "stat_delta": null
+ },
+ "142": {
+  "short": "Massive Ears: True Sight trait, range 4\"",
+  "stat_delta": null
+ },
+ "143": {
+  "short": "Mirror Face: moving into combat with it -> Will Roll (TN10) or stops 1\" away, activation ends",
+  "stat_delta": null
+ },
+ "144": {
+  "short": "Steady Hands: +1 Shoot",
+  "stat_delta": {
+   "shoot": {
+    "add": 1
+   }
+  }
+ },
+ "145": {
+  "short": "Short Legs: -1 Move",
+  "stat_delta": {
+   "move": {
+    "add": -1
+   }
+  }
+ },
+ "146": {
+  "short": "Animal Allergy: -2 Fight while in combat with an animal",
+  "stat_delta": null
+ },
+ "147": {
+  "short": "Weak: half melee damage dealt (round up)",
+  "stat_delta": null
+ },
+ "148": {
+  "short": "Extremely Hairy: -1 to shooting attacks against it unless it wears heavy armour",
+  "stat_delta": null
+ },
+ "149": {
+  "short": "Balancing Tail: automatically passes Move Rolls to avoid falling",
+  "stat_delta": null
+ },
+ "15": {
+  "short": "Crab Claw: always armed with hand weapon (+1 damage); no shields or 2-handed/2-slot weapons",
+  "stat_delta": null
+ },
+ "150": {
+  "short": "Zombie-Reanimation: reduced to 0 Health -> place an uncontrolled zombie where it fell",
+  "stat_delta": null
+ },
+ "151": {
+  "short": "Trophy: Bounty (20gc) trait",
+  "stat_delta": null
+ },
+ "152": {
+  "short": "Body of Glass: -3 Armour",
+  "stat_delta": {
+   "armour": {
+    "add": -3
+   }
+  }
+ },
+ "153": {
+  "short": "Death Scream: reduced to 0 Health -> +0 attack to all figures within 6\"",
+  "stat_delta": null
+ },
+ "154": {
+  "short": "Exoskeleton: cannot wear armour; +2 Armour, -3 Health",
+  "stat_delta": {
+   "armour": {
+    "add": 2
+   },
+   "health": {
+    "add": -3
+   }
+  }
+ },
+ "155": {
+  "short": "Insect Centaur: Expert Climber trait",
+  "stat_delta": null
+ },
+ "156": {
+  "short": "Extra Hand: +1 item slot",
+  "stat_delta": null
+ },
+ "157": {
+  "short": "Soul-Bonded: +1 Health; bonded to one random warband member - if they hit 0 Health, so does this figure (not reverse); rebond if that member leaves/dies",
+  "stat_delta": {
+   "health": {
+    "add": 1
+   }
+  }
+ },
+ "158": {
+  "short": "Grows with Pain: once/game, 5+ damage from one source -> +1 Fight/+1 damage for rest of the game",
+  "stat_delta": null
+ },
+ "159": {
+  "short": "Highly Toxic: all melee attacks are poisonous",
+  "stat_delta": null
+ },
+ "16": {
+  "short": "Vulnerable Spot: critical hit -> reduced to 0 Health, -1 to post-game Survival Rolls",
+  "stat_delta": null
+ },
+ "160": {
+  "short": "Shrinks with Pain: once/game, 5+ damage from one source -> -1 Fight/-1 damage for rest of the game",
+  "stat_delta": null
+ },
+ "161": {
+  "short": "No Torso: cannot wear armour; all figures get -1 Fight when fighting it",
+  "stat_delta": null
+ },
+ "162": {
+  "short": "Spontaneous Healer: natural 20 on any Stat/Combat/Casting Roll -> regain up to 2 Health",
+  "stat_delta": null
+ },
+ "163": {
+  "short": "Slippery: a figure forcing combat with it -> Move Roll (TN16) or cannot (may retry vs another figure)",
+  "stat_delta": null
+ },
+ "164": {
+  "short": "Hard to Kill: Survival Table rolls: roll two dice, take the highest",
+  "stat_delta": null
+ },
+ "165": {
+  "short": "Tinted Membrane: immune to Blinding Light and other bright-light effects",
+  "stat_delta": null
+ },
+ "166": {
+  "short": "Gigantic Horns: Horns trait; always armed with a hand weapon",
+  "stat_delta": null
+ },
+ "167": {
+  "short": "Brace: once/game, +3 Armour for one attack (decide before rolling)",
+  "stat_delta": null
+ },
+ "168": {
+  "short": "Immune to Curses: immune to the Curse spell",
+  "stat_delta": null
+ },
+ "169": {
+  "short": "Bat Head: no LoS penalty from darkness; True Sight trait",
+  "stat_delta": null
+ },
+ "17": {
+  "short": "Undead Bane: undead within 1\" (move/activate) -> that undead figure suffers 1 damage",
+  "stat_delta": null
+ },
+ "170": {
+  "short": "Beaver Tail: +3 to Swimming Rolls",
+  "stat_delta": null
+ },
+ "171": {
+  "short": "Inflate: free action each activation to inflate until its next activation: immune to fall damage, auto-passes Swimming Rolls, -4 Armour while inflated",
+  "stat_delta": null
+ },
+ "172": {
+  "short": "Eyes in Hands: needs a free hand to see; no 2-handed or 2+-slot weapons; sees around corners within 0.5\"",
+  "stat_delta": null
+ },
+ "173": {
+  "short": "Cat Centaur: no rough-terrain movement penalty; Move stat is 7",
+  "stat_delta": {
+   "move": {
+    "set": 7
+   }
+  }
+ },
+ "174": {
+  "short": "Small Antennae: +1 Will",
+  "stat_delta": {
+   "will": {
+    "add": 1
+   }
+  }
+ },
+ "175": {
+  "short": "Dazzling Aura: figures activating within 3\" (not turn 1) -> Will Roll (TN12) or -1 to all rolls that turn",
+  "stat_delta": null
+ },
+ "176": {
+  "short": "Must Move: activating out of combat with an unused move action -> suffers 2 damage",
+  "stat_delta": null
+ },
+ "177": {
+  "short": "Body of Rock: cannot wear armour; +3 Armour",
+  "stat_delta": {
+   "armour": {
+    "add": 3
+   }
+  }
+ },
+ "178": {
+  "short": "Slider: +2 Move on an unimpeded straight-line move",
+  "stat_delta": null
+ },
+ "179": {
+  "short": "Hump: may store one potion before each game; consume it on activation for free, or carry it over",
+  "stat_delta": null
+ },
+ "18": {
+  "short": "Quick Reflexes: +1 Fight",
+  "stat_delta": {
+   "fight": {
+    "add": 1
+   }
+  }
+ },
+ "180": {
+  "short": "Webbed Hands or Feet: automatically passes all Swimming Rolls",
+  "stat_delta": null
+ },
+ "181": {
+  "short": "Excretes Gems: after a game it survives, 12+ on d20 -> excretes a 10gc gem",
+  "stat_delta": null
+ },
+ "182": {
+  "short": "Pin Head: -1 Will",
+  "stat_delta": {
+   "will": {
+    "add": -1
+   }
+  }
+ },
+ "183": {
+  "short": "Chicken Feet: always armed with a dagger",
+  "stat_delta": null
+ },
+ "184": {
+  "short": "Project Self: action: move 6\" (LoS required) and act, then returns to its starting point after activation",
+  "stat_delta": null
+ },
+ "185": {
+  "short": "Imp-Spawn: reduced to 0 Health -> place an uncontrolled imp where it fell",
+  "stat_delta": null
+ },
+ "186": {
+  "short": "Back Stabber: +1 Fight when claiming a support bonus; never grants a support bonus to others",
+  "stat_delta": null
+ },
+ "187": {
+  "short": "Nerves of Steel: once/game, +4 to a Will Roll (decide before rolling)",
+  "stat_delta": null
+ },
+ "188": {
+  "short": "Phasing: Burrowing trait",
+  "stat_delta": null
+ },
+ "189": {
+  "short": "Shot Magnet: -1 Fight when rolling against shooting attacks",
+  "stat_delta": null
+ },
+ "19": {
+  "short": "Third Arm: shield + staff/2-handed weapon together; +1 item slot",
+  "stat_delta": null
+ },
+ "190": {
+  "short": "Lunging Attack: once/game, may force combat at 2\" range instead of 1\"",
+  "stat_delta": null
+ },
+ "191": {
+  "short": "Bouncy: falling/jumping moves 1\" horizontal per 2\" fallen (bounce); half fall damage",
+  "stat_delta": null
+ },
+ "192": {
+  "short": "Fog Form: once/game, action: Levitate trait + cannot be forced into combat for rest of this activation and the next; cannot attack or pick up treasure meanwhile; drops any carried treasure",
+  "stat_delta": null
+ },
+ "193": {
+  "short": "Free Mover: immune to Petrify and Slow",
+  "stat_delta": null
+ },
+ "194": {
+  "short": "Wolf Companion: gains a wolf companion (no soldier slot); must stay within 6\" of it; replaced if killed",
+  "stat_delta": null
+ },
+ "195": {
+  "short": "Demon Bane: demons within 1\" (move/activate, not turn 1) suffer 1 damage",
+  "stat_delta": null
+ },
+ "196": {
+  "short": "Mind Punch: melee attacks may force the opponent to use Will instead of Fight for its Combat Roll",
+  "stat_delta": null
+ },
+ "197": {
+  "short": "Always Visible: immune to invisibility effects",
+  "stat_delta": null
+ },
+ "198": {
+  "short": "Ethereal Vision: draws LoS through one piece of terrain (no shooting through it)",
+  "stat_delta": null
+ },
+ "199": {
+  "short": "Rat Attracter: Initiative Roll of 1-3 while on the table -> place a giant rat at a random table edge",
+  "stat_delta": null
+ },
+ "2": {
+  "short": "Bestial Features: Animal trait (keeps item slots/treasure ability)",
+  "stat_delta": null
+ },
+ "20": {
+  "short": "Gills: Amphibious trait",
+  "stat_delta": null
+ },
+ "200": {
+  "short": "Snake Arms: cannot carry weapons or shields; always armed with a poisonous hand weapon",
+  "stat_delta": null
+ },
+ "201": {
+  "short": "Hole in Chest: natural 1 vs an incoming shooting hit -> passes through, no damage",
+  "stat_delta": null
+ },
+ "202": {
+  "short": "Focus: once/game, +5 to one Stat Roll (decide before rolling)",
+  "stat_delta": null
+ },
+ "203": {
+  "short": "Temporary Amorphousness: once/game on activation: passes through any gap, no rough-ground penalty until end of activation; drops/cannot pick up treasure while amorphous",
+  "stat_delta": null
+ },
+ "204": {
+  "short": "Eater of the Dead: reduces a figure to 0 Health in melee -> that figure suffers -1 to its post-game Survival Roll",
+  "stat_delta": null
+ },
+ "205": {
+  "short": "Hardened Soul: immune to the Strike Dead spell",
+  "stat_delta": null
+ },
+ "206": {
+  "short": "Web Producer: once/game, action: create a 6\" web anchored at both ends, adjacent to it; blocks movement not LoS; Fight +0/Armour 14/Health 1 to destroy; lasts rest of game unless destroyed",
+  "stat_delta": null
+ },
+ "207": {
+  "short": "Dog Head: always armed with a hand weapon",
+  "stat_delta": null
+ },
+ "208": {
+  "short": "Enlarged Arms: +1 damage in melee combat",
+  "stat_delta": null
+ },
+ "209": {
+  "short": "High Metabolism: counts as Wounded after the fifth turn of the game",
+  "stat_delta": null
+ },
+ "21": {
+  "short": "Soulseer: True Sight trait",
+  "stat_delta": null
+ },
+ "210": {
+  "short": "Explosion Resistant: -3 damage from area-effect attacks",
+  "stat_delta": null
+ },
+ "211": {
+  "short": "Evil Eye: once/game, action: auto-cast Strike Dead at Casting Roll 14 (this figure takes 1 damage using it)",
+  "stat_delta": null
+ },
+ "212": {
+  "short": "Heavy Feet: -1 Move; -2 to Swimming Rolls",
+  "stat_delta": {
+   "move": {
+    "add": -1
+   }
+  }
+ },
+ "213": {
+  "short": "Mouth in Stomach: never unarmed; +2 melee damage while unarmoured; if armoured, cannot cast spells or speak",
+  "stat_delta": null
+ },
+ "214": {
+  "short": "Fully Rotatable Head: supporting-figure bonus against it capped at +1 (instead of +2)",
+  "stat_delta": null
+ },
+ "215": {
+  "short": "Three-Scrawny Arms: -1 melee damage; 2-handed weapon/staff + shield together, or a 2-slot item + a 1-slot item together",
+  "stat_delta": null
+ },
+ "216": {
+  "short": "Perfect Balance: automatically passes rolls to avoid falling",
+  "stat_delta": null
+ },
+ "217": {
+  "short": "Iron Heart: once/game, +2 to a Will Roll (may decide after rolling)",
+  "stat_delta": null
+ },
+ "218": {
+  "short": "Wererat: +1 Move, -1 Armour, -1 Will, -1 Health",
+  "stat_delta": {
+   "armour": {
+    "add": -1
+   },
+   "health": {
+    "add": -1
+   },
+   "move": {
+    "add": 1
+   },
+   "will": {
+    "add": -1
+   }
+  }
+ },
+ "219": {
+  "short": "Poor Eyesight: maximum line of sight 16\"",
+  "stat_delta": null
+ },
+ "22": {
+  "short": "Fate Kissed: once/game reroll a Combat/Will/Stat Roll (or a Survival Roll if unused)",
+  "stat_delta": null
+ },
+ "220": {
+  "short": "Air Sack: +2 to Swimming Rolls; never drowns; may ignore breathing-based effects (e.g. poison gas)",
+  "stat_delta": null
+ },
+ "221": {
+  "short": "Punishing Blow: once/game, melee damage dealt -> +2 extra damage",
+  "stat_delta": null
+ },
+ "222": {
+  "short": "Small: +1 Fight when rolling against shooting attacks",
+  "stat_delta": null
+ },
+ "223": {
+  "short": "Stout Centaur: Move stat is 7; cannot climb ladders/vertical terrain; never unarmed (kick attack)",
+  "stat_delta": {
+   "move": {
+    "set": 7
+   }
+  }
+ },
+ "224": {
+  "short": "Fully Rotatable Wrists: rolls an even number on a melee Attack Roll -> +1 more",
+  "stat_delta": null
+ },
+ "225": {
+  "short": "Empowering Will: may spend own Health 1-for-1 to boost a Will Roll",
+  "stat_delta": null
+ },
+ "226": {
+  "short": "Electrically Infused: damaged in melee -> attacker suffers +0 magic attack (+1 if wearing heavy armour)",
+  "stat_delta": null
+ },
+ "227": {
+  "short": "Rooted: once/game, negates a push-back/forced move; if in combat, opponent steps back instead",
+  "stat_delta": null
+ },
+ "228": {
+  "short": "Desperate Strike: once/game, +3 to a Combat Roll, then -3 Fight for the rest of the game",
+  "stat_delta": null
+ },
+ "229": {
+  "short": "Bright Plumage: +2 Will; -1 Fight against incoming shooting attacks",
+  "stat_delta": {
+   "will": {
+    "add": 2
+   }
+  }
+ },
+ "23": {
+  "short": "Redundant Organs: Immune to Critical Hits",
+  "stat_delta": null
+ },
+ "230": {
+  "short": "Werefly: -1 Move, -1 Fight, -1 Armour, -2 Health; Flying trait",
+  "stat_delta": {
+   "armour": {
+    "add": -1
+   },
+   "fight": {
+    "add": -1
+   },
+   "health": {
+    "add": -2
+   },
+   "move": {
+    "add": -1
+   }
+  }
+ },
+ "231": {
+  "short": "Mystic Hands: melee attacks count as magic",
+  "stat_delta": null
+ },
+ "232": {
+  "short": "Rock Eater: Burrowing trait",
+  "stat_delta": null
+ },
+ "233": {
+  "short": "Enchanted Blood: while below starting Health, all attacks count as magic; action: self-damage 1 to trigger",
+  "stat_delta": null
+ },
+ "234": {
+  "short": "Back Plates: first supporting-figure bonus against it capped at +1 (instead of +2)",
+  "stat_delta": null
+ },
+ "235": {
+  "short": "Incredibly Long Tongue: shooting attack, 3\" range, +0 damage",
+  "stat_delta": null
+ },
+ "236": {
+  "short": "Retractable Claws: no unarmed penalty; Expert Climber trait",
+  "stat_delta": null
+ },
+ "237": {
+  "short": "Steady Hand: once/game, +3 to a shooting attack (decide before rolling)",
+  "stat_delta": null
+ },
+ "238": {
+  "short": "Obese: -1 Move; +1 Health",
+  "stat_delta": {
+   "health": {
+    "add": 1
+   },
+   "move": {
+    "add": -1
+   }
+  }
+ },
+ "239": {
+  "short": "Minor Magic Immunity: targeted by a spell -> 15+ on d20 negates it",
+  "stat_delta": null
+ },
+ "24": {
+  "short": "Eye Stalks: +1 Fight when rolling against shooting attacks",
+  "stat_delta": null
+ },
+ "240": {
+  "short": "Mystic Eye: shooting attacks count as magic",
+  "stat_delta": null
+ },
+ "241": {
+  "short": "Officer of the Dead: once/game, action: auto-successful Raise Zombie",
+  "stat_delta": null
+ },
+ "242": {
+  "short": "Troll Form: takes damage -> Will Roll (TN10) or becomes an uncontrolled snow troll for the rest of the game (reverts after)",
+  "stat_delta": null
+ },
+ "243": {
+  "short": "Puppet Hand: no 2-handed weapons/staff/bow/crossbow/shield; sees around corners within 0.5\"",
+  "stat_delta": null
+ },
+ "244": {
+  "short": "Overawed: -1 damage vs figures with the Large trait",
+  "stat_delta": null
+ },
+ "245": {
+  "short": "Demonic Prison: demon contacting/activating in contact -> Will Roll (TN12) or imprisoned (max 1 at a time); release as an action (within 3\") or after the game",
+  "stat_delta": null
+ },
+ "246": {
+  "short": "Targeted Strike: once/game, natural 19 in melee -> treat as a natural 20 (critical hit)",
+  "stat_delta": null
+ },
+ "247": {
+  "short": "Detachable Spines: always armed with a dagger; shooting attack, 6\" range, -1 damage",
+  "stat_delta": null
+ },
+ "248": {
+  "short": "Tooth Spitter: shooting attack, 4\" range, +0 damage",
+  "stat_delta": null
+ },
+ "249": {
+  "short": "Ink Spray: once/game, as Blinding Light at Casting Roll 14 vs one target (not actual magic, cannot be dispelled)",
+  "stat_delta": null
+ },
+ "25": {
+  "short": "Temporary Growth: once/game, action: +2 Fight/+2 damage/+2 Armour + Large trait until end of next turn",
+  "stat_delta": null
+ },
+ "250": {
+  "short": "Beast Call: once/game, action: roll on the Random Encounter Table, place result at a random table edge (uncontrolled)",
+  "stat_delta": null
+ },
+ "251": {
+  "short": "Undead Allergy: -2 Fight while in combat with an undead creature",
+  "stat_delta": null
+ },
+ "252": {
+  "short": "Crumbling Touch: once/game, action: auto-cast Crumble on terrain within 1\"",
+  "stat_delta": null
+ },
+ "253": {
+  "short": "Must Move Quickly: activating out of combat with an unused move action -> suffers 3 damage",
+  "stat_delta": null
+ },
+ "254": {
+  "short": "Beast Commander: once/game, action: target an uncontrolled animal within LoS; fail Move Roll (TN20) -> moved up to its Move (no immediate-death moves)",
+  "stat_delta": null
+ },
+ "255": {
+  "short": "Wereboar: +2 Health; Tusks trait (as Horns)",
+  "stat_delta": {
+   "health": {
+    "add": 2
+   }
+  }
+ },
+ "256": {
+  "short": "Extra Forearms: +1 item slot, or 2-handed weapon + shield together",
+  "stat_delta": null
+ },
+ "257": {
+  "short": "Random Pain: natural 1 on any Stat/Combat/Casting Roll -> 2 damage (never below 1 Health)",
+  "stat_delta": null
+ },
+ "258": {
+  "short": "Wise Cyclops: Lost Eye permanent-injury penalties; +3 Will",
+  "stat_delta": null
+ },
+ "259": {
+  "short": "Extra Finger: one magic ring does not count toward its item maximum",
+  "stat_delta": null
+ },
+ "26": {
+  "short": "Bleeder: counts as Wounded whenever below full Health",
+  "stat_delta": null
+ },
+ "260": {
+  "short": "Killer's Strength: once/game, reduces a figure to 0 Health -> +1 Fight for rest of the game",
+  "stat_delta": null
+ },
+ "261": {
+  "short": "Fish Slayer: +5 melee damage vs Aquatic/Amphibious figures",
+  "stat_delta": null
+ },
+ "262": {
+  "short": "Albino: maximum line of sight 18\"",
+  "stat_delta": null
+ },
+ "263": {
+  "short": "Reflective Skin: +2 Fight against shooting attacks",
+  "stat_delta": null
+ },
+ "264": {
+  "short": "Mandibles: always armed with a dagger",
+  "stat_delta": null
+ },
+ "265": {
+  "short": "Bright Flash: figure activating in combat with it -> Will Roll (TN10) or -1 Fight (min +0) for that activation",
+  "stat_delta": null
+ },
+ "266": {
+  "short": "Heightened Magic Vulnerability: -2 to Will Rolls to resist/overcome spells",
+  "stat_delta": null
+ },
+ "267": {
+  "short": "Poisonous Fur: all melee attacks are poisonous",
+  "stat_delta": null
+ },
+ "268": {
+  "short": "Evade: once/game on activation, free action: move 1\" (no forced combat results from this move)",
+  "stat_delta": null
+ },
+ "269": {
+  "short": "Acrophobic: climbing terrain over 1\" high -> Will Roll (TN16) or loses the action (may retry, losing an action each failure)",
+  "stat_delta": null
+ },
+ "27": {
+  "short": "Tentacles: opponents may not push it back or step back after winning melee unless they deal damage",
+  "stat_delta": null
+ },
+ "270": {
+  "short": "Sickness Carrier: -2 Health; +1 melee damage (not vs undead/constructs)",
+  "stat_delta": {
+   "health": {
+    "add": -2
+   }
+  }
+ },
+ "271": {
+  "short": "Light Discharge: once/game, action: Blinding Light (CN 14) vs all within 6\"",
+  "stat_delta": null
+ },
+ "272": {
+  "short": "Mild Addiction: pay 10gc before each game or -1 starting Health that game",
+  "stat_delta": null
+ },
+ "273": {
+  "short": "Death Dancer: reduces a figure to 0 Health -> activation ends (or no actions next activation); regains up to 3 Health either way",
+  "stat_delta": null
+ },
+ "274": {
+  "short": "Brightly Coloured: each game, choose covered (-1 Will) or uncovered (+2 Will, +1 to incoming shooting)",
+  "stat_delta": null
+ },
+ "275": {
+  "short": "Hunchback: -1 Move",
+  "stat_delta": {
+   "move": {
+    "add": -1
+   }
+  }
+ },
+ "276": {
+  "short": "Ink Spew: once/game, as Blinding Light (CN 14) vs all within 3\" (not actual magic, cannot be dispelled)",
+  "stat_delta": null
+ },
+ "277": {
+  "short": "Low Preservation Sense: never gains bonuses for being in cover",
+  "stat_delta": null
+ },
+ "278": {
+  "short": "Improved Vision: +1 Shoot",
+  "stat_delta": {
+   "shoot": {
+    "add": 1
+   }
+  }
+ },
+ "279": {
+  "short": "Troglodyte: no darkness LoS penalty; -1 Fight/-1 Shoot outdoors in daylight",
+  "stat_delta": null
+ },
+ "28": {
+  "short": "Toxic Bile: shooting attack, 3\" range, -1 damage, poison",
+  "stat_delta": null
+ },
+ "280": {
+  "short": "Butterfly Wings: Flying trait, lost while below starting Health",
+  "stat_delta": null
+ },
+ "281": {
+  "short": "Backswing: once/game, wins a melee fight -> free extra attack vs the same figure",
+  "stat_delta": null
+ },
+ "282": {
+  "short": "Duckbill: -1 to Casting Rolls",
+  "stat_delta": null
+ },
+ "283": {
+  "short": "Thick Eye Stalks: +1 Fight vs shooting attacks; may reroll a Lost Eye Survival Roll result",
+  "stat_delta": null
+ },
+ "284": {
+  "short": "Poisonous Tentacles: opponents need to deal damage to push/step back after winning; melee attacks poisonous",
+  "stat_delta": null
+ },
+ "285": {
+  "short": "Very Slippery: a figure forcing combat with it -> Move Roll (TN18) or cannot (may retry vs another figure)",
+  "stat_delta": null
+ },
+ "286": {
+  "short": "Fast Undead: Undead trait; +1 Move",
+  "stat_delta": {
+   "move": {
+    "add": 1
+   }
+  }
+ },
+ "287": {
+  "short": "Flesh Sheath: +1 extra weapon (1-slot max)",
+  "stat_delta": null
+ },
+ "288": {
+  "short": "Evaporating Blood: takes damage -> 2\" cloud centred on it, blocks LoS not movement; 1-5 on d6 each end of turn disperses",
+  "stat_delta": null
+ },
+ "289": {
+  "short": "Armoured Beard-Plate: +1 Armour",
+  "stat_delta": {
+   "armour": {
+    "add": 1
+   }
+  }
+ },
+ "29": {
+  "short": "Withered: -2 Health",
+  "stat_delta": {
+   "health": {
+    "add": -2
+   }
+  }
+ },
+ "290": {
+  "short": "Wilful Ignorance: automatically passes the first Will Roll required each game",
+  "stat_delta": null
+ },
+ "291": {
+  "short": "Whiskers: True Sight trait, range 3\"",
+  "stat_delta": null
+ },
+ "292": {
+  "short": "Empathetic: an ally within 6\" rolls natural 20 -> regain 1 Health; an ally within 6\" reduced to 0 Health -> suffers 2 damage",
+  "stat_delta": null
+ },
+ "293": {
+  "short": "Blood Pact: before each game, suffer 3 damage or take -1 Fight/-1 Shoot; if damage taken, +3 Will instead, for that game",
+  "stat_delta": null
+ },
+ "294": {
+  "short": "Head on Arm: one hand only; no 2-handed weapon/staff/shield/bow/crossbow",
+  "stat_delta": null
+ },
+ "295": {
+  "short": "No Circulation: Immune to Poison trait",
+  "stat_delta": null
+ },
+ "296": {
+  "short": "Vomit Giant Insects: Animate Skull spell (CN 10), summons count as Animal not Undead; may never improve this spell",
+  "stat_delta": null
+ },
+ "297": {
+  "short": "Burning Bile: shooting attack, 3\" range, +1 damage",
+  "stat_delta": null
+ },
+ "298": {
+  "short": "Killer's Toughness: once/game, reduces a figure to 0 Health -> +1 Armour for rest of the game",
+  "stat_delta": null
+ },
+ "299": {
+  "short": "Poison Healer: poison damage it suffers is reduced by 2",
+  "stat_delta": null
+ },
+ "3": {
+  "short": "Prehensile Feet: Expert Climber trait",
+  "stat_delta": null
+ },
+ "30": {
+  "short": "Magically-Attuned Cyclops: -1 Combat Rolls vs shooting attacks; all its attacks count as magic",
+  "stat_delta": null
+ },
+ "300": {
+  "short": "No Shock Absorption: double damage from falls",
+  "stat_delta": null
+ },
+ "301": {
+  "short": "Motivated by Fear: \"Run For It\" moves 5\" instead of the normal 3\"",
+  "stat_delta": null
+ },
+ "302": {
+  "short": "Blubber: +1 Health; immune to cold-related scenario penalties",
+  "stat_delta": {
+   "health": {
+    "add": 1
+   }
+  }
+ },
+ "303": {
+  "short": "Fly-Eyes: +1 Fight against all shooting attacks",
+  "stat_delta": null
+ },
+ "304": {
+  "short": "Shakes: -1 Shoot",
+  "stat_delta": {
+   "shoot": {
+    "add": -1
+   }
+  }
+ },
+ "305": {
+  "short": "Hippo Head: Amphibious trait",
+  "stat_delta": null
+ },
+ "306": {
+  "short": "Extendable Breathing Tube: Amphibious trait",
+  "stat_delta": null
+ },
+ "307": {
+  "short": "No Organs: Immune to Critical Hits",
+  "stat_delta": null
+ },
+ "308": {
+  "short": "Adrenaline Boost: +1 to all rolls for the first 3 turns; then -2 to all rolls for the rest of the game",
+  "stat_delta": null
+ },
+ "309": {
+  "short": "Giraffe Head: +1 Will",
+  "stat_delta": {
+   "will": {
+    "add": 1
+   }
+  }
+ },
+ "31": {
+  "short": "Hard to Control Fire Breath: once/game, action: +5 magic shooting attack vs 3 closest figures within 10\"",
+  "stat_delta": null
+ },
+ "310": {
+  "short": "Enchantment Scrubber: each end of turn, 11+ on d20 -> all spells active on it are cancelled",
+  "stat_delta": null
+ },
+ "311": {
+  "short": "Unlife Gnawer: undead/constructs activating within 2\" (not turn 1) suffer 2 damage",
+  "stat_delta": null
+ },
+ "312": {
+  "short": "Cheek Pouch: +1 extra item (1-slot max)",
+  "stat_delta": null
+ },
+ "313": {
+  "short": "Turtle Shell: natural Armour Stat of 12; cannot wear armour",
+  "stat_delta": {
+   "armour": {
+    "set": 12
+   }
+  }
+ },
+ "314": {
+  "short": "Werebear: +1 Fight, +2 Health, +1 melee damage, Large trait",
+  "stat_delta": {
+   "fight": {
+    "add": 1
+   },
+   "health": {
+    "add": 2
+   }
+  }
+ },
+ "315": {
+  "short": "Hardened Exoskeleton: cannot wear armour; +3 Armour, -5 Health",
+  "stat_delta": {
+   "armour": {
+    "add": 3
+   },
+   "health": {
+    "add": -5
+   }
+  }
+ },
+ "316": {
+  "short": "Large Cloud Release: action: 4\" cloud adjacent (2 damage to self); blocks LoS; 1-5 on d6 each end of turn dissipates it",
+  "stat_delta": null
+ },
+ "317": {
+  "short": "Boiling Blood Spray: action: +3 shooting attack, +2 damage, 10\" range; 2 damage to self",
+  "stat_delta": null
+ },
+ "318": {
+  "short": "Construct Allergy: -2 Fight while in combat with a construct",
+  "stat_delta": null
+ },
+ "319": {
+  "short": "Mana Battery (2): once/game, an ally within 3\" casting a spell may draw +2 to the roll",
+  "stat_delta": null
+ },
+ "32": {
+  "short": "Unstable Energy Drain: double melee damage dealt; takes half that as damage (not vs undead/constructs)",
+  "stat_delta": null
+ },
+ "320": {
+  "short": "Ethereal Prison: an ethereal undead contacting/activating in contact -> Will Roll (TN12) or imprisoned (max 1 at a time); release as an action (within 3\") or after the game",
+  "stat_delta": null
+ },
+ "321": {
+  "short": "External Lungs: opponent's natural 19 in melee vs it -> treat as a 20 (critical hit)",
+  "stat_delta": null
+ },
+ "322": {
+  "short": "Shredding Blow: melee damage dealt -> target suffers -1 Armour (cumulative to a minimum of Armour 10)",
+  "stat_delta": null
+ },
+ "323": {
+  "short": "Blockhead: -1 Will",
+  "stat_delta": {
+   "will": {
+    "add": -1
+   }
+  }
+ },
+ "324": {
+  "short": "Limb-Stealer: immune to permanent injuries except Never Quite as Strong/Psychological Scars",
+  "stat_delta": null
+ },
+ "325": {
+  "short": "Mind Bash: melee attacks may force the opponent to use Will instead of Fight for its Combat Roll; if used, this figure gets +1 to its own Combat Roll",
+  "stat_delta": null
+ },
+ "326": {
+  "short": "Giant Buckteeth: always armed with a dagger",
+  "stat_delta": null
+ },
+ "327": {
+  "short": "Antennae: +2 Will",
+  "stat_delta": {
+   "will": {
+    "add": 2
+   }
+  }
+ },
+ "328": {
+  "short": "Blood Eagle: at half Health or less (round down) -> Flying trait for the rest of the scenario",
+  "stat_delta": null
+ },
+ "329": {
+  "short": "Empowering Dodge: may spend own Health 1-for-1 to boost a Combat Roll against a shooting attack",
+  "stat_delta": null
+ },
+ "33": {
+  "short": "Elemental Armour: Elemental Resistance (3)",
+  "stat_delta": null
+ },
+ "330": {
+  "short": "Self-Projectile: action: shooting attack, 6\" range, +2 damage; then moves 1.5\" in a random direction and takes 2 damage (drops any carried treasure)",
+  "stat_delta": null
+ },
+ "331": {
+  "short": "Mind Cloud: once/game, action: no figure may force combat with it for the rest of the turn",
+  "stat_delta": null
+ },
+ "332": {
+  "short": "Extendable Arms: may pick up a treasure token within 3\" if no enemy is within 1\" of it or the token",
+  "stat_delta": null
+ },
+ "333": {
+  "short": "Very Long Neck: +7 damage on a critical hit (instead of +5)",
+  "stat_delta": null
+ },
+ "334": {
+  "short": "Snail Shell: +2 Armour, cannot wear armour; once/turn may retreat into its shell for +3 more Armour and -3 Fight, Move set to 2, for the rest of that turn",
+  "stat_delta": null
+ },
+ "335": {
+  "short": "Improved Foresight: natural 19-20 for initiative -> gains an extra action next activation",
+  "stat_delta": null
+ },
+ "336": {
+  "short": "Blood-Enchanted: on activation, may sacrifice 1 Health (free) -> all its attacks count as magic until its next activation",
+  "stat_delta": null
+ },
+ "337": {
+  "short": "Sticky: opponents need to deal damage to push/step back after winning melee against it",
+  "stat_delta": null
+ },
+ "338": {
+  "short": "Thick Armoured Shell: cannot wear armour; +3 Armour, -1 Move",
+  "stat_delta": {
+   "armour": {
+    "add": 3
+   },
+   "move": {
+    "add": -1
+   }
+  }
+ },
+ "339": {
+  "short": "Continues to Shrink with Pain: 5+ damage from one source -> -1 Fight/-1 damage for rest of game (up to twice per game, stacking)",
+  "stat_delta": null
+ },
+ "34": {
+  "short": "Armoured Organs: Immune to Critical Hits",
+  "stat_delta": null
+ },
+ "340": {
+  "short": "Poisonous Quills: opponent rolls natural 1-2 in melee vs it -> opponent suffers +2 damage and is poisoned",
+  "stat_delta": null
+ },
+ "341": {
+  "short": "Powerful Icy Grasp: +3 melee damage (not vs undead/constructs)",
+  "stat_delta": null
+ },
+ "342": {
+  "short": "Illusionary Appearance: opponent's first Combat Roll against it each game is at -2 (not undead/constructs/True Sight)",
+  "stat_delta": null
+ },
+ "343": {
+  "short": "Strong Elemental Armour: Elemental Resistance (4)",
+  "stat_delta": null
+ },
+ "344": {
+  "short": "Mole Head: Burrowing trait",
+  "stat_delta": null
+ },
+ "345": {
+  "short": "Extended Reach: +1 Fight in melee combat",
+  "stat_delta": null
+ },
+ "346": {
+  "short": "Tough Undead: Undead trait; +2 Health",
+  "stat_delta": {
+   "health": {
+    "add": 2
+   }
+  }
+ },
+ "347": {
+  "short": "Addiction: pay 15gc before each game or -2 starting Health that game",
+  "stat_delta": null
+ },
+ "348": {
+  "short": "Minor Static Discharge: completing a move -> nearest figure in LoS suffers a -2 elemental magic shooting attack",
+  "stat_delta": null
+ },
+ "349": {
+  "short": "Will to Kill: +1 Will; melee attacks count as magic",
+  "stat_delta": {
+   "will": {
+    "add": 1
+   }
+  }
+ },
+ "35": {
+  "short": "Poison Feeder: Immune to Poison; damaged by a poison attack -> gains Poison on its next melee attack",
+  "stat_delta": null
+ },
+ "350": {
+  "short": "Duck Feet: -1 Move; +2 Move and +5 Swimming Rolls while in water",
+  "stat_delta": {
+   "move": {
+    "add": -1
+   }
+  }
+ },
+ "351": {
+  "short": "Mitigation: once/game, reduce damage from one source by up to 5",
+  "stat_delta": null
+ },
+ "352": {
+  "short": "Weak-Willed Bleeder: -1 Health on activation while below max Health (not if at 1 Health); -2 Will while below starting Health",
+  "stat_delta": null
+ },
+ "353": {
+  "short": "Fungal Growth: -2 Health; Never Wounded trait",
+  "stat_delta": {
+   "health": {
+    "add": -2
+   }
+  }
+ },
+ "354": {
+  "short": "Thrashing Tentacles: figures (incl. allies) moving/activating within 2\" (not turn 1) suffer +1 shooting attack",
+  "stat_delta": null
+ },
+ "355": {
+  "short": "Balancing Tail: +4 to Move Rolls",
+  "stat_delta": null
+ },
+ "356": {
+  "short": "Killer's Endurance: once/game, reduces a figure to 0 Health -> +3 Health (may exceed starting Health, this game only)",
+  "stat_delta": null
+ },
+ "357": {
+  "short": "Visions of the Future: while on the table, +1 to all Initiative Rolls",
+  "stat_delta": null
+ },
+ "358": {
+  "short": "Ghost Call: action (can replace move): 19+ on d20 -> place a wraith at a random table edge",
+  "stat_delta": null
+ },
+ "359": {
+  "short": "Dead Eye: once/game, +1 to a shooting attack (may decide after rolling)",
+  "stat_delta": null
+ },
+ "36": {
+  "short": "Force of Rage: once/game, action: cast Destructive Sphere at CN 5 (empowerable; CN fixed)",
+  "stat_delta": null
+ },
+ "360": {
+  "short": "Random Teleport: action: teleport 6\" in a random direction (not off table; drops carried treasure at the start point)",
+  "stat_delta": null
+ },
+ "361": {
+  "short": "Very Small: -1 Fight, -2 Health; +5 Fight when rolling against shooting attacks",
+  "stat_delta": {
+   "fight": {
+    "add": -1
+   },
+   "health": {
+    "add": -2
+   }
+  }
+ },
+ "362": {
+  "short": "Upside Down Head: +1 Will",
+  "stat_delta": {
+   "will": {
+    "add": 1
+   }
+  }
+ },
+ "363": {
+  "short": "Very Squishy: -2 Armour",
+  "stat_delta": {
+   "armour": {
+    "add": -2
+   }
+  }
+ },
+ "364": {
+  "short": "Snake Head: always armed with a poisonous dagger",
+  "stat_delta": null
+ },
+ "365": {
+  "short": "Barbed Tail: always armed with a hand weapon",
+  "stat_delta": null
+ },
+ "366": {
+  "short": "Brainless: immune to Suggestion and all Control spells",
+  "stat_delta": null
+ },
+ "367": {
+  "short": "Partial Magic Immunity: targeted by a spell -> 12+ on d20 negates it",
+  "stat_delta": null
+ },
+ "368": {
+  "short": "Surrounded by Bees: this figure and all within 2\" (not turn 1) suffer -2 to all rolls",
+  "stat_delta": null
+ },
+ "369": {
+  "short": "Poison Susceptibility: damaged by a poisoned attack -> suffers +3 extra damage",
+  "stat_delta": null
+ },
+ "37": {
+  "short": "Undead: gains the Undead trait (reroll if already undead)",
+  "stat_delta": null
+ },
+ "370": {
+  "short": "Dodge: once/game, +3 Armour for one combat (may decide after rolling)",
+  "stat_delta": null
+ },
+ "371": {
+  "short": "Undead Commander: once/game, action: target an uncontrolled undead within LoS; fail Will Roll (TN20) -> moved up to its Move (no immediate-death moves)",
+  "stat_delta": null
+ },
+ "372": {
+  "short": "Nearly 2-Dimensional: -1 Armour; never takes more than 4 damage from a non-magical bow/crossbow/javelin",
+  "stat_delta": {
+   "armour": {
+    "add": -1
+   }
+  }
+ },
+ "373": {
+  "short": "Bounding Attack: +4\" on a move action that ends in combat",
+  "stat_delta": null
+ },
+ "374": {
+  "short": "Glowing Eyes: True Sight trait",
+  "stat_delta": null
+ },
+ "375": {
+  "short": "Improved Magic Resistance: +2 to Will Rolls to resist/overcome spells",
+  "stat_delta": null
+ },
+ "376": {
+  "short": "Tortoise Shell: natural Armour 12, cannot wear armour; Elemental Resistance (1)",
+  "stat_delta": {
+   "armour": {
+    "set": 12
+   }
+  }
+ },
+ "377": {
+  "short": "Poison Gland: before each game, one weapon/ammo (its own or an ally's) counts as poisonous",
+  "stat_delta": null
+ },
+ "378": {
+  "short": "Extremely Emaciated: -2 Armour",
+  "stat_delta": {
+   "armour": {
+    "add": -2
+   }
+  }
+ },
+ "379": {
+  "short": "Extra Eyes: +1 Fight vs shooting attacks; unlimited Lost Eye Survival results with no further penalty",
+  "stat_delta": null
+ },
+ "38": {
+  "short": "Ill-Fated: Survival Table rolls: roll twice, take the lowest",
+  "stat_delta": null
+ },
+ "380": {
+  "short": "Enchanted Eye: shooting attacks count as magic, +1 elemental damage",
+  "stat_delta": null
+ },
+ "381": {
+  "short": "Extremely Acidic Blood: damaged in melee -> all other figures in that combat suffer 2 damage",
+  "stat_delta": null
+ },
+ "382": {
+  "short": "Empowering Damage: may spend own Health 1-for-1 (max +5) to boost damage on a won melee round",
+  "stat_delta": null
+ },
+ "383": {
+  "short": "Doesn't Float: -5 to all Swimming Rolls",
+  "stat_delta": null
+ },
+ "384": {
+  "short": "Horrific Wail: action: all within 6\" (except it) fail Will Roll (TN10) -> damage equal to the amount failed by (not undead/constructs/deaf)",
+  "stat_delta": null
+ },
+ "385": {
+  "short": "Featureless Face: -2 Will; must reroll any Lost Eye permanent injury result",
+  "stat_delta": null
+ },
+ "386": {
+  "short": "Armoured Serpent Tale: -1 Move (no rough-ground penalty); +1 Armour",
+  "stat_delta": {
+   "armour": {
+    "add": 1
+   },
+   "move": {
+    "add": -1
+   }
+  }
+ },
+ "387": {
+  "short": "Disease Carrier: -3 Health; damages another in melee -> they fail Health Roll (TN20) -> -3 Health next game (cumulative)",
+  "stat_delta": {
+   "health": {
+    "add": -3
+   }
+  }
+ },
+ "388": {
+  "short": "Satyr: unarmed Fight -2 (no damage penalty); -2 to Move Stat Rolls",
+  "stat_delta": null
+ },
+ "389": {
+  "short": "Demon Purger: Banish spell with CN 6; may never improve this spell",
+  "stat_delta": null
+ },
+ "39": {
+  "short": "Golden Eggs: +5gc after each game it participates in and survives",
+  "stat_delta": null
+ },
+ "390": {
+  "short": "Poison Leech: Immune to Poison; action (can replace move), within 1\" of a non-combat ally, removes their poisoned condition",
+  "stat_delta": null
+ },
+ "391": {
+  "short": "Reposte: once/game, +1 to a Combat Roll in melee (may decide after rolling)",
+  "stat_delta": null
+ },
+ "392": {
+  "short": "Leg Tentacles with Suckers: -1 Move (max jump -1\"); +5 to rolls to avoid falling",
+  "stat_delta": {
+   "move": {
+    "add": -1
+   }
+  }
+ },
+ "393": {
+  "short": "Rough on Weapons: natural 1 on a melee Combat Roll -> its weapon breaks (magic weapons lose bonuses/magic status instead)",
+  "stat_delta": null
+ },
+ "394": {
+  "short": "Nightmares of Doom: natural 19-20 for initiative -> max 1 action on its next activation",
+  "stat_delta": null
+ },
+ "395": {
+  "short": "Razor Mandibles: always armed with a hand weapon, +1 damage",
+  "stat_delta": null
+ },
+ "396": {
+  "short": "Stubby Legs: -1 Move",
+  "stat_delta": {
+   "move": {
+    "add": -1
+   }
+  }
+ },
+ "397": {
+  "short": "Unlucky Shot Magnet: -2 Fight when rolling against shooting attacks",
+  "stat_delta": null
+ },
+ "398": {
+  "short": "Rage Strength: +2 melee damage while below starting Health",
+  "stat_delta": null
+ },
+ "399": {
+  "short": "Soul-Paired: +2 Health; bonded to one random warband member - if they hit 0 Health, so does this figure (not reverse); rebond if that member leaves",
+  "stat_delta": {
+   "health": {
+    "add": 2
+   }
+  }
+ },
+ "4": {
+  "short": "Cyclops: Lost Eye permanent-injury penalties",
+  "stat_delta": null
+ },
+ "40": {
+  "short": "Squishy: -1 Armour",
+  "stat_delta": {
+   "armour": {
+    "add": -1
+   }
+  }
+ },
+ "400": {
+  "short": "Incredible Smell: True Sight trait, range 16\"",
+  "stat_delta": null
+ },
+ "401": {
+  "short": "Double Hump: may store two potions before each game; consume either on activation for free, or carry over",
+  "stat_delta": null
+ },
+ "402": {
+  "short": "Angelic Pact: before each game, may choose -1 Fight/-1 Shoot for +1 Armour/+3 Health that game",
+  "stat_delta": null
+ },
+ "403": {
+  "short": "Loud Soul: while on the table, random-encounter checks: roll two dice, take the highest",
+  "stat_delta": null
+ },
+ "404": {
+  "short": "Very Brittle Bones: -2 to Survival Rolls",
+  "stat_delta": null
+ },
+ "405": {
+  "short": "Gigantic Eyes: no line-of-sight penalty from darkness",
+  "stat_delta": null
+ },
+ "406": {
+  "short": "Killer's Will: reduces a figure to 0 Health -> +5 Will for rest of the game",
+  "stat_delta": null
+ },
+ "407": {
+  "short": "Bone Ruff: Immune to Critical Hits",
+  "stat_delta": null
+ },
+ "408": {
+  "short": "Commander of the Dead: twice/game, action: auto-successful Raise Zombie (max 1 zombie in play at once)",
+  "stat_delta": null
+ },
+ "409": {
+  "short": "Continues to Grow with Pain: 5+ damage from one source -> +1 Fight/+1 melee damage for rest of game (up to twice, stacking)",
+  "stat_delta": null
+ },
+ "41": {
+  "short": "Stealthy: before turn 1 initiative, may move up to 3\" ending out of enemy line of sight",
+  "stat_delta": null
+ },
+ "410": {
+  "short": "External Heart: opponent's natural 19 vs it -> treat as a 20 (critical hit)",
+  "stat_delta": null
+ },
+ "411": {
+  "short": "Vulnerability to Witchcraft: -2 Will to resist Witch school spells",
+  "stat_delta": null
+ },
+ "412": {
+  "short": "Elemental Absorption: Elemental Resistance (1); hit by an elemental attack that doesn't reduce it to 0 Health -> regain 1 Health",
+  "stat_delta": null
+ },
+ "413": {
+  "short": "Bright Butterfly Wings: Flying trait, lost while below starting Health; -1 vs all shooting attacks",
+  "stat_delta": null
+ },
+ "414": {
+  "short": "Crushing Blow: once/game, melee damage dealt -> +3 extra damage",
+  "stat_delta": null
+ },
+ "415": {
+  "short": "Ghoul Reanimation: reduced to 0 Health -> place an uncontrolled ghoul where it fell",
+  "stat_delta": null
+ },
+ "416": {
+  "short": "Sharpeye: once/game, natural 19 on a Shooting Roll -> treat as a 20 (critical hit)",
+  "stat_delta": null
+ },
+ "417": {
+  "short": "Severe Shakes: -2 Shoot",
+  "stat_delta": {
+   "shoot": {
+    "add": -2
+   }
+  }
+ },
+ "418": {
+  "short": "Eye Thief: once/game, action: auto-cast Blinding Light (CN 16) vs a target within 10\"/LoS (no effect on Mind Control/Suggestion-immune figures)",
+  "stat_delta": null
+ },
+ "419": {
+  "short": "Super Slider: +3 Move on an unimpeded straight-line move",
+  "stat_delta": null
+ },
+ "42": {
+  "short": "Vampiric: melee damage dealt -> heal up to 3 Health; no other healing allowed within a scenario",
+  "stat_delta": null
+ },
+ "420": {
+  "short": "Mark of Power: melee attacks count as magic, +1 elemental damage",
+  "stat_delta": null
+ },
+ "421": {
+  "short": "Sneak Attack: +2 Fight when claiming a support bonus; never grants a support bonus to others",
+  "stat_delta": null
+ },
+ "422": {
+  "short": "Strong Telekinetic Pull: once/game, action: target within 12\"/LoS; fail Move Roll (TN22) -> pulled 3\" toward this figure",
+  "stat_delta": null
+ },
+ "423": {
+  "short": "Desperate Levitation: once/game, any time (no action needed): Levitate trait until end of turn",
+  "stat_delta": null
+ },
+ "424": {
+  "short": "Extremely Poor Eyesight: maximum line of sight 12\"",
+  "stat_delta": null
+ },
+ "425": {
+  "short": "Flaming Fists: always armed with a magical hand weapon, +2 elemental damage",
+  "stat_delta": null
+ },
+ "426": {
+  "short": "Weak but Fast: +1 Move, +1 Fight; half melee damage dealt (round up)",
+  "stat_delta": {
+   "fight": {
+    "add": 1
+   },
+   "move": {
+    "add": 1
+   }
+  }
+ },
+ "427": {
+  "short": "Extra-Sharp Beak: always armed with a hand weapon",
+  "stat_delta": null
+ },
+ "428": {
+  "short": "Neck Frill: +2 Fight when rolling against shooting attacks",
+  "stat_delta": null
+ },
+ "429": {
+  "short": "Giant Scorpion Tail: always armed with a poisonous hand weapon, +1 damage",
+  "stat_delta": null
+ },
+ "43": {
+  "short": "Blessed: +1 to all Stat Rolls",
+  "stat_delta": null
+ },
+ "430": {
+  "short": "Vulnerability to Chronomancy: -2 Will to resist Chronomancy school spells",
+  "stat_delta": null
+ },
+ "431": {
+  "short": "Death Strike: once/game, natural 18-19 in melee -> treat as a 20 (critical hit)",
+  "stat_delta": null
+ },
+ "432": {
+  "short": "Barbs: opponents need to deal damage to push/step back after winning melee against it",
+  "stat_delta": null
+ },
+ "433": {
+  "short": "Werespider: -1 Fight, -2 Health; Expert Climber and Poison traits",
+  "stat_delta": {
+   "fight": {
+    "add": -1
+   },
+   "health": {
+    "add": -2
+   }
+  }
+ },
+ "434": {
+  "short": "Vulnerability to Illusion: -2 Will to resist Illusionist school spells",
+  "stat_delta": null
+ },
+ "435": {
+  "short": "Toxic Cloud Release: action: 2\" cloud adjacent (2 damage to self), blocks LoS; figures moving through it (not the producer) -> Will Roll (TN12) or poisoned; 1-5 on d6 each end of turn removes it",
+  "stat_delta": null
+ },
+ "436": {
+  "short": "Anteater Head: +1 Will",
+  "stat_delta": {
+   "will": {
+    "add": 1
+   }
+  }
+ },
+ "437": {
+  "short": "Crookback: -1 Fight",
+  "stat_delta": {
+   "fight": {
+    "add": -1
+   }
+  }
+ },
+ "438": {
+  "short": "Telekinetic Drag: action: target within 12\"/LoS; fail Move Roll (TN20) -> pulled 3\" toward this figure",
+  "stat_delta": null
+ },
+ "439": {
+  "short": "Faun: +1 Move, -1 Health",
+  "stat_delta": {
+   "health": {
+    "add": -1
+   },
+   "move": {
+    "add": 1
+   }
+  }
+ },
+ "44": {
+  "short": "Sticky Feet: +10 to Move Rolls to avoid falling",
+  "stat_delta": null
+ },
+ "440": {
+  "short": "Improved Fog Form: once/game, action: +4 Move and Levitate trait through the end of its next activation; cannot be forced into combat meanwhile; cannot attack or pick up treasure; drops any carried treasure",
+  "stat_delta": null
+ },
+ "441": {
+  "short": "Killer's Fury: reduces a figure to 0 Health -> +2 melee damage for rest of the game",
+  "stat_delta": null
+ },
+ "442": {
+  "short": "Extra Rude Finger: one magic ring does not count toward its item maximum; +1 to Will Rolls to resist spells",
+  "stat_delta": null
+ },
+ "443": {
+  "short": "Flaming Eyes: action: +2 elemental magic shooting attack, +1 damage, 8\" range",
+  "stat_delta": null
+ },
+ "444": {
+  "short": "Barbed Tentacles: always armed with a dagger; opponents need to deal damage to push/step back after winning melee against it",
+  "stat_delta": null
+ },
+ "445": {
+  "short": "Vicious Dog Companion: gains a war hound companion (no soldier slot); hound must stay within 6\" of it (not vice versa); replaced if killed",
+  "stat_delta": null
+ },
+ "446": {
+  "short": "Insanity: natural 1-2 on any roll -> uncontrolled for the rest of that turn and all of the next",
+  "stat_delta": null
+ },
+ "447": {
+  "short": "Greater Insanity: natural 1 on any roll -> uncontrolled for the rest of the game (drops any treasure); reverts after the game",
+  "stat_delta": null
+ },
+ "448": {
+  "short": "Hammerhead Shark Head: Amphibious trait",
+  "stat_delta": null
+ },
+ "449": {
+  "short": "Excretes Valuable Gems: after a game it survives, 15+ on d20 -> excretes a 30gc gem",
+  "stat_delta": null
+ },
+ "45": {
+  "short": "Power Lifter: no encumbrance penalty for carrying treasure tokens",
+  "stat_delta": null
+ },
+ "450": {
+  "short": "Severe Addiction: pay 25gc before each game or -1 to all rolls that game",
+  "stat_delta": null
+ },
+ "451": {
+  "short": "Life Burn: figures activating within 2\" (not turn 1) suffer 2 damage (not undead/constructs)",
+  "stat_delta": null
+ },
+ "452": {
+  "short": "Wilful Undead: Undead trait; +2 Will",
+  "stat_delta": {
+   "will": {
+    "add": 2
+   }
+  }
+ },
+ "453": {
+  "short": "Armoured Insect Centaur: Expert Climber trait; +1 Armour",
+  "stat_delta": {
+   "armour": {
+    "add": 1
+   }
+  }
+ },
+ "454": {
+  "short": "Beast Caller: twice/game, action: roll on the Random Encounter Table, place result at a random table edge (uncontrolled)",
+  "stat_delta": null
+ },
+ "455": {
+  "short": "Telekinetic Slam: once/game, action: target within 12\"/LoS; fail Move Roll (TN20) -> pushed 8\" directly away",
+  "stat_delta": null
+ },
+ "456": {
+  "short": "Bird Slayer: +5 damage vs figures with the Flying trait",
+  "stat_delta": null
+ },
+ "457": {
+  "short": "Giant Killer: +2 damage vs figures with the Large trait",
+  "stat_delta": null
+ },
+ "458": {
+  "short": "Undead Attracter: Initiative Roll of 1-3 while on the table -> place a skeleton at a random table edge",
+  "stat_delta": null
+ },
+ "459": {
+  "short": "Mana Battery (1/1): twice/game, an ally within 3\" casting a spell may draw +1 to the roll",
+  "stat_delta": null
+ },
+ "46": {
+  "short": "Chameleonic Skin: may only be seen beyond 12\" by figures with True Sight",
+  "stat_delta": null
+ },
+ "460": {
+  "short": "Poisonous Pustules: damaged in melee -> other figures in that combat: Will Roll (TN14) or poisoned",
+  "stat_delta": null
+ },
+ "461": {
+  "short": "Killer's Flight: reduces a figure to 0 Health -> Flying trait for rest of the game",
+  "stat_delta": null
+ },
+ "462": {
+  "short": "Ferocious Attack: once/game, +4 to a Combat Roll in melee it initiates (decide before rolling)",
+  "stat_delta": null
+ },
+ "463": {
+  "short": "Intense Bloodboil: before each game, may suffer 5 damage for +1 Fight and +1 Shoot",
+  "stat_delta": null
+ },
+ "464": {
+  "short": "Long Eye Stalks: +1 Fight vs shooting attacks; LoS over terrain up to 1\" above its head (not for attacks unless its head generates them)",
+  "stat_delta": null
+ },
+ "465": {
+  "short": "Greatly Extendable Neck: LoS/spellcasting up to 3\" higher than its actual height (not for attacks)",
+  "stat_delta": null
+ },
+ "466": {
+  "short": "Scalding Blood Spray: action: +4 shooting attack, +2 damage, 10\" range; 3 damage to self",
+  "stat_delta": null
+ },
+ "467": {
+  "short": "Empowering Speed: on activation, spend 3 Health for +1 Move or 5 Health for +2 Move (that activation only, max +2)",
+  "stat_delta": null
+ },
+ "468": {
+  "short": "Gorilla Form: takes damage -> Will Roll (TN10) or becomes an uncontrolled White Gorilla (drops treasure) for the rest of the game (reverts after)",
+  "stat_delta": null
+ },
+ "469": {
+  "short": "Terrifying Appearance: moving into combat with it -> Will Roll (TN10) or loses the action and cannot move into combat with it this turn",
+  "stat_delta": null
+ },
+ "47": {
+  "short": "Puncture Resistant Skin: -1 damage from non-area-effect shooting attacks",
+  "stat_delta": null
+ },
+ "470": {
+  "short": "Powerful Random Teleport: action: teleport 8\" in a random direction (not off table; drops carried treasure at the start point)",
+  "stat_delta": null
+ },
+ "471": {
+  "short": "Fully Rotatable Elbows: even number on a melee Attack Roll -> +1 more (a natural 20 stays 20)",
+  "stat_delta": null
+ },
+ "472": {
+  "short": "High Blood-Enchantment: on activation, may sacrifice 2 Health (free) -> all attacks count as magic and do +2 damage until its next activation",
+  "stat_delta": null
+ },
+ "473": {
+  "short": "Decaying Touch: Decay spell, CN 8, 3\" range; may not empower or improve this CN",
+  "stat_delta": null
+ },
+ "474": {
+  "short": "Intense Blood Allergy: damages another in melee -> suffers 2 damage and is poisoned itself (not vs undead/constructs)",
+  "stat_delta": null
+ },
+ "475": {
+  "short": "Bright Form: opponent's shooting attack vs it -> Will Roll (TN8) or blinded for the turn (stats become Move 1/Fight +0/Shoot +0)",
+  "stat_delta": null
+ },
+ "476": {
+  "short": "Highly Reflective Skin: +3 Fight against shooting attacks (not scenario special effects)",
+  "stat_delta": null
+ },
+ "477": {
+  "short": "Spiked Snail Shell: +2 Armour, cannot wear armour; once/turn may retreat into its shell until its next activation for +3 more Armour, -3 Fight, Move set to 2; always armed with a dagger",
+  "stat_delta": null
+ },
+ "478": {
+  "short": "Nerves of Adamant: once/game, +7 to a Will Roll (decide before rolling)",
+  "stat_delta": null
+ },
+ "479": {
+  "short": "Hair of Vipers: always armed with a poisonous hand weapon",
+  "stat_delta": null
+ },
+ "48": {
+  "short": "Pain Sight: True Sight trait while below maximum Health",
+  "stat_delta": null
+ },
+ "480": {
+  "short": "Vulnerability to Necromancy: -2 Will to resist Necromancy school spells",
+  "stat_delta": null
+ },
+ "481": {
+  "short": "Double Backswing: twice/game (once per activation max), wins a melee fight -> free extra attack vs the same figure",
+  "stat_delta": null
+ },
+ "482": {
+  "short": "Concentration Parasite: figures casting a spell within 6\"/LoS (not turn 1) suffer -1 to the Casting Roll",
+  "stat_delta": null
+ },
+ "483": {
+  "short": "Killer's Speed: reduces a figure to 0 Health -> +2 Move for rest of the game",
+  "stat_delta": null
+ },
+ "484": {
+  "short": "Gigantic Brain: natural 18-20 on a Will Roll -> automatic success",
+  "stat_delta": null
+ },
+ "485": {
+  "short": "Vulnerability to Mental Control: -2 Will to resist Soothsayer school spells",
+  "stat_delta": null
+ },
+ "486": {
+  "short": "Vicious Cat Centaur: no rough-terrain movement penalty; Move stat is 7; never unarmed (+1 damage claws)",
+  "stat_delta": {
+   "move": {
+    "set": 7
+   }
+  }
+ },
+ "487": {
+  "short": "Morbidly Obese: -2 Move, +3 Health",
+  "stat_delta": {
+   "health": {
+    "add": 3
+   },
+   "move": {
+    "add": -2
+   }
+  }
+ },
+ "488": {
+  "short": "Ghost Killer: melee attacks count as magic; Immune to Energy Drain",
+  "stat_delta": null
+ },
+ "489": {
+  "short": "Explosion Hardened: half damage (round down) from area-effect attacks",
+  "stat_delta": null
+ },
+ "49": {
+  "short": "Hammerblow: push-back after winning melee may be 1-3\" (not vs Large unless it is also Large)",
+  "stat_delta": null
+ },
+ "490": {
+  "short": "Steel Heart: once/game, +3 to a Will Roll (may decide after rolling)",
+  "stat_delta": null
+ },
+ "491": {
+  "short": "Barbed Serpent Tale: -1 Move (no rough-ground penalty); always armed with a dagger",
+  "stat_delta": {
+   "move": {
+    "add": -1
+   }
+  }
+ },
+ "492": {
+  "short": "Careless with Weapons: natural 1-2 on an attack -> its weapon breaks (magic weapons lose bonuses/magic status instead)",
+  "stat_delta": null
+ },
+ "493": {
+  "short": "Three-Brawny Arms: 2-handed weapon/staff + shield together; +1 melee damage",
+  "stat_delta": null
+ },
+ "494": {
+  "short": "Thamaturgic Vulnerability: -2 Will to resist Thaumaturgy school spells",
+  "stat_delta": null
+ },
+ "495": {
+  "short": "Poisonous Bite: may bite instead of its normal attack: no Fight penalty, -2 damage, poisonous",
+  "stat_delta": null
+ },
+ "496": {
+  "short": "Extremely Long Legs: +2 Move",
+  "stat_delta": {
+   "move": {
+    "add": 2
+   }
+  }
+ },
+ "497": {
+  "short": "Aardvark Head: Burrowing trait",
+  "stat_delta": null
+ },
+ "498": {
+  "short": "Improved Brace: once/game, +5 Armour for one attack (decide before rolling)",
+  "stat_delta": null
+ },
+ "499": {
+  "short": "No Knees: -1 Move; -3 to Move Stat Rolls",
+  "stat_delta": {
+   "move": {
+    "add": -1
+   }
+  }
+ },
+ "5": {
+  "short": "Leg Tentacles: no rough-ground movement penalty; max jump distance -1\"",
+  "stat_delta": null
+ },
+ "50": {
+  "short": "Breakable: rolling \"Badly Wounded\" on the Survival Table -> permanent -1 Health",
+  "stat_delta": null
+ },
+ "500": {
+  "short": "Electrically Powered: damaged in melee -> attacker suffers +1 elemental magic attack (+2 if wearing heavy armour)",
+  "stat_delta": null
+ },
+ "501": {
+  "short": "Web Spinner: twice/game, action: create a 6\" web anchored at both ends, adjacent to it; blocks movement not LoS; Fight +0/Armour 14/Health 1 to destroy; lasts rest of game unless destroyed",
+  "stat_delta": null
+ },
+ "502": {
+  "short": "Wraith Call: action (can replace move): 18+ on d20 -> place a wraith at a random table edge",
+  "stat_delta": null
+ },
+ "503": {
+  "short": "Empowered Strike: forgo all actions in an activation with 1+ actions -> next melee hit that activation deals +6 elemental magic damage",
+  "stat_delta": null
+ },
+ "504": {
+  "short": "Moves on Four Limbs: +1 Move, -1 Fight",
+  "stat_delta": {
+   "fight": {
+    "add": -1
+   },
+   "move": {
+    "add": 1
+   }
+  }
+ },
+ "505": {
+  "short": "Demon Commander: once/game, action: target an uncontrolled demon within LoS; fail Will Roll (TN20) -> moved up to its Move (no immediate-death moves)",
+  "stat_delta": null
+ },
+ "506": {
+  "short": "Werefrog: -1 Fight, -2 Health; Amphibious trait; full-Move jump with no run-up",
+  "stat_delta": {
+   "fight": {
+    "add": -1
+   },
+   "health": {
+    "add": -2
+   }
+  }
+ },
+ "507": {
+  "short": "Limited Levitation: action (can replace move): Levitate trait for the rest of the turn",
+  "stat_delta": null
+ },
+ "508": {
+  "short": "Perceptive Cyclops: Lost Eye permanent-injury penalties; True Sight trait",
+  "stat_delta": null
+ },
+ "509": {
+  "short": "Rabbit Head: True Sight trait, range 6\"",
+  "stat_delta": null
+ },
+ "51": {
+  "short": "Icy Grasp: +2 melee damage (not vs undead/constructs)",
+  "stat_delta": null
+ },
+ "510": {
+  "short": "Metal Exoskeleton: cannot wear armour; +4 Armour, -5 Health",
+  "stat_delta": {
+   "armour": {
+    "add": 4
+   },
+   "health": {
+    "add": -5
+   }
+  }
+ },
+ "511": {
+  "short": "Rat Form: takes damage -> Will Roll (TN10) or becomes an uncontrolled giant rat for the rest of the game (reverts after)",
+  "stat_delta": null
+ },
+ "512": {
+  "short": "Blinding Aura: figures activating within 3\" (not turn 1) -> Will Roll (TN12) or blinded for the turn (Move 1/Fight +0/no shooting or LoS actions)",
+  "stat_delta": null
+ },
+ "513": {
+  "short": "Half Life: may choose to have the Undead trait or not, at any time",
+  "stat_delta": null
+ },
+ "514": {
+  "short": "Attempted Self-Possession: action: 11-20 on d20 -> under a Possess spell effect (not if already possessed)",
+  "stat_delta": null
+ },
+ "515": {
+  "short": "Extremely High Metabolism: counts as Wounded after the fourth turn of the game",
+  "stat_delta": null
+ },
+ "516": {
+  "short": "Strong Magic Resistance: +3 to Will Rolls to resist/overcome spells",
+  "stat_delta": null
+ },
+ "517": {
+  "short": "Glowing Blood: always counts as under a Glow spell; +2 Health",
+  "stat_delta": {
+   "health": {
+    "add": 2
+   }
+  }
+ },
+ "518": {
+  "short": "Laser Eyes: action: +2 elemental magic shooting attack, +2 damage, 12\" range",
+  "stat_delta": null
+ },
+ "519": {
+  "short": "Large Antennae: +3 Will",
+  "stat_delta": {
+   "will": {
+    "add": 3
+   }
+  }
+ },
+ "52": {
+  "short": "Anger Strength: +1 melee damage while below starting Health",
+  "stat_delta": null
+ },
+ "520": {
+  "short": "Two Extra Hands: +2 item slots",
+  "stat_delta": null
+ },
+ "521": {
+  "short": "Killer's Enchantment: reduces a figure to 0 Health -> all attacks count as magic for the rest of the game",
+  "stat_delta": null
+ },
+ "522": {
+  "short": "Large Tusks: always armed with a hand weapon",
+  "stat_delta": null
+ },
+ "523": {
+  "short": "Spellcaster Allergy: -2 Fight while in combat with a spellcaster",
+  "stat_delta": null
+ },
+ "524": {
+  "short": "Extremely Slippery: a figure forcing combat with it -> Move Roll (TN20) or cannot (may retry vs another figure)",
+  "stat_delta": null
+ },
+ "525": {
+  "short": "Static Discharge: completing a move -> nearest figure in LoS within 8\" suffers a -1 elemental shooting attack (not turn 1)",
+  "stat_delta": null
+ },
+ "526": {
+  "short": "Thick Blubber: +2 Health; immune to cold-related scenario effects (not attacks)",
+  "stat_delta": {
+   "health": {
+    "add": 2
+   }
+  }
+ },
+ "527": {
+  "short": "Enchanted Bones: attacks count as magic; +2 to Will Rolls to resist/overcome spells",
+  "stat_delta": null
+ },
+ "528": {
+  "short": "Soul-Linked: +3 Health; bonded to one random warband member - if they hit 0 Health, so does this figure (not reverse); rebond if that member leaves",
+  "stat_delta": {
+   "health": {
+    "add": 3
+   }
+  }
+ },
+ "529": {
+  "short": "Fox Head: +3 Will",
+  "stat_delta": {
+   "will": {
+    "add": 3
+   }
+  }
+ },
+ "53": {
+  "short": "Phosphorescent Spray: once/game, action: spray target + engaged figures within 6\"/LoS; fail Move Roll (TN20) -> +3 to incoming shooting rolls for rest of game",
+  "stat_delta": null
+ },
+ "530": {
+  "short": "Powerful Favour: once, +5 to one Survival Roll (may decide after rolling; then lost)",
+  "stat_delta": null
+ },
+ "531": {
+  "short": "Toxic Belch: action: target within 4\"; Will Roll (TN14) or poisoned",
+  "stat_delta": null
+ },
+ "532": {
+  "short": "Gigantic Ears: True Sight trait, range 6\"",
+  "stat_delta": null
+ },
+ "533": {
+  "short": "Enchantment Purge: each end of turn, 6+ on d20 -> all spells active on it are cancelled",
+  "stat_delta": null
+ },
+ "534": {
+  "short": "Alligator Head: always armed with a hand weapon",
+  "stat_delta": null
+ },
+ "535": {
+  "short": "Magic Allergy: -5 Armour against magic attacks",
+  "stat_delta": null
+ },
+ "536": {
+  "short": "Powerful Undead: Undead trait; +1 melee damage",
+  "stat_delta": null
+ },
+ "537": {
+  "short": "Flaming Bile: magic shooting attack, 3\" range, +0 damage",
+  "stat_delta": null
+ },
+ "538": {
+  "short": "Body of Stone: cannot wear armour; +3 Armour; -3 to Swimming Rolls",
+  "stat_delta": {
+   "armour": {
+    "add": 3
+   }
+  }
+ },
+ "539": {
+  "short": "Insect Companions: all other figures within 2\" suffer -1 to all rolls",
+  "stat_delta": null
+ },
+ "54": {
+  "short": "Telekinetic Pull: once/game, action: target within 12\"/LoS; fail Move Roll (TN20) -> pulled 3\" toward this figure",
+  "stat_delta": null
+ },
+ "540": {
+  "short": "Heron Head: always armed with a dagger",
+  "stat_delta": null
+ },
+ "541": {
+  "short": "Quick Step: once/game on activation: move 2\" (no forced combat from this move)",
+  "stat_delta": null
+ },
+ "542": {
+  "short": "Bonehead: +1 Health; no unarmed damage penalty",
+  "stat_delta": {
+   "health": {
+    "add": 1
+   }
+  }
+ },
+ "543": {
+  "short": "Jinx: the first Survival Roll by any warband member after each game is at -1",
+  "stat_delta": null
+ },
+ "544": {
+  "short": "Improved Power Lifter: no encumbrance/movement penalty for treasure tokens; may carry 2 at once",
+  "stat_delta": null
+ },
+ "545": {
+  "short": "Nearly Blind: maximum line of sight 6\"",
+  "stat_delta": null
+ },
+ "546": {
+  "short": "Spikey Armoured Shell: cannot wear armour; +2 Armour; always armed with a dagger",
+  "stat_delta": {
+   "armour": {
+    "add": 2
+   }
+  }
+ },
+ "547": {
+  "short": "Improved Lunging Attack: once/game, may force combat at 3\" range instead of 1\"",
+  "stat_delta": null
+ },
+ "548": {
+  "short": "Killer's Sight: reduces a figure to 0 Health -> True Sight trait for the rest of the game",
+  "stat_delta": null
+ },
+ "549": {
+  "short": "Extremely Painful Body Restructure: start of each turn, spend 2 Health for one of Amphibious/Expert Climber/Immune to Poison/Never Wounded until its next activation",
+  "stat_delta": null
+ },
+ "55": {
+  "short": "Hideous Stench: figures moving within 1\"/into combat must pass Will Roll (TN8) (not undead/constructs)",
+  "stat_delta": null
+ },
+ "550": {
+  "short": "Weregorilla: +1 Fight, +2 Health; Expert Climber trait",
+  "stat_delta": {
+   "fight": {
+    "add": 1
+   },
+   "health": {
+    "add": 2
+   }
+  }
+ },
+ "551": {
+  "short": "Three Heads: opponents count one fewer supporting figure (min 0); support bonus capped at +1",
+  "stat_delta": null
+ },
+ "552": {
+  "short": "Enhanced Project Self: move action: move 8\" (LoS required) and act, then returns to its starting point after activation",
+  "stat_delta": null
+ },
+ "553": {
+  "short": "Deadeye: once/game, natural 18-19 on a Shooting Roll -> treat as a 20 (critical hit)",
+  "stat_delta": null
+ },
+ "554": {
+  "short": "Horrific Death Scream: reduced to 0 Health -> +1 attack to all figures within 6\"",
+  "stat_delta": null
+ },
+ "555": {
+  "short": "Hardened Elemental Armour: Elemental Resistance (5)",
+  "stat_delta": null
+ },
+ "556": {
+  "short": "Nearly 2-Dimensional: -2 Armour; fits through any gap no matter how narrow",
+  "stat_delta": {
+   "armour": {
+    "add": -2
+   }
+  }
+ },
+ "557": {
+  "short": "Massive Blood Evaporation: takes damage -> 3\" cloud centred on it, blocks LoS not movement; 1-5 on d6 each end of turn disperses",
+  "stat_delta": null
+ },
+ "558": {
+  "short": "Extreme Mitigation: once/game, reduce damage from one source by 8",
+  "stat_delta": null
+ },
+ "559": {
+  "short": "Minor Demon-Spawn: reduced to 0 Health -> place a minor demon where it fell",
+  "stat_delta": null
+ },
+ "56": {
+  "short": "Temporally Unstable: natural 1 on any roll -> removed from table; returns on 12+ each end of turn at same spot",
+  "stat_delta": null
+ },
+ "560": {
+  "short": "Perceptive Troglodyte: True Sight trait; no darkness LoS penalty; -1 Fight/-1 Shoot outdoors on land in daylight",
+  "stat_delta": null
+ },
+ "561": {
+  "short": "Vulture Head: always armed with a dagger",
+  "stat_delta": null
+ },
+ "562": {
+  "short": "Viper Arms: no weapons/shields; always armed with a poisonous hand weapon (+1 Fight)",
+  "stat_delta": null
+ },
+ "563": {
+  "short": "Eagle Head: +1 Shoot",
+  "stat_delta": {
+   "shoot": {
+    "add": 1
+   }
+  }
+ },
+ "564": {
+  "short": "Powerful Brachiator: Expert Climber trait; full-Move jump from standing, next to vertical terrain",
+  "stat_delta": null
+ },
+ "565": {
+  "short": "Half-Demonic: may choose to have the Demon trait or not, at any time; Elemental Resistance (3) while it does",
+  "stat_delta": null
+ },
+ "566": {
+  "short": "Long Whiskers: True Sight trait, range 5\"",
+  "stat_delta": null
+ },
+ "567": {
+  "short": "Advanced Mind Cloud: once/game, free action: no figure may force combat with it for the rest of the turn",
+  "stat_delta": null
+ },
+ "568": {
+  "short": "Octopus Head: Amphibious trait",
+  "stat_delta": null
+ },
+ "569": {
+  "short": "Amorphous: passes through any opening no matter how small",
+  "stat_delta": null
+ },
+ "57": {
+  "short": "Two Heads: only grants a +1 (not more) supporting-figure bonus against it",
+  "stat_delta": null
+ },
+ "570": {
+  "short": "Hibernate: 1 on d20 before each game -> sits out that game (replaced by a free figure); the next game it plays, starts at +2 Health",
+  "stat_delta": null
+ },
+ "571": {
+  "short": "Potent Acidic Blood: damaged in melee -> all other figures in that combat suffer 2 damage",
+  "stat_delta": null
+ },
+ "572": {
+  "short": "Withered Half: Crushed Arm and Smashed Leg permanent injuries",
+  "stat_delta": null
+ },
+ "573": {
+  "short": "Minor Static Charge: after moving 3\"+ in a move action, its next melee hit that game deals +1 elemental magic damage (any number of times)",
+  "stat_delta": null
+ },
+ "574": {
+  "short": "Valuable Trophy: Bounty (50gc) trait",
+  "stat_delta": null
+ },
+ "575": {
+  "short": "Burning Soul: melee attacks count as magic, +1 damage; natural 20 on any roll -> 2 damage to self",
+  "stat_delta": null
+ },
+ "576": {
+  "short": "Cute and Fluffy: uncontrolled creatures ignore it if another target is in LoS; in multi-combat, they target others first",
+  "stat_delta": null
+ },
+ "577": {
+  "short": "General of the Dead: once/game, action: auto-successful Raise Zombie, produces a ghoul instead",
+  "stat_delta": null
+ },
+ "578": {
+  "short": "Thin Ablative Skin: +2 Health; first 2 damage taken each game cannot be healed in-game (returns next game)",
+  "stat_delta": {
+   "health": {
+    "add": 2
+   }
+  }
+ },
+ "579": {
+  "short": "Mind Slam: melee attacks may force both figures to use Will instead of Fight for Combat Rolls; if used, this figure gets +2 to its own Combat Roll",
+  "stat_delta": null
+ },
+ "58": {
+  "short": "Bloodboil: before each game, may choose to suffer 3 damage for +1 Fight or +1 Shoot",
+  "stat_delta": null
+ },
+ "580": {
+  "short": "Magic-Resistant Snail Shell: +2 Armour, cannot wear armour; once/turn retreat into shell until next activation for +3 more Armour/-3 Fight/Move set to 2; +2 to Will Rolls resisting spells (+4 while retreated)",
+  "stat_delta": null
+ },
+ "581": {
+  "short": "Extremely Warty: +1 Health; cannot wear armour",
+  "stat_delta": {
+   "health": {
+    "add": 1
+   }
+  }
+ },
+ "582": {
+  "short": "Sprout Wings: action (can replace move), 1 damage: Flying trait for the rest of the turn and all of the next",
+  "stat_delta": null
+ },
+ "583": {
+  "short": "Long Arms, No Legs: -1 Move; +1 melee damage",
+  "stat_delta": {
+   "move": {
+    "add": -1
+   }
+  }
+ },
+ "584": {
+  "short": "Plague Carrier: -4 Health; wounds another in melee -> they fail Health Roll (TN20) -> -5 Health next game (cumulative)",
+  "stat_delta": {
+   "health": {
+    "add": -4
+   }
+  }
+ },
+ "585": {
+  "short": "Colourful Neck Frill: attackers shooting at it suffer -1 Shoot",
+  "stat_delta": null
+ },
+ "586": {
+  "short": "Construct Commander: once/game, action: target an uncontrolled construct within LoS; fail Will Roll (TN20) -> moved up to its Move (no immediate-death moves)",
+  "stat_delta": null
+ },
+ "587": {
+  "short": "Blade Hands: no weapons/shields; +1 Fight; always armed with a magic hand weapon",
+  "stat_delta": {
+   "fight": {
+    "add": 1
+   }
+  }
+ },
+ "588": {
+  "short": "Major Regeneration: regains up to 2 Health every time it activates",
+  "stat_delta": null
+ },
+ "589": {
+  "short": "Mind-Robber: damages another in melee -> Will Roll (TN14) or becomes a temporary member of its warband (may re-roll to break free at the end of each activation)",
+  "stat_delta": null
+ },
+ "59": {
+  "short": "Numbing Blow: melee damage dealt -> target -1 Fight, cumulative to min +0 (not vs Large)",
+  "stat_delta": null
+ },
+ "590": {
+  "short": "Cobra Head: always armed with a poisoned dagger",
+  "stat_delta": null
+ },
+ "591": {
+  "short": "Weak but Very Fast: +1 Move, +3 Fight; half melee damage dealt (round up)",
+  "stat_delta": {
+   "fight": {
+    "add": 3
+   },
+   "move": {
+    "add": 1
+   }
+  }
+ },
+ "592": {
+  "short": "Short Range Telepathy: may group-activate with one other model within 12\" that hasn't activated yet (Apprentices still cannot activate in the Wizard Phase)",
+  "stat_delta": null
+ },
+ "593": {
+  "short": "Highly Explosive Sneeze: natural 1 on Initiative (not turn 1) -> +2 shooting attack to all within 2\"",
+  "stat_delta": null
+ },
+ "594": {
+  "short": "Enhanced Crumbling Touch: 3x/game, action: auto-cast Crumble on terrain within 1\"",
+  "stat_delta": null
+ },
+ "595": {
+  "short": "Enchanted Horns: Horns trait; Horns-bonus attacks count as magic",
+  "stat_delta": null
+ },
+ "596": {
+  "short": "Explosive Excrement: forgo all actions -> place a marker adjacent (max 2 at once); triggered within 1\" -> +5 magic shooting attack to all within 3\" (immune to its own)",
+  "stat_delta": null
+ },
+ "597": {
+  "short": "Distracting Laugh: figures within 2\" (not turn 1) suffer -1 to all rolls",
+  "stat_delta": null
+ },
+ "598": {
+  "short": "Extremely Extendable Arms: may pick up a treasure token within 5\" if no enemy is within 1\" of it or the token",
+  "stat_delta": null
+ },
+ "599": {
+  "short": "Sticky Leg Tentacles: -1 Move; no rough-ground/climbing movement penalty",
+  "stat_delta": {
+   "move": {
+    "add": -1
+   }
+  }
+ },
+ "6": {
+  "short": "Skull Projection: Animate skull spell with CN 6",
+  "stat_delta": null
+ },
+ "60": {
+  "short": "Lashing Tentacles: any figure (incl. allies) moving/activating within 2\" suffers a +0 shooting attack",
+  "stat_delta": null
+ },
+ "600": {
+  "short": "Limited Teleportation: once/game, action (can replace move, usable in combat): teleport anywhere within 6\"/LoS",
+  "stat_delta": null
+ },
+ "601": {
+  "short": "Covered in Quills: cannot wear armour; opponent rolls natural 1-5 in melee vs it -> opponent suffers +2 damage (on top of any loss damage)",
+  "stat_delta": null
+ },
+ "602": {
+  "short": "Pig Head: -1 Will",
+  "stat_delta": {
+   "will": {
+    "add": -1
+   }
+  }
+ },
+ "603": {
+  "short": "Blazing Form: opponent's shooting attack vs it -> Will Roll (TN10) or blinded for the turn (stats become Move 1/Fight +0/Shoot +0)",
+  "stat_delta": null
+ },
+ "604": {
+  "short": "Unihorn: Horns trait",
+  "stat_delta": null
+ },
+ "605": {
+  "short": "Fated for Mediocrity: rolls 3d6 instead of d20 for all rolls (18 = critical hit/auto-success, 3 = auto-failure)",
+  "stat_delta": null
+ },
+ "606": {
+  "short": "Freezing Grasp: +3 melee damage (not vs undead/constructs)",
+  "stat_delta": null
+ },
+ "607": {
+  "short": "Static Charge: after moving 3\"+ in a move action, its next melee hit that game deals +2 elemental magic damage (any number of times)",
+  "stat_delta": null
+ },
+ "608": {
+  "short": "Devastating Blow: once/game, melee damage dealt -> +4 extra damage",
+  "stat_delta": null
+ },
+ "609": {
+  "short": "Exploding Poisonous Pustules: any figure fighting a round of combat with it -> Will Roll (TN14) or poisoned (regardless of outcome)",
+  "stat_delta": null
+ },
+ "61": {
+  "short": "Blood Allergy: damages another figure in melee -> becomes poisoned itself",
+  "stat_delta": null
+ },
+ "610": {
+  "short": "Sonic Digger: Burrowing trait",
+  "stat_delta": null
+ },
+ "611": {
+  "short": "Strong Magic Vulnerability: -3 to Will Rolls to resist/overcome spells",
+  "stat_delta": null
+ },
+ "612": {
+  "short": "Double Jointed: Expert Climber trait",
+  "stat_delta": null
+ },
+ "613": {
+  "short": "Stubby Legs: -2 Move",
+  "stat_delta": {
+   "move": {
+    "add": -2
+   }
+  }
+ },
+ "614": {
+  "short": "Major Addiction: pay 40gc before each game or -2 Health and -1 to all rolls that game",
+  "stat_delta": null
+ },
+ "615": {
+  "short": "Horrific Appearance: moving into combat with it -> Will Roll (TN12) or loses the action",
+  "stat_delta": null
+ },
+ "616": {
+  "short": "Painful Laughter: on activation, living figures (not undead/constructs) within 2\" (not turn 1) fail Will Roll (TN8) -> damage equal to the amount failed by",
+  "stat_delta": null
+ },
+ "617": {
+  "short": "Hands of Death: melee attacks count as magic, +2 damage vs living creatures (not undead/constructs)",
+  "stat_delta": null
+ },
+ "618": {
+  "short": "Low Boiling Point: double damage from elemental/fire attacks",
+  "stat_delta": null
+ },
+ "619": {
+  "short": "Mana Battery (2/2): twice/game, an ally within 3\" casting a spell may draw +2 to the roll",
+  "stat_delta": null
+ },
+ "62": {
+  "short": "Light Sensitivity: -1 to shooting attacks and Combat Rolls vs shooting (unless cover/underground/low light)",
+  "stat_delta": null
+ },
+ "620": {
+  "short": "Hoofed Legs: +1 Move; -3 to Move Stat Rolls",
+  "stat_delta": {
+   "move": {
+    "add": 1
+   }
+  }
+ },
+ "621": {
+  "short": "Murderous Strike: once/game, natural 17-19 in melee -> treat as a 20 (critical hit)",
+  "stat_delta": null
+ },
+ "622": {
+  "short": "Demon Attracter: Initiative Roll of 1-3 while on the table -> place an imp at a random table edge",
+  "stat_delta": null
+ },
+ "623": {
+  "short": "Frequent Insanity: natural 1-3 on any roll -> uncontrolled for the rest of that turn and all of the next",
+  "stat_delta": null
+ },
+ "624": {
+  "short": "Regenerating Organs: Immune to Critical Hits",
+  "stat_delta": null
+ },
+ "625": {
+  "short": "Death Eye: once/game, action: auto-cast Strike Dead at Casting Roll 15 (this figure takes 1 damage using it)",
+  "stat_delta": null
+ },
+ "626": {
+  "short": "Deathwish: never gains cover bonuses; -2 to Fight Rolls vs shooting; auto-passes Will Rolls vs Fear/Horror",
+  "stat_delta": null
+ },
+ "627": {
+  "short": "Powerful Ink Spray: once/game, as Blinding Light at Casting Roll 16 vs one target (cannot be dispelled)",
+  "stat_delta": null
+ },
+ "628": {
+  "short": "Runic Arms: all attacks count as magic",
+  "stat_delta": null
+ },
+ "629": {
+  "short": "Spider Form: takes damage -> Will Roll (TN10) or becomes an uncontrolled ice spider for the rest of the game (reverts after)",
+  "stat_delta": null
+ },
+ "63": {
+  "short": "Scorpion Tail: always armed with a poisonous hand weapon",
+  "stat_delta": null
+ },
+ "630": {
+  "short": "Burrowing Troglodyte: Burrowing trait; no darkness LoS penalty; -1 Fight/-1 Shoot outdoors on land in daylight",
+  "stat_delta": null
+ },
+ "631": {
+  "short": "Spider Blood: Immune to Poison trait",
+  "stat_delta": null
+ },
+ "632": {
+  "short": "Extremely Squishy: -3 Armour",
+  "stat_delta": {
+   "armour": {
+    "add": -3
+   }
+  }
+ },
+ "633": {
+  "short": "Improved Phosphorescent Spray: action: spray target + engaged figures within 6\"/LoS; fail Move Roll (TN20) -> +3 to incoming shooting rolls for rest of game",
+  "stat_delta": null
+ },
+ "634": {
+  "short": "Boiling Blood Spew: action: +3 shooting attack, +2 damage, 10\" range, all within 0.5\" of a point; 3 damage to self",
+  "stat_delta": null
+ },
+ "635": {
+  "short": "Super Bulky: +3 Health; Large trait",
+  "stat_delta": {
+   "health": {
+    "add": 3
+   }
+  }
+ },
+ "636": {
+  "short": "Wraith-Reanimation: reduced to 0 Health -> place an uncontrolled wraith where it fell",
+  "stat_delta": null
+ },
+ "637": {
+  "short": "Third Eye: Mind Lock trait",
+  "stat_delta": null
+ },
+ "638": {
+  "short": "Major Static Discharge: completing a move -> nearest figure in LoS suffers a +0 elemental shooting attack (not turn 1)",
+  "stat_delta": null
+ },
+ "639": {
+  "short": "Extremely Loud Soul: random-encounter checks after picking up treasure while it's on the table: roll two dice, keep both",
+  "stat_delta": null
+ },
+ "64": {
+  "short": "Minor Regeneration: regains 1 Health every time it activates",
+  "stat_delta": null
+ },
+ "640": {
+  "short": "Poisonous Detachable Spines: always armed with a poison dagger; shooting attack, 6\" range, -1 damage, poison",
+  "stat_delta": null
+ },
+ "641": {
+  "short": "More Plant than Man: Never Wounded trait",
+  "stat_delta": null
+ },
+ "642": {
+  "short": "Moose Head: Horns trait",
+  "stat_delta": null
+ },
+ "643": {
+  "short": "Inhumanly Obese: -3 Move (min 1); +5 Health",
+  "stat_delta": {
+   "health": {
+    "add": 5
+   },
+   "move": {
+    "add": -3
+   }
+  }
+ },
+ "644": {
+  "short": "Poisonous Blood: while below starting Health, all attacks are poisonous; action: 1 self-damage to trigger it early",
+  "stat_delta": null
+ },
+ "645": {
+  "short": "Big and Strong: Large and Strong traits",
+  "stat_delta": null
+ },
+ "646": {
+  "short": "Magically-Attuned Cyclops: Lost Eye permanent-injury penalties; once/game +5 to a Casting Roll (spellcasters, decide before) or +5 to a Will Roll resisting a spell (non-spellcasters, decide after)",
+  "stat_delta": null
+ },
+ "647": {
+  "short": "Blind: True Sight trait; no Lost Eye penalty; immune to Blinding Light",
+  "stat_delta": null
+ },
+ "648": {
+  "short": "Blood-Marked: +5 to Will Rolls resisting Mind Control/Suggestion; unarmed penalty is -2 Fight only (no -2 damage)",
+  "stat_delta": null
+ },
+ "649": {
+  "short": "Visions of Doom: natural 18-20 for initiative -> max 1 action on its next activation",
+  "stat_delta": null
+ },
+ "65": {
+  "short": "Leaping Attack: +2 Move, only if the move ends in combat",
+  "stat_delta": null
+ },
+ "650": {
+  "short": "Magical Self-Projectile: action: magic shooting attack, 6\" range, +3 damage; then moves 1.5\" in a random direction and takes 3 damage (drops any carried treasure)",
+  "stat_delta": null
+ },
+ "651": {
+  "short": "Highly Empathetic: an ally within 6\" rolls natural 20 -> regain 2 Health; an ally within 6\" reduced to 0 Health -> suffers 4 damage",
+  "stat_delta": null
+ },
+ "652": {
+  "short": "Shining Butterfly Wings: Flying trait, lost while below starting Health; +2 Will",
+  "stat_delta": null
+ },
+ "653": {
+  "short": "Clumsy: -4 to Move Rolls",
+  "stat_delta": null
+ },
+ "654": {
+  "short": "Walrus Head: Horns trait",
+  "stat_delta": null
+ },
+ "655": {
+  "short": "Redundant Organs: Immune to Critical Hits",
+  "stat_delta": null
+ },
+ "656": {
+  "short": "Poison Rage: while poisoned, +2 Fight and +2 melee damage",
+  "stat_delta": null
+ },
+ "657": {
+  "short": "Resistant to Missile Weapons: never takes more than 2 damage from a non-magic bow/crossbow/javelin (full damage from all other shooting)",
+  "stat_delta": null
+ },
+ "658": {
+  "short": "Extremely Long Neck: +7 damage on a critical hit (instead of +5)",
+  "stat_delta": null
+ },
+ "659": {
+  "short": "Suicide Attack: +8 melee damage; dealing any melee damage immediately reduces it to 0 Health",
+  "stat_delta": null
+ },
+ "66": {
+  "short": "Trunk: action: trumpet -> self and allies +2 to Will Rolls until this figure's next activation",
+  "stat_delta": null
+ },
+ "660": {
+  "short": "Whipping Tentacles: figures (incl. allies) moving/activating within 3\" (not turn 1) suffer +2 shooting attack",
+  "stat_delta": null
+ },
+ "661": {
+  "short": "Chilling Touch: +2 melee damage (not vs undead/constructs)",
+  "stat_delta": null
+ },
+ "662": {
+  "short": "Demon Hunter's Will: +2 to all Will Rolls while a non-allied demon is on the table",
+  "stat_delta": null
+ },
+ "663": {
+  "short": "Powerful Ink Spew: once/game, as Blinding Light (CN 16) vs all within 3\" (cannot be dispelled)",
+  "stat_delta": null
+ },
+ "664": {
+  "short": "Bison Head: Horns trait",
+  "stat_delta": null
+ },
+ "665": {
+  "short": "Channel Will: on activation, may declare: melee attacks become magic +1 damage, but -3 to its Will Rolls until its next activation",
+  "stat_delta": null
+ },
+ "666": {
+  "short": "Heavy Blubber: +3 Health; immune to cold-related scenario effects (not cold attacks)",
+  "stat_delta": null
+ },
+ "667": {
+  "short": "Limited Force Bubble: once/game, action: +8 shooting attack vs all in LoS, pushed away that many inches instead of taking damage (stops at terrain over 1\" high)",
+  "stat_delta": null
+ },
+ "668": {
+  "short": "Undead Hunter's Will: +2 to all Will Rolls while non-allied undead are on the table",
+  "stat_delta": null
+ },
+ "669": {
+  "short": "Draining Tentacles: melee damage dealt (1+) -> regains 1 Health; opponents need to deal damage to push/step back after winning against it",
+  "stat_delta": null
+ },
+ "67": {
+  "short": "Tusks: always armed with a dagger",
+  "stat_delta": null
+ },
+ "670": {
+  "short": "Delicious Smell: uncontrolled animals within 6\" target it first (even without LoS); reduced to 0 Health by an animal -> -1 to its Survival Roll",
+  "stat_delta": null
+ },
+ "671": {
+  "short": "Animal Hunter's Will: +2 to all Will Rolls while non-allied animals are on the table",
+  "stat_delta": null
+ },
+ "672": {
+  "short": "Skull Enchanter: may carry a skull (counts as an item); once/game, action: animate it as the Animate Skull spell",
+  "stat_delta": null
+ },
+ "673": {
+  "short": "Werehippo: +2 Health, +1 melee damage; Large and Amphibious traits",
+  "stat_delta": {
+   "health": {
+    "add": 2
+   }
+  }
+ },
+ "674": {
+  "short": "Fear of Demons: -2 to all Will Rolls while any demon is on the table",
+  "stat_delta": null
+ },
+ "675": {
+  "short": "Hurtling Attack: +6 Move on a move action that moves it into combat",
+  "stat_delta": null
+ },
+ "676": {
+  "short": "Innate Undead Slayer: natural 18-20 for initiative -> free-action cast Destroy Undead at a target of choice",
+  "stat_delta": null
+ },
+ "677": {
+  "short": "Chameleon Head: +2 Fight when rolling against shooting attacks",
+  "stat_delta": null
+ },
+ "678": {
+  "short": "Fear of Undead: -3 to Will Rolls while undead are on the table",
+  "stat_delta": null
+ },
+ "679": {
+  "short": "Reliable: rolls 2d10 instead of d20 for all rolls (natural 2 = auto-failure)",
+  "stat_delta": null
+ },
+ "68": {
+  "short": "Easily Weakened: damaged from any source -> -1 Fight, cumulative to min +0",
+  "stat_delta": null
+ },
+ "680": {
+  "short": "Two Animal Heads: supporting-figure bonus against it capped at +1 (instead of +2)",
+  "stat_delta": null
+ },
+ "681": {
+  "short": "Soulrattling Wail: action: all within 8\" (incl. itself) fail Will Roll (TN12) -> damage equal to the amount failed by (not undead/constructs/deaf)",
+  "stat_delta": null
+ },
+ "682": {
+  "short": "Shadowy Form: cannot be seen beyond 12\"; +3 to Fight Rolls against shooting attacks",
+  "stat_delta": null
+ },
+ "683": {
+  "short": "Gigantic Hand: +1 melee damage; always armed with a hand weapon",
+  "stat_delta": null
+ },
+ "684": {
+  "short": "Adamant Heart: once/game, +4 to a Will Roll (may decide after rolling)",
+  "stat_delta": null
+ },
+ "685": {
+  "short": "Fear of Animals: -3 to Will Rolls while animals are on the table",
+  "stat_delta": null
+ },
+ "686": {
+  "short": "Finger Darts: up to 5x/game, action: shooting attack as a successfully cast Bone Dart; once used, no 2-handed weapon/staff/bow/crossbow for the rest of the game (bones regrow between games)",
+  "stat_delta": null
+ },
+ "687": {
+  "short": "Swallow and Regurgitate: +1 unusable stored item; action: swap which extra item is usable",
+  "stat_delta": null
+ },
+ "688": {
+  "short": "Painful Body Restructure: on activation, spend 1 Health for one of Amphibious/Expert Climber/Immune to Poison/Never Wounded until its next activation",
+  "stat_delta": null
+ },
+ "689": {
+  "short": "Doomed Shot Magnet: -3 Fight when rolling against shooting attacks",
+  "stat_delta": null
+ },
+ "69": {
+  "short": "Extra Eye: +1 Fight when rolling against shooting attacks",
+  "stat_delta": null
+ },
+ "690": {
+  "short": "Major Static Charge: after moving 3\"+ in a move action, its next melee hit that game deals +3 elemental magic damage (any number of times)",
+  "stat_delta": null
+ },
+ "691": {
+  "short": "Pumpkinhead: -1 Armour, -2 Health; Magic Attacks, Mind Lock, and Undead traits",
+  "stat_delta": {
+   "armour": {
+    "add": -1
+   },
+   "health": {
+    "add": -2
+   }
+  }
+ },
+ "692": {
+  "short": "Werewasp: -1 Move, -1 Fight, -1 Armour, -2 Health; Flying and Poison traits",
+  "stat_delta": {
+   "armour": {
+    "add": -1
+   },
+   "fight": {
+    "add": -1
+   },
+   "health": {
+    "add": -2
+   },
+   "move": {
+    "add": -1
+   }
+  }
+ },
+ "693": {
+  "short": "Covered in Feathers: cannot fly; immune to fall damage",
+  "stat_delta": null
+ },
+ "694": {
+  "short": "Walking Head: -1 Move",
+  "stat_delta": {
+   "move": {
+    "add": -1
+   }
+  }
+ },
+ "695": {
+  "short": "Shattering Sneeze: natural 1 on Initiative (not turn 1) -> +3 shooting attack to all within 2\"",
+  "stat_delta": null
+ },
+ "696": {
+  "short": "Hatred of Undead: a non-allied undead within 10\" on activation -> must move to and attack the closest one with all actions",
+  "stat_delta": null
+ },
+ "697": {
+  "short": "Scalding Blood Spew: action: +4 shooting attack, +2 damage, 10\" range, all within 0.5\" of a point; 4 damage to self",
+  "stat_delta": null
+ },
+ "698": {
+  "short": "Rotting: +1 Armour immediately; -1 Health after every future game (cumulative until it reaches 0 and dies - track manually)",
+  "stat_delta": {
+   "armour": {
+    "add": 1
+   }
+  }
+ },
+ "699": {
+  "short": "Magical Venom Sacks: melee attacks count as Magic and Poison",
+  "stat_delta": null
+ },
+ "7": {
+  "short": "Rapid Healer: Badly Wounded results become Full Recovery; always Full Health after a game",
+  "stat_delta": null
+ },
+ "70": {
+  "short": "Insect Head: always armed with a dagger",
+  "stat_delta": null
+ },
+ "700": {
+  "short": "Four Arms/No Legs: -2 Move; Expert Climber trait",
+  "stat_delta": {
+   "move": {
+    "add": -2
+   }
+  }
+ },
+ "701": {
+  "short": "Demonic Oubliette: demon contacting/activating in contact -> Will Roll (TN16) or imprisoned (max 1 at a time); release as an action (within 3\") or after the game",
+  "stat_delta": null
+ },
+ "702": {
+  "short": "Mystic Absorber: figures within 3\" suffer -1 to all Casting Rolls",
+  "stat_delta": null
+ },
+ "703": {
+  "short": "Thunderhand: push-back after winning melee may be 1-6\" (not vs Large)",
+  "stat_delta": null
+ },
+ "704": {
+  "short": "Focus Elemental Power: forgo all actions in an activation with 1+ actions -> weapon charged as Elemental Hammer",
+  "stat_delta": null
+ },
+ "705": {
+  "short": "Amphibious Troglodyte: Amphibious trait; no darkness LoS penalty; -1 Fight/-1 Shoot outdoors on land in daylight",
+  "stat_delta": null
+ },
+ "706": {
+  "short": "Toad Form: takes damage -> Will Roll (TN10) or becomes an uncontrolled Ice Toad for the rest of the game (reverts after)",
+  "stat_delta": null
+ },
+ "707": {
+  "short": "Hatred of Demons: a non-allied demon within 10\"/LoS on activation -> must move to and attack the closest one with all actions",
+  "stat_delta": null
+ },
+ "708": {
+  "short": "Burning Blood: damaged in melee -> all other figures in that combat suffer 2 damage; a non-magical melee weapon that damaged it is destroyed",
+  "stat_delta": null
+ },
+ "709": {
+  "short": "Lion Head: always armed with a hand weapon",
+  "stat_delta": null
+ },
+ "71": {
+  "short": "Horns: Horns trait",
+  "stat_delta": null
+ },
+ "710": {
+  "short": "Psychic Wings: action: Will Roll (TN15) -> Flying trait for 3 turns or until it takes damage (may retry to regain it)",
+  "stat_delta": null
+ },
+ "711": {
+  "short": "Cool Hand: once/game, +4 to a shooting attack (decide before rolling)",
+  "stat_delta": null
+ },
+ "712": {
+  "short": "Cursed Touch: wins a melee round -> opponent treated as hit by Curse at Casting Roll 14",
+  "stat_delta": null
+ },
+ "713": {
+  "short": "Undead Stench: uncontrolled undead ignore it entirely",
+  "stat_delta": null
+ },
+ "714": {
+  "short": "Blinding Flash: figure activating in combat with it -> Will Roll (TN10) or -5 Fight (min +0) for that activation (immune if immune to Blinding Light)",
+  "stat_delta": null
+ },
+ "715": {
+  "short": "Hatred of Constructs: a non-allied construct within 10\"/LoS on activation -> must move to and attack the closest one with all actions",
+  "stat_delta": null
+ },
+ "716": {
+  "short": "Web Creator: action: create a 6\" web anchored at both ends, adjacent to it; blocks movement not LoS; Fight +0/Armour 14/Health 1 to destroy; lasts rest of game unless destroyed",
+  "stat_delta": null
+ },
+ "717": {
+  "short": "Levitation: Levitate trait",
+  "stat_delta": null
+ },
+ "718": {
+  "short": "Killer's Eye: once/game, natural 17-19 on a Shooting Roll -> treat as a 20 (critical hit)",
+  "stat_delta": null
+ },
+ "719": {
+  "short": "Demonic Aura: uncontrolled demons ignore it entirely",
+  "stat_delta": null
+ },
+ "72": {
+  "short": "Pain Instability: takes 1+ damage -> teleports 1-10\" in a random direction (stops at table edge)",
+  "stat_delta": null
+ },
+ "720": {
+  "short": "Ball: +1 Move; rolls instead of walking; cannot climb",
+  "stat_delta": {
+   "move": {
+    "add": 1
+   }
+  }
+ },
+ "721": {
+  "short": "Devastating Attack: once/game, +5 to a Combat Roll in melee it initiates (decide before rolling)",
+  "stat_delta": null
+ },
+ "722": {
+  "short": "Stinger: may attack at normal Fight/damage with a poisonous stinger",
+  "stat_delta": null
+ },
+ "723": {
+  "short": "Master of Stealth: before turn 1 initiative, may move up to 12\" ending out of enemy LoS and 3\"+ from any treasure; if moved 3\"+, only 1 action (not move) on its first activation",
+  "stat_delta": null
+ },
+ "724": {
+  "short": "Enchanted Razor Mandibles: always armed with a magic hand weapon",
+  "stat_delta": null
+ },
+ "725": {
+  "short": "Jack o' Lantern Head: -1 Armour, -2 Health, +2 Will; Magic Attacks, Mind Lock, and Undead traits",
+  "stat_delta": {
+   "armour": {
+    "add": -1
+   },
+   "health": {
+    "add": -2
+   },
+   "will": {
+    "add": 2
+   }
+  }
+ },
+ "726": {
+  "short": "Magic Volatility: hit by a magic attack -> double damage; if reduced to 0 Health, explodes (+4 magic shooting attack to all within 3\"; -2 to its own post-game Survival Roll)",
+  "stat_delta": null
+ },
+ "727": {
+  "short": "Unstable Portal: natural 1 for initiative while on the table -> place an uncontrolled imp 3d6\" away in a random direction",
+  "stat_delta": null
+ },
+ "728": {
+  "short": "Ethereal Oubliette: an ethereal undead contacting/activating in contact -> Will Roll (TN16) or imprisoned (max 1 at a time); release as an action (within 3\") or after the game",
+  "stat_delta": null
+ },
+ "729": {
+  "short": "Bat Form: action: Flying trait (other stats unaffected); cannot carry treasure while in this form (drops any carried)",
+  "stat_delta": null
+ },
+ "73": {
+  "short": "Demonic Allergy: within 1\" of a demon (move/activate) -> Will Roll (TN10) or 2 damage",
+  "stat_delta": null
+ },
+ "730": {
+  "short": "Poison Vulnerability: damaged by a poison attack -> suffers +5 extra damage",
+  "stat_delta": null
+ },
+ "731": {
+  "short": "Beast Master: once/turn, action: roll on the Random Encounter Table, place result at a random table edge (uncontrolled)",
+  "stat_delta": null
+ },
+ "732": {
+  "short": "Unnatural Health: only heals via blood (pay 5gc, or take a warband member's blood and remove them from the roster until after the next game) or via spells during a game",
+  "stat_delta": null
+ },
+ "733": {
+  "short": "Elementally Charged: +1 melee damage, counts as elemental magic",
+  "stat_delta": null
+ },
+ "734": {
+  "short": "Extreme Growth with Pain: 5+ damage from one source -> +1 Fight/+1 damage for rest of game (up to 3x, stacking; Large trait after the 2nd time)",
+  "stat_delta": null
+ },
+ "735": {
+  "short": "Flashy Demise: reduced to 0 Health -> everyone in LoS of that spot treated as hit by Blinding Light (CN 14)",
+  "stat_delta": null
+ },
+ "736": {
+  "short": "Acid Spray: once/game, action: +5 elemental magic attack, 10\" range; treats all targets as Armour 10",
+  "stat_delta": null
+ },
+ "737": {
+  "short": "Hatred of Spellcasters: a non-allied spellcaster within 10\"/LoS on activation -> must move to and attack the closest one with all actions",
+  "stat_delta": null
+ },
+ "738": {
+  "short": "Quarter Size: -1 Move, -1 Fight, -2 Health; +4 Fight when rolling against shooting attacks",
+  "stat_delta": {
+   "fight": {
+    "add": -1
+   },
+   "health": {
+    "add": -2
+   },
+   "move": {
+    "add": -1
+   }
+  }
+ },
+ "739": {
+  "short": "Extreme Shrinking with Pain: 5+ damage from one source -> -1 Fight/-1 damage for rest of game (up to 3x, stacking; +3 Fight vs shooting after the 2nd time)",
+  "stat_delta": null
+ },
+ "74": {
+  "short": "Stick Thin: -1 Armour; can squeeze through gaps at least 0.5\" wide",
+  "stat_delta": {
+   "armour": {
+    "add": -1
+   }
+  }
+ },
+ "740": {
+  "short": "Mind-Grabber: damages another in melee -> Will Roll (TN14) or becomes a temporary member of its warband (may re-roll to break free at the end of each activation; Mind Lock is immune)",
+  "stat_delta": null
+ },
+ "741": {
+  "short": "Inferno Fists: always armed with a magical hand weapon (+1 Fight, +3 elemental damage)",
+  "stat_delta": null
+ },
+ "742": {
+  "short": "Invisible to Constructs: invisible to and ignored by uncontrolled constructs",
+  "stat_delta": null
+ },
+ "743": {
+  "short": "Treasure Addiction: on activation, unclaimed treasure within 10\"/LoS -> must move to and pick it up; else an enemy within 6\"/LoS carrying treasure -> must move to and attack it",
+  "stat_delta": null
+ },
+ "744": {
+  "short": "Mystical Force Projection: all its attacks count as magic",
+  "stat_delta": null
+ },
+ "745": {
+  "short": "Crow Head: always armed with a dagger; +2 Will",
+  "stat_delta": {
+   "will": {
+    "add": 2
+   }
+  }
+ },
+ "746": {
+  "short": "Extreme Magic Resistance: +4 to Will Rolls to resist/overcome spells",
+  "stat_delta": null
+ },
+ "747": {
+  "short": "Body of Metal: cannot wear armour; +4 Armour; -5 to Swimming Rolls",
+  "stat_delta": {
+   "armour": {
+    "add": 4
+   }
+  }
+ },
+ "748": {
+  "short": "Hatred of Animals: a non-allied animal within 10\"/LoS on activation -> must move to and attack the closest one with all actions",
+  "stat_delta": null
+ },
+ "749": {
+  "short": "Extremely Acidic Blood: damaged in melee -> all other figures in that combat suffer 3 damage",
+  "stat_delta": null
+ },
+ "75": {
+  "short": "Burning Fists: always armed with a magical hand weapon, +1 elemental damage",
+  "stat_delta": null
+ },
+ "750": {
+  "short": "Thick Spikey Armoured Shell: cannot wear armour; +3 Armour, -1 Move; always armed with a dagger",
+  "stat_delta": {
+   "armour": {
+    "add": 3
+   },
+   "move": {
+    "add": -1
+   }
+  }
+ },
+ "751": {
+  "short": "Infectious: wounds another in melee -> they start their next game at -2 Health (cumulative)",
+  "stat_delta": null
+ },
+ "752": {
+  "short": "Giant Slayer: +3 damage vs figures with the Large trait",
+  "stat_delta": null
+ },
+ "753": {
+  "short": "Random Spellcaster: before each game, roll a random spell it may attempt at base CN; counts as a spellcaster, may empower",
+  "stat_delta": null
+ },
+ "754": {
+  "short": "Adrenaline Surge: +2 to all rolls for the first 3 turns; then -4 to all rolls for the rest of the game",
+  "stat_delta": null
+ },
+ "755": {
+  "short": "Ethereal: Ethereal trait; may never pick up treasure/loot tokens",
+  "stat_delta": null
+ },
+ "756": {
+  "short": "Filtered Breathing: never takes damage or effects from harmful gases",
+  "stat_delta": null
+ },
+ "757": {
+  "short": "Free Mover: immune to Blink, Bones of the Earth, Petrify, Push, Slow, and Transpose",
+  "stat_delta": null
+ },
+ "758": {
+  "short": "Giant Worm Attracter: natural 1 for initiative while on the table -> place a giant worm at a random table edge",
+  "stat_delta": null
+ },
+ "759": {
+  "short": "Wounded Eagle: 4+ points below starting Health -> Flying trait for the rest of the scenario",
+  "stat_delta": null
+ },
+ "76": {
+  "short": "Brachiator: Expert Climber trait",
+  "stat_delta": null
+ },
+ "760": {
+  "short": "Berserker Strength: +3 melee damage while below starting Health",
+  "stat_delta": null
+ },
+ "761": {
+  "short": "Death Call: action (can replace move): 16+ on d20 -> place a wraith at a random table edge",
+  "stat_delta": null
+ },
+ "762": {
+  "short": "Extremely Brittle Bones: -3 to Survival Rolls",
+  "stat_delta": null
+ },
+ "763": {
+  "short": "Murderous War Hound Companion: gains a war hound companion (permanent +1 Fight/+1 damage, no soldier slot); hound must stay within 6\" of it; replaced if killed",
+  "stat_delta": null
+ },
+ "764": {
+  "short": "Fast Slider: +2 Move on an unimpeded straight-line move",
+  "stat_delta": null
+ },
+ "765": {
+  "short": "Rending Death Scream: reduced to 0 Health -> +2 attack to all within 6\" (not figures that cannot hear)",
+  "stat_delta": null
+ },
+ "766": {
+  "short": "Massive Static Charge: after moving 3\"+ in a move action, its next melee hit that game deals +4 elemental magic damage (any number of times)",
+  "stat_delta": null
+ },
+ "767": {
+  "short": "Vengeful Skull: reduced to 0 Health -> place an uncontrolled animate skull where it fell",
+  "stat_delta": null
+ },
+ "768": {
+  "short": "Excretes Extremely Valuable Gems: after a game it survives, 18+ on d20 -> excretes a 100gc gem",
+  "stat_delta": null
+ },
+ "769": {
+  "short": "Frog Form: action: Amphibious trait (other stats unaffected); cannot carry treasure while in this form (drops any carried); action to switch back",
+  "stat_delta": null
+ },
+ "77": {
+  "short": "Partial Insanity: natural 1 on any roll -> uncontrolled for rest of that turn and all of the next",
+  "stat_delta": null
+ },
+ "770": {
+  "short": "Limited Elemental Blast: once/game, action: +8 elemental magic shooting attack, 3\" range",
+  "stat_delta": null
+ },
+ "771": {
+  "short": "Treasure Hurler: carrying treasure -> action: hurl it up to 6\" (no damage to it); if hurled at a figure, +4 shooting attack",
+  "stat_delta": null
+ },
+ "772": {
+  "short": "Extremely Bouncy: immune to fall damage; free move equal to the fall distance in any direction after falling",
+  "stat_delta": null
+ },
+ "773": {
+  "short": "Covered in Poisonous Quills: cannot wear armour; opponent rolls natural 1-5 in melee vs it -> opponent suffers +2 damage and poisoned",
+  "stat_delta": null
+ },
+ "774": {
+  "short": "Ablative Skin: +3 Health; first 3 damage taken each game cannot be healed in-game (returns next game)",
+  "stat_delta": {
+   "health": {
+    "add": 3
+   }
+  }
+ },
+ "775": {
+  "short": "Powerful Enchanted Horns: Horns trait; Horns-bonus attacks count as magic, +2 elemental damage",
+  "stat_delta": null
+ },
+ "776": {
+  "short": "Minor Ablative Elemental Resistance: Elemental Resistance (5), decreasing by 1 per point prevented (resets each game)",
+  "stat_delta": null
+ },
+ "777": {
+  "short": "Extremely Valuable Trophy: Bounty (100gc) trait",
+  "stat_delta": null
+ },
+ "778": {
+  "short": "Elemental Magnet: Elemental Bolt/Ball targeted within 4\" of it is redirected to it",
+  "stat_delta": null
+ },
+ "779": {
+  "short": "Improved Dodge: once/game, +4 Armour for one combat round (may decide after rolling)",
+  "stat_delta": null
+ },
+ "78": {
+  "short": "Empowered Blow: forgo all actions in an activation with 1+ actions -> next melee hit that activation deals +5 elemental magic damage",
+  "stat_delta": null
+ },
+ "780": {
+  "short": "Teleport Blip: action (usable in combat): teleport d6\" in a random direction",
+  "stat_delta": null
+ },
+ "781": {
+  "short": "Minorly Empowered: gains 1 power/turn: empower a Casting/Will Roll (if spellcaster) or add to melee damage that turn",
+  "stat_delta": null
+ },
+ "782": {
+  "short": "A Little Extra: tied melee combat -> +1 Fight, winning it (cancels out if both sides have this)",
+  "stat_delta": null
+ },
+ "783": {
+  "short": "Wizard Killer: double melee damage vs spellcasters",
+  "stat_delta": null
+ },
+ "784": {
+  "short": "Explosive Rune Tattoo: once/game, action: trigger an explosive rune centred on itself (it also suffers the +5 attack)",
+  "stat_delta": null
+ },
+ "785": {
+  "short": "Uncontrollable Rage Projection: natural 1-2 for initiative (not turn 1) -> Destructive Sphere cast on itself (immune to its own effect)",
+  "stat_delta": null
+ },
+ "786": {
+  "short": "Radiant Aura: figures activating within 6\" (not turn 1) -> Will Roll (TN12) or blinded for the turn (Move 1/Fight +0/no shooting or LoS actions)",
+  "stat_delta": null
+ },
+ "787": {
+  "short": "Accursed Blow: wins a melee round -> opponent treated as hit by Curse at Casting Roll 16",
+  "stat_delta": null
+ },
+ "788": {
+  "short": "Sensitive Antenna: True Sight trait, range 10\"",
+  "stat_delta": null
+ },
+ "789": {
+  "short": "Leaping Attack: once/game, may force combat at 4\" range instead of 1\"",
+  "stat_delta": null
+ },
+ "79": {
+  "short": "Long Neck: +6 damage on a critical hit (instead of +5)",
+  "stat_delta": null
+ },
+ "790": {
+  "short": "Limited Will: +4 Will; each Will Roll made that game -> cumulative -1 Will for rest of game",
+  "stat_delta": {
+   "will": {
+    "add": 4
+   }
+  }
+ },
+ "791": {
+  "short": "Assassin's Eye: once/game, +2 to a shooting attack (may decide after rolling)",
+  "stat_delta": null
+ },
+ "792": {
+  "short": "External Ribcage: +2 Armour, +1 Health; cannot wear armour",
+  "stat_delta": {
+   "armour": {
+    "add": 2
+   },
+   "health": {
+    "add": 1
+   }
+  }
+ },
+ "793": {
+  "short": "Skull Animator: may carry 2 skulls (count as 1 item together); action: animate one as Animate Skull (once per skull carried)",
+  "stat_delta": null
+ },
+ "794": {
+  "short": "Penetrating Stare: draws LoS through fog/clouds/smoke, including magically generated",
+  "stat_delta": null
+ },
+ "795": {
+  "short": "Large Toxic Cloud Release: action: 4\" cloud adjacent (2 damage to self), blocks LoS; figures moving through it (not the producer) -> Will Roll (TN12) or poisoned; 1-5 on d6 each end of turn dissipates",
+  "stat_delta": null
+ },
+ "796": {
+  "short": "Major Magic Immunity: targeted by a spell -> 8+ on d20 negates it",
+  "stat_delta": null
+ },
+ "797": {
+  "short": "Powerful Against Demons: double melee damage vs demons",
+  "stat_delta": null
+ },
+ "798": {
+  "short": "Easy Healer: healing magic on it is doubled",
+  "stat_delta": null
+ },
+ "799": {
+  "short": "Penetrating Gaze: shooting attacks count as magic; targets get no Armour benefit (-1 Armour light, -2 heavy)",
+  "stat_delta": null
+ },
+ "8": {
+  "short": "Soulmarked: Demon trait (keeps item slots)",
+  "stat_delta": null
+ },
+ "80": {
+  "short": "Weak Arms: winning a round of melee -> may only step back, never push back",
+  "stat_delta": null
+ },
+ "800": {
+  "short": "Soul Bargain: first \"Dead\" Survival result -> treat as Full Recovery instead, but gains the Demon trait",
+  "stat_delta": null
+ },
+ "801": {
+  "short": "Mystic Sinkhole: figures within 2\" suffer -2 to all Casting Rolls",
+  "stat_delta": null
+ },
+ "802": {
+  "short": "Powerful Against Animals: double melee damage vs animals",
+  "stat_delta": null
+ },
+ "803": {
+  "short": "Natural Spellcaster: before each game, roll two random spells it may attempt at base CN; counts as a spellcaster, may empower",
+  "stat_delta": null
+ },
+ "804": {
+  "short": "Resilient: +5 Health",
+  "stat_delta": {
+   "health": {
+    "add": 5
+   }
+  }
+ },
+ "805": {
+  "short": "Lucky Charm: the first Survival Roll by any warband member after each game is at +1",
+  "stat_delta": null
+ },
+ "806": {
+  "short": "Focused Mystic Shield: forgo all actions in an activation with 1+ actions -> Elemental Shield spell effect",
+  "stat_delta": null
+ },
+ "807": {
+  "short": "Unlife Feaster: undead/constructs activating within 3\" suffer 3 damage",
+  "stat_delta": null
+ },
+ "808": {
+  "short": "Extreme Magic Vulnerability: -4 to Will Rolls to resist/overcome spells",
+  "stat_delta": null
+ },
+ "809": {
+  "short": "Burning Jack o' Lantern Head: -1 Armour, -2 Health, +2 Will; Magic Attacks, Mind Lock, Undead traits; +2 melee damage",
+  "stat_delta": {
+   "armour": {
+    "add": -1
+   },
+   "health": {
+    "add": -2
+   },
+   "will": {
+    "add": 2
+   }
+  }
+ },
+ "81": {
+  "short": "Volatile Excrement: forgo all actions -> place a marker (max 2 at once); triggered within 2\" -> +4 shooting attack to all within 2\" (immune to its own)",
+  "stat_delta": null
+ },
+ "810": {
+  "short": "Slippery: may always move out of combat; figures it was fighting cannot force combat with it until the end of its activation",
+  "stat_delta": null
+ },
+ "811": {
+  "short": "Power Word Tattoo: a random Power Word spell is always in effect while on the table (reroll if Out-of-Game-only)",
+  "stat_delta": null
+ },
+ "812": {
+  "short": "Powerful Static Discharge: completing a move -> nearest figure in LoS suffers a +1 elemental shooting attack",
+  "stat_delta": null
+ },
+ "813": {
+  "short": "Giant Worm Form: takes damage -> Will Roll (TN10) or becomes an uncontrolled giant worm for the rest of the game (reverts after)",
+  "stat_delta": null
+ },
+ "814": {
+  "short": "Wasp Companions: all other figures within 2\" suffer -2 to all rolls",
+  "stat_delta": null
+ },
+ "815": {
+  "short": "Peacock Feathers: gives a +3 supporting-figure bonus (instead of +2)",
+  "stat_delta": null
+ },
+ "816": {
+  "short": "Electrically Super-Charged: damaged in melee -> attacker suffers +2 elemental magic attack (+3 if wearing heavy armour)",
+  "stat_delta": null
+ },
+ "817": {
+  "short": "Worm Transformation: action (can replace move): Burrowing and Large traits (other stats unaffected); cannot carry treasure in this form (drops any carried); action to revert",
+  "stat_delta": null
+ },
+ "818": {
+  "short": "Burning Death Eye: once/game, action: auto-cast Strike Dead at Casting Roll 18 (this figure takes 1 damage using it)",
+  "stat_delta": null
+ },
+ "819": {
+  "short": "Bladed Arms: always armed with a hand weapon, attacks count as magic, +1 damage; may never use a shield",
+  "stat_delta": null
+ },
+ "82": {
+  "short": "Quick Reactions: may activate in any phase (still only once/turn unless another rule allows more)",
+  "stat_delta": null
+ },
+ "820": {
+  "short": "Powerbash: push-back after winning melee may be 1-10\" (max 5\" vs Large)",
+  "stat_delta": null
+ },
+ "821": {
+  "short": "Mist Form: action: Levitate trait, passes through any gap; cannot carry treasure, cast, use items, or attack; immune to non-magic weapons; cannot be forced into combat; action to revert",
+  "stat_delta": null
+ },
+ "822": {
+  "short": "Powerful Against Constructs: double melee damage vs constructs",
+  "stat_delta": null
+ },
+ "823": {
+  "short": "Lord of the Dead: twice/game, action: auto-successful Raise Zombie, produces a ghoul (doesn't count against warband limits; max 1 in play)",
+  "stat_delta": null
+ },
+ "824": {
+  "short": "Detonating Excrement: forgo all actions -> place a marker (max 4 at once); triggered within 3\" -> +5 magic shooting attack to all within 3\" (immune to its own)",
+  "stat_delta": null
+ },
+ "825": {
+  "short": "Mind Crush: melee attacks may force both figures to use Will instead of Fight; if used, this figure gets +3 to its own Combat Roll",
+  "stat_delta": null
+ },
+ "826": {
+  "short": "Monkey Form: action (can replace move): Expert Climber trait (other stats unaffected); cannot carry treasure in this form (drops any carried); action to revert",
+  "stat_delta": null
+ },
+ "827": {
+  "short": "Serendipitous: +1 to all die rolls",
+  "stat_delta": null
+ },
+ "828": {
+  "short": "Spontaneous Combustion: natural 1 on any roll -> reroll; a second natural 1 -> detonates (reduced to 0 Health, -4 to post-game Survival Roll, +5 shooting attack to all within 6\"/LoS)",
+  "stat_delta": null
+ },
+ "829": {
+  "short": "Visionary: natural 18-20 for initiative -> gains an extra action next activation",
+  "stat_delta": null
+ },
+ "83": {
+  "short": "Long Legs: +1 Move",
+  "stat_delta": {
+   "move": {
+    "add": 1
+   }
+  }
+ },
+ "830": {
+  "short": "Limited Mental Strike: once/game, action: mental melee combat vs a target within 6\"/LoS, both use Will not Fight, both count as Armour 10, no support bonuses, no step/push back either way",
+  "stat_delta": null
+ },
+ "831": {
+  "short": "Mind-Shattering Appearance: moving into combat with it -> Will Roll (TN16) or that activation ends immediately",
+  "stat_delta": null
+ },
+ "832": {
+  "short": "Thick Ablative Skin: +4 Health; first 4 damage taken each game cannot be healed in-game (returns next game)",
+  "stat_delta": {
+   "health": {
+    "add": 4
+   }
+  }
+ },
+ "833": {
+  "short": "Animator: after a game it isn't reduced to 0 Health, may freely and automatically cast Animate Construct once",
+  "stat_delta": null
+ },
+ "834": {
+  "short": "Weak Animated Skin: once/game, action: create a 1-Health copy soldier with its stats/equipment (non-magic versions of magic gear); cannot cast or use Tricks",
+  "stat_delta": null
+ },
+ "835": {
+  "short": "Concentration Storm: figures casting a spell within 6\"/LoS suffer -2 to the Casting Roll",
+  "stat_delta": null
+ },
+ "836": {
+  "short": "Child of the Storm: takes 1+ damage -> 11+ on d20 -> auto-casts Call Storm (no roll/action)",
+  "stat_delta": null
+ },
+ "837": {
+  "short": "Blinding Demise: reduced to 0 Health -> everyone in LoS of that spot treated as hit by Blinding Light (CN 18)",
+  "stat_delta": null
+ },
+ "838": {
+  "short": "Miracle Blessed: after its Survival Rolls each game, 18+ on d20 -> heal one permanent injury on any warband member (itself included); natural 20 -> revive a figure killed last game to full Health",
+  "stat_delta": null
+ },
+ "839": {
+  "short": "Greater Fog Form: twice/game, free action: +4 Move and Levitate trait through the end of its next activation; immune to non-magic attacks; cannot be forced into combat meanwhile; cannot attack or pick up loot/treasure; drops any carried",
+  "stat_delta": null
+ },
+ "84": {
+  "short": "Blinding Gaze: once/game, action: automatically cast Blinding Light at CN 16",
+  "stat_delta": null
+ },
+ "840": {
+  "short": "Double Attack: one action attacks two figures it's in combat with (separate Combat Rolls, all support bonuses apply, its choice of order)",
+  "stat_delta": null
+ },
+ "841": {
+  "short": "Uncontrolled Elemental Reflection: targeted by an elemental shooting attack -> 11+ on d20 -> retargets a random figure in LoS instead",
+  "stat_delta": null
+ },
+ "842": {
+  "short": "Hardened Metal Exoskeleton: cannot wear armour; +5 Armour, -7 Health",
+  "stat_delta": {
+   "armour": {
+    "add": 5
+   },
+   "health": {
+    "add": -7
+   }
+  }
+ },
+ "843": {
+  "short": "Poison Feeder: Immune to Poison, +3 Armour vs poison attacks; action (can replace move), within 1\" of a non-combat ally, removes their poisoned condition and heals this figure up to 3 Health",
+  "stat_delta": null
+ },
+ "844": {
+  "short": "Greater Telekinetic Pull: once/game, action: target within 12\"/LoS; fail Move Roll (TN25) -> pulled 3\" toward this figure",
+  "stat_delta": null
+ },
+ "845": {
+  "short": "Draining Word Tattoo: a random Draining Word spell is always in effect while on the table (reroll if Out-of-Game-only)",
+  "stat_delta": null
+ },
+ "846": {
+  "short": "Empowered Smash: forgo all actions in an activation with 1+ actions -> next melee hit that activation deals +7 elemental magic damage",
+  "stat_delta": null
+ },
+ "847": {
+  "short": "Zombie Master: kills a figure in melee -> place a zombie there (its warband, max 1 at a time; crumbles if it leaves the table or the game ends)",
+  "stat_delta": null
+ },
+ "848": {
+  "short": "Rat Master: starts each game with a giant rat companion (doesn't count against warband size); becomes uncontrolled if this figure leaves the table",
+  "stat_delta": null
+ },
+ "849": {
+  "short": "Powerful Against Undead: double melee damage vs undead; attacks vs undead count as magic",
+  "stat_delta": null
+ },
+ "85": {
+  "short": "Cloud Release: action: 2\" cloud adjacent (1 damage to self), blocks LoS; 1-5 on d6 each end of turn dissipates it",
+  "stat_delta": null
+ },
+ "850": {
+  "short": "Random Teleportation: action (can replace move, usable in combat): teleport d10\" in a random direction",
+  "stat_delta": null
+ },
+ "851": {
+  "short": "Time Tinkerer: once/game, if it has 2+ actions available, its first action auto-casts Time Store (saving the second action for later)",
+  "stat_delta": null
+ },
+ "852": {
+  "short": "Enhanced Laser Eyes: action: +4 elemental magic shooting attack, +2 damage, 18\" range",
+  "stat_delta": null
+ },
+ "853": {
+  "short": "Tumultuous Body Chemistry: on an activation that would give 2 actions, may instead roll: 1-15 = only 1 action, 16+ = 3 actions",
+  "stat_delta": null
+ },
+ "854": {
+  "short": "Loud Buzz: seen within 6\" even if invisible; other figures within 1\" of it suffer -1 Fight",
+  "stat_delta": null
+ },
+ "855": {
+  "short": "No Body Fat: +1 Move; -2 Health",
+  "stat_delta": {
+   "health": {
+    "add": -2
+   },
+   "move": {
+    "add": 1
+   }
+  }
+ },
+ "856": {
+  "short": "Item Teleportation: carrying treasure -> forgo all actions in an activation with 1+ actions to teleport the token up to 6\"/LoS (auto-carried if landing on a valid figure)",
+  "stat_delta": null
+ },
+ "857": {
+  "short": "Weak Inherent Magic: may attempt any non-Out-of-Game spell, succeeds only on 19-20 (no empowering); counts as a spellcaster",
+  "stat_delta": null
+ },
+ "858": {
+  "short": "Arrow Magnet: within 2\" of a bow/crossbow/javelin target -> that attack redirects to it",
+  "stat_delta": null
+ },
+ "859": {
+  "short": "Damaging Rage: action: auto-cast Strength on itself (no roll); each use -> permanent -1 Will; dies at -5 Will",
+  "stat_delta": null
+ },
+ "86": {
+  "short": "Bleeder: -1 Health on activation while below max Health (not if at 1 Health)",
+  "stat_delta": null
+ },
+ "860": {
+  "short": "Keeper of Secrets: before each game, 15+ on d20 -> warband counts as having cast Reveal Secret",
+  "stat_delta": null
+ },
+ "861": {
+  "short": "Methodical: only 1 action/activation as its base (immune to wound/poison action loss); +1 to all die rolls",
+  "stat_delta": null
+ },
+ "862": {
+  "short": "Spider Master: starts each game with an ice spider companion (doesn't count against warband size); becomes uncontrolled if this figure leaves the table",
+  "stat_delta": null
+ },
+ "863": {
+  "short": "Blinding Form: opponent's shooting attack vs it -> Will Roll (TN12) or blinded for the turn (stats become Move 1/Fight +0/Shoot +0)",
+  "stat_delta": null
+ },
+ "864": {
+  "short": "Immune to Chronomancy: immune to all Chronomancer school spells",
+  "stat_delta": null
+ },
+ "865": {
+  "short": "Empower Solids: spending 2 actions in one activation -> hurl a Grenade-spell effect",
+  "stat_delta": null
+ },
+ "866": {
+  "short": "Sacrificial Blood-Enchantment: on activation, may sacrifice 3 Health (free) -> +2 Fight/+2 damage and all attacks count as magic until its next activation",
+  "stat_delta": null
+ },
+ "867": {
+  "short": "Immune to Elementalism: immune to all Elementalist school spells",
+  "stat_delta": null
+ },
+ "868": {
+  "short": "Construct Tinkerer: starts each game with a small construct companion (doesn't count against warband size); becomes uncontrolled if this figure leaves the table",
+  "stat_delta": null
+ },
+ "869": {
+  "short": "Greater Demon-Spawn: reduced to 0 Health -> place a greater demon where it fell",
+  "stat_delta": null
+ },
+ "87": {
+  "short": "Large Brain: +2 Will, -2 Health",
+  "stat_delta": {
+   "health": {
+    "add": -2
+   },
+   "will": {
+    "add": 2
+   }
+  }
+ },
+ "870": {
+  "short": "Immune to Illusion: immune to all Illusionist school spells; contact with an illusionary soldier removes it instantly",
+  "stat_delta": null
+ },
+ "871": {
+  "short": "Does Not Breathe: no ill effects from harmful gases; no damage from failed Swimming Rolls",
+  "stat_delta": null
+ },
+ "872": {
+  "short": "Resistance to Non-Magical Weapons: -1 damage from all non-magical attacks/sources",
+  "stat_delta": null
+ },
+ "873": {
+  "short": "Skeletal Form: Undead and Immune to Control Undead traits",
+  "stat_delta": null
+ },
+ "874": {
+  "short": "Mostly Immune to Magic: targeted by a spell (incl. magic shooting attacks) -> 5+ on d20 negates it",
+  "stat_delta": null
+ },
+ "875": {
+  "short": "Skeleton Master: kills a figure in melee -> place a skeleton there (its warband, max 1 at a time; crumbles if it leaves the table or the game ends)",
+  "stat_delta": null
+ },
+ "876": {
+  "short": "Psychic Death Scream: reduced to 0 Health -> every figure on the table fails a Will Roll (TN10) -> damage equal to the amount failed by",
+  "stat_delta": null
+ },
+ "877": {
+  "short": "Immune to Necromancy: immune to all Necromancer school spells",
+  "stat_delta": null
+ },
+ "878": {
+  "short": "Powerful but Uncoordinated: -2 Fight; double melee damage",
+  "stat_delta": {
+   "fight": {
+    "add": -2
+   }
+  }
+ },
+ "879": {
+  "short": "Immune to Soothsayer Spells: immune to all Soothsayer school spells",
+  "stat_delta": null
+ },
+ "88": {
+  "short": "Surrounded by Flies: this figure and all within 2\" suffer -1 to all rolls",
+  "stat_delta": null
+ },
+ "880": {
+  "short": "Explosive Rune Tattoos: up to 3x/game, action: trigger an explosive rune centred on itself (it also suffers the +5 attack)",
+  "stat_delta": null
+ },
+ "881": {
+  "short": "Immune to Summoning Magic: immune to all Summoner school spells",
+  "stat_delta": null
+ },
+ "882": {
+  "short": "Supreme Bloodboil: before each game, may suffer 6 damage for +2 Fight or +2 Shoot",
+  "stat_delta": null
+ },
+ "883": {
+  "short": "Master of Secrets: before each game, 11+ on d20 -> warband counts as having cast Reveal Secret",
+  "stat_delta": null
+ },
+ "884": {
+  "short": "Bullrush: once/game, move+attack as one action at +2 Fight; if it wins and has another action, may repeat vs a different figure",
+  "stat_delta": null
+ },
+ "885": {
+  "short": "Immune to Thaumaturgy: immune to all Thaumaturge school spells",
+  "stat_delta": null
+ },
+ "886": {
+  "short": "Six Arms: +1 item slot",
+  "stat_delta": null
+ },
+ "887": {
+  "short": "Greater Regeneration: regains up to 3 Health every time it activates",
+  "stat_delta": null
+ },
+ "888": {
+  "short": "Uncontrollable Lightning: natural 1 for initiative (not turn 1) -> fires an Elemental Bolt at the closest figure (random figure in its combat if engaged, never itself)",
+  "stat_delta": null
+ },
+ "889": {
+  "short": "Continue after Death: reduced to 0 Health -> stays on the table at 0 Health; each activation and after any further damage, 1-10 on d20 removes it, else it stays (no further damage actually applied)",
+  "stat_delta": null
+ },
+ "89": {
+  "short": "Frog Legs: full Move distance jump, no run-up needed (incl. horizontal)",
+  "stat_delta": null
+ },
+ "890": {
+  "short": "Uncontrollable Poison Cloud: natural 1 for initiative -> 3\" toxic cloud centred on it, blocks LoS; figures activating/moving through fail Health Roll (TN20) -> poisoned (immune to its own); 1-5 on d6 each end of turn dissipates",
+  "stat_delta": null
+ },
+ "891": {
+  "short": "Magically Charged: Magic Attacks trait; may not carry magic weapons/armour/items",
+  "stat_delta": null
+ },
+ "892": {
+  "short": "Empty Armour: Heavy Armour regardless of normal restriction; Immune to Poison, Immune to Critical Hits, Never Wounded traits",
+  "stat_delta": null
+ },
+ "893": {
+  "short": "Immune to Witchcraft: immune to all Witch school spells",
+  "stat_delta": null
+ },
+ "894": {
+  "short": "Giant Blob: Fight and Shoot become +0, Move becomes 3, +20 Health; cannot carry items/equipment (never unarmed); Large trait",
+  "stat_delta": {
+   "fight": {
+    "set": 0
+   },
+   "health": {
+    "add": 20
+   },
+   "move": {
+    "set": 3
+   },
+   "shoot": {
+    "set": 0
+   }
+  }
+ },
+ "895": {
+  "short": "Body of Diamond: +4 Armour, +3 Health; cannot wear armour",
+  "stat_delta": {
+   "armour": {
+    "add": 4
+   },
+   "health": {
+    "add": 3
+   }
+  }
+ },
+ "896": {
+  "short": "Treasure Eater: alone within 1\" of unclaimed treasure and not in combat -> eats it (lost)",
+  "stat_delta": null
+ },
+ "897": {
+  "short": "Massive Blubber: +4 Health; immune to cold-related scenario effects (not attacks)",
+  "stat_delta": {
+   "health": {
+    "add": 4
+   }
+  }
+ },
+ "898": {
+  "short": "Eight Arms: +2 item slots",
+  "stat_delta": null
+ },
+ "899": {
+  "short": "Uncontrolled Levitation: each activation, 11+ on d20 -> Levitate trait until its next activation",
+  "stat_delta": null
+ },
+ "9": {
+  "short": "Flesh Pocket: +1 extra item (1-slot max)",
+  "stat_delta": null
+ },
+ "90": {
+  "short": "Missing Digits: -1 Shoot",
+  "stat_delta": {
+   "shoot": {
+    "add": -1
+   }
+  }
+ },
+ "900": {
+  "short": "Self-Reanimation: first \"Dead\" Survival result -> treat as Full Recovery instead, gains Undead trait; next \"Dead\" result is final",
+  "stat_delta": null
+ },
+ "901": {
+  "short": "Uncontrollable Push: natural 1 for initiative (not turn 1) -> auto-casts Push at the closest figure (friend or foe, even if engaged)",
+  "stat_delta": null
+ },
+ "902": {
+  "short": "Painful Invisibility: on activation, may turn invisible (4 self-damage); cannot be seen or forced into combat unless the viewer can see invisible (figures already in combat still fight); lasts until its next activation",
+  "stat_delta": null
+ },
+ "903": {
+  "short": "Empowered Action: on activation, spend 5 Health for +1 action (max 3 total)",
+  "stat_delta": null
+ },
+ "904": {
+  "short": "Crippling Strike: melee damage dealt -> roll on the Permanent Injury table, target suffers it for the rest of the game only (heals after)",
+  "stat_delta": null
+ },
+ "905": {
+  "short": "Time Lord: with 2+ actions available, may use the first to auto-cast Time Store, saving the second for later (max 1 stored action at a time)",
+  "stat_delta": null
+ },
+ "906": {
+  "short": "Miracle Worker: after a game it survives, 15+ on d20 -> heal one permanent injury on any warband member (itself included); 19+ -> revive a figure killed last game to full Health",
+  "stat_delta": null
+ },
+ "907": {
+  "short": "Empowered: gains 3 power/turn: empower Casting/Will Rolls (if spellcaster) or add to melee damage that turn (split freely)",
+  "stat_delta": null
+ },
+ "908": {
+  "short": "Mind Wipe: a warband member entering combat with it -> Will Roll (TN18) or -2 Will for rest of game; if a spellcaster, also forgets one random known spell for rest of game (once per game per figure)",
+  "stat_delta": null
+ },
+ "909": {
+  "short": "Burning with Magic: takes 1 damage every activation; Immune to Normal Weapons trait",
+  "stat_delta": null
+ },
+ "91": {
+  "short": "Mana Battery (1): once/game, an ally within 3\" casting a spell may draw +1 to empower it",
+  "stat_delta": null
+ },
+ "910": {
+  "short": "Extremely Vulnerable Spot: critical hit -> reduced to 0 Health, -3 to post-game Survival Roll",
+  "stat_delta": null
+ },
+ "911": {
+  "short": "Rusting Touch: no heavy armour; its weapons -1 damage (not magic ones); damaged in melee by a weapon -> 11+ on d20 -> that weapon treated as hit by Decay",
+  "stat_delta": null
+ },
+ "912": {
+  "short": "Toughness Against Normal Weapons: -1 damage from all non-magical attacks",
+  "stat_delta": null
+ },
+ "913": {
+  "short": "Fixed Magical Metabolism: after a game it isn't reduced to 0 Health, warband gains a random Lesser Potion (reroll 19-20)",
+  "stat_delta": null
+ },
+ "914": {
+  "short": "Futuristic Projectile Weapon: fixed crossbow that reduces target Armour by 2 (min 10); cannot be given away/sold; replaced if lost",
+  "stat_delta": null
+ },
+ "915": {
+  "short": "Feaster on the Dead: reduces a figure to 0 Health in melee -> that figure suffers -1 to its post-game Survival Roll",
+  "stat_delta": null
+ },
+ "916": {
+  "short": "Soul Leech: a figure reduced to 0 Health in its LoS -> regains 1 Health",
+  "stat_delta": null
+ },
+ "917": {
+  "short": "Consciousness Grasp: reduced to 0 Health -> closest enemy within 6\" fails Will Roll (TN14) -> under Mind Control (CN 18) by this figure",
+  "stat_delta": null
+ },
+ "918": {
+  "short": "Echoing Soul: while on the table, random-encounter checks: roll three dice, keep all three",
+  "stat_delta": null
+ },
+ "919": {
+  "short": "Mind Parasite: melee damage dealt -> target treated as hit by Mind Control (CN 10) from this figure (ignored if immune)",
+  "stat_delta": null
+ },
+ "92": {
+  "short": "Magic Vulnerability: -3 Armour against magic attacks",
+  "stat_delta": null
+ },
+ "920": {
+  "short": "Life Bane: figures activating within 3\" (not turn 1) suffer 3 damage (not undead/constructs)",
+  "stat_delta": null
+ },
+ "921": {
+  "short": "Antithetical to Magic: immune to all magic (cannot be targeted by spells, no magic damage); opponents' magic items lose their bonuses while fighting it; cannot be a spellcaster or gain Immune to Normal Weapons (reroll if it would)",
+  "stat_delta": null
+ },
+ "922": {
+  "short": "Great Beauty: permanent Beauty spell effect at CN 14 (not a spell, cannot be dispelled)",
+  "stat_delta": null
+ },
+ "923": {
+  "short": "Ablative Elemental Resistance: Elemental Resistance (10), decreasing by 1 per point prevented (resets each game)",
+  "stat_delta": null
+ },
+ "924": {
+  "short": "Partial Invisibility: cannot be seen/forced into combat unless the viewer starts an action within 3\" (True Sight ignores this)",
+  "stat_delta": null
+ },
+ "925": {
+  "short": "Potential Elemental Reflection: targeted by an elemental shooting attack -> 11+ on d20 -> may redirect it to any figure in LoS (decide before rolling)",
+  "stat_delta": null
+ },
+ "926": {
+  "short": "Incredibly Dense: +2 Armour; -8 to Swimming Rolls",
+  "stat_delta": {
+   "armour": {
+    "add": 2
+   }
+  }
+ },
+ "927": {
+  "short": "Hardened Ablative Skin: +5 Health; first 5 damage taken each game cannot be healed in-game (returns next game)",
+  "stat_delta": {
+   "health": {
+    "add": 5
+   }
+  }
+ },
+ "928": {
+  "short": "Self-Possession: action: under a Possess spell effect",
+  "stat_delta": null
+ },
+ "929": {
+  "short": "Ethereal Flicker: each activation, 11+ on d20 -> Ethereal trait until its next activation (cannot carry treasure while ethereal, drops any carried; also Immune to Non-magical weapons while ethereal)",
+  "stat_delta": null
+ },
+ "93": {
+  "short": "Hammerhand: always armed with a magical hand weapon; cannot carry a 2-handed weapon, shield, bow, or crossbow",
+  "stat_delta": null
+ },
+ "930": {
+  "short": "Crayfish Head: Amphibious trait",
+  "stat_delta": null
+ },
+ "931": {
+  "short": "Curse of Immortality: must reroll any \"Dead\" Survival result; each time it does, permanent -1 to every stat and -6 levels (if leveled)",
+  "stat_delta": null
+ },
+ "932": {
+  "short": "Undead Hands: no weapons/shields (never unarmed); Energy Drain and Magic Attacks traits",
+  "stat_delta": null
+ },
+ "933": {
+  "short": "Massively Unstable Portal: natural 1 for initiative while on the table -> place an uncontrolled minor demon 3d6\" away in a random direction",
+  "stat_delta": null
+ },
+ "934": {
+  "short": "Burst of Quickness: each activation, 16+ on d20 -> +1 action (max 3 total)",
+  "stat_delta": null
+ },
+ "935": {
+  "short": "Power Slam: once/game, initiating combat, decide before rolling: hit -> +10 damage",
+  "stat_delta": null
+ },
+ "936": {
+  "short": "Magic Infusion: action: touch an ally within 1\" (or itself) -> their attacks count as magic for the rest of the game",
+  "stat_delta": null
+ },
+ "937": {
+  "short": "Painfully Insubstantial: never locked in combat, may always move out freely; cannot be forced into combat unless it allows it; 1 self-damage at the end of every activation",
+  "stat_delta": null
+ },
+ "938": {
+  "short": "Animal Charmer: action: animals within 12\"/LoS fail Will Roll (TN14) -> no actions on their next activation",
+  "stat_delta": null
+ },
+ "939": {
+  "short": "The Will to Live: once/game, would be reduced to 0 Health -> stays at 1 Health instead (later reduced to 0 -> -2 to post-game Survival Roll)",
+  "stat_delta": null
+ },
+ "94": {
+  "short": "Scrawny Arms: double the normal Fight/Shoot penalty for carrying a treasure token",
+  "stat_delta": null
+ },
+ "940": {
+  "short": "Immune to Elemental Magic Damage: elemental magic damage against it is reduced to 0 (reroll if already Immune to Non-Magic Weapons)",
+  "stat_delta": null
+ },
+ "941": {
+  "short": "Animated Skin: once/game, action: create a 6-Health copy soldier with its stats/equipment (non-magic versions of magic gear); cannot cast or use Tricks",
+  "stat_delta": null
+ },
+ "942": {
+  "short": "Flaming Bile Stream: shooting attack, 8\" range, +2 damage, counts as magic",
+  "stat_delta": null
+ },
+ "943": {
+  "short": "Mental Strike: action: mental melee combat vs a target within 6\"/LoS, both use Will not Fight, both count as Armour 10, no support bonuses, no step/push back either way",
+  "stat_delta": null
+ },
+ "944": {
+  "short": "Flaming Bullrush: once/game, move+attack as one action at +2 Fight/+2 damage, counts as elemental magic; if it wins and has another action, may repeat vs a different figure",
+  "stat_delta": null
+ },
+ "945": {
+  "short": "Boom Stick: fixed crossbow that needs no reload turn; cannot be given away/sold; replaced if lost",
+  "stat_delta": null
+ },
+ "946": {
+  "short": "Rusting Presence: no heavy armour; its weapons -1 damage (not magic ones); after each melee round it completes, all other figures in it suffer a Decay spell on a random weapon",
+  "stat_delta": null
+ },
+ "947": {
+  "short": "Wild Spellcaster: before each game, roll three random spells it may attempt at base CN; counts as a spellcaster, may empower",
+  "stat_delta": null
+ },
+ "948": {
+  "short": "Heart-Feaster: reduces a figure to 0 Health in melee -> that figure suffers -1 to its post-game Survival Roll",
+  "stat_delta": null
+ },
+ "949": {
+  "short": "Consciousness Leap: reduced to 0 Health -> closest enemy within 6\" fails Will Roll (TN18) -> under Mind Control (CN 18) by this figure",
+  "stat_delta": null
+ },
+ "95": {
+  "short": "Withered Arm: Crushed Arm permanent injury",
+  "stat_delta": null
+ },
+ "950": {
+  "short": "Armoured Ball: +2 Armour, -1 Move; no armour/shield; on activation may roll up for +4 more Armour/-4 more Move (min 2) until its next activation, but cannot shoot/pick up or drop treasure/climb while rolled up",
+  "stat_delta": {
+   "armour": {
+    "add": 2
+   },
+   "move": {
+    "add": -1
+   }
+  }
+ },
+ "951": {
+  "short": "Crocodile Jaws for Hands: no weapons/shields (never unarmed); +1 Fight; +2 melee damage",
+  "stat_delta": {
+   "fight": {
+    "add": 1
+   }
+  }
+ },
+ "952": {
+  "short": "Magical Metabolism: after a game it isn't reduced to 0 Health, roll for one random potion it extrudes",
+  "stat_delta": null
+ },
+ "953": {
+  "short": "Never Average: natural 10-11 on any roll -> must reroll and take the second result",
+  "stat_delta": null
+ },
+ "954": {
+  "short": "Highly Empowered: gains 5 power/turn: empower Casting/Will Rolls (if spellcaster) or add to melee damage that turn (split freely)",
+  "stat_delta": null
+ },
+ "955": {
+  "short": "Extremely Hard to Kill: Survival Table rolls: roll three dice, take the highest",
+  "stat_delta": null
+ },
+ "956": {
+  "short": "Extreme Regeneration: regains up to 3 Health every time it activates; Permanent Injury/Badly Wounded Survival results always count as Full Recovery instead",
+  "stat_delta": null
+ },
+ "957": {
+  "short": "Shared Pain: takes damage -> pick another figure in LoS: fails Will Roll (TN14) -> takes half that damage (round down); no other figure in LoS -> this figure takes +1 damage instead",
+  "stat_delta": null
+ },
+ "958": {
+  "short": "Terrain Destroyer: action: auto-cast Crumble (no roll required)",
+  "stat_delta": null
+ },
+ "959": {
+  "short": "Illusionary Self: at game start, treated as under a successfully cast Illusionary Soldier spell (same stats except Health)",
+  "stat_delta": null
+ },
+ "96": {
+  "short": "Serpent Tale: -1 Move; no rough-ground movement penalty",
+  "stat_delta": {
+   "move": {
+    "add": -1
+   }
+  }
+ },
+ "960": {
+  "short": "Deal with the Devil: once/game, on any die roll, may roll 5 dice and pick one to use; if 2+ dice match, it's reduced to 0 Health after resolving the roll",
+  "stat_delta": null
+ },
+ "961": {
+  "short": "Ablative Scales: cannot wear armour; natural Armour 16, but every time it takes any damage, Armour drops by 1 (min 10)",
+  "stat_delta": null
+ },
+ "962": {
+  "short": "Deathmark: a melee attack that would reduce the target to 0 Health or less does +5 damage",
+  "stat_delta": null
+ },
+ "963": {
+  "short": "Blinding Quickness: each activation, 11+ on d20 -> +1 action (unless another rule caps it at one)",
+  "stat_delta": null
+ },
+ "964": {
+  "short": "Four Arms: may carry 2 shields + a 2-handed weapon/staff together; or a 2-handed weapon/staff + 2 hand weapons together for +1 Fight",
+  "stat_delta": null
+ },
+ "965": {
+  "short": "Elemental Reflection: targeted by an elemental shooting attack -> may redirect it to any figure in LoS (decide before rolling)",
+  "stat_delta": null
+ },
+ "966": {
+  "short": "Stonegaze: action: auto-cast Petrify at Casting Roll 14 vs a target within 6\"",
+  "stat_delta": null
+ },
+ "967": {
+  "short": "Incredibly Quick: always activates first each turn regardless of phase (roll off vs others with this ability); may never group activate",
+  "stat_delta": null
+ },
+ "968": {
+  "short": "Mystic Shield: action: Elemental Shield spell effect",
+  "stat_delta": null
+ },
+ "969": {
+  "short": "Partial Immunity to Normal Weapons: half damage (round down) from non-magical attacks",
+  "stat_delta": null
+ },
+ "97": {
+  "short": "Parachute: immune to fall damage",
+  "stat_delta": null
+ },
+ "970": {
+  "short": "Elemental Charge: action: charge its own weapon as Elemental Hammer",
+  "stat_delta": null
+ },
+ "971": {
+  "short": "Mind Infestation: melee damage dealt -> target treated as hit by Mind Control (CN 14) from this figure (ignored if immune)",
+  "stat_delta": null
+ },
+ "972": {
+  "short": "Nearly Immortal: always may reroll any \"Dead\" Survival result; each time it does, permanent -3 Will/-2 Health and -5 levels (if leveled)",
+  "stat_delta": null
+ },
+ "973": {
+  "short": "Far Teleportation: action (usable in combat): teleport d20\" in a random direction",
+  "stat_delta": null
+ },
+ "974": {
+  "short": "Stormborn: takes 1+ damage -> auto-casts Call Storm (no roll/action)",
+  "stat_delta": null
+ },
+ "975": {
+  "short": "Second Chance: first \"Dead\" Survival result -> treat as Full Recovery instead",
+  "stat_delta": null
+ },
+ "976": {
+  "short": "Immense Resilience: +10 Health",
+  "stat_delta": {
+   "health": {
+    "add": 10
+   }
+  }
+ },
+ "977": {
+  "short": "Stunning Beauty: permanent Beauty spell effect at CN 18 (not a spell, cannot be dispelled)",
+  "stat_delta": null
+ },
+ "978": {
+  "short": "Body of Flame: cannot wear armour; melee attacks count as elemental magic, +2 damage; anyone forcing combat with it suffers 2 elemental magic damage",
+  "stat_delta": null
+ },
+ "979": {
+  "short": "Tornado Spin: action (usable in combat): all within 6\" fail Move Roll (TN16) -> pushed away and damaged by the amount failed by",
+  "stat_delta": null
+ },
+ "98": {
+  "short": "Three-Arms with Claws: 2-handed weapon/staff + shield together; no unarmed damage penalty",
+  "stat_delta": null
+ },
+ "980": {
+  "short": "Psychic Death Shriek: reduced to 0 Health -> every figure on the table fails a Will Roll (TN14) -> damage equal to the amount failed by",
+  "stat_delta": null
+ },
+ "981": {
+  "short": "Adamantine Elemental Armour: Elemental Resistance (6)",
+  "stat_delta": null
+ },
+ "982": {
+  "short": "Invisible: cannot be seen or forced into combat unless the viewer can see invisible (figures already in combat still fight); not invisible while carrying treasure",
+  "stat_delta": null
+ },
+ "983": {
+  "short": "Raging Attack: one action attacks every figure it's in combat with (separate Combat Rolls, all support bonuses apply, its choice of order)",
+  "stat_delta": null
+ },
+ "984": {
+  "short": "Inherent Magic: may attempt any rulebook spell, succeeds only on a natural 20 (may empower normally); counts as a spellcaster",
+  "stat_delta": null
+ },
+ "985": {
+  "short": "Mind-Stealer: damages another in melee -> Will Roll (TN16) or becomes a temporary member of its warband (may re-roll to break free at end of each activation; Mind Lock/Immune to Mind Control are immune)",
+  "stat_delta": null
+ },
+ "986": {
+  "short": "Restructure Body: each activation, choose one of Amphibious/Expert Climber/Immune to Poison/Never Wounded until its next activation",
+  "stat_delta": null
+ },
+ "987": {
+  "short": "Immune to Normal Weapons: can only be hurt by magical weapons or magical spell effects",
+  "stat_delta": null
+ },
+ "988": {
+  "short": "Partially Insubstantial: never locked in combat, may always move out freely; cannot be forced into combat unless it allows it",
+  "stat_delta": null
+ },
+ "989": {
+  "short": "Miracle Wielder: after each game (and its Survival Roll if any), 11+ on d20 -> heal one permanent injury on any warband member (itself included); 15+ -> revive a figure killed last game to full Health",
+  "stat_delta": null
+ },
+ "99": {
+  "short": "Large: Large trait, +1 melee damage",
+  "stat_delta": null
+ },
+ "990": {
+  "short": "Immortal: always may reroll any \"Dead\" Survival result; each time it does, permanent -2 Will and -2 levels (if leveled)",
+  "stat_delta": null
+ },
+ "991": {
+  "short": "Greased Lightning: 3 actions per activation as standard",
+  "stat_delta": null
+ },
+ "992": {
+  "short": "Mirror Image: projects a duplicate image adjacent; shooting attacks vs it: 1-10 on d20 -> hits the image instead (auto-miss)",
+  "stat_delta": null
+ },
+ "993": {
+  "short": "Elemental Blast: action: +8 elemental magic shooting attack, 3\" range",
+  "stat_delta": null
+ },
+ "994": {
+  "short": "Force Bubble: action: +10 shooting attack vs all in LoS, pushed away that many inches instead of taking damage (stops at terrain over 1\" high)",
+  "stat_delta": null
+ },
+ "995": {
+  "short": "Massive: +5 melee damage; Large trait",
+  "stat_delta": null
+ },
+ "996": {
+  "short": "Reform: once/game, not in combat: action: return to its original starting Health",
+  "stat_delta": null
+ },
+ "997": {
+  "short": "Celerity: activates twice per turn (end of Wizard Phase and end of Soldier Phase, unless one is already its normal phase); still gets its normal number of actions each time",
+  "stat_delta": null
+ },
+ "998": {
+  "short": "Life Drain: double melee damage vs living targets (not undead/constructs)",
+  "stat_delta": null
+ },
+ "999": {
+  "short": "Powerful: double melee damage",
+  "stat_delta": null
+ }
+}

@@ -225,6 +225,25 @@
   </details>
 
   <details class="card">
+    <summary><h2>Traits ({{ traits|length }})</h2></summary>
+    <p class="muted">Every trait a creature or mutation can carry — Undead, Burrowing, Large, and the
+      rest — with the exact rule each one grants.</p>
+    {% if traits %}
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            {% for t in traits %}
+              <tr><td><strong>{{ t.name }}</strong></td><td class="muted">{{ t.text }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="empty">No traits data loaded.</p>
+    {% endif %}
+  </details>
+
+  <details class="card">
     <summary><h2>Random encounters</h2></summary>
     <p class="muted">The optional random-encounter tables from the core rules and the supplements that
       give one — roll when a treasure token is first picked up (core: 10+), or however your group has
@@ -459,4 +478,21 @@
     {% endfor %}
   </details>
   {% endif %}
+
+  <details class="card">
+    <summary><h2>Quick Reference</h2></summary>
+    <p class="muted">The Core Rules' own condensed reference sheet — turn sequence, actions,
+      combat/shooting/casting procedures, and the post-game checklist.</p>
+    {% for sec in quick_reference %}
+      <details class="ref-panel">
+        <summary>{{ sec.title }}</summary>
+        {% for e in sec.entries %}
+          <p style="margin:0.4rem 0">
+            <strong>{{ e.name }}</strong>{% if e.tag %} <span class="badge">{{ e.tag }}</span>{% endif %}
+            {% if e.text %}<br /><span class="muted">{{ e.text }}</span>{% endif %}
+          </p>
+        {% endfor %}
+      </details>
+    {% endfor %}
+  </details>
 {% endblock %}

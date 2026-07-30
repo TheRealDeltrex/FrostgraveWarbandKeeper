@@ -77,16 +77,19 @@ from game_content import (
     load_bestiary,
     load_expansion_rules,
     load_ghost_archipelago,
+    load_grave_mutations,
     load_magic_items,
     magic_items_for_sources,
     load_loot_tables,
     load_potion_choices,
     load_potion_choices_detailed,
+    load_quick_reference,
     load_random_encounters,
     load_spell_descriptions,
     load_spell_names,
     load_spellcaster_items,
     load_standard_items,
+    load_traits,
     spell_description,
 )
 import expansions
@@ -94,15 +97,20 @@ from idle_watchdog import note_closing, note_heartbeat
 from warband_store import (
     PORTRAIT_DIR,
     WARBAND_DIR,
+    add_apprentice_mutation,
+    add_captain_mutation,
     add_captain_xp,
     add_history,
     add_pact_tier,
     add_soldier,
+    add_soldier_mutation,
     add_soldier_xp,
     add_vault_item,
+    add_wizard_mutation,
     add_wizard_xp,
     adjust_gold,
     apply_captain_level_up,
+    apply_portrait,
     apply_captain_trick,
     apply_level_up,
     apply_soldier_level_up,
@@ -141,10 +149,12 @@ from warband_store import (
     recompute_spell_cns,
     record_game_loot,
     recruit_preview,
+    remove_portrait,
     remove_soldier,
     remove_vault_item,
     reorder_soldiers,
     reorder_spells,
+    restore_portraits_by_name,
     save_portrait,
     save_warband,
     sell_or_remove_base_resource,
@@ -269,6 +279,18 @@ def _parse_signed_int(raw: str | None) -> int | None:
         return None
 
 
+def _mutation_number_from_form() -> tuple[bool, int | None]:
+    """Reads mutation_action/mutation_number from the current POST.
+    Returns (True, None) for a random roll, (True, N) for a specific pick, or
+    (False, None) if a pick was required but nothing valid was submitted."""
+    if request.form.get("mutation_action") == "random":
+        return True, None
+    raw = (request.form.get("mutation_number") or "").strip()
+    if not raw.isdigit():
+        return False, None
+    return True, int(raw)
+
+
 @app.route("/")
 def home():
     return render_template("index.html", warbands=list_warbands())
@@ -304,6 +326,8 @@ def reference():
         potion_choices=load_potion_choices(),
         potions_detailed=load_potion_choices_detailed(),
         bestiary=load_bestiary(),
+        traits=load_traits(),
+        quick_reference=load_quick_reference(),
         spell_names=load_spell_names(),
         # The Lexicon is a browsable reference, so unlike the warband page none
         # of this is filtered by source toggles — same as the bestiary already is.
@@ -387,14 +411,10 @@ def warband_new():
 
         try:
             wiz_file = request.files.get("wizard_portrait")
-            if wiz_file and wiz_file.filename:
-                rel = save_portrait(wb["id"], "wizard", wiz_file)
-                wb["wizard"]["portrait"] = rel
+            apply_portrait(wb["wizard"], wb["id"], "wizard", wiz_file)
             if with_apprentice and wb.get("apprentice"):
                 ap_file = request.files.get("apprentice_portrait")
-                if ap_file and ap_file.filename:
-                    rel = save_portrait(wb["id"], "apprentice", ap_file)
-                    wb["apprentice"]["portrait"] = rel
+                apply_portrait(wb["apprentice"], wb["id"], "apprentice", ap_file)
         except ValueError as exc:
             flash(str(exc), "error")
 
@@ -491,6 +511,8 @@ def warband_view(warband_id: str):
     known = known_spell_ids(wb)
     wschool = (wb.get("wizard") or {}).get("school") or "Elementalist"
     wb_sources = enabled_sources(wb)
+    grave_mutations_enabled = "Grave Mutations" in wb_sources
+    mutation_picker_data = load_grave_mutations() if grave_mutations_enabled else []
     # Only spells this warband could actually learn: its books are on and the
     # wizard's state allows them. Spells already known are excluded here but are
     # never hidden from the wizard's own list, even if their book is later
@@ -620,6 +642,8 @@ def warband_view(warband_id: str):
                 {s["name"] for s in all_spells_flat() if s["source"] in wb_sources}, key=str.lower
             ),
         },
+        grave_mutations_enabled=grave_mutations_enabled,
+        mutation_picker_data=mutation_picker_data,
     )
 
 
@@ -653,8 +677,7 @@ def warband_update(warband_id: str):
                 f = request.files.get("soldier_portrait")
                 if f and f.filename and wb["soldiers"]:
                     sid = wb["soldiers"][-1]["id"]
-                    rel = save_portrait(wb["id"], f"soldier_{sid}", f)
-                    wb["soldiers"][-1]["portrait"] = rel
+                    apply_portrait(wb["soldiers"][-1], wb["id"], f"soldier_{sid}", f)
                 save_warband(wb)
 
         elif action == "remove_soldier":
@@ -689,9 +712,10 @@ def warband_update(warband_id: str):
                 if s.get("id") == sid:
                     s["name"] = (request.form.get("soldier_name") or s.get("name", "")).strip()
                     s["notes"] = request.form.get("notes") or ""
+                    if request.form.get("soldier_portrait_remove") == "on":
+                        remove_portrait(s, wb["id"], f"soldier_{sid}")
                     f = request.files.get("soldier_portrait")
-                    if f and f.filename:
-                        s["portrait"] = save_portrait(wb["id"], f"soldier_{sid}", f)
+                    apply_portrait(s, wb["id"], f"soldier_{sid}", f)
                     save_warband(wb)
                     flash(f"Updated {s['name']}.", "success")
                     break
@@ -703,8 +727,7 @@ def warband_update(warband_id: str):
             flash(msg, "success" if ok else "error")
             if ok:
                 f = request.files.get("apprentice_portrait")
-                if f and f.filename:
-                    wb["apprentice"]["portrait"] = save_portrait(wb["id"], "apprentice", f)
+                apply_portrait(wb["apprentice"], wb["id"], "apprentice", f)
                 save_warband(wb)
 
         elif action == "dismiss_apprentice":
@@ -770,8 +793,7 @@ def warband_update(warband_id: str):
             flash(msg, "success" if ok else "error")
             if ok:
                 f = request.files.get("captain_portrait")
-                if f and f.filename:
-                    wb["captain"]["portrait"] = save_portrait(wb["id"], "captain", f)
+                apply_portrait(wb["captain"], wb["id"], "captain", f)
                 save_warband(wb)
 
         elif action == "dismiss_captain":
@@ -797,9 +819,10 @@ def warband_update(warband_id: str):
                 n = int(hr.get(slot_key, 6))
                 slots = [(request.form.get(f"captain_slot_{i}") or "").strip() for i in range(n)]
                 cap["item_slots"] = normalize_item_slots(slots, n)
+                if request.form.get("captain_portrait_remove") == "on":
+                    remove_portrait(cap, wb["id"], "captain")
                 f = request.files.get("captain_portrait")
-                if f and f.filename:
-                    cap["portrait"] = save_portrait(wb["id"], "captain", f)
+                apply_portrait(cap, wb["id"], "captain", f)
                 save_warband(wb)
                 flash(f"Updated {cap['name']}.", "success")
 
@@ -970,7 +993,7 @@ def warband_update(warband_id: str):
         elif action == "upload_wizard_portrait":
             f = request.files.get("wizard_portrait")
             if f and f.filename:
-                wb["wizard"]["portrait"] = save_portrait(wb["id"], "wizard", f)
+                apply_portrait(wb["wizard"], wb["id"], "wizard", f)
                 save_warband(wb)
                 flash("Wizard portrait updated.", "success")
             else:
@@ -982,7 +1005,7 @@ def warband_update(warband_id: str):
             else:
                 f = request.files.get("apprentice_portrait")
                 if f and f.filename:
-                    wb["apprentice"]["portrait"] = save_portrait(wb["id"], "apprentice", f)
+                    apply_portrait(wb["apprentice"], wb["id"], "apprentice", f)
                     save_warband(wb)
                     flash("Apprentice portrait updated.", "success")
                 else:
@@ -1029,6 +1052,46 @@ def warband_update(warband_id: str):
             if ok:
                 save_warband(wb)
 
+        elif action == "add_soldier_mutation":
+            has_input, number = _mutation_number_from_form()
+            if not has_input:
+                flash("Pick a mutation to add, or use “Add random mutation”.", "error")
+            else:
+                ok, msg = add_soldier_mutation(wb, request.form.get("soldier_id") or "", number)
+                flash(msg, "success" if ok else "error")
+                if ok:
+                    save_warband(wb)
+
+        elif action == "add_wizard_mutation":
+            has_input, number = _mutation_number_from_form()
+            if not has_input:
+                flash("Pick a mutation to add, or use “Add random mutation”.", "error")
+            else:
+                ok, msg = add_wizard_mutation(wb, number)
+                flash(msg, "success" if ok else "error")
+                if ok:
+                    save_warband(wb)
+
+        elif action == "add_apprentice_mutation":
+            has_input, number = _mutation_number_from_form()
+            if not has_input:
+                flash("Pick a mutation to add, or use “Add random mutation”.", "error")
+            else:
+                ok, msg = add_apprentice_mutation(wb, number)
+                flash(msg, "success" if ok else "error")
+                if ok:
+                    save_warband(wb)
+
+        elif action == "add_captain_mutation":
+            has_input, number = _mutation_number_from_form()
+            if not has_input:
+                flash("Pick a mutation to add, or use “Add random mutation”.", "error")
+            else:
+                ok, msg = add_captain_mutation(wb, number)
+                flash(msg, "success" if ok else "error")
+                if ok:
+                    save_warband(wb)
+
         else:
             flash("Unknown action.", "error")
 
@@ -1055,9 +1118,10 @@ def _update_details(wb: dict) -> None:
         wiz_slots.append((request.form.get(f"wizard_slot_{i}") or "").strip())
     wiz["item_slots"] = normalize_item_slots(wiz_slots, wiz_slot_n)
 
+    if request.form.get("wizard_portrait_remove") == "on":
+        remove_portrait(wiz, wb["id"], "wizard")
     f = request.files.get("wizard_portrait")
-    if f and f.filename:
-        wiz["portrait"] = save_portrait(wb["id"], "wizard", f)
+    apply_portrait(wiz, wb["id"], "wizard", f)
 
     if wb.get("apprentice"):
         ap = wb["apprentice"]
@@ -1069,9 +1133,10 @@ def _update_details(wb: dict) -> None:
         for i in range(ap_slot_n):
             ap_slots.append((request.form.get(f"apprentice_slot_{i}") or "").strip())
         ap["item_slots"] = normalize_item_slots(ap_slots, ap_slot_n)
+        if request.form.get("apprentice_portrait_remove") == "on":
+            remove_portrait(ap, wb["id"], "apprentice")
         af = request.files.get("apprentice_portrait")
-        if af and af.filename:
-            ap["portrait"] = save_portrait(wb["id"], "apprentice", af)
+        apply_portrait(ap, wb["id"], "apprentice", af)
 
 
 @app.route("/warband/<warband_id>/delete", methods=["POST"])
@@ -1140,8 +1205,12 @@ def warband_import():
         except Exception as exc:
             flash(f"Could not import: {exc}", "error")
             return render_template("import.html")
+        restored = restore_portraits_by_name(wb, request.files.getlist("pictures"))
         save_warband(wb)
-        flash(f"Imported “{wb.get('name', 'warband')}”.", "success")
+        msg = f"Imported “{wb.get('name', 'warband')}”."
+        if restored:
+            msg += f" Restored {restored} picture(s)."
+        flash(msg, "success")
         return redirect(url_for("warband_view", warband_id=wb["id"]))
     return render_template("import.html")
 

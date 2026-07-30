@@ -17,6 +17,11 @@
         <label for="json_text">Or paste JSON</label>
         <textarea id="json_text" name="json_text" class="tall" placeholder='{"name": "...", "wizard": {...}}'></textarea>
       </div>
+      <div class="form-row">
+        <label for="pictures">Also restore pictures (optional)</label>
+        <input id="pictures" name="pictures" type="file" accept="image/*" multiple />
+        <p class="muted" style="font-size:0.8rem">Select the original image files — matched automatically by filename and reapplied to the right character.</p>
+      </div>
       <div class="actions">
         <button class="btn" type="submit">Import</button>
         <a class="btn secondary" href="{{ url_for('home') }}">Cancel</a>

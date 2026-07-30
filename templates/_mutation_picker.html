@@ -1,0 +1,51 @@
+{# Grave Mutations picker: hundred -> twenty-block -> named entry cascading
+   dropdowns (mirrors the Lexicon's own nesting), plus an "Add random mutation"
+   escape hatch. Shared by the Wizard/Apprentice/Captain/each Soldier. #}
+{% macro mutation_picker(action, mutations, soldier_id=none) %}
+  {% if mutations or grave_mutations_enabled %}
+    <details class="ref-panel">
+      <summary>Mutations ({{ mutations|length }})</summary>
+      {% if mutations %}
+        <ul class="list-plain">
+          {% for m in mutations %}
+            <li><strong>{{ m.number }}. {{ m.name }}</strong> — {{ m.text }}</li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="empty">No mutations yet.</p>
+      {% endif %}
+      {% if grave_mutations_enabled %}
+        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="mutation-picker stack-sm" style="margin-top:0.5rem">
+          <input type="hidden" name="action" value="{{ action }}" />
+          {% if soldier_id %}<input type="hidden" name="soldier_id" value="{{ soldier_id }}" />{% endif %}
+          <div class="stat-row">
+            <div class="form-row">
+              <label>Hundred</label>
+              <select class="mutation-hundred">
+                <option value="">— pick —</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label>Twenty</label>
+              <select class="mutation-twenty" disabled>
+                <option value="">— pick a hundred first —</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label>Mutation</label>
+              <select name="mutation_number" class="mutation-number" required disabled>
+                <option value="">— pick a twenty-block first —</option>
+              </select>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn secondary small" type="submit" name="mutation_action" value="pick">Add selected mutation</button>
+            <button class="btn secondary small" type="submit" name="mutation_action" value="random" formnovalidate>Add random mutation</button>
+          </div>
+        </form>
+      {% else %}
+        <p class="muted" style="font-size:0.8rem">Enable Grave Mutations under Additional Rules and Homerules to add more.</p>
+      {% endif %}
+    </details>
+  {% endif %}
+{% endmacro %}
