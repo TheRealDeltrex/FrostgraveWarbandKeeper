@@ -30,6 +30,11 @@
     "source": "Core Rules"
   },
   {
+    "name": "Burning",
+    "source": "Blood Legacy",
+    "text": "This creature deals +2 damage on a fight it wins, even if it deals no other damage."
+  },
+  {
     "name": "Burrowing",
     "text": "This creature may move through terrain as though it were not there, provided it has enough movement to reach the other side (it cannot end its movement within a solid piece of terrain). Furthermore, the creature never suffers any movement penalty for moving over rough ground.",
     "source": "Core Rules"
@@ -38,6 +43,11 @@
     "name": "Carry Disease",
     "source": "The Wildwoods",
     "text": "A figure wounded by this creature must pass a Will Roll (TN10) or suffer -2 Health in its next game."
+  },
+  {
+    "name": "Chilling Touch",
+    "source": "Blood Legacy",
+    "text": "This creature deals +2 damage in combat, except against undead or constructs."
   },
   {
     "name": "Construct",
@@ -95,6 +105,16 @@
     "source": "Core Rules"
   },
   {
+    "name": "Giant-blooded",
+    "source": "Blood Legacy",
+    "text": "This creature deals +1 melee damage and gains +4 to TN-based Fight rolls. Includes the Large trait."
+  },
+  {
+    "name": "Harvest Blood",
+    "source": "Blood Legacy",
+    "text": "After the game, this creature heals 1 Health for each figure in its warband reduced to 0 Health that game (maximum one source of healing per game)."
+  },
+  {
     "name": "Hate Undead",
     "source": "The Wildwoods",
     "text": "This creature gains +1 Fight, all of its attacks count as magic attacks, and it always moves toward and attacks the nearest undead figure if any are in play."
@@ -103,6 +123,16 @@
     "name": "Horns",
     "text": "If this creature moves into combat and spends an action to fight as part of the same activation, it receives +2 Fight for that attack only.",
     "source": "Core Rules"
+  },
+  {
+    "name": "Hunter's Will (X)",
+    "source": "Blood Legacy",
+    "text": "This creature gains +2 Will while creature (X) is on the table."
+  },
+  {
+    "name": "Hurl Rock",
+    "source": "Blood Legacy",
+    "text": "This creature has a 12\" ranged attack dealing +4 damage."
   },
   {
     "name": "Immune to (Spell)",
@@ -165,6 +195,16 @@
     "source": "Core Rules"
   },
   {
+    "name": "Magic Attacks (X)",
+    "source": "Blood Legacy",
+    "text": "This creature's attacks only count as magic attacks against (X)."
+  },
+  {
+    "name": "Magic Vulnerability",
+    "source": "Blood Legacy",
+    "text": "This creature takes +1 damage from all magic attacks."
+  },
+  {
     "name": "Mind Lock",
     "text": "This creature is Immune to Mind Control and Immune to Suggestion.",
     "source": "Core Rules"
@@ -180,9 +220,19 @@
     "text": "This creature suffers no movement penalty for rough ground."
   },
   {
+    "name": "Opponent Armour Reduction",
+    "source": "Blood Legacy",
+    "text": "A light- or heavy-armoured figure beaten by this creature in combat has its Armour reduced by 1."
+  },
+  {
     "name": "Pack Hunter",
     "text": "If more than one of these creatures appears at the same time, place them in base contact. Whenever a pack hunter is activated, all other pack hunters in contact with it should be activated and moved as one. Roll randomly to see which creature is the \"pack leader\" and determine the pack's actions using that figure.",
     "source": "Core Rules"
+  },
+  {
+    "name": "Partial Immunity to Normal Damage",
+    "source": "Blood Legacy",
+    "text": "Non-magic damage dealt to this creature is halved, rounded down."
   },
   {
     "name": "Poison",
@@ -230,6 +280,11 @@
     "text": "This creature has a natural ranged attack dealing +0 damage at 12\" range, unless otherwise stated."
   },
   {
+    "name": "Shrouded Form",
+    "source": "Blood Legacy",
+    "text": "This creature cannot be seen beyond 12\" and gains +3 Fight against shooting attacks."
+  },
+  {
     "name": "Spellcaster",
     "text": "This creature can cast spells. Exactly which spells it can cast and how this is handled will be given in the creature's description.",
     "source": "Core Rules"
@@ -238,6 +293,11 @@
     "name": "Strong",
     "text": "This creature does +2 damage.",
     "source": "Core Rules"
+  },
+  {
+    "name": "Supporting Figure Maximum",
+    "source": "Blood Legacy",
+    "text": "Figures fighting this creature gain a maximum of +2 from supporting figures, regardless of how many are actually supporting."
   },
   {
     "name": "Surprise Attack",
@@ -260,9 +320,19 @@
     "text": "This soldier picks a Terrain Expertise (Mountain, Bog, Ice, or Forest) and never consumes supplies. In a game where that terrain type is dominant, it also gains Nimble, and the warband gains +2 Initiative and +2 supply points after the game."
   },
   {
+    "name": "Thaumaturgic Vulnerability",
+    "source": "Blood Legacy",
+    "text": "This creature suffers -1 Will against spells cast by a Thaumaturge."
+  },
+  {
     "name": "True Sight",
     "text": "Ignore any castings of Beauty or Invisibility when determining this creature's actions. Furthermore, if this figure is ever in combat with an Illusionary Soldier, the Illusionary Soldier is immediately removed from the table.",
     "source": "Core Rules"
+  },
+  {
+    "name": "Two-Headed",
+    "source": "Blood Legacy",
+    "text": "Opponents fighting this creature count one fewer supporting figure (minimum 0)."
   },
   {
     "name": "Unaggressive Unless Startled",

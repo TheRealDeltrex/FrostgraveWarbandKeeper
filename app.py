@@ -57,7 +57,6 @@ from frostgrave_data import (
     SCHOOL_OPPOSED,
     SCHOOL_RELATIONS,
     SCHOOLS,
-    SCROUNGER_WEAPON_CHOICES,
     SOLDIERS,
     SOURCE_BOOK_BY_SLUG,
     SOURCE_BOOK_OPTIONS,
@@ -68,10 +67,13 @@ from frostgrave_data import (
     TEMPORARY_MEMBER_LIMIT,
     XP_PER_LEVEL,
     all_spells_flat,
+    animal_companion_type_keys,
     bonus_choice_amount,
     cn_penalty,
+    construct_type_keys,
     format_stat,
     group_soldiers_by_source,
+    illusion_source_choices,
     level_from_xp,
     soldier_list_for_ui,
     spells_for_wizard_ui,
@@ -115,6 +117,7 @@ from warband_store import (
     animal_companion_limit,
     apply_captain_level_up,
     apply_captain_trick,
+    apply_animal_companion_crit_bonus,
     apply_level_up,
     apply_portrait,
     apply_soldier_level_up,
@@ -254,7 +257,9 @@ app.jinja_env.globals.update(
     CAPTAIN_TRICK_BY_ID=CAPTAIN_TRICK_BY_ID,
     KNIGHTLY_ORDERS=KNIGHTLY_ORDERS,
     KNIGHTLY_ORDER_ELIGIBLE=KNIGHTLY_ORDER_ELIGIBLE,
-    SCROUNGER_WEAPON_CHOICES=SCROUNGER_WEAPON_CHOICES,
+    ILLUSION_SOURCE_CHOICES=illusion_source_choices(),
+    ANIMAL_COMPANION_TYPE_KEYS=animal_companion_type_keys(),
+    CONSTRUCT_TYPE_KEYS=construct_type_keys(),
     LEVELUP_STATS=LEVELUP_STATS,
     level_from_xp=level_from_xp,
     captain_effective_stats=captain_effective_stats,
@@ -422,12 +427,21 @@ def warband_new() -> str | Response:
         with_apprentice = request.form.get("with_apprentice") == "on"
         apprentice_name = (request.form.get("apprentice_name") or "").strip()
         sources = _posted_sources(request.form)
+        try:
+            starting_gold = int(request.form.get("starting_gold") or STARTING_GOLD)
+        except ValueError:
+            starting_gold = STARTING_GOLD
+        try:
+            wizard_starting_xp = int(request.form.get("wizard_starting_xp") or 0)
+        except ValueError:
+            wizard_starting_xp = 0
 
         if not name or not wizard:
             flash("Warband name and wizard name are required.", "error")
             return _render_new(school=school, selected=spell_keys, sources=sources,
                                pentangle=pentangle, warband_name=name, wizard_name=wizard,
-                               with_apprentice=with_apprentice, apprentice_name=apprentice_name)
+                               with_apprentice=with_apprentice, apprentice_name=apprentice_name,
+                               starting_gold=starting_gold, wizard_starting_xp=wizard_starting_xp)
 
         # Soldiers are not hired at creation — they're recruited later on the
         # warband page (from the full roster, including supplement mercenaries).
@@ -440,12 +454,15 @@ def warband_new() -> str | Response:
             apprentice_name,
             enabled_sources_map=sources,
             pentangle_playable=pentangle,
+            starting_gold=starting_gold,
+            wizard_starting_xp=wizard_starting_xp,
         )
         if not wb:
             flash(msg, "error")
             return _render_new(school=school, selected=spell_keys, sources=sources,
                                pentangle=pentangle, warband_name=name, wizard_name=wizard,
-                               with_apprentice=with_apprentice, apprentice_name=apprentice_name)
+                               with_apprentice=with_apprentice, apprentice_name=apprentice_name,
+                               starting_gold=starting_gold, wizard_starting_xp=wizard_starting_xp)
 
         try:
             wiz_file = request.files.get("wizard_portrait")
@@ -501,6 +518,8 @@ def _render_new(
     wizard_name: str = "",
     with_apprentice: bool = False,
     apprentice_name: str = "",
+    starting_gold: int = STARTING_GOLD,
+    wizard_starting_xp: int = 0,
 ):
     sources = sources or {}
     schools = _new_schools(sources, pentangle)
@@ -539,6 +558,8 @@ def _render_new(
         wizard_name=wizard_name,
         with_apprentice=with_apprentice,
         apprentice_name=apprentice_name,
+        starting_gold=starting_gold,
+        wizard_starting_xp=wizard_starting_xp,
     )
 
 
@@ -759,7 +780,7 @@ def _act_hire_soldier(wb: dict) -> tuple[bool, str]:
         request.form.get("type_key") or "",
         (request.form.get("soldier_name") or "").strip(),
         request.form.get("knightly_order") or "",
-        request.form.get("scrounger_weapon") or "",
+        request.form.get("illusion_source") or "",
     )
     if ok:
         # optional portrait on hire
@@ -959,6 +980,11 @@ def _act_soldier_level_up(wb: dict) -> tuple[bool, str]:
 @register_action("reverse_soldier_level_up")
 def _act_reverse_soldier_level_up(wb: dict) -> tuple[bool, str]:
     return reverse_last_soldier_level_up(wb, request.form.get("soldier_id") or "")
+
+
+@register_action("soldier_crit_bonus")
+def _act_soldier_crit_bonus(wb: dict) -> tuple[bool, str]:
+    return apply_animal_companion_crit_bonus(wb, request.form.get("soldier_id") or "")
 
 
 @register_action("adjust_gold")

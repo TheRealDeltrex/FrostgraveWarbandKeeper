@@ -58,6 +58,19 @@
         instead of three, so they start with three neutral spells instead of two.
       </p>
 
+      <div class="grid-2" style="margin-top:0.9rem">
+        <div class="form-row">
+          <label for="starting_gold">Starting gold</label>
+          <input id="starting_gold" name="starting_gold" type="number" min="0" step="1"
+                 value="{{ starting_gold if starting_gold is defined else STARTING_GOLD }}" />
+        </div>
+        <div class="form-row">
+          <label for="wizard_starting_xp">Wizard starting XP</label>
+          <input id="wizard_starting_xp" name="wizard_starting_xp" type="number" min="0" step="1"
+                 value="{{ wizard_starting_xp if wizard_starting_xp is defined else 0 }}" />
+        </div>
+      </div>
+
       <script>
         // Ticking a book has to re-render the spell picker, which is built
         // server-side — same route the school dropdown already used to hit via a

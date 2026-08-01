@@ -42,7 +42,7 @@
       {"name": "Dagger", "tag": "-1 damage", "text": "The first dagger a figure carries does not take up an item slot."},
       {"name": "Hand Weapon", "tag": "no modifier", "text": ""},
       {"name": "Two-Handed Weapon", "tag": "+2 damage", "text": "Takes up two item slots."},
-      {"name": "Staff", "tag": "-1 damage to opponent", "text": "Applies to the opponent's damage modifier in hand-to-hand combat."},
+      {"name": "Staff", "tag": "-1 damage to self and opponent", "text": "Applies -1 to both the wielder's and the opponent's damage modifier in hand-to-hand combat."},
       {"name": "Bow", "tag": "24\" range", "text": "Load and fire as a single action; must have a quiver."},
       {"name": "Crossbow", "tag": "+2 damage, 24\" range", "text": "Load and fire as separate actions; may reload in place of movement; must have a quiver."},
       {"name": "Unarmed", "tag": "-2 damage, -2 Fight", "text": ""},

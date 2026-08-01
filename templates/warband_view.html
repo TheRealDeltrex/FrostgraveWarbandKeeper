@@ -211,6 +211,9 @@
         </script>
       </details>
 
+      <details class="ref-panel" id="captain-rules-card">
+        <summary>Captain Rules</summary>
+
       <div class="form-row">
         <label for="captain_mode">Captain (FG1E Sellswords-style homerule)</label>
         <select id="captain_mode" name="captain_mode">
@@ -331,6 +334,8 @@
         </div>
       </details>
 
+      </details>
+
       <details class="ref-panel">
         <summary>Soldier Leveling</summary>
         <p class="muted" style="font-size:0.85rem">
@@ -340,6 +345,14 @@
         <div class="checkbox-row">
           <input id="soldier_leveling_enabled" name="soldier_leveling_enabled" type="checkbox" {% if hr.soldier_leveling_enabled %}checked{% endif %} />
           <label for="soldier_leveling_enabled" style="margin:0">Enable Soldier Leveling</label>
+        </div>
+        <div class="checkbox-row">
+          <input id="soldier_leveling_animal_companions" name="soldier_leveling_animal_companions" type="checkbox" {% if hr.soldier_leveling_animal_companions %}checked{% endif %} />
+          <label for="soldier_leveling_animal_companions" style="margin:0">Animal companions can level</label>
+        </div>
+        <div class="checkbox-row">
+          <input id="soldier_leveling_constructs" name="soldier_leveling_constructs" type="checkbox" {% if hr.soldier_leveling_constructs %}checked{% endif %} />
+          <label for="soldier_leveling_constructs" style="margin:0">Constructs can level</label>
         </div>
         <div class="form-row">
           <label for="soldier_max_levels">Max levels gained (per soldier)</label>
@@ -1306,7 +1319,17 @@
                       </form>
                     </details>
                     {{ mutation_picker('add_soldier_mutation', s.mutations, soldier_id=s.id) }}
-                    {% if hr.soldier_leveling_enabled %}
+                    {% if s.type_key in ANIMAL_COMPANION_TYPE_KEYS and s.type_key != 'companion_white_gorilla' and not s.crit_health_bonus %}
+                      <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
+                        <input type="hidden" name="action" value="soldier_crit_bonus" />
+                        <input type="hidden" name="soldier_id" value="{{ s.id }}" />
+                        <button class="btn secondary small" type="submit" title="Animal Companion casting roll was a critical success — normal pick, so a one-time +1 Health instead of the White Gorilla.">Summoned with crit</button>
+                      </form>
+                    {% endif %}
+                    {% set s_can_level = hr.soldier_leveling_enabled
+                        and (s.type_key not in ANIMAL_COMPANION_TYPE_KEYS or hr.soldier_leveling_animal_companions)
+                        and (s.type_key not in CONSTRUCT_TYPE_KEYS or hr.soldier_leveling_constructs) %}
+                    {% if s_can_level %}
                       {% set s_pending = level_from_xp(s.xp) - s.level %}
                       <details>
                         <summary class="muted" style="cursor:pointer;font-size:0.85rem">Level up {% if s_pending > 0 %}({{ s_pending }} ready){% endif %}</summary>
@@ -1535,7 +1558,7 @@
                 <td><strong>{{ c.name }}</strong></td>
                 <td><span class="badge {{ c.category }}">{{ c.category }}</span></td>
                 <td class="muted">{% if c.requires_spell %}<span class="badge">via {{ c.requires_spell }}</span>{% elif c.source != 'Core Rules' %}<span class="badge">{{ c.source }}</span>{% else %}—{% endif %}</td>
-                <td class="gold">{% if c.cost == 0 %}{{ 'Spell' if c.requires_spell else 'Free' }}{% else %}{{ c.cost }}{% endif %}</td>
+                <td class="gold">{% if c.cost_label %}{{ c.cost_label }}{% elif c.cost == 0 %}{{ 'Spell' if c.requires_spell else 'Free' }}{% else %}{{ c.cost }}{% endif %}</td>
                 <td>{{ c.move }}</td>
                 <td>{{ format_stat(c.fight) }}</td>
                 <td>{{ format_stat(c.shoot) }}</td>
@@ -1559,13 +1582,6 @@
                         <option value="">No order</option>
                         {% for o in KNIGHTLY_ORDERS %}
                           <option value="{{ o.id }}">{{ o.name }}</option>
-                        {% endfor %}
-                      </select>
-                    {% endif %}
-                    {% if c.key == 'scrounger' %}
-                      <select name="scrounger_weapon" style="margin-bottom:0.3rem" title="Carries both; picks which to fight with each round at the table — this just sets the initial gear line.">
-                        {% for w in SCROUNGER_WEAPON_CHOICES %}
-                          <option value="{{ w.id }}">{{ w.label }}</option>
                         {% endfor %}
                       </select>
                     {% endif %}
@@ -1637,6 +1653,13 @@
                     <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
                       <input type="hidden" name="action" value="hire_soldier" />
                       <input type="hidden" name="type_key" value="{{ c.key }}" />
+                      {% if c.key == 'illusionary_soldier' %}
+                        <select name="illusion_source" style="margin-bottom:0.3rem" title="Which core soldier's Move/Fight/Shoot/Armour/Will it copies — Health is always 1.">
+                          {% for opt in ILLUSION_SOURCE_CHOICES %}
+                            <option value="{{ opt.id }}">{{ opt.label }}</option>
+                          {% endfor %}
+                        </select>
+                      {% endif %}
                       <button class="btn small" type="submit" {% if temp_at_cap %}disabled title="{{ temporary_member_limit }} temporary members already on the table."{% endif %}>Hire</button>
                       {% if temp_at_cap %}<div class="muted" style="font-size:0.78rem;margin-top:0.2rem">{{ temporary_member_limit }} temporary members already on the table.</div>{% endif %}
                     </form>
