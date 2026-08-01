@@ -1,0 +1,74 @@
+name: Deploy Pages
+
+# Manually-triggered publish for the GitHub Pages site (F4). Builds docs/ fresh
+# from whichever branch is checked out here (defaults to devversion) and
+# deploys it directly to Pages — main no longer needs to carry hand-synced
+# generated files, which is the class of drift that motivated this workflow
+# (see IMPROVEMENTS.md F4; docs/static/style.css had drifted from static/
+# style.css by 5 lines before this was written).
+#
+# This does not touch main and does not commit anything — it only builds and
+# deploys the Pages site. Nothing here runs automatically; someone has to
+# dispatch it explicitly from the Actions tab.
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Branch or tag to build the site from"
+        required: false
+        default: "devversion"
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Build the browser bundle (docs/app/)
+        run: |
+          mkdir -p /tmp/fwk-ci-data
+          FWK_DATA_DIR=/tmp/fwk-ci-data python scripts/build_browser_bundle.py
+
+      - name: Build the live-preview pages (docs/preview-*.html, docs/static/)
+        run: |
+          mkdir -p /tmp/fwk-ci-data-2
+          FWK_DATA_DIR=/tmp/fwk-ci-data-2 python scripts/build_preview_pages.py
+
+      - name: Check the synced copies didn't drift (A5 drift check)
+        run: |
+          diff static/style.css docs/static/style.css
+          diff static/item_slots.js docs/static/item_slots.js
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
