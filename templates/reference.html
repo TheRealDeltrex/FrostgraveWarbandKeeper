@@ -33,6 +33,40 @@
   </details>
 
   <details class="card">
+    <summary><span class="card-title">Core Rules</span></summary>
+    <p class="muted">Rules from the core rulebook not already covered by the Quick Reference above —
+      the stat-line and equipment rules, warband composition, the post-game Survival Roll and
+      Permanent Injury tables, XP/leveling, and spending treasure. The Treasure Table itself lives
+      under Loot tables (Core Rules); Base Locations/Resources below are the same data the app
+      itself uses on the warband page, not a separate transcription.</p>
+    {% for sec in core_rules %}
+      <details class="ref-panel">
+        <summary>{{ sec.title }}</summary>
+        {% if sec.blurb %}<p class="muted" style="font-size:0.85rem">{{ sec.blurb }}</p>{% endif %}
+        {% for row in sec.rows %}
+          <p style="margin:0.4rem 0"><strong>{{ row.name }}</strong><br /><span class="muted">{{ row.text }}</span></p>
+        {% endfor %}
+      </details>
+    {% endfor %}
+    <details class="ref-panel">
+      <summary>Base Locations</summary>
+      <p class="muted" style="font-size:0.85rem">Free to establish after one or more games; changeable after any game (any purchased resources are lost when you do).</p>
+      {% for key, loc in base_locations.items() %}
+        {% if key != 'none' %}
+          <p style="margin:0.4rem 0"><strong>{{ loc.name }}</strong><br /><span class="muted">{{ loc.effects }}</span></p>
+        {% endif %}
+      {% endfor %}
+    </details>
+    <details class="ref-panel">
+      <summary>Base Resources</summary>
+      <p class="muted" style="font-size:0.85rem">Any number may be added to a base; each type only once.</p>
+      {% for key, res in base_resources.items() %}
+        <p style="margin:0.4rem 0"><strong>{{ res.name }}</strong> <span class="gold">{{ res.cost }}gc</span><br /><span class="muted">{{ res.effects }}</span></p>
+      {% endfor %}
+    </details>
+  </details>
+
+  <details class="card">
     <summary><span class="card-title">Schools</span></summary>
     <h3>Standard Schools</h3>
     <div class="table-wrap">
@@ -270,24 +304,26 @@
       house-ruled it. Not every supplement has a standalone table; Into the Breeding Pits' underground
       variant is under Expansion rules below instead.</p>
     {% for book, sections in random_encounters.items() %}
-      <h3>{{ book }}</h3>
-      {% for sec in sections %}
-        <details class="ref-panel">
-          <summary>{{ sec.title }}</summary>
-          {% if sec.blurb %}<p class="muted" style="font-size:0.85rem">{{ sec.blurb }}</p>{% endif %}
-          {% if sec.rows %}
-            <div class="table-wrap">
-              <table>
-                <tbody>
-                  {% for row in sec.rows %}
-                    <tr><td><strong>{{ row.name }}</strong></td><td class="muted">{{ row.text }}</td></tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            </div>
-          {% endif %}
-        </details>
-      {% endfor %}
+      <details class="ref-panel">
+        <summary>{{ book }}</summary>
+        {% for sec in sections %}
+          <details class="ref-panel">
+            <summary>{{ sec.title }}</summary>
+            {% if sec.blurb %}<p class="muted" style="font-size:0.85rem">{{ sec.blurb }}</p>{% endif %}
+            {% if sec.rows %}
+              <div class="table-wrap">
+                <table>
+                  <tbody>
+                    {% for row in sec.rows %}
+                      <tr><td><strong>{{ row.name }}</strong></td><td class="muted">{{ row.text }}</td></tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% endif %}
+          </details>
+        {% endfor %}
+      </details>
     {% endfor %}
   </details>
 
@@ -320,24 +356,26 @@
       items themselves are the Magic items &amp; treasure table above and the Potions sub-list under
       Arms, armour &amp; consumables.</p>
     {% for book, sections in loot_tables.items() %}
-      <h3>{{ book }}</h3>
-      {% for sec in sections %}
-        <details class="ref-panel">
-          <summary>{{ sec.title }}</summary>
-          {% if sec.blurb %}<p class="muted" style="font-size:0.85rem">{{ sec.blurb }}</p>{% endif %}
-          {% if sec.rows %}
-            <div class="table-wrap">
-              <table>
-                <tbody>
-                  {% for row in sec.rows %}
-                    <tr><td><strong>{{ row.name }}</strong></td><td class="muted">{{ row.text }}</td></tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            </div>
-          {% endif %}
-        </details>
-      {% endfor %}
+      <details class="ref-panel">
+        <summary>{{ book }}</summary>
+        {% for sec in sections %}
+          <details class="ref-panel">
+            <summary>{{ sec.title }}</summary>
+            {% if sec.blurb %}<p class="muted" style="font-size:0.85rem">{{ sec.blurb }}</p>{% endif %}
+            {% if sec.rows %}
+              <div class="table-wrap">
+                <table>
+                  <tbody>
+                    {% for row in sec.rows %}
+                      <tr><td><strong>{{ row.name }}</strong></td><td class="muted">{{ row.text }}</td></tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% endif %}
+          </details>
+        {% endfor %}
+      </details>
     {% endfor %}
   </details>
 
@@ -348,45 +386,47 @@
       toolkit. Reference only: these govern play at the table, so the app shows them rather than
       tracking them.</p>
     {% for book, sections in expansion_rules.items() %}
-      <h3>{{ book }}</h3>
-      {% for sec in sections %}
-        <details class="ref-panel">
-          <summary>{{ sec.title }}</summary>
-          {% if sec.blurb %}<p class="muted" style="font-size:0.85rem">{{ sec.blurb }}</p>{% endif %}
-          {% if sec.subsections %}
-            {% for sub in sec.subsections %}
-              <details class="ref-panel">
-                <summary>{{ sub.title }}</summary>
-                <div class="table-wrap">
-                  <table>
-                    <tbody>
-                      {% for row in sub.rows %}
-                        <tr><td><strong>{{ row.name }}</strong></td><td class="muted">{{ row.text }}</td></tr>
-                      {% endfor %}
-                    </tbody>
-                  </table>
-                </div>
-              </details>
+      <details class="ref-panel">
+        <summary>{{ book }}</summary>
+        {% for sec in sections %}
+          <details class="ref-panel">
+            <summary>{{ sec.title }}</summary>
+            {% if sec.blurb %}<p class="muted" style="font-size:0.85rem">{{ sec.blurb }}</p>{% endif %}
+            {% if sec.subsections %}
+              {% for sub in sec.subsections %}
+                <details class="ref-panel">
+                  <summary>{{ sub.title }}</summary>
+                  <div class="table-wrap">
+                    <table>
+                      <tbody>
+                        {% for row in sub.rows %}
+                          <tr><td><strong>{{ row.name }}</strong></td><td class="muted">{{ row.text }}</td></tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                </details>
+              {% endfor %}
+            {% elif sec.rows %}
+              <div class="table-wrap">
+                <table>
+                  <tbody>
+                    {% for row in sec.rows %}
+                      <tr><td><strong>{{ row.name }}</strong></td><td class="muted">{{ row.text }}</td></tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% endif %}
+            {% for e in sec.entries %}
+              <p style="margin:0.4rem 0">
+                <strong>{{ e.name }}</strong>{% if e.tag %} <span class="badge">{{ e.tag }}</span>{% endif %}
+                {% if e.text %}<br /><span class="muted">{{ e.text }}</span>{% endif %}
+              </p>
             {% endfor %}
-          {% elif sec.rows %}
-            <div class="table-wrap">
-              <table>
-                <tbody>
-                  {% for row in sec.rows %}
-                    <tr><td><strong>{{ row.name }}</strong></td><td class="muted">{{ row.text }}</td></tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            </div>
-          {% endif %}
-          {% for e in sec.entries %}
-            <p style="margin:0.4rem 0">
-              <strong>{{ e.name }}</strong>{% if e.tag %} <span class="badge">{{ e.tag }}</span>{% endif %}
-              {% if e.text %}<br /><span class="muted">{{ e.text }}</span>{% endif %}
-            </p>
-          {% endfor %}
-        </details>
-      {% endfor %}
+          </details>
+        {% endfor %}
+      </details>
     {% endfor %}
 
     <h3>Wizard states</h3>

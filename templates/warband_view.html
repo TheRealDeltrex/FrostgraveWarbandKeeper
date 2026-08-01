@@ -1,10 +1,19 @@
 {% extends "base.html" %}
 {% from "_loot_picker.html" import loot_picker_row with context %}
 {% from "_mutation_picker.html" import mutation_picker with context %}
+{% from "_construct_modification_picker.html" import construct_modification_picker with context %}
+{% from "_permanent_injury_picker.html" import permanent_injury_picker with context %}
 {% block title %}{{ wb.name }} · Frostgrave{% endblock %}
 {% block content %}
   {% set wiz = wb.wizard %}
   {% set ap = wb.apprentice %}
+  {% if not limits.specialists_ok %}
+    <div class="card flash warn">
+      Too many specialists hired ({{ limits.specialists }} / {{ limits.max_specialists }}). The app
+      won't auto-resolve this — dismiss a specialist, or raise the cap under Additional Rules and
+      Homerules if your group plays with a bigger allowance.
+    </div>
+  {% endif %}
   <script type="application/json" id="loot-picker-data">{{ loot_picker_data | tojson }}</script>
   <script type="application/json" id="mutation-picker-data">{{ mutation_picker_data | tojson }}</script>
   {% set cap = wb.captain %}
@@ -130,6 +139,26 @@
             });
           });
         </script>
+      </details>
+
+      <details class="ref-panel">
+        <summary>Roster caps</summary>
+        <p class="muted" style="font-size:0.85rem">
+          2e core defaults to {{ MAX_SOLDIERS }} soldiers / {{ MAX_SPECIALISTS }} specialists.
+          Raise these if your group plays with a bigger warband, or if a mechanic (e.g. Fireheart's
+          Projectile Weapon Construct Modification) has pushed an existing warband over the default
+          specialist cap and you'd rather raise the limit than dismiss someone.
+        </p>
+        <div class="stat-row">
+          <div class="form-row">
+            <label for="hr_max_soldiers">Max soldiers</label>
+            <input id="hr_max_soldiers" name="max_soldiers" type="number" min="1" step="1" value="{{ hr.max_soldiers }}" />
+          </div>
+          <div class="form-row">
+            <label for="hr_max_specialists">Max specialists</label>
+            <input id="hr_max_specialists" name="max_specialists" type="number" min="0" step="1" value="{{ hr.max_specialists }}" />
+          </div>
+        </div>
       </details>
 
       <details class="ref-panel">
@@ -320,6 +349,10 @@
             </div>
           </div>
         </div>
+        <div class="checkbox-row" style="margin-top:0.5rem">
+          <input id="promote_captain_specialist_only" name="promote_captain_specialist_only" type="checkbox" {% if hr.promote_captain_specialist_only %}checked{% endif %} />
+          <label for="promote_captain_specialist_only" style="margin:0">Specialists only — only a specialist soldier may be promoted to Captain</label>
+        </div>
         <p class="muted" style="font-size:0.85rem;margin-top:0.5rem">
           Flat promotion bonus — always applied in full, on top of the pick above. Zero by default,
           so a promotion is worth just the single chosen bonus.
@@ -353,6 +386,10 @@
         <div class="checkbox-row">
           <input id="soldier_leveling_constructs" name="soldier_leveling_constructs" type="checkbox" {% if hr.soldier_leveling_constructs %}checked{% endif %} />
           <label for="soldier_leveling_constructs" style="margin:0">Constructs can level</label>
+        </div>
+        <div class="checkbox-row">
+          <input id="soldier_permanent_injuries_enabled" name="soldier_permanent_injuries_enabled" type="checkbox" {% if hr.soldier_permanent_injuries_enabled %}checked{% endif %} />
+          <label for="soldier_permanent_injuries_enabled" style="margin:0">Ordinary soldiers can take permanent injuries (Permanent Injury Table, page 77 — normally only the wizard/apprentice/captain's Survival Roll uses it)</label>
         </div>
         <div class="form-row">
           <label for="soldier_max_levels">Max levels gained (per soldier)</label>
@@ -581,18 +618,27 @@
 
     </form>
 
-    {{ mutation_picker('add_wizard_mutation', wiz.mutations) }}
-    {% if ap %}{{ mutation_picker('add_apprentice_mutation', ap.mutations) }}{% endif %}
-
-    {# ---- Wizard state -----------------------------------------------------
-       Its own panel rather than nested in the form above: each control posts
-       its own action, and forms cannot be nested. Only shown when at least
-       one of the three books that introduce a state is switched on. Details
-       of what each state does live in the Lexicon, not here. #}
+    {# ---- Mutations, Permanent Injuries & Wizard state -----------------------
+       Grouped under one sub-panel so the wizard/apprentice card's top level
+       stays short — these are all occasional extras rather than everyday
+       roster upkeep. Wizard state gets its own <details>/form rather than
+       nesting in the main details form above: each control posts its own
+       action, and forms cannot be nested. Permanent injuries (Core Rules,
+       page 77) always show — unlike mutations they're not gated by a source
+       book; wizard state is only shown when at least one of the three books
+       that introduce one is switched on, and what each state does lives in
+       the Lexicon, not here. #}
     {% set available_states = [] %}
     {% for kind in [STATE_LICH, STATE_BEASTCRAFTER, STATE_PACT] %}
       {% if STATE_SOURCE[kind] in enabled_source_names %}{% set _ = available_states.append(kind) %}{% endif %}
     {% endfor %}
+      <details class="ref-panel">
+        <summary>Mutations, Permanent Injuries &amp; Wizard state</summary>
+        {{ mutation_picker('add_wizard_mutation', wiz.mutations, label="Wizard mutations") }}
+        {% if ap %}{{ mutation_picker('add_apprentice_mutation', ap.mutations, label="Apprentice mutations") }}{% endif %}
+        {{ permanent_injury_picker('add_wizard_permanent_injury', wiz.permanent_injuries, label="Wizard permanent injuries") }}
+        {% if ap %}{{ permanent_injury_picker('add_apprentice_permanent_injury', ap.permanent_injuries, label="Apprentice permanent injuries") }}{% endif %}
+
     {% if available_states %}
       <details class="ref-panel" {% if wizard_state_kind != STATE_NONE %}open{% endif %}>
         <summary>Wizard state — {{ STATE_LABELS[wizard_state_kind] }}</summary>
@@ -698,6 +744,7 @@
         {% endif %}
       </details>
     {% endif %}
+      </details>
 
     <details class="ref-panel">
       <summary>Level up wizard {% if pending_levels %}({{ pending_levels }} ready){% endif %}</summary>
@@ -1056,6 +1103,7 @@
         </div>
 
         {{ mutation_picker('add_captain_mutation', cap.mutations) }}
+        {{ permanent_injury_picker('add_captain_permanent_injury', cap.permanent_injuries) }}
 
         {% set cap_pending = [level_from_xp(cap.xp), hr.captain_max_level]|min - cap.level %}
         <details class="ref-panel">
@@ -1266,6 +1314,12 @@
                 <td>{{ s.health }}</td>
                 <td class="gold">{{ s.cost }}</td>
                 <td class="actions-cell">
+                  {% if s.description %}
+                    <details class="actions-cell-persistent">
+                      <summary class="muted" style="cursor:pointer;font-size:0.85rem">Info</summary>
+                      <p class="muted" style="font-size:0.85rem;margin:0.4rem 0 0;max-width:32rem">{{ s.description }}</p>
+                    </details>
+                  {% endif %}
                   <div class="stack-sm">
                     <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
                       <input type="hidden" name="action" value="soldier_status" />
@@ -1299,12 +1353,6 @@
                       </form>
                     {% endif %}
                     <div class="actions" style="align-items:flex-start;margin-top:0">
-                    {% if s.description %}
-                      <details>
-                        <summary class="muted" style="cursor:pointer;font-size:0.85rem">Info</summary>
-                        <p class="muted" style="font-size:0.85rem;margin:0.4rem 0 0;max-width:32rem">{{ s.description }}</p>
-                      </details>
-                    {% endif %}
                     <details>
                       <summary class="muted" style="cursor:pointer;font-size:0.85rem">Edit / picture</summary>
                       <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" enctype="multipart/form-data" class="stack-sm" style="margin-top:0.4rem" data-autosave>
@@ -1319,6 +1367,12 @@
                       </form>
                     </details>
                     {{ mutation_picker('add_soldier_mutation', s.mutations, soldier_id=s.id) }}
+                    {% if hr.soldier_permanent_injuries_enabled or s.permanent_injuries %}
+                      {{ permanent_injury_picker('add_soldier_permanent_injury', s.permanent_injuries, soldier_id=s.id) }}
+                    {% endif %}
+                    {% if s.type_key in STANDARD_CONSTRUCT_TYPE_KEYS %}
+                      {{ construct_modification_picker(s.id, s.modifications) }}
+                    {% endif %}
                     {% if s.type_key in ANIMAL_COMPANION_TYPE_KEYS and s.type_key != 'companion_white_gorilla' and not s.crit_health_bonus %}
                       <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
                         <input type="hidden" name="action" value="soldier_crit_bonus" />
@@ -1370,7 +1424,7 @@
                         </div>
                       </details>
                     {% endif %}
-                    {% if hr.captain_mode in ('promote', 'both') and not cap and s.status == 'active' %}
+                    {% if hr.captain_mode in ('promote', 'both') and not cap and s.status == 'active' and not s.temporary and not s.requires_spell and s.type_key != 'construct_hound' and (not hr.promote_captain_specialist_only or s.category == 'specialist') %}
                       <details>
                         <summary class="muted" style="cursor:pointer;font-size:0.85rem">Promote to Captain</summary>
                         <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="stack-sm" style="margin-top:0.4rem" onsubmit="return confirm('Promote {{ s.name }} to Captain for {{ hr.promote_captain_cost }} gc?');">

@@ -517,8 +517,10 @@ tr.info-desc-row td {
 
 /* Compact roster: hidden by default, revealed by the "Show actions" toggle in
    the Actions column header (static/js in warband_view.html toggles the class
-   on #roster-table and remembers the choice in localStorage). */
-table#roster-table:not(.show-actions) td.actions-cell > * {
+   on #roster-table and remembers the choice in localStorage). The Info
+   details (.actions-cell-persistent) is exempted — it's read-only reference
+   text, not an action, so it should stay visible even in compact mode. */
+table#roster-table:not(.show-actions) td.actions-cell > *:not(.actions-cell-persistent) {
   display: none;
 }
 

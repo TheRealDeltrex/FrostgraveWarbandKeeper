@@ -42,6 +42,7 @@ from warband_store import (
     normalize_item_slots,
     recompute_spell_cns,
     resolve_portrait_path,
+    specialist_count,
     wizard_effective_stats,
 )
 
@@ -272,6 +273,23 @@ def build_warband_pdf(wb: dict) -> bytes:
         new_x="LMARGIN",
         new_y="NEXT",
     )
+    # Flagged, never auto-resolved (e.g. a Fireheart Projectile Weapon
+    # modification can push an existing warband over its specialist cap) —
+    # the player decides whether to dismiss someone or raise the cap
+    # (Additional Rules and Homerules).
+    spec_cap = expansions.max_specialists(wb)
+    specs = specialist_count(wb)
+    if specs > spec_cap:
+        pdf.set_font("Helvetica", "B", 18)
+        pdf.set_text_color(180, 30, 30)
+        pdf.cell(
+            0,
+            10,
+            _t(f"TOO MANY SPECIALISTS HIRED ({specs}/{spec_cap})"),
+            new_x="LMARGIN",
+            new_y="NEXT",
+        )
+        pdf.set_text_color(60, 60, 60)
     pdf.ln(2)
 
     wiz = wb.get("wizard") or {}
@@ -343,6 +361,13 @@ def build_warband_pdf(wb: dict) -> bytes:
         for line in wiz_mut_lines:
             pdf.set_x(left)
             pdf.multi_cell(0, 4.5, line, new_x="LMARGIN", new_y="NEXT", markdown=True)
+    wiz_inj_lines = _mutation_lines(wiz.get("permanent_injuries"))
+    if wiz_inj_lines:
+        pdf.set_x(left)
+        pdf.multi_cell(0, 4.5, _t("**Permanent Injuries:**"), new_x="LMARGIN", new_y="NEXT", markdown=True)
+        for line in wiz_inj_lines:
+            pdf.set_x(left)
+            pdf.multi_cell(0, 4.5, line, new_x="LMARGIN", new_y="NEXT", markdown=True)
     pdf.set_y(max(pdf.get_y(), y0 + wiz_size + 2))
     pdf.ln(2)
 
@@ -388,6 +413,13 @@ def build_warband_pdf(wb: dict) -> bytes:
             pdf.set_x(left)
             pdf.multi_cell(0, 4.5, _t("**Mutations:**"), new_x="LMARGIN", new_y="NEXT", markdown=True)
             for line in ap_mut_lines:
+                pdf.set_x(left)
+                pdf.multi_cell(0, 4.5, line, new_x="LMARGIN", new_y="NEXT", markdown=True)
+        ap_inj_lines = _mutation_lines(ap.get("permanent_injuries"))
+        if ap_inj_lines:
+            pdf.set_x(left)
+            pdf.multi_cell(0, 4.5, _t("**Permanent Injuries:**"), new_x="LMARGIN", new_y="NEXT", markdown=True)
+            for line in ap_inj_lines:
                 pdf.set_x(left)
                 pdf.multi_cell(0, 4.5, line, new_x="LMARGIN", new_y="NEXT", markdown=True)
         pdf.set_y(max(pdf.get_y(), y0 + wiz_size + 2))
@@ -493,6 +525,13 @@ def build_warband_pdf(wb: dict) -> bytes:
             for line in cap_mut_lines:
                 pdf.set_x(left)
                 pdf.multi_cell(0, 4.5, line, new_x="LMARGIN", new_y="NEXT", markdown=True)
+        cap_inj_lines = _mutation_lines(cap.get("permanent_injuries"))
+        if cap_inj_lines:
+            pdf.set_x(left)
+            pdf.multi_cell(0, 4.5, _t("**Permanent Injuries:**"), new_x="LMARGIN", new_y="NEXT", markdown=True)
+            for line in cap_inj_lines:
+                pdf.set_x(left)
+                pdf.multi_cell(0, 4.5, line, new_x="LMARGIN", new_y="NEXT", markdown=True)
         pdf.set_y(max(pdf.get_y(), y0 + wiz_size + 2))
         pdf.ln(2)
     else:
@@ -570,6 +609,20 @@ def build_warband_pdf(wb: dict) -> bytes:
                 pdf.set_x(left)
                 pdf.multi_cell(0, 4.5, _t("**Mutations:**"), new_x="LMARGIN", new_y="NEXT", markdown=True)
                 for line in s_mut_lines:
+                    pdf.set_x(left)
+                    pdf.multi_cell(0, 4.5, line, new_x="LMARGIN", new_y="NEXT", markdown=True)
+            s_mod_lines = _mutation_lines(s.get("modifications"))
+            if s_mod_lines:
+                pdf.set_x(left)
+                pdf.multi_cell(0, 4.5, _t("**Construct Modification:**"), new_x="LMARGIN", new_y="NEXT", markdown=True)
+                for line in s_mod_lines:
+                    pdf.set_x(left)
+                    pdf.multi_cell(0, 4.5, line, new_x="LMARGIN", new_y="NEXT", markdown=True)
+            s_inj_lines = _mutation_lines(s.get("permanent_injuries"))
+            if s_inj_lines:
+                pdf.set_x(left)
+                pdf.multi_cell(0, 4.5, _t("**Permanent Injuries:**"), new_x="LMARGIN", new_y="NEXT", markdown=True)
+                for line in s_inj_lines:
                     pdf.set_x(left)
                     pdf.multi_cell(0, 4.5, line, new_x="LMARGIN", new_y="NEXT", markdown=True)
             s_rev_line = _revenant_line(s.get("revenant"))

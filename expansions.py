@@ -363,9 +363,14 @@ def soldier_cost(wb: dict, info: dict, type_key: str = "") -> int:
 
 
 def max_soldiers(wb: dict) -> int:
-    """The roster cap, raised by the Chilopendra Soldier boon."""
+    """The roster cap: the group's own base (settable at warband creation,
+    default MAX_SOLDIERS — see default_homerules()), raised by the Chilopendra
+    Soldier boon."""
+    hr = wb.get("homerules") or {}
+    base_raw = hr.get("max_soldiers")
+    base = int(base_raw) if base_raw is not None else MAX_SOLDIERS
     extra = sum(1 for p in pact_tiers(wb) if p.get("boon") == BOON_EXTRA_SOLDIER)
-    return MAX_SOLDIERS + extra
+    return base + extra
 
 
 def wizard_stat_caps(wb: dict) -> dict:
@@ -406,10 +411,15 @@ def wizard_level(wb: dict) -> int:
 
 
 def max_specialists(wb: dict) -> int:
-    """Specialist-soldier cap, raised by Increased Specialist Soldier
-    Allowance: +1 per full 20 wizard levels, capped at +4 (8 total at level 80+)."""
+    """Specialist-soldier cap: the group's own base (settable at warband
+    creation, default MAX_SPECIALISTS — see default_homerules()), raised by
+    Increased Specialist Soldier Allowance: +1 per full 20 wizard levels,
+    capped at +4 (8 total at level 80+ on top of the default base)."""
+    hr = wb.get("homerules") or {}
+    base_raw = hr.get("max_specialists")
+    base = int(base_raw) if base_raw is not None else MAX_SPECIALISTS
     extra = min(4, wizard_level(wb) // 20) if _hlw_active(wb, "hlw_specialist_allowance") else 0
-    return MAX_SPECIALISTS + extra
+    return base + extra
 
 
 def _hlw_item_slot_bonus(wb: dict) -> int:
