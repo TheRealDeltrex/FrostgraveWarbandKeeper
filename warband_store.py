@@ -54,9 +54,6 @@ from frostgrave_data import (
     PROMOTE_CAPTAIN_TRICKS,
     SCHOOL_RELATIONS,
     SCHOOLS,
-    SCROUNGER_WEAPON_BY_ID,
-    SCROUNGER_WEAPON_DEFAULT,
-    SCROUNGER_WEAPON_IDS,
     SOLDIER_MAX_LEVELS,
     SOLDIER_STAT_CAPS,
     SOLDIERS,
@@ -73,8 +70,10 @@ from frostgrave_data import (
     animal_companion_type_keys,
     bonus_choice_amount,
     cn_penalty,
+    construct_type_keys,
     find_spell,
     get_soldier,
+    illusion_source_choices,
     level_from_xp,
     school_relation,
     xp_to_next_level,
@@ -262,6 +261,11 @@ def default_homerules() -> dict:
         "captain_mind_control": CAPTAIN_MIND_CONTROL_DEFAULT,
         "captain_starting_tricks": CAPTAIN_STARTING_TRICKS,
         "soldier_leveling_enabled": False,
+        # Whether summoned animal companions / constructs may level up when
+        # Soldier Leveling is on. Off by default — a group opts summons in
+        # rather than out.
+        "soldier_leveling_animal_companions": False,
+        "soldier_leveling_constructs": False,
         "soldier_max_levels": SOLDIER_MAX_LEVELS,
         "soldier_stat_caps": deepcopy(SOLDIER_STAT_CAPS),
         "promote_captain_cost": PROMOTE_CAPTAIN_COST,
@@ -547,6 +551,8 @@ def create_warband(
     soldiers: list[dict] | None = None,
     enabled_sources_map: dict | None = None,
     pentangle_playable: bool = False,
+    starting_gold: int | None = None,
+    wizard_starting_xp: int = 0,
 ) -> tuple[Warband | None, str]:
     """
     soldiers: optional list of {type_key, name} hired at creation (costs deducted).
@@ -554,6 +560,8 @@ def create_warband(
         warband, so supplement spells and soldiers can be picked at creation.
     pentangle_playable: allow one of the five Pentangle schools as the wizard's
         own school (needs The Maze of Malcor switched on).
+    starting_gold: house-ruled starting gold; defaults to STARTING_GOLD (400).
+    wizard_starting_xp: house-ruled starting XP for the wizard; defaults to 0.
     """
     homerules = default_homerules()
     if enabled_sources_map:
@@ -584,7 +592,7 @@ def create_warband(
     if not ok:
         return None, msg
 
-    gold = STARTING_GOLD
+    gold = STARTING_GOLD if starting_gold is None else int(starting_gold)
     apprentice = None
     if with_apprentice:
         if gold < APPRENTICE_COST:
@@ -645,6 +653,8 @@ def create_warband(
         "history": [],
     }
     wb["wizard"]["spells"] = spells_from_keys(spell_keys, school)
+    if wizard_starting_xp:
+        wb["wizard"]["xp"] = int(wizard_starting_xp)
     if apprentice:
         sync_apprentice(wb)
     parts = [f"Warband founded with {gold} gc remaining"]
@@ -1331,7 +1341,7 @@ def _new_soldier_leveling_fields(info: dict) -> dict:
 
 
 def add_soldier(
-    wb: dict, type_key: str, name: str = "", order: str = "", scrounger_weapon: str = ""
+    wb: dict, type_key: str, name: str = "", order: str = "", illusion_source: str = ""
 ) -> tuple[bool, str]:
     info = get_soldier(type_key)
     if not info:
@@ -1341,6 +1351,13 @@ def add_soldier(
         return False, f"{info['name']} is from {src}; enable that source under Additional Rules and Homerules first."
     if not soldier_from_book_enabled(wb, src):
         return False, f"{info['name']}'s soldiers are switched off for {src} under Additional Rules and Homerules (its spells/items/bestiary can stay on)."
+    illusion_source = (illusion_source or "").strip()
+    illusion_info = None
+    if type_key == "illusionary_soldier":
+        choices = {c["id"] for c in illusion_source_choices()}
+        if illusion_source not in choices:
+            return False, "Pick which core soldier type the Illusionary Soldier copies."
+        illusion_info = get_soldier(illusion_source)
     order = (order or "").strip()
     if order:
         hr = wb.get("homerules") or {}
@@ -1350,10 +1367,6 @@ def add_soldier(
             return False, "Knightly Orders need Spellcaster Magazine and its own toggle switched on under Additional Rules and Homerules."
         if order not in KNIGHTLY_ORDER_IDS:
             return False, "Unknown Knightly Order."
-    if type_key == "scrounger":
-        scrounger_weapon = scrounger_weapon or SCROUNGER_WEAPON_DEFAULT
-        if scrounger_weapon not in SCROUNGER_WEAPON_IDS:
-            return False, "Unknown weapon choice for the Scrounger."
     blocked = expansions.soldier_state_block(wb, type_key)
     if blocked:
         return False, blocked
@@ -1411,13 +1424,20 @@ def add_soldier(
         "knightly_order": order or None,
         **leveling_fields,
     }
-    if type_key == "scrounger":
-        soldier["scrounger_weapon"] = scrounger_weapon
-        soldier["gear"] = SCROUNGER_WEAPON_BY_ID[scrounger_weapon]["gear"]
+    illusion_suffix = ""
+    if illusion_info:
+        soldier["fight"] = illusion_info.get("fight")
+        soldier["shoot"] = illusion_info.get("shoot")
+        soldier["will"] = illusion_info.get("will")
+        soldier["health"] = 1
+        soldier["move"] = illusion_info.get("move")
+        soldier["armour"] = illusion_info.get("armour")
+        soldier["illusion_source"] = illusion_source
+        illusion_suffix = f", as a {illusion_info['name']}"
     wb["gold"] = int(wb.get("gold", 0)) - cost
     wb.setdefault("soldiers", []).append(soldier)
     wb.setdefault("history", []).append(
-        {"when": _now(), "text": f"Hired {soldier['name']} ({info['name']}{order_suffix}) for {cost} gc."}
+        {"when": _now(), "text": f"Hired {soldier['name']} ({info['name']}{order_suffix}{illusion_suffix}) for {cost} gc."}
     )
     return True, f"Hired {soldier['name']} ({info['name']}) for {cost} gc. Treasury: {wb['gold']} gc."
 
@@ -1802,6 +1822,8 @@ def update_homerules(wb: dict, form: "ImmutableMultiDict") -> tuple[bool, str]:
                 form.get("captain_starting_tricks") or hr["captain_starting_tricks"]
             ),
             "soldier_leveling_enabled": form.get("soldier_leveling_enabled") == "on",
+            "soldier_leveling_animal_companions": form.get("soldier_leveling_animal_companions") == "on",
+            "soldier_leveling_constructs": form.get("soldier_leveling_constructs") == "on",
             "soldier_max_levels": int(form.get("soldier_max_levels") or hr["soldier_max_levels"]),
             "soldier_stat_caps": _parse_stat_caps(form, "soldier", hr["soldier_stat_caps"]),
             "promote_captain_cost": int(
@@ -2283,6 +2305,15 @@ def promote_soldier_to_captain(
     return True, text
 
 
+def _soldier_leveling_blocked(hr: dict, type_key: str) -> str | None:
+    """Reason a summoned creature can't level, or None if it's allowed to."""
+    if type_key in animal_companion_type_keys() and not hr.get("soldier_leveling_animal_companions"):
+        return "Animal companions can't level up for this warband (see Homerules)."
+    if type_key in construct_type_keys() and not hr.get("soldier_leveling_constructs"):
+        return "Constructs can't level up for this warband (see Homerules)."
+    return None
+
+
 def apply_soldier_level_up(wb: dict, soldier_id: str, choice: str) -> tuple[bool, str]:
     """Spend one pending soldier level-up. Requires the Soldier Leveling homerule."""
     hr = wb.setdefault("homerules", default_homerules())
@@ -2290,6 +2321,9 @@ def apply_soldier_level_up(wb: dict, soldier_id: str, choice: str) -> tuple[bool
         return False, "Soldier Leveling is not enabled for this warband (see Homerules)."
     for s in wb.get("soldiers") or []:
         if s.get("id") == soldier_id:
+            blocked = _soldier_leveling_blocked(hr, s.get("type_key", ""))
+            if blocked:
+                return False, blocked
             ok, msg = _spend_stat_level_up(
                 s,
                 choice,
@@ -2317,6 +2351,25 @@ def reverse_last_soldier_level_up(wb: dict, soldier_id: str) -> tuple[bool, str]
             if ok:
                 add_history(wb, msg)
             return ok, msg
+    return False, "Soldier not found."
+
+
+def apply_animal_companion_crit_bonus(wb: dict, soldier_id: str) -> tuple[bool, str]:
+    """One-time +1 Health for an Animal Companion whose casting roll was a
+    critical success (Spellcaster Magazine's Casting Roll Criticals) but whose
+    player picked the normal +1 Health option rather than the White Gorilla."""
+    for s in wb.get("soldiers") or []:
+        if s.get("id") == soldier_id:
+            if s.get("type_key") not in animal_companion_type_keys():
+                return False, "Only an Animal Companion can take this bonus."
+            if s.get("crit_health_bonus"):
+                return False, f"{s.get('name', 'This companion')} already took its critical-success Health bonus."
+            info = get_soldier(s.get("type_key", "")) or {}
+            s["health"] = int(s.get("health", info.get("health", 0)) or 0) + 1
+            s["crit_health_bonus"] = True
+            text = f"{s.get('name', 'Companion')} summoned with a critical success: +1 Health."
+            add_history(wb, text)
+            return True, text
     return False, "Soldier not found."
 
 

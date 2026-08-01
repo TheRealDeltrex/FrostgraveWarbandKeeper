@@ -158,18 +158,6 @@ KNIGHTLY_ORDER_IDS = {o["id"] for o in KNIGHTLY_ORDERS}
 KNIGHTLY_ORDER_BY_ID = {o["id"]: o for o in KNIGHTLY_ORDERS}
 KNIGHTLY_ORDER_ELIGIBLE = {"knight", "templar"}
 
-# The Scrounger (Fireheart) carries both a staff and a hand weapon, deciding
-# which to fight with each round before the dice are rolled — the app doesn't
-# track per-round table decisions, so this is fixed to a flavour pick made
-# once at hire time instead (no stat difference between the two).
-SCROUNGER_WEAPON_CHOICES = [
-    {"id": "staff", "label": "Staff", "gear": "Staff, light armour"},
-    {"id": "hand_weapon", "label": "Hand weapon", "gear": "Hand weapon, light armour"},
-]
-SCROUNGER_WEAPON_IDS = {w["id"] for w in SCROUNGER_WEAPON_CHOICES}
-SCROUNGER_WEAPON_BY_ID = {w["id"]: w for w in SCROUNGER_WEAPON_CHOICES}
-SCROUNGER_WEAPON_DEFAULT = "staff"
-
 # --- Soldier Leveling (homerule, not core 2e) -------------------------------
 SOLDIER_MAX_LEVELS = 3
 SOLDIER_STAT_CAPS = {
@@ -1385,6 +1373,26 @@ SOLDIERS: dict[str, dict] = {
         "notes": "Joins via Summon Demon (Casting Roll succeeded by 13+) as a temporary member; only one summoned demon at a time. Demon; Large; Strong (+2 damage); True Sight.",
         "description": "Placed by the Summon Demon spell as a temporary member of the warband — not a permanent hire, and doesn't count against the soldier or specialist limit. Which demon tier arrives depends on how much the Casting Roll succeeded by: 0–5 an imp, 6–12 a minor demon, 13+ gives this major demon. Summon Demon can't be cast again while a summoned demon is already under control. Demon: immune to poison, all attacks count as magic, can carry treasure tokens but has no item slots. Large: suffers the -2 Large Target penalty against shooting attacks. Strong: deals +2 damage. True Sight: ignores Beauty and Invisibility, and destroys any Illusionary Soldier it fights.",
     },
+    "illusionary_soldier": {
+        "name": "Illusionary Soldier",
+        "cost": 0,
+        "category": "temporary",
+        "temporary": True,
+        "temporary_group": "illusion",
+        "requires_spell": "Illusionary Soldier",
+        # Placeholder stats — overwritten at hire time by the chosen core
+        # soldier type's Move/Fight/Shoot/Armour/Will, with Health fixed to 1
+        # (see illusion_source in add_soldier).
+        "move": 5,
+        "fight": 0,
+        "shoot": 0,
+        "armour": 10,
+        "will": 0,
+        "health": 1,
+        "gear": "—",
+        "notes": "Joins via Illusionary Soldier as a temporary member; takes the Move/Fight/Shoot/Armour/Will of a chosen core soldier type (any but the Apothecary) but always has 1 Health.",
+        "description": "Conjured by the Illusionary Soldier spell as a temporary member of the warband — not a permanent hire, and doesn't count against the soldier or specialist limit. Chosen at hire to look and fight like any core soldier type except the Apothecary, copying that type's Move, Fight, Shoot, Armour, and Will — but it always has only 1 Health, since it's an illusion rather than a real body. Destroyed automatically if it ever fights a creature with True Sight.",
+    },
     # Joins through a pact boon rather than a spell — gated in expansions.py.
     "chilopendra": {
         "name": "Chilopendra",
@@ -1594,6 +1602,26 @@ SOLDIERS: dict[str, dict] = {
         ),
         "description": 'A wilderness companion available only to a Beastcrafter I wizard (Into the Breeding Pits), bonded via the Animal Companion spell. Poison: its attacks deal poison damage. Animal: cannot pick up treasure tokens and has no item slot. Will shown already includes the +3 Animal Companion bonus.',
     },
+    "companion_white_gorilla": {
+        "name": "White Gorilla",
+        "cost": 0,
+        "cost_label": "Crit spell",
+        "category": "standard",
+        "requires_spell": "Animal Companion",
+        "move": 6,
+        "fight": 4,
+        "shoot": 0,
+        "armour": 12,
+        "will": 8,
+        "health": 14,
+        "gear": "Unarmed",
+        "notes": (
+            "Animal Companion; Animal; Strong (+2 damage). Only available in place of the "
+            "usual Animal Companion pick if the Animal Companion casting roll was a critical "
+            "success (Spellcaster Magazine, Casting Roll Criticals)."
+        ),
+        "description": 'A rare, powerful companion bonded via a critical success on the Animal Companion casting roll (Spellcaster Magazine’s Casting Roll Criticals), taken instead of the normal companion pick. Strong: deals +2 damage. Animal: cannot pick up treasure tokens and has no item slot. Will shown already includes the +3 Animal Companion bonus.',
+    },
     # --- The Wildwoods ---
     "guide": {
         "name": "Guide",
@@ -1729,6 +1757,22 @@ SOLDIERS: dict[str, dict] = {
         "notes": "Construct, Cannot Carry Treasure. Already modified; cannot be modified further. May fill a kennel's wolf/warhound slot.",
         "description": 'A construct built to resemble and serve as a war hound (Fireheart). Construct: immune to poison, never counts as wounded. Cannot Carry Treasure. Comes pre-modified and cannot take any further Construct Modification. May be taken in place of a wolf or warhound wherever a kennel-type resource allows one.',
     },
+    "construct_hound_summoned": {
+        "name": "Construct Hound",
+        "cost": 0,
+        "category": "standard",
+        "source": "Fireheart",
+        "requires_spell": "Animate Construct",
+        "move": 7,
+        "fight": 1,
+        "shoot": 0,
+        "armour": 10,
+        "will": -1,
+        "health": 10,
+        "gear": "—",
+        "notes": "Construct, Cannot Carry Treasure. Already modified; cannot be modified further. May fill a kennel's wolf/warhound slot. Animated by the Animate Construct spell instead of purchased.",
+        "description": 'A construct built to resemble and serve as a war hound (Fireheart), animated directly with the Animate Construct spell rather than bought outright. Construct: immune to poison, never counts as wounded. Cannot Carry Treasure. Comes pre-modified and cannot take any further Construct Modification. May be taken in place of a wolf or warhound wherever a kennel-type resource allows one.',
+    },
     "scrounger": {
         "name": "Scrounger",
         "cost": 60,
@@ -1740,13 +1784,13 @@ SOLDIERS: dict[str, dict] = {
         "armour": 11,
         "will": 1,
         "health": 12,
-        "gear": "Staff or hand weapon",
+        "gear": "Staff, hand weapon",
         "notes": (
             "Grants the warband one Black Market roll restricted to the Construct Modification "
             "table (or a 20% discount on such a purchase without the Black Market rule). Only "
             "one Scrounger's benefit applies per warband."
         ),
-        "description": 'A construct-parts hoarder and tinkerer (Fireheart). Grants the warband one Black Market roll restricted to the Construct Modification table (or a 20% discount on such a purchase if the Black Market rule isn\'t in use); only one Scrounger\'s benefit applies even with multiple in the warband. Fights with either a staff or a hand weapon, chosen when hired.',
+        "description": 'A construct-parts hoarder and tinkerer (Fireheart). Grants the warband one Black Market roll restricted to the Construct Modification table (or a 20% discount on such a purchase if the Black Market rule isn\'t in use); only one Scrounger\'s benefit applies even with multiple in the warband. Scroungers carry both a staff and a hand weapon. They may decide which to use during any given round of combat but must decide before the dice are rolled.',
     },
     "tinkerer": {
         "name": "Tinkerer",
@@ -2215,10 +2259,12 @@ SUMMONED_ORDER = [
     "companion_ice_toad",
     "companion_snow_leopard",
     "companion_wolf",
+    "companion_white_gorilla",
     "small_construct",
     "medium_construct",
     "large_construct",
     "construct_familiar",
+    "construct_hound_summoned",
     "demonic_servant",
 ]
 
@@ -2229,6 +2275,7 @@ TEMPORARY_ORDER = [
     "summoned_imp",
     "summoned_minor_demon",
     "summoned_major_demon",
+    "illusionary_soldier",
 ]
 
 
@@ -2276,6 +2323,27 @@ def _ui_sort_key(r: dict) -> tuple:
 def animal_companion_type_keys() -> set[str]:
     """Soldier type keys summoned by the Animal Companion spell (one allowed at a time)."""
     return {k for k, v in SOLDIERS.items() if v.get("requires_spell") == "Animal Companion"}
+
+
+def construct_type_keys() -> set[str]:
+    """Soldier type keys animated by the Animate Construct spell."""
+    return {k for k, v in SOLDIERS.items() if v.get("requires_spell") == "Animate Construct"}
+
+
+# Core soldier types an Illusionary Soldier may copy Move/Fight/Shoot/Armour/
+# Will from — every Core Rules standard/specialist soldier except the
+# Apothecary (its stat line wouldn't make sense on a combat illusion).
+def illusion_source_choices() -> list[dict]:
+    rows = [
+        {"id": k, "label": v["name"]}
+        for k, v in SOLDIERS.items()
+        if v.get("source", "Core Rules") == "Core Rules"
+        and not v.get("requires_spell")
+        and not v.get("temporary")
+        and k != "apothecary"
+    ]
+    rows.sort(key=lambda r: r["label"])
+    return rows
 
 
 def get_soldier(type_key: str) -> dict | None:

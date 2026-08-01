@@ -16,6 +16,23 @@
   </section>
 
   <details class="card">
+    <summary><span class="card-title">Quick Reference</span></summary>
+    <p class="muted">The Core Rules' own condensed reference sheet — turn sequence, actions,
+      combat/shooting/casting procedures, and the post-game checklist.</p>
+    {% for sec in quick_reference %}
+      <details class="ref-panel">
+        <summary>{{ sec.title }}</summary>
+        {% for e in sec.entries %}
+          <p style="margin:0.4rem 0">
+            <strong>{{ e.name }}</strong>{% if e.tag %} <span class="badge">{{ e.tag }}</span>{% endif %}
+            {% if e.text %}<br /><span class="muted">{{ e.text }}</span>{% endif %}
+          </p>
+        {% endfor %}
+      </details>
+    {% endfor %}
+  </details>
+
+  <details class="card">
     <summary><span class="card-title">Schools</span></summary>
     <h3>Standard Schools</h3>
     <div class="table-wrap">
@@ -160,7 +177,7 @@
                 <td><strong>{{ s.name }}</strong></td>
                 <td><span class="badge {{ s.category }}">{{ s.category }}</span></td>
                 <td class="muted">{% if s.requires_spell %}<span class="badge">via {{ s.requires_spell }}</span>{% elif s.source != 'Core Rules' %}<span class="badge">{{ s.source }}</span>{% else %}Core Rules{% endif %}</td>
-                <td class="gold">{% if s.cost == 0 %}{{ 'Spell' if s.requires_spell else 'Free' }}{% else %}{{ s.cost }}{% endif %}</td>
+                <td class="gold">{% if s.cost_label %}{{ s.cost_label }}{% elif s.cost == 0 %}{{ 'Spell' if s.requires_spell else 'Free' }}{% else %}{{ s.cost }}{% endif %}</td>
                 <td>{{ s.move }}</td>
                 <td>{{ format_stat(s.fight) }}</td>
                 <td>{{ format_stat(s.shoot) }}</td>
@@ -482,22 +499,6 @@
   </details>
   {% endif %}
 
-  <details class="card">
-    <summary><span class="card-title">Quick Reference</span></summary>
-    <p class="muted">The Core Rules' own condensed reference sheet — turn sequence, actions,
-      combat/shooting/casting procedures, and the post-game checklist.</p>
-    {% for sec in quick_reference %}
-      <details class="ref-panel">
-        <summary>{{ sec.title }}</summary>
-        {% for e in sec.entries %}
-          <p style="margin:0.4rem 0">
-            <strong>{{ e.name }}</strong>{% if e.tag %} <span class="badge">{{ e.tag }}</span>{% endif %}
-            {% if e.text %}<br /><span class="muted">{{ e.text }}</span>{% endif %}
-          </p>
-        {% endfor %}
-      </details>
-    {% endfor %}
-  </details>
   <script>
     document.addEventListener("DOMContentLoaded", function () {
       if (window.fgInitFilter) {
