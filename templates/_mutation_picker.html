@@ -1,11 +1,11 @@
 {# Grave Mutations picker: hundred -> twenty-block -> named entry cascading
    dropdowns (mirrors the Lexicon's own nesting), plus an "Add random mutation"
    escape hatch. Shared by the Wizard/Apprentice/Captain/each Soldier. #}
-{% macro mutation_picker(action, mutations, soldier_id=none) %}
+{% macro mutation_picker(action, mutations, soldier_id=none, label="Mutations") %}
   {% set remove_action = action.replace('add_', 'remove_', 1) %}
   {% if mutations or grave_mutations_enabled %}
     <details class="ref-panel">
-      <summary>Mutations ({{ mutations|length }})</summary>
+      <summary>{{ label }} ({{ mutations|length }})</summary>
       {% if mutations %}
         <ul class="list-plain">
           {% for m in mutations %}

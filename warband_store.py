@@ -48,6 +48,7 @@ from frostgrave_data import (
     MAX_WIZARD_LEVEL,
     OWN_SCHOOL_SPELLS,
     PENTANGLE_SCHOOLS,
+    PERMANENT_INJURY_BY_ID,
     PROMOTE_CAPTAIN_BONUS,
     PROMOTE_CAPTAIN_COST,
     PROMOTE_CAPTAIN_ITEM_SLOTS,
@@ -59,6 +60,7 @@ from frostgrave_data import (
     SOLDIERS,
     SOURCE_BOOK_BY_SLUG,
     SOURCE_BOOKS,
+    STANDARD_CONSTRUCT_TYPE_KEYS,
     STARTING_GOLD,
     STARTING_SPELL_COUNT,
     TEMPORARY_MEMBER_LIMIT,
@@ -78,7 +80,7 @@ from frostgrave_data import (
     school_relation,
     xp_to_next_level,
 )
-from game_content import equipment_bonuses, grave_mutations_by_number
+from game_content import construct_modifications, equipment_bonuses, grave_mutations_by_number
 
 logger = logging.getLogger(__name__)
 
@@ -225,6 +227,7 @@ def empty_wizard(name: str = "", school: str = "Elementalist") -> dict:
         "has_dagger": True,  # free slot (2e: first dagger takes no slot), so on by default
         "spells": [],
         "mutations": [],
+        "permanent_injuries": [],
         "notes": "",
         "portrait": None,
         "level_history": [],
@@ -242,6 +245,7 @@ def empty_apprentice(name: str = "") -> dict:
         "item_slots": _default_item_slots(WIZARD_DEFAULT_GEAR, APPRENTICE_ITEM_SLOTS),
         "has_dagger": True,
         "mutations": [],
+        "permanent_injuries": [],
         "notes": "",
         "portrait": None,
     }
@@ -250,6 +254,12 @@ def empty_apprentice(name: str = "") -> dict:
 def default_homerules() -> dict:
     """Optional house rules, off by default. See frostgrave_data.CAPTAIN_* etc. for context."""
     return {
+        # Roster caps, settable at creation for a group that wants a bigger
+        # (or smaller) warband than the 2e default — see expansions.max_soldiers/
+        # max_specialists, which add their usual bonuses (Chilopendra Soldier,
+        # Increased Specialist Soldier Allowance) on top of these.
+        "max_soldiers": MAX_SOLDIERS,
+        "max_specialists": MAX_SPECIALISTS,
         "captain_mode": CAPTAIN_MODE_DEFAULT,  # "off" | "hire" | "promote" | "both"
         "captain_hiring_cost": CAPTAIN_HIRING_COST,
         "captain_item_slots": CAPTAIN_ITEM_SLOTS,
@@ -266,6 +276,12 @@ def default_homerules() -> dict:
         # rather than out.
         "soldier_leveling_animal_companions": False,
         "soldier_leveling_constructs": False,
+        # Off by default: the Permanent Injury Table (page 77) is written for
+        # the wizard/apprentice/captain's Survival Roll. Soldiers instead die
+        # or are dismissed on a failed roll — a group that wants ordinary
+        # soldiers to shrug off a Survival Roll with a lasting injury instead
+        # ticks this on.
+        "soldier_permanent_injuries_enabled": False,
         "soldier_max_levels": SOLDIER_MAX_LEVELS,
         "soldier_stat_caps": deepcopy(SOLDIER_STAT_CAPS),
         "promote_captain_cost": PROMOTE_CAPTAIN_COST,
@@ -273,6 +289,10 @@ def default_homerules() -> dict:
         "promote_captain_bonus_choice_enabled": True,
         "promote_captain_item_slots": PROMOTE_CAPTAIN_ITEM_SLOTS,
         "promote_captain_tricks": PROMOTE_CAPTAIN_TRICKS,
+        # Off by default: restricts promote_soldier_to_captain to soldiers
+        # already counted as specialists (see _soldier_is_specialist) — a
+        # group that wants "only your best troops make Captain" ticks this on.
+        "promote_captain_specialist_only": False,
         # Per-source-book content toggles (soldiers/creatures/rules from the
         # supplements). On by default — most groups play with everything
         # available rather than opting in book by book.
@@ -373,6 +393,7 @@ def empty_captain(name: str = "", homerules: dict | None = None, origin: str = "
         "origin": origin,  # "hired" | "promoted"
         "known_tricks": [],  # list of CAPTAIN_TRICK ids
         "mutations": [],
+        "permanent_injuries": [],
     }
 
 
@@ -553,6 +574,8 @@ def create_warband(
     pentangle_playable: bool = False,
     starting_gold: int | None = None,
     wizard_starting_xp: int = 0,
+    max_soldiers: int | None = None,
+    max_specialists: int | None = None,
 ) -> tuple[Warband | None, str]:
     """
     soldiers: optional list of {type_key, name} hired at creation (costs deducted).
@@ -562,8 +585,14 @@ def create_warband(
         own school (needs The Maze of Malcor switched on).
     starting_gold: house-ruled starting gold; defaults to STARTING_GOLD (400).
     wizard_starting_xp: house-ruled starting XP for the wizard; defaults to 0.
+    max_soldiers: house-ruled roster cap; defaults to MAX_SOLDIERS (8).
+    max_specialists: house-ruled specialist cap; defaults to MAX_SPECIALISTS (4).
     """
     homerules = default_homerules()
+    if max_soldiers is not None:
+        homerules["max_soldiers"] = max(1, int(max_soldiers))
+    if max_specialists is not None:
+        homerules["max_specialists"] = max(0, int(max_specialists))
     if enabled_sources_map:
         homerules["enabled_sources"] = {
             book: bool(enabled_sources_map.get(book)) for book in SOURCE_BOOKS
@@ -603,9 +632,11 @@ def create_warband(
     # Validate soldiers before committing
     hired: list[dict] = []
     specs = 0
+    soldier_cap = homerules["max_soldiers"]
+    spec_cap = homerules["max_specialists"]
     if soldiers:
-        if len(soldiers) > MAX_SOLDIERS:
-            return None, f"Max {MAX_SOLDIERS} soldiers."
+        if len(soldiers) > soldier_cap:
+            return None, f"Max {soldier_cap} soldiers."
         for entry in soldiers:
             type_key = entry.get("type_key") or ""
             info = get_soldier(type_key)
@@ -616,8 +647,8 @@ def create_warband(
                 return None, f"{info['name']} is from {src}; switch that source book on to hire it."
             if info["category"] == "specialist":
                 specs += 1
-                if specs > MAX_SPECIALISTS:
-                    return None, f"Max {MAX_SPECIALISTS} specialists."
+                if specs > spec_cap:
+                    return None, f"Max {spec_cap} specialists."
             cost = int(info["cost"])
             if gold < cost:
                 return None, f"Not enough gold for {info['name']} (need {cost} gc)."
@@ -878,6 +909,7 @@ def _normalize_warband(wb: dict) -> dict:
     wiz.pop("health_current", None)
     wiz.setdefault("has_dagger", True)
     wiz.setdefault("mutations", [])
+    wiz.setdefault("permanent_injuries", [])
     wiz.setdefault("portrait_source_name", None)
     # Wizard state (Lich / Beastcrafter / pact). Backfilled per-key so a warband
     # saved before this existed loads as an ordinary wizard.
@@ -906,6 +938,7 @@ def _normalize_warband(wb: dict) -> dict:
         ap = wb["apprentice"]
         ap.setdefault("has_dagger", True)
         ap.setdefault("mutations", [])
+        ap.setdefault("permanent_injuries", [])
         ap.setdefault("portrait_source_name", None)
         ap.pop("health_current", None)
     hr = wb.setdefault("homerules", default_homerules())
@@ -927,6 +960,7 @@ def _normalize_warband(wb: dict) -> dict:
         cap.setdefault("origin", "hired")
         cap.setdefault("known_tricks", [])
         cap.setdefault("mutations", [])
+        cap.setdefault("permanent_injuries", [])
         cap.setdefault("portrait_source_name", None)
         cap.setdefault("level", 0)
         n = int(hr.get("captain_item_slots", CAPTAIN_ITEM_SLOTS))
@@ -938,6 +972,8 @@ def _normalize_warband(wb: dict) -> dict:
         s.setdefault("portrait_source_name", None)
         s.setdefault("items", [])
         s.setdefault("mutations", [])
+        s.setdefault("modifications", [])
+        s.setdefault("permanent_injuries", [])
         s.pop("health_current", None)
         if any(s.get(k) is None for k in ("fight", "shoot", "will", "health")):
             info = get_soldier(s.get("type_key", "")) or {}
@@ -1221,13 +1257,21 @@ def resolve_portrait_path(
     return (DEFAULT_PORTRAIT_DIR / name) if name else None
 
 
+def _soldier_is_specialist(s: dict) -> bool:
+    """A soldier's catalog category, or "specialist" if a Construct
+    Modification (Projectile Weapon) forced it — see add_construct_modification."""
+    if s.get("forced_specialist"):
+        return True
+    info = SOLDIERS.get(s.get("type_key", ""), {})
+    return info.get("category") == "specialist"
+
+
 def count_specialists(wb: dict) -> int:
     n = 0
     for s in wb.get("soldiers") or []:
         if s.get("status") == "dead":
             continue
-        info = SOLDIERS.get(s.get("type_key", ""), {})
-        if info.get("category") == "specialist":
+        if _soldier_is_specialist(s):
             n += 1
     return n
 
@@ -1304,7 +1348,7 @@ def enrich_soldier(wb: dict, s: dict) -> dict:
     cat = get_soldier(type_key) or {}
     out = {**cat, **s}
     out["type_name"] = cat.get("name", type_key or "?")
-    out["category"] = cat.get("category", "standard")
+    out["category"] = "specialist" if _soldier_is_specialist(s) else cat.get("category", "standard")
     # Live cost, not what was paid at hire time — same rule as everywhere else
     # cost is computed (hireable list, warband_limits): homerule adjustments
     # (Edition 2 toggle, Beastcrafter surcharge, base discount) always apply
@@ -1419,6 +1463,8 @@ def add_soldier(
         "status": "active",
         "items": [],
         "mutations": [],
+        "modifications": [],
+        "permanent_injuries": [],
         "notes": "",
         "portrait": None,
         "knightly_order": order or None,
@@ -1588,6 +1634,10 @@ def _apply_mutation_stat_delta(get_stat, set_stat, delta: dict | None) -> tuple[
                 after = math.floor(raw)
             else:
                 after = round(raw)
+        elif "min" in op:
+            # "raised to N if lower" (e.g. Projectile Weapon's Shoot) — never
+            # lowers an already-higher stat, unlike "set".
+            after = max(before, op["min"])
         else:
             after = op["set"]
         after = max(0, int(after))
@@ -1733,6 +1783,224 @@ def remove_captain_mutation(wb: dict, index: int) -> tuple[bool, str]:
     return remove_mutation(wb, "captain", index)
 
 
+# Floors for the mandatory -1 modification penalty. Fight/Shoot/Will are
+# deliberately absent: Frostgrave prints those negative and the catalog already
+# carries some (thug, war hound, construct hound all have negative Will), and
+# every standard construct has Will 0 — flooring at 0 would have made "take the
+# penalty on Will" a free pass out of a mandatory cost. Move/Armour/Health floor
+# at 1, where 0 or less is meaningless; with one modification per construct
+# that's a safety rail, not a value a real stat line reaches.
+MODIFICATION_PENALTY_FLOORS = {"move": 1, "armour": 1, "health": 1}
+
+
+def _construct_modification_gate(wb: dict, soldier: dict | None) -> str | None:
+    if "Fireheart" not in enabled_sources(wb):
+        return "Fireheart is switched off; enable it under Additional Rules and Homerules first."
+    if soldier is None:
+        return "Soldier not found."
+    if soldier.get("type_key") not in STANDARD_CONSTRUCT_TYPE_KEYS:
+        return "Only standard small/medium/large constructs can take a Construct Modification."
+    return None
+
+
+def add_construct_modification(
+    wb: dict, soldier_id: str, name: str, stat: str | None = None
+) -> tuple[bool, str]:
+    """Applies one Fireheart Construct Modification to a standard small/medium/
+    large construct. The rulebook caps a construct at exactly one modification,
+    so a second attempt is rejected rather than silently replacing the first.
+
+    A handful of entries (Armour Plating, Construct Oil, ...) have a clean,
+    unconditional numeric effect — that stat_delta (construct_modification_meta.json)
+    is applied automatically here, the same way a grave mutation's is. The rest
+    are situational (e.g. "+1 Fight vs. constructs") and stay text-only, same as
+    every other soldier trait in this app.
+
+    Every modification but the handful marked "No modification penalty" also
+    costs a permanent -1 to one stat of the player's choice. Both the auto
+    effect and the penalty are backed up into one {stat: prior value} dict on
+    the record itself (same idiom as grave mutations' stat_delta backup), so
+    remove_construct_modification can restore the soldier exactly."""
+    soldier = next((s for s in wb.get("soldiers") or [] if s.get("id") == soldier_id), None)
+    err = _construct_modification_gate(wb, soldier)
+    if err:
+        return False, err
+    if soldier.get("modifications"):
+        return False, f"{soldier.get('name', 'This construct')} already has a modification; a construct may only take one."
+    row = next((m for m in construct_modifications() if m["name"] == name), None)
+    if row is None:
+        return False, f"Unknown modification ({name!r})."
+    if soldier.get("type_key") in row["disallow_types"]:
+        return False, f"{row['name']} cannot be taken by this size of construct."
+
+    cat = get_soldier(soldier.get("type_key", "")) or {}
+    get_stat = lambda k: int(soldier.get(k, cat.get(k, 0)))  # noqa: E731
+    set_stat = lambda k, v: soldier.__setitem__(k, v)  # noqa: E731
+
+    # _apply_mutation_stat_delta's own suffix is dropped — for the handful of
+    # entries with an auto stat_delta, the rulebook text (row["text"]) already
+    # says the same thing ("+1 Armour."), so echoing it again would be redundant.
+    _effect_suffix, backup = _apply_mutation_stat_delta(get_stat, set_stat, row["stat_delta"])
+
+    penalty_suffix = ""
+    if not row["no_penalty"]:
+        if stat not in ("move", "fight", "shoot", "armour", "will", "health"):
+            # Undo the auto effect applied above before bailing out — this
+            # function must be all-or-nothing from the caller's perspective.
+            for s, v in backup.items():
+                set_stat(s, v)
+            return False, "Pick a stat to take the modification's -1 penalty."
+        before = get_stat(stat)
+        after = before - 1
+        floor = MODIFICATION_PENALTY_FLOORS.get(stat)
+        if floor is not None:
+            after = max(floor, after)
+        backup.setdefault(stat, before)
+        set_stat(stat, after)
+        penalty_suffix = f" ({stat.capitalize()} -1: {before} -> {after})"
+
+    # Projectile Weapon: "small/medium constructs become specialist soldiers".
+    # Large is already a specialist in the catalog, so only note/flag it when
+    # this modification actually changes that construct's status — the flag
+    # is read by count_specialists()/enrich_soldier() (see _soldier_is_specialist),
+    # not enforced against the specialist cap here; a warband can end up over
+    # cap and it's left to the player to resolve (see warband_limits/PDF banner).
+    specialist_suffix = ""
+    if row["forces_specialist"] and cat.get("category") != "specialist":
+        soldier["forced_specialist"] = True
+        specialist_suffix = " Now counts as a specialist soldier."
+
+    short = f"{row['text']}{penalty_suffix}{specialist_suffix}"
+    soldier.setdefault("modifications", []).append({
+        "name": row["name"],
+        "text": row["text"],
+        "short": short,
+        "when": _now(),
+        "stat_backup": backup,
+    })
+    text = f"{soldier.get('name', 'Construct')} gained a Construct Modification: {row['name']}{penalty_suffix}{specialist_suffix}"
+    add_history(wb, text)
+    return True, text
+
+
+def remove_construct_modification(wb: dict, soldier_id: str, index: int) -> tuple[bool, str]:
+    soldier = next((s for s in wb.get("soldiers") or [] if s.get("id") == soldier_id), None)
+    if soldier is None:
+        return False, "Soldier not found."
+    mods = soldier.get("modifications") or []
+    if not (0 <= index < len(mods)):
+        return False, "Modification not found."
+    m = mods.pop(index)
+    for stat, value in (m.get("stat_backup") or {}).items():
+        soldier[stat] = value
+    soldier.pop("forced_specialist", None)
+    text = f"Removed {soldier.get('name', 'Construct')}'s Construct Modification: {m.get('name', '?')}."
+    add_history(wb, text)
+    return True, text
+
+
+def add_permanent_injury(
+    wb: dict, kind: str, injury_id: str, soldier_id: str | None = None
+) -> tuple[bool, str]:
+    """Records a Core Rules Permanent Injury (Chapter Three, page 77) on the
+    wizard/apprentice/captain/soldier — the outcome of a "Permanent Injury"
+    result on the Spellcaster Survival Table, applied here by the player after
+    making that roll at the table (this app doesn't roll it for you).
+
+    Reuses _mutation_target's (entity, get_stat, set_stat, label) resolution —
+    the same four roles can suffer one. A clean, unconditional stat penalty
+    (Lost Toes, Crushed Arm, ...) is applied automatically via stat_delta, the
+    same idiom as Grave Mutations/Construct Modifications; Niggling Injury/
+    Smashed Jaw/Lost Eye stay text-only, since their effects are per-game
+    upkeep or situational, not a permanent stat-line change. Each injury may
+    be suffered up to its max_stacks times (2, per the rulebook) before the
+    book says "any further result must be re-rolled"."""
+    entity, get_stat, set_stat, label = _mutation_target(wb, kind, soldier_id)
+    if entity is None:
+        return False, label
+    row = PERMANENT_INJURY_BY_ID.get(injury_id)
+    if row is None:
+        return False, f"Unknown permanent injury ({injury_id!r})."
+    existing = [r for r in entity.get("permanent_injuries") or [] if r.get("id") == injury_id]
+    max_stacks = row.get("max_stacks", 1)
+    if len(existing) >= max_stacks:
+        return False, (
+            f"{label} has already suffered {row['name']} {max_stacks} time(s) — "
+            "the rulebook says any further result must be re-rolled."
+        )
+    stat_suffix, backup = _apply_mutation_stat_delta(get_stat, set_stat, row.get("stat_delta"))
+    entity.setdefault("permanent_injuries", []).append({
+        "id": row["id"],
+        "name": row["name"],
+        "text": row["text"],
+        "short": row["text"],
+        "when": _now(),
+        "stat_backup": backup,
+    })
+    text = f"{label[:1].upper() + label[1:]} suffered a permanent injury: {row['name']}{stat_suffix}."
+    add_history(wb, text)
+    return True, text
+
+
+def remove_permanent_injury(
+    wb: dict, kind: str, index: int, soldier_id: str | None = None
+) -> tuple[bool, str]:
+    """Removes one recorded permanent injury (e.g. healed by Miraculous
+    Cure), restoring any stat it had backed up."""
+    entity, _get_stat, set_stat, label = _mutation_target(wb, kind, soldier_id)
+    if entity is None:
+        return False, label
+    injuries = entity.get("permanent_injuries") or []
+    if not (0 <= index < len(injuries)):
+        return False, "Permanent injury not found."
+    inj = injuries.pop(index)
+    for stat, value in (inj.get("stat_backup") or {}).items():
+        set_stat(stat, value)
+    text = f"Removed {label}'s permanent injury: {inj.get('name', '?')}."
+    add_history(wb, text)
+    return True, text
+
+
+def add_soldier_permanent_injury(wb: dict, soldier_id: str, injury_id: str) -> tuple[bool, str]:
+    hr = wb.setdefault("homerules", default_homerules())
+    if not hr.get("soldier_permanent_injuries_enabled"):
+        return False, (
+            "Ordinary soldiers can't take permanent injuries by default — the Permanent "
+            "Injury Table is written for the wizard/apprentice/captain's Survival Roll. "
+            "Enable this under Homerules (Soldier Leveling) if your group plays it "
+            "differently."
+        )
+    return add_permanent_injury(wb, "soldier", injury_id, soldier_id)
+
+
+def remove_soldier_permanent_injury(wb: dict, soldier_id: str, index: int) -> tuple[bool, str]:
+    return remove_permanent_injury(wb, "soldier", index, soldier_id)
+
+
+def add_wizard_permanent_injury(wb: dict, injury_id: str) -> tuple[bool, str]:
+    return add_permanent_injury(wb, "wizard", injury_id)
+
+
+def remove_wizard_permanent_injury(wb: dict, index: int) -> tuple[bool, str]:
+    return remove_permanent_injury(wb, "wizard", index)
+
+
+def add_apprentice_permanent_injury(wb: dict, injury_id: str) -> tuple[bool, str]:
+    return add_permanent_injury(wb, "apprentice", injury_id)
+
+
+def remove_apprentice_permanent_injury(wb: dict, index: int) -> tuple[bool, str]:
+    return remove_permanent_injury(wb, "apprentice", index)
+
+
+def add_captain_permanent_injury(wb: dict, injury_id: str) -> tuple[bool, str]:
+    return add_permanent_injury(wb, "captain", injury_id)
+
+
+def remove_captain_permanent_injury(wb: dict, index: int) -> tuple[bool, str]:
+    return remove_permanent_injury(wb, "captain", index)
+
+
 def hire_apprentice(wb: dict, name: str = "") -> tuple[bool, str]:
     if wb.get("apprentice"):
         return False, "Warband already has an apprentice."
@@ -1788,6 +2056,10 @@ def update_homerules(wb: dict, form: "ImmutableMultiDict") -> tuple[bool, str]:
     hr = wb.setdefault("homerules", default_homerules())
     try:
         new_hr = {
+            "max_soldiers": max(1, int(form.get("max_soldiers") or hr.get("max_soldiers", MAX_SOLDIERS))),
+            "max_specialists": max(
+                0, int(form.get("max_specialists") or hr.get("max_specialists", MAX_SPECIALISTS))
+            ),
             "captain_mode": (
                 form.get("captain_mode")
                 if form.get("captain_mode") in CAPTAIN_MODE_OPTIONS
@@ -1824,6 +2096,7 @@ def update_homerules(wb: dict, form: "ImmutableMultiDict") -> tuple[bool, str]:
             "soldier_leveling_enabled": form.get("soldier_leveling_enabled") == "on",
             "soldier_leveling_animal_companions": form.get("soldier_leveling_animal_companions") == "on",
             "soldier_leveling_constructs": form.get("soldier_leveling_constructs") == "on",
+            "soldier_permanent_injuries_enabled": form.get("soldier_permanent_injuries_enabled") == "on",
             "soldier_max_levels": int(form.get("soldier_max_levels") or hr["soldier_max_levels"]),
             "soldier_stat_caps": _parse_stat_caps(form, "soldier", hr["soldier_stat_caps"]),
             "promote_captain_cost": int(
@@ -1843,6 +2116,7 @@ def update_homerules(wb: dict, form: "ImmutableMultiDict") -> tuple[bool, str]:
                 form.get("promote_captain_tricks")
                 or hr.get("promote_captain_tricks", PROMOTE_CAPTAIN_TRICKS)
             ),
+            "promote_captain_specialist_only": form.get("promote_captain_specialist_only") == "on",
             "enabled_sources": {
                 book: form.get(f"source_enabled_{slug}") == "on"
                 for slug, book in SOURCE_BOOK_BY_SLUG.items()
@@ -2194,6 +2468,26 @@ def add_captain_xp(wb: dict, amount: int) -> tuple[bool, str]:
     return ok, msg
 
 
+def _promotion_blocked_reason(type_key: str) -> str | None:
+    """None if this soldier type may be promoted to Captain, else the reason
+    it can't be — temporary members, Animal Companions, and any other
+    spell-summoned/magical creature (constructs, Demonic Servant, ...) are
+    never eligible, regardless of stats or specialist status."""
+    info = SOLDIERS.get(type_key, {}) or {}
+    if info.get("temporary"):
+        return "Temporary members (raised/summoned for one game) can't be promoted to Captain."
+    if type_key in animal_companion_type_keys():
+        return "Animal Companions can't be promoted to Captain."
+    # construct_hound is bought outright rather than summoned, but it's the
+    # same creature as construct_hound_summoned — gating by acquisition path
+    # would let one instance of "Construct Hound" promote and not the other.
+    if type_key in construct_type_keys() or type_key in ("construct_hound", "war_hound"):
+        return "Constructs and war hounds can't be promoted to Captain."
+    if info.get("requires_spell"):
+        return "Summoned creatures can't be promoted to Captain."
+    return None
+
+
 def promote_soldier_to_captain(
     wb: dict,
     soldier_id: str,
@@ -2225,6 +2519,11 @@ def promote_soldier_to_captain(
         return False, "Soldier not found."
     if soldier.get("status") != "active":
         return False, "Only an active soldier can be promoted."
+    blocked = _promotion_blocked_reason(soldier.get("type_key", ""))
+    if blocked:
+        return False, blocked
+    if hr.get("promote_captain_specialist_only") and not _soldier_is_specialist(soldier):
+        return False, "Only specialists may be promoted to Captain (see Homerules)."
     cost = int(hr.get("promote_captain_cost", PROMOTE_CAPTAIN_COST))
     if int(wb.get("gold", 0)) < cost:
         return False, f"Need {cost} gc to promote a captain."
@@ -2235,7 +2534,7 @@ def promote_soldier_to_captain(
     # specialist regardless of what they were promoted from, so promoting a
     # non-specialist can still push the specialist count over the cap.
     spec_cap = expansions.max_specialists(wb)
-    if info.get("category") != "specialist" and specialist_count(wb) >= spec_cap:
+    if not _soldier_is_specialist(soldier) and specialist_count(wb) >= spec_cap:
         return False, f"Specialist limit reached ({spec_cap})."
     # Soldiers don't normally persist move/armour at all (they're read from the
     # catalog at display time) until a mutation writes them — so all six stats
@@ -2275,7 +2574,10 @@ def promote_soldier_to_captain(
         "name": name,
         "stats": stats,
         "bonus_extra_stat": applied_extra_stat,
-        "item_slots": normalize_item_slots(soldier.get("items"), n),
+        # Same default starting gear a hired captain gets (empty_captain()) —
+        # a promoted soldier's own equipment doesn't carry over; the roster
+        # slot it vacated is what gets refunded/removed, not its gear.
+        "item_slots": _default_item_slots(CAPTAIN_DEFAULT_GEAR, n),
         "has_dagger": True,
         "notes": soldier.get("notes", ""),
         "portrait": soldier.get("portrait"),
@@ -2291,8 +2593,10 @@ def promote_soldier_to_captain(
         "known_tricks": list(tricks or []),
         # Carried over rather than reset (G2) — a mutated soldier's grave
         # mutations, and the audit trail (stat_backup) needed to remove them
-        # later, shouldn't vanish just because they were promoted.
+        # later, shouldn't vanish just because they were promoted. Permanent
+        # injuries are real ongoing character history for the same reason.
         "mutations": deepcopy(soldier.get("mutations") or []),
+        "permanent_injuries": deepcopy(soldier.get("permanent_injuries") or []),
     }
     wb["captain"] = cap
     soldiers.pop(idx)

@@ -98,6 +98,21 @@ def load_quick_reference() -> list[dict]:
 
 
 @lru_cache(maxsize=1)
+def load_core_rules() -> list[dict]:
+    """Core rulebook content the Quick Reference's cheat-sheet doesn't spell
+    out in full: stat-line/equipment rules, warband composition, the
+    post-game Survival Roll + Permanent Injury tables, XP/leveling, and
+    spending treasure. Deliberately doesn't repeat the Treasure Table (Loot
+    tables card) or Base Locations/Resources (already frostgrave_data.BASE_
+    LOCATIONS/BASE_RESOURCES, rendered in the Lexicon from that same source
+    the app plays from, not a separate transcription). Reference only."""
+    path = DATA / "core_rules.json"
+    if not path.is_file():
+        return []
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+@lru_cache(maxsize=1)
 def load_magic_items() -> list[dict]:
     """Supplement treasure, {name, source, effect}. Built by
     scripts/extract_expansion_content.py from the local reference documents."""
@@ -201,6 +216,57 @@ def grave_mutations_by_number() -> dict[int, dict]:
                     "stat_delta": m.get("stat_delta"),
                 }
     return out
+
+
+@lru_cache(maxsize=1)
+def load_construct_modification_meta() -> dict[str, dict]:
+    """Authored per-modification stat_delta (+ any hard size restriction),
+    keyed by modification name. Kept separate from expansion_rules.json's
+    verbatim rulebook transcription.
+
+    A stat_delta means "this permanently changes the printed stat line", so
+    only an unconditional numeric effect earns one (Armour Plating's "+1
+    Armour", Construct Oil's "+1 Move"). Anything qualified by circumstance
+    stays text-only, however numeric it looks — a trailing "vs. <target>"
+    governs the whole entry, so Projectile Shield's "+2 Armour, +2 Fight vs.
+    bow/crossbow/javelin" applies only against projectiles and must not touch
+    Armour; likewise "while" clauses (Drillhead's -1 Move while burrowing) and
+    per-roll bonuses (Mind Shield's +5 Will vs. mind control). Damage, Survival
+    Rolls and casting-roll modifiers are never stat-line stats at all. Same
+    convention as Grave Mutations."""
+    path = DATA / "construct_modification_meta.json"
+    if not path.is_file():
+        return {}
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+@lru_cache(maxsize=1)
+def construct_modifications() -> list[dict]:
+    """The Fireheart Construct Modification table, flattened out of
+    expansion_rules.json's verbatim transcription for the modification picker:
+    each entry as {name, text, no_penalty, stat_delta, disallow_types,
+    forces_specialist}. Unlike Grave Mutations these aren't numbered — a
+    modification is picked by name, not rolled."""
+    meta = load_construct_modification_meta()
+    sections = load_expansion_rules().get("Fireheart", [])
+    for sec in sections:
+        if sec.get("title", "").startswith("Construct Modification"):
+            out = []
+            for e in sec.get("entries", []):
+                m = meta.get(e["name"]) or {}
+                out.append({
+                    "name": e["name"],
+                    "text": e["text"],
+                    "no_penalty": "no modification penalty" in e["text"].lower(),
+                    "stat_delta": m.get("stat_delta"),
+                    "disallow_types": set(m.get("disallow_types") or ()),
+                    # Projectile Weapon: "small/medium constructs become
+                    # specialist soldiers" — Large is already a specialist in
+                    # the catalog, so this only ever matters for those two.
+                    "forces_specialist": bool(m.get("forces_specialist")),
+                })
+            return out
+    return []
 
 
 @lru_cache(maxsize=1)

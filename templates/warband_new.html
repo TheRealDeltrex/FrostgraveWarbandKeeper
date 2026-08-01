@@ -70,6 +70,23 @@
                  value="{{ wizard_starting_xp if wizard_starting_xp is defined else 0 }}" />
         </div>
       </div>
+      <div class="grid-2" style="margin-top:0.6rem">
+        <div class="form-row">
+          <label for="max_soldiers">Max soldiers</label>
+          <input id="max_soldiers" name="max_soldiers" type="number" min="1" step="1"
+                 value="{{ max_soldiers if max_soldiers is defined else MAX_SOLDIERS }}" />
+        </div>
+        <div class="form-row">
+          <label for="max_specialists">Max specialists</label>
+          <input id="max_specialists" name="max_specialists" type="number" min="0" step="1"
+                 value="{{ max_specialists if max_specialists is defined else MAX_SPECIALISTS }}" />
+        </div>
+      </div>
+      <p class="muted" style="font-size:0.82rem;margin:0.3rem 0 0">
+        2e core defaults to {{ MAX_SOLDIERS }} soldiers / {{ MAX_SPECIALISTS }} specialists. Raise
+        these here if your group plays with a bigger warband — also changeable later under
+        Additional Rules and Homerules.
+      </p>
 
       <script>
         // Ticking a book has to re-render the spell picker, which is built

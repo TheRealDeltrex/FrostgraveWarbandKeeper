@@ -130,6 +130,91 @@ CAPTAIN_TRICKS = [
 ]
 CAPTAIN_TRICK_IDS = {t["id"] for t in CAPTAIN_TRICKS}
 CAPTAIN_TRICK_BY_ID = {t["id"]: t for t in CAPTAIN_TRICKS}
+
+# Core Rules' Permanent Injury Table (Chapter Three, page 77) — the outcome of
+# a "Permanent Injury" result on the Spellcaster Survival Table. Fixed core
+# content (not a supplement), so defined here directly rather than as JSON.
+# Each may be suffered at most max_stacks times before the book says any
+# further result "must be re-rolled"; stat_delta uses the same {stat: {"add":
+# n}} shape as Grave Mutations/Construct Modifications, applied per occurrence
+# so a second Lost Toes, say, actually doubles to -2 Move. The book's printed
+# "6-10" range for Crushed Arm overlaps Smashed Leg's "3-6" by one — shown
+# here as 7-10 so the d20 table sums to 20 with no gap (see the Lexicon's Core
+# Rules > Post-Game: Injury & Death card for the full table with die ranges).
+PERMANENT_INJURIES = [
+    {
+        "id": "lost_toes",
+        "name": "Lost Toes",
+        "text": "-1 to all Move Rolls.",
+        "stat_delta": {"move": {"add": -1}},
+        "max_stacks": 2,
+    },
+    {
+        "id": "smashed_leg",
+        "name": "Smashed Leg",
+        "text": "-2 Move.",
+        "stat_delta": {"move": {"add": -2}},
+        "max_stacks": 2,
+    },
+    {
+        "id": "crushed_arm",
+        "name": "Crushed Arm",
+        "text": "-1 Fight.",
+        "stat_delta": {"fight": {"add": -1}},
+        "max_stacks": 2,
+    },
+    {
+        "id": "lost_fingers",
+        "name": "Lost Fingers",
+        "text": "-1 Shoot.",
+        "stat_delta": {"shoot": {"add": -1}},
+        "max_stacks": 2,
+    },
+    {
+        "id": "never_quite_as_strong",
+        "name": "Never Quite as Strong",
+        "text": "-1 Health.",
+        "stat_delta": {"health": {"add": -1}},
+        "max_stacks": 2,
+    },
+    {
+        "id": "psychological_scars",
+        "name": "Psychological Scars",
+        "text": "-1 Will.",
+        "stat_delta": {"will": {"add": -1}},
+        "max_stacks": 2,
+    },
+    {
+        "id": "niggling_injury",
+        "name": "Niggling Injury",
+        "text": (
+            "30gc upkeep before each game, or start that game at -3 Health instead "
+            "(10gc discount per apothecary in the warband). No stat_delta — the "
+            "upkeep/per-game penalty isn't a permanent stat change, so it's shown "
+            "as text only, same as every other situational effect in this app."
+        ),
+        "stat_delta": None,
+        "max_stacks": 2,
+    },
+    {
+        "id": "smashed_jaw",
+        "name": "Smashed Jaw",
+        "text": "May only activate 2 soldiers per phase instead of the normal 3.",
+        "stat_delta": None,
+        "max_stacks": 2,
+    },
+    {
+        "id": "lost_eye",
+        "name": "Lost Eye",
+        "text": (
+            "-1 Combat Roll when targeted by a shooting attack. A second Lost Eye "
+            "leaves the figure effectively blind."
+        ),
+        "stat_delta": None,
+        "max_stacks": 2,
+    },
+]
+PERMANENT_INJURY_BY_ID = {i["id"]: i for i in PERMANENT_INJURIES}
 CAPTAIN_STARTING_TRICKS = 2
 
 # Knightly Orders (Spellcaster Magazine, Issue 1) — an optional pick made once,
@@ -1249,7 +1334,7 @@ SOLDIERS: dict[str, dict] = {
         "armour": 11,
         "will": 1,
         "health": 12,
-        "gear": "Hand weapon, dagger, light armour",
+        "gear": "Two daggers, light armour",
         "notes": "Once per game, may treat the first initiative roll of 1 as a 2 for the purpose of springing a trap.",
         "description": "Someone who has survived the city's traps often enough to read the warning signs. Once per game, treats the first initiative roll of 1 as a 2 for the purpose of springing a trap, giving the party one extra chance to avoid it.",
     },
@@ -2328,6 +2413,14 @@ def animal_companion_type_keys() -> set[str]:
 def construct_type_keys() -> set[str]:
     """Soldier type keys animated by the Animate Construct spell."""
     return {k for k, v in SOLDIERS.items() if v.get("requires_spell") == "Animate Construct"}
+
+
+# Fireheart's Construct Modification rule only applies to the "standard"
+# small/medium/large constructs — the Construct Familiar and both Construct
+# Hound entries come pre-modified and can never take another modification
+# (see their "notes" above), even though the familiar is also animated by
+# Animate Construct.
+STANDARD_CONSTRUCT_TYPE_KEYS = {"small_construct", "medium_construct", "large_construct"}
 
 
 # Core soldier types an Illusionary Soldier may copy Move/Fight/Shoot/Armour/

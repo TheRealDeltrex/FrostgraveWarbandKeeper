@@ -51,6 +51,7 @@ from frostgrave_data import (
     NEUTRAL_SPELLS,
     OWN_SCHOOL_SPELLS,
     PENTANGLE_SCHOOLS,
+    PERMANENT_INJURIES,
     PROMOTE_CAPTAIN_ITEM_SLOTS,
     SCHOOL_ALIGNED,
     SCHOOL_NEUTRAL,
@@ -62,6 +63,7 @@ from frostgrave_data import (
     SOURCE_BOOK_OPTIONS,
     SOURCE_BOOKS,
     SPELLS,
+    STANDARD_CONSTRUCT_TYPE_KEYS,
     STARTING_GOLD,
     STARTING_SPELL_COUNT,
     TEMPORARY_MEMBER_LIMIT,
@@ -79,9 +81,11 @@ from frostgrave_data import (
     spells_for_wizard_ui,
 )
 from game_content import (
+    construct_modifications,
     enrich_spells_with_descriptions,
     group_magic_items,
     load_bestiary,
+    load_core_rules,
     load_expansion_rules,
     load_ghost_archipelago,
     load_grave_mutations,
@@ -102,15 +106,20 @@ from idle_watchdog import note_closing, note_heartbeat
 from warband_store import (
     ALT_XP_CONVERSIONS,
     add_apprentice_mutation,
+    add_apprentice_permanent_injury,
     add_captain_mutation,
+    add_captain_permanent_injury,
     add_captain_xp,
+    add_construct_modification,
     add_history,
     add_pact_tier,
     add_soldier,
     add_soldier_mutation,
+    add_soldier_permanent_injury,
     add_soldier_xp,
     add_vault_item,
     add_wizard_mutation,
+    add_wizard_permanent_injury,
     add_wizard_xp,
     adjust_gold,
     advance_beastcrafter,
@@ -151,13 +160,18 @@ from warband_store import (
     recompute_spell_cns,
     record_game_loot,
     remove_apprentice_mutation,
+    remove_apprentice_permanent_injury,
     remove_captain_mutation,
+    remove_captain_permanent_injury,
+    remove_construct_modification,
     remove_portrait,
     remove_revenant,
     remove_soldier,
     remove_soldier_mutation,
+    remove_soldier_permanent_injury,
     remove_vault_item,
     remove_wizard_mutation,
+    remove_wizard_permanent_injury,
     reorder_soldiers,
     reorder_spells,
     resolve_portrait_path,
@@ -255,11 +269,13 @@ app.jinja_env.globals.update(
     CAPTAIN_MODE_LABELS=CAPTAIN_MODE_LABELS,
     CAPTAIN_TRICKS=CAPTAIN_TRICKS,
     CAPTAIN_TRICK_BY_ID=CAPTAIN_TRICK_BY_ID,
+    PERMANENT_INJURIES=PERMANENT_INJURIES,
     KNIGHTLY_ORDERS=KNIGHTLY_ORDERS,
     KNIGHTLY_ORDER_ELIGIBLE=KNIGHTLY_ORDER_ELIGIBLE,
     ILLUSION_SOURCE_CHOICES=illusion_source_choices(),
     ANIMAL_COMPANION_TYPE_KEYS=animal_companion_type_keys(),
     CONSTRUCT_TYPE_KEYS=construct_type_keys(),
+    STANDARD_CONSTRUCT_TYPE_KEYS=STANDARD_CONSTRUCT_TYPE_KEYS,
     LEVELUP_STATS=LEVELUP_STATS,
     level_from_xp=level_from_xp,
     captain_effective_stats=captain_effective_stats,
@@ -369,6 +385,9 @@ def reference() -> str:
         bestiary=load_bestiary(),
         traits=load_traits(),
         quick_reference=load_quick_reference(),
+        core_rules=load_core_rules(),
+        base_locations=BASE_LOCATIONS,
+        base_resources=BASE_RESOURCES,
         spell_names=load_spell_names(),
         # The Lexicon is a browsable reference, so unlike the warband page none
         # of this is filtered by source toggles — same as the bestiary already is.
@@ -435,13 +454,22 @@ def warband_new() -> str | Response:
             wizard_starting_xp = int(request.form.get("wizard_starting_xp") or 0)
         except ValueError:
             wizard_starting_xp = 0
+        try:
+            max_soldiers = int(request.form.get("max_soldiers") or MAX_SOLDIERS)
+        except ValueError:
+            max_soldiers = MAX_SOLDIERS
+        try:
+            max_specialists = int(request.form.get("max_specialists") or MAX_SPECIALISTS)
+        except ValueError:
+            max_specialists = MAX_SPECIALISTS
 
         if not name or not wizard:
             flash("Warband name and wizard name are required.", "error")
             return _render_new(school=school, selected=spell_keys, sources=sources,
                                pentangle=pentangle, warband_name=name, wizard_name=wizard,
                                with_apprentice=with_apprentice, apprentice_name=apprentice_name,
-                               starting_gold=starting_gold, wizard_starting_xp=wizard_starting_xp)
+                               starting_gold=starting_gold, wizard_starting_xp=wizard_starting_xp,
+                               max_soldiers=max_soldiers, max_specialists=max_specialists)
 
         # Soldiers are not hired at creation — they're recruited later on the
         # warband page (from the full roster, including supplement mercenaries).
@@ -456,13 +484,16 @@ def warband_new() -> str | Response:
             pentangle_playable=pentangle,
             starting_gold=starting_gold,
             wizard_starting_xp=wizard_starting_xp,
+            max_soldiers=max_soldiers,
+            max_specialists=max_specialists,
         )
         if not wb:
             flash(msg, "error")
             return _render_new(school=school, selected=spell_keys, sources=sources,
                                pentangle=pentangle, warband_name=name, wizard_name=wizard,
                                with_apprentice=with_apprentice, apprentice_name=apprentice_name,
-                               starting_gold=starting_gold, wizard_starting_xp=wizard_starting_xp)
+                               starting_gold=starting_gold, wizard_starting_xp=wizard_starting_xp,
+                               max_soldiers=max_soldiers, max_specialists=max_specialists)
 
         try:
             wiz_file = request.files.get("wizard_portrait")
@@ -520,6 +551,8 @@ def _render_new(
     apprentice_name: str = "",
     starting_gold: int = STARTING_GOLD,
     wizard_starting_xp: int = 0,
+    max_soldiers: int = MAX_SOLDIERS,
+    max_specialists: int = MAX_SPECIALISTS,
 ):
     sources = sources or {}
     schools = _new_schools(sources, pentangle)
@@ -560,6 +593,8 @@ def _render_new(
         apprentice_name=apprentice_name,
         starting_gold=starting_gold,
         wizard_starting_xp=wizard_starting_xp,
+        max_soldiers=max_soldiers,
+        max_specialists=max_specialists,
     )
 
 
@@ -586,6 +621,8 @@ def warband_view(warband_id: str) -> str:
     wb_sources = enabled_sources(wb)
     grave_mutations_enabled = "Grave Mutations" in wb_sources
     mutation_picker_data = load_grave_mutations() if grave_mutations_enabled else []
+    fireheart_enabled = "Fireheart" in wb_sources
+    construct_modification_data = construct_modifications() if fireheart_enabled else []
     # Only spells this warband could actually learn: its books are on and the
     # wizard's state allows them. Spells already known are excluded here but are
     # never hidden from the wizard's own list, even if their book is later
@@ -717,6 +754,8 @@ def warband_view(warband_id: str) -> str:
         },
         grave_mutations_enabled=grave_mutations_enabled,
         mutation_picker_data=mutation_picker_data,
+        fireheart_enabled=fireheart_enabled,
+        construct_modification_data=construct_modification_data,
     )
 
 
@@ -1163,6 +1202,22 @@ def _act_remove_soldier_mutation(wb: dict) -> tuple[bool, str]:
     return remove_soldier_mutation(wb, request.form.get("soldier_id") or "", _mutation_index_from_form())
 
 
+@register_action("add_construct_modification")
+def _act_add_construct_modification(wb: dict) -> tuple[bool, str]:
+    name = (request.form.get("modification_name") or "").strip()
+    if not name:
+        return False, "Pick a Construct Modification to add."
+    stat = (request.form.get("modification_stat") or "").strip() or None
+    return add_construct_modification(wb, request.form.get("soldier_id") or "", name, stat)
+
+
+@register_action("remove_construct_modification")
+def _act_remove_construct_modification(wb: dict) -> tuple[bool, str]:
+    return remove_construct_modification(
+        wb, request.form.get("soldier_id") or "", _mutation_index_from_form()
+    )
+
+
 @register_action("add_wizard_mutation")
 def _act_add_wizard_mutation(wb: dict) -> tuple[bool, str]:
     has_input, number = _mutation_number_from_form()
@@ -1200,6 +1255,64 @@ def _act_add_captain_mutation(wb: dict) -> tuple[bool, str]:
 @register_action("remove_captain_mutation")
 def _act_remove_captain_mutation(wb: dict) -> tuple[bool, str]:
     return remove_captain_mutation(wb, _mutation_index_from_form())
+
+
+def _injury_id_from_form() -> str:
+    return (request.form.get("injury_id") or "").strip()
+
+
+@register_action("add_wizard_permanent_injury")
+def _act_add_wizard_permanent_injury(wb: dict) -> tuple[bool, str]:
+    injury_id = _injury_id_from_form()
+    if not injury_id:
+        return False, "Pick a permanent injury to add."
+    return add_wizard_permanent_injury(wb, injury_id)
+
+
+@register_action("remove_wizard_permanent_injury")
+def _act_remove_wizard_permanent_injury(wb: dict) -> tuple[bool, str]:
+    return remove_wizard_permanent_injury(wb, _mutation_index_from_form())
+
+
+@register_action("add_apprentice_permanent_injury")
+def _act_add_apprentice_permanent_injury(wb: dict) -> tuple[bool, str]:
+    injury_id = _injury_id_from_form()
+    if not injury_id:
+        return False, "Pick a permanent injury to add."
+    return add_apprentice_permanent_injury(wb, injury_id)
+
+
+@register_action("remove_apprentice_permanent_injury")
+def _act_remove_apprentice_permanent_injury(wb: dict) -> tuple[bool, str]:
+    return remove_apprentice_permanent_injury(wb, _mutation_index_from_form())
+
+
+@register_action("add_captain_permanent_injury")
+def _act_add_captain_permanent_injury(wb: dict) -> tuple[bool, str]:
+    injury_id = _injury_id_from_form()
+    if not injury_id:
+        return False, "Pick a permanent injury to add."
+    return add_captain_permanent_injury(wb, injury_id)
+
+
+@register_action("remove_captain_permanent_injury")
+def _act_remove_captain_permanent_injury(wb: dict) -> tuple[bool, str]:
+    return remove_captain_permanent_injury(wb, _mutation_index_from_form())
+
+
+@register_action("add_soldier_permanent_injury")
+def _act_add_soldier_permanent_injury(wb: dict) -> tuple[bool, str]:
+    injury_id = _injury_id_from_form()
+    if not injury_id:
+        return False, "Pick a permanent injury to add."
+    return add_soldier_permanent_injury(wb, request.form.get("soldier_id") or "", injury_id)
+
+
+@register_action("remove_soldier_permanent_injury")
+def _act_remove_soldier_permanent_injury(wb: dict) -> tuple[bool, str]:
+    return remove_soldier_permanent_injury(
+        wb, request.form.get("soldier_id") or "", _mutation_index_from_form()
+    )
 
 
 def _update_details(wb: dict) -> None:

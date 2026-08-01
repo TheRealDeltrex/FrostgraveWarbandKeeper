@@ -1,0 +1,64 @@
+{# Fireheart Construct Modification picker: a flat named-entry dropdown (no
+   d100 roll like Grave Mutations — a modification is picked, not rolled),
+   plus a stat picker for the -1 penalty most entries impose. Soldier-only:
+   only standard small/medium/large constructs may take one, and only one. #}
+{% macro construct_modification_picker(soldier_id, modifications) %}
+  {% if modifications or fireheart_enabled %}
+    <details class="ref-panel">
+      <summary>Construct Modification ({{ modifications|length }})</summary>
+      {% if modifications %}
+        <ul class="list-plain">
+          {% for m in modifications %}
+            <li>
+              <strong>{{ m.name }}</strong> — {{ m.short }}
+              <form class="inline-form" method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" onsubmit="return confirm('Remove modification “{{ m.name }}”? Any stat penalty it applied will be reversed.');">
+                <input type="hidden" name="action" value="remove_construct_modification" />
+                <input type="hidden" name="soldier_id" value="{{ soldier_id }}" />
+                <input type="hidden" name="mutation_index" value="{{ loop.index0 }}" />
+                <button class="btn danger small" type="submit" title="Remove this modification">Remove</button>
+              </form>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="empty">No modification yet.</p>
+      {% endif %}
+      {% if not modifications %}
+        {% if fireheart_enabled %}
+          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="stack-sm" style="margin-top:0.5rem">
+            <input type="hidden" name="action" value="add_construct_modification" />
+            <input type="hidden" name="soldier_id" value="{{ soldier_id }}" />
+            <div class="stat-row">
+              <div class="form-row">
+                <label>Modification</label>
+                <select name="modification_name" required>
+                  <option value="">— pick —</option>
+                  {% for entry in construct_modification_data %}
+                    <option value="{{ entry.name }}">{{ entry.name }}{% if entry.no_penalty %} (no penalty){% endif %}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="form-row">
+                <label>Penalty stat</label>
+                <select name="modification_stat">
+                  <option value="">— if a penalty applies —</option>
+                  <option value="move">Move</option>
+                  <option value="fight">Fight</option>
+                  <option value="shoot">Shoot</option>
+                  <option value="armour">Armour</option>
+                  <option value="will">Will</option>
+                  <option value="health">Health</option>
+                </select>
+              </div>
+            </div>
+            <div class="actions">
+              <button class="btn secondary small" type="submit">Add modification</button>
+            </div>
+          </form>
+        {% else %}
+          <p class="muted" style="font-size:0.8rem">Enable Fireheart under Additional Rules and Homerules to add one.</p>
+        {% endif %}
+      {% endif %}
+    </details>
+  {% endif %}
+{% endmacro %}
