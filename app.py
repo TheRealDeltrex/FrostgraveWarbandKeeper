@@ -6,13 +6,15 @@ level-up, post-game loot, and PDF rosters. Data saved locally (no login).
 
 from __future__ import annotations
 
+import logging
 import os
 import subprocess
 import sys
 import threading
 import webbrowser
+from collections.abc import Callable
+from logging.handlers import RotatingFileHandler
 
-import paths
 from flask import (
     Flask,
     Response,
@@ -26,12 +28,14 @@ from flask import (
 )
 from werkzeug.utils import secure_filename
 
+import expansions
+import paths
 from frostgrave_data import (
     ALIGNED_SCHOOL_SPELLS,
     APPRENTICE_COST,
     BASE_LOCATIONS,
     BASE_RESOURCES,
-    bonus_choice_amount,
+    CAPTAIN_ITEM_SLOTS,
     CAPTAIN_MIND_CONTROL_LABELS,
     CAPTAIN_MIND_CONTROL_OPTIONS,
     CAPTAIN_MODE_LABELS,
@@ -41,34 +45,35 @@ from frostgrave_data import (
     KNIGHTLY_ORDER_ELIGIBLE,
     KNIGHTLY_ORDERS,
     LEVEL_UP_OPTIONS,
-    SCROUNGER_WEAPON_CHOICES,
     LEVELUP_STATS,
     MAX_SOLDIERS,
     MAX_SPECIALISTS,
     NEUTRAL_SPELLS,
     OWN_SCHOOL_SPELLS,
+    PENTANGLE_SCHOOLS,
+    PROMOTE_CAPTAIN_ITEM_SLOTS,
     SCHOOL_ALIGNED,
     SCHOOL_NEUTRAL,
     SCHOOL_OPPOSED,
     SCHOOL_RELATIONS,
     SCHOOLS,
-    PENTANGLE_SCHOOLS,
+    SCROUNGER_WEAPON_CHOICES,
     SOLDIERS,
     SOURCE_BOOK_BY_SLUG,
     SOURCE_BOOK_OPTIONS,
     SOURCE_BOOKS,
     SPELLS,
-    TEMPORARY_MEMBER_LIMIT,
     STARTING_GOLD,
     STARTING_SPELL_COUNT,
+    TEMPORARY_MEMBER_LIMIT,
     XP_PER_LEVEL,
     all_spells_flat,
+    bonus_choice_amount,
     cn_penalty,
     format_stat,
-    level_from_xp,
     group_soldiers_by_source,
+    level_from_xp,
     soldier_list_for_ui,
-    spell_id,
     spells_for_wizard_ui,
 )
 from game_content import (
@@ -78,9 +83,8 @@ from game_content import (
     load_expansion_rules,
     load_ghost_archipelago,
     load_grave_mutations,
-    load_magic_items,
-    magic_items_for_sources,
     load_loot_tables,
+    load_magic_items,
     load_potion_choices,
     load_potion_choices_detailed,
     load_quick_reference,
@@ -90,13 +94,11 @@ from game_content import (
     load_spellcaster_items,
     load_standard_items,
     load_traits,
-    spell_description,
+    magic_items_for_sources,
 )
-import expansions
 from idle_watchdog import note_closing, note_heartbeat
 from warband_store import (
-    PORTRAIT_DIR,
-    WARBAND_DIR,
+    ALT_XP_CONVERSIONS,
     add_apprentice_mutation,
     add_captain_mutation,
     add_captain_xp,
@@ -109,21 +111,18 @@ from warband_store import (
     add_wizard_mutation,
     add_wizard_xp,
     adjust_gold,
+    advance_beastcrafter,
+    animal_companion_limit,
     apply_captain_level_up,
-    apply_portrait,
     apply_captain_trick,
     apply_level_up,
+    apply_portrait,
     apply_soldier_level_up,
-    advance_beastcrafter,
-    break_wizard_pact,
-    reverse_last_captain_level_up,
-    reverse_last_level_up,
-    reverse_last_soldier_level_up,
     base_summary,
+    break_wizard_pact,
     buy_base_resource,
     captain_effective_stats,
     create_warband,
-    default_homerules,
     delete_warband,
     dismiss_all_temporary_members,
     dismiss_apprentice,
@@ -132,35 +131,37 @@ from warband_store import (
     enabled_sources,
     enrich_soldier,
     export_warband_json,
+    has_animal_companion,
     hire_apprentice,
     hire_captain,
     import_warband_json,
-    animal_companion_limit,
-    default_portrait_name,
-    portrait_filesystem_path,
-    has_animal_companion,
     known_spell_ids,
     known_spell_names,
+    list_unreadable_warbands,
     list_warbands,
     load_warband,
     normalize_item_slots,
+    portrait_filesystem_path,
+    portraits_root_dir,
     promote_soldier_to_captain,
     raise_revenant,
-    remove_revenant,
     recompute_spell_cns,
     record_game_loot,
-    recruit_preview,
     remove_apprentice_mutation,
     remove_captain_mutation,
     remove_portrait,
+    remove_revenant,
     remove_soldier,
     remove_soldier_mutation,
     remove_vault_item,
     remove_wizard_mutation,
     reorder_soldiers,
     reorder_spells,
+    resolve_portrait_path,
     restore_portraits_by_name,
-    save_portrait,
+    reverse_last_captain_level_up,
+    reverse_last_level_up,
+    reverse_last_soldier_level_up,
     save_warband,
     sell_or_remove_base_resource,
     set_animal_feature,
@@ -169,10 +170,31 @@ from warband_store import (
     set_wizard_state,
     soldier_from_book_enabled,
     spend_alt_xp,
-    ALT_XP_CONVERSIONS,
     update_homerules,
+    warband_dir,
     warband_limits,
+    wizard_effective_stats,
 )
+
+logger = logging.getLogger(__name__)
+
+
+def _configure_logging() -> None:
+    """E4: the packaged .exe has no console (frostgrave.spec, console=False),
+    so that's the one case that needs its own handler — a small rotating file
+    in the data dir. Everywhere else (dev server, tests, the in-browser build)
+    keeps Python's normal stderr-on-WARNING+ default."""
+    if not paths.is_frozen():
+        return
+    log_path = paths.user_data_dir() / "fwk.log"
+    handler = RotatingFileHandler(log_path, maxBytes=512 * 1024, backupCount=2, encoding="utf-8")
+    handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s"))
+    root = logging.getLogger()
+    root.addHandler(handler)
+    root.setLevel(logging.INFO)
+
+
+_configure_logging()
 
 _BUNDLE_DIR = paths.bundle_dir()
 app = Flask(
@@ -180,7 +202,7 @@ app = Flask(
     template_folder=str(_BUNDLE_DIR / "templates"),
     static_folder=str(_BUNDLE_DIR / "static"),
 )
-app.secret_key = os.environ.get("SECRET_KEY", "frostgrave-dev-key")
+app.secret_key = os.environ.get("SECRET_KEY") or paths.get_or_create_secret_key()
 app.config["MAX_CONTENT_LENGTH"] = 8 * 1024 * 1024  # 8 MB uploads
 
 # Set by the in-browser (Pyodide) build. When on, the UI drops the desktop-only
@@ -195,14 +217,17 @@ def portrait_src(portrait: str | None, kind: str, type_key: str | None = None) -
     default artwork shipped with the app. None means neither exists, and the
     template should fall back to its "?" placeholder.
 
-    Checks the file actually exists (same as resolve_portrait_path(), used for
-    the PDF) rather than trusting the stored path blindly — a warband can carry
-    a portrait reference to a file that's no longer there (e.g. an imported
-    .warbands file, since portrait bytes are never included in the export)."""
+    Delegates the "does a file actually exist" decision to resolve_portrait_path()
+    (also used by the PDF export) rather than duplicating that fallback chain —
+    a warband can carry a portrait reference to a file that's no longer there
+    (e.g. an imported .warbands file, since portrait bytes are never included
+    in the export), so the stored path can't be trusted blindly."""
+    path = resolve_portrait_path(portrait, kind, type_key)
+    if not path:
+        return None
     if portrait and portrait_filesystem_path(portrait):
         return url_for("portrait_file", relpath=portrait)
-    name = default_portrait_name(kind, type_key)
-    return url_for("static", filename=f"portraits/{name}") if name else None
+    return url_for("static", filename=f"portraits/{path.name}")
 
 
 app.jinja_env.globals.update(
@@ -258,14 +283,6 @@ app.jinja_env.globals.update(
 )
 
 
-def _stats_with_state_bonus(wb: dict) -> dict:
-    """The wizard's stats as they play, with any wizard-state bonus folded in."""
-    stats = dict((wb.get("wizard") or {}).get("stats") or {})
-    for stat, amount in expansions.wizard_state_stat_bonus(wb).items():
-        stats[stat] = int(stats.get(stat, 0)) + amount
-    return stats
-
-
 def _require_warband(warband_id: str) -> dict:
     wb = load_warband(warband_id)
     if not wb:
@@ -305,12 +322,16 @@ def _mutation_index_from_form() -> int:
 
 
 @app.route("/")
-def home():
-    return render_template("index.html", warbands=list_warbands())
+def home() -> str:
+    return render_template(
+        "index.html",
+        warbands=list_warbands(),
+        unreadable_warbands=list_unreadable_warbands(),
+    )
 
 
 @app.route("/reference")
-def reference():
+def reference() -> str:
     descs = load_spell_descriptions()
     spells_with_desc = {
         school: [
@@ -354,35 +375,35 @@ def reference():
 
 
 @app.route("/about")
-def about():
+def about() -> str:
     return render_template("about.html")
 
 
 @app.route("/heartbeat", methods=["POST"])
-def heartbeat():
+def heartbeat() -> tuple[str, int]:
     """Pinged periodically by every open page — see idle_watchdog.py."""
     note_heartbeat()
     return ("", 204)
 
 
 @app.route("/heartbeat/closing", methods=["POST"])
-def heartbeat_closing():
+def heartbeat_closing() -> tuple[str, int]:
     """Pinged via sendBeacon when a page unloads — see idle_watchdog.py."""
     note_closing()
     return ("", 204)
 
 
 @app.route("/portraits/<path:relpath>")
-def portrait_file(relpath: str):
+def portrait_file(relpath: str) -> Response:
     if ".." in relpath:
         abort(404)
-    return send_from_directory(PORTRAIT_DIR, relpath)
+    return send_from_directory(portraits_root_dir(), relpath)
 
 
 # ---- Create warband (wizard + spells + apprentice) ------------------------
 
 @app.route("/warband/new", methods=["GET", "POST"])
-def warband_new():
+def warband_new() -> str | Response:
     if request.method == "POST":
         name = (request.form.get("warband_name") or "").strip()
         wizard = (request.form.get("wizard_name") or "").strip()
@@ -403,7 +424,8 @@ def warband_new():
         if not name or not wizard:
             flash("Warband name and wizard name are required.", "error")
             return _render_new(school=school, selected=spell_keys, sources=sources,
-                               pentangle=pentangle)
+                               pentangle=pentangle, warband_name=name, wizard_name=wizard,
+                               with_apprentice=with_apprentice, apprentice_name=apprentice_name)
 
         # Soldiers are not hired at creation — they're recruited later on the
         # warband page (from the full roster, including supplement mercenaries).
@@ -420,7 +442,8 @@ def warband_new():
         if not wb:
             flash(msg, "error")
             return _render_new(school=school, selected=spell_keys, sources=sources,
-                               pentangle=pentangle)
+                               pentangle=pentangle, warband_name=name, wizard_name=wizard,
+                               with_apprentice=with_apprentice, apprentice_name=apprentice_name)
 
         try:
             wiz_file = request.files.get("wizard_portrait")
@@ -472,6 +495,10 @@ def _render_new(
     selected: list | None = None,
     sources: dict | None = None,
     pentangle: bool = False,
+    warband_name: str = "",
+    wizard_name: str = "",
+    with_apprentice: bool = False,
+    apprentice_name: str = "",
 ):
     sources = sources or {}
     schools = _new_schools(sources, pentangle)
@@ -506,13 +533,17 @@ def _render_new(
         pentangle_playable=pentangle,
         PENTANGLE_SCHOOLS=PENTANGLE_SCHOOLS,
         neutral_needed=neutral_needed,
+        warband_name=warband_name,
+        wizard_name=wizard_name,
+        with_apprentice=with_apprentice,
+        apprentice_name=apprentice_name,
     )
 
 
 # ---- View / maintain ------------------------------------------------------
 
 @app.route("/warband/<warband_id>")
-def warband_view(warband_id: str):
+def warband_view(warband_id: str) -> str:
     wb = _require_warband(warband_id)
     recompute_spell_cns(wb)
     all_soldiers = wb.get("soldiers") or []
@@ -622,7 +653,7 @@ def warband_view(warband_id: str):
         # The Beastcrafter III Animal Feature (Fast / Scales) is a real stat
         # change, so the wizard card shows the boosted value. The stored stats
         # stay clean — the feature is reversible by picking another one.
-        wizard_display_stats=_stats_with_state_bonus(wb),
+        wizard_display_stats=wizard_effective_stats(wb),
         wizard_state_bonus=expansions.wizard_state_stat_bonus(wb),
         beastcrafter_tier=expansions.beastcrafter_tier(wb),
         pact_tiers=expansions.pact_tiers(wb),
@@ -666,490 +697,481 @@ def warband_view(warband_id: str):
     )
 
 
+ActionHandler = Callable[[dict], tuple[bool, str]]
+ACTION_HANDLERS: dict[str, ActionHandler] = {}
+
+
+def register_action(name: str) -> Callable[[ActionHandler], ActionHandler]:
+    """Registers a `warband_update` form handler under `action=<name>`.
+
+    Handlers take the warband dict (mutating it in place as needed) and return
+    `(ok, message)`. The route flashes the message and saves the warband iff
+    `ok` is true — see `warband_update` below. Handlers read `request.form`/
+    `request.files` directly, same as the branches they replace.
+    """
+
+    def deco(fn: ActionHandler) -> ActionHandler:
+        ACTION_HANDLERS[name] = fn
+        return fn
+
+    return deco
+
+
 @app.route("/warband/<warband_id>/update", methods=["POST"])
-def warband_update(warband_id: str):
+def warband_update(warband_id: str) -> Response:
     wb = _require_warband(warband_id)
-    action = request.form.get("action") or ""
+    action_name = request.form.get("action") or ""
+    handler = ACTION_HANDLERS.get(action_name)
 
     try:
-        if action == "details":
-            _update_details(wb)
-            save_warband(wb)
-            flash("Details saved.", "success")
-
-        elif action == "set_notes":
-            wb["notes"] = request.form.get("notes") or ""
-            save_warband(wb)
-            flash("Notes saved.", "success")
-
-        elif action == "hire_soldier":
-            ok, msg = add_soldier(
-                wb,
-                request.form.get("type_key") or "",
-                (request.form.get("soldier_name") or "").strip(),
-                request.form.get("knightly_order") or "",
-                request.form.get("scrounger_weapon") or "",
-            )
-            flash(msg, "success" if ok else "error")
-            if ok:
-                # optional portrait on hire
-                f = request.files.get("soldier_portrait")
-                if f and f.filename and wb["soldiers"]:
-                    sid = wb["soldiers"][-1]["id"]
-                    apply_portrait(wb["soldiers"][-1], wb["id"], f"soldier_{sid}", f)
-                save_warband(wb)
-
-        elif action == "remove_soldier":
-            ok, msg = remove_soldier(
-                wb,
-                request.form.get("soldier_id") or "",
-                refund=request.form.get("refund") == "on",
-            )
-            flash(msg, "success" if ok else "error")
-            if ok:
-                save_warband(wb)
-
-        elif action == "dismiss_all_temporary":
-            ok, msg = dismiss_all_temporary_members(wb)
-            flash(msg, "success" if ok else "error")
-            if ok:
-                save_warband(wb)
-
-        elif action == "soldier_status":
-            ok, msg = set_soldier_status(
-                wb,
-                request.form.get("soldier_id") or "",
-                request.form.get("status") or "active",
-            )
-            flash(msg, "success" if ok else "error")
-            if ok:
-                save_warband(wb)
-
-        elif action == "soldier_edit":
-            sid = request.form.get("soldier_id") or ""
-            for s in wb.get("soldiers") or []:
-                if s.get("id") == sid:
-                    s["name"] = (request.form.get("soldier_name") or s.get("name", "")).strip()
-                    s["notes"] = request.form.get("notes") or ""
-                    if request.form.get("soldier_portrait_remove") == "on":
-                        remove_portrait(s, wb["id"], f"soldier_{sid}")
-                    f = request.files.get("soldier_portrait")
-                    apply_portrait(s, wb["id"], f"soldier_{sid}", f)
-                    save_warband(wb)
-                    flash(f"Updated {s['name']}.", "success")
-                    break
-            else:
-                flash("Soldier not found.", "error")
-
-        elif action == "hire_apprentice":
-            ok, msg = hire_apprentice(wb, (request.form.get("apprentice_name") or "").strip())
-            flash(msg, "success" if ok else "error")
-            if ok:
-                f = request.files.get("apprentice_portrait")
-                apply_portrait(wb["apprentice"], wb["id"], "apprentice", f)
-                save_warband(wb)
-
-        elif action == "dismiss_apprentice":
-            ok, msg = dismiss_apprentice(wb, refund=request.form.get("refund") == "on")
-            flash(msg, "success" if ok else "error")
-            if ok:
-                save_warband(wb)
-
-        elif action == "update_homerules":
-            ok, msg = update_homerules(wb, request.form)
-            flash(msg, "success" if ok else "error")
-            if ok:
-                save_warband(wb)
-
-        elif action == "set_wizard_state":
-            ok, msg = set_wizard_state(wb, request.form.get("state_kind") or "")
-            flash(msg, "success" if ok else "error")
-            if ok:
-                save_warband(wb)
-
-        elif action == "advance_beastcrafter":
-            ok, msg = advance_beastcrafter(wb)
-            flash(msg, "success" if ok else "error")
-            if ok:
-                save_warband(wb)
-
-        elif action == "set_animal_feature":
-            ok, msg = set_animal_feature(wb, request.form.get("feature") or "")
-            flash(msg, "success" if ok else "error")
-            if ok:
-                save_warband(wb)
-
-        elif action == "add_pact_tier":
-            ok, msg = add_pact_tier(
-                wb,
-                request.form.get("sacrifice") or "",
-                request.form.get("boon") or "",
-                (request.form.get("demon") or "").strip(),
-            )
-            flash(msg, "success" if ok else "error")
-            if ok:
-                save_warband(wb)
-
-        elif action == "break_pact":
-            ok, msg = break_wizard_pact(wb)
-            flash(msg, "success" if ok else "error")
-            if ok:
-                save_warband(wb)
-
-        elif action == "raise_revenant":
-            ok, msg = raise_revenant(wb, request.form.get("soldier_id") or "")
-            flash(msg, "success" if ok else "error")
-            if ok:
-                save_warband(wb)
-
-        elif action == "remove_revenant":
-            ok, msg = remove_revenant(wb, request.form.get("soldier_id") or "")
-            flash(msg, "success" if ok else "error")
-            if ok:
-                save_warband(wb)
-
-        elif action == "hire_captain":
-            ok, msg = hire_captain(
-                wb,
-                (request.form.get("captain_name") or "").strip(),
-                request.form.get("captain_extra_stat") or None,
-                request.form.getlist("captain_tricks"),
-            )
-            flash(msg, "success" if ok else "error")
-            if ok:
-                f = request.files.get("captain_portrait")
-                apply_portrait(wb["captain"], wb["id"], "captain", f)
-                save_warband(wb)
-
-        elif action == "dismiss_captain":
-            ok, msg = dismiss_captain(wb, refund=request.form.get("refund") == "on")
-            flash(msg, "success" if ok else "error")
-            if ok:
-                save_warband(wb)
-
-        elif action == "captain_edit":
-            cap = wb.get("captain")
-            if not cap:
-                flash("No captain hired.", "error")
-            else:
-                cap["name"] = (request.form.get("captain_name") or cap.get("name", "")).strip()
-                cap["notes"] = request.form.get("captain_notes") or ""
-                cap["has_dagger"] = request.form.get("captain_dagger") == "on"
-                hr = wb.get("homerules") or {}
-                slot_key = (
-                    "promote_captain_item_slots"
-                    if cap.get("origin") == "promoted"
-                    else "captain_item_slots"
-                )
-                n = int(hr.get(slot_key, 6))
-                slots = [(request.form.get(f"captain_slot_{i}") or "").strip() for i in range(n)]
-                cap["item_slots"] = normalize_item_slots(slots, n)
-                if request.form.get("captain_portrait_remove") == "on":
-                    remove_portrait(cap, wb["id"], "captain")
-                f = request.files.get("captain_portrait")
-                apply_portrait(cap, wb["id"], "captain", f)
-                save_warband(wb)
-                flash(f"Updated {cap['name']}.", "success")
-
-        elif action == "captain_level_up":
-            ok, msg = apply_captain_level_up(wb, request.form.get("choice") or "")
-            flash(msg, "success" if ok else "error")
-            if ok:
-                save_warband(wb)
-
-        elif action == "reverse_captain_level_up":
-            ok, msg = reverse_last_captain_level_up(wb)
-            flash(msg, "success" if ok else "error")
-            if ok:
-                save_warband(wb)
-
-        elif action == "captain_pick_trick":
-            ok, msg = apply_captain_trick(wb, request.form.get("trick_id") or "")
-            flash(msg, "success" if ok else "error")
-            if ok:
-                save_warband(wb)
-
-        elif action == "captain_add_xp":
-            amount = _parse_signed_int(request.form.get("amount"))
-            if amount is None:
-                flash("Enter a whole number for XP.", "error")
-            else:
-                ok, msg = add_captain_xp(wb, amount)
-                flash(msg, "success" if ok else "error")
-                if ok:
-                    save_warband(wb)
-
-        elif action == "promote_soldier":
-            ok, msg = promote_soldier_to_captain(
-                wb,
-                request.form.get("soldier_id") or "",
-                request.form.get("extra_stat") or None,
-                request.form.getlist("tricks"),
-            )
-            flash(msg, "success" if ok else "error")
-            if ok:
-                save_warband(wb)
-
-        elif action == "soldier_add_xp":
-            amount = _parse_signed_int(request.form.get("amount"))
-            if amount is None:
-                flash("Enter a whole number for XP.", "error")
-            else:
-                ok, msg = add_soldier_xp(wb, request.form.get("soldier_id") or "", amount)
-                flash(msg, "success" if ok else "error")
-                if ok:
-                    save_warband(wb)
-
-        elif action == "soldier_level_up":
-            ok, msg = apply_soldier_level_up(
-                wb, request.form.get("soldier_id") or "", request.form.get("choice") or ""
-            )
-            flash(msg, "success" if ok else "error")
-            if ok:
-                save_warband(wb)
-
-        elif action == "reverse_soldier_level_up":
-            ok, msg = reverse_last_soldier_level_up(wb, request.form.get("soldier_id") or "")
-            flash(msg, "success" if ok else "error")
-            if ok:
-                save_warband(wb)
-
-        elif action == "adjust_gold":
-            delta = _parse_signed_int(request.form.get("delta"))
-            reason = (request.form.get("reason") or "").strip()
-            if delta is None:
-                flash("Enter a whole number for the gold amount.", "error")
-            elif delta == 0:
-                flash("Enter a non-zero gold amount.", "error")
-            else:
-                adjust_gold(wb, delta, reason)
-                save_warband(wb)
-                flash(f"Treasury updated ({delta:+d} gc → {wb['gold']} gc).", "success")
-
-        elif action == "set_gold":
-            amount = int(request.form.get("amount") or 0)
-            old = int(wb.get("gold", 0))
-            wb["gold"] = amount
-            add_history(wb, f"Gold set to {amount} gc (was {old}).")
-            save_warband(wb)
-            flash(f"Treasury set to {amount} gc.", "success")
-
-        elif action == "add_log":
-            text = (request.form.get("log_text") or "").strip()
-            if text:
-                add_history(wb, text)
-                save_warband(wb)
-                flash("Log entry added.", "success")
-            else:
-                flash("Log entry was empty.", "error")
-
-        elif action == "level_up":
-            choice = request.form.get("choice") or ""
-            ok, msg = apply_level_up(
-                wb,
-                choice,
-                spell_key=request.form.get("learn_spell") or None,
-                improve_spell_id=request.form.get("improve_spell") or None,
-            )
-            flash(msg, "success" if ok else "error")
-            if ok:
-                save_warband(wb)
-
-        elif action == "reverse_level_up":
-            ok, msg = reverse_last_level_up(wb)
-            flash(msg, "success" if ok else "error")
-            if ok:
-                save_warband(wb)
-
-        elif action == "add_xp":
-            xp = _parse_signed_int(request.form.get("xp"))
-            if xp is None:
-                flash("Enter a whole number for XP.", "error")
-            else:
-                ok, msg = add_wizard_xp(wb, xp)
-                if ok:
-                    save_warband(wb)
-                    flash(f"{msg} Pending level-ups: {warband_limits(wb)['pending_levels']}.", "success")
-                else:
-                    flash(msg, "error")
-
-        elif action == "spend_alt_xp":
-            ok, msg = spend_alt_xp(
-                wb,
-                request.form.get("conversion") or "",
-                request.form.get("xp_amount") or "0",
-            )
-            flash(msg, "success" if ok else "error")
-            if ok:
-                save_warband(wb)
-
-        elif action == "post_game":
-            gold = int(request.form.get("loot_gold") or 0)
-            xp = int(request.form.get("loot_xp") or 0)
-            captain_xp = int(request.form.get("loot_captain_xp") or 0)
-            notes = request.form.get("loot_notes") or ""
-            items_raw = request.form.get("loot_items") or ""
-            items = [line.strip() for line in items_raw.splitlines() if line.strip()]
-            # also support comma-separated single line
-            if len(items) == 1 and "," in items[0]:
-                items = [x.strip() for x in items[0].split(",") if x.strip()]
-            # Rows from the rulebook -> item -> spell picker, alongside the freeform textarea.
-            items += [x.strip() for x in request.form.getlist("loot_structured_items") if x.strip()]
-            summary = record_game_loot(wb, gold, items, xp, notes, captain_xp)
-            save_warband(wb)
-            flash(summary, "success")
-
-        elif action == "remove_vault_item":
-            if remove_vault_item(wb, request.form.get("item_id") or ""):
-                save_warband(wb)
-                flash("Item removed from vault.", "success")
-            else:
-                flash("Item not found.", "error")
-
-        elif action == "add_vault_item":
-            name = (request.form.get("item_name") or "").strip()
-            if name:
-                add_vault_item(wb, name, request.form.get("item_notes") or "", "manual")
-                save_warband(wb)
-                flash(f"Added “{name}” to vault.", "success")
-            else:
-                flash("Item name required.", "error")
-
-        elif action == "upload_wizard_portrait":
-            f = request.files.get("wizard_portrait")
-            if f and f.filename:
-                apply_portrait(wb["wizard"], wb["id"], "wizard", f)
-                save_warband(wb)
-                flash("Wizard portrait updated.", "success")
-            else:
-                flash("Choose an image file.", "error")
-
-        elif action == "upload_apprentice_portrait":
-            if not wb.get("apprentice"):
-                flash("No apprentice.", "error")
-            else:
-                f = request.files.get("apprentice_portrait")
-                if f and f.filename:
-                    apply_portrait(wb["apprentice"], wb["id"], "apprentice", f)
-                    save_warband(wb)
-                    flash("Apprentice portrait updated.", "success")
-                else:
-                    flash("Choose an image file.", "error")
-
-        elif action == "reorder_spells":
-            order_raw = (request.form.get("spell_order") or "").strip()
-            ids = [x for x in order_raw.split("|") if x]
-            ok, msg = reorder_spells(wb, ids)
-            flash(msg, "success" if ok else "error")
-            if ok:
-                save_warband(wb)
-
-        elif action == "reorder_soldiers":
-            order_raw = (request.form.get("soldier_order") or "").strip()
-            ids = [x for x in order_raw.split("|") if x]
-            ok, msg = reorder_soldiers(wb, ids)
-            flash(msg, "success" if ok else "error")
-            if ok:
-                save_warband(wb)
-
-        elif action == "set_base_location":
-            loc = request.form.get("location") or "none"
-            ok, msg = set_base_location(wb, loc)
-            notes = (request.form.get("base_notes") or "").strip()
-            wb.setdefault("base", {})["notes"] = notes
-            flash(msg, "success" if ok else "error")
-            if ok:
-                save_warband(wb)
-
-        elif action == "buy_base_resource":
-            ok, msg = buy_base_resource(wb, request.form.get("resource") or "")
-            flash(msg, "success" if ok else "error")
-            if ok:
-                save_warband(wb)
-
-        elif action == "remove_base_resource":
-            ok, msg = sell_or_remove_base_resource(
-                wb,
-                request.form.get("resource") or "",
-                refund=request.form.get("refund") == "on",
-            )
-            flash(msg, "success" if ok else "error")
-            if ok:
-                save_warband(wb)
-
-        elif action == "add_soldier_mutation":
-            has_input, number = _mutation_number_from_form()
-            if not has_input:
-                flash("Pick a mutation to add, or use “Add random mutation”.", "error")
-            else:
-                ok, msg = add_soldier_mutation(wb, request.form.get("soldier_id") or "", number)
-                flash(msg, "success" if ok else "error")
-                if ok:
-                    save_warband(wb)
-
-        elif action == "remove_soldier_mutation":
-            ok, msg = remove_soldier_mutation(
-                wb, request.form.get("soldier_id") or "", _mutation_index_from_form()
-            )
-            flash(msg, "success" if ok else "error")
-            if ok:
-                save_warband(wb)
-
-        elif action == "add_wizard_mutation":
-            has_input, number = _mutation_number_from_form()
-            if not has_input:
-                flash("Pick a mutation to add, or use “Add random mutation”.", "error")
-            else:
-                ok, msg = add_wizard_mutation(wb, number)
-                flash(msg, "success" if ok else "error")
-                if ok:
-                    save_warband(wb)
-
-        elif action == "remove_wizard_mutation":
-            ok, msg = remove_wizard_mutation(wb, _mutation_index_from_form())
-            flash(msg, "success" if ok else "error")
-            if ok:
-                save_warband(wb)
-
-        elif action == "add_apprentice_mutation":
-            has_input, number = _mutation_number_from_form()
-            if not has_input:
-                flash("Pick a mutation to add, or use “Add random mutation”.", "error")
-            else:
-                ok, msg = add_apprentice_mutation(wb, number)
-                flash(msg, "success" if ok else "error")
-                if ok:
-                    save_warband(wb)
-
-        elif action == "remove_apprentice_mutation":
-            ok, msg = remove_apprentice_mutation(wb, _mutation_index_from_form())
-            flash(msg, "success" if ok else "error")
-            if ok:
-                save_warband(wb)
-
-        elif action == "add_captain_mutation":
-            has_input, number = _mutation_number_from_form()
-            if not has_input:
-                flash("Pick a mutation to add, or use “Add random mutation”.", "error")
-            else:
-                ok, msg = add_captain_mutation(wb, number)
-                flash(msg, "success" if ok else "error")
-                if ok:
-                    save_warband(wb)
-
-        elif action == "remove_captain_mutation":
-            ok, msg = remove_captain_mutation(wb, _mutation_index_from_form())
-            flash(msg, "success" if ok else "error")
-            if ok:
-                save_warband(wb)
-
-        else:
+        if handler is None:
             flash("Unknown action.", "error")
-
-    except ValueError as exc:
-        flash(str(exc), "error")
+        else:
+            ok, msg = handler(wb)
+            if msg:
+                flash(msg, "success" if ok else "error")
+            if ok:
+                save_warband(wb)
+    except ValueError:
+        flash("Please enter a valid number.", "error")
 
     return redirect(url_for("warband_view", warband_id=warband_id))
+
+
+@register_action("details")
+def _act_details(wb: dict) -> tuple[bool, str]:
+    _update_details(wb)
+    return True, "Details saved."
+
+
+@register_action("set_notes")
+def _act_set_notes(wb: dict) -> tuple[bool, str]:
+    wb["notes"] = request.form.get("notes") or ""
+    return True, "Notes saved."
+
+
+@register_action("hire_soldier")
+def _act_hire_soldier(wb: dict) -> tuple[bool, str]:
+    ok, msg = add_soldier(
+        wb,
+        request.form.get("type_key") or "",
+        (request.form.get("soldier_name") or "").strip(),
+        request.form.get("knightly_order") or "",
+        request.form.get("scrounger_weapon") or "",
+    )
+    if ok:
+        # optional portrait on hire
+        f = request.files.get("soldier_portrait")
+        if f and f.filename and wb["soldiers"]:
+            sid = wb["soldiers"][-1]["id"]
+            apply_portrait(wb["soldiers"][-1], wb["id"], f"soldier_{sid}", f)
+    return ok, msg
+
+
+@register_action("remove_soldier")
+def _act_remove_soldier(wb: dict) -> tuple[bool, str]:
+    return remove_soldier(
+        wb,
+        request.form.get("soldier_id") or "",
+        refund=request.form.get("refund") == "on",
+    )
+
+
+@register_action("dismiss_all_temporary")
+def _act_dismiss_all_temporary(wb: dict) -> tuple[bool, str]:
+    return dismiss_all_temporary_members(wb)
+
+
+@register_action("soldier_status")
+def _act_soldier_status(wb: dict) -> tuple[bool, str]:
+    return set_soldier_status(
+        wb,
+        request.form.get("soldier_id") or "",
+        request.form.get("status") or "active",
+    )
+
+
+@register_action("soldier_edit")
+def _act_soldier_edit(wb: dict) -> tuple[bool, str]:
+    sid = request.form.get("soldier_id") or ""
+    for s in wb.get("soldiers") or []:
+        if s.get("id") == sid:
+            s["name"] = (request.form.get("soldier_name") or s.get("name", "")).strip()
+            s["notes"] = request.form.get("notes") or ""
+            if request.form.get("soldier_portrait_remove") == "on":
+                remove_portrait(s, wb["id"], f"soldier_{sid}")
+            f = request.files.get("soldier_portrait")
+            apply_portrait(s, wb["id"], f"soldier_{sid}", f)
+            return True, f"Updated {s['name']}."
+    return False, "Soldier not found."
+
+
+@register_action("hire_apprentice")
+def _act_hire_apprentice(wb: dict) -> tuple[bool, str]:
+    ok, msg = hire_apprentice(wb, (request.form.get("apprentice_name") or "").strip())
+    if ok:
+        f = request.files.get("apprentice_portrait")
+        apply_portrait(wb["apprentice"], wb["id"], "apprentice", f)
+    return ok, msg
+
+
+@register_action("dismiss_apprentice")
+def _act_dismiss_apprentice(wb: dict) -> tuple[bool, str]:
+    return dismiss_apprentice(wb, refund=request.form.get("refund") == "on")
+
+
+@register_action("update_homerules")
+def _act_update_homerules(wb: dict) -> tuple[bool, str]:
+    return update_homerules(wb, request.form)
+
+
+@register_action("set_wizard_state")
+def _act_set_wizard_state(wb: dict) -> tuple[bool, str]:
+    return set_wizard_state(wb, request.form.get("state_kind") or "")
+
+
+@register_action("advance_beastcrafter")
+def _act_advance_beastcrafter(wb: dict) -> tuple[bool, str]:
+    return advance_beastcrafter(wb)
+
+
+@register_action("set_animal_feature")
+def _act_set_animal_feature(wb: dict) -> tuple[bool, str]:
+    return set_animal_feature(wb, request.form.get("feature") or "")
+
+
+@register_action("add_pact_tier")
+def _act_add_pact_tier(wb: dict) -> tuple[bool, str]:
+    return add_pact_tier(
+        wb,
+        request.form.get("sacrifice") or "",
+        request.form.get("boon") or "",
+        (request.form.get("demon") or "").strip(),
+    )
+
+
+@register_action("break_pact")
+def _act_break_pact(wb: dict) -> tuple[bool, str]:
+    return break_wizard_pact(wb)
+
+
+@register_action("raise_revenant")
+def _act_raise_revenant(wb: dict) -> tuple[bool, str]:
+    return raise_revenant(wb, request.form.get("soldier_id") or "")
+
+
+@register_action("remove_revenant")
+def _act_remove_revenant(wb: dict) -> tuple[bool, str]:
+    return remove_revenant(wb, request.form.get("soldier_id") or "")
+
+
+@register_action("hire_captain")
+def _act_hire_captain(wb: dict) -> tuple[bool, str]:
+    ok, msg = hire_captain(
+        wb,
+        (request.form.get("captain_name") or "").strip(),
+        request.form.get("captain_extra_stat") or None,
+        request.form.getlist("captain_tricks"),
+    )
+    if ok:
+        f = request.files.get("captain_portrait")
+        apply_portrait(wb["captain"], wb["id"], "captain", f)
+    return ok, msg
+
+
+@register_action("dismiss_captain")
+def _act_dismiss_captain(wb: dict) -> tuple[bool, str]:
+    return dismiss_captain(wb, refund=request.form.get("refund") == "on")
+
+
+@register_action("captain_edit")
+def _act_captain_edit(wb: dict) -> tuple[bool, str]:
+    cap = wb.get("captain")
+    if not cap:
+        return False, "No captain hired."
+    cap["name"] = (request.form.get("captain_name") or cap.get("name", "")).strip()
+    cap["notes"] = request.form.get("captain_notes") or ""
+    cap["has_dagger"] = request.form.get("captain_dagger") == "on"
+    hr = wb.get("homerules") or {}
+    if cap.get("origin") == "promoted":
+        n = int(hr.get("promote_captain_item_slots", PROMOTE_CAPTAIN_ITEM_SLOTS))
+    else:
+        n = int(hr.get("captain_item_slots", CAPTAIN_ITEM_SLOTS))
+    slots = [(request.form.get(f"captain_slot_{i}") or "").strip() for i in range(n)]
+    cap["item_slots"] = normalize_item_slots(slots, n)
+    if request.form.get("captain_portrait_remove") == "on":
+        remove_portrait(cap, wb["id"], "captain")
+    f = request.files.get("captain_portrait")
+    apply_portrait(cap, wb["id"], "captain", f)
+    return True, f"Updated {cap['name']}."
+
+
+@register_action("captain_level_up")
+def _act_captain_level_up(wb: dict) -> tuple[bool, str]:
+    return apply_captain_level_up(wb, request.form.get("choice") or "")
+
+
+@register_action("reverse_captain_level_up")
+def _act_reverse_captain_level_up(wb: dict) -> tuple[bool, str]:
+    return reverse_last_captain_level_up(wb)
+
+
+@register_action("captain_pick_trick")
+def _act_captain_pick_trick(wb: dict) -> tuple[bool, str]:
+    return apply_captain_trick(wb, request.form.get("trick_id") or "")
+
+
+@register_action("captain_add_xp")
+def _act_captain_add_xp(wb: dict) -> tuple[bool, str]:
+    amount = _parse_signed_int(request.form.get("amount"))
+    if amount is None:
+        return False, "Enter a whole number for XP."
+    return add_captain_xp(wb, amount)
+
+
+@register_action("promote_soldier")
+def _act_promote_soldier(wb: dict) -> tuple[bool, str]:
+    return promote_soldier_to_captain(
+        wb,
+        request.form.get("soldier_id") or "",
+        request.form.get("extra_stat") or None,
+        request.form.getlist("tricks"),
+    )
+
+
+@register_action("soldier_add_xp")
+def _act_soldier_add_xp(wb: dict) -> tuple[bool, str]:
+    amount = _parse_signed_int(request.form.get("amount"))
+    if amount is None:
+        return False, "Enter a whole number for XP."
+    return add_soldier_xp(wb, request.form.get("soldier_id") or "", amount)
+
+
+@register_action("soldier_level_up")
+def _act_soldier_level_up(wb: dict) -> tuple[bool, str]:
+    return apply_soldier_level_up(
+        wb, request.form.get("soldier_id") or "", request.form.get("choice") or ""
+    )
+
+
+@register_action("reverse_soldier_level_up")
+def _act_reverse_soldier_level_up(wb: dict) -> tuple[bool, str]:
+    return reverse_last_soldier_level_up(wb, request.form.get("soldier_id") or "")
+
+
+@register_action("adjust_gold")
+def _act_adjust_gold(wb: dict) -> tuple[bool, str]:
+    delta = _parse_signed_int(request.form.get("delta"))
+    reason = (request.form.get("reason") or "").strip()
+    if delta is None:
+        return False, "Enter a whole number for the gold amount."
+    if delta == 0:
+        return False, "Enter a non-zero gold amount."
+    adjust_gold(wb, delta, reason)
+    return True, f"Treasury updated ({delta:+d} gc → {wb['gold']} gc)."
+
+
+@register_action("set_gold")
+def _act_set_gold(wb: dict) -> tuple[bool, str]:
+    amount = _parse_signed_int(request.form.get("amount"))
+    if amount is None:
+        return False, "Enter a whole number for gold."
+    old = int(wb.get("gold", 0))
+    wb["gold"] = amount
+    add_history(wb, f"Gold set to {amount} gc (was {old}).")
+    return True, f"Treasury set to {amount} gc."
+
+
+@register_action("add_log")
+def _act_add_log(wb: dict) -> tuple[bool, str]:
+    text = (request.form.get("log_text") or "").strip()
+    if not text:
+        return False, "Log entry was empty."
+    add_history(wb, text)
+    return True, "Log entry added."
+
+
+@register_action("level_up")
+def _act_level_up(wb: dict) -> tuple[bool, str]:
+    choice = request.form.get("choice") or ""
+    return apply_level_up(
+        wb,
+        choice,
+        spell_key=request.form.get("learn_spell") or None,
+        improve_spell_id=request.form.get("improve_spell") or None,
+    )
+
+
+@register_action("reverse_level_up")
+def _act_reverse_level_up(wb: dict) -> tuple[bool, str]:
+    return reverse_last_level_up(wb)
+
+
+@register_action("add_xp")
+def _act_add_xp(wb: dict) -> tuple[bool, str]:
+    xp = _parse_signed_int(request.form.get("xp"))
+    if xp is None:
+        return False, "Enter a whole number for XP."
+    ok, msg = add_wizard_xp(wb, xp)
+    if ok:
+        return True, f"{msg} Pending level-ups: {warband_limits(wb)['pending_levels']}."
+    return False, msg
+
+
+@register_action("spend_alt_xp")
+def _act_spend_alt_xp(wb: dict) -> tuple[bool, str]:
+    return spend_alt_xp(
+        wb,
+        request.form.get("conversion") or "",
+        request.form.get("xp_amount") or "0",
+    )
+
+
+@register_action("post_game")
+def _act_post_game(wb: dict) -> tuple[bool, str]:
+    gold_raw = (request.form.get("loot_gold") or "").strip()
+    xp_raw = (request.form.get("loot_xp") or "").strip()
+    captain_xp_raw = (request.form.get("loot_captain_xp") or "").strip()
+    gold = _parse_signed_int(gold_raw) if gold_raw else 0
+    xp = _parse_signed_int(xp_raw) if xp_raw else 0
+    captain_xp = _parse_signed_int(captain_xp_raw) if captain_xp_raw else 0
+    if gold is None or xp is None or captain_xp is None:
+        return False, "Enter whole numbers for gold and XP."
+    notes = request.form.get("loot_notes") or ""
+    items_raw = request.form.get("loot_items") or ""
+    items = [line.strip() for line in items_raw.splitlines() if line.strip()]
+    # also support comma-separated single line
+    if len(items) == 1 and "," in items[0]:
+        items = [x.strip() for x in items[0].split(",") if x.strip()]
+    # Rows from the rulebook -> item -> spell picker, alongside the freeform textarea.
+    items += [x.strip() for x in request.form.getlist("loot_structured_items") if x.strip()]
+    summary = record_game_loot(wb, gold, items, xp, notes, captain_xp)
+    return True, summary
+
+
+@register_action("remove_vault_item")
+def _act_remove_vault_item(wb: dict) -> tuple[bool, str]:
+    if remove_vault_item(wb, request.form.get("item_id") or ""):
+        return True, "Item removed from vault."
+    return False, "Item not found."
+
+
+@register_action("add_vault_item")
+def _act_add_vault_item(wb: dict) -> tuple[bool, str]:
+    name = (request.form.get("item_name") or "").strip()
+    if not name:
+        return False, "Item name required."
+    add_vault_item(wb, name, request.form.get("item_notes") or "", "manual")
+    return True, f"Added “{name}” to vault."
+
+
+@register_action("upload_wizard_portrait")
+def _act_upload_wizard_portrait(wb: dict) -> tuple[bool, str]:
+    f = request.files.get("wizard_portrait")
+    if not (f and f.filename):
+        return False, "Choose an image file."
+    apply_portrait(wb["wizard"], wb["id"], "wizard", f)
+    return True, "Wizard portrait updated."
+
+
+@register_action("upload_apprentice_portrait")
+def _act_upload_apprentice_portrait(wb: dict) -> tuple[bool, str]:
+    if not wb.get("apprentice"):
+        return False, "No apprentice."
+    f = request.files.get("apprentice_portrait")
+    if not (f and f.filename):
+        return False, "Choose an image file."
+    apply_portrait(wb["apprentice"], wb["id"], "apprentice", f)
+    return True, "Apprentice portrait updated."
+
+
+@register_action("reorder_spells")
+def _act_reorder_spells(wb: dict) -> tuple[bool, str]:
+    order_raw = (request.form.get("spell_order") or "").strip()
+    ids = [x for x in order_raw.split("|") if x]
+    return reorder_spells(wb, ids)
+
+
+@register_action("reorder_soldiers")
+def _act_reorder_soldiers(wb: dict) -> tuple[bool, str]:
+    order_raw = (request.form.get("soldier_order") or "").strip()
+    ids = [x for x in order_raw.split("|") if x]
+    return reorder_soldiers(wb, ids)
+
+
+@register_action("set_base_location")
+def _act_set_base_location(wb: dict) -> tuple[bool, str]:
+    loc = request.form.get("location") or "none"
+    ok, msg = set_base_location(wb, loc)
+    notes = (request.form.get("base_notes") or "").strip()
+    wb.setdefault("base", {})["notes"] = notes
+    return ok, msg
+
+
+@register_action("buy_base_resource")
+def _act_buy_base_resource(wb: dict) -> tuple[bool, str]:
+    return buy_base_resource(wb, request.form.get("resource") or "")
+
+
+@register_action("remove_base_resource")
+def _act_remove_base_resource(wb: dict) -> tuple[bool, str]:
+    return sell_or_remove_base_resource(
+        wb,
+        request.form.get("resource") or "",
+        refund=request.form.get("refund") == "on",
+    )
+
+
+@register_action("add_soldier_mutation")
+def _act_add_soldier_mutation(wb: dict) -> tuple[bool, str]:
+    has_input, number = _mutation_number_from_form()
+    if not has_input:
+        return False, "Pick a mutation to add, or use “Add random mutation”."
+    return add_soldier_mutation(wb, request.form.get("soldier_id") or "", number)
+
+
+@register_action("remove_soldier_mutation")
+def _act_remove_soldier_mutation(wb: dict) -> tuple[bool, str]:
+    return remove_soldier_mutation(wb, request.form.get("soldier_id") or "", _mutation_index_from_form())
+
+
+@register_action("add_wizard_mutation")
+def _act_add_wizard_mutation(wb: dict) -> tuple[bool, str]:
+    has_input, number = _mutation_number_from_form()
+    if not has_input:
+        return False, "Pick a mutation to add, or use “Add random mutation”."
+    return add_wizard_mutation(wb, number)
+
+
+@register_action("remove_wizard_mutation")
+def _act_remove_wizard_mutation(wb: dict) -> tuple[bool, str]:
+    return remove_wizard_mutation(wb, _mutation_index_from_form())
+
+
+@register_action("add_apprentice_mutation")
+def _act_add_apprentice_mutation(wb: dict) -> tuple[bool, str]:
+    has_input, number = _mutation_number_from_form()
+    if not has_input:
+        return False, "Pick a mutation to add, or use “Add random mutation”."
+    return add_apprentice_mutation(wb, number)
+
+
+@register_action("remove_apprentice_mutation")
+def _act_remove_apprentice_mutation(wb: dict) -> tuple[bool, str]:
+    return remove_apprentice_mutation(wb, _mutation_index_from_form())
+
+
+@register_action("add_captain_mutation")
+def _act_add_captain_mutation(wb: dict) -> tuple[bool, str]:
+    has_input, number = _mutation_number_from_form()
+    if not has_input:
+        return False, "Pick a mutation to add, or use “Add random mutation”."
+    return add_captain_mutation(wb, number)
+
+
+@register_action("remove_captain_mutation")
+def _act_remove_captain_mutation(wb: dict) -> tuple[bool, str]:
+    return remove_captain_mutation(wb, _mutation_index_from_form())
 
 
 def _update_details(wb: dict) -> None:
@@ -1191,7 +1213,7 @@ def _update_details(wb: dict) -> None:
 
 
 @app.route("/warband/<warband_id>/delete", methods=["POST"])
-def warband_delete(warband_id: str):
+def warband_delete(warband_id: str) -> Response:
     wb = _require_warband(warband_id)
     name = wb.get("name", warband_id)
     delete_warband(warband_id)
@@ -1200,7 +1222,7 @@ def warband_delete(warband_id: str):
 
 
 @app.route("/warband/<warband_id>/duplicate", methods=["POST"])
-def warband_duplicate(warband_id: str):
+def warband_duplicate(warband_id: str) -> Response:
     _require_warband(warband_id)
     custom = (request.form.get("new_name") or "").strip() or None
     wb, msg = duplicate_warband(warband_id, custom)
@@ -1212,7 +1234,7 @@ def warband_duplicate(warband_id: str):
 
 
 @app.route("/warband/<warband_id>/export")
-def warband_export(warband_id: str):
+def warband_export(warband_id: str) -> Response:
     wb = _require_warband(warband_id)
     payload = export_warband_json(wb)
     filename = f"{wb.get('id', 'warband')}.warbands"
@@ -1224,7 +1246,7 @@ def warband_export(warband_id: str):
 
 
 @app.route("/warband/<warband_id>/pdf")
-def warband_pdf(warband_id: str):
+def warband_pdf(warband_id: str) -> Response:
     wb = _require_warband(warband_id)
     # Imported lazily so the app can start without the PDF stack (fpdf / Pillow)
     # present — e.g. the in-browser build, where PDF export is not offered.
@@ -1240,7 +1262,7 @@ def warband_pdf(warband_id: str):
 
 
 @app.route("/import", methods=["GET", "POST"])
-def warband_import():
+def warband_import() -> str | Response:
     if request.method == "POST":
         uploaded = request.files.get("file")
         raw = ""
@@ -1250,12 +1272,17 @@ def warband_import():
             raw = request.form.get("json_text") or ""
         if not raw.strip():
             flash("Paste JSON or choose a file.", "error")
-            return render_template("import.html")
+            return render_template("import.html", json_text=raw)
         try:
             wb = import_warband_json(raw)
         except Exception as exc:
+            # Genuine last-resort guard — imported JSON is arbitrary user
+            # input and can fail in any number of ways (bad JSON, missing
+            # keys, wrong types); log it so a "could not import" report is
+            # diagnosable without the user having to reproduce it live.
+            logger.warning("Warband import failed: %s", exc, exc_info=True)
             flash(f"Could not import: {exc}", "error")
-            return render_template("import.html")
+            return render_template("import.html", json_text=raw)
         restored = restore_portraits_by_name(wb, request.files.getlist("pictures"))
         save_warband(wb)
         msg = f"Imported “{wb.get('name', 'warband')}”."
@@ -1269,7 +1296,7 @@ def warband_import():
 # ---- Settings (data folder) ------------------------------------------------
 
 @app.route("/settings", methods=["GET", "POST"])
-def settings():
+def settings() -> str | Response:
     if BROWSER_MODE:
         # Unreachable via the UI (no nav link in browser mode) — this is just
         # defense-in-depth, since a real filesystem config write makes no sense
@@ -1281,21 +1308,18 @@ def settings():
             flash("Enter a folder path.", "error")
         else:
             paths.set_user_data_dir(new_dir)
-            flash(
-                f"Data folder set to “{new_dir}”. Restart the app for this to take effect.",
-                "success",
-            )
+            flash(f"Data folder set to “{new_dir}”.", "success")
         return redirect(url_for("settings"))
     return render_template(
         "settings.html",
-        active_dir=str(WARBAND_DIR.parent),
+        active_dir=str(warband_dir().parent),
         configured_dir=str(paths.user_data_dir()),
         default_dir=str(paths.default_user_data_dir()),
     )
 
 
 @app.route("/settings/browse", methods=["POST"])
-def settings_browse():
+def settings_browse() -> tuple[dict, int] | dict:
     """Show a native folder picker via a short-lived subprocess — tkinter's
     dialog is not safe to call directly from a waitress worker thread."""
     if BROWSER_MODE:
@@ -1317,17 +1341,22 @@ def settings_browse():
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
         chosen = (result.stdout or "").strip()
     except Exception as exc:
+        # Genuine last-resort guard — the subprocess/tkinter dialog can fail
+        # in ways that vary by OS and desktop environment (missing tkinter,
+        # no display, timeout); log it since it's otherwise reported to the
+        # user only as the raw exception string in the JSON response.
+        logger.warning("Folder picker subprocess failed: %s", exc, exc_info=True)
         return {"path": "", "error": str(exc)}, 500
     return {"path": chosen}
 
 
 @app.errorhandler(404)
-def not_found(_e):
+def not_found(_e: Exception) -> Response:
     flash("That page or warband was not found.", "error")
     return redirect(url_for("home"))
 
 
-def main():
+def main() -> None:
     # Hidden flag: re-invoked by /settings/browse in a frozen build to show a
     # native folder picker without calling tkinter from a waitress worker
     # thread. Just print the chosen path and exit — no server involved.
@@ -1367,8 +1396,11 @@ def main():
 
                 tray.run(url)  # blocks on the tray icon's event loop until Quit
                 return
-            except Exception:
-                pass  # no usable tray backend — fall back to idle_watchdog alone
+            except Exception as exc:
+                # Genuine last-resort guard — tray backends vary by Windows
+                # version/desktop environment and can fail in ways we can't
+                # enumerate; fall back to idle_watchdog alone, but log why.
+                logger.info("Tray icon unavailable, falling back to idle_watchdog: %s", exc)
 
         threading.Event().wait()  # keep the main thread alive; idle_watchdog exits the process
     else:

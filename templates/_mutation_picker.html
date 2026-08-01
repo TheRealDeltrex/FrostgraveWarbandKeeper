@@ -11,7 +11,7 @@
           {% for m in mutations %}
             <li>
               <strong>{{ m.number }}. {{ m.name }}</strong> — {{ m.text }}
-              <form class="inline-form" method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
+              <form class="inline-form" method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" onsubmit="return confirm('Remove mutation “{{ m.name }}”? Any stat change it made will be reversed.');">
                 <input type="hidden" name="action" value="{{ remove_action }}" />
                 {% if soldier_id %}<input type="hidden" name="soldier_id" value="{{ soldier_id }}" />{% endif %}
                 <input type="hidden" name="mutation_index" value="{{ loop.index0 }}" />

@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import html
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -27,7 +28,9 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
-REFERENCE_DIR = Path(r"E:/RPG/Tabletop/Frostgrave")
+# Documented example only — set FWK_REFERENCE_DIR to point at your own copy of
+# these hand-compiled reference docs; they aren't part of the repo.
+REFERENCE_DIR = Path(os.environ.get("FWK_REFERENCE_DIR", r"E:/RPG/Tabletop/Frostgrave"))
 DEFAULT_SUPPLEMENTS = REFERENCE_DIR / "Frostgrave Expansion Reference.html"
 DEFAULT_GHOST = REFERENCE_DIR / "Ghost Archipelago Reference.html"
 # Second wave of supplements + the magazine, added in a later pass than the

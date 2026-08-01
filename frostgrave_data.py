@@ -171,7 +171,6 @@ SCROUNGER_WEAPON_BY_ID = {w["id"]: w for w in SCROUNGER_WEAPON_CHOICES}
 SCROUNGER_WEAPON_DEFAULT = "staff"
 
 # --- Soldier Leveling (homerule, not core 2e) -------------------------------
-SOLDIER_LEVELING_ENABLED = False
 SOLDIER_MAX_LEVELS = 3
 SOLDIER_STAT_CAPS = {
     "fight": {"limit": 0, "unlimited": False},
@@ -495,52 +494,52 @@ SCHOOL_RELATIONS: dict[str, dict] = {
     "Chronomancer": {
         "aligned": ["Elementalist", "Necromancer", "Soothsayer"],
         "neutral": ["Illusionist", "Sigilist", "Summoner", "Thaumaturge", "Witch"],
-        "opposed": "Enchanter",
+        "opposed": ["Enchanter"],
     },
     "Elementalist": {
         "aligned": ["Chronomancer", "Enchanter", "Summoner"],
         "neutral": ["Necromancer", "Sigilist", "Soothsayer", "Thaumaturge", "Witch"],
-        "opposed": "Illusionist",
+        "opposed": ["Illusionist"],
     },
     "Enchanter": {
         "aligned": ["Elementalist", "Sigilist", "Witch"],
         "neutral": ["Illusionist", "Necromancer", "Soothsayer", "Summoner", "Thaumaturge"],
-        "opposed": "Chronomancer",
+        "opposed": ["Chronomancer"],
     },
     "Illusionist": {
         "aligned": ["Sigilist", "Soothsayer", "Thaumaturge"],
         "neutral": ["Chronomancer", "Enchanter", "Necromancer", "Summoner", "Witch"],
-        "opposed": "Elementalist",
+        "opposed": ["Elementalist"],
     },
     "Necromancer": {
         "aligned": ["Chronomancer", "Summoner", "Witch"],
         "neutral": ["Elementalist", "Enchanter", "Illusionist", "Sigilist", "Soothsayer"],
-        "opposed": "Thaumaturge",
+        "opposed": ["Thaumaturge"],
     },
     "Sigilist": {
         "aligned": ["Enchanter", "Illusionist", "Thaumaturge"],
         "neutral": ["Chronomancer", "Elementalist", "Necromancer", "Soothsayer", "Witch"],
-        "opposed": "Summoner",
+        "opposed": ["Summoner"],
     },
     "Soothsayer": {
         "aligned": ["Chronomancer", "Illusionist", "Thaumaturge"],
         "neutral": ["Elementalist", "Enchanter", "Necromancer", "Sigilist", "Summoner"],
-        "opposed": "Witch",
+        "opposed": ["Witch"],
     },
     "Summoner": {
         "aligned": ["Elementalist", "Necromancer", "Witch"],
         "neutral": ["Chronomancer", "Enchanter", "Illusionist", "Soothsayer", "Thaumaturge"],
-        "opposed": "Sigilist",
+        "opposed": ["Sigilist"],
     },
     "Thaumaturge": {
         "aligned": ["Illusionist", "Sigilist", "Soothsayer"],
         "neutral": ["Chronomancer", "Elementalist", "Enchanter", "Summoner", "Witch"],
-        "opposed": "Necromancer",
+        "opposed": ["Necromancer"],
     },
     "Witch": {
         "aligned": ["Enchanter", "Necromancer", "Summoner"],
         "neutral": ["Chronomancer", "Elementalist", "Illusionist", "Sigilist", "Thaumaturge"],
-        "opposed": "Soothsayer",
+        "opposed": ["Soothsayer"],
     },
 }
 
@@ -551,15 +550,37 @@ SCHOOL_OPPOSED = {k: v["opposed"] for k, v in SCHOOL_RELATIONS.items()}
 
 
 def school_relation(wizard_school: str, spell_school: str) -> str:
+    """own/aligned/neutral/opposed of spell_school as wizard_school sees it.
+
+    Symmetric (H1): Vampire, Fire Giant, Rangifer, and the five Pentangle
+    schools only declare relations FROM their own perspective (toward the ten
+    core schools) — the core schools' own rows were never updated to name them
+    back. Frostgrave's alignment wheel is symmetric and no supplement
+    documents an intentional asymmetry, so if wizard_school's own table
+    doesn't mention spell_school, this checks spell_school's table for a
+    relation back to wizard_school instead of defaulting straight to neutral.
+    This mirroring happens here, dynamically, rather than by writing the
+    reverse entries into SCHOOL_RELATIONS itself — validate_starting_spells()
+    counts exactly one pick per name in a school's own "aligned" list, and
+    mutating that list would silently change how many starting spells a
+    wizard has to pick.
+    """
     if wizard_school == spell_school:
         return "own"
     rel = SCHOOL_RELATIONS.get(wizard_school)
-    if not rel:
-        return "neutral"
-    if spell_school in rel["aligned"]:
-        return "aligned"
-    if spell_school == rel["opposed"]:
-        return "opposed"
+    if rel:
+        if spell_school in rel["aligned"]:
+            return "aligned"
+        if spell_school in rel["opposed"]:
+            return "opposed"
+        if spell_school in rel["neutral"]:
+            return "neutral"
+    rev = SCHOOL_RELATIONS.get(spell_school)
+    if rev:
+        if wizard_school in rev["aligned"]:
+            return "aligned"
+        if wizard_school in rev["opposed"]:
+            return "opposed"
     return "neutral"
 
 
@@ -827,7 +848,7 @@ for _school, _spells in LOST_SPELLS.items():
     SCHOOL_RELATIONS[_school] = {
         "aligned": PENTANGLE_RELATIONS[_school]["aligned"],
         "neutral": [s for s in SCHOOLS if s not in PENTANGLE_RELATIONS[_school]["aligned"]],
-        "opposed": "",
+        "opposed": [],
     }
 del _school, _spells
 
@@ -868,12 +889,12 @@ BLOOD_LEGACY_SCHOOL_RELATIONS = {
     "Vampire": {
         "aligned": ["Chronomancer", "Necromancer", "Soothsayer"],
         "neutral": ["Elementalist", "Enchanter", "Illusionist", "Sigilist", "Summoner", "Witch"],
-        "opposed": "Thaumaturge",
+        "opposed": ["Thaumaturge"],
     },
     "Fire Giant": {
         "aligned": ["Enchanter", "Elementalist", "Soothsayer"],
         "neutral": ["Illusionist", "Necromancer", "Sigilist", "Summoner", "Thaumaturge", "Witch"],
-        "opposed": "Chronomancer",
+        "opposed": ["Chronomancer"],
     },
 }
 
@@ -902,7 +923,7 @@ RANGIFER_SPELLS = [
     {"name": "Sunder", "cn": 8, "type": "Line of Sight"},
 ]
 SPELLS["Rangifer"] = [{**sp, "source": "Spellcaster Magazine"} for sp in RANGIFER_SPELLS]
-SCHOOL_RELATIONS["Rangifer"] = {"aligned": [], "neutral": list(SCHOOLS), "opposed": ""}
+SCHOOL_RELATIONS["Rangifer"] = {"aligned": [], "neutral": list(SCHOOLS), "opposed": []}
 del RANGIFER_SPELLS
 
 # Schools that carry spells but that no wizard may choose at creation. They are

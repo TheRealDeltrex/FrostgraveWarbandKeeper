@@ -1,0 +1,25 @@
+[project]
+name = "frostgrave-warband-keeper"
+version = "1.0.0"
+description = "Local Frostgrave (2nd Edition) warband creator and maintainer"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "See LICENSE" }
+dependencies = [
+    "flask>=3.0.0",
+    "fpdf2>=2.7.0",
+    "Pillow>=10.0.0",
+    "waitress>=3.0.0",
+    "pystray>=0.19.5",
+]
+
+# requirements.txt / requirements-dev.txt remain the source installers
+# actually use (pip install -r ...); this file adds project metadata and tool
+# config on top without changing the install flow (E1).
+
+[tool.ruff]
+line-length = 110
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]

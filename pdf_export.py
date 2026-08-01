@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from io import BytesIO
 from pathlib import Path
 
@@ -9,9 +10,11 @@ from fpdf import FPDF
 
 import expansions
 
+logger = logging.getLogger(__name__)
+
 try:
     from PIL import Image
-except Exception:  # pragma: no cover - only hit if Pillow genuinely isn't installed
+except ImportError:  # pragma: no cover - only hit if Pillow genuinely isn't installed
     # fpdf2 itself hard-requires Pillow to embed any image (see _draw_portrait),
     # so this is a hard requirement, not an optional nicety. The in-browser
     # (Pyodide) build loads Pillow as a native Pyodide package (not a PyPI/
@@ -39,6 +42,7 @@ from warband_store import (
     normalize_item_slots,
     recompute_spell_cns,
     resolve_portrait_path,
+    wizard_effective_stats,
 )
 
 # Apprentice casts with -2 to the roll => effective difficulty is wizard CN + 2
@@ -149,7 +153,10 @@ def _crop_to_square(path: Path) -> BytesIO | None:
         img.save(buf, format="JPEG", quality=90)
         buf.seek(0)
         return buf
-    except Exception:
+    except OSError as exc:
+        # Corrupt/truncated file or a format Pillow can't identify
+        # (UnidentifiedImageError is itself a subclass of OSError).
+        logger.warning("Could not crop portrait %s for PDF export: %s", path, exc)
         return None
 
 
@@ -186,8 +193,8 @@ def _draw_portrait(
                     w=size - 2 * inset,
                     h=size - 2 * inset,
                 )
-            except Exception:
-                pass
+            except OSError as exc:
+                logger.warning("Could not embed portrait %s in PDF: %s", path, exc)
 
     pdf.set_draw_color(40, 70, 100)
     pdf.set_line_width(0.5)
@@ -288,7 +295,7 @@ def build_warband_pdf(wb: dict) -> bytes:
     left = pdf.l_margin + wiz_size + portrait_gap
     pdf.set_xy(left, y0)
     pdf.set_font("Helvetica", "B", 12)
-    wstats = wiz.get("stats") or {}
+    wstats = wizard_effective_stats(wb)
     school = wiz.get("school", "")
     # Lich / Beastcrafter / pact-holder, if any — it changes how the wizard levels
     # and what they may field, so it belongs on the printed sheet.

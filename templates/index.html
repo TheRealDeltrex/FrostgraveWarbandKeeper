@@ -15,10 +15,29 @@
     </div>
   </section>
 
+  {% if unreadable_warbands %}
+    <div class="card flash error">
+      <h2>Some warband files could not be read</h2>
+      <ul>
+        {% for u in unreadable_warbands %}
+          <li>
+            <code>{{ u.filename }}</code> — the file is still on disk at
+            <code>{{ u.path }}</code> ({{ u.error }})
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
   <div class="card">
     <h2>Your warbands</h2>
     {% if warbands %}
-      <ul class="warband-list">
+      {% if warbands|length > 5 %}
+        <div class="filter-bar">
+          <input type="search" id="warband-filter" placeholder="Filter warbands…" aria-label="Filter warbands" />
+        </div>
+      {% endif %}
+      <ul class="warband-list" id="warband-list">
         {% for w in warbands %}
           <li class="warband-list-item">
             <a class="card-link" href="{{ url_for('warband_view', warband_id=w.id) }}">
@@ -27,7 +46,7 @@
                 {% if src %}
                   <img class="portrait-sm" src="{{ src }}" alt="" />
                 {% else %}
-                  <span class="portrait-placeholder">❄</span>
+                  <span class="portrait-placeholder" aria-hidden="true">❄</span>
                 {% endif %}
                 <div>
                   <div class="title">{{ w.name }}</div>
@@ -59,4 +78,15 @@
       <a class="btn" href="{{ url_for('warband_new') }}">Create first warband</a>
     {% endif %}
   </div>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      if (window.fgInitFilter) {
+        window.fgInitFilter(
+          document.getElementById("warband-filter"),
+          document.getElementById("warband-list"),
+          { itemSelector: ".warband-list-item" }
+        );
+      }
+    });
+  </script>
 {% endblock %}

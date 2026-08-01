@@ -25,7 +25,7 @@
        Pentangle school only ever shows up in the dropdown once its toggle here
        is on. #}
     <details class="card" id="source-books-card" {% if enabled_sources_map and enabled_sources_map.values()|select|list %}open{% endif %}>
-      <summary><h2>1. Rules &amp; source books <span class="muted" style="font-weight:500;font-size:0.9rem">— optional</span></h2></summary>
+      <summary><span class="card-title">1. Rules &amp; source books <span class="muted" style="font-weight:500;font-size:0.9rem">— optional</span></span></summary>
       <p class="muted" style="font-size:0.88rem">
         Switch on the supplements you play with. Their spells become available below, and their
         mercenaries become hireable once the warband exists. You can change this later under
@@ -117,15 +117,15 @@
     </details>
 
     <details class="card" open>
-      <summary><h2>2. Warband &amp; wizard</h2></summary>
+      <summary><span class="card-title">2. Warband &amp; wizard</span></summary>
       <div class="grid-2">
         <div class="form-row">
           <label for="warband_name">Warband name</label>
-          <input id="warband_name" name="warband_name" type="text" required placeholder="The Frozen Hand" />
+          <input id="warband_name" name="warband_name" type="text" required placeholder="The Frozen Hand" value="{{ warband_name }}" />
         </div>
         <div class="form-row">
           <label for="wizard_name">Wizard name</label>
-          <input id="wizard_name" name="wizard_name" type="text" required placeholder="Morvain" />
+          <input id="wizard_name" name="wizard_name" type="text" required placeholder="Morvain" value="{{ wizard_name }}" />
         </div>
         <div class="form-row" id="school-field">
           <label for="school">School of magic</label>
@@ -143,12 +143,13 @@
             <div class="limit">Own (+0 CN): <strong>{{ school }}</strong></div>
             <div class="limit">Aligned (+2): {{ relations.aligned|join(', ') }}</div>
             <div class="limit">Neutral (+4): {{ relations.neutral|join(', ') }}</div>
-            <div class="limit bad">Opposed (+6, locked at start): {{ relations.opposed }}</div>
+            <div class="limit bad">Opposed (+6, locked at start): {{ relations.opposed|join(', ') }}</div>
           </div>
         </div>
         <div class="form-row">
           <label for="wizard_portrait">Wizard picture</label>
           <input id="wizard_portrait" name="wizard_portrait" type="file" accept="image/*" />
+          {% if warband_name or wizard_name %}<p class="muted" style="font-size:0.82rem;margin:0.25rem 0 0">Please re-select the wizard picture — it wasn't kept from your last submission.</p>{% endif %}
         </div>
       </div>
       <p class="muted">Starting wizard stats: Move 6 · Fight +2 · Shoot +0 · Armour 10 · Will +4 · Health 14</p>
@@ -159,17 +160,18 @@
         Same spells (cast with −2 to the roll). Cost: <span class="gold">{{ APPRENTICE_COST }} gc</span>.
       </p>
       <div class="checkbox-row">
-        <input id="with_apprentice" name="with_apprentice" type="checkbox" />
+        <input id="with_apprentice" name="with_apprentice" type="checkbox" {% if with_apprentice %}checked{% endif %} />
         <label for="with_apprentice" style="margin:0">Hire apprentice (−{{ APPRENTICE_COST }} gc)</label>
       </div>
       <div class="grid-2">
         <div class="form-row">
           <label for="apprentice_name">Apprentice name</label>
-          <input id="apprentice_name" name="apprentice_name" type="text" placeholder="Sable" />
+          <input id="apprentice_name" name="apprentice_name" type="text" placeholder="Sable" value="{{ apprentice_name }}" />
         </div>
         <div class="form-row">
           <label for="apprentice_portrait">Apprentice picture</label>
           <input id="apprentice_portrait" name="apprentice_portrait" type="file" accept="image/*" />
+          {% if with_apprentice %}<p class="muted" style="font-size:0.82rem;margin:0.25rem 0 0">Please re-select the apprentice picture — it wasn't kept from your last submission.</p>{% endif %}
         </div>
       </div>
     </details>
@@ -187,11 +189,11 @@
       } | tojson }}
     </script>
     <details class="card" open>
-      <summary><h2>3. Spells
+      <summary><span class="card-title">3. Spells
         <span class="muted" style="font-weight:500;font-size:0.9rem">
           — <span id="spell-count">0</span> / {{ STARTING_SPELL_COUNT }}
         </span>
-      </h2></summary>
+      </span></summary>
       <p class="muted" style="font-size:0.88rem">Click <strong>Info</strong> on a spell line for its description (not on PDF).</p>
 
       <div class="limit-bar" id="spell-limits">
@@ -200,7 +202,7 @@
           <div class="limit" data-aligned="{{ al }}">Aligned {{ al }}: <span class="al-count">0</span> / 1</div>
         {% endfor %}
         <div class="limit" id="lim-neutral">Neutral (diff. schools): <span id="neu-count">0</span> / {{ neutral_needed }}</div>
-        <div class="limit bad">Opposed {{ relations.opposed }}: locked</div>
+        <div class="limit bad">Opposed {{ relations.opposed|join(', ') }}: locked</div>
       </div>
 
       <div style="margin-top:1rem">
@@ -211,9 +213,9 @@
         </p>
         <details class="ref-panel" open>
           <summary>Spell list (collapse all)</summary>
-          {% set schools_order = [school] + relations.aligned + relations.neutral + [relations.opposed] %}
+          {% set schools_order = [school] + relations.aligned + relations.neutral + relations.opposed %}
           {% for sch in schools_order %}
-            {% set rel = 'own' if sch == school else ('aligned' if sch in relations.aligned else ('opposed' if sch == relations.opposed else 'neutral')) %}
+            {% set rel = 'own' if sch == school else ('aligned' if sch in relations.aligned else ('opposed' if sch in relations.opposed else 'neutral')) %}
             <details class="spell-school" {% if sch == school or sch in relations.aligned %}open{% endif %}>
               <summary>
                 <strong>{{ sch }}</strong>
@@ -283,7 +285,7 @@
     </div>
 
     <details class="card" open>
-      <summary><h2>4. Confirm</h2></summary>
+      <summary><span class="card-title">4. Confirm</span></summary>
       <p class="muted" style="margin:0 0 0.75rem">
         Soldiers aren't hired here — create the warband first, then recruit from the full roster
         on the warband page (that's also where supplement mercenaries live).
@@ -335,7 +337,7 @@
 
     function canAdd(school, currentlyChecked) {
       // Would checking this school be legal given current selection (excluding itself if already checked)?
-      if (school === OPPOSED) return false;
+      if (OPPOSED.includes(school)) return false;
       const c = counts();
       // If already checked, always allow uncheck path — handled separately
       if (currentlyChecked) return true;
@@ -361,7 +363,7 @@
     /** Stricter greying: also grey neutrals/aligned if remaining slots must be filled by other requirements. */
     function canAddSmart(school, currentlyChecked) {
       if (currentlyChecked) return true;
-      if (school === OPPOSED) return false;
+      if (OPPOSED.includes(school)) return false;
       if (!canAdd(school, false)) return false;
 
       const c = counts();
@@ -404,7 +406,7 @@
       if (c.neuTotal !== NEU_N) return false;
       if (c.neuSchools.length !== NEU_N) return false;
       if (c.neuSchools.some(s => (c.bySchool[s] || 0) !== 1)) return false;
-      if ((c.bySchool[OPPOSED] || 0) > 0) return false;
+      if (OPPOSED.some(s => (c.bySchool[s] || 0) > 0)) return false;
       return true;
     }
 
