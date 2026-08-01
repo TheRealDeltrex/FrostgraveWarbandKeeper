@@ -214,13 +214,23 @@ a:hover {
   font-weight: 700;
 }
 
-/* Flash */
+/* Flash toasts (D1): fixed bottom-right so the scroll-position restorer
+   (base.html) can't carry the user away from them. Errors have no
+   .dismissing auto-close; success/warn get one added by JS after ~4s. */
 .flashes {
   list-style: none;
-  margin: 0 0 1.1rem;
+  margin: 0;
   padding: 0;
   display: grid;
-  gap: 0.45rem;
+  gap: 0.5rem;
+  position: fixed;
+  z-index: 1000;
+  right: 1rem;
+  bottom: 1rem;
+  left: 1rem;
+  max-width: 26rem;
+  margin-left: auto;
+  pointer-events: none;
 }
 
 .flash {
@@ -228,6 +238,54 @@ a:hover {
   border-radius: 8px;
   border: 1px solid var(--border);
   font-size: 0.93rem;
+}
+
+/* Toast-only presentation (D1) — kept separate from the bare .flash color
+   classes above, which are also reused for standalone warning cards
+   (e.g. the unreadable-warbands notice on the home page) that aren't toasts
+   and shouldn't get a close button, shadow, or animation. */
+.flashes .flash {
+  padding: 0.65rem 2.1rem 0.65rem 0.95rem;
+  position: relative;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  pointer-events: auto;
+  animation: flash-in 0.18s ease-out;
+}
+
+.flashes .flash.dismissing {
+  animation: flash-out 0.18s ease-in forwards;
+}
+
+@keyframes flash-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+}
+
+@keyframes flash-out {
+  to {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+}
+
+.flash-close {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.5rem;
+  background: none;
+  border: none;
+  color: inherit;
+  opacity: 0.6;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0.2rem;
+}
+
+.flash-close:hover {
+  opacity: 1;
 }
 
 .flash.success {
@@ -1053,6 +1111,24 @@ code {
   gap: 0.2rem;
 }
 
+/* D7: filter.js toggles this on non-matching rows/entries. */
+.filter-hidden {
+  display: none !important;
+}
+
+.filter-bar {
+  margin: 0 0 0.75rem;
+  max-width: 420px;
+}
+
+.filter-bar input[type="search"] {
+  width: 100%;
+}
+
+.filter-no-match {
+  margin: 0.5rem 0 0;
+}
+
 .spell-row {
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -1181,9 +1257,15 @@ code {
   margin-bottom: 0.85rem;
 }
 
-.card > summary h2 {
+/* D10: card headings render as the <summary>'s accessible name, not a nested
+   <h2> — an interactive disclosure widget shouldn't also claim a document-
+   outline heading role. Styled to look identical to the old inline h2. */
+.card > summary .card-title {
   display: inline;
   margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--ice-dim);
 }
 
 .item-list-detail {
@@ -1324,6 +1406,12 @@ button:disabled,
 .btn:disabled {
   opacity: 0.45;
   cursor: not-allowed;
+}
+
+/* D9: submit-in-progress feedback, set briefly before the page navigates away. */
+button.busy:disabled {
+  opacity: 0.7;
+  cursor: progress;
 }
 
 @media (max-width: 700px) {

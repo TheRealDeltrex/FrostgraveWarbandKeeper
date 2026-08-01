@@ -54,18 +54,22 @@
 
       {% if BROWSER_MODE %}
         <div class="session-warning" role="alert">
-          <strong>⚠ Online session — nothing is saved.</strong>
-          This warband lives only in this browser tab. Use <strong>Export</strong> on a warband to
-          download it as a file, and <a href="{{ url_for('warband_import') }}">Import</a> to load it
-          again later. If you close or refresh this tab, anything not exported is gone.
+          <strong>⚠ Online version — saved in this browser only.</strong>
+          Your warbands are kept in this browser (this device, this browser) and survive a refresh
+          or closing the tab — but not clearing browser data, a different browser, or another device.
+          Use <strong>Export</strong> on a warband for a portable backup, and
+          <a href="{{ url_for('warband_import') }}">Import</a> to load it elsewhere.
         </div>
       {% endif %}
 
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-          <ul class="flashes">
+          <ul class="flashes" role="status" aria-live="polite">
             {% for category, message in messages %}
-              <li class="flash {{ category }}">{{ message }}</li>
+              <li class="flash {{ category }}" data-autodismiss="{{ 'false' if category == 'error' else 'true' }}">
+                {{ message }}
+                <button type="button" class="flash-close" aria-label="Dismiss">&times;</button>
+              </li>
             {% endfor %}
           </ul>
         {% endif %}
@@ -78,6 +82,7 @@
       </footer>
     </div>
     <script src="{{ url_for('static', filename='item_slots.js') }}"></script>
+    <script src="{{ url_for('static', filename='filter.js') }}"></script>
     <script>
       (function () {
         // Saving a form (post -> redirect -> get, same URL) should return the
@@ -149,12 +154,41 @@
         // save before submitting a form programmatically.
         window.fgSaveViewState = saveViewState;
 
+        // Debounced auto-submit (D5): reorder controls call this after every
+        // DOM move instead of submitting immediately, so moving an entry
+        // several places is one POST instead of one per click.
+        window.fgDebounceSubmit = function (form, ms) {
+          clearTimeout(form._fgDebounceTimer);
+          form._fgDebounceTimer = setTimeout(function () {
+            saveViewState();
+            if (form.requestSubmit) form.requestSubmit();
+            else form.submit();
+          }, ms);
+        };
+
         document.addEventListener(
           "submit",
           function (e) {
             var form = e.target;
             if (form && form.tagName === "FORM" && (form.method || "get").toLowerCase() === "post") {
               saveViewState();
+              // Busy feedback (D9): disable the pressed submit button so a slow
+              // save or a second accidental click can't double-submit; it
+              // re-enables naturally on the full-page reload that follows.
+              // Deferred via setTimeout(0) — some forms rely on the submitter
+              // button's own name/value pair (e.g. the mutation picker's
+              // "pick" vs "random" buttons), and disabling a form control
+              // synchronously inside the submit handler excludes it from the
+              // submitted data; deferring to the next tick lets the browser
+              // read the form first.
+              var submitter = e.submitter;
+              if (submitter && submitter.tagName === "BUTTON" && !submitter.disabled) {
+                setTimeout(function () {
+                  submitter.disabled = true;
+                  submitter.classList.add("busy");
+                  submitter.textContent = "Saving…";
+                }, 0);
+              }
             }
           },
           true
@@ -209,6 +243,40 @@
             } catch (err) {
               /* ignore */
             }
+          }
+        });
+      })();
+    </script>
+    <script>
+      (function () {
+        // Flash toasts (D1): fixed bottom-right so they're never scrolled
+        // out of view by the restorer above. Errors stay until dismissed;
+        // success/warn auto-dismiss after a few seconds.
+        var AUTO_DISMISS_MS = 4000;
+
+        function dismiss(li) {
+          if (!li || li.classList.contains("dismissing")) return;
+          li.classList.add("dismissing");
+          li.addEventListener(
+            "animationend",
+            function () {
+              li.remove();
+            },
+            { once: true }
+          );
+        }
+
+        document.querySelectorAll(".flashes > .flash").forEach(function (li) {
+          var closeBtn = li.querySelector(".flash-close");
+          if (closeBtn) {
+            closeBtn.addEventListener("click", function () {
+              dismiss(li);
+            });
+          }
+          if (li.dataset.autodismiss === "true") {
+            setTimeout(function () {
+              dismiss(li);
+            }, AUTO_DISMISS_MS);
           }
         });
       })();

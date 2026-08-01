@@ -7,6 +7,10 @@ actually render. Re-run this after any change to templates/warband_view.html,
 templates/reference.html, templates/base.html, or static/style.css — then copy the
 regenerated docs/preview-*.html + docs/static/* over to the `main` branch.
 
+IMPORTANT: docs/static/style.css and docs/static/item_slots.js are generated copies.
+If this script isn't re-run after a CSS/JS change, the published preview drifts from
+the real app (this has happened before) — always re-run before publishing.
+
 Usage (from the repo root, on devversion, with the venv active):
     python scripts/build_preview_pages.py
 
@@ -26,7 +30,9 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
-# Must happen before importing app/warband_store — WARBAND_DIR is resolved once at import time.
+# warband_store resolves its data folder lazily now (B4), so this no longer
+# strictly needs to happen before the import — kept here anyway so the demo
+# warband is unambiguously built in a scratch dir from the very first line.
 os.environ["FWK_DATA_DIR"] = tempfile.mkdtemp(prefix="fwk-preview-")
 
 sys.path.insert(0, str(REPO_ROOT))

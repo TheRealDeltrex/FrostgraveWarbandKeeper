@@ -4,6 +4,9 @@
  * 2H weapons occupy two slots; unselect clears both.
  */
 (function () {
+  // Kept in sync by hand with item_slot_cost()'s two-handed detection in
+  // game_content.py (B5.5) — that Python function is the server-side source of
+  // truth; this is a client-side mirror for instant feedback before posting.
   function isTwoHandedName(name) {
     const n = (name || "").trim().toLowerCase();
     return (

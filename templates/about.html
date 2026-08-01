@@ -3,26 +3,40 @@
 {% block content %}
   <section class="hero">
     <h1>About</h1>
-    <p>Local multi-page Frostgrave warband creator and campaign tracker. No login; data stays on your PC.</p>
+    <p>Local multi-page Frostgrave warband creator and maintainer — also runs entirely in the browser. No login; data stays on your PC (or, in the browser version, in this tab).</p>
   </section>
   <div class="grid-2">
     <div class="card">
       <h2>Features</h2>
       <ul class="list-plain">
-        <li>Wizard: name, school, portrait, 8 spells with CN</li>
-        <li>Apprentice: name + portrait; stats/spells auto from wizard</li>
-        <li>Level-up wizard (stats / learn / improve spell); apprentice auto-levels</li>
-        <li>Recruit soldiers with cost + total/specialist limits</li>
-        <li>Post-game gold, XP, and items into treasury/vault</li>
-        <li>PDF roster: wizard, apprentice, spells, soldiers</li>
+        <li>Wizard: name, school, portrait, spells with casting numbers (own/aligned/neutral/opposed penalties)</li>
+        <li>Apprentice: name + portrait; stats/spells auto-derived from the wizard</li>
+        <li>Level-up wizard (stats / learn / improve spell), with reversible level-ups</li>
+        <li>Wizard states: Lich, Beastcrafter, Demonic Pacts</li>
+        <li>Captains: hire or promote a soldier, tricks, level-up</li>
+        <li>Grave mutations for wizard, apprentice, captain, and soldiers</li>
+        <li>Recruit soldiers with cost + total/specialist limits, optional soldier leveling</li>
+        <li>Home base: location and resources</li>
+        <li>Treasury and vault, post-game gold/XP/items entry</li>
+        <li>Per-warband homerules for most of the above</li>
+        <li>PDF roster export and JSON export/import</li>
+        <li>Frostgrave Lexicon: full spell/soldier/bestiary/magic-item reference</li>
         <li>Name + picture on every character</li>
       </ul>
     </div>
     <div class="card">
       <h2>Data &amp; disclaimer</h2>
-      <p class="muted">
-        Warbands: <code>data/warbands/</code> · Portraits: <code>data/portraits/</code>
-      </p>
+      {% if BROWSER_MODE %}
+        <p class="muted">
+          This is the browser version: everything lives only in this tab. Use Export to save a
+          warband as a file, and Import to load it again later.
+        </p>
+      {% else %}
+        <p class="muted">
+          Warbands and portraits are saved as plain files under your data folder
+          (see <a href="{{ url_for('settings') }}">Settings</a> for the exact path, and to change it).
+        </p>
+      {% endif %}
       <p class="muted">
         Unofficial fan tool — not affiliated with Osprey Games or Joseph A. McCullough.
         Spell casting numbers follow 2e spell cards; always check your rulebook.

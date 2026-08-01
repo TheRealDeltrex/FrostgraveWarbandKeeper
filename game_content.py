@@ -3,16 +3,23 @@
 from __future__ import annotations
 
 import json
+import logging
 from functools import lru_cache
 
 import paths
 
 DATA = paths.bundle_dir() / "data"
+logger = logging.getLogger(__name__)
 
 
 @lru_cache(maxsize=1)
 def load_standard_items() -> list[dict]:
-    """Full list including armour (kept for later / reference)."""
+    """Full list including armour (kept for later / reference).
+
+    Unlike spells/soldiers/magic items, standard items are deliberately NOT
+    filtered by enabled_sources — mundane gear (e.g. Ghost Archipelago's
+    Throwing Knife) is available regardless of which source books are
+    switched on for a warband. The `source` field here is informational only."""
     path = DATA / "standard_items.json"
     if not path.is_file():
         return []
@@ -233,7 +240,8 @@ def load_spell_names() -> list[str]:
 
         names = [sp["name"] for _, sps in SPELLS.items() for sp in sps]
         return sorted(set(names), key=str.lower)
-    except Exception:
+    except (ImportError, KeyError) as exc:
+        logger.warning("Could not load spell names: %s", exc)
         return []
 
 
@@ -243,10 +251,6 @@ def load_spell_descriptions() -> dict[str, str]:
     if not path.is_file():
         return {}
     return json.loads(path.read_text(encoding="utf-8"))
-
-
-def spell_description(name: str) -> str:
-    return load_spell_descriptions().get(name, "") or "No description available."
 
 
 def enrich_spells_with_descriptions(spells: list[dict]) -> list[dict]:
@@ -295,6 +299,9 @@ def item_slot_cost(name: str) -> int:
     for it in load_standard_items():
         if it["name"].lower() == n:
             return int(it.get("slot_cost", 1))
+    # Kept in sync by hand with isTwoHandedName() in static/item_slots.js (B5.5) —
+    # that JS does the same detection client-side for instant slot-count feedback
+    # before the form posts here.
     if any(k in n for k in ("two-handed", "two handed", "2h ", "2-handed", "2 handed")):
         return 2
     return 1
@@ -316,25 +323,7 @@ def parse_item_selection(value: str) -> tuple[str, str]:
             return v, ""
 
     potions = load_potion_choices()
-    if v in potions or v.lower().startswith("potion of ") or v in {
-        "Poison",
-        "Explosive Cocktail",
-        "Construct Oil",
-        "Elixir of Speed",
-        "Elixir of the Chameleon",
-        "Elixir of Life",
-        "Cordial of Clearsight",
-        "Cordial of Empowerment",
-        "Philtre of Fury",
-        "Philtre of Fairy Dust",
-        "Bottle of Burrowing",
-        "Bottle of Darkness",
-        "Bottle of Dreams and Nightmares",
-        "Bottle of Null",
-        "Ethereal Vacuum",
-        "Shatterstar Draught",
-        "Shrinking Potion",
-    }:
+    if v in potions or v.lower().startswith("potion of "):
         return "Potion", v
 
     if v.startswith("Scroll of "):

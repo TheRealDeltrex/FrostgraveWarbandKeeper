@@ -10,10 +10,13 @@
       Spells: {{ OWN_SCHOOL_SPELLS }} own + 1 each aligned + {{ NEUTRAL_SPELLS }} neutrals (different schools) · no opposed at start.
       CN penalties: own +0 · aligned +2 · neutral +4 · opposed +6.
     </p>
+    <div class="filter-bar">
+      <input type="search" id="lexicon-filter" placeholder="Filter spells, items, soldiers, bestiary…" aria-label="Filter the Lexicon" />
+    </div>
   </section>
 
   <details class="card">
-    <summary><h2>Schools</h2></summary>
+    <summary><span class="card-title">Schools</span></summary>
     <h3>Standard Schools</h3>
     <div class="table-wrap">
       <table>
@@ -24,7 +27,7 @@
               <td><strong>{{ s }}</strong></td>
               <td class="muted">{{ relations[s].aligned|join(', ') }}</td>
               <td class="muted">{{ relations[s].neutral|join(', ') }}</td>
-              <td>{{ relations[s].opposed }}</td>
+              <td>{{ relations[s].opposed|join(', ') }}</td>
             </tr>
           {% endfor %}
         </tbody>
@@ -41,7 +44,7 @@
               <td><strong>{{ s }}</strong></td>
               <td class="muted">{{ relations[s].aligned|join(', ') }}</td>
               <td class="muted">{{ relations[s].neutral|join(', ') }}</td>
-              <td>{{ relations[s].opposed }}</td>
+              <td>{{ relations[s].opposed|join(', ') }}</td>
             </tr>
           {% endfor %}
         </tbody>
@@ -50,7 +53,7 @@
   </details>
 
   <details class="card">
-    <summary><h2>Spells by school</h2></summary>
+    <summary><span class="card-title">Spells by school</span></summary>
     <p class="muted">Click <strong>Info</strong> on a spell line for full text.</p>
     {% for sch, splist in spells.items() %}
       <details class="ref-panel">
@@ -81,7 +84,7 @@
   </details>
 
   <details class="card">
-    <summary><h2>Arms, armour &amp; consumables</h2></summary>
+    <summary><span class="card-title">Arms, armour &amp; consumables</span></summary>
     <p class="muted">General Arms and Armour List from Frostgrave 2e, plus a few notable supplement
       weapons and potion / scroll / grimoire types.</p>
     <div class="item-list-detail">
@@ -134,7 +137,7 @@
   </details>
 
   <details class="card">
-    <summary><h2>Soldiers ({{ soldiers|length }})</h2></summary>
+    <summary><span class="card-title">Soldiers ({{ soldiers|length }})</span></summary>
     <p class="muted">Core tables plus every supplement soldier. Supplement soldiers must have their source
       book switched on under a warband's Additional Rules and Homerules before they can be hired.
       Entries marked <em>via &lt;spell&gt;</em> are summoned for free and only become hireable when your
@@ -185,7 +188,7 @@
   </details>
 
   <details class="card">
-    <summary><h2>Bestiary ({{ bestiary|length }})</h2></summary>
+    <summary><span class="card-title">Bestiary ({{ bestiary|length }})</span></summary>
     <p class="muted">Creatures from the Core Rules and the supplements (Thaw of the Lich Lord, Into the Breeding
       Pits, Forgotten Pacts, The Maze of Malcor, The Perilous Dark). Each carries its source. Click
       <strong>Info</strong> for full rules text.</p>
@@ -225,7 +228,7 @@
   </details>
 
   <details class="card">
-    <summary><h2>Traits ({{ traits|length }})</h2></summary>
+    <summary><span class="card-title">Traits ({{ traits|length }})</span></summary>
     <p class="muted">Every trait a creature or mutation can carry — Undead, Burrowing, Large, and the
       rest — with the exact rule each one grants.</p>
     {% if traits %}
@@ -244,7 +247,7 @@
   </details>
 
   <details class="card">
-    <summary><h2>Random encounters</h2></summary>
+    <summary><span class="card-title">Random encounters</span></summary>
     <p class="muted">The optional random-encounter tables from the core rules and the supplements that
       give one — roll when a treasure token is first picked up (core: 10+), or however your group has
       house-ruled it. Not every supplement has a standalone table; Into the Breeding Pits' underground
@@ -272,7 +275,7 @@
   </details>
 
   <details class="card">
-    <summary><h2>Magic items &amp; treasure ({{ magic_item_count }})</h2></summary>
+    <summary><span class="card-title">Magic items &amp; treasure ({{ magic_item_count }})</span></summary>
     <p class="muted">Treasure from the core rules and the supplements. A book's items only become
       suggestions in a warband's vault once that book is switched on under its Additional Rules and
       Homerules — but everything is browsable here.</p>
@@ -294,7 +297,7 @@
   </details>
 
   <details class="card">
-    <summary><h2>Loot tables</h2></summary>
+    <summary><span class="card-title">Loot tables</span></summary>
     <p class="muted">The top-level "roll to see what you found" tables — how many potions, scrolls, or
       rolls on the magic item/weapon/armour/grimoire tables a recovered treasure token is worth. The
       items themselves are the Magic items &amp; treasure table above and the Potions sub-list under
@@ -322,7 +325,7 @@
   </details>
 
   <details class="card">
-    <summary><h2>Expansion rules</h2></summary>
+    <summary><span class="card-title">Expansion rules</span></summary>
     <p class="muted">The table rules each supplement adds beyond its soldiers, spells and creatures —
       traps, demonic attributes, underground play, the optional core-rule updates, the solo/co-op
       toolkit. Reference only: these govern play at the table, so the app shows them rather than
@@ -448,7 +451,7 @@
 
   {% if ghost and ghost.sections %}
   <details class="card">
-    <summary><h2>Ghost Archipelago</h2></summary>
+    <summary><span class="card-title">Ghost Archipelago</span></summary>
     <p class="muted">A separate Osprey ruleset, not a Frostgrave supplement — a Heritor and a Warden
       lead a Crew across the Lost Isles instead of a Wizard leading a Warband. Nothing here is
       hireable and it has no source-book toggle; it is carried purely for reference.</p>
@@ -480,7 +483,7 @@
   {% endif %}
 
   <details class="card">
-    <summary><h2>Quick Reference</h2></summary>
+    <summary><span class="card-title">Quick Reference</span></summary>
     <p class="muted">The Core Rules' own condensed reference sheet — turn sequence, actions,
       combat/shooting/casting procedures, and the post-game checklist.</p>
     {% for sec in quick_reference %}
@@ -495,4 +498,11 @@
       </details>
     {% endfor %}
   </details>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      if (window.fgInitFilter) {
+        window.fgInitFilter(document.getElementById("lexicon-filter"), document.querySelector(".container"));
+      }
+    });
+  </script>
 {% endblock %}

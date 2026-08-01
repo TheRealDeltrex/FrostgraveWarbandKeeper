@@ -77,3 +77,23 @@ def set_user_data_dir(path: Path | str) -> None:
     cfg = load_config()
     cfg["data_dir"] = str(path)
     save_config(cfg)
+
+
+def get_or_create_secret_key() -> str:
+    """Flask session secret (only used for flash messages — this app has no
+    accounts). A per-install random key persisted next to the warband data
+    (E6), generated once on first run, instead of a fixed value baked into
+    the exe. Kept inside user_data_dir() rather than the global config.json
+    so it respects the same FWK_DATA_DIR sandboxing tests/scripts already use
+    — nothing here should ever touch a real install's files by accident."""
+    key_path = user_data_dir() / ".secret_key"
+    if key_path.is_file():
+        existing = key_path.read_text(encoding="utf-8").strip()
+        if existing:
+            return existing
+    import secrets
+
+    key = secrets.token_hex(32)
+    key_path.parent.mkdir(parents=True, exist_ok=True)
+    key_path.write_text(key, encoding="utf-8")
+    return key

@@ -14,23 +14,17 @@ block_cipher = None
 # Only the read-only reference data is bundled. Runtime user data (warbands,
 # portraits) is never bundled — it lives in paths.user_data_dir(), resolved
 # fresh at runtime, outside this read-only extracted bundle.
+#
+# Globbed rather than hand-listed (B6) — this exact list used to be
+# maintained by hand in three places (this file, frostgrave-linux.spec, and
+# scripts/build_browser_bundle.py) and has desynced and shipped broken twice
+# (see git history). A glob can't drift.
+from pathlib import Path
+
 datas = [
     ("templates", "templates"),
     ("static", "static"),
-    ("data/potions.json", "data"),
-    ("data/potion_descriptions.json", "data"),
-    ("data/spell_descriptions.json", "data"),
-    ("data/standard_items.json", "data"),
-    ("data/bestiary.json", "data"),
-    ("data/magic_items.json", "data"),
-    ("data/expansion_rules.json", "data"),
-    ("data/grave_mutation_meta.json", "data"),
-    ("data/traits.json", "data"),
-    ("data/quick_reference.json", "data"),
-    ("data/ghost_archipelago.json", "data"),
-    ("data/loot_tables.json", "data"),
-    ("data/random_encounters.json", "data"),
-]
+] + [(str(p), "data") for p in sorted(Path("data").glob("*.json"))]
 
 a = Analysis(
     ["run_app.py"],

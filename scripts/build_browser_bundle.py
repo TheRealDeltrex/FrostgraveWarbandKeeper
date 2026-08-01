@@ -21,13 +21,22 @@ cross-branch flow as the preview pages and docs/index.html).
 """
 from __future__ import annotations
 
+import hashlib
 import json
+import re
 import shutil
 from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "docs" / "app" / "bundle.json"
+SHELL = ROOT / "docs" / "app" / "index.html"
+
+# F2: matches the shell's bundle.json fetch URL regardless of what's currently
+# there — a first-run placeholder ("__BUNDLE_VERSION__") or a previous build's
+# hash — so this substitution is idempotent across repeated builds without
+# needing separate template/output copies of index.html.
+BUNDLE_VERSION_RE = re.compile(r'(bundle\.json\?v=)[^"]*')
 
 # Python modules the Flask app needs at import time (pdf_export is imported
 # lazily by the /pdf route, but does get imported in-browser — fpdf2 is
@@ -43,22 +52,10 @@ PY_MODULES = [
     "pdf_export.py",
 ]
 
-# Reference data read by game_content / the reference page.
-DATA_FILES = [
-    "data/bestiary.json",
-    "data/spell_descriptions.json",
-    "data/potions.json",
-    "data/potion_descriptions.json",
-    "data/standard_items.json",
-    "data/magic_items.json",
-    "data/expansion_rules.json",
-    "data/grave_mutation_meta.json",
-    "data/traits.json",
-    "data/quick_reference.json",
-    "data/ghost_archipelago.json",
-    "data/loot_tables.json",
-    "data/random_encounters.json",
-]
+# Reference data read by game_content / the reference page. Globbed rather
+# than hand-listed (B6) — this exact list used to be maintained by hand here
+# and in both PyInstaller specs, and has desynced and shipped broken twice.
+DATA_FILES = [f"data/{p.name}" for p in sorted((ROOT / "data").glob("*.json"))]
 
 # Loaded once and inlined into every rendered page by the shell (the in-browser
 # app has no real static-file server).
@@ -115,6 +112,20 @@ def mirror_portraits() -> int:
     return n
 
 
+def update_bundle_version(bundle_bytes: bytes) -> str:
+    """F2: stamps the shell's bundle.json fetch URL with a content hash instead
+    of Date.now(), so GitHub Pages' HTTP caching actually works — repeat visits
+    between builds re-fetch nothing, and the URL only changes when the bundle's
+    content does."""
+    version = hashlib.sha256(bundle_bytes).hexdigest()[:12]
+    html = SHELL.read_text(encoding="utf-8")
+    new_html, n = BUNDLE_VERSION_RE.subn(rf"\g<1>{version}", html)
+    if n == 0:
+        raise RuntimeError(f"Could not find the bundle.json version placeholder in {SHELL}")
+    SHELL.write_text(new_html, encoding="utf-8")
+    return version
+
+
 def main() -> None:
     files = collect()
     OUT.parent.mkdir(parents=True, exist_ok=True)
@@ -122,12 +133,16 @@ def main() -> None:
         "generated": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
         "files": files,
     }
-    OUT.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+    bundle_bytes = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+    OUT.write_bytes(bundle_bytes)
 
     total = sum(len(v) for v in files.values())
     print(f"Wrote {OUT} — {len(files)} files, {total/1024:.0f} KB uncompressed.")
     for name in files:
         print(f"  {name}")
+
+    version = update_bundle_version(bundle_bytes)
+    print(f"Stamped {SHELL} with bundle version {version}")
 
     n_portraits = mirror_portraits()
     print(f"Mirrored {n_portraits} default portrait(s) to {PORTRAITS_OUT}")

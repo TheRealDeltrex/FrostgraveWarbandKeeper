@@ -3,24 +3,26 @@
 from __future__ import annotations
 
 import json
+import logging
 import math
+import os
 import random
 import re
 import shutil
 import uuid
+from collections.abc import Callable, Iterable
 from copy import deepcopy
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import TYPE_CHECKING, TypedDict
 
 import expansions
 import paths
-from game_content import equipment_bonuses, grave_mutations_by_number
 from frostgrave_data import (
     ALIGNED_SCHOOL_SPELLS,
     APPRENTICE_BASE,
     APPRENTICE_COST,
     APPRENTICE_ITEM_SLOTS,
-    APPRENTICE_STAT_OFFSET,
     BASE_LOCATIONS,
     BASE_RESOURCES,
     CAPTAIN_BASE,
@@ -40,58 +42,93 @@ from frostgrave_data import (
     KNIGHTLY_ORDER_BY_ID,
     KNIGHTLY_ORDER_ELIGIBLE,
     KNIGHTLY_ORDER_IDS,
-    KNIGHTLY_ORDERS,
     LEVELUP_STATS,
-    SCROUNGER_WEAPON_BY_ID,
-    SCROUNGER_WEAPON_CHOICES,
-    SCROUNGER_WEAPON_DEFAULT,
-    SCROUNGER_WEAPON_IDS,
     MAX_SOLDIERS,
     MAX_SPECIALISTS,
     MAX_WIZARD_LEVEL,
-    NEUTRAL_SPELLS,
     OWN_SCHOOL_SPELLS,
+    PENTANGLE_SCHOOLS,
     PROMOTE_CAPTAIN_BONUS,
     PROMOTE_CAPTAIN_COST,
     PROMOTE_CAPTAIN_ITEM_SLOTS,
     PROMOTE_CAPTAIN_TRICKS,
-    SCHOOL_ALIGNED,
-    SCHOOL_NEUTRAL,
-    SCHOOL_OPPOSED,
     SCHOOL_RELATIONS,
     SCHOOLS,
+    SCROUNGER_WEAPON_BY_ID,
+    SCROUNGER_WEAPON_DEFAULT,
+    SCROUNGER_WEAPON_IDS,
     SOLDIER_MAX_LEVELS,
     SOLDIER_STAT_CAPS,
-    PENTANGLE_SCHOOLS,
     SOLDIERS,
-    SOURCE_BOOKS,
     SOURCE_BOOK_BY_SLUG,
+    SOURCE_BOOKS,
     STARTING_GOLD,
-    TEMPORARY_MEMBER_LIMIT,
-    WIZARD_MIN_CASTING_NUMBER_DEFAULT,
-    WIZARD_STAT_LIMITS_DEFAULT,
     STARTING_SPELL_COUNT,
+    TEMPORARY_MEMBER_LIMIT,
     WIZARD_BASE,
     WIZARD_ITEM_SLOTS,
+    WIZARD_MIN_CASTING_NUMBER_DEFAULT,
+    WIZARD_STAT_LIMITS_DEFAULT,
     XP_PER_LEVEL,
     animal_companion_type_keys,
     bonus_choice_amount,
     cn_penalty,
-    effective_cn,
     find_spell,
     get_soldier,
     level_from_xp,
     school_relation,
-    spell_id,
-    xp_for_level,
     xp_to_next_level,
 )
+from game_content import equipment_bonuses, grave_mutations_by_number
 
-DATA_DIR = paths.user_data_dir()
-WARBAND_DIR = DATA_DIR / "warbands"
-PORTRAIT_DIR = DATA_DIR / "portraits"
-WARBAND_DIR.mkdir(parents=True, exist_ok=True)
-PORTRAIT_DIR.mkdir(parents=True, exist_ok=True)
+logger = logging.getLogger(__name__)
+
+if TYPE_CHECKING:
+    # Only used for type hints — this module otherwise stays framework-
+    # agnostic (it just duck-types "has .filename / .save()" / "has .get()").
+    from werkzeug.datastructures import FileStorage, ImmutableMultiDict
+
+
+class Warband(TypedDict, total=False):
+    """Shape of the dict built by create_warband() (E3). total=False since
+    every key is optional in principle — old files pre-migration, or a dict
+    mid-construction, may be missing some. Sub-entities (wizard/apprentice/
+    captain/soldier/vault item/base) aren't broken out into their own
+    TypedDicts — the value here is documenting the warband's top-level shape
+    for IDE support, not chasing full static coverage."""
+
+    id: str
+    schema_version: int
+    name: str
+    created: str
+    updated: str
+    gold: int
+    notes: str
+    wizard: dict
+    apprentice: dict | None
+    captain: dict | None
+    homerules: dict
+    soldiers: list[dict]
+    vault_items: list[dict]
+    base: dict
+    history: list[dict]
+
+
+def warband_dir() -> Path:
+    """Writable warbands folder — resolved (and created) fresh on every call
+    rather than once at import time (B4), so changing the data folder under
+    /settings takes effect without an app restart, and importing this module
+    has no filesystem side effects (handy for scripts/tests)."""
+    d = paths.user_data_dir() / "warbands"
+    d.mkdir(parents=True, exist_ok=True)
+    return d
+
+
+def portraits_root_dir() -> Path:
+    """Writable portraits folder — same lazy-resolution reasoning as warband_dir()."""
+    d = paths.user_data_dir() / "portraits"
+    d.mkdir(parents=True, exist_ok=True)
+    return d
 
 ALLOWED_IMAGE_EXT = {".jpg", ".jpeg", ".png", ".gif", ".webp"}
 
@@ -160,7 +197,7 @@ def empty_base() -> dict:
     }
 
 
-def normalize_item_slots(raw, n: int) -> list[str]:
+def normalize_item_slots(raw: Iterable[str], n: int) -> list[str]:
     """Convert legacy item formats into a fixed-length list of slot strings."""
     slots: list[str] = []
     if isinstance(raw, list):
@@ -187,7 +224,6 @@ def empty_wizard(name: str = "", school: str = "Elementalist") -> dict:
         "stats": stats,
         "item_slots": _default_item_slots(WIZARD_DEFAULT_GEAR, WIZARD_ITEM_SLOTS),
         "has_dagger": True,  # free slot (2e: first dagger takes no slot), so on by default
-        "items": [],  # legacy
         "spells": [],
         "mutations": [],
         "notes": "",
@@ -206,7 +242,6 @@ def empty_apprentice(name: str = "") -> dict:
         "stats": stats,
         "item_slots": _default_item_slots(WIZARD_DEFAULT_GEAR, APPRENTICE_ITEM_SLOTS),
         "has_dagger": True,
-        "items": [],
         "mutations": [],
         "notes": "",
         "portrait": None,
@@ -349,6 +384,17 @@ def captain_effective_stats(cap: dict) -> dict:
     return stats
 
 
+def wizard_effective_stats(wb: dict) -> dict:
+    """The wizard's stats as they play, with any wizard-state bonus folded in
+    (e.g. Beastcrafter III's Fast/Scales animal feature). Lives here rather than
+    in app.py (G6) so pdf_export.py can use the same numbers the web UI shows,
+    instead of reading raw stats and printing a wrong roster."""
+    stats = dict((wb.get("wizard") or {}).get("stats") or {})
+    for stat, amount in expansions.wizard_state_stat_bonus(wb).items():
+        stats[stat] = int(stats.get(stat, 0)) + amount
+    return stats
+
+
 def sync_apprentice(wb: dict) -> None:
     """Apprentice stats from wizard (2e p.27): M same, F-2, S same, A10, W-2, H-2."""
     ap = wb.get("apprentice")
@@ -365,6 +411,15 @@ def sync_apprentice(wb: dict) -> None:
         "will": int(wstats.get("will", 4)) - 2,
         "health": max(1, wiz_h - 2),  # starting: 14-2 = 12
     }
+    # Re-apply each grave mutation's recorded stat offset on top of the derived
+    # base (G1) — without this, add_apprentice_mutation()'s effect is discarded
+    # the moment sync_apprentice() runs again on the next save.
+    for m in ap.get("mutations") or []:
+        for stat, offset in (m.get("stat_offsets") or {}).items():
+            if stat in ap_stats:
+                ap_stats[stat] += offset
+    for stat in ap_stats:
+        ap_stats[stat] = max(1, ap_stats[stat]) if stat == "health" else max(0, ap_stats[stat])
     ap["stats"] = ap_stats
     ap["level"] = int(wiz.get("level", 0)) // 2
     ap.setdefault("has_dagger", True)
@@ -446,8 +501,9 @@ def validate_starting_spells(
 
     # No opposed
     opp = rel["opposed"]
-    if by_school.get(opp, 0) > 0:
-        return False, f"Starting wizards cannot take spells from opposed school ({opp})."
+    bad_opp = [o for o in opp if by_school.get(o, 0) > 0]
+    if bad_opp:
+        return False, f"Starting wizards cannot take spells from opposed school(s) ({', '.join(bad_opp)})."
 
     # Own: exactly 3
     own_n = by_school.get(school, 0)
@@ -491,7 +547,7 @@ def create_warband(
     soldiers: list[dict] | None = None,
     enabled_sources_map: dict | None = None,
     pentangle_playable: bool = False,
-) -> tuple[dict | None, str]:
+) -> tuple[Warband | None, str]:
     """
     soldiers: optional list of {type_key, name} hired at creation (costs deducted).
     enabled_sources_map: {book name: bool} source books to switch on for the new
@@ -573,6 +629,7 @@ def create_warband(
 
     wb = {
         "id": new_warband_id(warband_name),
+        "schema_version": SCHEMA_VERSION,
         "name": warband_name.strip() or "Unnamed Warband",
         "created": _now(),
         "updated": _now(),
@@ -618,10 +675,22 @@ def reorder_soldiers(wb: dict, soldier_ids_in_order: list[str]) -> tuple[bool, s
     return True, "Soldier order updated."
 
 
+def list_unreadable_warbands() -> list[dict]:
+    """Warband files that exist on disk but fail to parse, for a home-page warning."""
+    unreadable = []
+    for path in warband_dir().glob("*.warbands"):
+        try:
+            json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            logger.warning("Warband file %s could not be read: %s", path, exc)
+            unreadable.append({"filename": path.name, "path": str(path), "error": str(exc)})
+    return unreadable
+
+
 def list_warbands() -> list[dict]:
     items = []
     for path in sorted(
-        WARBAND_DIR.glob("*.warbands"), key=lambda p: p.stat().st_mtime, reverse=True
+        warband_dir().glob("*.warbands"), key=lambda p: p.stat().st_mtime, reverse=True
     ):
         try:
             data = json.loads(path.read_text(encoding="utf-8"))
@@ -645,37 +714,157 @@ def list_warbands() -> list[dict]:
     return items
 
 
+def _sanitize_filename(s: str) -> str:
+    """Strip everything but the safe filename charset, for building paths out
+    of user-supplied ids/roles (warband id, portrait role)."""
+    return re.sub(r"[^a-zA-Z0-9._-]", "", s)
+
+
 def warband_path(warband_id: str) -> Path:
     """Warband files use a .warbands extension; the content is plain JSON."""
-    safe = re.sub(r"[^a-zA-Z0-9._-]", "", warband_id)
-    return WARBAND_DIR / f"{safe}.warbands"
+    safe = _sanitize_filename(warband_id)
+    return warband_dir() / f"{safe}.warbands"
 
 
 def portrait_dir(warband_id: str) -> Path:
-    safe = re.sub(r"[^a-zA-Z0-9._-]", "", warband_id)
-    d = PORTRAIT_DIR / safe
+    safe = _sanitize_filename(warband_id)
+    d = portraits_root_dir() / safe
     d.mkdir(parents=True, exist_ok=True)
     return d
 
 
-def load_warband(warband_id: str) -> dict | None:
-    path = warband_path(warband_id)
-    if not path.is_file():
-        return None
-    try:
-        wb = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        return None
-    # Migrate older formats
+SCHEMA_VERSION = 1
+# Bump this and append a new (version, function) pair to MIGRATIONS whenever a
+# future format change needs one-time cleanup on old files. Each migration
+# only runs once per file: files with no "schema_version" are treated as
+# version 0 (run everything), then get stamped with SCHEMA_VERSION so later
+# loads skip work they've already done (B3).
+
+
+def _migrate_wizard_health_2e(wb: dict) -> None:
+    """Pre-2e health base was 10; 2e starting wizard is 14."""
+    wstats = wb["wizard"]["stats"]
+    if int(wstats.get("health", 14)) == 10:
+        wstats["health"] = 14
+
+
+def _migrate_item_slots(wb: dict) -> None:
+    """items (freeform list) -> item_slots (fixed-length slot list), wizard + apprentice."""
+    wiz = wb["wizard"]
+    wiz_slot_n = expansions.wizard_item_slots(wb)
+    if "item_slots" not in wiz or not isinstance(wiz.get("item_slots"), list):
+        wiz["item_slots"] = normalize_item_slots(wiz.get("items"), wiz_slot_n)
+    ap = wb.get("apprentice")
+    if ap and ("item_slots" not in ap or not isinstance(ap.get("item_slots"), list)):
+        ap["item_slots"] = normalize_item_slots(ap.get("items"), expansions.apprentice_item_slots(wb))
+
+
+def _migrate_vault_string_to_list(wb: dict) -> None:
+    """vault (freeform textarea string) -> vault_items (structured list)."""
+    if isinstance(wb.get("vault"), str) and wb["vault"] and not wb.get("vault_items"):
+        wb["vault_items"] = [
+            {"name": line, "notes": "migrated", "source": "vault"}
+            for line in wb["vault"].splitlines()
+            if line.strip()
+        ]
+
+
+def _migrate_captain_stat_caps(wb: dict) -> None:
+    """Old flat per-stat cap fields (fight/shoot only) + XP multiplier -> captain_stat_caps."""
+    hr = wb.get("homerules") or {}
+    if "captain_fight_levelup_cap" in hr or "captain_shoot_levelup_cap" in hr:
+        caps = deepcopy(CAPTAIN_STAT_CAPS)
+        if "captain_fight_levelup_cap" in hr:
+            caps["fight"] = {"limit": int(hr["captain_fight_levelup_cap"]), "unlimited": False}
+        if "captain_shoot_levelup_cap" in hr:
+            caps["shoot"] = {"limit": int(hr["captain_shoot_levelup_cap"]), "unlimited": False}
+        hr["captain_stat_caps"] = caps
+    for old_key in ("captain_fight_levelup_cap", "captain_shoot_levelup_cap", "captain_xp_multiplier"):
+        hr.pop(old_key, None)
+
+
+def _migrate_captain_mode_flags(wb: dict) -> None:
+    """Old independent captains_enabled/promote_captain_enabled booleans -> single captain_mode select."""
+    hr = wb.get("homerules") or {}
+    if "captain_mode" not in hr:
+        old_hire = bool(hr.get("captains_enabled", False))
+        old_promote = bool(hr.get("promote_captain_enabled", False))
+        if old_hire and old_promote:
+            hr["captain_mode"] = "both"
+        elif old_hire:
+            hr["captain_mode"] = "hire"
+        elif old_promote:
+            hr["captain_mode"] = "promote"
+        else:
+            hr["captain_mode"] = "off"
+    hr.pop("captains_enabled", None)
+    hr.pop("promote_captain_enabled", None)
+
+
+def _migrate_captain_levelup_counts(wb: dict) -> None:
+    """fight_levelup_count/shoot_levelup_count (captain-only) -> levelup_counts."""
+    cap = wb.get("captain")
+    if not cap:
+        return
+    counts = cap.setdefault("levelup_counts", {s: 0 for s in LEVELUP_STATS})
+    for s in LEVELUP_STATS:
+        counts.setdefault(s, 0)
+    if "fight_levelup_count" in cap:
+        counts["fight"] = int(cap.pop("fight_levelup_count"))
+    if "shoot_levelup_count" in cap:
+        counts["shoot"] = int(cap.pop("shoot_levelup_count"))
+
+
+def _migrate_soldier_items_string_to_list(wb: dict) -> None:
+    """Soldier items as a freeform newline-separated string -> structured list."""
+    for s in wb.get("soldiers") or []:
+        if isinstance(s.get("items"), str):
+            text = s["items"].strip()
+            s["items"] = (
+                [{"name": line, "notes": ""} for line in text.splitlines() if line.strip()]
+                if text
+                else []
+            )
+
+
+MIGRATIONS: list[tuple[int, Callable[[dict], None]]] = [
+    (1, _migrate_wizard_health_2e),
+    (1, _migrate_item_slots),
+    (1, _migrate_vault_string_to_list),
+    (1, _migrate_captain_stat_caps),
+    (1, _migrate_captain_mode_flags),
+    (1, _migrate_captain_levelup_counts),
+    (1, _migrate_soldier_items_string_to_list),
+]
+
+
+def _run_migrations(wb: dict) -> None:
+    version = int(wb.get("schema_version", 0))
+    ran = [target for target, _ in MIGRATIONS if version < target]
+    for target_version, migration in MIGRATIONS:
+        if version < target_version:
+            migration(wb)
+    if ran:
+        logger.info(
+            "Migrated warband %s from schema %d to %d (ran: %s)",
+            wb.get("id", "?"), version, SCHEMA_VERSION, ran,
+        )
+    wb["schema_version"] = SCHEMA_VERSION
+
+
+def _normalize_warband(wb: dict) -> dict:
+    """Backfill defaults and run migrations on a freshly-parsed warband dict —
+    shared by load_warband() and import_warband_json() (B3) so an imported
+    file is in current shape immediately rather than waiting for the next
+    load to pick up the migration chain.
+
+    Backfill defensively, per-key, everywhere below — not version-gated,
+    since new optional fields get added over time and every load should
+    still see sane defaults for them regardless of a file's schema_version.
+    """
     wiz = wb.setdefault("wizard", empty_wizard())
     wiz.setdefault("stats", deepcopy(WIZARD_BASE))
-    # Fix pre-2e health base (was H10; 2e starting wizard is H14)
-    wstats = wiz["stats"]
-    old_h = int(wstats.get("health", 14))
-    if old_h == 10:
-        # Old default base — bump to 14 (preserve any extra from level-ups if somehow >10)
-        wstats["health"] = 14
-    wstats.setdefault("health", 14)
+    wiz["stats"].setdefault("health", 14)
     wiz.pop("health_current", None)
     wiz.setdefault("has_dagger", True)
     wiz.setdefault("mutations", [])
@@ -689,22 +878,9 @@ def load_warband(warband_id: str) -> dict | None:
         state.setdefault(key, value)
     if state.get("kind") not in expansions.WIZARD_STATES:
         state["kind"] = expansions.STATE_NONE
-    # Migrate items -> item_slots
-    wiz_slot_n = expansions.wizard_item_slots(wb)
-    if "item_slots" not in wiz or not isinstance(wiz.get("item_slots"), list):
-        wiz["item_slots"] = normalize_item_slots(wiz.get("items"), wiz_slot_n)
-    else:
-        wiz["item_slots"] = normalize_item_slots(wiz["item_slots"], wiz_slot_n)
-
     if isinstance(wiz.get("spells"), str):
         wiz["spells"] = []
     wb.setdefault("vault_items", [])
-    if isinstance(wb.get("vault"), str) and wb["vault"] and not wb["vault_items"]:
-        wb["vault_items"] = [
-            {"name": line, "notes": "migrated", "source": "vault"}
-            for line in wb["vault"].splitlines()
-            if line.strip()
-        ]
     if not isinstance(wb.get("base"), dict):
         wb["base"] = empty_base()
     else:
@@ -722,38 +898,7 @@ def load_warband(warband_id: str) -> dict | None:
         ap.setdefault("mutations", [])
         ap.setdefault("portrait_source_name", None)
         ap.pop("health_current", None)
-        if "item_slots" not in ap or not isinstance(ap.get("item_slots"), list):
-            ap["item_slots"] = normalize_item_slots(ap.get("items"), expansions.apprentice_item_slots(wb))
-        sync_apprentice(wb)
-    # Homerules (Captains/Soldier Leveling/Promote Captain): backfill defensively,
-    # per-key, so future new fields backfill too.
     hr = wb.setdefault("homerules", default_homerules())
-    # Migrate old flat per-stat cap fields (fight/shoot only) + XP multiplier into
-    # the new captain_stat_caps shape, then drop the old keys.
-    if "captain_fight_levelup_cap" in hr or "captain_shoot_levelup_cap" in hr:
-        caps = deepcopy(CAPTAIN_STAT_CAPS)
-        if "captain_fight_levelup_cap" in hr:
-            caps["fight"] = {"limit": int(hr["captain_fight_levelup_cap"]), "unlimited": False}
-        if "captain_shoot_levelup_cap" in hr:
-            caps["shoot"] = {"limit": int(hr["captain_shoot_levelup_cap"]), "unlimited": False}
-        hr["captain_stat_caps"] = caps
-    for old_key in ("captain_fight_levelup_cap", "captain_shoot_levelup_cap", "captain_xp_multiplier"):
-        hr.pop(old_key, None)
-    # Migrate the old independent captains_enabled/promote_captain_enabled booleans
-    # into the single captain_mode select ("off" | "hire" | "promote" | "both").
-    if "captain_mode" not in hr:
-        old_hire = bool(hr.get("captains_enabled", False))
-        old_promote = bool(hr.get("promote_captain_enabled", False))
-        if old_hire and old_promote:
-            hr["captain_mode"] = "both"
-        elif old_hire:
-            hr["captain_mode"] = "hire"
-        elif old_promote:
-            hr["captain_mode"] = "promote"
-        else:
-            hr["captain_mode"] = "off"
-    hr.pop("captains_enabled", None)
-    hr.pop("promote_captain_enabled", None)
     for k, v in default_homerules().items():
         hr.setdefault(k, v)
     es = hr.setdefault("enabled_sources", {})
@@ -773,14 +918,7 @@ def load_warband(warband_id: str) -> dict | None:
         cap.setdefault("known_tricks", [])
         cap.setdefault("mutations", [])
         cap.setdefault("portrait_source_name", None)
-        counts = cap.setdefault("levelup_counts", {s: 0 for s in LEVELUP_STATS})
-        for s in LEVELUP_STATS:
-            counts.setdefault(s, 0)
-        if "fight_levelup_count" in cap:
-            counts["fight"] = int(cap.pop("fight_levelup_count"))
-        if "shoot_levelup_count" in cap:
-            counts["shoot"] = int(cap.pop("shoot_levelup_count"))
-        cap.setdefault("level", sum(counts.values()))
+        cap.setdefault("level", 0)
         n = int(hr.get("captain_item_slots", CAPTAIN_ITEM_SLOTS))
         if cap.get("origin") == "promoted":
             n = int(hr.get("promote_captain_item_slots", PROMOTE_CAPTAIN_ITEM_SLOTS))
@@ -791,13 +929,6 @@ def load_warband(warband_id: str) -> dict | None:
         s.setdefault("items", [])
         s.setdefault("mutations", [])
         s.pop("health_current", None)
-        if isinstance(s.get("items"), str):
-            text = s["items"].strip()
-            s["items"] = (
-                [{"name": line, "notes": ""} for line in text.splitlines() if line.strip()]
-                if text
-                else []
-            )
         if any(s.get(k) is None for k in ("fight", "shoot", "will", "health")):
             info = get_soldier(s.get("type_key", "")) or {}
             for k in ("fight", "shoot", "will", "health"):
@@ -808,15 +939,53 @@ def load_warband(warband_id: str) -> dict | None:
         for stat in LEVELUP_STATS:
             counts.setdefault(stat, 0)
         s.setdefault("level_history", [])
+
+    _run_migrations(wb)
+
+    # item_slots normalization must run after migrations (which may populate
+    # item_slots from legacy "items" for the first time) so an already-list
+    # item_slots also gets re-padded/trimmed to the current slot count even
+    # when no migration fired.
+    wiz["item_slots"] = normalize_item_slots(wiz.get("item_slots"), expansions.wizard_item_slots(wb))
+    if wb.get("apprentice"):
+        ap = wb["apprentice"]
+        ap["item_slots"] = normalize_item_slots(ap.get("item_slots"), expansions.apprentice_item_slots(wb))
+        sync_apprentice(wb)
+
     return wb
 
 
-def save_warband(wb: dict) -> None:
+def load_warband(warband_id: str) -> Warband | None:
+    path = warband_path(warband_id)
+    if not path.is_file():
+        return None
+    try:
+        wb = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        logger.warning("Warband file %s could not be read: %s", path, exc)
+        return None
+    return _normalize_warband(wb)
+
+
+def save_warband(wb: Warband) -> None:
     if wb.get("apprentice"):
         sync_apprentice(wb)
+    wb.setdefault("schema_version", SCHEMA_VERSION)
     wb["updated"] = _now()
     path = warband_path(wb["id"])
-    path.write_text(json.dumps(wb, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    data = json.dumps(wb, indent=2, ensure_ascii=False) + "\n"
+    tmp = path.with_suffix(".tmp")
+    with open(tmp, "w", encoding="utf-8") as f:
+        f.write(data)
+        f.flush()
+        os.fsync(f.fileno())
+    if path.is_file():
+        bak = path.with_suffix(".bak")
+        try:
+            shutil.copy2(path, bak)
+        except OSError as exc:
+            logger.warning("Could not write backup %s for warband %s: %s", bak, wb.get("id", "?"), exc)
+    os.replace(tmp, path)
 
 
 def delete_warband(warband_id: str) -> bool:
@@ -847,7 +1016,7 @@ def _copy_portrait_file(rel: str | None, old_id: str, new_id: str) -> str | None
     if not src:
         # try as old_id/filename
         name = Path(rel).name
-        src = PORTRAIT_DIR / old_id / name
+        src = portraits_root_dir() / old_id / name
         if not src.is_file():
             return None
     dest_dir = portrait_dir(new_id)
@@ -859,7 +1028,7 @@ def _copy_portrait_file(rel: str | None, old_id: str, new_id: str) -> str | None
     return f"{new_id}/{dest.name}"
 
 
-def duplicate_warband(source_id: str, new_name: str | None = None) -> tuple[dict | None, str]:
+def duplicate_warband(source_id: str, new_name: str | None = None) -> tuple[Warband | None, str]:
     """Deep-copy a warband (data + portraits) under a new id and name."""
     src = load_warband(source_id)
     if not src:
@@ -921,11 +1090,11 @@ def duplicate_warband(source_id: str, new_name: str | None = None) -> tuple[dict
     return wb, f"Duplicated as “{base_name}”."
 
 
-def export_warband_json(wb: dict) -> str:
+def export_warband_json(wb: Warband) -> str:
     return json.dumps(wb, indent=2, ensure_ascii=False)
 
 
-def import_warband_json(raw: str) -> dict:
+def import_warband_json(raw: str) -> Warband:
     data = json.loads(raw)
     if not isinstance(data, dict) or "wizard" not in data:
         raise ValueError("Invalid warband file")
@@ -941,10 +1110,10 @@ def import_warband_json(raw: str) -> dict:
     data.setdefault("vault_items", [])
     data.setdefault("apprentice", None)
     data.setdefault("created", _now())
-    return data
+    return _normalize_warband(data)
 
 
-def restore_portraits_by_name(wb: dict, files) -> int:
+def restore_portraits_by_name(wb: dict, files: "Iterable[FileStorage]") -> int:
     """Matches uploaded files (from the Import page's optional 'pictures'
     field) against each character's remembered portrait_source_name and
     reapplies any matches — portrait bytes are never included in an export,
@@ -975,14 +1144,14 @@ def restore_portraits_by_name(wb: dict, files) -> int:
     return count
 
 
-def save_portrait(warband_id: str, role: str, file_storage) -> str | None:
+def save_portrait(warband_id: str, role: str, file_storage: "FileStorage | None") -> str | None:
     """Save uploaded image. role = wizard | apprentice | soldier_<id>. Returns relative path."""
     if not file_storage or not file_storage.filename:
         return None
     ext = Path(file_storage.filename).suffix.lower()
     if ext not in ALLOWED_IMAGE_EXT:
         raise ValueError("Image must be jpg, png, gif, or webp.")
-    safe_role = re.sub(r"[^a-zA-Z0-9._-]", "", role)
+    safe_role = _sanitize_filename(role)
     dest = portrait_dir(warband_id) / f"{safe_role}{ext}"
     # Remove old portraits for same role
     for old in portrait_dir(warband_id).glob(f"{safe_role}.*"):
@@ -995,7 +1164,7 @@ def save_portrait(warband_id: str, role: str, file_storage) -> str | None:
     return f"{warband_id}/{dest.name}"
 
 
-def apply_portrait(entity: dict, warband_id: str, role: str, file_storage) -> None:
+def apply_portrait(entity: dict, warband_id: str, role: str, file_storage: "FileStorage | None") -> None:
     """Saves an uploaded portrait onto a character dict and remembers the
     browser-supplied original filename (portrait_source_name) so a later
     Import can re-match and reapply it — see restore_portraits_by_name()."""
@@ -1008,7 +1177,7 @@ def apply_portrait(entity: dict, warband_id: str, role: str, file_storage) -> No
 def remove_portrait(entity: dict, warband_id: str, role: str) -> None:
     """Deletes any saved portrait file for this role so the character
     reverts to showing default artwork again."""
-    safe_role = re.sub(r"[^a-zA-Z0-9._-]", "", role)
+    safe_role = _sanitize_filename(role)
     for old in portrait_dir(warband_id).glob(f"{safe_role}.*"):
         try:
             old.unlink()
@@ -1025,7 +1194,7 @@ def portrait_filesystem_path(rel: str | None) -> Path | None:
     # prevent traversal
     if ".." in parts.parts:
         return None
-    path = PORTRAIT_DIR / parts
+    path = portraits_root_dir() / parts
     return path if path.is_file() else None
 
 
@@ -1434,145 +1603,114 @@ def _remove_mutation(mutations: list, index: int, set_stat) -> tuple[bool, dict 
     return True, m
 
 
-def add_soldier_mutation(wb: dict, soldier_id: str, number: int | None = None) -> tuple[bool, str]:
+def _mutation_target(wb: dict, kind: str, soldier_id: str | None = None):
+    """Resolves 'wizard' | 'apprentice' | 'captain' | 'soldier' (+ soldier_id)
+    to (entity, get_stat, set_stat, label) for the mutation add/remove
+    helpers below (B2), or (None, None, None, error_message) if the target
+    doesn't exist. Soldiers keep their stats flat on the entity dict itself
+    (falling back to the catalog for anything a mutation hasn't touched yet),
+    while wizard/apprentice/captain nest theirs under a "stats" dict seeded
+    from that role's base stat block — a real structural difference, so this
+    returns accessor closures rather than a single dict path for all four."""
+    if kind == "wizard":
+        wiz = wb.setdefault("wizard", {})
+        stats = wiz.setdefault("stats", deepcopy(WIZARD_BASE))
+        return wiz, (lambda k: int(stats.get(k, 0))), (lambda k, v: stats.__setitem__(k, v)), (wiz.get("name") or "your wizard")
+    if kind == "apprentice":
+        ap = wb.get("apprentice")
+        if not ap:
+            return None, None, None, "No apprentice hired."
+        stats = ap.setdefault("stats", deepcopy(APPRENTICE_BASE))
+        return ap, (lambda k: int(stats.get(k, 0))), (lambda k, v: stats.__setitem__(k, v)), (ap.get("name") or "your apprentice")
+    if kind == "captain":
+        cap = wb.get("captain")
+        if not cap:
+            return None, None, None, "No captain hired."
+        stats = cap.setdefault("stats", deepcopy(CAPTAIN_BASE))
+        return cap, (lambda k: int(stats.get(k, 0))), (lambda k, v: stats.__setitem__(k, v)), (cap.get("name") or "your captain")
+    if kind == "soldier":
+        for s in wb.get("soldiers") or []:
+            if s.get("id") == soldier_id:
+                cat = get_soldier(s.get("type_key", "")) or {}
+                return s, (lambda k: s.get(k, cat.get(k, 0))), (lambda k, v: s.__setitem__(k, v)), s.get("name", "Soldier")
+        return None, None, None, "Soldier not found."
+    raise ValueError(f"Unknown mutation target kind: {kind!r}")
+
+
+def add_mutation(
+    wb: dict, kind: str, number: int | None = None, soldier_id: str | None = None
+) -> tuple[bool, str]:
     err = _mutation_gate(wb)
     if err:
         return False, err
-    for s in wb.get("soldiers") or []:
-        if s.get("id") != soldier_id:
-            continue
-        row, err = _pick_mutation(number)
-        if err:
-            return False, err
-        cat = get_soldier(s.get("type_key", "")) or {}
-        stat_suffix, backup = _apply_mutation_stat_delta(
-            lambda k: s.get(k, cat.get(k, 0)),
-            lambda k, v: s.__setitem__(k, v),
-            row["stat_delta"],
-        )
-        text = _record_mutation(s, row, stat_suffix, s.get("name", "Soldier"), backup)
-        add_history(wb, text)
-        return True, text
-    return False, "Soldier not found."
+    entity, get_stat, set_stat, label = _mutation_target(wb, kind, soldier_id)
+    if entity is None:
+        return False, label  # label holds the not-found message in this branch
+    row, err = _pick_mutation(number)
+    if err:
+        return False, err
+    stat_suffix, backup = _apply_mutation_stat_delta(get_stat, set_stat, row["stat_delta"])
+    # Sentence-initial here ("Your wizard gained..."), unlike remove_mutation's
+    # "Removed your wizard's..." — capitalize only the fallback label ("your
+    # wizard" -> "Your wizard"); a real character name is already cased right.
+    text = _record_mutation(entity, row, stat_suffix, label[:1].upper() + label[1:], backup)
+    if kind == "apprentice" and backup:
+        # sync_apprentice() re-derives ap["stats"] from the wizard on every save,
+        # which would otherwise wipe this mutation's effect (G1). Record it as a
+        # {stat: delta} offset from the pre-mutation value so sync_apprentice can
+        # re-apply it after deriving the base stats, instead of trying to replay
+        # a possibly-non-idempotent multiply/round op.
+        entity["mutations"][-1]["stat_offsets"] = {
+            stat: get_stat(stat) - before for stat, before in backup.items()
+        }
+    add_history(wb, text)
+    return True, text
+
+
+def remove_mutation(
+    wb: dict, kind: str, index: int, soldier_id: str | None = None
+) -> tuple[bool, str]:
+    entity, _get_stat, set_stat, label = _mutation_target(wb, kind, soldier_id)
+    if entity is None:
+        return False, label
+    ok, m = _remove_mutation(entity.get("mutations") or [], index, set_stat)
+    if not ok:
+        return False, "Mutation not found."
+    text = f"Removed {label}'s mutation: {m.get('name', '?')}."
+    add_history(wb, text)
+    return True, text
+
+
+def add_soldier_mutation(wb: dict, soldier_id: str, number: int | None = None) -> tuple[bool, str]:
+    return add_mutation(wb, "soldier", number, soldier_id)
 
 
 def remove_soldier_mutation(wb: dict, soldier_id: str, index: int) -> tuple[bool, str]:
-    for s in wb.get("soldiers") or []:
-        if s.get("id") != soldier_id:
-            continue
-        ok, m = _remove_mutation(
-            s.get("mutations") or [], index, lambda k, v: s.__setitem__(k, v)
-        )
-        if not ok:
-            return False, "Mutation not found."
-        text = f"Removed {s.get('name', 'Soldier')}'s mutation: {m.get('name', '?')}."
-        add_history(wb, text)
-        return True, text
-    return False, "Soldier not found."
+    return remove_mutation(wb, "soldier", index, soldier_id)
 
 
 def add_wizard_mutation(wb: dict, number: int | None = None) -> tuple[bool, str]:
-    err = _mutation_gate(wb)
-    if err:
-        return False, err
-    row, err = _pick_mutation(number)
-    if err:
-        return False, err
-    wiz = wb.setdefault("wizard", {})
-    stats = wiz.setdefault("stats", deepcopy(WIZARD_BASE))
-    stat_suffix, backup = _apply_mutation_stat_delta(
-        lambda k: int(stats.get(k, 0)),
-        lambda k, v: stats.__setitem__(k, v),
-        row["stat_delta"],
-    )
-    text = _record_mutation(wiz, row, stat_suffix, wiz.get("name") or "Your wizard", backup)
-    add_history(wb, text)
-    return True, text
+    return add_mutation(wb, "wizard", number)
 
 
 def remove_wizard_mutation(wb: dict, index: int) -> tuple[bool, str]:
-    wiz = wb.get("wizard") or {}
-    stats = wiz.setdefault("stats", deepcopy(WIZARD_BASE))
-    ok, m = _remove_mutation(
-        wiz.get("mutations") or [], index, lambda k, v: stats.__setitem__(k, v)
-    )
-    if not ok:
-        return False, "Mutation not found."
-    text = f"Removed {wiz.get('name') or 'your wizard'}'s mutation: {m.get('name', '?')}."
-    add_history(wb, text)
-    return True, text
+    return remove_mutation(wb, "wizard", index)
 
 
 def add_apprentice_mutation(wb: dict, number: int | None = None) -> tuple[bool, str]:
-    err = _mutation_gate(wb)
-    if err:
-        return False, err
-    ap = wb.get("apprentice")
-    if not ap:
-        return False, "No apprentice hired."
-    row, err = _pick_mutation(number)
-    if err:
-        return False, err
-    stats = ap.setdefault("stats", deepcopy(APPRENTICE_BASE))
-    stat_suffix, backup = _apply_mutation_stat_delta(
-        lambda k: int(stats.get(k, 0)),
-        lambda k, v: stats.__setitem__(k, v),
-        row["stat_delta"],
-    )
-    text = _record_mutation(ap, row, stat_suffix, ap.get("name") or "Your apprentice", backup)
-    add_history(wb, text)
-    return True, text
+    return add_mutation(wb, "apprentice", number)
 
 
 def remove_apprentice_mutation(wb: dict, index: int) -> tuple[bool, str]:
-    ap = wb.get("apprentice")
-    if not ap:
-        return False, "No apprentice hired."
-    stats = ap.setdefault("stats", deepcopy(APPRENTICE_BASE))
-    ok, m = _remove_mutation(
-        ap.get("mutations") or [], index, lambda k, v: stats.__setitem__(k, v)
-    )
-    if not ok:
-        return False, "Mutation not found."
-    text = f"Removed {ap.get('name') or 'your apprentice'}'s mutation: {m.get('name', '?')}."
-    add_history(wb, text)
-    return True, text
+    return remove_mutation(wb, "apprentice", index)
 
 
 def add_captain_mutation(wb: dict, number: int | None = None) -> tuple[bool, str]:
-    err = _mutation_gate(wb)
-    if err:
-        return False, err
-    cap = wb.get("captain")
-    if not cap:
-        return False, "No captain hired."
-    row, err = _pick_mutation(number)
-    if err:
-        return False, err
-    stats = cap.setdefault("stats", deepcopy(CAPTAIN_BASE))
-    stat_suffix, backup = _apply_mutation_stat_delta(
-        lambda k: int(stats.get(k, 0)),
-        lambda k, v: stats.__setitem__(k, v),
-        row["stat_delta"],
-    )
-    text = _record_mutation(cap, row, stat_suffix, cap.get("name") or "Your captain", backup)
-    add_history(wb, text)
-    return True, text
+    return add_mutation(wb, "captain", number)
 
 
 def remove_captain_mutation(wb: dict, index: int) -> tuple[bool, str]:
-    cap = wb.get("captain")
-    if not cap:
-        return False, "No captain hired."
-    stats = cap.setdefault("stats", deepcopy(CAPTAIN_BASE))
-    ok, m = _remove_mutation(
-        cap.get("mutations") or [], index, lambda k, v: stats.__setitem__(k, v)
-    )
-    if not ok:
-        return False, "Mutation not found."
-    text = f"Removed {cap.get('name') or 'your captain'}'s mutation: {m.get('name', '?')}."
-    add_history(wb, text)
-    return True, text
+    return remove_mutation(wb, "captain", index)
 
 
 def hire_apprentice(wb: dict, name: str = "") -> tuple[bool, str]:
@@ -1602,7 +1740,7 @@ def dismiss_apprentice(wb: dict, refund: bool = False) -> tuple[bool, str]:
     return True, text
 
 
-def _parse_stat_caps(form, prefix: str, current: dict) -> dict:
+def _parse_stat_caps(form: "ImmutableMultiDict", prefix: str, current: dict) -> dict:
     """Parse the 4-stat {limit, unlimited} grid submitted as
     {prefix}_cap_{stat}_limit / {prefix}_cap_{stat}_unlimited."""
     caps = {}
@@ -1625,7 +1763,7 @@ def _validate_tricks(tricks: list[str] | None, required: int) -> tuple[bool, str
     return True, ""
 
 
-def update_homerules(wb: dict, form) -> tuple[bool, str]:
+def update_homerules(wb: dict, form: "ImmutableMultiDict") -> tuple[bool, str]:
     """Parse and apply the per-warband homerule settings form."""
     hr = wb.setdefault("homerules", default_homerules())
     try:
@@ -1742,7 +1880,10 @@ def update_homerules(wb: dict, form) -> tuple[bool, str]:
         return False, "Tricks on promotion cannot be negative."
     if new_hr["promote_captain_tricks"] > len(CAPTAIN_TRICKS):
         return False, f"Tricks on promotion cannot exceed {len(CAPTAIN_TRICKS)} (the number of known tricks)."
-    wb["homerules"] = new_hr
+    # Merge onto defaults + existing values so any homerule key not (yet) handled
+    # by the literal above — e.g. one added after this warband was created —
+    # survives the save instead of being silently dropped.
+    wb["homerules"] = {**default_homerules(), **hr, **new_hr}
     if wb.get("captain"):
         cap = wb["captain"]
         n = (
@@ -1864,12 +2005,20 @@ def _apply_xp_delta(
 
 
 def _pending_level_check(
-    entity: dict, overall_max: int | None, label: str, per_level: int = XP_PER_LEVEL
+    entity: dict,
+    overall_max: int | None,
+    label: str,
+    per_level: int = XP_PER_LEVEL,
+    xp_level_cap: int = MAX_WIZARD_LEVEL,
 ) -> tuple[bool, str]:
-    """Shared earned-XP / max-level guard for any level-up spend (stat or trick)."""
+    """Shared earned-XP / max-level guard for any level-up spend (stat or trick).
+
+    `xp_level_cap` mirrors the same parameter on `_apply_xp_delta` — the level
+    ceiling XP alone can earn — and must be passed through by any caller that
+    doesn't also rely on `overall_max` to mask it (see G7)."""
     xp = int(entity.get("xp", 0))
     level = int(entity.get("level", 0))
-    earned = level_from_xp(xp, per_level)
+    earned = level_from_xp(xp, per_level, xp_level_cap)
     if level >= earned:
         return False, f"No pending level-ups (level {level}, XP {xp}). Earn more XP first."
     if overall_max is not None and level >= overall_max:
@@ -2066,11 +2215,16 @@ def promote_soldier_to_captain(
     spec_cap = expansions.max_specialists(wb)
     if info.get("category") != "specialist" and specialist_count(wb) >= spec_cap:
         return False, f"Specialist limit reached ({spec_cap})."
+    # Soldiers don't normally persist move/armour at all (they're read from the
+    # catalog at display time) until a mutation writes them — so all six stats
+    # must fall back to the catalog the same way, or mutation-driven move/armour
+    # changes are silently discarded on promotion while fight/shoot/will/health
+    # changes are kept (G2).
     stats = {
-        "move": int(info.get("move", 0)),
+        "move": int(soldier.get("move", info.get("move", 0)) or 0),
         "fight": int(soldier.get("fight", info.get("fight", 0)) or 0),
         "shoot": int(soldier.get("shoot", info.get("shoot", 0)) or 0),
-        "armour": int(info.get("armour", 0)),
+        "armour": int(soldier.get("armour", info.get("armour", 0)) or 0),
         "will": int(soldier.get("will", info.get("will", 0)) or 0),
         "health": int(soldier.get("health", info.get("health", 0)) or 0),
     }
@@ -2113,7 +2267,10 @@ def promote_soldier_to_captain(
         "level_history": [],
         "origin": "promoted",
         "known_tricks": list(tricks or []),
-        "mutations": [],
+        # Carried over rather than reset (G2) — a mutated soldier's grave
+        # mutations, and the audit trail (stat_backup) needed to remove them
+        # later, shouldn't vanish just because they were promoted.
+        "mutations": deepcopy(soldier.get("mutations") or []),
     }
     wb["captain"] = cap
     soldiers.pop(idx)
@@ -2231,13 +2388,29 @@ def record_game_loot(
             add_vault_item(wb, item_name, notes="Found in game", source="game")
             parts.append(item_name)
     if xp:
+        # Routed through _apply_xp_delta (G3) rather than a bare assignment, so a
+        # negative after-game XP entry clamps at 0 and auto-reverses any level-ups
+        # the reduced total no longer earns, instead of leaving them held for free.
         wiz = wb.setdefault("wizard", {})
-        wiz["xp"] = int(wiz.get("xp", 0)) + int(xp)
-        parts.append(f"+{xp} XP")
-        # Do not auto-raise level — player spends level-ups consciously
+        ok, msg = _apply_xp_delta(
+            wiz,
+            int(xp),
+            lambda: reverse_last_level_up(wb),
+            None,
+            "Wizard",
+            expansions.xp_per_level(wb),
+            expansions.max_wizard_level(wb),
+        )
+        if ok:
+            parts.append(msg)
     if captain_xp and wb.get("captain"):
-        wb["captain"]["xp"] = int(wb["captain"].get("xp", 0)) + int(captain_xp)
-        parts.append(f"Captain +{captain_xp} XP")
+        hr = wb.setdefault("homerules", default_homerules())
+        overall_max = int(hr.get("captain_max_level", CAPTAIN_MAX_LEVEL))
+        ok, msg = _apply_xp_delta(
+            wb["captain"], int(captain_xp), lambda: reverse_last_captain_level_up(wb), overall_max, "Captain"
+        )
+        if ok:
+            parts.append(msg)
     if notes.strip():
         add_history(wb, f"Game notes: {notes.strip()}")
     summary = "After-game: " + (", ".join(parts) if parts else "no loot")
@@ -2382,10 +2555,13 @@ def reverse_last_level_up(wb: dict) -> tuple[bool, str]:
         stat = entry.get("stat") or choice
         if stat not in ("fight", "shoot", "will", "health"):
             return False, f"Cannot reverse unknown stat choice: {choice}"
-        base_val = int(WIZARD_BASE.get(stat, 0))
-        new_val = int(stats.get(stat, base_val)) - 1
-        if new_val < base_val:
-            return False, f"Cannot reverse: {stat} is already at starting value ({base_val})."
+        # Undo exactly what this level-up recorded, floored at 0 (1 for Health)
+        # rather than at WIZARD_BASE (G4) — a mutation or wizard state can lower
+        # a stat below its starting value independently of level-ups, and the
+        # level_history entry (not the base stat) is the source of truth for
+        # what a reversal should subtract.
+        floor = 1 if stat == "health" else 0
+        new_val = max(floor, int(stats.get(stat, 0)) - 1)
         stats[stat] = new_val
     elif choice == "learn_spell":
         spell_id = entry.get("spell_id")
@@ -2395,7 +2571,7 @@ def reverse_last_level_up(wb: dict) -> tuple[bool, str]:
         if spell_id:
             for i, s in enumerate(spells):
                 if s.get("id") == spell_id:
-                    # only remove if no improvements were made after learning via later undos... 
+                    # only remove if no improvements were made after learning via later undos...
                     # If improved later, those should have been undone first (LIFO).
                     spells.pop(i)
                     removed = True
@@ -2636,26 +2812,37 @@ def set_wizard_state(wb: dict, kind: str) -> tuple[bool, str]:
 def break_wizard_pact(wb: dict) -> tuple[bool, str]:
     """End a demonic pact, paying the 1 level + 1 Health per Sacrifice held.
 
-    Levels come off through the normal reversal path so the wizard's level
-    history stays truthful; the Health loss is a permanent stat reduction.
+    The level cost is charged as XP (G5) — burned via _apply_xp_delta, the
+    same machinery add_wizard_xp uses — rather than only popping level_history,
+    so the penalty actually sticks instead of leaving `earned` XP the player
+    can immediately re-spend for free. The reported Health loss is computed
+    from before/after values rather than the raw penalty, since a reversed
+    level-up that happened to be a Health level also reduces Health.
     """
     if expansions.state_kind(wb) != expansions.STATE_PACT:
         return False, "Your wizard holds no pact."
     penalty = expansions.pact_break_penalty(wb)
     wiz = wb.setdefault("wizard", {})
-    lost = 0
-    for _ in range(penalty["levels"]):
-        ok, _msg = reverse_last_level_up(wb)
-        if not ok:
-            break
-        lost += 1
+    stats = wiz.setdefault("stats", deepcopy(WIZARD_BASE))
+    level_before = int(wiz.get("level", 0))
+    health_before = int(stats.get("health", 14))
+
+    per_level = expansions.xp_per_level(wb)
+    xp_cost = penalty["levels"] * per_level
+    if xp_cost:
+        _apply_xp_delta(
+            wiz, -xp_cost, lambda: reverse_last_level_up(wb), None, "Wizard",
+            per_level, expansions.max_wizard_level(wb),
+        )
     if penalty["health"]:
-        stats = wiz.setdefault("stats", deepcopy(WIZARD_BASE))
         stats["health"] = max(1, int(stats.get("health", 14)) - penalty["health"])
+
+    lost = level_before - int(wiz.get("level", 0))
+    health_lost = health_before - int(stats.get("health", 14))
     wiz["state"] = expansions.default_wizard_state()
     text = (
         f"{wiz.get('name', 'The wizard')} broke their pact: "
-        f"−{lost} level{'s' if lost != 1 else ''}, −{penalty['health']} Health."
+        f"−{lost} level{'s' if lost != 1 else ''}, −{health_lost} Health."
     )
     add_history(wb, text)
     return True, text
