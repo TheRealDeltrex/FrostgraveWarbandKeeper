@@ -186,7 +186,9 @@ def _configure_logging() -> None:
     keeps Python's normal stderr-on-WARNING+ default."""
     if not paths.is_frozen():
         return
-    log_path = paths.user_data_dir() / "fwk.log"
+    data_dir = paths.user_data_dir()
+    data_dir.mkdir(parents=True, exist_ok=True)
+    log_path = data_dir / "fwk.log"
     handler = RotatingFileHandler(log_path, maxBytes=512 * 1024, backupCount=2, encoding="utf-8")
     handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s"))
     root = logging.getLogger()

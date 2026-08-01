@@ -1,0 +1,766 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Frostgrave Warband Keeper — Online</title>
+  <style>
+    :root { color-scheme: dark; }
+    html, body { margin: 0; height: 100%; }
+    body {
+      background: #0e1420;
+      color: #e8eef7;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    #app-frame { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; display: none; background: #0e1420; }
+    #loading {
+      position: fixed; inset: 0; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; text-align: center; padding: 1.5rem;
+    }
+    #loading h1 { font-size: 1.5rem; margin: 1rem 0 0.4rem; color: #cfe4ff; }
+    #loading .sub { color: #9fb2c8; max-width: 32rem; line-height: 1.5; margin: 0.2rem 0; }
+    #loading-msg { color: #ffd479; font-weight: 600; margin-top: 1rem; min-height: 1.4em; }
+    .spinner {
+      width: 46px; height: 46px; border-radius: 50%;
+      border: 4px solid rgba(224,169,58,0.25); border-top-color: #e0a93a;
+      animation: spin 0.9s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #err { display: none; max-width: 34rem; color: #ffb3b3; line-height: 1.5; }
+    #err code { color: #ffd479; }
+    #toast {
+      position: fixed; left: 50%; bottom: 1.2rem; transform: translateX(-50%) translateY(2rem);
+      background: #1b2740; color: #f0d9a6; border: 1px solid #b8862b; border-left: 4px solid #e0a93a;
+      padding: 0.7rem 1rem; border-radius: 8px; font-size: 0.9rem; max-width: 90vw;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4); opacity: 0; pointer-events: none;
+      transition: opacity 0.25s, transform 0.25s; z-index: 9999;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+  <div id="loading">
+    <div class="spinner"></div>
+    <h1>Frostgrave Warband Keeper</h1>
+    <p class="sub">The full app, running entirely in your browser — nothing is uploaded, nothing is stored on a server.</p>
+    <p class="sub">Your warband is saved in this browser (this device, this browser only). <strong>Export it to a file</strong> for a portable backup or to move it elsewhere.</p>
+    <p id="loading-msg">Starting…</p>
+    <div id="err">
+      <p id="err-headline">Sorry — the app couldn't start. This build needs a modern desktop browser (Chrome, Edge, Firefox or Safari) with WebAssembly enabled.</p>
+      <p id="err-detail" class="sub"></p>
+    </div>
+  </div>
+
+  <iframe id="app-frame" title="Frostgrave Warband Keeper"></iframe>
+  <div id="toast" role="status"></div>
+  <a href="#" id="clear-data-link"
+     style="display:none;position:fixed;right:0.6rem;bottom:0.6rem;font-size:0.75rem;color:#7f93ab;text-decoration:underline;z-index:9998">
+    Clear browser data
+  </a>
+
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+  <script>
+  (function () {
+    "use strict";
+
+    var PYODIDE_INDEX = "https://cdn.jsdelivr.net/pyodide/v0.26.4/full/";
+    var frame = document.getElementById("app-frame");
+    var loading = document.getElementById("loading");
+    var loadingMsg = document.getElementById("loading-msg");
+
+    var pyodide = null;
+    var navigatePy = null;
+    var STYLE_CSS = "";
+    var ITEM_SLOTS_JS = "";
+    var sessionDirty = false;      // a mutation happened since the last snapshot
+    var remindedThisSession = false;
+    var portraitCache = {};        // F5: src -> data URI, cleared on portrait uploads
+    var suppressHistoryPush = false; // F3: true while replaying a popstate navigation
+    var snapshotTimer = null;      // F1: debounce for the localStorage snapshot
+
+    // F1: browser-storage keys for the warband/portrait snapshot. Versioned so
+    // a future incompatible format change can detect + ignore old data instead
+    // of crashing on it.
+    var STORAGE_KEY_WARBANDS = "fwk_warbands_v1";
+    var STORAGE_KEY_PORTRAITS = "fwk_portraits_v1";
+
+    function setMsg(m) { loadingMsg.textContent = m; }
+
+    function uint8ToBase64(bytes) {
+      var bin = "";
+      for (var i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+      return btoa(bin);
+    }
+
+    function base64ToUint8(b64) {
+      var bin = atob(b64);
+      var bytes = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      return bytes;
+    }
+
+    // F1: recursively lists file paths (not directories) under `dir` in
+    // Pyodide's in-memory FS. Used to snapshot every warband/portrait file
+    // without hardcoding the portraits/<warband_id>/<role> subdirectory shape.
+    function fsWalk(dir) {
+      var out = [];
+      var entries;
+      try { entries = pyodide.FS.readdir(dir); } catch (e) { return out; }
+      entries.forEach(function (name) {
+        if (name === "." || name === "..") return;
+        var full = dir + "/" + name;
+        var stat;
+        try { stat = pyodide.FS.stat(full); } catch (e) { return; }
+        if (pyodide.FS.isDir(stat.mode)) {
+          out = out.concat(fsWalk(full));
+        } else {
+          out.push(full);
+        }
+      });
+      return out;
+    }
+
+    function fsMkdirp(dir) {
+      var parts = dir.split("/").filter(Boolean);
+      var cur = "";
+      parts.forEach(function (part) {
+        cur += "/" + part;
+        try { pyodide.FS.mkdir(cur); } catch (e) { /* already exists */ }
+      });
+    }
+
+    // F1: snapshot every warband + portrait file into localStorage, debounced
+    // so a burst of autosave POSTs doesn't thrash storage. Wrapped so a full
+    // private-window (storage throws/quota) degrades silently to today's
+    // session-only behavior instead of breaking navigation.
+    function snapshotToStorage() {
+      if (!pyodide) return;
+      try {
+        var wbData = {};
+        fsWalk("/data/warbands").forEach(function (p) {
+          if (!/\.warbands$/.test(p)) return;
+          try { wbData[p] = pyodide.FS.readFile(p, { encoding: "utf8" }); } catch (e) { /* skip */ }
+        });
+        localStorage.setItem(STORAGE_KEY_WARBANDS, JSON.stringify(wbData));
+
+        var pData = {};
+        var skipped = 0;
+        fsWalk("/data/portraits").forEach(function (p) {
+          try {
+            var bytes = pyodide.FS.readFile(p);
+            if (bytes.length > 1024 * 1024) { skipped++; return; }
+            pData[p] = uint8ToBase64(bytes);
+          } catch (e) { /* skip */ }
+        });
+        localStorage.setItem(STORAGE_KEY_PORTRAITS, JSON.stringify(pData));
+        if (skipped) {
+          showToast(
+            skipped + " portrait file(s) were too large (over 1 MB) to keep in browser " +
+            "storage — re-upload them after a refresh if needed.",
+            6000
+          );
+        }
+      } catch (e) {
+        // localStorage unavailable (private window quota, disabled storage,
+        // etc.) — degrade to today's session-only behavior.
+      }
+    }
+
+    function scheduleSnapshot() {
+      clearTimeout(snapshotTimer);
+      snapshotTimer = setTimeout(snapshotToStorage, 500);
+    }
+
+    // F1: restores any previously-snapshotted warbands/portraits into the
+    // fresh in-memory FS at boot, before the first page render. Returns how
+    // many warband files were restored (for the "Restored N…" toast).
+    function restoreFromStorage() {
+      var restored = 0;
+      try {
+        var wbRaw = localStorage.getItem(STORAGE_KEY_WARBANDS);
+        if (wbRaw) {
+          var wbData = JSON.parse(wbRaw);
+          Object.keys(wbData).forEach(function (p) {
+            try {
+              fsMkdirp(p.substring(0, p.lastIndexOf("/")));
+              pyodide.FS.writeFile(p, wbData[p], { encoding: "utf8" });
+              restored++;
+            } catch (e) { /* skip this one file, keep going */ }
+          });
+        }
+        var pRaw = localStorage.getItem(STORAGE_KEY_PORTRAITS);
+        if (pRaw) {
+          var pData = JSON.parse(pRaw);
+          Object.keys(pData).forEach(function (p) {
+            try {
+              fsMkdirp(p.substring(0, p.lastIndexOf("/")));
+              pyodide.FS.writeFile(p, base64ToUint8(pData[p]));
+            } catch (e) { /* skip this one file, keep going */ }
+          });
+        }
+      } catch (e) {
+        // localStorage unavailable — nothing to restore, stay session-only.
+      }
+      return restored;
+    }
+
+    function clearBrowserStorage() {
+      try {
+        localStorage.removeItem(STORAGE_KEY_WARBANDS);
+        localStorage.removeItem(STORAGE_KEY_PORTRAITS);
+      } catch (e) { /* ignore */ }
+      location.reload();
+    }
+    window.fgClearBrowserStorage = clearBrowserStorage;
+
+    function fail(detail) {
+      document.querySelector(".spinner").style.display = "none";
+      loadingMsg.style.display = "none";
+      var err = document.getElementById("err");
+      err.style.display = "block";
+      // F2: distinguish "the CDN/network is unreachable" from "your browser
+      // can't run this" — the generic browser-support message is actively
+      // misleading for what's really a connectivity problem.
+      var headline = document.getElementById("err-headline");
+      var isNetwork = /NETWORK:/.test(detail || "");
+      headline.textContent = isNetwork
+        ? "Sorry — the app couldn't start."
+        : "Sorry — the app couldn't start. This build needs a modern desktop browser (Chrome, Edge, Firefox or Safari) with WebAssembly enabled.";
+      document.getElementById("err-detail").textContent = isNetwork ? detail.replace(/^.*NETWORK:\s*/, "") : (detail || "");
+    }
+
+    // ---- Python bootstrap: unpack the bundle into an in-memory FS, then drive
+    // the real Flask app through its test client. -----------------------------
+    var BOOTSTRAP_PY = [
+      "import os, sys, json",
+      "b = json.loads(BUNDLE_JSON)",
+      "os.makedirs('/app', exist_ok=True)",
+      "for _path, _content in b['files'].items():",
+      "    _full = '/app/' + _path",
+      "    _d = os.path.dirname(_full)",
+      "    if _d:",
+      "        os.makedirs(_d, exist_ok=True)",
+      "    with open(_full, 'w', encoding='utf-8') as _f:",
+      "        _f.write(_content)",
+      "os.environ['FWK_BROWSER'] = '1'",
+      "os.environ['FWK_DATA_DIR'] = '/data'",
+      "os.makedirs('/data', exist_ok=True)",
+      "os.chdir('/app')",
+      "sys.path.insert(0, '/app')",
+      "import app as _appmod",
+      "_client = _appmod.app.test_client()",
+      "from urllib.parse import urlencode",
+      "import base64, io",
+      "from werkzeug.datastructures import FileStorage",
+      "def navigate(path, method='GET', pairs_json='[]', files_json='[]'):",
+      "    pairs = json.loads(pairs_json)",
+      "    files = json.loads(files_json or '[]')",
+      "    method = (method or 'GET').upper()",
+      "    if method == 'GET':",
+      "        if pairs:",
+      "            sep = '&' if '?' in path else '?'",
+      "            path = path + sep + urlencode([(p[0], p[1]) for p in pairs])",
+      "        resp = _client.open(path, method='GET', follow_redirects=True)",
+      "    elif files:",
+      "        data = {}",
+      "        for k, v in pairs:",
+      "            if k in data:",
+      "                if isinstance(data[k], list):",
+      "                    data[k].append(v)",
+      "                else:",
+      "                    data[k] = [data[k], v]",
+      "            else:",
+      "                data[k] = v",
+      "        for f in files:",
+      "            stream = io.BytesIO(base64.b64decode(f['base64']))",
+      "            data[f['field']] = FileStorage(",
+      "                stream=stream, filename=f['filename'],",
+      "                content_type=f.get('contentType') or 'application/octet-stream',",
+      "            )",
+      "        # A dict `data` with any file-like value makes werkzeug's test client",
+      "        # switch to multipart/form-data automatically — no explicit content_type.",
+      "        resp = _client.open(path, method=method, data=data, follow_redirects=True)",
+      "    else:",
+      "        body = urlencode([(p[0], p[1]) for p in pairs])",
+      "        resp = _client.open(path, method=method, data=body,",
+      "                            content_type='application/x-www-form-urlencoded',",
+      "                            follow_redirects=True)",
+      "    ctype = resp.headers.get('Content-Type', '')",
+      "    is_text = (ctype == '' or ctype.startswith('text/') or 'html' in ctype",
+      "               or 'json' in ctype or 'xml' in ctype or 'javascript' in ctype)",
+      "    raw = resp.get_data(as_text=False)",
+      "    if is_text:",
+      "        body = raw.decode('utf-8', 'replace')",
+      "    else:",
+      "        body = base64.b64encode(raw).decode('ascii')",
+      "    final_path = getattr(getattr(resp, 'request', None), 'path', path)",
+      "    return json.dumps({",
+      "        'status': resp.status_code,",
+      "        'content_type': ctype,",
+      "        'content_disposition': resp.headers.get('Content-Disposition', ''),",
+      "        'is_binary': (not is_text),",
+      "        'body': body,",
+      "        'final_path': final_path,",
+      "    })",
+      ""
+    ].join("\n");
+
+    // ---- Interceptor injected into every rendered page (runs in the iframe).
+    // Turns internal link clicks and form submits into postMessage() calls to
+    // this parent window, which routes them through the Python test client. ---
+    var INTERCEPTOR_JS = [
+      "(function(){",
+      // F5: srcdoc content shares the parent's origin (no sandbox attribute
+      // on the iframe), so we CAN target it precisely instead of '*' — fall
+      // back to '*' only if that read ever fails (e.g. a future sandboxed
+      // embed).
+      "  var _targetOrigin = '*';",
+      "  try { _targetOrigin = window.parent.location.origin || '*'; } catch(e){}",
+      "  function send(m){ try { parent.postMessage(m, _targetOrigin); } catch(e){ try{ parent.postMessage(m, '*'); }catch(e2){} } }",
+      "  // Exposed so template code that must navigate programmatically (e.g. the",
+      "  // new-warband school <select>) routes through the driver instead of",
+      "  // assigning location.href, which would break out of the in-browser app.",
+      "  window.fgNavigate = function(path, method, pairs){ send({fg:1, path:path, method:(method||'GET'), pairs:pairs||[]}); };",
+      "  // A promise-based GET bridge for in-page code that needs the response body",
+      "  // back as a value (e.g. the creation page's partial-reload fetch()) rather",
+      "  // than a full page swap. Round-trips through the parent via postMessage",
+      "  // since a raw fetch() here has no real network target inside this srcdoc.",
+      "  var _fgSeq = 0, _fgPending = {};",
+      "  window.fgFetch = function(url){",
+      "    return new Promise(function(resolve){",
+      "      var id = ++_fgSeq;",
+      "      _fgPending[id] = resolve;",
+      "      send({fg:1, kind:'fetch', id:id, path:url, method:'GET', pairs:[]});",
+      "    });",
+      "  };",
+      "  window.addEventListener('message', function(e){",
+      // F5: only accept replies from the parent window, not any embedder.
+      "    if(e.source !== window.parent) return;",
+      "    var d = e.data;",
+      "    if(!d || d.fgReply !== 1) return;",
+      "    var resolve = _fgPending[d.id];",
+      // F5: fgFetch never rejects — a failed navigatePy call (parent-side)
+      // now always replies with an error payload instead of dropping the
+      // message, so this always resolves rather than hanging forever.
+      "    if(resolve){ delete _fgPending[d.id]; resolve({ ok: !d.error, text: function(){ return Promise.resolve(d.body || ''); } }); }",
+      "  });",
+      "  function pairsFrom(form, cb){",
+      "    var pairs = [], files = [], reads = [];",
+      "    var els = form.elements;",
+      "    for (var i=0;i<els.length;i++){",
+      "      var el = els[i];",
+      "      if(!el.name || el.disabled) continue;",
+      "      var tag = (el.tagName||'').toLowerCase();",
+      "      var type = (el.type||'').toLowerCase();",
+      "      if(type==='file'){",
+      "        if(!el.files || !el.files.length) continue;",
+      "        var f = el.files[0], fieldName = el.name;",
+      "        if(fieldName==='file'){",
+      "          // The Import page's warband-file picker: read as text, forwarded",
+      "          // as the json_text field. The page's \"Or paste JSON\" textarea",
+      "          // shares that same name — when both are present (textarea left",
+      "          // empty, a file chosen), the file must win: its value only lands",
+      "          // in `pairs` once this async read finishes, AFTER the textarea's",
+      "          // empty value was already pushed by the synchronous loop below, so",
+      "          // any earlier json_text entry has to be dropped here or the empty",
+      "          // one — being first — would be what the server sees.",
+      "          (function(ff){ reads.push(new Promise(function(res){",
+      "            var fr=new FileReader();",
+      "            fr.onload=function(){",
+      "              for (var i = pairs.length - 1; i >= 0; i--) { if (pairs[i][0] === 'json_text') pairs.splice(i, 1); }",
+      "              pairs.push(['json_text', String(fr.result)]);",
+      "              res();",
+      "            };",
+      "            fr.onerror=function(){ res(); };",
+      "            fr.readAsText(ff);",
+      "          })); })(f);",
+      "        } else {",
+      "          // Any other file input (portrait uploads): read as bytes so the",
+      "          // Python side can rebuild a real FileStorage for request.files.",
+      "          (function(ff, name){ reads.push(new Promise(function(res){",
+      "            var fr=new FileReader();",
+      "            fr.onload=function(){",
+      "              var s = String(fr.result);",
+      "              var comma = s.indexOf(',');",
+      "              files.push({",
+      "                field: name, filename: ff.name,",
+      "                contentType: ff.type || 'application/octet-stream',",
+      "                base64: comma>=0 ? s.slice(comma+1) : s,",
+      "              });",
+      "              res();",
+      "            };",
+      "            fr.onerror=function(){ res(); };",
+      "            fr.readAsDataURL(ff);",
+      "          })); })(f, fieldName);",
+      "        }",
+      "        continue;",
+      "      }",
+      "      if((type==='checkbox'||type==='radio') && !el.checked) continue;",
+      "      if(type==='submit'||type==='button') continue;",
+      "      if(tag==='select' && el.multiple){",
+      "        for(var j=0;j<el.options.length;j++){ if(el.options[j].selected) pairs.push([el.name, el.options[j].value]); }",
+      "        continue;",
+      "      }",
+      "      pairs.push([el.name, el.value]);",
+      "    }",
+      "    if(reads.length){ Promise.all(reads).then(function(){ cb(pairs, files); }); } else { cb(pairs, files); }",
+      "  }",
+      "  function submitForm(form){",
+      "    var method = (form.getAttribute('method')||'GET').toUpperCase();",
+      "    var action = form.getAttribute('action') || location.pathname;",
+      "    pairsFrom(form, function(pairs, files){ send({fg:1, path:action, method:method, pairs:pairs, files:files}); });",
+      "  }",
+      "  document.addEventListener('click', function(e){",
+      "    var a = e.target && e.target.closest ? e.target.closest('a[href]') : null;",
+      "    if(!a) return;",
+      "    var href = a.getAttribute('href');",
+      "    if(!href) return;",
+      "    if(a.target==='_blank' || a.hasAttribute('download')) return;",
+      "    if(/^(https?:|mailto:|tel:|#|javascript:)/i.test(href)) return;",
+      "    e.preventDefault();",
+      "    send({fg:1, path:href, method:'GET', pairs:[]});",
+      "  }, true);",
+      "  // Bubbling (not capturing) + defaultPrevented so that a form runs its",
+      "  // onsubmit=return confirm(...) FIRST: if the user cancels, the event is",
+      "  // already defaultPrevented and we must not dispatch the action.",
+      "  document.addEventListener('submit', function(e){",
+      "    var form = e.target;",
+      "    if(!form || form.tagName!=='FORM') return;",
+      "    if(e.defaultPrevented) return;",
+      "    e.preventDefault();",
+      "    submitForm(form);",
+      "  }, false);",
+      "  // Some controls call form.submit() directly (e.g. the soldier-status",
+      "  // dropdown's onchange) which does NOT fire the submit event — override it.",
+      "  var _native = HTMLFormElement.prototype.submit;",
+      "  HTMLFormElement.prototype.submit = function(){ try { submitForm(this); } catch(e){ _native.call(this); } };",
+      "})();",
+      ""
+    ].join("\n");
+
+    // Default character art ships as real files next to this page (docs/app/static/
+    // portraits/) — a cheap relative rewrite, no Python round-trip needed. Must stay
+    // relative (no leading "/"): GitHub Pages serves this at a subpath, not the
+    // domain root, so an absolute path would 404 in production.
+    // Uploaded portraits only exist as real bytes in Pyodide's in-memory /data dir —
+    // those have to come from the Python side, once per unique src, inlined as a
+    // data: URI (the same base64 mechanism that already powers PDF downloads).
+    function inlinePortraits(html) {
+      html = html.split('src="/static/portraits/').join('src="static/portraits/');
+      var seen = {}, srcs = [], m;
+      var re = /<img\b[^>]*?src="(\/portraits\/[^"]+)"/g;
+      while ((m = re.exec(html))) {
+        if (!seen[m[1]]) { seen[m[1]] = true; srcs.push(m[1]); }
+      }
+      srcs.forEach(function (src) {
+        // F5: inlining does a synchronous Python round-trip + base64 encode
+        // per unique portrait — cache by src across renders (cleared on
+        // portrait uploads, see the message handler) so only the first
+        // render of a given portrait pays that cost.
+        if (portraitCache[src]) {
+          html = html.split('src="' + src + '"').join('src="' + portraitCache[src] + '"');
+          return;
+        }
+        try {
+          var res = JSON.parse(navigatePy(src, "GET", "[]", "[]"));
+          // is_binary guards against navigate()'s follow_redirects=True quietly
+          // resolving a missing portrait (404 -> the app's own error handler ->
+          // a real HTML page) into "status 200" — that's text, not image bytes,
+          // and must not be wrapped as one. Leave the original src in that case;
+          // portrait_src() (app.py) already prefers the default art whenever the
+          // file doesn't actually exist, so this path is a rare fallback.
+          if (res.status === 200 && res.is_binary) {
+            var uri = "data:" + (res.content_type || "application/octet-stream") + ";base64," + res.body;
+            portraitCache[src] = uri;
+            html = html.split('src="' + src + '"').join('src="' + uri + '"');
+          }
+        } catch (e) { /* leave the original src — worst case, a broken image */ }
+      });
+      return html;
+    }
+
+    function renderPage(html) {
+      html = html.replace(/<link[^>]*href="[^"]*style\.css"[^>]*>/i, function () {
+        return "<style>" + STYLE_CSS + "</style>";
+      });
+      var itemJs = ITEM_SLOTS_JS.replace(/<\/script>/gi, "<\\/script>");
+      html = html.replace(/<script[^>]*src="[^"]*item_slots\.js"[^>]*><\/script>/i, function () {
+        return "<script>" + itemJs + "<\/script>";
+      });
+      html = inlinePortraits(html);
+      html = html.replace(/<\/body>/i, function () {
+        return "<script>" + INTERCEPTOR_JS + "<\/script></body>";
+      });
+      frame.srcdoc = html;
+    }
+
+    function downloadText(text, filename, type) {
+      var blob = new Blob([text], { type: type || "application/octet-stream" });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url; a.download = filename || "warband.warbands";
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
+    }
+
+    function downloadBinary(b64, filename, type) {
+      var bin = atob(b64);
+      var bytes = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      var blob = new Blob([bytes], { type: type || "application/octet-stream" });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url; a.download = filename || "roster.pdf";
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
+    }
+
+    var toastEl = document.getElementById("toast");
+    var toastTimer = null;
+    function showToast(msg, ms) {
+      toastEl.textContent = msg;
+      toastEl.classList.add("show");
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(function () { toastEl.classList.remove("show"); }, ms || 4200);
+    }
+
+    // F5: each navigation is a synchronous Python call on the main thread —
+    // on a slow device a click can feel dead for a beat. Cheap signal: swap
+    // the cursor to "progress" for the duration; the frame's own 'load'
+    // listener (set up in boot()) clears it once the new page is actually on
+    // screen.
+    function go(path, method, pairs, files) {
+      document.body.style.cursor = "progress";
+      var resJson;
+      try {
+        resJson = navigatePy(path, method || "GET", JSON.stringify(pairs || []), JSON.stringify(files || []));
+      } catch (e) {
+        document.body.style.cursor = "";
+        renderPage("<!doctype html><meta charset=utf-8><body style='font-family:sans-serif;color:#e8eef7;background:#0e1420;padding:2rem'><h2>Something went wrong</h2><pre style='white-space:pre-wrap;color:#ffb3b3'>" +
+          String(e).replace(/[<&]/g, function (c) { return c === "<" ? "&lt;" : "&amp;"; }) + "</pre><p><a href='/' style='color:#ffd479'>Back to warbands</a></p></body>");
+        return;
+      }
+      var res = JSON.parse(resJson);
+      var cd = res.content_disposition || "";
+      if (/attachment/i.test(cd)) {
+        document.body.style.cursor = "";
+        var m = /filename\*?=(?:UTF-8'')?"?([^";]+)"?/i.exec(cd);
+        var fname = m ? decodeURIComponent(m[1]) : "warband.warbands";
+        if (res.is_binary) {
+          // e.g. the PDF roster — body is base64-encoded bytes, not text.
+          downloadBinary(res.body, fname, res.content_type || "application/octet-stream");
+          showToast("Downloaded “" + fname + "”.");
+        } else {
+          downloadText(res.body, fname, res.content_type || "application/json");
+          sessionDirty = false;
+          showToast(
+            "Exported “" + fname + "”. Keep that file safe — it's a portable backup/transfer " +
+            "copy. Note: portraits aren't included in the export — keep your image files; " +
+            "you can re-attach them after import.",
+            7000
+          );
+        }
+        return;
+      }
+      renderPage(res.body);
+      // F3: reflect the resolved path in the URL hash so Back/Forward and
+      // deep links work — but not while replaying a popstate navigation
+      // (that history entry already exists; pushing again would break Forward).
+      if (!suppressHistoryPush) {
+        var finalPath = res.final_path || path;
+        var hash = "#" + finalPath;
+        if (location.hash !== hash) {
+          try { history.pushState(null, "", hash); } catch (e) { /* ignore */ }
+        }
+      }
+    }
+
+    window.addEventListener("message", function (e) {
+      // F5: only accept these from our own srcdoc iframe, not any other
+      // window that might be embedded on the same page.
+      if (e.source !== frame.contentWindow) return;
+      var d = e.data;
+      if (!d || d.fg !== 1) return;
+      if (d.kind === "fetch") {
+        // window.fgFetch's bridge: answer via the same Python navigate() call,
+        // reply directly to the iframe (no sessionDirty/toast — it's a read).
+        var res, errMsg = null;
+        try {
+          res = JSON.parse(navigatePy(d.path, d.method || "GET", "[]", "[]"));
+        } catch (e2) {
+          errMsg = String(e2);
+        }
+        // F5: always reply, even on failure — leaving the iframe's pending
+        // fgFetch promise unresolved was a permanent hang for whatever in-page
+        // code was awaiting it (e.g. the creation page's partial reload).
+        var replyTarget = frame.contentWindow.location.origin !== "null"
+          ? frame.contentWindow.location.origin : "*";
+        frame.contentWindow.postMessage(
+          errMsg
+            ? { fgReply: 1, id: d.id, status: 0, body: "", error: errMsg }
+            : { fgReply: 1, id: d.id, status: res.status, body: res.body },
+          replyTarget
+        );
+        return;
+      }
+      if ((d.method || "GET").toUpperCase() === "POST") {
+        sessionDirty = true;
+        // F1: uploaded portrait bytes only live in Pyodide's in-memory FS —
+        // drop the inline-render cache so the next page picks up the new file
+        // instead of a stale cached data URI (F5).
+        if (d.files && d.files.length) portraitCache = {};
+        if (!remindedThisSession) {
+          remindedThisSession = true;
+          showToast(
+            "Heads up: changes are saved in this browser only (this device, this browser). " +
+            "Use “Export warband” for a portable backup or to move it to another device/browser.",
+            6500
+          );
+        }
+      }
+      go(d.path, d.method, d.pairs, d.files);
+      if ((d.method || "GET").toUpperCase() === "POST") scheduleSnapshot();
+    });
+
+    // Warn before leaving if there are unsaved changes this session.
+    window.addEventListener("beforeunload", function (e) {
+      if (sessionDirty) { e.preventDefault(); e.returnValue = ""; return ""; }
+    });
+
+    // F3: Back/Forward navigates within the app instead of leaving the site.
+    window.addEventListener("popstate", function () {
+      var path = location.hash && location.hash.length > 1 ? decodeURIComponent(location.hash.slice(1)) : "/";
+      if (path.charAt(0) !== "/") path = "/";
+      suppressHistoryPush = true;
+      try { go(path, "GET", []); }
+      finally { suppressHistoryPush = false; }
+    });
+
+    async function boot() {
+      try {
+        // F2: loadPyodide comes from the jsdelivr <script> tag in <head> — if
+        // that's blocked (content blocker, offline, jsdelivr down), it never
+        // defines the global and the generic "needs a modern browser" message
+        // below would be actively misleading for what's really a network problem.
+        if (typeof loadPyodide === "undefined") {
+          throw new Error(
+            "NETWORK: Couldn't reach the CDN that hosts the Python runtime (jsdelivr.net) — " +
+            "check your internet connection or content/ad blocker, then reload."
+          );
+        }
+
+        setMsg("Starting the Python runtime… (first load downloads it, ~10 MB)");
+        pyodide = await loadPyodide({ indexURL: PYODIDE_INDEX });
+
+        setMsg("Installing Flask…");
+        await pyodide.loadPackage("micropip");
+        var micropip = pyodide.pyimport("micropip");
+        await micropip.install("flask");
+
+        setMsg("Enabling PDF export…");
+        try {
+          // Pillow is a native (precompiled WASM) Pyodide package, not a plain
+          // PyPI wheel micropip can build — and fpdf2 hard-requires it to embed
+          // ANY image (portraits included; there's no Pillow-free fallback in
+          // fpdf2 itself). Must load before fpdf2 is ever imported — pdf_export.py
+          // imports it lazily on the first PDF export, so this only needs to run
+          // before that, but doing it here at boot keeps the ordering simple.
+          await pyodide.loadPackage("Pillow");
+          await micropip.install("fpdf2");
+        } catch (pdfErr) {
+          // Non-fatal: the app still runs; PDF export may error or omit portraits.
+          // Surfaced as a toast too (D12) — a silent console.warn means the only
+          // sign of trouble is a broken PDF export link later with no explanation.
+          console.warn("PDF export could not be fully enabled:", pdfErr);
+          setTimeout(function () {
+            showToast("PDF export is unavailable in this session (the PDF library didn't load). Everything else still works.", 8000);
+          }, 500);
+        }
+
+        setMsg("Loading the warband keeper…");
+        // F2: a content hash, not Date.now() — the old cache-buster forced a
+        // fresh ~1.4 MB download on *every* visit, defeating GitHub Pages'
+        // HTTP caching entirely. build_browser_bundle.py rewrites the version
+        // string below in place on every build (regex, not a one-shot
+        // placeholder swap — see BUNDLE_VERSION_RE in that script), so repeat
+        // visits between builds hit the browser cache instead.
+        var resp = await fetch("bundle.json?v=__BUNDLE_VERSION__");
+        if (!resp.ok) throw new Error("Could not fetch bundle.json (" + resp.status + ")");
+        var bundle = await resp.json();
+        STYLE_CSS = bundle.files["static/style.css"] || "";
+        ITEM_SLOTS_JS = bundle.files["static/item_slots.js"] || "";
+
+        pyodide.globals.set("BUNDLE_JSON", JSON.stringify(bundle));
+        await pyodide.runPythonAsync(BOOTSTRAP_PY);
+        navigatePy = pyodide.globals.get("navigate");
+
+        // BOOTSTRAP_PY just wrote empty (0-byte) placeholders for every default
+        // portrait — just enough for warband_store.default_portrait_name()'s
+        // Path.is_file() check to succeed, matching what actually served images
+        // relies on for the WEB view (a plain relative-URL rewrite in
+        // inlinePortraits(), never touching these bytes at all). But the PDF
+        // export reads portraits directly through Python/Pillow from this same
+        // MEMFS path, so an empty placeholder there fails silently (caught by
+        // pdf_export.py's try/except) and default art never appears in the PDF.
+        // Fix: fetch the real bytes (same files inlinePortraits() already relies
+        // on being served from static/portraits/ next to this page) and write
+        // them over the placeholders via Pyodide's virtual FS.
+        setMsg("Loading default character art…");
+        var portraitPaths = Object.keys(bundle.files).filter(function (k) {
+          return k.indexOf("static/portraits/") === 0;
+        });
+        await Promise.all(portraitPaths.map(function (relPath) {
+          return fetch(relPath)
+            .then(function (r) { return r.arrayBuffer(); })
+            .then(function (buf) { pyodide.FS.writeFile("/app/" + relPath, new Uint8Array(buf)); })
+            .catch(function (e) { console.warn("Could not load default portrait", relPath, e); });
+        }));
+
+        // F1: bring back whatever this browser saved from a previous visit,
+        // before the very first render.
+        setMsg("Restoring your warbands…");
+        var restoredCount = restoreFromStorage();
+
+        // F3: a bookmarked/shared "#/reference"-style link opens straight to
+        // that page instead of always landing on the warband list.
+        var initialPath = "/";
+        if (location.hash && location.hash.length > 1) {
+          var candidate = decodeURIComponent(location.hash.slice(1));
+          if (candidate.charAt(0) === "/") initialPath = candidate;
+        }
+        suppressHistoryPush = true;
+        go(initialPath, "GET", []);
+        suppressHistoryPush = false;
+
+        loading.style.display = "none";
+        frame.style.display = "block";
+        var clearLink = document.getElementById("clear-data-link");
+        clearLink.style.display = "block";
+        clearLink.addEventListener("click", function (e) {
+          e.preventDefault();
+          if (confirm("Clear all warbands and portraits saved in this browser? This can't be undone (export first if you want to keep them).")) {
+            clearBrowserStorage();
+          }
+        });
+        // F5: the busy-cursor set at the start of each go() clears once the
+        // freshly-rendered srcdoc has actually finished loading.
+        frame.addEventListener("load", function () {
+          document.body.style.cursor = "";
+        });
+
+        if (restoredCount > 0) {
+          setTimeout(function () {
+            showToast("Restored " + restoredCount + " warband file(s) from this browser's storage.", 5000);
+          }, 300);
+        }
+      } catch (e) {
+        console.error(e);
+        fail(String(e));
+      }
+    }
+
+    boot();
+  })();
+  </script>
+</body>
+</html>
