@@ -42,6 +42,7 @@ from frostgrave_data import (
     CAPTAIN_MODE_OPTIONS,
     CAPTAIN_TRICK_BY_ID,
     CAPTAIN_TRICKS,
+    GIANT_BLOODED_COST,
     KNIGHTLY_ORDER_ELIGIBLE,
     KNIGHTLY_ORDERS,
     LEVEL_UP_OPTIONS,
@@ -75,6 +76,7 @@ from frostgrave_data import (
     cn_penalty,
     construct_type_keys,
     format_stat,
+    giant_blooded_eligible_type_keys,
     group_soldiers_by_source,
     illusion_source_choices,
     level_from_xp,
@@ -185,6 +187,7 @@ from warband_store import (
     set_animal_feature,
     set_base_location,
     set_permanent_injury_prosthetic,
+    set_soldier_giant_blooded,
     set_soldier_status,
     set_wizard_state,
     soldier_from_book_enabled,
@@ -279,6 +282,7 @@ app.jinja_env.globals.update(
     ANIMAL_COMPANION_TYPE_KEYS=animal_companion_type_keys(),
     CONSTRUCT_TYPE_KEYS=construct_type_keys(),
     STANDARD_CONSTRUCT_TYPE_KEYS=STANDARD_CONSTRUCT_TYPE_KEYS,
+    GIANT_BLOODED_COST=GIANT_BLOODED_COST,
     LEVELUP_STATS=LEVELUP_STATS,
     level_from_xp=level_from_xp,
     captain_effective_stats=captain_effective_stats,
@@ -438,7 +442,8 @@ def warband_new() -> str | Response:
         wizard = (request.form.get("wizard_name") or "").strip()
         school = request.form.get("school") or SCHOOLS[0]
         pentangle = request.form.get("pentangle_schools_playable") == "on"
-        if school not in _new_schools(_posted_sources(request.form), pentangle):
+        fire_giant = request.form.get("fire_giant_wizard_playable") == "on"
+        if school not in _new_schools(_posted_sources(request.form), pentangle, fire_giant):
             school = SCHOOLS[0]
         # Order preserved from hidden field if present
         order_raw = (request.form.get("spell_order") or "").strip()
@@ -469,7 +474,7 @@ def warband_new() -> str | Response:
         if not name or not wizard:
             flash("Warband name and wizard name are required.", "error")
             return _render_new(school=school, selected=spell_keys, sources=sources,
-                               pentangle=pentangle, warband_name=name, wizard_name=wizard,
+                               pentangle=pentangle, fire_giant=fire_giant, warband_name=name, wizard_name=wizard,
                                with_apprentice=with_apprentice, apprentice_name=apprentice_name,
                                starting_gold=starting_gold, wizard_starting_xp=wizard_starting_xp,
                                max_soldiers=max_soldiers, max_specialists=max_specialists)
@@ -485,6 +490,7 @@ def warband_new() -> str | Response:
             apprentice_name,
             enabled_sources_map=sources,
             pentangle_playable=pentangle,
+            fire_giant_playable=fire_giant,
             starting_gold=starting_gold,
             wizard_starting_xp=wizard_starting_xp,
             max_soldiers=max_soldiers,
@@ -493,7 +499,7 @@ def warband_new() -> str | Response:
         if not wb:
             flash(msg, "error")
             return _render_new(school=school, selected=spell_keys, sources=sources,
-                               pentangle=pentangle, warband_name=name, wizard_name=wizard,
+                               pentangle=pentangle, fire_giant=fire_giant, warband_name=name, wizard_name=wizard,
                                with_apprentice=with_apprentice, apprentice_name=apprentice_name,
                                starting_gold=starting_gold, wizard_starting_xp=wizard_starting_xp,
                                max_soldiers=max_soldiers, max_specialists=max_specialists)
@@ -521,17 +527,22 @@ def warband_new() -> str | Response:
     if request.args.get("sources_touched"):
         sources = _posted_sources(request.args)
         pentangle = request.args.get("pentangle_schools_playable") == "on"
+        fire_giant = request.args.get("fire_giant_wizard_playable") == "on"
     else:
         sources = {book: True for book in SOURCE_BOOKS}
         pentangle = False
-    return _render_new(school=school, sources=sources, pentangle=pentangle)
+        fire_giant = False
+    return _render_new(school=school, sources=sources, pentangle=pentangle, fire_giant=fire_giant)
 
 
-def _new_schools(sources: dict, pentangle: bool) -> list[str]:
+def _new_schools(sources: dict, pentangle: bool, fire_giant: bool = False) -> list[str]:
     """Schools offered on the creation page for these toggles."""
+    schools = list(SCHOOLS)
     if pentangle and sources.get("The Maze of Malcor"):
-        return list(SCHOOLS) + list(PENTANGLE_SCHOOLS)
-    return list(SCHOOLS)
+        schools += list(PENTANGLE_SCHOOLS)
+    if fire_giant and sources.get("Blood Legacy"):
+        schools.append("Fire Giant")
+    return schools
 
 
 def _posted_sources(form) -> dict:
@@ -548,6 +559,7 @@ def _render_new(
     selected: list | None = None,
     sources: dict | None = None,
     pentangle: bool = False,
+    fire_giant: bool = False,
     warband_name: str = "",
     wizard_name: str = "",
     with_apprentice: bool = False,
@@ -558,7 +570,7 @@ def _render_new(
     max_specialists: int = MAX_SPECIALISTS,
 ):
     sources = sources or {}
-    schools = _new_schools(sources, pentangle)
+    schools = _new_schools(sources, pentangle, fire_giant)
     school = school if school in schools else SCHOOLS[0]
     rel = SCHOOL_RELATIONS[school]
     # A Pentangle school has two aligned schools where a core school has three,
@@ -588,6 +600,7 @@ def _render_new(
         source_books=SOURCE_BOOK_OPTIONS,
         enabled_sources_map=sources,
         pentangle_playable=pentangle,
+        fire_giant_playable=fire_giant,
         PENTANGLE_SCHOOLS=PENTANGLE_SCHOOLS,
         neutral_needed=neutral_needed,
         warband_name=warband_name,
@@ -671,6 +684,21 @@ def warband_view(warband_id: str) -> str:
     temporary_member_count = sum(
         1 for s in all_soldiers if s.get("status") != "dead" and _is_temporary(s)
     )
+    # Blood Legacy's Giant-Blooded: a single global picker (see
+    # set_soldier_giant_blooded) rather than a button repeated on every
+    # soldier's row, since only one soldier in the warband may take it.
+    giant_blooded_enabled = "Blood Legacy" in wb_sources and bool(
+        (wb.get("homerules") or {}).get("giant_blooded_enabled")
+    )
+    giant_blooded_eligible_keys = giant_blooded_eligible_type_keys()
+    giant_blooded_soldier = next(
+        (s for s in all_soldiers if s.get("giant_blooded")), None
+    )
+    giant_blooded_choices = [
+        {"id": s["id"], "name": s.get("name") or "Unnamed"}
+        for s in all_soldiers
+        if s.get("status") != "dead" and s.get("type_key") in giant_blooded_eligible_keys
+    ]
     return render_template(
         "warband_view.html",
         wb=wb,
@@ -683,6 +711,9 @@ def warband_view(warband_id: str) -> str:
         known_spell_names=wb_spells,
         has_animal_companion=has_animal_companion(wb),
         animal_companion_limit=animal_companion_limit(wb),
+        giant_blooded_enabled=giant_blooded_enabled,
+        giant_blooded_soldier=giant_blooded_soldier,
+        giant_blooded_choices=giant_blooded_choices,
         schools=SCHOOLS,
         learnable=learnable,
         pending_levels=limits["pending_levels"],
@@ -1334,6 +1365,13 @@ def _act_add_soldier_permanent_injury(wb: dict) -> tuple[bool, str]:
 def _act_remove_soldier_permanent_injury(wb: dict) -> tuple[bool, str]:
     return remove_soldier_permanent_injury(
         wb, request.form.get("soldier_id") or "", _mutation_index_from_form()
+    )
+
+
+@register_action("toggle_soldier_giant_blooded")
+def _act_toggle_soldier_giant_blooded(wb: dict) -> tuple[bool, str]:
+    return set_soldier_giant_blooded(
+        wb, request.form.get("soldier_id") or "", _fitted_from_form()
     )
 
 

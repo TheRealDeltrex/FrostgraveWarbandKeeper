@@ -90,6 +90,11 @@
   "effect": "+1 damage; Destroy Undead can hit 2 adjacent undead instead of one."
  },
  {
+  "name": "The Grimoire of Fin Dalka",
+  "source": "Blood Legacy",
+  "effect": "A ciphered tome of all 8 Fire Giant spells. Deciphering one costs 100gc + a Will Roll (TN20): success learns it normally; failure grants a cumulative +1 to future attempts on that spell; a natural 1 permanently locks it for that wizard. Sells for 1,000gc minus 100gc per spell already learned from it."
+ },
+ {
   "name": "Two-Headed Wand",
   "source": "Blood Legacy",
   "effect": "Casts Transpose between two figures in LoS of the caster and within 16\" of each other."

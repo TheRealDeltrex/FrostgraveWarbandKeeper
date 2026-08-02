@@ -20,6 +20,9 @@ from __future__ import annotations
 
 from frostgrave_data import (
     APPRENTICE_ITEM_SLOTS,
+    FIRE_GIANT_HEALTH_CAP,
+    FIRE_GIANT_WIZARD_BASE,
+    FIRE_GIANT_XP_PER_LEVEL,
     LEVEL_UP_OPTIONS,
     MAX_SOLDIERS,
     MAX_SPECIALISTS,
@@ -80,6 +83,15 @@ def state_kind(wb: dict) -> str:
 
 def is_lich(wb: dict) -> bool:
     return state_kind(wb) == STATE_LICH
+
+
+def is_fire_giant(wb: dict) -> bool:
+    """Blood Legacy's Fire Giant Wizard — a school (like a race marker), not a
+    wizard state: unlike Lich/Beastcrafter/Pact it replaces the wizard's base
+    stat line outright rather than layering on top of an ordinary human one,
+    so it's set once at creation via the wizard's own `school` field instead
+    of `state.kind`. See warband_store.playable_schools()/empty_wizard()."""
+    return (wb.get("wizard") or {}).get("school") == "Fire Giant"
 
 
 def beastcrafter_tier(wb: dict) -> int:
@@ -316,7 +328,14 @@ def has_vault_item(wb: dict, needle: str) -> bool:
 
 
 def xp_per_level(wb: dict) -> int:
-    """XP one wizard level costs. A Lich levels more slowly."""
+    """XP one wizard level costs. A Lich levels more slowly; a Fire Giant
+    levels more slowly still (Blood Legacy: 200xp, vs. a Lich's 150xp). The
+    book also caps a Fire Giant at 400xp spent per game — a per-game (not
+    per-warband-lifetime) limit this app has no bookkeeping for anywhere else
+    (same as the niggling injury/prosthetic upkeep fees), so it's left as a
+    house rule to track at the table rather than enforced here."""
+    if is_fire_giant(wb):
+        return FIRE_GIANT_XP_PER_LEVEL
     return LICH_XP_PER_LEVEL if is_lich(wb) else XP_PER_LEVEL
 
 
@@ -384,6 +403,13 @@ def wizard_stat_caps(wb: dict) -> dict:
         caps = dict(LICH_STAT_CAPS)
     else:
         caps = dict(hr.get("wizard_stat_limits") or WIZARD_STAT_LIMITS_DEFAULT)
+    if is_fire_giant(wb):
+        # Only "Health cap 30" is spelled out for a Fire Giant; the other caps
+        # are bumped no lower than its starting stat line so a brand-new Fire
+        # Giant never starts above its own cap (see FIRE_GIANT_WIZARD_BASE).
+        caps["health"] = FIRE_GIANT_HEALTH_CAP
+        caps["fight"] = max(caps.get("fight", 0), FIRE_GIANT_WIZARD_BASE["fight"])
+        caps["will"] = max(caps.get("will", 0), FIRE_GIANT_WIZARD_BASE["will"])
     if _hlw_active(wb, "hlw_max_health"):
         base = caps.get("health", WIZARD_STAT_LIMITS_DEFAULT["health"])
         caps["health"] = base + min(10, wizard_level(wb) // 10)
@@ -522,6 +548,8 @@ def spell_state_block(wb: dict, spell: dict) -> str | None:
     name = spell.get("name", "")
     if name in LICH_FORBIDDEN_SPELLS and is_lich(wb):
         return f"A Lich cannot cast {name}."
+    if is_fire_giant(wb) and (spell.get("school") == "Chronomancer" or name == "Write Scroll"):
+        return "A Fire Giant Wizard cannot learn Chronomancer spells or Write Scroll (Blood Legacy)."
     need_tier = BEASTCRAFTER_SPELLS.get(name)
     if need_tier and beastcrafter_tier(wb) < need_tier:
         return f"Requires {BEASTCRAFTER_TIER_BY_N[need_tier]['name']}."

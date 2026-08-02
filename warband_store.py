@@ -39,6 +39,9 @@ from frostgrave_data import (
     CAPTAIN_TRICK_BY_ID,
     CAPTAIN_TRICK_IDS,
     CAPTAIN_TRICKS,
+    FIRE_GIANT_WIZARD_BASE,
+    GIANT_BLOODED_COST,
+    GIANT_BLOODED_STAT_DELTA,
     KNIGHTLY_ORDER_BY_ID,
     KNIGHTLY_ORDER_ELIGIBLE,
     KNIGHTLY_ORDER_IDS,
@@ -75,6 +78,7 @@ from frostgrave_data import (
     construct_type_keys,
     find_spell,
     get_soldier,
+    giant_blooded_eligible_type_keys,
     illusion_source_choices,
     level_from_xp,
     school_relation,
@@ -216,7 +220,7 @@ def normalize_item_slots(raw: Iterable[str], n: int) -> list[str]:
 
 
 def empty_wizard(name: str = "", school: str = "Elementalist") -> dict:
-    stats = deepcopy(WIZARD_BASE)
+    stats = deepcopy(FIRE_GIANT_WIZARD_BASE if school == "Fire Giant" else WIZARD_BASE)
     return {
         "name": name,
         "school": school,
@@ -301,6 +305,18 @@ def default_homerules() -> dict:
         # gives rules for playing them properly "if a group agrees". Off by
         # default; needs The Maze of Malcor switched on to have any effect.
         "pentangle_schools_playable": False,
+        # Blood Legacy's Fire Giant Wizard (Chapter Three) — the book frames
+        # it as a build for very hard/large encounters rather than balanced
+        # campaign play, so it's opt-in like Pentangle. Off by default; needs
+        # Blood Legacy switched on to have any effect. Only affects newly
+        # created warbands — see playable_schools()/create_warband().
+        "fire_giant_wizard_playable": False,
+        # Blood Legacy's Giant-Blooded soldier modification (Chapter Three):
+        # one soldier per warband may take it (+50gc, -1 Move, -2 Will,
+        # +2 Health, Giant-Blooded trait). Off by default; needs Blood Legacy
+        # switched on to have any effect. See giant_blooded_eligible_type_keys()
+        # and set_soldier_giant_blooded() below.
+        "giant_blooded_enabled": False,
         # House correction for six supplement soldiers costed closer to 1st
         # edition than the rest of the 2e tables. On by default; see
         # expansions.EDITION_2_SOLDIER_COSTS.
@@ -339,12 +355,16 @@ def default_homerules() -> dict:
 def playable_schools(wb: dict | None = None) -> list[str]:
     """Schools a wizard may actually be. The five Pentangle schools join the ten
     core ones only when The Maze of Malcor is on and the group has agreed to the
-    homerule that makes them playable."""
+    homerule that makes them playable; Fire Giant joins the same way, gated on
+    Blood Legacy and its own "Fire Giant Wizard playable" homerule."""
     hr = (wb or {}).get("homerules") or {}
     es = hr.get("enabled_sources") or {}
+    schools = list(SCHOOLS)
     if hr.get("pentangle_schools_playable") and es.get("The Maze of Malcor"):
-        return list(SCHOOLS) + list(PENTANGLE_SCHOOLS)
-    return list(SCHOOLS)
+        schools += list(PENTANGLE_SCHOOLS)
+    if hr.get("fire_giant_wizard_playable") and es.get("Blood Legacy"):
+        schools.append("Fire Giant")
+    return schools
 
 
 def enabled_sources(wb: dict) -> set[str]:
@@ -572,6 +592,7 @@ def create_warband(
     soldiers: list[dict] | None = None,
     enabled_sources_map: dict | None = None,
     pentangle_playable: bool = False,
+    fire_giant_playable: bool = False,
     starting_gold: int | None = None,
     wizard_starting_xp: int = 0,
     max_soldiers: int | None = None,
@@ -583,6 +604,8 @@ def create_warband(
         warband, so supplement spells and soldiers can be picked at creation.
     pentangle_playable: allow one of the five Pentangle schools as the wizard's
         own school (needs The Maze of Malcor switched on).
+    fire_giant_playable: allow Fire Giant as the wizard's own school (needs
+        Blood Legacy switched on) — Blood Legacy's Fire Giant Wizard build.
     starting_gold: house-ruled starting gold; defaults to STARTING_GOLD (400).
     wizard_starting_xp: house-ruled starting XP for the wizard; defaults to 0.
     max_soldiers: house-ruled roster cap; defaults to MAX_SOLDIERS (8).
@@ -607,11 +630,17 @@ def create_warband(
             ):
                 homerules[key] = True
     homerules["pentangle_schools_playable"] = bool(pentangle_playable)
+    homerules["fire_giant_wizard_playable"] = bool(fire_giant_playable)
     if school not in playable_schools({"homerules": homerules}):
         if school in PENTANGLE_SCHOOLS:
             return None, (
                 f"{school} is a Pentangle school — switch on The Maze of Malcor and the "
                 "'Pentangle schools playable' homerule to use it."
+            )
+        if school == "Fire Giant":
+            return None, (
+                "Fire Giant is Blood Legacy's Fire Giant Wizard build — switch on Blood Legacy "
+                "and the 'Fire Giant Wizard playable' homerule to use it."
             )
         return None, "Invalid school."
     picked_sources = {"Core Rules"} | {
@@ -620,6 +649,15 @@ def create_warband(
     ok, msg = validate_starting_spells(school, spell_keys, picked_sources)
     if not ok:
         return None, msg
+    if school == "Fire Giant":
+        # "can't learn/use Chronomancer spells or Write Scroll" — Chronomancer
+        # itself is already excluded (it's Fire Giant's one opposed school,
+        # so validate_starting_spells above already rejects it), but Write
+        # Scroll is offered by every other school too and needs its own check.
+        if any((find_spell(k) or {}).get("name") == "Write Scroll" for k in spell_keys):
+            return None, "A Fire Giant Wizard cannot take Write Scroll as a starting spell (Blood Legacy)."
+        if with_apprentice:
+            return None, "A Fire Giant Wizard has no apprentice (Blood Legacy)."
 
     gold = STARTING_GOLD if starting_gold is None else int(starting_gold)
     apprentice = None
@@ -1899,6 +1937,79 @@ def remove_construct_modification(wb: dict, soldier_id: str, index: int) -> tupl
     return True, text
 
 
+def _giant_blooded_gate(wb: dict, soldier: dict | None) -> str | None:
+    hr = wb.get("homerules") or {}
+    if "Blood Legacy" not in enabled_sources(wb) or not hr.get("giant_blooded_enabled"):
+        return (
+            "Giant-Blooded needs Blood Legacy and its own homerule switched on "
+            "under Additional Rules and Homerules first."
+        )
+    if soldier is None:
+        return "Soldier not found."
+    if soldier.get("type_key") not in giant_blooded_eligible_type_keys():
+        return (
+            "Only an ordinary Core Rules standard/specialist soldier can be Giant-Blooded "
+            "(not animals, demons, constructs or undead)."
+        )
+    return None
+
+
+def set_soldier_giant_blooded(wb: dict, soldier_id: str, fitted: bool) -> tuple[bool, str]:
+    """Blood Legacy's Giant-Blooded modification (Chapter Three): +50gc,
+    -1 Move, -2 Will, +2 Health, and the Giant-Blooded trait, declared for one
+    soldier in the warband. The book allows only one Giant-Blooded soldier per
+    warband, so this is exposed as a single global picker (choose which
+    hired soldier gets it) gated behind one homerule toggle, rather than a
+    "make Giant-Blooded" button repeated on every soldier's row.
+
+    Reverses the stat changes exactly on removal via a backup dict on the
+    soldier record itself — same idiom as add_construct_modification's
+    stat_backup. The 50gc fee isn't refunded on removal (declared/paid once,
+    same as the apprentice-hiring fee unless a refund is explicitly asked for)."""
+    soldiers = wb.get("soldiers") or []
+    soldier = next((s for s in soldiers if s.get("id") == soldier_id), None)
+    err = _giant_blooded_gate(wb, soldier)
+    if err:
+        return False, err
+    already = bool(soldier.get("giant_blooded"))
+    if fitted == already:
+        return False, "Already in that state."
+    if fitted:
+        other = next(
+            (s for s in soldiers if s.get("giant_blooded") and s.get("id") != soldier_id), None
+        )
+        if other:
+            return False, f"{other.get('name', 'Another soldier')} is already Giant-Blooded; only one per warband."
+        if int(wb.get("gold", 0)) < GIANT_BLOODED_COST:
+            return False, f"Need {GIANT_BLOODED_COST} gc for Giant-Blooded."
+        cat = get_soldier(soldier.get("type_key", "")) or {}
+        get_stat = lambda k: int(soldier.get(k, cat.get(k, 0)))  # noqa: E731
+        set_stat = lambda k, v: soldier.__setitem__(k, v)  # noqa: E731
+        backup = {}
+        parts = []
+        for stat, delta in GIANT_BLOODED_STAT_DELTA.items():
+            before = get_stat(stat)
+            after = before + delta
+            backup[stat] = before
+            set_stat(stat, after)
+            parts.append(f"{stat.capitalize()} {before} -> {after}")
+        wb["gold"] = int(wb.get("gold", 0)) - GIANT_BLOODED_COST
+        soldier["giant_blooded"] = True
+        soldier["giant_blooded_backup"] = backup
+        text = (
+            f"{soldier.get('name', 'Soldier')} became Giant-Blooded for {GIANT_BLOODED_COST}gc "
+            f"({', '.join(parts)})."
+        )
+    else:
+        backup = soldier.pop("giant_blooded_backup", {}) or {}
+        for stat, value in backup.items():
+            soldier[stat] = value
+        soldier["giant_blooded"] = False
+        text = f"{soldier.get('name', 'Soldier')} is no longer Giant-Blooded."
+    add_history(wb, text)
+    return True, text
+
+
 def add_permanent_injury(
     wb: dict, kind: str, injury_id: str, soldier_id: str | None = None
 ) -> tuple[bool, str]:
@@ -2074,6 +2185,8 @@ def remove_captain_permanent_injury(wb: dict, index: int) -> tuple[bool, str]:
 def hire_apprentice(wb: dict, name: str = "") -> tuple[bool, str]:
     if wb.get("apprentice"):
         return False, "Warband already has an apprentice."
+    if (wb.get("wizard") or {}).get("school") == "Fire Giant":
+        return False, "A Fire Giant Wizard has no apprentice (Blood Legacy)."
     if int(wb.get("gold", 0)) < APPRENTICE_COST:
         return False, f"Need {APPRENTICE_COST} gc for an apprentice."
     wb["gold"] = int(wb["gold"]) - APPRENTICE_COST
@@ -2192,6 +2305,8 @@ def update_homerules(wb: dict, form: "ImmutableMultiDict") -> tuple[bool, str]:
                 for slug, book in SOURCE_BOOK_BY_SLUG.items()
             },
             "pentangle_schools_playable": form.get("pentangle_schools_playable") == "on",
+            "fire_giant_wizard_playable": form.get("fire_giant_wizard_playable") == "on",
+            "giant_blooded_enabled": form.get("giant_blooded_enabled") == "on",
             "edition2_soldier_costs": form.get("edition2_soldier_costs") == "on",
             "spellcaster_magazine_soldiers": form.get("spellcaster_magazine_soldiers") == "on",
             "knightly_orders_enabled": form.get("knightly_orders_enabled") == "on",
