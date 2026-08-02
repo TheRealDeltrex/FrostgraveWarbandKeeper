@@ -74,11 +74,16 @@ works the same as on Windows.
 
 The online build is a zero-backend build of the app that runs entirely in the browser via
 [Pyodide](https://pyodide.org/): it loads Python + Flask in the tab, unpacks the app, and drives it
-through Flask's test client. Storage is in-memory only, so it's session-only — export a warband to a
-file to keep it. Portrait uploads work normally within a session (a small Python↔JS bridge in
-`docs/app/index.html` turns file inputs into real multipart uploads against the test client, and
-inlines uploaded/default portraits as data URIs when rendering each page) — they just don't persist
-across a refresh or round-trip through export/import, same as everything else in this build.
+through Flask's test client.
+
+Pyodide's filesystem is in-memory and dies with the tab, so `docs/app/index.html` snapshots it out to
+`localStorage` (`fwk_warbands_v1` / `fwk_portraits_v1`) after every mutating request and restores it
+at boot before the first render. Warbands therefore survive a refresh — but only in *that* browser on
+*that* device; there's no account and no server, so exporting to a file is still the only portable
+backup. Portrait uploads work normally (a small Python↔JS bridge turns file inputs into real
+multipart uploads against the test client, and inlines uploaded/default portraits as data URIs when
+rendering each page) and persist the same way, subject to the browser's ~5 MB storage quota — the
+snapshot writes warbands first and drops portraits if the quota is hit, so game data always wins.
 
 It embeds a copy of the app's Python, templates and reference data in a single bundle, and mirrors
 the default character artwork as plain sibling files (not bundled — see the script's docstring):
@@ -87,8 +92,17 @@ the default character artwork as plain sibling files (not bundled — see the sc
 python scripts/build_browser_bundle.py   # writes docs/app/bundle.json + docs/app/static/portraits/
 ```
 
-Browser-specific UI (session-only banner, no Settings/native folder picker) is gated behind
+Browser-specific UI (browser-storage banner, no Settings/native folder picker) is gated behind
 `FWK_BROWSER=1` in `app.py` and the templates.
+
+### Publishing the site
+
+GitHub Pages is published by `.github/workflows/deploy-pages.yml` (manual dispatch), which builds
+`docs/` fresh from `devversion` and deploys the artifact directly. **Do not hand-sync generated files
+into `main`.** The site used to be served from `main`'s `/docs`, with `bundle.json` copied across by
+hand while `index.html` was maintained as a second, separate copy — the two silently diverged and
+`main`'s shell sat frozen at a pre-`localStorage` version for several releases, so the online build
+appeared to save nothing at all. Building from one branch in CI is what prevents that recurring.
 
 ## Static preview pages
 

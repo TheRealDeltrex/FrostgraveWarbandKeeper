@@ -71,7 +71,7 @@
     var pyodide = null;
     var navigatePy = null;
     var STYLE_CSS = "";
-    var ITEM_SLOTS_JS = "";
+    var SCRIPT_JS = {};            // "item_slots.js" -> source text, from the bundle
     var sessionDirty = false;      // a mutation happened since the last snapshot
     var remindedThisSession = false;
     var portraitCache = {};        // F5: src -> data URI, cleared on portrait uploads
@@ -130,40 +130,78 @@
     }
 
     // F1: snapshot every warband + portrait file into localStorage, debounced
-    // so a burst of autosave POSTs doesn't thrash storage. Wrapped so a full
-    // private-window (storage throws/quota) degrades silently to today's
-    // session-only behavior instead of breaking navigation.
+    // so a burst of autosave POSTs doesn't thrash storage.
+    //
+    // Warbands are written FIRST and in their own try/catch, portraits second in
+    // theirs. That ordering is deliberate: both share the one ~5 MB per-origin
+    // quota, and portraits are base64 (~33% inflation) so they're what actually
+    // blows it. Saving them together meant one oversized portrait threw and took
+    // the (tiny, irreplaceable) warband JSON down with it.
+    //
+    // Failures are never silent. An earlier version wrapped the whole body in a
+    // single swallow-everything catch, so "storage is full" and "storage is
+    // disabled" both presented as "the app just doesn't save anything" with no
+    // explanation — exactly the symptom that's hardest to report and diagnose.
     function snapshotToStorage() {
       if (!pyodide) return;
-      try {
-        var wbData = {};
-        fsWalk("/data/warbands").forEach(function (p) {
-          if (!/\.warbands$/.test(p)) return;
-          try { wbData[p] = pyodide.FS.readFile(p, { encoding: "utf8" }); } catch (e) { /* skip */ }
-        });
-        localStorage.setItem(STORAGE_KEY_WARBANDS, JSON.stringify(wbData));
 
-        var pData = {};
-        var skipped = 0;
-        fsWalk("/data/portraits").forEach(function (p) {
-          try {
-            var bytes = pyodide.FS.readFile(p);
-            if (bytes.length > 1024 * 1024) { skipped++; return; }
-            pData[p] = uint8ToBase64(bytes);
-          } catch (e) { /* skip */ }
-        });
-        localStorage.setItem(STORAGE_KEY_PORTRAITS, JSON.stringify(pData));
-        if (skipped) {
-          showToast(
-            skipped + " portrait file(s) were too large (over 1 MB) to keep in browser " +
-            "storage — re-upload them after a refresh if needed.",
-            6000
-          );
-        }
+      var wbData = {};
+      fsWalk("/data/warbands").forEach(function (p) {
+        if (!/\.warbands$/.test(p)) return;
+        try { wbData[p] = pyodide.FS.readFile(p, { encoding: "utf8" }); } catch (e) { /* skip */ }
+      });
+      try {
+        localStorage.setItem(STORAGE_KEY_WARBANDS, JSON.stringify(wbData));
       } catch (e) {
-        // localStorage unavailable (private window quota, disabled storage,
-        // etc.) — degrade to today's session-only behavior.
+        showToast(
+          "Couldn't save to this browser's storage (it may be full, or storage may be " +
+          "disabled for this site — private windows often block it). Your changes are " +
+          "still here for now, but use “Export warband” to save them to a file before " +
+          "you close this tab.",
+          10000
+        );
+        return;  // portraits are pointless without the warband they belong to
       }
+
+      var pData = {};
+      var skipped = 0;
+      fsWalk("/data/portraits").forEach(function (p) {
+        try {
+          var bytes = pyodide.FS.readFile(p);
+          if (bytes.length > 1024 * 1024) { skipped++; return; }
+          pData[p] = uint8ToBase64(bytes);
+        } catch (e) { /* skip */ }
+      });
+      try {
+        localStorage.setItem(STORAGE_KEY_PORTRAITS, JSON.stringify(pData));
+      } catch (e) {
+        // Quota fallback: drop the portrait store entirely rather than leave a
+        // half-written/stale one behind. The warbands above are already safely
+        // committed, which is the part that can't be re-created from source
+        // images the user still has on disk.
+        try { localStorage.removeItem(STORAGE_KEY_PORTRAITS); } catch (e2) { /* ignore */ }
+        showToast(
+          "Your warbands were saved, but there wasn't room in this browser's storage for " +
+          "the portraits — they'll be gone after a refresh and you'll need to re-upload " +
+          "them. Smaller image files will fit.",
+          10000
+        );
+        sessionDirty = false;
+        return;
+      }
+
+      if (skipped) {
+        showToast(
+          skipped + " portrait file(s) were too large (over 1 MB) to keep in browser " +
+          "storage — re-upload them after a refresh if needed.",
+          6000
+        );
+      }
+      // Everything that was going to be persisted is now persisted, so the
+      // beforeunload "unsaved changes" prompt would be pure noise — and a
+      // warning that cries wolf on every single tab close is one the user
+      // learns to click through on the one occasion it's real.
+      sessionDirty = false;
     }
 
     function scheduleSnapshot() {
@@ -483,10 +521,20 @@
       html = html.replace(/<link[^>]*href="[^"]*style\.css"[^>]*>/i, function () {
         return "<style>" + STYLE_CSS + "</style>";
       });
-      var itemJs = ITEM_SLOTS_JS.replace(/<\/script>/gi, "<\\/script>");
-      html = html.replace(/<script[^>]*src="[^"]*item_slots\.js"[^>]*><\/script>/i, function () {
-        return "<script>" + itemJs + "<\/script>";
-      });
+      // Inline every bundled static script over its <script src="..."> tag.
+      // Driven off SCRIPT_JS instead of one hardcoded rule per filename: the
+      // rendered HTML asks for these by absolute "/static/..." URL, which in
+      // here resolves against the site root and 404s. filter.js was missed by
+      // the old per-file rules and died silently (its callers are all
+      // `if (window.fgInitFilter)`-guarded), so every search box was inert.
+      html = html.replace(
+        /<script[^>]*\ssrc="[^"]*?([\w.-]+\.js)"[^>]*><\/script>/gi,
+        function (tag, name) {
+          var src = SCRIPT_JS[name];
+          if (src === undefined) return tag;
+          return "<script>" + src.replace(/<\/script>/gi, "<\\/script>") + "<\/script>";
+        }
+      );
       html = inlinePortraits(html);
       html = html.replace(/<\/body>/i, function () {
         return "<script>" + INTERCEPTOR_JS + "<\/script></body>";
@@ -688,7 +736,13 @@
         if (!resp.ok) throw new Error("Could not fetch bundle.json (" + resp.status + ")");
         var bundle = await resp.json();
         STYLE_CSS = bundle.files["static/style.css"] || "";
-        ITEM_SLOTS_JS = bundle.files["static/item_slots.js"] || "";
+        // Pick up every bundled static/*.js by name rather than listing them
+        // here — renderPage() inlines whatever's present, so adding a script to
+        // STATIC_FILES in build_browser_bundle.py is the only step needed.
+        Object.keys(bundle.files).forEach(function (k) {
+          var m = /^static\/([\w.-]+\.js)$/.exec(k);
+          if (m) SCRIPT_JS[m[1]] = bundle.files[k];
+        });
 
         pyodide.globals.set("BUNDLE_JSON", JSON.stringify(bundle));
         await pyodide.runPythonAsync(BOOTSTRAP_PY);

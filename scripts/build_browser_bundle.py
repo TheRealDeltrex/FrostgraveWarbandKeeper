@@ -7,15 +7,21 @@ The browser build (docs/app/index.html) loads Pyodide, installs Flask, writes
 these files into an in-memory filesystem, sets FWK_BROWSER=1 and points
 FWK_DATA_DIR at an in-memory dir, then drives the *real* Flask app through its
 test client — so the online version runs the exact same rules engine as the
-desktop app, with nothing persisted between sessions.
+desktop app. That filesystem dies with the tab, so the shell snapshots it to
+localStorage after each mutating request and restores it at boot; warbands
+persist per-browser, not per-session.
 
 Also mirrors static/portraits/*.png to docs/app/static/portraits/ as plain
 sibling files (default character art; served relatively, not bundled — see
 PORTRAITS_SRC/PORTRAITS_OUT below).
 
-Re-run this after changing any bundled source file, then commit the refreshed
-docs/app/bundle.json and docs/app/static/portraits/ on the `main` branch (same
-cross-branch flow as the preview pages and docs/index.html).
+Re-run this after changing any bundled source file. The output is NOT meant to
+be committed onto `main` by hand: .github/workflows/deploy-pages.yml runs this
+script against `devversion` and deploys docs/ to Pages directly. The old flow
+hand-copied bundle.json to `main`, where index.html lived as a second,
+independently-maintained copy — the two diverged unnoticed and `main`'s shell
+shipped without the localStorage code for several releases, making the online
+app look like it saved nothing. Build from one branch, in CI.
 
     python scripts/build_browser_bundle.py
 """
@@ -59,9 +65,16 @@ DATA_FILES = [f"data/{p.name}" for p in sorted((ROOT / "data").glob("*.json"))]
 
 # Loaded once and inlined into every rendered page by the shell (the in-browser
 # app has no real static-file server).
+# Every <script>/<link> base.html pulls from static/ has to be listed here AND
+# given an inlining rule in the shell's renderPage(), or the browser resolves
+# the tag's absolute "/static/..." URL against the site root and 404s — silently,
+# since the callers are all `if (window.fgInitFilter)`-guarded. filter.js shipped
+# broken online that way, leaving every search box (warband list, Lexicon, hire
+# catalog) inert.
 STATIC_FILES = [
     "static/style.css",
     "static/item_slots.js",
+    "static/filter.js",
 ]
 
 # Default character artwork is mirrored as real sibling files next to
