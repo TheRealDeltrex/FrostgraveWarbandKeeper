@@ -42,6 +42,7 @@ from frostgrave_data import (
     FIRE_GIANT_WIZARD_BASE,
     GIANT_BLOODED_COST,
     GIANT_BLOODED_STAT_DELTA,
+    VAMPIRE_MIN_MAX_SOLDIERS,
     KNIGHTLY_ORDER_BY_ID,
     KNIGHTLY_ORDER_ELIGIBLE,
     KNIGHTLY_ORDER_IDS,
@@ -311,6 +312,11 @@ def default_homerules() -> dict:
         # Blood Legacy switched on to have any effect. Only affects newly
         # created warbands — see playable_schools()/create_warband().
         "fire_giant_wizard_playable": False,
+        # Blood Legacy's Vampire Wizard (Chapter Three) — the book frames it
+        # as a GM/NPC villain build "or PC by group agreement", so it's
+        # opt-in the same way. Off by default; needs Blood Legacy switched
+        # on to have any effect. Only affects newly created warbands.
+        "vampire_wizard_playable": False,
         # Blood Legacy's Giant-Blooded soldier modification (Chapter Three):
         # one soldier per warband may take it (+50gc, -1 Move, -2 Will,
         # +2 Health, Giant-Blooded trait). Off by default; needs Blood Legacy
@@ -355,8 +361,8 @@ def default_homerules() -> dict:
 def playable_schools(wb: dict | None = None) -> list[str]:
     """Schools a wizard may actually be. The five Pentangle schools join the ten
     core ones only when The Maze of Malcor is on and the group has agreed to the
-    homerule that makes them playable; Fire Giant joins the same way, gated on
-    Blood Legacy and its own "Fire Giant Wizard playable" homerule."""
+    homerule that makes them playable; Fire Giant and Vampire join the same way,
+    each gated on Blood Legacy and its own "playable" homerule."""
     hr = (wb or {}).get("homerules") or {}
     es = hr.get("enabled_sources") or {}
     schools = list(SCHOOLS)
@@ -364,6 +370,8 @@ def playable_schools(wb: dict | None = None) -> list[str]:
         schools += list(PENTANGLE_SCHOOLS)
     if hr.get("fire_giant_wizard_playable") and es.get("Blood Legacy"):
         schools.append("Fire Giant")
+    if hr.get("vampire_wizard_playable") and es.get("Blood Legacy"):
+        schools.append("Vampire")
     return schools
 
 
@@ -593,6 +601,7 @@ def create_warband(
     enabled_sources_map: dict | None = None,
     pentangle_playable: bool = False,
     fire_giant_playable: bool = False,
+    vampire_playable: bool = False,
     starting_gold: int | None = None,
     wizard_starting_xp: int = 0,
     max_soldiers: int | None = None,
@@ -606,6 +615,8 @@ def create_warband(
         own school (needs The Maze of Malcor switched on).
     fire_giant_playable: allow Fire Giant as the wizard's own school (needs
         Blood Legacy switched on) — Blood Legacy's Fire Giant Wizard build.
+    vampire_playable: allow Vampire as the wizard's own school (needs Blood
+        Legacy switched on) — Blood Legacy's Vampire Wizard build.
     starting_gold: house-ruled starting gold; defaults to STARTING_GOLD (400).
     wizard_starting_xp: house-ruled starting XP for the wizard; defaults to 0.
     max_soldiers: house-ruled roster cap; defaults to MAX_SOLDIERS (8).
@@ -631,6 +642,7 @@ def create_warband(
                 homerules[key] = True
     homerules["pentangle_schools_playable"] = bool(pentangle_playable)
     homerules["fire_giant_wizard_playable"] = bool(fire_giant_playable)
+    homerules["vampire_wizard_playable"] = bool(vampire_playable)
     if school not in playable_schools({"homerules": homerules}):
         if school in PENTANGLE_SCHOOLS:
             return None, (
@@ -641,6 +653,11 @@ def create_warband(
             return None, (
                 "Fire Giant is Blood Legacy's Fire Giant Wizard build — switch on Blood Legacy "
                 "and the 'Fire Giant Wizard playable' homerule to use it."
+            )
+        if school == "Vampire":
+            return None, (
+                "Vampire is Blood Legacy's Vampire Wizard build — switch on Blood Legacy "
+                "and the 'Vampire Wizard playable' homerule to use it."
             )
         return None, "Invalid school."
     picked_sources = {"Core Rules"} | {
@@ -658,6 +675,14 @@ def create_warband(
             return None, "A Fire Giant Wizard cannot take Write Scroll as a starting spell (Blood Legacy)."
         if with_apprentice:
             return None, "A Fire Giant Wizard has no apprentice (Blood Legacy)."
+    if school == "Vampire":
+        # Thaumaturge is Vampire's one opposed school (never learnable), so
+        # validate_starting_spells above already rejects it as a starting pick.
+        if with_apprentice:
+            return None, "A Vampire Wizard has no apprentice (Blood Legacy)."
+        # "9 soldiers (4 specialist)" — a floor, not a suggestion; never
+        # lowers a bigger cap the group asked for of their own.
+        homerules["max_soldiers"] = max(homerules["max_soldiers"], VAMPIRE_MIN_MAX_SOLDIERS)
 
     gold = STARTING_GOLD if starting_gold is None else int(starting_gold)
     apprentice = None
@@ -2185,8 +2210,11 @@ def remove_captain_permanent_injury(wb: dict, index: int) -> tuple[bool, str]:
 def hire_apprentice(wb: dict, name: str = "") -> tuple[bool, str]:
     if wb.get("apprentice"):
         return False, "Warband already has an apprentice."
-    if (wb.get("wizard") or {}).get("school") == "Fire Giant":
+    wschool = (wb.get("wizard") or {}).get("school")
+    if wschool == "Fire Giant":
         return False, "A Fire Giant Wizard has no apprentice (Blood Legacy)."
+    if wschool == "Vampire":
+        return False, "A Vampire Wizard has no apprentice (Blood Legacy)."
     if int(wb.get("gold", 0)) < APPRENTICE_COST:
         return False, f"Need {APPRENTICE_COST} gc for an apprentice."
     wb["gold"] = int(wb["gold"]) - APPRENTICE_COST
@@ -2306,6 +2334,7 @@ def update_homerules(wb: dict, form: "ImmutableMultiDict") -> tuple[bool, str]:
             },
             "pentangle_schools_playable": form.get("pentangle_schools_playable") == "on",
             "fire_giant_wizard_playable": form.get("fire_giant_wizard_playable") == "on",
+            "vampire_wizard_playable": form.get("vampire_wizard_playable") == "on",
             "giant_blooded_enabled": form.get("giant_blooded_enabled") == "on",
             "edition2_soldier_costs": form.get("edition2_soldier_costs") == "on",
             "spellcaster_magazine_soldiers": form.get("spellcaster_magazine_soldiers") == "on",

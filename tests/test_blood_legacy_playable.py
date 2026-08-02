@@ -1,5 +1,6 @@
-"""Blood Legacy (Chapter Three): Giant-Blooded soldier modification and the
-Fire Giant Wizard playable build, plus The Grimoire of Fin Dalka magic item."""
+"""Blood Legacy (Chapter Three): Giant-Blooded soldier modification, the Fire
+Giant and Vampire Wizard playable builds, plus The Grimoire of Fin Dalka
+magic item."""
 
 import warband_store
 from frostgrave_data import (
@@ -7,6 +8,11 @@ from frostgrave_data import (
     FIRE_GIANT_WIZARD_BASE,
     FIRE_GIANT_XP_PER_LEVEL,
     GIANT_BLOODED_COST,
+    VAMPIRE_HEALTH_CAP,
+    VAMPIRE_MIN_MAX_SOLDIERS,
+    VAMPIRE_WILL_CAP,
+    VAMPIRE_XP_PER_LEVEL,
+    WIZARD_BASE,
     giant_blooded_eligible_type_keys,
     spell_id,
 )
@@ -165,6 +171,87 @@ def test_ordinary_wizard_is_not_fire_giant(fresh_warband):
     assert expansions.spell_state_block(
         fresh_warband, {"name": "Write Scroll", "school": "Elementalist"}
     ) is None
+
+
+# --- Vampire Wizard -----------------------------------------------------------
+
+
+def _vampire_spell_keys() -> list[str]:
+    # 3 own (Vampire) + 1 each aligned (Chronomancer/Necromancer/Soothsayer)
+    # + 2 neutral from different schools (Elementalist/Enchanter here).
+    school = "Vampire"
+    return [
+        spell_id(school, "Mist Form"),
+        spell_id(school, "Lifedrain"),
+        spell_id(school, "Thralldom"),
+        spell_id("Chronomancer", "Fast Act"),
+        spell_id("Necromancer", "Bone Dart"),
+        spell_id("Soothsayer", "Awareness"),
+        spell_id("Elementalist", "Wall"),
+        spell_id("Enchanter", "Enchant Weapon"),
+    ]
+
+
+def test_vampire_school_rejected_without_homerule():
+    wb, msg = warband_store.create_warband(
+        warband_name="Nightfall", wizard_name="Countess", school="Vampire",
+        spell_keys=[], vampire_playable=False,
+    )
+    assert wb is None
+    assert "vampire" in msg.lower()
+
+
+def test_vampire_wizard_stats_no_apprentice_bigger_roster_and_caps():
+    wb, msg = warband_store.create_warband(
+        warband_name="Nightfall", wizard_name="Countess", school="Vampire",
+        spell_keys=_vampire_spell_keys(), vampire_playable=True,
+        with_apprentice=False,
+    )
+    assert wb, msg
+    wiz = wb["wizard"]
+    # Same starting stats as an ordinary wizard.
+    assert wiz["stats"] == WIZARD_BASE
+    assert expansions.is_vampire(wb) is True
+    assert expansions.xp_per_level(wb) == VAMPIRE_XP_PER_LEVEL
+    caps = expansions.wizard_stat_caps(wb)
+    assert caps["health"] == VAMPIRE_HEALTH_CAP
+    assert caps["will"] == VAMPIRE_WILL_CAP
+    assert wb["homerules"]["max_soldiers"] >= VAMPIRE_MIN_MAX_SOLDIERS
+
+    ok, msg = warband_store.hire_apprentice(wb)
+    assert not ok
+    assert "apprentice" in msg.lower()
+
+
+def test_vampire_cannot_take_apprentice_at_creation():
+    wb, msg = warband_store.create_warband(
+        warband_name="Nightfall", wizard_name="Countess", school="Vampire",
+        spell_keys=_vampire_spell_keys(), vampire_playable=True,
+        with_apprentice=True,
+    )
+    assert wb is None
+    assert "apprentice" in msg.lower()
+
+
+def test_vampire_cannot_learn_thaumaturge_spells_or_field_a_rangifer():
+    wb, msg = warband_store.create_warband(
+        warband_name="Nightfall", wizard_name="Countess", school="Vampire",
+        spell_keys=_vampire_spell_keys(), vampire_playable=True,
+    )
+    assert wb, msg
+    thaum_spell = {"name": "Heal", "school": "Thaumaturge", "source": "Core Rules"}
+    ok_spell = {"name": "Lifedrain", "school": "Vampire", "source": "Blood Legacy"}
+    assert expansions.spell_state_block(wb, thaum_spell) is not None
+    assert expansions.spell_state_block(wb, ok_spell) is None
+    assert expansions.soldier_state_block(wb, "rangifer") is not None
+
+
+def test_ordinary_wizard_is_not_vampire(fresh_warband):
+    assert expansions.is_vampire(fresh_warband) is False
+    assert expansions.spell_state_block(
+        fresh_warband, {"name": "Heal", "school": "Thaumaturge"}
+    ) is None
+    assert expansions.soldier_state_block(fresh_warband, "rangifer") is None
 
 
 # --- The Grimoire of Fin Dalka ------------------------------------------------

@@ -110,6 +110,15 @@
           school. Only affects newly created warbands — a wizard's own school is fixed once chosen.
         </p>
         <label class="checkbox-row" style="margin-top:0.6rem">
+          <input name="vampire_wizard_playable" type="checkbox" {% if hr.vampire_wizard_playable %}checked{% endif %} />
+          Vampire Wizard playable (Blood Legacy)
+        </label>
+        <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0">
+          Needs Blood Legacy. The book frames the Vampire Wizard as a GM/NPC villain build "or PC
+          by group agreement" — this opts it in as a choosable wizard school. Only affects newly
+          created warbands — a wizard's own school is fixed once chosen.
+        </p>
+        <label class="checkbox-row" style="margin-top:0.6rem">
           <input name="giant_blooded_enabled" type="checkbox" {% if hr.giant_blooded_enabled %}checked{% endif %} />
           Giant-Blooded soldier modification (Blood Legacy)
         </label>
@@ -523,6 +532,18 @@
             spells or Write Scroll. A found magic weapon is giant-usable only on a roll of 16+;
             potions/items are human-sized unless resized at the table — this app doesn't resolve
             that, just tracks what's owned.
+          </p>
+        {% elif wiz.school == "Vampire" %}
+          <p class="muted" style="font-size:0.85rem">
+            Blood Legacy's Vampire Wizard: Undead, Immune to Control Undead, Magic Attacks, Mind
+            Lock, Thaumaturgic Vulnerability, True Sight, Partial Immunity to Normal Damage. No
+            apprentice (a 9-soldier roster instead — 4 specialist, unchanged). Will capped at 5,
+            Health cap 22; 120xp per level (book caps spending at 300xp/game — untracked here,
+            same as other per-game limits). Thaumaturge spells are never learnable, nor is
+            Transcendence. Never fields a Rangifer. Sun Damage, the Unnatural Health economy
+            (post-game healing costs 5gc/Health or a warband member's blood instead of the
+            ordinary rules), and regaining Health from damaging giants are house rules to apply
+            at the table — this app doesn't track per-game upkeep like that anywhere.
           </p>
         {% endif %}
         <div class="char-block">

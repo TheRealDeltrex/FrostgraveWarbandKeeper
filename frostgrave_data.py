@@ -561,6 +561,19 @@ FIRE_GIANT_WIZARD_BASE = {
 FIRE_GIANT_XP_PER_LEVEL = 200
 FIRE_GIANT_HEALTH_CAP = 30
 
+# Blood Legacy's Vampire Wizard (Chapter Three) — "same starting stats as a
+# wizard" (WIZARD_BASE above; no separate base-stat constant needed), no
+# apprentice, a 9th soldier slot (4 specialist, unchanged), Will capped
+# lower than an ordinary wizard, Health capped lower too, and slower
+# leveling. Traits (display text only; this app doesn't resolve combat):
+# Undead, Immune to Control Undead, Magic Attacks, Mind Lock, Thaumaturgic
+# Vulnerability, True Sight, Partial Immunity to Normal Damage. See
+# expansions.is_vampire()/warband_store.playable_schools().
+VAMPIRE_XP_PER_LEVEL = 120
+VAMPIRE_HEALTH_CAP = 22
+VAMPIRE_WILL_CAP = 5
+VAMPIRE_MIN_MAX_SOLDIERS = 9
+
 # Apprentice = wizard M, F-2, S, A10, W-2, H-2 (p.27–28)
 APPRENTICE_BASE = {
     "move": 6,
@@ -958,17 +971,19 @@ del _school, _spells
 
 # --- Vampire & Fire Giant schools (Blood Legacy) ----------------------------
 #
-# The Vampire Wizard progression (no apprentice, altered soldier cap, Will/
-# Health caps, Sun Damage, the Unnatural-Health economy, etc.) stays a
-# deferred mechanic — reference-only in the Lexicon — since it's a GM/NPC
-# villain build the book doesn't expect a player to run. The Fire Giant
-# Wizard progression IS implemented (see FIRE_GIANT_WIZARD_BASE above and
-# expansions.is_fire_giant()): a warband can play one once Blood Legacy and
-# the "Fire Giant Wizard playable" homerule are both switched on
-# (warband_store.playable_schools()). Both schools' spell lists/alignments
-# stay usable by an ordinary wizard as off-school picks either way (gated on
-# Blood Legacy being enabled, like any other supplement spell) — that's what
-# the rest of this section sets up.
+# Both the Vampire Wizard and Fire Giant Wizard progressions are implemented
+# as playable schools (see VAMPIRE_XP_PER_LEVEL/FIRE_GIANT_WIZARD_BASE above
+# and expansions.is_vampire()/is_fire_giant()): a warband can play either
+# once Blood Legacy and that school's own "playable" homerule are both
+# switched on (warband_store.playable_schools()). Genuinely per-game/
+# situational nuances that have no existing tracking infrastructure anywhere
+# in this app — the Vampire's Unnatural Health economy and Sun Damage, the
+# separate "NPC Vampire-led warband" GM tool (henchmen thralls/ghouls, no
+# XP, different activation phases) — stay reference-only text, same
+# treatment as e.g. the niggling injury's per-game upkeep. Both schools'
+# spell lists/alignments also stay usable by an ordinary wizard as off-
+# school picks either way (gated on Blood Legacy being enabled, like any
+# other supplement spell) — that's what the rest of this section sets up.
 BLOOD_LEGACY_SPELLS: dict[str, list[dict]] = {
     "Vampire": [
         {"name": "Animal Form", "cn": 10, "type": "Self Only"},
@@ -1035,8 +1050,9 @@ del RANGIFER_SPELLS
 
 # Schools that carry spells but that no *ordinary* wizard may choose as their
 # own school at creation — they're reachable only through a wizard state
-# (Beastcrafter), a homerule (Pentangle's "Pentangle schools playable", Fire
-# Giant's "Fire Giant Wizard playable"), or (Vampire/Rangifer) not at all yet.
+# (Beastcrafter), a homerule (Pentangle's "Pentangle schools playable",
+# Vampire's "Vampire Wizard playable", Fire Giant's "Fire Giant Wizard
+# playable"), or (Rangifer) not at all yet.
 EXTRA_SPELL_SCHOOLS = ["Beastcrafter", "Vampire", "Fire Giant", "Rangifer"] + PENTANGLE_SCHOOLS
 
 LEVEL_UP_OPTIONS = [

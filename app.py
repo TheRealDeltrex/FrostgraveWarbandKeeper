@@ -443,7 +443,8 @@ def warband_new() -> str | Response:
         school = request.form.get("school") or SCHOOLS[0]
         pentangle = request.form.get("pentangle_schools_playable") == "on"
         fire_giant = request.form.get("fire_giant_wizard_playable") == "on"
-        if school not in _new_schools(_posted_sources(request.form), pentangle, fire_giant):
+        vampire = request.form.get("vampire_wizard_playable") == "on"
+        if school not in _new_schools(_posted_sources(request.form), pentangle, fire_giant, vampire):
             school = SCHOOLS[0]
         # Order preserved from hidden field if present
         order_raw = (request.form.get("spell_order") or "").strip()
@@ -474,7 +475,8 @@ def warband_new() -> str | Response:
         if not name or not wizard:
             flash("Warband name and wizard name are required.", "error")
             return _render_new(school=school, selected=spell_keys, sources=sources,
-                               pentangle=pentangle, fire_giant=fire_giant, warband_name=name, wizard_name=wizard,
+                               pentangle=pentangle, fire_giant=fire_giant, vampire=vampire,
+                               warband_name=name, wizard_name=wizard,
                                with_apprentice=with_apprentice, apprentice_name=apprentice_name,
                                starting_gold=starting_gold, wizard_starting_xp=wizard_starting_xp,
                                max_soldiers=max_soldiers, max_specialists=max_specialists)
@@ -491,6 +493,7 @@ def warband_new() -> str | Response:
             enabled_sources_map=sources,
             pentangle_playable=pentangle,
             fire_giant_playable=fire_giant,
+            vampire_playable=vampire,
             starting_gold=starting_gold,
             wizard_starting_xp=wizard_starting_xp,
             max_soldiers=max_soldiers,
@@ -499,7 +502,8 @@ def warband_new() -> str | Response:
         if not wb:
             flash(msg, "error")
             return _render_new(school=school, selected=spell_keys, sources=sources,
-                               pentangle=pentangle, fire_giant=fire_giant, warband_name=name, wizard_name=wizard,
+                               pentangle=pentangle, fire_giant=fire_giant, vampire=vampire,
+                               warband_name=name, wizard_name=wizard,
                                with_apprentice=with_apprentice, apprentice_name=apprentice_name,
                                starting_gold=starting_gold, wizard_starting_xp=wizard_starting_xp,
                                max_soldiers=max_soldiers, max_specialists=max_specialists)
@@ -528,20 +532,25 @@ def warband_new() -> str | Response:
         sources = _posted_sources(request.args)
         pentangle = request.args.get("pentangle_schools_playable") == "on"
         fire_giant = request.args.get("fire_giant_wizard_playable") == "on"
+        vampire = request.args.get("vampire_wizard_playable") == "on"
     else:
         sources = {book: True for book in SOURCE_BOOKS}
         pentangle = False
         fire_giant = False
-    return _render_new(school=school, sources=sources, pentangle=pentangle, fire_giant=fire_giant)
+        vampire = False
+    return _render_new(school=school, sources=sources, pentangle=pentangle,
+                        fire_giant=fire_giant, vampire=vampire)
 
 
-def _new_schools(sources: dict, pentangle: bool, fire_giant: bool = False) -> list[str]:
+def _new_schools(sources: dict, pentangle: bool, fire_giant: bool = False, vampire: bool = False) -> list[str]:
     """Schools offered on the creation page for these toggles."""
     schools = list(SCHOOLS)
     if pentangle and sources.get("The Maze of Malcor"):
         schools += list(PENTANGLE_SCHOOLS)
     if fire_giant and sources.get("Blood Legacy"):
         schools.append("Fire Giant")
+    if vampire and sources.get("Blood Legacy"):
+        schools.append("Vampire")
     return schools
 
 
@@ -560,6 +569,7 @@ def _render_new(
     sources: dict | None = None,
     pentangle: bool = False,
     fire_giant: bool = False,
+    vampire: bool = False,
     warband_name: str = "",
     wizard_name: str = "",
     with_apprentice: bool = False,
@@ -570,7 +580,7 @@ def _render_new(
     max_specialists: int = MAX_SPECIALISTS,
 ):
     sources = sources or {}
-    schools = _new_schools(sources, pentangle, fire_giant)
+    schools = _new_schools(sources, pentangle, fire_giant, vampire)
     school = school if school in schools else SCHOOLS[0]
     rel = SCHOOL_RELATIONS[school]
     # A Pentangle school has two aligned schools where a core school has three,
@@ -601,6 +611,7 @@ def _render_new(
         enabled_sources_map=sources,
         pentangle_playable=pentangle,
         fire_giant_playable=fire_giant,
+        vampire_playable=vampire,
         PENTANGLE_SCHOOLS=PENTANGLE_SCHOOLS,
         neutral_needed=neutral_needed,
         warband_name=warband_name,
