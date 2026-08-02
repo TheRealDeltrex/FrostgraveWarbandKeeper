@@ -5,9 +5,15 @@
 {% macro permanent_injury_picker(action, injuries, soldier_id=none, label="Permanent injuries", kind=none) %}
   {% set remove_action = action.replace('add_', 'remove_', 1) %}
   {% set prosthetic_action = "toggle_" ~ kind ~ "_injury_prosthetic" if kind else none %}
+  {% set add_upgrade_action = "add_" ~ kind ~ "_prosthetic_upgrade" if kind in ("wizard", "apprentice", "captain") else none %}
+  {% set remove_upgrade_action = "remove_" ~ kind ~ "_prosthetic_upgrade" if add_upgrade_action else none %}
   <details class="ref-panel">
     <summary>{{ label }} ({{ injuries|length }})</summary>
     {% if injuries %}
+      {% set ns = namespace(used_upgrade_ids=[]) %}
+      {% for other in injuries %}
+        {% for u in other.upgrades or [] %}{% set ns.used_upgrade_ids = ns.used_upgrade_ids + [u.id] %}{% endfor %}
+      {% endfor %}
       <ul class="list-plain">
         {% for inj in injuries %}
           <li>
@@ -31,6 +37,44 @@
                   <button class="btn secondary small" type="submit" title="Fit an Animated Prosthetic (Fireheart) — Animate Construct removes this injury's stat penalty; 10gc upkeep after every game, or a fresh casting">Fit prosthetic</button>
                 {% endif %}
               </form>
+            {% endif %}
+            {% if add_upgrade_action and fireheart_enabled and inj.prosthetic %}
+              {% set injury_index = loop.index0 %}
+              {% if inj.upgrades %}
+                <ul class="list-plain">
+                  {% for up in inj.upgrades %}
+                    <li>
+                      <em>{{ up.name }} Prosthetic Upgrade</em> ({{ up.cost }}gc)
+                      <form class="inline-form" method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
+                        <input type="hidden" name="action" value="{{ remove_upgrade_action }}" />
+                        <input type="hidden" name="mutation_index" value="{{ injury_index }}" />
+                        <input type="hidden" name="upgrade_index" value="{{ loop.index0 }}" />
+                        <button class="btn danger small" type="submit" title="Remove this Prosthetic Upgrade">Remove</button>
+                      </form>
+                    </li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+              {% set ns2 = namespace(available=[]) %}
+              {% for up in PROSTHETIC_UPGRADES %}
+                {% if up.id not in ns.used_upgrade_ids and (up.requires == 'any' or inj.id in up.requires) %}
+                  {% set ns2.available = ns2.available + [up] %}
+                {% endif %}
+              {% endfor %}
+              {% set available_upgrades = ns2.available %}
+              {% if available_upgrades %}
+                <form class="inline-form" method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
+                  <input type="hidden" name="action" value="{{ add_upgrade_action }}" />
+                  <input type="hidden" name="mutation_index" value="{{ injury_index }}" />
+                  <select name="upgrade_id" required>
+                    <option value="">— Prosthetic Upgrade —</option>
+                    {% for up in available_upgrades %}
+                      <option value="{{ up.id }}">{{ up.name }} ({{ up.cost }}gc) — {{ up.text }}</option>
+                    {% endfor %}
+                  </select>
+                  <button class="btn secondary small" type="submit" title="Fireheart Prosthetic Upgrade">Add upgrade</button>
+                </form>
+              {% endif %}
             {% endif %}
           </li>
         {% endfor %}

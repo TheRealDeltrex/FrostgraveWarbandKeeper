@@ -57,6 +57,7 @@ from frostgrave_data import (
     PROMOTE_CAPTAIN_COST,
     PROMOTE_CAPTAIN_ITEM_SLOTS,
     PROMOTE_CAPTAIN_TRICKS,
+    PROSTHETIC_UPGRADE_BY_ID,
     SCHOOL_RELATIONS,
     SCHOOLS,
     SOLDIER_MAX_LEVELS,
@@ -2303,17 +2304,21 @@ def add_permanent_injury(
     if row is None:
         return False, f"Unknown permanent injury ({injury_id!r})."
     existing = [r for r in entity.get("permanent_injuries") or [] if r.get("id") == injury_id]
+    prior_fitted = next((r for r in existing if r.get("prosthetic")), None)
     if (
         "Fireheart" in enabled_sources(wb)
         and kind in PROSTHETIC_ELIGIBLE_KINDS
         and row.get("prosthetic_eligible")
-        and any(r.get("prosthetic") for r in existing)
+        and prior_fitted is not None
     ):
+        destroyed = _destroy_prosthetic_upgrades(entity, prior_fitted)
         text = (
             f"{label[:1].upper() + label[1:]} already has an Animated Prosthetic fitted for {row['name']} — "
             "per Fireheart, suffering it again becomes Badly Wounded instead of a second copy of the injury "
             "(no additional stat penalty applied; record the Badly Wounded result as normal)."
         )
+        if destroyed:
+            text += f" Its Prosthetic Upgrade(s) ({', '.join(destroyed)}) are destroyed."
         add_history(wb, text)
         return True, text
     max_stacks = row.get("max_stacks", 1)
@@ -2410,6 +2415,122 @@ def set_permanent_injury_prosthetic(
     text = f"{label[:1].upper() + label[1:]} is {verb} {row['name']}{suffix}."
     add_history(wb, text)
     return True, text
+
+
+def _destroy_prosthetic_upgrades(entity: dict, inj: dict) -> list[str]:
+    """Clears every Prosthetic Upgrade fitted to one prosthetic-fitted injury
+    record, freeing any item slot it occupied. Returns the destroyed names,
+    for the caller's history-log text."""
+    upgrades = inj.get("upgrades") or []
+    if not upgrades:
+        return []
+    slots = entity.get("item_slots") or []
+    names = []
+    for up in upgrades:
+        names.append(up.get("name", "?"))
+        slot_index = up.get("slot_index")
+        if slot_index is not None and 0 <= slot_index < len(slots):
+            slots[slot_index] = ""
+    inj["upgrades"] = []
+    return names
+
+
+def add_prosthetic_upgrade(
+    wb: dict, kind: str, mutation_index: int, upgrade_id: str, soldier_id: str | None = None
+) -> tuple[bool, str]:
+    """Fireheart's Prosthetic Upgrade table: buys one add-on for an already
+    Animated-Prosthetic-fitted injury. Most take one of the entity's item
+    slots (max one of each upgrade across wizard/apprentice/captain — Toe Ring
+    and Potion Reservoir are the book's two named exceptions that don't)."""
+    if "Fireheart" not in enabled_sources(wb):
+        return False, "Fireheart is switched off; enable it under Additional Rules and Homerules first."
+    if kind not in PROSTHETIC_ELIGIBLE_KINDS:
+        return False, "Only a wizard, apprentice or captain can be fitted with a Prosthetic Upgrade."
+    entity, _get_stat, _set_stat, label = _mutation_target(wb, kind, soldier_id)
+    if entity is None:
+        return False, label
+    injuries = entity.get("permanent_injuries") or []
+    if not (0 <= mutation_index < len(injuries)):
+        return False, "Permanent injury not found."
+    inj = injuries[mutation_index]
+    if not inj.get("prosthetic"):
+        return False, "That injury needs an Animated Prosthetic fitted first."
+    upgrade = PROSTHETIC_UPGRADE_BY_ID.get(upgrade_id)
+    if upgrade is None:
+        return False, "Unknown Prosthetic Upgrade."
+    requires = upgrade["requires"]
+    if requires != "any" and inj.get("id") not in requires:
+        needed = " or ".join(PERMANENT_INJURY_BY_ID[i]["name"] for i in requires if i in PERMANENT_INJURY_BY_ID)
+        return False, f"{upgrade['name']} needs {needed}, not {inj.get('name', 'this injury')}."
+    if any(u.get("id") == upgrade_id for other in injuries for u in other.get("upgrades") or []):
+        return False, f"{label} already has a {upgrade['name']}."
+    slot_index = None
+    if upgrade.get("takes_slot", True):
+        slots = entity.get("item_slots") or []
+        slot_index = next((i for i, v in enumerate(slots) if not v), None)
+        if slot_index is None:
+            return False, f"{label} has no free item slot for {upgrade['name']}."
+        slots[slot_index] = f"{upgrade['name']} (Prosthetic Upgrade)"
+    inj.setdefault("upgrades", []).append({
+        "id": upgrade["id"],
+        "name": upgrade["name"],
+        "cost": upgrade["cost"],
+        "slot_index": slot_index,
+    })
+    text = (
+        f"{label[:1].upper() + label[1:]} fitted a {upgrade['name']} Prosthetic Upgrade "
+        f"({upgrade['cost']}gc) to their {inj.get('name', 'prosthetic')}."
+    )
+    add_history(wb, text)
+    return True, text
+
+
+def remove_prosthetic_upgrade(
+    wb: dict, kind: str, mutation_index: int, upgrade_index: int, soldier_id: str | None = None
+) -> tuple[bool, str]:
+    entity, _get_stat, _set_stat, label = _mutation_target(wb, kind, soldier_id)
+    if entity is None:
+        return False, label
+    injuries = entity.get("permanent_injuries") or []
+    if not (0 <= mutation_index < len(injuries)):
+        return False, "Permanent injury not found."
+    inj = injuries[mutation_index]
+    upgrades = inj.get("upgrades") or []
+    if not (0 <= upgrade_index < len(upgrades)):
+        return False, "Prosthetic Upgrade not found."
+    up = upgrades.pop(upgrade_index)
+    slot_index = up.get("slot_index")
+    if slot_index is not None:
+        slots = entity.get("item_slots") or []
+        if 0 <= slot_index < len(slots):
+            slots[slot_index] = ""
+    text = f"Removed {label}'s {up.get('name', '?')} Prosthetic Upgrade."
+    add_history(wb, text)
+    return True, text
+
+
+def add_wizard_prosthetic_upgrade(wb: dict, mutation_index: int, upgrade_id: str) -> tuple[bool, str]:
+    return add_prosthetic_upgrade(wb, "wizard", mutation_index, upgrade_id)
+
+
+def remove_wizard_prosthetic_upgrade(wb: dict, mutation_index: int, upgrade_index: int) -> tuple[bool, str]:
+    return remove_prosthetic_upgrade(wb, "wizard", mutation_index, upgrade_index)
+
+
+def add_apprentice_prosthetic_upgrade(wb: dict, mutation_index: int, upgrade_id: str) -> tuple[bool, str]:
+    return add_prosthetic_upgrade(wb, "apprentice", mutation_index, upgrade_id)
+
+
+def remove_apprentice_prosthetic_upgrade(wb: dict, mutation_index: int, upgrade_index: int) -> tuple[bool, str]:
+    return remove_prosthetic_upgrade(wb, "apprentice", mutation_index, upgrade_index)
+
+
+def add_captain_prosthetic_upgrade(wb: dict, mutation_index: int, upgrade_id: str) -> tuple[bool, str]:
+    return add_prosthetic_upgrade(wb, "captain", mutation_index, upgrade_id)
+
+
+def remove_captain_prosthetic_upgrade(wb: dict, mutation_index: int, upgrade_index: int) -> tuple[bool, str]:
+    return remove_prosthetic_upgrade(wb, "captain", mutation_index, upgrade_index)
 
 
 def add_soldier_permanent_injury(wb: dict, soldier_id: str, injury_id: str) -> tuple[bool, str]:
@@ -3584,6 +3705,67 @@ def animal_companion_limit(wb: dict) -> int:
 def has_animal_companion(wb: dict) -> bool:
     """True if the warband is at its Animal Companion limit already."""
     return count_animal_companions(wb) >= animal_companion_limit(wb)
+
+
+# --- Blood Legacy: Becoming a Vampire ----------------------------------------
+
+
+def become_vampire(wb: dict) -> tuple[bool, str]:
+    """Blood Legacy's "Becoming a Vampire" (usually accidental): converts an
+    already-created, ordinary wizard into a Vampire mid-campaign.
+
+    Distinct from choosing Vampire as a starting school at creation (see
+    empty_wizard()/playable_schools() and expansions.is_vampire()'s "school
+    marker, not a wizard state" note) — this reworks an existing wizard's
+    spellbook/apprentice in place instead of building one from scratch, so it
+    lives here as its own mutation rather than going through set_wizard_state.
+
+    Applies the book-keepable parts: school becomes Vampire (which makes
+    expansions.wizard_stat_caps()/casting-number relations apply from here on
+    automatically), Thaumaturge spells are dropped and every remaining spell's
+    Casting Number is recalculated for the new school relations, any stat now
+    over the Vampire's caps (Will +5, Health 22) is clamped down, and an
+    apprentice is dismissed for a 9th soldier slot. It does not attempt to
+    recompute the wizard's level for the XP a lost spell/stat point would no
+    longer justify — the same "left to the player" boundary as this app's
+    other reminder-only bookkeeping (Niggling Injury upkeep, Ragged Warbands'
+    restrictions)."""
+    if "Blood Legacy" not in enabled_sources(wb):
+        return False, "Becoming a Vampire needs Blood Legacy switched on under Additional Rules and Homerules first."
+    wiz = wb.setdefault("wizard", {})
+    school = wiz.get("school")
+    if school == "Vampire":
+        return False, "Your wizard is already a Vampire."
+    if school == "Fire Giant":
+        return False, "A Fire Giant Wizard cannot become a Vampire."
+    stats = wiz.setdefault("stats", deepcopy(WIZARD_BASE))
+    spells = wiz.get("spells") or []
+    lost = [s for s in spells if s.get("school") == "Thaumaturge"]
+    wiz["spells"] = [s for s in spells if s.get("school") != "Thaumaturge"]
+    wiz["school"] = "Vampire"
+    recompute_spell_cns(wb)
+    clamped = []
+    for stat, cap in expansions.wizard_stat_caps(wb).items():
+        cur = int(stats.get(stat, 0))
+        if cur > cap:
+            stats[stat] = cap
+            clamped.append(f"{stat.capitalize()} {cur} -> {cap}")
+    ap_note = ""
+    if wb.get("apprentice"):
+        dismiss_apprentice(wb)
+        hr = wb.setdefault("homerules", default_homerules())
+        hr["max_soldiers"] = max(int(hr.get("max_soldiers", MAX_SOLDIERS)), VAMPIRE_MIN_MAX_SOLDIERS)
+        ap_note = "; lost their apprentice, gaining a 9th soldier slot instead"
+    spell_note = (
+        f"; lost {len(lost)} Thaumaturge spell(s) (remaining Casting Numbers recalculated)" if lost else ""
+    )
+    cap_note = f"; {', '.join(clamped)}" if clamped else ""
+    text = (
+        f"{wiz.get('name', 'The wizard')} became a Vampire (Blood Legacy){spell_note}{cap_note}{ap_note}. "
+        "Recalculate their level for any XP a lost spell or capped stat no longer justifies."
+    )
+    add_history(wb, text)
+    return True, text
 
 
 # --- Wizard states (Lich / Beastcrafter / Demonic Pact) ---------------------
