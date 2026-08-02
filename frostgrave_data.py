@@ -241,6 +241,73 @@ def permanent_injury_by_roll(n: int) -> dict | None:
     return None
 
 
+# Fireheart's Prosthetic Upgrade table: purchasable add-ons for an already
+# Animated-Prosthetic-fitted injury (see set_permanent_injury_prosthetic in
+# warband_store.py). "requires" is either "any" prosthetic-eligible injury, or
+# the specific injury id(s) the upgrade needs. Most take an item slot (max one
+# of each upgrade across the whole entity); Potion Reservoir and Toe Ring are
+# the book's two named exceptions ("itself free of item-slot cost").
+PROSTHETIC_UPGRADES = [
+    {
+        "id": "climbing_claws",
+        "name": "Climbing Claws",
+        "requires": {"lost_toes", "lost_fingers"},
+        "cost": 350,
+        "text": "Expert Climber.",
+        "takes_slot": True,
+    },
+    {
+        "id": "fighting_claws",
+        "name": "Fighting Claws",
+        "requires": {"lost_fingers"},
+        "cost": 450,
+        "text": "+1 melee damage, never unarmed.",
+        "takes_slot": True,
+    },
+    {
+        "id": "gem_of_power",
+        "name": "Gem of Power",
+        "requires": "any",
+        "cost": 500,
+        "text": "One power point for empowering.",
+        "takes_slot": True,
+    },
+    {
+        "id": "hidden_projectile",
+        "name": "Hidden Projectile",
+        "requires": {"lost_fingers", "crushed_arm"},
+        "cost": 400,
+        "text": "Once/game, 12\" shooting attack at normal Shoot.",
+        "takes_slot": True,
+    },
+    {
+        "id": "potion_reservoir_prosthetic",
+        "name": "Potion Reservoir",
+        "requires": {"smashed_leg", "crushed_arm"},
+        "cost": 400,
+        "text": "Carries 2 potions with no item slot.",
+        "takes_slot": False,
+    },
+    {
+        "id": "shock_absorbers",
+        "name": "Shock Absorbers",
+        "requires": {"smashed_leg"},
+        "cost": 500,
+        "text": "Immune to fall damage.",
+        "takes_slot": True,
+    },
+    {
+        "id": "toe_ring",
+        "name": "Toe Ring",
+        "requires": {"lost_toes"},
+        "cost": 200,
+        "text": "May wear 2 rings, itself free of item-slot cost.",
+        "takes_slot": False,
+    },
+]
+PROSTHETIC_UPGRADE_BY_ID = {u["id"]: u for u in PROSTHETIC_UPGRADES}
+
+
 # --- Ragged Warbands & Random Recruits (The Red King, Chapter Two) ---------
 # Each row is (lo, hi, value); a d20 roll against Table I picks which of
 # Table II/III to roll on next, and a second d20 roll against that table

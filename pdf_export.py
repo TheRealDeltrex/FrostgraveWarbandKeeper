@@ -117,6 +117,10 @@ def _mutation_lines(mutations: list[dict] | None) -> list[str] | None:
         short = m.get("short") or m.get("text", "")
         prefix = f"{name}: "
         rest = short[len(prefix):] if short.startswith(prefix) else short
+        if m.get("prosthetic"):
+            rest += " (Animated Prosthetic fitted — penalty removed)"
+        for up in m.get("upgrades") or []:
+            rest += f"; {up.get('name', '?')} Prosthetic Upgrade"
         lines.append(_t(f"**{name}:** {rest}"))
     return lines
 

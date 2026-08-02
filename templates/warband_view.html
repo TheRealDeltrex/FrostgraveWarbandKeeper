@@ -833,6 +833,23 @@
         {% endif %}
       </details>
     {% endif %}
+
+    {% if "Blood Legacy" in enabled_source_names and wiz.school not in ("Vampire", "Fire Giant") %}
+      <details class="ref-panel">
+        <summary>Becoming a Vampire (Blood Legacy)</summary>
+        <p class="muted" style="font-size:0.85rem">
+          "Usually accidental" per Blood Legacy — drops Thaumaturge spells (other Casting Numbers
+          recalculate), clamps Will to +5 and Health to 22, and trades the apprentice for a 9th
+          soldier slot. Check the lexicon for the full text; this app doesn't recompute the
+          wizard's level for the XP a lost spell/stat point no longer justifies.
+        </p>
+        {% set vampire_wizard_label = wiz.name or "your wizard" %}
+        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" onsubmit="return confirm('Turn {{ vampire_wizard_label }} into a Vampire? This drops Thaumaturge spells, clamps Will/Health to the Vampire caps, and trades the apprentice (if any) for a 9th soldier slot. This cannot be undone automatically.');">
+          <input type="hidden" name="action" value="become_vampire" />
+          <button class="btn danger small" type="submit">Become a Vampire</button>
+        </form>
+      </details>
+    {% endif %}
       </details>
 
     <details class="ref-panel">

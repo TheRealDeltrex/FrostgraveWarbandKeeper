@@ -54,6 +54,8 @@ from frostgrave_data import (
     PENTANGLE_SCHOOLS,
     PERMANENT_INJURIES,
     PERMANENT_INJURY_BY_ID,
+    PROSTHETIC_UPGRADES,
+    PROSTHETIC_UPGRADE_BY_ID,
     PROMOTE_CAPTAIN_ITEM_SLOTS,
     SCHOOL_ALIGNED,
     SCHOOL_NEUTRAL,
@@ -130,6 +132,7 @@ from warband_store import (
     apply_captain_level_up,
     apply_captain_trick,
     apply_animal_companion_crit_bonus,
+    become_vampire,
     apply_level_up,
     apply_portrait,
     apply_soldier_level_up,
@@ -182,6 +185,12 @@ from warband_store import (
     restore_portraits_by_name,
     reverse_last_captain_level_up,
     reverse_last_level_up,
+    add_apprentice_prosthetic_upgrade,
+    add_captain_prosthetic_upgrade,
+    add_wizard_prosthetic_upgrade,
+    remove_apprentice_prosthetic_upgrade,
+    remove_captain_prosthetic_upgrade,
+    remove_wizard_prosthetic_upgrade,
     reverse_last_soldier_level_up,
     roll_random_recruits,
     save_warband,
@@ -279,6 +288,8 @@ app.jinja_env.globals.update(
     CAPTAIN_TRICK_BY_ID=CAPTAIN_TRICK_BY_ID,
     PERMANENT_INJURIES=PERMANENT_INJURIES,
     PERMANENT_INJURY_BY_ID=PERMANENT_INJURY_BY_ID,
+    PROSTHETIC_UPGRADES=PROSTHETIC_UPGRADES,
+    PROSTHETIC_UPGRADE_BY_ID=PROSTHETIC_UPGRADE_BY_ID,
     KNIGHTLY_ORDERS=KNIGHTLY_ORDERS,
     KNIGHTLY_ORDER_ELIGIBLE=KNIGHTLY_ORDER_ELIGIBLE,
     ILLUSION_SOURCE_CHOICES=illusion_source_choices(),
@@ -984,6 +995,11 @@ def _act_set_wizard_state(wb: dict) -> tuple[bool, str]:
     return set_wizard_state(wb, request.form.get("state_kind") or "")
 
 
+@register_action("become_vampire")
+def _act_become_vampire(wb: dict) -> tuple[bool, str]:
+    return become_vampire(wb)
+
+
 @register_action("advance_beastcrafter")
 def _act_advance_beastcrafter(wb: dict) -> tuple[bool, str]:
     return advance_beastcrafter(wb)
@@ -1409,6 +1425,45 @@ def _act_toggle_apprentice_injury_prosthetic(wb: dict) -> tuple[bool, str]:
 @register_action("toggle_captain_injury_prosthetic")
 def _act_toggle_captain_injury_prosthetic(wb: dict) -> tuple[bool, str]:
     return set_permanent_injury_prosthetic(wb, "captain", _mutation_index_from_form(), _fitted_from_form())
+
+
+def _upgrade_id_from_form() -> str:
+    return (request.form.get("upgrade_id") or "").strip()
+
+
+def _upgrade_index_from_form() -> int:
+    raw = (request.form.get("upgrade_index") or "").strip()
+    return int(raw) if raw.lstrip("-").isdigit() else -1
+
+
+@register_action("add_wizard_prosthetic_upgrade")
+def _act_add_wizard_prosthetic_upgrade(wb: dict) -> tuple[bool, str]:
+    return add_wizard_prosthetic_upgrade(wb, _mutation_index_from_form(), _upgrade_id_from_form())
+
+
+@register_action("remove_wizard_prosthetic_upgrade")
+def _act_remove_wizard_prosthetic_upgrade(wb: dict) -> tuple[bool, str]:
+    return remove_wizard_prosthetic_upgrade(wb, _mutation_index_from_form(), _upgrade_index_from_form())
+
+
+@register_action("add_apprentice_prosthetic_upgrade")
+def _act_add_apprentice_prosthetic_upgrade(wb: dict) -> tuple[bool, str]:
+    return add_apprentice_prosthetic_upgrade(wb, _mutation_index_from_form(), _upgrade_id_from_form())
+
+
+@register_action("remove_apprentice_prosthetic_upgrade")
+def _act_remove_apprentice_prosthetic_upgrade(wb: dict) -> tuple[bool, str]:
+    return remove_apprentice_prosthetic_upgrade(wb, _mutation_index_from_form(), _upgrade_index_from_form())
+
+
+@register_action("add_captain_prosthetic_upgrade")
+def _act_add_captain_prosthetic_upgrade(wb: dict) -> tuple[bool, str]:
+    return add_captain_prosthetic_upgrade(wb, _mutation_index_from_form(), _upgrade_id_from_form())
+
+
+@register_action("remove_captain_prosthetic_upgrade")
+def _act_remove_captain_prosthetic_upgrade(wb: dict) -> tuple[bool, str]:
+    return remove_captain_prosthetic_upgrade(wb, _mutation_index_from_form(), _upgrade_index_from_form())
 
 
 @register_action("add_soldier_permanent_injury")
