@@ -732,7 +732,7 @@
         // string below in place on every build (regex, not a one-shot
         // placeholder swap — see BUNDLE_VERSION_RE in that script), so repeat
         // visits between builds hit the browser cache instead.
-        var resp = await fetch("bundle.json?v=4b3e0e2abae0");
+        var resp = await fetch("bundle.json?v=1e36ee2a48e4");
         if (!resp.ok) throw new Error("Could not fetch bundle.json (" + resp.status + ")");
         var bundle = await resp.json();
         STYLE_CSS = bundle.files["static/style.css"] || "";
