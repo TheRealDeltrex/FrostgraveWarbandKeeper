@@ -27,6 +27,9 @@ from frostgrave_data import (
     MAX_SOLDIERS,
     MAX_SPECIALISTS,
     MAX_WIZARD_LEVEL,
+    VAMPIRE_HEALTH_CAP,
+    VAMPIRE_WILL_CAP,
+    VAMPIRE_XP_PER_LEVEL,
     WIZARD_ITEM_SLOTS,
     WIZARD_MIN_CASTING_NUMBER_DEFAULT,
     WIZARD_STAT_LIMITS_DEFAULT,
@@ -94,6 +97,14 @@ def is_fire_giant(wb: dict) -> bool:
     return (wb.get("wizard") or {}).get("school") == "Fire Giant"
 
 
+def is_vampire(wb: dict) -> bool:
+    """Blood Legacy's Vampire Wizard — same "school marker, not a wizard
+    state" reasoning as is_fire_giant(); it uses the ordinary wizard's base
+    stat line (WIZARD_BASE), unlike Fire Giant, so only its caps/leveling/
+    spell restrictions differ."""
+    return (wb.get("wizard") or {}).get("school") == "Vampire"
+
+
 def beastcrafter_tier(wb: dict) -> int:
     """0 if the wizard isn't a Beastcrafter, else the tier (1–3) reached."""
     if state_kind(wb) != STATE_BEASTCRAFTER:
@@ -119,7 +130,8 @@ LICH_FORBIDDEN_LEVELUP = {"fight", "shoot"}
 # Transcendence is a Perilous Dark spell the app doesn't carry yet; listed so the
 # restriction holds automatically if it is ever added.
 LICH_FORBIDDEN_SPELLS = {"Familiar", "Transcendence"}
-# The rangifer "will leave if any undead join the warband", and a Lich is undead.
+# The rangifer "will leave if any undead join the warband", and both a Lich
+# and a Vampire are Undead — reused by is_vampire()'s soldier_state_block too.
 LICH_BLOCKED_SOLDIERS = {"rangifer"}
 
 # Casting Lichdom (CN 20, Out of Game) and missing. The app records the outcome
@@ -329,13 +341,16 @@ def has_vault_item(wb: dict, needle: str) -> bool:
 
 def xp_per_level(wb: dict) -> int:
     """XP one wizard level costs. A Lich levels more slowly; a Fire Giant
-    levels more slowly still (Blood Legacy: 200xp, vs. a Lich's 150xp). The
-    book also caps a Fire Giant at 400xp spent per game — a per-game (not
-    per-warband-lifetime) limit this app has no bookkeeping for anywhere else
+    levels more slowly still (Blood Legacy: 200xp, vs. a Lich's 150xp); a
+    Vampire's 120xp sits between the two. The book also caps a Fire Giant at
+    400xp and a Vampire at 300xp spent per game — a per-game (not per-
+    warband-lifetime) limit this app has no bookkeeping for anywhere else
     (same as the niggling injury/prosthetic upkeep fees), so it's left as a
     house rule to track at the table rather than enforced here."""
     if is_fire_giant(wb):
         return FIRE_GIANT_XP_PER_LEVEL
+    if is_vampire(wb):
+        return VAMPIRE_XP_PER_LEVEL
     return LICH_XP_PER_LEVEL if is_lich(wb) else XP_PER_LEVEL
 
 
@@ -410,6 +425,11 @@ def wizard_stat_caps(wb: dict) -> dict:
         caps["health"] = FIRE_GIANT_HEALTH_CAP
         caps["fight"] = max(caps.get("fight", 0), FIRE_GIANT_WIZARD_BASE["fight"])
         caps["will"] = max(caps.get("will", 0), FIRE_GIANT_WIZARD_BASE["will"])
+    if is_vampire(wb):
+        # "Will capped at +5; Health cap 22" — both explicit, lower ceilings
+        # than an ordinary wizard's (Will 8, Health 20+HLW), not a floor.
+        caps["health"] = VAMPIRE_HEALTH_CAP
+        caps["will"] = VAMPIRE_WILL_CAP
     if _hlw_active(wb, "hlw_max_health"):
         base = caps.get("health", WIZARD_STAT_LIMITS_DEFAULT["health"])
         caps["health"] = base + min(10, wizard_level(wb) // 10)
@@ -529,6 +549,8 @@ def soldier_state_block(wb: dict, type_key: str) -> str | None:
     None means nothing here blocks it."""
     if type_key in LICH_BLOCKED_SOLDIERS and is_lich(wb):
         return "A Rangifer will not serve an undead wizard — your wizard is a Lich."
+    if type_key in LICH_BLOCKED_SOLDIERS and is_vampire(wb):
+        return "A Rangifer will not serve an undead wizard — your wizard is a Vampire."
     need_tier = BEASTCRAFTER_COMPANIONS.get(type_key)
     if need_tier and beastcrafter_tier(wb) < need_tier:
         name = BEASTCRAFTER_TIER_BY_N[need_tier]["name"]
@@ -550,6 +572,8 @@ def spell_state_block(wb: dict, spell: dict) -> str | None:
         return f"A Lich cannot cast {name}."
     if is_fire_giant(wb) and (spell.get("school") == "Chronomancer" or name == "Write Scroll"):
         return "A Fire Giant Wizard cannot learn Chronomancer spells or Write Scroll (Blood Legacy)."
+    if is_vampire(wb) and spell.get("school") == "Thaumaturge":
+        return "A Vampire Wizard cannot learn Thaumaturge spells — Thaumaturge is antithetical (Blood Legacy)."
     need_tier = BEASTCRAFTER_SPELLS.get(name)
     if need_tier and beastcrafter_tier(wb) < need_tier:
         return f"Requires {BEASTCRAFTER_TIER_BY_N[need_tier]['name']}."

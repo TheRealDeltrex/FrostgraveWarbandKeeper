@@ -69,6 +69,18 @@
         Needs Blood Legacy above. A giant-scale wizard build (M6 F6 S0 A14 W8 H22, no armour/
         shields, no apprentice, Health cap 30, 200xp/level) rather than an ordinary human wizard.
       </p>
+      {# Blood Legacy frames the Vampire Wizard as a GM/NPC villain build "or PC
+         by group agreement" — same opt-in shape as Fire Giant above. #}
+      <label class="checkbox-row" style="margin-top:0.6rem" id="vampire-row">
+        <input name="vampire_wizard_playable" type="checkbox" data-source-toggle
+               {% if vampire_playable %}checked{% endif %} />
+        Vampire Wizard playable (Blood Legacy)
+      </label>
+      <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0">
+        Needs Blood Legacy above. Same starting stats as an ordinary wizard, but no apprentice,
+        a 9-soldier roster, Will capped at 5, Health cap 22, 120xp/level, and Thaumaturge spells
+        are never learnable.
+      </p>
 
       <div class="grid-2" style="margin-top:0.9rem">
         <div class="form-row">
@@ -196,6 +208,8 @@
       </div>
       {% if school == "Fire Giant" %}
         <p class="muted">Starting wizard stats: Move 6 · Fight 6 · Shoot 0 · Armour 14 · Will 8 · Health 22 (no armour/shield item slots)</p>
+      {% elif school == "Vampire" %}
+        <p class="muted">Starting wizard stats: Move 6 · Fight +2 · Shoot +0 · Armour 10 · Will +4 · Health 14 (same as an ordinary wizard; Will capped at 5, Health cap 22)</p>
       {% else %}
         <p class="muted">Starting wizard stats: Move 6 · Fight +2 · Shoot +0 · Armour 10 · Will +4 · Health 14</p>
       {% endif %}
@@ -203,6 +217,8 @@
       <h3 style="margin-top:1.35rem">Apprentice (optional)</h3>
       {% if school == "Fire Giant" %}
         <p class="muted">A Fire Giant Wizard has no apprentice (Blood Legacy).</p>
+      {% elif school == "Vampire" %}
+        <p class="muted">A Vampire Wizard has no apprentice (Blood Legacy).</p>
       {% else %}
         <p class="muted">
           Name + picture only. Stats auto: Move same, Fight −2, Shoot same, Armour 10, Will −2, Health −2 from wizard.
