@@ -24,6 +24,7 @@ except ImportError:  # pragma: no cover - only hit if Pillow genuinely isn't ins
 
 from frostgrave_data import (
     CAPTAIN_TRICK_BY_ID,
+    SOLDIER_COMPANION_BY_TYPE_KEY,
     format_stat,
 )
 from game_content import item_slot_cost
@@ -48,7 +49,7 @@ from warband_store import (
 
 # Apprentice casts with -2 to the roll => effective difficulty is wizard CN + 2
 APPRENTICE_CAST_PENALTY = 2
-EMPTY_SLOT = "___"
+EMPTY_SLOT = ""
 
 
 class RosterPDF(FPDF):
@@ -569,6 +570,11 @@ def build_warband_pdf(wb: dict) -> bytes:
                 new_x="LMARGIN",
                 new_y="NEXT",
             )
+            companion = SOLDIER_COMPANION_BY_TYPE_KEY.get(s.get("type_key", ""))
+            if companion:
+                pdf.set_x(left + 3)
+                pdf.set_font("Helvetica", "I", 7)
+                pdf.cell(0, 3.5, _t(f"- with {companion}"), new_x="LMARGIN", new_y="NEXT")
             pdf.set_x(left)
             pdf.set_font("Helvetica", "", 9)
             stats = {

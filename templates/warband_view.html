@@ -1474,7 +1474,12 @@
                     <span class="portrait-placeholder" aria-hidden="true">?</span>
                   {% endif %}
                 </td>
-                <td><strong>{{ s.name }}</strong>{% if hr.soldier_leveling_enabled and s.level %} <span class="muted">(Lv {{ s.level }})</span>{% endif %}</td>
+                <td>
+                  <strong>{{ s.name }}</strong>{% if hr.soldier_leveling_enabled and s.level %} <span class="muted">(Lv {{ s.level }})</span>{% endif %}
+                  {% if SOLDIER_COMPANION_BY_TYPE_KEY.get(s.type_key) %}
+                    <div class="muted" style="font-size:0.75em; margin-left:0.9em">↳ {{ SOLDIER_COMPANION_BY_TYPE_KEY[s.type_key] }}</div>
+                  {% endif %}
+                </td>
                 <td>
                   {{ s.type_name }}
                   <div>
