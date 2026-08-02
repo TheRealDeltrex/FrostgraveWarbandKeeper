@@ -2,8 +2,9 @@
    outcome of a "Permanent Injury" result on the Spellcaster Survival Table.
    The player rolls at the table and records the result here; this app never
    rolls it for them. Shared by the Wizard/Apprentice/Captain/each Soldier. #}
-{% macro permanent_injury_picker(action, injuries, soldier_id=none, label="Permanent injuries") %}
+{% macro permanent_injury_picker(action, injuries, soldier_id=none, label="Permanent injuries", kind=none) %}
   {% set remove_action = action.replace('add_', 'remove_', 1) %}
+  {% set prosthetic_action = "toggle_" ~ kind ~ "_injury_prosthetic" if kind else none %}
   <details class="ref-panel">
     <summary>{{ label }} ({{ injuries|length }})</summary>
     {% if injuries %}
@@ -11,12 +12,26 @@
         {% for inj in injuries %}
           <li>
             <strong>{{ inj.name }}</strong> — {{ inj.short or inj.text }}
+            {% if inj.prosthetic %}<em>(Animated Prosthetic fitted — penalty removed)</em>{% endif %}
             <form class="inline-form" method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" onsubmit="return confirm('Remove permanent injury “{{ inj.name }}”? Any stat penalty it applied will be reversed (e.g. healed by Miraculous Cure).');">
               <input type="hidden" name="action" value="{{ remove_action }}" />
               {% if soldier_id %}<input type="hidden" name="soldier_id" value="{{ soldier_id }}" />{% endif %}
               <input type="hidden" name="mutation_index" value="{{ loop.index0 }}" />
               <button class="btn danger small" type="submit" title="Remove this permanent injury">Remove</button>
             </form>
+            {% if prosthetic_action and fireheart_enabled and PERMANENT_INJURY_BY_ID.get(inj.id, {}).get('prosthetic_eligible') %}
+              <form class="inline-form" method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
+                <input type="hidden" name="action" value="{{ prosthetic_action }}" />
+                <input type="hidden" name="mutation_index" value="{{ loop.index0 }}" />
+                {% if inj.prosthetic %}
+                  <input type="hidden" name="fitted" value="0" />
+                  <button class="btn secondary small" type="submit" title="Remove the Animated Prosthetic (Fireheart) — the stat penalty returns">Remove prosthetic</button>
+                {% else %}
+                  <input type="hidden" name="fitted" value="1" />
+                  <button class="btn secondary small" type="submit" title="Fit an Animated Prosthetic (Fireheart) — Animate Construct removes this injury's stat penalty; 10gc upkeep after every game, or a fresh casting">Fit prosthetic</button>
+                {% endif %}
+              </form>
+            {% endif %}
           </li>
         {% endfor %}
       </ul>
