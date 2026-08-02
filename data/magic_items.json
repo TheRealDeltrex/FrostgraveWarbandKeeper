@@ -1273,5 +1273,290 @@
   "name": "Construct Hammer",
   "source": "Core Rules",
   "effect": "Fits a medium/large construct before or after a game; the construct counts as carrying a magic weapon with an additional +1 damage modifier. One per construct."
+ },
+ {
+  "name": "Amulet of Elemental Energy Absorption",
+  "source": "The Red King",
+  "effect": "Negates 1 elemental damage per hit; once/game, absorb all damage from one source instead (17+ roll fails and it explodes for +3 extra damage)."
+ },
+ {
+  "name": "Armring of Strength",
+  "source": "The Red King",
+  "effect": "+5 to all Fight Stat Rolls (not combat rolls)."
+ },
+ {
+  "name": "Blood Beetle",
+  "source": "The Red King",
+  "effect": "Wearer is immune to poison."
+ },
+ {
+  "name": "Book of the Foulhorn",
+  "source": "The Red King",
+  "effect": "Hire a Foulhorn specialist soldier (200gc); risk of it injuring a random warband member (-3 Health) before each game on a 16+."
+ },
+ {
+  "name": "Book of Wisdom",
+  "source": "The Red King",
+  "effect": "Wizard may count one Monk or Mystic Warrior as a standard soldier instead of a specialist."
+ },
+ {
+  "name": "Bottle Imp",
+  "source": "The Red King",
+  "effect": "Smash (action) to release an uncontrolled Imp adjacent; single use."
+ },
+ {
+  "name": "Bracelet of Vigour",
+  "source": "The Red King",
+  "effect": "+8 to Health Stat Rolls; wounded threshold becomes 2 Health instead of half."
+ },
+ {
+  "name": "Bronze Star of the Apprentice",
+  "source": "The Red King",
+  "effect": "Spellcaster never takes more than 1 damage from a failed Casting Roll."
+ },
+ {
+  "name": "Burning Icon",
+  "source": "The Red King",
+  "effect": "+2 to the Will-roll effect of a Casting Roll when casting Banish."
+ },
+ {
+  "name": "Cloak of Tattered Shadows",
+  "source": "The Red King",
+  "effect": "+2 Fight vs. shooting attacks."
+ },
+ {
+  "name": "Dazzling Cape",
+  "source": "The Red King",
+  "effect": "Once/game, move while in combat without triggering forced combat from current opponents."
+ },
+ {
+  "name": "Enchanted Scroll Wax (6 uses)",
+  "source": "The Red King",
+  "effect": "Seals a written scroll so its Casting Number becomes 15 instead of 14."
+ },
+ {
+  "name": "Enchanted Teetotum",
+  "source": "The Red King",
+  "effect": "Once/game, force a reroll of any randomly-determined direction."
+ },
+ {
+  "name": "Enchanted Vials (6 uses)",
+  "source": "The Red King",
+  "effect": "Sealed potion has a chance (19-20) not to be consumed on use."
+ },
+ {
+  "name": "Extended Scroll",
+  "source": "The Red King",
+  "effect": "Bridge spell creates a 9\" bridge instead of 6\" and lasts longer (vanishes only on a roll of 1); one use."
+ },
+ {
+  "name": "Feather Blade",
+  "source": "The Red King",
+  "effect": "Magic two-handed sword that takes only 1 item slot instead of 2."
+ },
+ {
+  "name": "Golden Fangs (6 uses)",
+  "source": "The Red King",
+  "effect": "Used with Animate Skull for +1 Fight; up to 6 fit in one item slot."
+ },
+ {
+  "name": "Golden Incunabula",
+  "source": "The Red King",
+  "effect": "Apprentice suffers only -1 (not -2) Casting Roll penalty for an associated spell."
+ },
+ {
+  "name": "Gutter Flail",
+  "source": "The Red King",
+  "effect": "Two-handed flail; free attack action when moving into combat."
+ },
+ {
+  "name": "Hypnotic Puppet",
+  "source": "The Red King",
+  "effect": "-2 to target's Will Roll vs. Mind Control/Suggestion cast within 8\"; risk of self-damage on a natural 1."
+ },
+ {
+  "name": "Ice-Crystal Pin",
+  "source": "The Red King",
+  "effect": "Grants Elemental Resistance (1)."
+ },
+ {
+  "name": "Icon of the Sun",
+  "source": "The Red King",
+  "effect": "+1 damage vs. undead in melee; immune to Energy Drain doubling."
+ },
+ {
+  "name": "Ivory Hand",
+  "source": "The Red King",
+  "effect": "Push spell attack becomes +11 (from +10), plus 3 extra damage if the push stops the target early. Can be grafted onto a staff (500gc)."
+ },
+ {
+  "name": "Lantern of Holy Light",
+  "source": "The Red King",
+  "effect": "Free action to unshutter: acts as Glow plus a mobile Circle of Protection, forcing undead/demons within 3\" to flee; risk of going out."
+ },
+ {
+  "name": "Lifelong Plant",
+  "source": "The Red King",
+  "effect": "Vault item; pluck a leaf post-game for +1 to one warband member's survival roll; the plant can die on a 21 roll."
+ },
+ {
+  "name": "Lightning Brooch",
+  "source": "The Red King",
+  "effect": "Elemental Resistance (2); incompatible with heavy armour or other Elemental Resistance sources."
+ },
+ {
+  "name": "Mantle of the Bear (or Leopard)",
+  "source": "The Red King",
+  "effect": "The matching Animal Companion counts as a standard soldier instead of a specialist."
+ },
+ {
+  "name": "Mask of Many Faces",
+  "source": "The Red King",
+  "effect": "Attackers get only +1 (not +2) per supporting figure when ganging up on the wearer."
+ },
+ {
+  "name": "Mind Lock Collar",
+  "source": "The Red King",
+  "effect": "Animal-only item; grants the Mind Lock creature trait; blocks other items."
+ },
+ {
+  "name": "Mindguard Shield",
+  "source": "The Red King",
+  "effect": "+4 Will on all rolls to resist or break spells."
+ },
+ {
+  "name": "Potion Drinker Staff",
+  "source": "The Red King",
+  "effect": "+1 damage staff; can be pre-loaded with a sacrificed potion's effect, usable once as an action."
+ },
+ {
+  "name": "Quiver of the Hunter",
+  "source": "The Red King",
+  "effect": "Carries up to 4 magic ammo pieces without using item slots."
+ },
+ {
+  "name": "Ring of Elemental Fire",
+  "source": "The Red King",
+  "effect": "A Wall spell wall does 2 elemental damage to anyone touching or activating in contact with it."
+ },
+ {
+  "name": "Slippery Boots",
+  "source": "The Red King",
+  "effect": "Push-back after winning combat extends to 3\", usable even in a tied combat."
+ },
+ {
+  "name": "Sticky Finger Gloves",
+  "source": "The Red King",
+  "effect": "Bonus/extra rolls for claiming unclaimed treasure at game end; one wearer's benefit per warband per game."
+ },
+ {
+  "name": "Surefoot Boots",
+  "source": "The Red King",
+  "effect": "+5 to Move Stat Rolls."
+ },
+ {
+  "name": "Talisman of Speed",
+  "source": "The Red King",
+  "effect": "Once/game, \"Run For It\" move up to 6\" instead of 3\"."
+ },
+ {
+  "name": "Amulet of Charisma",
+  "source": "The Red King",
+  "effect": "Artefact (unlock: post-game Will Roll TN18). Recruit one extra specialist; wearer suffers -1 Will."
+ },
+ {
+  "name": "Circlet of Defence",
+  "source": "The Red King",
+  "effect": "Artefact (unlock: post-game Will Roll TN22). Wizard is immune to one chosen spell forever (and can no longer cast it); starts each game at -2 Health."
+ },
+ {
+  "name": "Creature Mask",
+  "source": "The Red King",
+  "effect": "Artefact (unlock: post-game Will Roll TN16). Uncontrolled creatures fighting the spellcaster attack the next-highest-Health target instead; cumulative -1 Will each trigger."
+ },
+ {
+  "name": "Gloves of the Worm Rider",
+  "source": "The Red King",
+  "effect": "Artefact (unlock: post-game Will Roll TN20). Giant worms ignore the wearer; can summon a giant worm once/game; risk of death by worms on a natural 1 survival roll."
+ },
+ {
+  "name": "Golden Bottle of Yens",
+  "source": "The Red King",
+  "effect": "Artefact (unlock: post-game Will Roll TN16). Used with Brew Potion to create 2 doses; drinking requires a Will Roll or the drinker is poisoned instead of gaining the effect."
+ },
+ {
+  "name": "Mask of Death",
+  "source": "The Red King",
+  "effect": "Artefact (unlock: post-game Will Roll TN14). Wearer counts as undead (with both bonuses and penalties); loses the normal +1 survival-roll bonus."
+ },
+ {
+  "name": "Mystic Shears",
+  "source": "The Red King",
+  "effect": "Artefact (unlock: post-game Will Roll TN18). Cut a specialist's hair pre-game for +2 to one Casting Roll; risk of -1 Health to that specialist (permanent on a 20)."
+ },
+ {
+  "name": "Pulsing Gem",
+  "source": "The Red King",
+  "effect": "Artefact (unlock: post-game Will Roll TN18). Item of Power (4) usable only for Blink; lets Blink move 6\" and reroll direction; cumulative -1 Fight vs. shooting per use."
+ },
+ {
+  "name": "Ring of Destiny",
+  "source": "The Red King",
+  "effect": "Artefact (unlock: post-game Will Roll TN20). +20 XP after the game (can exceed the 300 cap); -1 to survival roll if reduced to 0 Health."
+ },
+ {
+  "name": "Ring of Levitation",
+  "source": "The Red King",
+  "effect": "Artefact (unlock: post-game Will Roll TN16). Grants the Levitate creature trait; wearer suffers -3 Will."
+ },
+ {
+  "name": "Scroll Shield",
+  "source": "The Red King",
+  "effect": "Artefact (unlock: post-game Will Roll TN14). A random spell appears on the shield pre-game; a nearby spellcaster can cast it like a scroll; wearer starts each game having already taken 1 damage."
+ },
+ {
+  "name": "Skull Staff",
+  "source": "The Red King",
+  "effect": "Artefact (unlock: post-game Will Roll TN16). +1 Casting Roll for Animate Skull/Raise Zombie; can maintain two skulls/zombies at once (they gain Strong); -2 Casting Roll if more than one is on the table."
+ },
+ {
+  "name": "Soulchill Blade",
+  "source": "The Red King",
+  "effect": "Artefact (unlock: post-game Will Roll TN12). On a combat win, treat the opponent's Armour as 9+Will; damaged figures get -1 Fight for the rest of the game; wielder loses -1 Will per kill."
+ },
+ {
+  "name": "Staff of the Illusionist",
+  "source": "The Red King",
+  "effect": "Artefact (unlock: post-game Will Roll TN18). Fool's Gold token moves 6\" instead of 4\"; wizard may maintain two illusionary soldiers; -2 Will while both are active."
+ },
+ {
+  "name": "Sword of Elemental Fire",
+  "source": "The Red King",
+  "effect": "Artefact (unlock: post-game Will Roll TN16). Builds \"Elemental Energy\" from Elementalist spells, adding to hit damage (max 5, resets each hit/game); a natural 1 in melee causes self-damage and resets it."
+ },
+ {
+  "name": "Sword of Woe",
+  "source": "The Red King",
+  "effect": "Artefact (unlock: post-game Will Roll TN18). +2 Fight, +1 Will; losing a fight causes 2 extra damage; a natural 1 while receiving support damages a random ally for 10."
+ },
+ {
+  "name": "Tiger Eye Ring",
+  "source": "The Red King",
+  "effect": "Artefact (unlock: post-game Will Roll TN20). Extends line of sight 2\" past any visible point (wizard only), moving the Wizard Eye further; risk of 3 damage on a failed Will Roll each use."
+ },
+ {
+  "name": "Vampire Staff",
+  "source": "The Red King",
+  "effect": "Artefact (unlock: post-game Will Roll TN18). Empowers Casting/Will Rolls using a nearby warband member's Health (3 Health = +1, max +4); a damaged donor permanently leaves the warband (or becomes uncontrolled if a creature)."
+ },
+ {
+  "name": "Wand of Brilliant Power (3)",
+  "source": "The Red King",
+  "effect": "Artefact (unlock: post-game Will Roll TN12). Counts as a Wand of Power (3); +2 Casting Roll for Draining Word/Power Word; only the wand's power (not the caster's own Health) can empower those spells."
+ },
+ {
+  "name": "Wraith Bow",
+  "source": "The Red King",
+  "effect": "Artefact (unlock: post-game Will Roll TN16). +1 damage bow; once/game, fire through terrain (target gets +1 Fight as intervening terrain); risk of a Curse effect (Casting Roll 14) on a failed Will Roll after use."
  }
 ]

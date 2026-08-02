@@ -27,6 +27,7 @@ from frostgrave_data import (
     MAX_SOLDIERS,
     MAX_SPECIALISTS,
     MAX_WIZARD_LEVEL,
+    SOLDIER_ITEM_SLOTS,
     VAMPIRE_HEALTH_CAP,
     VAMPIRE_WILL_CAP,
     VAMPIRE_XP_PER_LEVEL,
@@ -34,6 +35,9 @@ from frostgrave_data import (
     WIZARD_MIN_CASTING_NUMBER_DEFAULT,
     WIZARD_STAT_LIMITS_DEFAULT,
     XP_PER_LEVEL,
+    animal_companion_type_keys,
+    construct_type_keys,
+    get_soldier,
 )
 
 # Internal sentinel for an "unlimited" wizard level cap — plain int rather than
@@ -485,6 +489,23 @@ def apprentice_item_slots(wb: dict) -> int:
     """Same Increased Item Slots bonus, applied to the apprentice too — the
     book raises both together."""
     return APPRENTICE_ITEM_SLOTS + _hlw_item_slot_bonus(wb)
+
+
+def soldier_item_slots(wb: dict, type_key: str) -> int:
+    """A soldier's item slot count (2e core: 1). Zero for anything the book
+    says "has no item slots" — animals, constructs, and temporary
+    spell-summoned members (undead/demon/illusion) all carry that text
+    verbatim in their own catalog description. An explicit "item_slots" key
+    on the catalog entry (e.g. a Red King creature with no item slots of its
+    own) always wins; otherwise it's derived from the entry's own flags."""
+    info = get_soldier(type_key) or {}
+    if "item_slots" in info:
+        return int(info["item_slots"])
+    if type_key in animal_companion_type_keys() or type_key in construct_type_keys():
+        return 0
+    if info.get("temporary"):
+        return 0
+    return SOLDIER_ITEM_SLOTS
 
 
 def casting_number_minimum(wb: dict) -> int:

@@ -120,7 +120,14 @@
         // instead this fetches the same URL and swaps in just the regions that
         // actually depend on school/sources, leaving the rest of the page — and
         // the scroll position — untouched.
-        window.fgNewReload = function () {
+        // extraParams (optional): additional query params merged in on top of
+        // the usual school/sources_touched/source_enabled_* — used by
+        // fgRandomWizard() below to add randomize=1&exclude_school=... to an
+        // otherwise ordinary reload. Returns the fetch promise (resolved
+        // after the swap + fgInitSpellPicker() have both run) so a caller
+        // can chase it with its own follow-up work, like copying random
+        // names onto the (unswapped) identity fields.
+        window.fgNewReload = function (extraParams) {
           var params = new URLSearchParams();
           params.set("school", document.getElementById("school").value);
           // Tells the backend this is a follow-up request, not the first page
@@ -130,11 +137,14 @@
           document.querySelectorAll("#source-books-card input[data-source-toggle]").forEach(function (box) {
             if (box.checked) { params.set(box.name, "on"); }
           });
+          if (extraParams) {
+            Object.keys(extraParams).forEach(function (key) { params.set(key, extraParams[key]); });
+          }
           var url = "{{ url_for('warband_new') }}?" + params.toString();
           // In the in-browser (Pyodide) build, a raw fetch() has no real network
           // target inside the sandboxed srcdoc iframe — window.fgFetch, when
           // present, bridges it through the driver's Python test client instead.
-          (window.fgFetch || fetch)(url)
+          return (window.fgFetch || fetch)(url)
             .then(function (r) { return r.text(); })
             .then(function (html) {
               var doc = new DOMParser().parseFromString(html, "text/html");
@@ -153,7 +163,7 @@
             .catch(function () { location.href = url; });
         };
         document.querySelectorAll("#source-books-card input[data-source-toggle]")
-          .forEach(function (box) { box.addEventListener("change", window.fgNewReload); });
+          .forEach(function (box) { box.addEventListener("change", function () { window.fgNewReload(); }); });
         // Enable/Disable all: tick every source book + Pentangle toggle in this
         // card at once (literally everything here, no exception), then reload
         // the same way a single checkbox change does.
@@ -172,6 +182,16 @@
 
     <details class="card" open>
       <summary><span class="card-title">2. Warband &amp; wizard</span></summary>
+      <div class="actions" style="margin-bottom:0.75rem">
+        <button class="btn small secondary" type="button" id="random-wizard-btn">
+          Random wizard (core rules)
+        </button>
+        <span class="muted" style="font-size:0.85rem">
+          Fills in a random legal core-rules wizard — school, 8 spells, names, and an apprentice.
+          Nothing is submitted; edit anything before accepting. Press again for a different one
+          (never repeats the school currently shown).
+        </span>
+      </div>
       <div class="grid-2">
         <div class="form-row">
           <label for="warband_name">Warband name</label>
@@ -254,6 +274,15 @@
         "neuN": neutral_needed,
       } | tojson }}
     </script>
+    {# Only present on a randomize=1 response (see app.py's warband_new GET
+       handler). Lives inside this swapped region — not next to the name/
+       apprentice fields themselves, which sit outside the swap and would
+       otherwise have a chosen portrait silently discarded on every reload —
+       so fgRandomWizard() reads it right after the swap and copies the
+       values onto those fields itself. #}
+    {% if random_identity %}
+      <script type="application/json" id="random-identity-data">{{ random_identity | tojson }}</script>
+    {% endif %}
     <details class="card" open>
       <summary><span class="card-title">3. Spells
         <span class="muted" style="font-weight:500;font-size:0.9rem">
@@ -606,6 +635,47 @@
     window.__fgSubmitGuardAttached = true;
     document.getElementById('create-form').addEventListener('submit', function (e) {
       if (document.getElementById('submit-btn').disabled) e.preventDefault();
+    });
+  }
+
+  // "Random wizard" button — placed here (not the earlier script block, which
+  // runs before this card exists in the DOM) so the button is guaranteed to
+  // be present. Fills in a random legal core-rules wizard without ever
+  // submitting the form, so the player can still edit anything before
+  // accepting. Only wired once; the button itself lives outside every
+  // swapped region, so it survives fgNewReload() swaps untouched.
+  if (!window.__fgRandomWizardAttached) {
+    window.__fgRandomWizardAttached = true;
+    document.getElementById('random-wizard-btn').addEventListener('click', function () {
+      var schoolEl = document.getElementById('school');
+      var currentSchool = schoolEl ? schoolEl.value : '';
+      // Fire Giant / Vampire don't render the apprentice block at all (it's
+      // outside every swapped region), so #with_apprentice wouldn't exist
+      // after an AJAX swap either way — fall back to a full navigation.
+      if (currentSchool === 'Fire Giant' || currentSchool === 'Vampire') {
+        var params = new URLSearchParams();
+        params.set('randomize', '1');
+        params.set('exclude_school', currentSchool);
+        params.set('sources_touched', '1');
+        document.querySelectorAll('#source-books-card input[data-source-toggle]').forEach(function (box) {
+          if (box.checked) { params.set(box.name, 'on'); }
+        });
+        location.href = "{{ url_for('warband_new') }}?" + params.toString();
+        return;
+      }
+      window.fgNewReload({ randomize: '1', exclude_school: currentSchool }).then(function () {
+        var blob = document.getElementById('random-identity-data');
+        if (!blob) return;
+        var names = JSON.parse(blob.textContent || '{}');
+        var warbandEl = document.getElementById('warband_name');
+        var wizardEl = document.getElementById('wizard_name');
+        var apprenticeEl = document.getElementById('apprentice_name');
+        var withApprenticeEl = document.getElementById('with_apprentice');
+        if (warbandEl && names.warband_name) warbandEl.value = names.warband_name;
+        if (wizardEl && names.wizard_name) wizardEl.value = names.wizard_name;
+        if (apprenticeEl && names.apprentice_name) apprenticeEl.value = names.apprentice_name;
+        if (withApprenticeEl) withApprenticeEl.checked = true;
+      });
     });
   }
 

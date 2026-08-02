@@ -10,6 +10,11 @@
     "source": "Core Rules"
   },
   {
+    "name": "Antithetical to Magic",
+    "source": "The Red King",
+    "text": "This creature is completely immune to magic in all forms. It may not be the target of any spell, nor will it suffer damage from any kind of magic attack. A figure in combat with this creature may not use any magic item, and any magic items being carried will temporarily lose all bonuses or effects. A figure may fight with a magic weapon, but treat it as a mundane example of the weapon."
+  },
+  {
     "name": "Antlers",
     "source": "The Wildwoods",
     "text": "This creature may fight unarmed with its antlers at -1 Fight, with no other unarmed penalty."
@@ -20,9 +25,24 @@
     "source": "Core Rules"
   },
   {
+    "name": "Aura of Pain",
+    "source": "The Red King",
+    "text": "If a figure activates within 6\" of this creature, the figure must make an immediate Will Roll (TN12) or suffer 2 points of damage. Undead, constructs, and demons are immune to this damage and thus do not have to make a Will Roll."
+  },
+  {
+    "name": "Automatic Damage",
+    "source": "The Red King",
+    "text": "Any figure that activates while in combat with this creature takes 2 points of elemental magic damage. Creatures with automatic damage are immune to damage from automatic damage."
+  },
+  {
     "name": "Awkward on Land",
     "source": "The Wildwoods",
     "text": "Despite being Amphibious, this creature's Move is halved while on land."
+  },
+  {
+    "name": "Blood-Marked",
+    "source": "The Red King",
+    "text": "These creatures gain +5 on all Will Rolls to resist Mind Control or Suggestion. Should a creature with Blood-Marked lose its weapon, it suffers the usual -2 Fight, but not the normal -2 damage."
   },
   {
     "name": "Bounty (X)",
@@ -63,6 +83,11 @@
     "name": "Demon",
     "text": "All attacks made by this creature count as magic attacks. This creature is immune to poison. Demons can pick up and carry treasure tokens but have no item slots.",
     "source": "Core Rules"
+  },
+  {
+    "name": "Elemental Blast",
+    "source": "The Red King",
+    "text": "This creature can make one +3 elemental magic shooting attack every time it activates. It will follow the normal rules for a creature armed with a missile weapon until it makes this attack. Afterwards it follows the rules as though not armed with a missile weapon."
   },
   {
     "name": "Elemental Resistance (X)",
@@ -205,6 +230,11 @@
     "text": "This creature takes +1 damage from all magic attacks."
   },
   {
+    "name": "Melt Weapon",
+    "source": "The Red King",
+    "text": "If a figure that is fighting this creature rolls a natural '1' on their attack roll, then the weapon they are using is immediately destroyed. This attribute has no effect on magic weapons."
+  },
+  {
     "name": "Mind Lock",
     "text": "This creature is Immune to Mind Control and Immune to Suggestion.",
     "source": "Core Rules"
@@ -230,6 +260,11 @@
     "source": "Core Rules"
   },
   {
+    "name": "Pain-Blink",
+    "source": "The Red King",
+    "text": "Whenever this creature suffers damage from any source, and is not reduced to 0 Health, immediately move it 6\" in a random direction. This may move the creature into or out of combat. If this would move the creature into terrain, place it on top of that terrain. If this would move it onto another figure, place the pain-blink creature in combat with this figure at the point nearest where it should have appeared. If it moves the figure off the table, place it adjacent to the table edge at the point it would have left."
+  },
+  {
     "name": "Partial Immunity to Normal Damage",
     "source": "Blood Legacy",
     "text": "Non-magic damage dealt to this creature is halved, rounded down."
@@ -238,6 +273,11 @@
     "name": "Poison",
     "text": "Attacks from this creature are venomous and deal poison damage.",
     "source": "Core Rules"
+  },
+  {
+    "name": "Possible Self-Combustion",
+    "source": "The Red King",
+    "text": "At the end of each turn this creature is on the table roll one die: on a roll of '20', the creature self-combusts and should be replaced with a Burning Man figure at full Health. If a figure is in combat with this creature when it self-combusts, it suffers an immediate +0 Elemental magic attack."
   },
   {
     "name": "Potential Marsh Gas Cloud",
@@ -260,9 +300,19 @@
     "text": "This creature gains a bonus against figures with the Horns, Antlers, or Bounty traits, and its warband gains +5 XP for killing one."
   },
   {
+    "name": "Resistant to Missile Weapons",
+    "source": "The Red King",
+    "text": "This creature never takes more than 2 points of damage from non-magic bow, crossbow, or javelin attacks. It takes full damage from all other shooting attacks, including attacks made with magic arrows, bolts, or javelins."
+  },
+  {
     "name": "Rock-hard Skin",
     "source": "The Wildwoods",
     "text": "A natural roll of 1 on a Fight Roll made against this creature breaks the attacker's weapon."
+  },
+  {
+    "name": "Sense Magic",
+    "source": "The Red King",
+    "text": "For the purposes of determining movement (and nothing else), this creature counts as having line of sight to all spellcasters within 12\", and may move into combat with spellcasters even if they are invisible (immediately ending the Invisibility spell)."
   },
   {
     "name": "Set Traps",
@@ -285,6 +335,11 @@
     "text": "This creature cannot be seen beyond 12\" and gains +3 Fight against shooting attacks."
   },
   {
+    "name": "Spell Reflection",
+    "source": "The Red King",
+    "text": "Any time a spell is successfully cast upon this creature, roll a die: on a 16+ the spell is reflected back on the figure that originally cast the spell. This spellcaster should make any Will Rolls or Combat Rolls required as the target of the spell. This includes any spells that include the creature in their area of effect."
+  },
+  {
     "name": "Spellcaster",
     "text": "This creature can cast spells. Exactly which spells it can cast and how this is handled will be given in the creature's description.",
     "source": "Core Rules"
@@ -293,6 +348,11 @@
     "name": "Strong",
     "text": "This creature does +2 damage.",
     "source": "Core Rules"
+  },
+  {
+    "name": "Suicide Attack",
+    "source": "The Red King",
+    "text": "This creature dies as soon as it inflicts any damage in hand-to-hand combat. So, if this creature attacks another figure in hand-to-hand combat, and inflicts at least 1 point of damage, it is immediately reduced to 0 Health."
   },
   {
     "name": "Supporting Figure Maximum",

@@ -1,15 +1,14 @@
 {#
   Item slot editor with short primary list + secondary detail for Potion/Scroll/Grimoire.
-  Expects: prefix, n, slots, standard_items, vault_names, potion_choices, spell_names
+  Expects: prefix, n, slots, standard_items, vault_names (optional)
+
+  The potion list, spell list, and item-suggestions datalist are the same on
+  every block on the page (wizard/apprentice/captain/soldier), so they are
+  emitted once at page level with fixed ids (fg-potion-data, fg-spell-data,
+  fg-item-suggestions — see warband_view.html) instead of once per block here.
 #}
 {% set vault_names = vault_names or [] %}
-{% set potion_choices = potion_choices or [] %}
-{% set spell_names = spell_names or [] %}
 {% set cat_order = ['Weapon', 'Missile', 'Armour', 'Gear', 'Consumable'] %}
-
-{# JSON blobs for JS #}
-<script type="application/json" id="{{ prefix }}-potion-data">{{ potion_choices|tojson }}</script>
-<script type="application/json" id="{{ prefix }}-spell-data">{{ spell_names|tojson }}</script>
 
 <div class="item-slots" data-prefix="{{ prefix }}" data-count="{{ n }}">
   {% for i in range(n) %}
@@ -30,13 +29,15 @@
                 {% for it in group %}
                   {% set sc = it.slot_cost if it.slot_cost is defined else 1 %}
                   {% set kind = it.kind if it.kind is defined else 'simple' %}
-                  <option
-                    value="{{ it.name }}"
-                    data-slots="{{ sc }}"
-                    data-kind="{{ kind }}"
-                  >
-                    {{ it.name }}{% if sc > 1 %} ({{ sc }} slots){% endif %}
-                  </option>
+                  {% if sc <= n %}
+                    <option
+                      value="{{ it.name }}"
+                      data-slots="{{ sc }}"
+                      data-kind="{{ kind }}"
+                    >
+                      {{ it.name }}{% if sc > 1 %} ({{ sc }} slots){% endif %}
+                    </option>
+                  {% endif %}
                 {% endfor %}
               </optgroup>
             {% endif %}
@@ -69,24 +70,9 @@
           value="{{ cur }}"
           placeholder="___ or custom item"
           data-index="{{ i }}"
-          list="{{ prefix }}_item_suggestions"
+          list="fg-item-suggestions"
         />
       </div>
     </div>
   {% endfor %}
-  <datalist id="{{ prefix }}_item_suggestions">
-    {% for it in standard_items if it.kind == 'simple' %}
-      <option value="{{ it.name }}"></option>
-    {% endfor %}
-    {% for name in potion_choices %}
-      <option value="{{ name }}"></option>
-    {% endfor %}
-    {% for name in spell_names %}
-      <option value="Scroll of {{ name }}"></option>
-      <option value="Grimoire of {{ name }}"></option>
-    {% endfor %}
-    {% for name in vault_names %}
-      <option value="{{ name }}"></option>
-    {% endfor %}
-  </datalist>
 </div>
