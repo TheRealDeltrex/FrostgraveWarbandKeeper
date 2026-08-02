@@ -2783,6 +2783,15 @@ def get_soldier(type_key: str) -> dict | None:
     return out
 
 
+# A soldier type's own companion creature (not a separate roster entry) —
+# shown smaller/indented under the soldier's row/block so it reads as
+# belonging to them rather than as its own soldier. Only the Crow Master
+# has one today; add further entries here if that changes.
+SOLDIER_COMPANION_BY_TYPE_KEY = {
+    "crow_master": "Blood Crow",
+}
+
+
 def format_stat(value: int) -> str:
     return f"+{value}" if value >= 0 else str(value)
 
