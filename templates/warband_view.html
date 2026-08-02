@@ -101,6 +101,24 @@
           a wizard's own school is fixed once chosen.
         </p>
         <label class="checkbox-row" style="margin-top:0.6rem">
+          <input name="fire_giant_wizard_playable" type="checkbox" {% if hr.fire_giant_wizard_playable %}checked{% endif %} />
+          Fire Giant Wizard playable (Blood Legacy)
+        </label>
+        <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0">
+          Needs Blood Legacy. The book frames the Fire Giant Wizard as a build for very hard/large
+          encounters rather than balanced campaign play — this opts it in as a choosable wizard
+          school. Only affects newly created warbands — a wizard's own school is fixed once chosen.
+        </p>
+        <label class="checkbox-row" style="margin-top:0.6rem">
+          <input name="giant_blooded_enabled" type="checkbox" {% if hr.giant_blooded_enabled %}checked{% endif %} />
+          Giant-Blooded soldier modification (Blood Legacy)
+        </label>
+        <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0">
+          Needs Blood Legacy. Lets one ordinary soldier in the warband become Giant-Blooded
+          (+50gc, -1 Move, -2 Will, +2 Health) — picked from a single control on the Soldiers
+          card below rather than a button on every soldier's row, since only one may take it.
+        </p>
+        <label class="checkbox-row" style="margin-top:0.6rem">
           <input name="edition2_soldier_costs" type="checkbox" {% if hr.edition2_soldier_costs %}checked{% endif %} />
           Adjust soldiers to edition 2
         </label>
@@ -497,6 +515,16 @@
       <input type="hidden" name="action" value="details" />
       <details class="ref-panel" open>
         <summary>Wizard — {{ wiz.name }} · {{ wiz.school }}</summary>
+        {% if wiz.school == "Fire Giant" %}
+          <p class="muted" style="font-size:0.85rem">
+            Blood Legacy's Fire Giant Wizard: Large, Strong, Elemental Resistance (2). No armour/
+            shield item slots, no apprentice. Health cap 30; 200xp per level (book caps spending
+            at 400xp/game — untracked here, same as other per-game limits). Can't learn Chronomancer
+            spells or Write Scroll. A found magic weapon is giant-usable only on a roll of 16+;
+            potions/items are human-sized unless resized at the table — this app doesn't resolve
+            that, just tracks what's owned.
+          </p>
+        {% endif %}
         <div class="char-block">
           {% if wiz_src %}
             <img class="portrait-md" src="{{ wiz_src }}" alt="" />
@@ -1259,6 +1287,44 @@
       <div class="limit">Treasury: <span class="gold">{{ wb.gold }} gc</span></div>
     </div>
 
+    {% if giant_blooded_enabled %}
+      <details class="ref-panel">
+        <summary>Giant-Blooded (Blood Legacy)</summary>
+        <p class="muted" style="font-size:0.85rem">
+          One ordinary soldier in the warband may be Giant-Blooded: +{{ GIANT_BLOODED_COST }}gc,
+          -1 Move, -2 Will, +2 Health, and the Giant-Blooded trait (+1 melee damage, +4 to
+          TN-based Fight rolls, includes Large). Animals, demons, constructs and undead aren't
+          eligible. A single control here, not a button on every soldier's row — only one
+          soldier may take it.
+        </p>
+        {% if giant_blooded_soldier %}
+          <p>
+            <strong>{{ giant_blooded_soldier.name }}</strong> is Giant-Blooded.
+          </p>
+          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" onsubmit="return confirm('Remove Giant-Blooded from {{ giant_blooded_soldier.name }}? The stat changes will be reversed (the {{ GIANT_BLOODED_COST }}gc fee is not refunded).');">
+            <input type="hidden" name="action" value="toggle_soldier_giant_blooded" />
+            <input type="hidden" name="soldier_id" value="{{ giant_blooded_soldier.id }}" />
+            <input type="hidden" name="fitted" value="0" />
+            <button class="btn secondary small" type="submit">Remove Giant-Blooded</button>
+          </form>
+        {% elif giant_blooded_choices %}
+          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
+            <input type="hidden" name="action" value="toggle_soldier_giant_blooded" />
+            <input type="hidden" name="fitted" value="1" />
+            <select name="soldier_id" required>
+              <option value="">— pick a soldier —</option>
+              {% for c in giant_blooded_choices %}
+                <option value="{{ c.id }}">{{ c.name }}</option>
+              {% endfor %}
+            </select>
+            <button class="btn secondary small" type="submit">Make Giant-Blooded</button>
+          </form>
+        {% else %}
+          <p class="empty">No eligible soldier hired yet (needs an ordinary Core Rules standard/specialist soldier).</p>
+        {% endif %}
+      </details>
+    {% endif %}
+
     {% set temp_on_table = soldiers | selectattr("temporary") | list %}
     {% if temp_on_table %}
       <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-bottom:1rem" onsubmit="return confirm('Dismiss all {{ temp_on_table|length }} temporary member(s) (raised zombie / summoned demon)?');">
@@ -1308,6 +1374,7 @@
                     <span class="badge {{ s.category }}">{{ s.category }}</span>
                     {% if s.revenant %}<span class="badge" title="Reanimated with the Revenant spell">revenant</span>{% endif %}
                     {% if s.mutations %}<span class="badge" title="{{ s.mutations|length }} Grave Mutation{{ 's' if s.mutations|length != 1 }}">mutated</span>{% endif %}
+                    {% if s.giant_blooded %}<span class="badge" title="Blood Legacy's Giant-Blooded: -1 Move, -2 Will, +2 Health, Giant-Blooded trait">giant-blooded</span>{% endif %}
                     {% if s.knightly_order_info %}<span class="badge" title="{{ s.knightly_order_info.ability }}">{{ s.knightly_order_info.name }}</span>{% endif %}
                   </div>
                 </td>

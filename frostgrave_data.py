@@ -268,6 +268,15 @@ PROMOTE_CAPTAIN_ITEM_SLOTS = 6
 # so a group can make promotion more or less rewarding than hiring.
 PROMOTE_CAPTAIN_TRICKS = 2
 
+# --- Giant-Blooded (Blood Legacy, Chapter Three) ----------------------------
+# Generic soldier modification, one per warband, declared at hire: +50gc,
+# -1 Move, -2 Will, +2 Health, plus the Giant-Blooded trait (+1 melee damage,
+# +4 to TN-based Fight rolls, includes Large — display text only, this app
+# doesn't resolve combat). See giant_blooded_eligible_type_keys() above for
+# which soldier types may take it.
+GIANT_BLOODED_COST = 50
+GIANT_BLOODED_STAT_DELTA = {"move": -1, "will": -2, "health": 2}
+
 # Establishing a Base (2e core p.106–107)
 BASE_LOCATIONS: dict[str, dict] = {
     "none": {
@@ -533,6 +542,24 @@ WIZARD_BASE = {
     "will": 4,
     "health": 14,  # Starting Wizard, p.25
 }
+
+# Blood Legacy's Fire Giant Wizard (Chapter Three) — a giant-scale wizard
+# build the book itself frames as being for "very hard/large encounters, not
+# balanced campaign play". M6 F+4 S+0 A14 W+4 H22 relative to the ordinary
+# Starting Wizard line above, i.e. Fight 6 / Armour 14 (natural, no
+# armour/shield item slots) / Will 8 / Health 22. See
+# expansions.is_fire_giant()/warband_store.playable_schools() for how a
+# warband actually opts into this as the wizard's own school.
+FIRE_GIANT_WIZARD_BASE = {
+    "move": 6,
+    "fight": 6,
+    "shoot": 0,
+    "armour": 14,
+    "will": 8,
+    "health": 22,
+}
+FIRE_GIANT_XP_PER_LEVEL = 200
+FIRE_GIANT_HEALTH_CAP = 30
 
 # Apprentice = wizard M, F-2, S, A10, W-2, H-2 (p.27–28)
 APPRENTICE_BASE = {
@@ -931,14 +958,17 @@ del _school, _spells
 
 # --- Vampire & Fire Giant schools (Blood Legacy) ----------------------------
 #
-# The book's actual Vampire Wizard / Fire Giant Wizard progressions (no
-# apprentice, altered soldier cap, Will/Health caps, Sun Damage, the
-# Unnatural-Health economy, giant item resizing, etc.) are a deferred mechanic
-# — see the implementation plan. For now these two schools exist only so their
-# spells are learnable by an ordinary wizard (gated on Blood Legacy being
-# enabled, like any other supplement spell); playable_schools() never offers
-# either as a wizard's own school, so nobody actually becomes a vampire or a
-# fire giant through this data alone.
+# The Vampire Wizard progression (no apprentice, altered soldier cap, Will/
+# Health caps, Sun Damage, the Unnatural-Health economy, etc.) stays a
+# deferred mechanic — reference-only in the Lexicon — since it's a GM/NPC
+# villain build the book doesn't expect a player to run. The Fire Giant
+# Wizard progression IS implemented (see FIRE_GIANT_WIZARD_BASE above and
+# expansions.is_fire_giant()): a warband can play one once Blood Legacy and
+# the "Fire Giant Wizard playable" homerule are both switched on
+# (warband_store.playable_schools()). Both schools' spell lists/alignments
+# stay usable by an ordinary wizard as off-school picks either way (gated on
+# Blood Legacy being enabled, like any other supplement spell) — that's what
+# the rest of this section sets up.
 BLOOD_LEGACY_SPELLS: dict[str, list[dict]] = {
     "Vampire": [
         {"name": "Animal Form", "cn": 10, "type": "Self Only"},
@@ -1003,11 +1033,10 @@ SPELLS["Rangifer"] = [{**sp, "source": "Spellcaster Magazine"} for sp in RANGIFE
 SCHOOL_RELATIONS["Rangifer"] = {"aligned": [], "neutral": list(SCHOOLS), "opposed": []}
 del RANGIFER_SPELLS
 
-# Schools that carry spells but that no wizard may choose at creation. They are
-# reachable only through a wizard state (Beastcrafter) or, for the Pentangle,
-# the "Pentangle schools playable" homerule. Vampire/Fire Giant/Rangifer join
-# this list too, but with no "playable" homerule at all yet — see the comments
-# above each one.
+# Schools that carry spells but that no *ordinary* wizard may choose as their
+# own school at creation — they're reachable only through a wizard state
+# (Beastcrafter), a homerule (Pentangle's "Pentangle schools playable", Fire
+# Giant's "Fire Giant Wizard playable"), or (Vampire/Rangifer) not at all yet.
 EXTRA_SPELL_SCHOOLS = ["Beastcrafter", "Vampire", "Fire Giant", "Rangifer"] + PENTANGLE_SCHOOLS
 
 LEVEL_UP_OPTIONS = [
@@ -2425,6 +2454,29 @@ def construct_type_keys() -> set[str]:
 # (see their "notes" above), even though the familiar is also animated by
 # Animate Construct.
 STANDARD_CONSTRUCT_TYPE_KEYS = {"small_construct", "medium_construct", "large_construct"}
+
+
+# Blood Legacy's Giant-Blooded modification (Chapter Three) is written for
+# "any core-rulebook standard/specialist soldier" — which already excludes
+# every animal/demon/construct/undead entry, since none of those are plain
+# Core Rules hires with no requires_spell/temporary marker (war_hound is the
+# one Core Rules animal, so it's excluded explicitly).
+GIANT_BLOODED_EXCLUDED_TYPE_KEYS = {"war_hound"}
+
+
+def giant_blooded_eligible_type_keys() -> set[str]:
+    """Soldier type keys Giant-Blooded may be applied to: ordinary Core Rules
+    standard/specialist hires only — not animals, demons, constructs or
+    undead (see GIANT_BLOODED_EXCLUDED_TYPE_KEYS and the requires_spell/
+    temporary checks below, which rule out every summoned/animated entry)."""
+    return {
+        k
+        for k, v in SOLDIERS.items()
+        if v.get("source", "Core Rules") == "Core Rules"
+        and not v.get("requires_spell")
+        and not v.get("temporary")
+        and k not in GIANT_BLOODED_EXCLUDED_TYPE_KEYS
+    }
 
 
 # Core soldier types an Illusionary Soldier may copy Move/Fight/Shoot/Armour/
