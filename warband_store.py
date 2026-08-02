@@ -1041,6 +1041,20 @@ def _run_migrations(wb: dict) -> None:
     wb["schema_version"] = SCHEMA_VERSION
 
 
+def _resync_permanent_injury_text(entity: dict) -> None:
+    """Keeps stored permanent-injury name/text current with
+    PERMANENT_INJURY_BY_ID. add_permanent_injury() snapshots them at add-time
+    (so editing this data later never rewrites history), which means a wording
+    fix — e.g. removing a leaked implementation note — wouldn't otherwise reach
+    a warband that already recorded that injury until this resync runs."""
+    for inj in entity.get("permanent_injuries") or []:
+        row = PERMANENT_INJURY_BY_ID.get(inj.get("id"))
+        if row:
+            inj["name"] = row["name"]
+            inj["text"] = row["text"]
+            inj["short"] = row["text"]
+
+
 def _normalize_warband(wb: dict) -> dict:
     """Backfill defaults and run migrations on a freshly-parsed warband dict —
     shared by load_warband() and import_warband_json() (B3) so an imported
@@ -1058,6 +1072,7 @@ def _normalize_warband(wb: dict) -> dict:
     wiz.setdefault("has_dagger", True)
     wiz.setdefault("mutations", [])
     wiz.setdefault("permanent_injuries", [])
+    _resync_permanent_injury_text(wiz)
     wiz.setdefault("portrait_source_name", None)
     # Wizard state (Lich / Beastcrafter / pact). Backfilled per-key so a warband
     # saved before this existed loads as an ordinary wizard.
@@ -1087,6 +1102,7 @@ def _normalize_warband(wb: dict) -> dict:
         ap.setdefault("has_dagger", True)
         ap.setdefault("mutations", [])
         ap.setdefault("permanent_injuries", [])
+        _resync_permanent_injury_text(ap)
         ap.setdefault("portrait_source_name", None)
         ap.pop("health_current", None)
     hr = wb.setdefault("homerules", default_homerules())
@@ -1109,6 +1125,7 @@ def _normalize_warband(wb: dict) -> dict:
         cap.setdefault("known_tricks", [])
         cap.setdefault("mutations", [])
         cap.setdefault("permanent_injuries", [])
+        _resync_permanent_injury_text(cap)
         cap.setdefault("portrait_source_name", None)
         cap.setdefault("level", 0)
         n = int(hr.get("captain_item_slots", CAPTAIN_ITEM_SLOTS))
@@ -1121,6 +1138,7 @@ def _normalize_warband(wb: dict) -> dict:
         s.setdefault("mutations", [])
         s.setdefault("modifications", [])
         s.setdefault("permanent_injuries", [])
+        _resync_permanent_injury_text(s)
         s.pop("health_current", None)
         if any(s.get(k) is None for k in ("fight", "shoot", "will", "health")):
             info = get_soldier(s.get("type_key", "")) or {}
