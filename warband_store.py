@@ -72,7 +72,12 @@ from frostgrave_data import (
     WIZARD_ITEM_SLOTS,
     WIZARD_MIN_CASTING_NUMBER_DEFAULT,
     WIZARD_STAT_LIMITS_DEFAULT,
+    RANDOM_RECRUIT_STATUS_TABLE,
+    RANDOM_RECRUIT_TABLE_I,
+    RANDOM_RECRUIT_TABLE_II,
+    RANDOM_RECRUIT_TABLE_III,
     XP_PER_LEVEL,
+    all_spells_flat,
     animal_companion_type_keys,
     bonus_choice_amount,
     cn_penalty,
@@ -82,10 +87,19 @@ from frostgrave_data import (
     giant_blooded_eligible_type_keys,
     illusion_source_choices,
     level_from_xp,
+    permanent_injury_by_roll,
+    range_table_lookup,
     school_relation,
+    spell_id,
     xp_to_next_level,
 )
-from game_content import construct_modifications, equipment_bonuses, grave_mutations_by_number
+from game_content import (
+    construct_modifications,
+    equipment_bonuses,
+    grave_mutations_by_number,
+    load_potion_choices,
+    magic_items_for_sources,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -323,6 +337,15 @@ def default_homerules() -> dict:
         # switched on to have any effect. See giant_blooded_eligible_type_keys()
         # and set_soldier_giant_blooded() below.
         "giant_blooded_enabled": False,
+        # The Red King's Ragged Warbands & Random Recruits (endgame campaign
+        # mode): fills the roster to 10 members with Random Recruit Table
+        # rolls, bypassing gold/cap checks the way the book allows. Off by
+        # default; needs The Red King switched on to have any effect. Only
+        # the roster-filling roll is implemented — the surrounding campaign
+        # restrictions (no spending, no dismissing, soldiers lost on a poor
+        # survival roll) are shown as reminder text only, same as this app's
+        # other per-game upkeep rules. See roll_random_recruits() below.
+        "ragged_warbands_enabled": False,
         # House correction for six supplement soldiers costed closer to 1st
         # edition than the rest of the 2e tables. On by default; see
         # expansions.EDITION_2_SOLDIER_COSTS.
@@ -588,6 +611,67 @@ def validate_starting_spells(
             return False, f"Spell school {s} is not allowed at creation."
 
     return True, "OK"
+
+
+# Name pools for the "Random wizard" button on the creation page — invented
+# for this app (not from the rulebook), evoking the setting (a frozen,
+# fallen city) without being tied to any one school. Kept short and simple
+# on purpose; the player can always edit the result before accepting it.
+RANDOM_WARBAND_NAMES = [
+    "The Frozen Hand", "The Last Lantern", "The Grey Wanderers", "The Shattered Crown",
+    "The Ice-Bound", "The Hollow Vault", "The Winter Compact", "The Salt and Snow",
+    "The Ashfall Company", "The Northwind Cabal", "The Cracked Spire", "The Long Thaw",
+    "The Silent Ledger", "The Drift", "The Bonefire Circle", "The Pale Standard",
+    "The Sunken Crest", "The Iron Solstice", "The Wayfarer's Oath", "The Frost Reliquary",
+]
+RANDOM_WIZARD_NAMES = [
+    "Morvain", "Sable", "Thessaly", "Corvinus", "Isolde", "Branick", "Vesper", "Old Halric",
+    "Ondine", "Fenrick", "Aldous Grey", "Lysenne", "Osric", "Marlowe", "Tamsin", "Grendric",
+    "Selwyn", "Ithra", "Corvan", "Wrenna",
+]
+RANDOM_APPRENTICE_NAMES = [
+    "Pip", "Wick", "Nessa", "Bram", "Tally", "Oren", "Marnie", "Sorrel", "Fitch", "Ilsa",
+    "Cobb", "Vesna", "Dune", "Petra", "Ashwin", "Lark", "Bexley", "Rowan", "Sena", "Tobin",
+]
+
+
+def random_core_wizard(exclude_school: str | None = None) -> tuple[str, list[str], dict]:
+    """Generates a random, legal core-rules wizard for the "Random wizard"
+    button on the creation page: a school (never exclude_school, so pressing
+    the button again always changes it), 8 starting spells satisfying
+    validate_starting_spells (3 own + 1 per aligned school + the rest from
+    distinct neutral schools, all Core Rules), and random warband/wizard/
+    apprentice names.
+
+    Self-validates before returning — cheap insurance against ever handing
+    the creation page an illegal spell set, and the natural unit-test seam
+    (call this many times with a seeded RNG rather than testing the route)."""
+    candidates = [s for s in SCHOOLS if s != exclude_school] or list(SCHOOLS)
+    school = random.choice(candidates)
+    rel = SCHOOL_RELATIONS[school]
+
+    def core_pool(for_school: str) -> list[str]:
+        return [
+            sp["name"] for sp in all_spells_flat()
+            if sp["school"] == for_school and sp["source"] == "Core Rules"
+        ]
+
+    keys = [spell_id(school, n) for n in random.sample(core_pool(school), OWN_SCHOOL_SPELLS)]
+    for aligned_school in rel["aligned"]:
+        keys.append(spell_id(aligned_school, random.choice(core_pool(aligned_school))))
+    neutral_needed = STARTING_SPELL_COUNT - OWN_SCHOOL_SPELLS - len(rel["aligned"]) * ALIGNED_SCHOOL_SPELLS
+    for neutral_school in random.sample(rel["neutral"], neutral_needed):
+        keys.append(spell_id(neutral_school, random.choice(core_pool(neutral_school))))
+
+    ok, err = validate_starting_spells(school, keys, {"Core Rules"})
+    assert ok, f"random_core_wizard produced an illegal spell set ({err}): {keys}"
+
+    names = {
+        "warband_name": random.choice(RANDOM_WARBAND_NAMES),
+        "wizard_name": random.choice(RANDOM_WIZARD_NAMES),
+        "apprentice_name": random.choice(RANDOM_APPRENTICE_NAMES),
+    }
+    return school, keys, names
 
 
 def create_warband(
@@ -1033,7 +1117,6 @@ def _normalize_warband(wb: dict) -> dict:
     for s in wb.get("soldiers") or []:
         s.setdefault("portrait", None)
         s.setdefault("portrait_source_name", None)
-        s.setdefault("items", [])
         s.setdefault("mutations", [])
         s.setdefault("modifications", [])
         s.setdefault("permanent_injuries", [])
@@ -1060,6 +1143,15 @@ def _normalize_warband(wb: dict) -> dict:
         ap = wb["apprentice"]
         ap["item_slots"] = normalize_item_slots(ap.get("item_slots"), expansions.apprentice_item_slots(wb))
         sync_apprentice(wb)
+
+    # Soldiers: same rule as above, plus a one-time migration from the old,
+    # never-rendered "items" field (a list of {"name": ...} dicts) — folded in
+    # here rather than as a MIGRATIONS entry since the target slot count is
+    # per-type-key (expansions.soldier_item_slots), not a fixed constant.
+    for s in wb.get("soldiers") or []:
+        n = expansions.soldier_item_slots(wb, s.get("type_key", ""))
+        s["item_slots"] = normalize_item_slots(s.get("item_slots") or s.get("items"), n)
+        s.pop("items", None)
 
     return wb
 
@@ -1447,6 +1539,59 @@ def _new_soldier_leveling_fields(info: dict) -> dict:
     }
 
 
+def _build_soldier_record(
+    wb: dict,
+    type_key: str,
+    info: dict,
+    name: str = "",
+    order: str = "",
+    illusion_info: dict | None = None,
+    illusion_source: str = "",
+) -> tuple[dict, str, str]:
+    """Build a soldier dict from a validated (type_key, info) pair.
+
+    Shared by add_soldier() and the Random Recruit roller (Ragged Warbands) —
+    both need every field enrich_soldier() and the templates expect, not a
+    hand-picked subset. Callers are responsible for everything that happens
+    *around* this: cost/cap checks, charging gold, appending to the roster,
+    and the history entry. Returns (soldier, order_suffix, illusion_suffix)
+    where the suffixes are just for the caller's own history/flash text.
+    """
+    leveling_fields = _new_soldier_leveling_fields(info)
+    order_suffix = ""
+    if order:
+        order_info = KNIGHTLY_ORDER_BY_ID[order]
+        stat = order_info["stat"]
+        leveling_fields[stat] = leveling_fields[stat] + order_info["delta"]
+        order_suffix = f", {order_info['name']}"
+
+    soldier = {
+        "id": uuid.uuid4().hex[:10],
+        "type_key": type_key,
+        "name": (name or _next_type_name(wb, type_key, info["name"])).strip(),
+        "status": "active",
+        "item_slots": empty_slots(expansions.soldier_item_slots(wb, type_key)),
+        "mutations": [],
+        "modifications": [],
+        "permanent_injuries": [],
+        "notes": "",
+        "portrait": None,
+        "knightly_order": order or None,
+        **leveling_fields,
+    }
+    illusion_suffix = ""
+    if illusion_info:
+        soldier["fight"] = illusion_info.get("fight")
+        soldier["shoot"] = illusion_info.get("shoot")
+        soldier["will"] = illusion_info.get("will")
+        soldier["health"] = 1
+        soldier["move"] = illusion_info.get("move")
+        soldier["armour"] = illusion_info.get("armour")
+        soldier["illusion_source"] = illusion_source
+        illusion_suffix = f", as a {illusion_info['name']}"
+    return soldier, order_suffix, illusion_suffix
+
+
 def add_soldier(
     wb: dict, type_key: str, name: str = "", order: str = "", illusion_source: str = ""
 ) -> tuple[bool, str]:
@@ -1511,38 +1656,9 @@ def add_soldier(
     if wb.get("gold", 0) < cost:
         return False, f"Not enough gold (need {cost} gc, have {wb.get('gold', 0)} gc)."
 
-    leveling_fields = _new_soldier_leveling_fields(info)
-    order_suffix = ""
-    if order:
-        order_info = KNIGHTLY_ORDER_BY_ID[order]
-        stat = order_info["stat"]
-        leveling_fields[stat] = leveling_fields[stat] + order_info["delta"]
-        order_suffix = f", {order_info['name']}"
-
-    soldier = {
-        "id": uuid.uuid4().hex[:10],
-        "type_key": type_key,
-        "name": (name or _next_type_name(wb, type_key, info["name"])).strip(),
-        "status": "active",
-        "items": [],
-        "mutations": [],
-        "modifications": [],
-        "permanent_injuries": [],
-        "notes": "",
-        "portrait": None,
-        "knightly_order": order or None,
-        **leveling_fields,
-    }
-    illusion_suffix = ""
-    if illusion_info:
-        soldier["fight"] = illusion_info.get("fight")
-        soldier["shoot"] = illusion_info.get("shoot")
-        soldier["will"] = illusion_info.get("will")
-        soldier["health"] = 1
-        soldier["move"] = illusion_info.get("move")
-        soldier["armour"] = illusion_info.get("armour")
-        soldier["illusion_source"] = illusion_source
-        illusion_suffix = f", as a {illusion_info['name']}"
+    soldier, order_suffix, illusion_suffix = _build_soldier_record(
+        wb, type_key, info, name, order, illusion_info, illusion_source
+    )
     wb["gold"] = int(wb.get("gold", 0)) - cost
     wb.setdefault("soldiers", []).append(soldier)
     wb.setdefault("history", []).append(
@@ -2035,6 +2151,135 @@ def set_soldier_giant_blooded(wb: dict, soldier_id: str, fitted: bool) -> tuple[
     return True, text
 
 
+def _ragged_warbands_gate(wb: dict) -> str | None:
+    hr = wb.get("homerules") or {}
+    if "The Red King" not in enabled_sources(wb) or not hr.get("ragged_warbands_enabled"):
+        return (
+            "Ragged Warbands needs The Red King and its own homerule switched on "
+            "under Additional Rules and Homerules first."
+        )
+    return None
+
+
+def _roll_recruit_type_key(wb: dict) -> str | None:
+    """One full Random Recruit roll: Table I picks Table II or III, then a
+    second d20 roll on that table picks the recruit. Re-rolls (up to a
+    generous bound) any result the book itself says to re-roll: a source
+    book that isn't switched on ("Re-roll any result from a supplement you
+    don't own/use"), a wizard-state ban (e.g. a Lich can't field a Rangifer),
+    or the Captain slot (Table III, roll 3 — see RANDOM_RECRUIT_TABLE_III).
+    Returns None if 200 rolls in a row all had to be re-rolled, which would
+    only happen with an unreasonably small set of enabled source books."""
+    sources = enabled_sources(wb)
+    for _ in range(200):
+        table_name = range_table_lookup(RANDOM_RECRUIT_TABLE_I, random.randint(1, 20))
+        table = RANDOM_RECRUIT_TABLE_II if table_name == "II" else RANDOM_RECRUIT_TABLE_III
+        type_key = range_table_lookup(table, random.randint(1, 20))
+        if type_key is None:
+            continue  # Captain slot
+        info = SOLDIERS.get(type_key)
+        if not info:
+            continue
+        src = info.get("source", "Core Rules")
+        if src not in sources or not soldier_from_book_enabled(wb, src):
+            continue
+        if expansions.soldier_state_block(wb, type_key):
+            continue
+        return type_key
+    return None
+
+
+def _apply_random_recruit_status(wb: dict, soldier: dict) -> str:
+    """Random Recruit Status Table (d20, optional follow-up roll): returns a
+    short ", ..." suffix describing the result, or "" for no result — either
+    because the roll landed on an empty range or, per the book's own "if the
+    result cannot be logically applied, treat the roll as 'no result'"
+    clause, an item result on a recruit with no (free) item slot."""
+    n = random.randint(1, 20)
+    kind = range_table_lookup(RANDOM_RECRUIT_STATUS_TABLE, n)
+    if kind == "injury":
+        row = permanent_injury_by_roll(random.randint(1, 20))
+        if not row:
+            return ""
+        ok, _msg = add_permanent_injury(wb, "soldier", row["id"], soldier["id"])
+        return f", {row['name']}" if ok else ""
+    stat_deltas = {
+        "fight_minus_1": ("fight", -1),
+        "health_minus_2": ("health", -2),
+        "will_plus_1": ("will", 1),
+        "health_plus_1": ("health", 1),
+    }
+    if kind in stat_deltas:
+        stat, delta = stat_deltas[kind]
+        cat = get_soldier(soldier.get("type_key", "")) or {}
+        before = int(soldier.get(stat, cat.get(stat, 0)))
+        after = before + delta
+        soldier[stat] = after
+        soldier.setdefault("random_recruit_status", []).append(
+            {"stat": stat, "delta": delta, "before": before}
+        )
+        return f", {stat.capitalize()} {before} -> {after}"
+    if kind in ("potion", "weapon_fight_plus_1", "magic_item"):
+        slots = soldier.get("item_slots") or []
+        empty_idx = next((i for i, v in enumerate(slots) if not v), None)
+        if empty_idx is None:
+            return ""  # no free item slot -- "cannot be logically applied"
+        if kind == "potion":
+            choices = load_potion_choices()
+            item_name = random.choice(choices) if choices else "Potion"
+        elif kind == "weapon_fight_plus_1":
+            item_name = "Magic weapon (+1 Fight)"
+        else:
+            items = magic_items_for_sources(enabled_sources(wb))
+            item_name = random.choice(items)["name"] if items else "Magic item"
+        slots[empty_idx] = item_name
+        return f", carries {item_name}"
+    return ""
+
+
+def roll_random_recruits(wb: dict, with_status: bool = True) -> tuple[bool, str]:
+    """The Red King's Random Recruit roller (Ragged Warbands & Random
+    Recruits, Chapter Two): fills the roster up to the book's "ten members"
+    (wizard + apprentice, if any + soldiers, a Captain already counting as
+    one via soldier_count) with Random Recruit Table rolls, bypassing the
+    usual gold cost, soldier cap, and specialist cap — the book explicitly
+    authorises all three ("can legally produce more specialists than
+    normally allowed, or a creature that would otherwise need a specific
+    magic item"). with_status also rolls the optional Random Recruit Status
+    Table for each new recruit (a per-roll player choice in the book, so it's
+    a parameter here rather than always-on).
+
+    The surrounding campaign restrictions (no spending gold, no hiring/
+    dismissing outside this roll, no Vault storage, a soldier lost on a 1-8
+    survival roll) are reference text only — see the "Ragged Warbands &
+    Random Recruits" section under The Red King in data/expansion_rules.json
+    — this app doesn't lock the warband down while the homerule is on."""
+    err = _ragged_warbands_gate(wb)
+    if err:
+        return False, err
+    have = 1 + (1 if wb.get("apprentice") else 0) + soldier_count(wb)
+    needed = 10 - have
+    if needed <= 0:
+        return False, "Roster is already at or above 10 members."
+    hired = []
+    for _ in range(needed):
+        type_key = _roll_recruit_type_key(wb)
+        if type_key is None:
+            break
+        info = get_soldier(type_key)
+        soldier, _order_suffix, _illusion_suffix = _build_soldier_record(wb, type_key, info)
+        wb.setdefault("soldiers", []).append(soldier)
+        status_suffix = _apply_random_recruit_status(wb, soldier) if with_status else ""
+        hired.append(f"{soldier['name']} ({info['name']}){status_suffix}")
+    if not hired:
+        return False, (
+            "Couldn't find any eligible recruits — check that enough source books are "
+            "switched on under Additional Rules and Homerules."
+        )
+    add_history(wb, f"Rolled {len(hired)} Random Recruit(s): {'; '.join(hired)}.")
+    return True, f"Rolled {len(hired)} Random Recruit(s): {'; '.join(hired)}."
+
+
 def add_permanent_injury(
     wb: dict, kind: str, injury_id: str, soldier_id: str | None = None
 ) -> tuple[bool, str]:
@@ -2336,6 +2581,7 @@ def update_homerules(wb: dict, form: "ImmutableMultiDict") -> tuple[bool, str]:
             "fire_giant_wizard_playable": form.get("fire_giant_wizard_playable") == "on",
             "vampire_wizard_playable": form.get("vampire_wizard_playable") == "on",
             "giant_blooded_enabled": form.get("giant_blooded_enabled") == "on",
+            "ragged_warbands_enabled": form.get("ragged_warbands_enabled") == "on",
             "edition2_soldier_costs": form.get("edition2_soldier_costs") == "on",
             "spellcaster_magazine_soldiers": form.get("spellcaster_magazine_soldiers") == "on",
             "knightly_orders_enabled": form.get("knightly_orders_enabled") == "on",

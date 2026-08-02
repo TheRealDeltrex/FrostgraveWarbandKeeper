@@ -33,9 +33,35 @@ def test_pre2e_health_and_item_slots_migrate():
     assert wb["wizard"]["stats"]["health"] == 14
     assert "Staff" in wb["wizard"]["item_slots"]
     assert [v["name"] for v in wb["vault_items"]] == ["Potion of Healing", "Scroll of Wall"]
-    assert wb["soldiers"][0]["items"] == [
-        {"name": "Hand weapon", "notes": ""}, {"name": "Shield", "notes": ""},
-    ]
+    # Soldier gear used to live in a dead "items" field (never rendered
+    # anywhere); it now migrates straight into item_slots (a thug gets the
+    # standard 1 slot, so only the first entry survives) and "items" is gone.
+    assert wb["soldiers"][0]["item_slots"] == ["Hand weapon"]
+    assert "items" not in wb["soldiers"][0]
+
+
+def test_soldier_items_dict_form_migrates_to_item_slots():
+    _write_old_warband("old-4", {
+        "id": "old-4",
+        "name": "Old Warband 4",
+        "gold": 0,
+        "wizard": {"name": "W", "school": "Elementalist", "level": 0, "xp": 0,
+                   "stats": {"move": 6, "fight": 2, "shoot": 0, "armour": 10, "will": 4, "health": 10},
+                   "spells": []},
+        "soldiers": [
+            {"id": "s1", "type_key": "pack_mule", "name": "Mule", "status": "active",
+             "items": [{"name": "Potion of Healing", "notes": ""}, {"name": "Rope", "notes": ""}]},
+            {"id": "s2", "type_key": "companion_wolf", "name": "Wolf", "status": "active", "items": []},
+        ],
+    })
+    wb = ws.load_warband("old-4")
+    # pack_mule has 3 explicit item_slots (frostgrave_data.py), so both entries
+    # survive, padded to length 3.
+    assert wb["soldiers"][0]["item_slots"] == ["Potion of Healing", "Rope", ""]
+    # An Animal Companion has 0 item slots regardless of what "items" held.
+    assert wb["soldiers"][1]["item_slots"] == []
+    assert "items" not in wb["soldiers"][0]
+    assert "items" not in wb["soldiers"][1]
 
 
 def test_captain_homerule_and_levelup_count_migrate():

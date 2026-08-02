@@ -4763,6 +4763,162 @@
    ]
   }
  ],
+ "The Red King": [
+  {
+   "title": "Reality Cracks (generic mechanic, usable in any scenario)",
+   "blurb": "A generic escalating random-event system, explicitly offered by the author for use in any scenario, Red King campaign or not. At the start of each turn, compare any player's priority roll to the Occurrence Table below (using the 3+ Players column with three or more players); if it's higher, a reality crack has occurred — one player immediately rolls a die and applies the matching entry from the Reality Cracks List before any figures activate. Only one crack occurs per scenario, but many have ongoing effects that persist or recur turn to turn.",
+   "rows": [
+    {
+     "name": "Reality Cracks Occurrence Table",
+     "text": "Turn 1: occurrence number 20 (20 with 3+ players). Turn 2: 18 (19). Turn 3: 16 (17). Turn 4: 14 (16). Turn 5: 12 (14). Turn 6: 8 (11). Turn 7: 4 (8). Turn 8+: 1 (4)."
+    },
+    {
+     "name": "Random School of Magic Table (d20)",
+     "text": "1-2 Necromancer; 3-4 Illusionist; 5-6 Witch; 7-8 Sigilist; 9-10 Elementalist; 11-12 Thaumaturge; 13-14 Soothsayer; 15-16 Chronomancer; 17-18 Summoner; 19-20 Enchanter. Several crack entries below call for a roll on this table."
+    }
+   ]
+  },
+  {
+   "title": "Reality Cracks List (d20)",
+   "blurb": "Full text of all 20 entries:",
+   "entries": [
+    {
+     "name": "1",
+     "tag": "",
+     "text": "Immediately move every figure on the table 6\" in a random direction (ignore terrain — place atop it instead; place adjacent to the table edge if this would move a figure off; place as close as possible if it would land on another figure). Dropped/carried treasure tokens are not moved (a carrying figure drops its token first)."
+    },
+    {
+     "name": "2",
+     "tag": "",
+     "text": "Randomly select one table corner and lay a string from it, through the table's middle, to the opposite corner. No line of sight may be drawn through the string (figures may still move through it). End of turn, roll a die: 1-10 the string stays; 11-16 it switches to the other two corners; 17-20 it vanishes."
+    },
+    {
+     "name": "3",
+     "tag": "",
+     "text": "Gravity weakens: figures may only move in a straight line per move action (a separate action is needed to turn), suffer no movement penalty for climbing/rough ground/carrying treasure, take falling damage as though the fall were 3\" shorter (but 3\" more of a move action is consumed), and all shooting attacks are at -2. End of each turn, roll a die: 1-16 nothing happens; 17-20 gravity returns to normal."
+    },
+    {
+     "name": "4",
+     "tag": "",
+     "text": "The world spins: move all figures 6\" directly away from the table's centre point (stopping at terrain/table edge; falls apply normally if moved off elevated terrain). A treasure-carrying figure must pass a Move Roll (TN18) or drop the token, which then moves 6\" in a random direction. Start of each subsequent turn, roll a die: 1-16 nothing; 17-20 it spins again, same rules."
+    },
+    {
+     "name": "5",
+     "tag": "",
+     "text": "A null wave cancels all spells currently in play; all spellcasters suffer -2 Casting Rolls this turn; no magic items may be used this turn (even always-on ones like magic weapons/armour lose all bonuses); constructs and undead must pass a Will Roll (TN12) or fail to activate this turn. Start of each subsequent turn, roll a die: 1-16 nothing; 17-20 the wave returns, same rules."
+    },
+    {
+     "name": "6",
+     "tag": "",
+     "text": "An implosion: move all figures 6\" directly towards the table's centre point (stopping at terrain or the centre; falls apply normally if moved off elevated terrain). A treasure-carrying figure must pass a Move Roll (TN18) or drop the token, which then moves 6\" in a random direction. Start of each subsequent turn, roll a die: 1-16 nothing; 17-20 another implosion, same rules."
+    },
+    {
+     "name": "7",
+     "tag": "",
+     "text": "Each turn for the rest of the game, roll a random school of magic; that turn, casters of that school get +5 Casting Roll but immediately suffer 2 damage from the energy. Additionally, all figures get +3 to all Will Rolls for the remainder of the game."
+    },
+    {
+     "name": "8",
+     "tag": "",
+     "text": "Randomly determine one table edge and lay a string from its centre to the centre of the opposite edge. Move all figures 6\" directly towards the string (stopping at terrain/the string; falls apply normally if moved off elevated terrain). A treasure-carrying figure must pass a Move Roll (TN18) or drop the token, which moves 6\" in a random direction. The string is then removed. Start of each subsequent turn, roll a die: 1-16 nothing; 17-20 space folds again — pick a new random edge, same rules."
+    },
+    {
+     "name": "9",
+     "tag": "",
+     "text": "Each turn for the rest of the game, roll a random school of magic; that turn, casters of that school suffer -5 Casting Roll. Additionally, all figures suffer -2 to all Will Rolls for the remainder of the game."
+    },
+    {
+     "name": "10",
+     "tag": "",
+     "text": "Randomly determine one table edge and place a string from its centre to the centre of the opposite edge; all figures within 4\" of the string immediately suffer a +3 Elemental magic attack, then the string is removed. Start of each subsequent turn, roll a die: 1-16 nothing; 17-20 another ball of energy rolls across — pick a new random edge, same rules."
+    },
+    {
+     "name": "11",
+     "tag": "",
+     "text": "End of each turn, each player randomly selects one warband member, who immediately switches places with the figure selected by the player to their left (a player with only one figure left may opt out; if only one player selects, that player must pick a second figure to swap with the first)."
+    },
+    {
+     "name": "12",
+     "tag": "",
+     "text": "Figures can no longer exit the table via any table edge; the only way off is to reach the table's centre point and spend an action to exit."
+    },
+    {
+     "name": "13",
+     "tag": "",
+     "text": "Place a 2\"-wide portal disc in the centre of the table (blocks line of sight and movement through/over it); roll a die and move it half that many inches in a random direction (pushing any figures/tokens it would land on the least distance needed to clear it). At the start of every turn, including this one, place one Hrut Warrior at a random point around the portal (uncontrolled creature) until the game ends."
+    },
+    {
+     "name": "14",
+     "tag": "",
+     "text": "Place a marker at the table centre and roll a random direction, laying a string from the centre in that direction; the figure closest to the centre and within 3\" of the line is immediately moved to the table centre (skip if none). Repeat for six random directions total, moving one eligible figure per roll (each subsequent figure is placed in base contact with one already-moved figure; its controller — or a die-off for uncontrolled monsters — chooses placement)."
+    },
+    {
+     "name": "15",
+     "tag": "",
+     "text": "In priority order (lowest first), each player selects a different terrain piece and moves it up to 10\" (staying on the table, not overlapping other terrain; any figures/tokens on it move too). Repeat once more in the same order so each player moves up to two terrain pieces; no piece may be moved more than once."
+    },
+    {
+     "name": "16",
+     "tag": "",
+     "text": "Place a 3\"-diameter disc at the table centre; roll a die and move it that many inches ÷3 (round down) in a random direction. Every figure in contact with the disc suffers a +10 magic attack; treasure tokens in contact (even carried ones) are destroyed and removed. The disc is impassable terrain blocking line of sight and moves again (same rules) at the end of every subsequent turn until it leaves the table or the game ends; nothing warband members do can affect it."
+    },
+    {
+     "name": "17",
+     "tag": "",
+     "text": "The battlefield becomes a spherical pocket reality: figures may not exit the table (moving off one edge wraps to the corresponding point on the opposite edge; line of sight wraps the same way). Maximum line of sight for any figure is 6\" plus however many inches it stands above the ground. End of every turn, roll a die: 16+ reality returns to normal."
+    },
+    {
+     "name": "18",
+     "tag": "",
+     "text": "All figures must pass a Will Roll (TN18) or receive no actions on their next activation (undead/constructs/demons auto-pass). Place two strings dividing the table into four quarters; randomly pick one quarter — it and its diagonal opposite are sealed off entirely (no exit, no line of sight to anywhere else). The other two quarters sit \"perpendicular\": no physical movement between them, but line of sight between them is always allowed at a fixed 12\" distance (Teleport/Transpose may move a figure between them; Plane Walk crosses a string as normal). End of every turn, roll a die: 13+ reality returns to normal and the strings are removed."
+    },
+    {
+     "name": "19",
+     "tag": "",
+     "text": "End of every turn, each player secretly selects one non-undead, non-construct warband member; choices are revealed simultaneously, then in priority order each selected figure swaps places with the one selected by the player to their left (rippling around the table). If a treasure-carrying figure swaps, roll a die: 13+ the token moves with it, else the token moves 2\" randomly from its original spot. If only one player has an eligible figure, the crack ends; a player with only one eligible figure may decline to select."
+    },
+    {
+     "name": "20",
+     "tag": "",
+     "text": "Place four strings forming a 3x3 tic-tac-toe grid on the table; no line of sight may cross a string (figures may move over one but never end a move on it — if forced onto one, keep moving until clear). No figure may exit the table; moving off an edge wraps to the same spot on the opposite edge. End of every turn, roll a die: 1-15 nothing; 16+ reality reverts to normal and the strings are removed."
+    }
+   ]
+  },
+  {
+   "title": "Ragged Warbands & Random Recruits (optional alternate game mode — reference only)",
+   "blurb": "An optional standalone campaign mode from the Red King campaign's endgame, explicitly flagged by the author as usable outside that campaign \"by anyone who just likes the idea of having completely random warbands.\" A distinct game mode, not built as an interactive feature here (matching how this app treats other GM/alternate-mode subsystems) — summarized for reference.",
+   "rows": [
+    {
+     "name": "Ragged Warbands: injury, death & economy",
+     "text": "While in effect, normal recruiting/vault spending is suspended. After each game, roll wizard/apprentice injury and death as normal. Soldiers make a survival roll: 9+ returns at full Health next game; 1-8 the soldier is out for the rest of this phase of the campaign (counts as a Full Recovery; may be added back to the roster for free once the phase ends, or dropped). Lost soldiers are replaced for free by Random Recruit rolls; soldiers cannot be dismissed during this phase. XP/leveling proceeds normally. Treasure may not be stored in the Vault (must be carried or discarded) except gold crowns and grimoires. No treasure may be spent: no hiring, no buying/selling soldiers, grimoires, or magic items, and no base purchases/benefits. If the wizard is lost, the player may promote the apprentice or create a new wizard, but plays the rest of the phase without an apprentice; a lost apprentice cannot be replaced during this phase."
+    },
+    {
+     "name": "Rolling for Random Recruits",
+     "text": "Before each scenario, fill the warband up to 10 members by rolling on the Random Recruit tables below (a 6-figure warband gets 4 rolls, a 2-figure warband gets 8). Out-of-Game spells that add permanent members (Animal Companion, Animate Construct, etc.) should be resolved first. This can legally produce more specialists than normally allowed, or a creature that would otherwise need a specific magic item. Re-roll any result from a supplement you don't own/use."
+    },
+    {
+     "name": "Random Recruit Table I (d20)",
+     "text": "1-14: roll on Table II. 15-20: roll on Table III."
+    },
+    {
+     "name": "Random Recruit Table II (d20)",
+     "text": "1-2 Thug; 3-4 Thief; 5-6 Warhound; 7-8 Infantryman; 9-10 Man-at-Arms; 11 Archer; 12 Crossbowman; 13 Treasure Hunter; 14 Apothecary; 15 Knight; 16 Templar; 17 Ranger; 18 Tracker; 19 Barbarian; 20 Marksman."
+    },
+    {
+     "name": "Random Recruit Table III (d20)",
+     "text": "1 Assassin; 2 Bard; 3 Captain; 4 Collegium Porter; 5 Crow Master; 6 Demon Hunter; 7 Demonic Servant; 8 Javelineer; 9 Monk; 10 Mystic Warrior; 11 Pack Mule; 12 Rangifer; 13 Trap Expert; 14 Tunnel Fighter; 15 Werewolf; 16 Large Construct; 17 Minor Demon; 18 Snow Troll; 19 Foulhorn; 20 Vampire."
+    },
+    {
+     "name": "Random Recruit Status Table (optional, d20)",
+     "text": "After each recruit roll, optionally roll once more (result must be taken if it can logically apply, else treat as no result): 1-4 roll once on the Permanent Injury Table; 5-6 permanent -1 Fight; 7-8 permanent -2 Health; 9-10 carries a random potion; 11-14 carries a magic weapon giving +1 Fight; 15-16 carries a random magic item (reassignable after the first game); 17-18 permanent +1 Will; 19-20 permanent +1 Health."
+    },
+    {
+     "name": "Permanent Random Recruits",
+     "text": "At the end of the campaign phase, any surviving random recruit may be kept for free, but normal warband-legality rules (specialist limits, required magic items for specific creatures) apply again immediately — a recruit that can no longer legally be part of the warband is lost."
+    }
+   ]
+  }
+ ],
  "Blood Legacy": [
   {
    "title": "Vampire Wizard (deferred mechanic — reference only)",

@@ -16,6 +16,29 @@
   {% endif %}
   <script type="application/json" id="loot-picker-data">{{ loot_picker_data | tojson }}</script>
   <script type="application/json" id="mutation-picker-data">{{ mutation_picker_data | tojson }}</script>
+  {# Shared data for every _item_slots.html block on this page (wizard,
+     apprentice, captain, and one per soldier). These are identical for every
+     block, so they're emitted once here rather than once per block — with up
+     to ~10 soldiers, repeating the full spell list per block would otherwise
+     multiply it that many times over. See _item_slots.html and item_slots.js
+     (initBlock reads these same three fixed ids). #}
+  <script type="application/json" id="fg-potion-data">{{ potion_choices | tojson }}</script>
+  <script type="application/json" id="fg-spell-data">{{ spell_names | tojson }}</script>
+  <datalist id="fg-item-suggestions">
+    {% for it in full_standard_items if it.kind == 'simple' %}
+      <option value="{{ it.name }}"></option>
+    {% endfor %}
+    {% for name in potion_choices %}
+      <option value="{{ name }}"></option>
+    {% endfor %}
+    {% for name in spell_names %}
+      <option value="Scroll of {{ name }}"></option>
+      <option value="Grimoire of {{ name }}"></option>
+    {% endfor %}
+    {% for it in vault_names %}
+      <option value="{{ it }}"></option>
+    {% endfor %}
+  </datalist>
   {% set cap = wb.captain %}
   {% set hr = wb.homerules %}
 
@@ -126,6 +149,17 @@
           Needs Blood Legacy. Lets one ordinary soldier in the warband become Giant-Blooded
           (+50gc, -1 Move, -2 Will, +2 Health) — picked from a single control on the Soldiers
           card below rather than a button on every soldier's row, since only one may take it.
+        </p>
+        <label class="checkbox-row" style="margin-top:0.6rem">
+          <input name="ragged_warbands_enabled" type="checkbox" {% if hr.ragged_warbands_enabled %}checked{% endif %} />
+          Ragged Warbands &amp; Random Recruits (The Red King)
+        </label>
+        <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0">
+          Needs The Red King. Adds a "Fill roster" control to the Soldiers card below, rolling
+          random recruits up to 10 members and bypassing the usual gold/roster caps, per the
+          book's endgame campaign mode. The surrounding restrictions (no spending gold, no
+          hiring/dismissing outside this roll, no Vault storage, a soldier lost on a 1-8 survival
+          roll) are shown there as reminder text — this app doesn't enforce them for you.
         </p>
         <label class="checkbox-row" style="margin-top:0.6rem">
           <input name="edition2_soldier_costs" type="checkbox" {% if hr.edition2_soldier_costs %}checked{% endif %} />
@@ -1346,6 +1380,41 @@
       </details>
     {% endif %}
 
+    {% if ragged_warbands_enabled %}
+      <details class="ref-panel">
+        <summary>Ragged Warbands &amp; Random Recruits (The Red King)</summary>
+        <p class="muted" style="font-size:0.85rem">
+          Rolls random recruits (Random Recruit Tables I-III) up to the book's ten members,
+          bypassing gold cost, the soldier cap, and the specialist cap — the book explicitly
+          allows both. "Roll recruit status" also rolls the optional Random Recruit Status Table
+          for each new recruit (a permanent injury, a small stat tweak, or a potion/weapon/magic
+          item in a free gear slot).
+        </p>
+        {% if ragged_warbands_rules %}
+          <details>
+            <summary class="muted" style="cursor:pointer;font-size:0.85rem">Campaign reminders (not enforced by this app)</summary>
+            <div class="stack-sm" style="margin-top:0.4rem">
+              {% for row in ragged_warbands_rules.rows %}
+                <p class="muted" style="font-size:0.82rem"><strong>{{ row.name }}:</strong> {{ row.text }}</p>
+              {% endfor %}
+            </div>
+          </details>
+        {% endif %}
+        <p style="margin-top:0.5rem">Roster: <strong>{{ ragged_warbands_have }}</strong> / 10 members.</p>
+        {% if ragged_warbands_have < 10 %}
+          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
+            <input type="hidden" name="action" value="roll_random_recruits" />
+            <label class="checkbox-row" style="margin:0 0.5rem 0 0">
+              <input name="with_status" type="checkbox" checked /> Roll recruit status too
+            </label>
+            <button class="btn secondary small" type="submit">Fill roster to 10</button>
+          </form>
+        {% else %}
+          <p class="empty">Roster is already at 10 members.</p>
+        {% endif %}
+      </details>
+    {% endif %}
+
     {% set temp_on_table = soldiers | selectattr("temporary") | list %}
     {% if temp_on_table %}
       <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-bottom:1rem" onsubmit="return confirm('Dismiss all {{ temp_on_table|length }} temporary member(s) (raised zombie / summoned demon)?');">
@@ -1447,19 +1516,36 @@
                       </form>
                     {% endif %}
                     <div class="actions" style="align-items:flex-start;margin-top:0">
-                    <details>
-                      <summary class="muted" style="cursor:pointer;font-size:0.85rem">Edit / picture</summary>
-                      <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" enctype="multipart/form-data" class="stack-sm" style="margin-top:0.4rem" data-autosave>
-                        <input type="hidden" name="action" value="soldier_edit" />
-                        <input type="hidden" name="soldier_id" value="{{ s.id }}" />
-                        <input name="soldier_name" type="text" value="{{ s.name }}" />
-                        <input name="soldier_portrait" type="file" accept="image/*" />
-                        {% if s.portrait %}
-                          <label class="muted" style="font-size:0.8rem"><input name="soldier_portrait_remove" type="checkbox" /> Remove picture (revert to default)</label>
-                        {% endif %}
-                        <input name="notes" type="text" value="{{ s.notes }}" placeholder="Notes" />
-                      </form>
-                    </details>
+                    <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" enctype="multipart/form-data" data-autosave>
+                      <input type="hidden" name="action" value="soldier_edit" />
+                      <input type="hidden" name="soldier_id" value="{{ s.id }}" />
+                      <details>
+                        <summary class="muted" style="cursor:pointer;font-size:0.85rem">Edit / picture</summary>
+                        <div class="stack-sm" style="margin-top:0.4rem">
+                          <input name="soldier_name" type="text" value="{{ s.name }}" />
+                          <input name="soldier_portrait" type="file" accept="image/*" />
+                          {% if s.portrait %}
+                            <label class="muted" style="font-size:0.8rem"><input name="soldier_portrait_remove" type="checkbox" /> Remove picture (revert to default)</label>
+                          {% endif %}
+                          <input name="notes" type="text" value="{{ s.notes }}" placeholder="Notes" />
+                        </div>
+                      </details>
+                      {% set soldier_slot_n = soldier_item_slots(wb, s.type_key) %}
+                      {% if soldier_slot_n %}
+                        <details>
+                          <summary class="muted" style="cursor:pointer;font-size:0.85rem">Gear ({{ soldier_slot_n }} slot{{ 's' if soldier_slot_n != 1 else '' }})</summary>
+                          <div style="margin-top:0.4rem">
+                            {% set prefix = 'soldier_' ~ s.id %}
+                            {% set n = soldier_slot_n %}
+                            {% set slots = s.item_slots if s.item_slots is defined else [] %}
+                            {% set standard_items = full_standard_items %}
+                            {% include '_item_slots.html' %}
+                          </div>
+                        </details>
+                      {% else %}
+                        <p class="muted" style="font-size:0.8rem;margin:0.4rem 0 0">No item slots ({{ s.type_name }}).</p>
+                      {% endif %}
+                    </form>
                     {{ mutation_picker('add_soldier_mutation', s.mutations, soldier_id=s.id) }}
                     {% if hr.soldier_permanent_injuries_enabled or s.permanent_injuries %}
                       {{ permanent_injury_picker('add_soldier_permanent_injury', s.permanent_injuries, soldier_id=s.id) }}

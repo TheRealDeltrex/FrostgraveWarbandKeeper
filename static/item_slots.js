@@ -30,8 +30,11 @@
   function initBlock(root) {
     const n = parseInt(root.dataset.count, 10) || 0;
     const prefix = root.dataset.prefix || "";
-    const potions = readJson(prefix + "-potion-data");
-    const spells = readJson(prefix + "-spell-data");
+    // Shared across every block on the page (wizard/apprentice/captain/each
+    // soldier) — emitted once, at fixed ids, by warband_view.html — rather
+    // than once per block, which used to repeat the full spell list per block.
+    const potions = readJson("fg-potion-data");
+    const spells = readJson("fg-spell-data");
     const picks = [...root.querySelectorAll(".item-slot-pick")];
     const details = [...root.querySelectorAll(".item-slot-detail")];
     const texts = [...root.querySelectorAll(".item-slot-text")];

@@ -149,6 +149,7 @@ PERMANENT_INJURIES = [
         "stat_delta": {"move": {"add": -1}},
         "max_stacks": 2,
         "prosthetic_eligible": True,
+        "roll": [1, 2],
     },
     {
         "id": "smashed_leg",
@@ -157,6 +158,7 @@ PERMANENT_INJURIES = [
         "stat_delta": {"move": {"add": -2}},
         "max_stacks": 2,
         "prosthetic_eligible": True,
+        "roll": [3, 6],
     },
     {
         "id": "crushed_arm",
@@ -165,6 +167,7 @@ PERMANENT_INJURIES = [
         "stat_delta": {"fight": {"add": -1}},
         "max_stacks": 2,
         "prosthetic_eligible": True,
+        "roll": [7, 10],
     },
     {
         "id": "lost_fingers",
@@ -173,6 +176,7 @@ PERMANENT_INJURIES = [
         "stat_delta": {"shoot": {"add": -1}},
         "max_stacks": 2,
         "prosthetic_eligible": True,
+        "roll": [11, 12],
     },
     {
         "id": "never_quite_as_strong",
@@ -180,6 +184,7 @@ PERMANENT_INJURIES = [
         "text": "-1 Health.",
         "stat_delta": {"health": {"add": -1}},
         "max_stacks": 2,
+        "roll": [13, 14],
     },
     {
         "id": "psychological_scars",
@@ -187,6 +192,7 @@ PERMANENT_INJURIES = [
         "text": "-1 Will.",
         "stat_delta": {"will": {"add": -1}},
         "max_stacks": 2,
+        "roll": [15, 16],
     },
     {
         "id": "niggling_injury",
@@ -199,6 +205,7 @@ PERMANENT_INJURIES = [
         ),
         "stat_delta": None,
         "max_stacks": 2,
+        "roll": [17, 18],
     },
     {
         "id": "smashed_jaw",
@@ -206,6 +213,7 @@ PERMANENT_INJURIES = [
         "text": "May only activate 2 soldiers per phase instead of the normal 3.",
         "stat_delta": None,
         "max_stacks": 2,
+        "roll": [19, 19],
     },
     {
         "id": "lost_eye",
@@ -216,9 +224,93 @@ PERMANENT_INJURIES = [
         ),
         "stat_delta": None,
         "max_stacks": 2,
+        "roll": [20, 20],
     },
 ]
 PERMANENT_INJURY_BY_ID = {i["id"]: i for i in PERMANENT_INJURIES}
+
+
+def permanent_injury_by_roll(n: int) -> dict | None:
+    """d20 lookup against each entry's "roll" range — used by the Random
+    Recruit Status Table (The Red King), which sends a fresh recruit to a
+    roll here rather than the mutation-style single-number table."""
+    for row in PERMANENT_INJURIES:
+        lo, hi = row["roll"]
+        if lo <= n <= hi:
+            return row
+    return None
+
+
+# --- Ragged Warbands & Random Recruits (The Red King, Chapter Two) ---------
+# Each row is (lo, hi, value); a d20 roll against Table I picks which of
+# Table II/III to roll on next, and a second d20 roll against that table
+# picks the actual recruit (as a SOLDIERS type_key). "Captain" (Table III,
+# roll 3) has no type_key — the app models a Captain as a separate entity
+# with its own hire flow, so a hit there is a plain reroll (see
+# warband_store.roll_random_recruits), same treatment as any result from a
+# supplement the warband doesn't have switched on.
+RANDOM_RECRUIT_TABLE_I = [(1, 14, "II"), (15, 20, "III")]
+RANDOM_RECRUIT_TABLE_II = [
+    (1, 2, "thug"),
+    (3, 4, "thief"),
+    (5, 6, "war_hound"),
+    (7, 8, "infantryman"),
+    (9, 10, "man_at_arms"),
+    (11, 11, "archer"),
+    (12, 12, "crossbowman"),
+    (13, 13, "treasure_hunter"),
+    (14, 14, "apothecary"),
+    (15, 15, "knight"),
+    (16, 16, "templar"),
+    (17, 17, "ranger"),
+    (18, 18, "tracker"),
+    (19, 19, "barbarian"),
+    (20, 20, "marksman"),
+]
+RANDOM_RECRUIT_TABLE_III = [
+    (1, 1, "assassin"),
+    (2, 2, "bard"),
+    (3, 3, None),  # Captain — reroll
+    (4, 4, "collegium_porter"),
+    (5, 5, "crow_master"),
+    (6, 6, "demon_hunter"),
+    (7, 7, "demonic_servant"),
+    (8, 8, "javelineer"),
+    (9, 9, "monk"),
+    (10, 10, "mystic_warrior"),
+    (11, 11, "pack_mule"),
+    (12, 12, "rangifer"),
+    (13, 13, "trap_expert"),
+    (14, 14, "tunnel_fighter"),
+    (15, 15, "werewolf"),
+    (16, 16, "large_construct"),
+    (17, 17, "minor_demon"),
+    (18, 18, "snow_troll"),
+    (19, 19, "foulhorn"),
+    (20, 20, "vampire"),
+]
+
+# Random Recruit Status Table (d20, optional follow-up roll after a recruit
+# joins). "cannot be logically applied" (e.g. an item result on a 0-item-slot
+# recruit) is handled by the roller returning no result, per the book's own
+# instruction.
+RANDOM_RECRUIT_STATUS_TABLE = [
+    (1, 4, "injury"),
+    (5, 6, "fight_minus_1"),
+    (7, 8, "health_minus_2"),
+    (9, 10, "potion"),
+    (11, 14, "weapon_fight_plus_1"),
+    (15, 16, "magic_item"),
+    (17, 18, "will_plus_1"),
+    (19, 20, "health_plus_1"),
+]
+
+
+def range_table_lookup(table: list[tuple], n: int):
+    for lo, hi, value in table:
+        if lo <= n <= hi:
+            return value
+    return None
 CAPTAIN_STARTING_TRICKS = 2
 
 # Knightly Orders (Spellcaster Magazine, Issue 1) — an optional pick made once,
@@ -1105,6 +1197,7 @@ SOLDIERS: dict[str, dict] = {
         "will": -2,
         "health": 8,
         "gear": "—",
+        "item_slots": 0,
         "notes": "Animal; no treasure, no item slots.",
         "description": 'A trained hunting dog, useful for harrying an enemy rather than holding a line. Animal: cannot pick up treasure tokens and has no item slot.',
     },
@@ -1306,6 +1399,7 @@ SOLDIERS: dict[str, dict] = {
         "will": 0,
         "health": 10,
         "gear": "Dagger",
+        "item_slots": 3,
         "notes": "May carry up to three items and hand them to nearby warband members (3 item slots).",
         "description": 'A hired hand whose whole job is logistics: they carry three items and can hand any of them off to (or take one from) a warband member within 1", freeing up other soldiers\' single item slot for something more useful in a fight.',
     },
@@ -1336,6 +1430,7 @@ SOLDIERS: dict[str, dict] = {
         "will": 2,
         "health": 10,
         "gear": "Hand weapon, leather armour",
+        "item_slots": 0,
         "notes": "Requires a Crow Roost base upgrade (100gc). Brings one blood crow; may carry treasure but no items.",
         "description": "A handler bonded to a trained blood crow. Requires a Crow Roost base upgrade (100gc) before one can be hired. Comes with one blood crow that acts independently and is replaced free of charge if it's killed; the crow master may carry treasure but has no item slots of their own.",
     },
@@ -1366,6 +1461,7 @@ SOLDIERS: dict[str, dict] = {
         "will": 3,
         "health": 14,
         "gear": "—",
+        "item_slots": 3,
         "notes": (
             "Joins via the Porter Control Rod (treasure), not purchased. Construct; "
             "never attacks spellcasters; gains 3 potion/scroll item slots once recruited."
@@ -1429,6 +1525,7 @@ SOLDIERS: dict[str, dict] = {
         "will": 4,
         "health": 10,
         "gear": "—",
+        "item_slots": 0,
         "requires_spell": "Demonic Servant",
         "notes": "Joins via the Demonic Servant spell (never purchased). Demon; one minor demonic attribute; aids Summon Demon rolls.",
         "description": "A minor demon bound into service, joining a warband only through the Demonic Servant spell (Forgotten Pacts) rather than being purchased. Demon: immune to poison, all its attacks count as magic, and it may carry treasure tokens but has no item slots. Rolls one Minor Demonic Attribute on arrival and improves the wizard's future Summon Demon rolls.",
@@ -1540,6 +1637,7 @@ SOLDIERS: dict[str, dict] = {
         "will": 4,
         "health": 14,
         "gear": "—",
+        "item_slots": 0,
         "notes": "Requires the Chilopendra Soldier pact boon (Tiszirain). Demon; Horns; Poisonous.",
         "description": 'Demon/human hybrids created when a human sacrifices himself to the demon lord Tiszirain; human from the waist up, with the lower body of a great centipede, fighting just as readily with sharp horns and envenomed legs as with a weapon. Joins only through the Chilopendra Soldier pact boon (Forgotten Pacts, Tiszirain pact only). Demon: immune to poison, all its attacks count as magic, may carry treasure tokens but has no item slots. Horns: +2 Fight when it charges into combat and fights in the same activation. Poisonous: its own attacks deal poison damage.',
     },
@@ -1888,6 +1986,7 @@ SOLDIERS: dict[str, dict] = {
         "will": -1,
         "health": 10,
         "gear": "—",
+        "item_slots": 0,
         "notes": "Construct, Cannot Carry Treasure. Already modified; cannot be modified further. May fill a kennel's wolf/warhound slot.",
         "description": 'A construct built to resemble and serve as a war hound (Fireheart). Construct: immune to poison, never counts as wounded. Cannot Carry Treasure. Comes pre-modified and cannot take any further Construct Modification. May be taken in place of a wolf or warhound wherever a kennel-type resource allows one.',
     },
@@ -2097,6 +2196,7 @@ SOLDIERS: dict[str, dict] = {
         "will": 3,
         "health": 12,
         "gear": "—",
+        "item_slots": 3,
         "notes": "Part of a rangifer \"hide\" (Issue 3). Hate Undead, Antlers, Flint Weapons. 3 item slots; all Pack Mule abilities (Thaw of the Lich Lord).",
         "description": 'A burden-bearing rangifer (Spellcaster Magazine, Issue 3), part of a hired "hide" of up to 5 rangifer troops. Hate Undead, Antlers, Flint Weapons. Carries 3 item slots and has all of a Pack Mule\'s abilities (Thaw of the Lich Lord).',
     },
@@ -2133,6 +2233,7 @@ SOLDIERS: dict[str, dict] = {
         "will": 5,
         "health": 14,
         "gear": "—",
+        "item_slots": 3,
         "notes": (
             "Legendary Soldier (Issue 4) — the by-wizard-level hiring cap is a deferred "
             "mechanic; hires here like an ordinary Specialist Soldier. Immune to Critical "
@@ -2154,6 +2255,7 @@ SOLDIERS: dict[str, dict] = {
         "will": 4,
         "health": 12,
         "gear": "—",
+        "item_slots": 0,
         "notes": (
             "Legendary Soldier (Issue 4) — the by-wizard-level hiring cap is a deferred "
             "mechanic. Animal, Leap (up to 6\" of any move as a leap in any direction), "
@@ -2173,6 +2275,7 @@ SOLDIERS: dict[str, dict] = {
         "will": 4,
         "health": 12,
         "gear": "Bow, up to 3 magic arrows (free)",
+        "item_slots": 2,
         "notes": (
             "Legendary Soldier (Issue 4) — the by-wizard-level hiring cap is a deferred "
             "mechanic. All shooting attacks count as magic. May \"steady aim\" (an action, "
@@ -2193,6 +2296,7 @@ SOLDIERS: dict[str, dict] = {
         "will": 4,
         "health": 14,
         "gear": "—",
+        "item_slots": 2,
         "notes": (
             "Legendary Soldier (Issue 4) — the by-wizard-level hiring cap is a deferred "
             "mechanic. +2 Fight vs. undead, magic attacks vs. undead. Immune to Drain Life "
@@ -2233,6 +2337,7 @@ SOLDIERS: dict[str, dict] = {
         "will": 7,
         "health": 12,
         "gear": "—",
+        "item_slots": 2,
         "notes": (
             "Legendary Soldier (Issue 4) — the by-wizard-level hiring cap is a deferred "
             "mechanic. Once per activation: move a visible treasure token 3\", or move "
@@ -2253,6 +2358,7 @@ SOLDIERS: dict[str, dict] = {
         "will": 3,
         "health": 14,
         "gear": "Whip",
+        "item_slots": 2,
         "notes": (
             "Legendary Soldier (Issue 4) — the by-wizard-level hiring cap is a deferred "
             "mechanic. Whip: 3\" range shooting attack (max +2); on a hit, target drops "
@@ -2274,6 +2380,7 @@ SOLDIERS: dict[str, dict] = {
         "will": 2,
         "health": 14,
         "gear": "—",
+        "item_slots": 2,
         "notes": (
             "Legendary Soldier (Issue 5) — the by-wizard-level hiring cap is a deferred "
             "mechanic, as is the Monster Hunting harvest-economy this soldier ties into. "
@@ -2295,6 +2402,7 @@ SOLDIERS: dict[str, dict] = {
         "will": 5,
         "health": 14,
         "gear": "—",
+        "item_slots": 4,
         "notes": (
             "Legendary Soldier (Issues 5 & 6, reprinted) — the by-wizard-level hiring cap "
             "is a deferred mechanic. Doubles the wizard's Brew Potion component bonus "
@@ -2303,6 +2411,95 @@ SOLDIERS: dict[str, dict] = {
             "potion-table roll per game."
         ),
         "description": 'A potion specialist ("Legendary Soldier", Spellcaster Magazine Issues 5 and 6). Doubles the wizard\'s Brew Potion component bonus (+2 to the Casting Roll, 50gc off ingredient cost). Drinks potions as a free action, and may apply a potion to a nearby figure. Carries 4 item slots, but only for potions (max 3). The wizard may reroll one potion-table roll per game while this soldier is on the roster. The Legendary Soldier hiring cap is a deferred mechanic.',
+    },
+    # --- Bestiary creatures hireable as soldiers, previously reference-only ---
+    # Added for Ragged Warbands & Random Recruits (The Red King, Chapter Two),
+    # whose Random Recruit Table III can produce any of these four. Each is
+    # sourced to the book that actually grants the hire (only Foulhorn is
+    # genuinely a Red King addition), modeled on "rangifer": a plain soldier
+    # entry whose hiring prerequisite (a magic item, here) is documented but
+    # not enforced by the app.
+    "werewolf": {
+        "name": "Werewolf",
+        "cost": 200,
+        "category": "specialist",
+        "source": "The Perilous Dark",
+        "item_slots": 0,
+        "move": 7,
+        "fight": 4,
+        "shoot": 0,
+        "armour": 11,
+        "will": 5,
+        "health": 12,
+        "gear": "—",
+        "notes": "Joins via the Book of the Werewolf (200gc; carries no items). Needs 20gc/game upkeep or it leaves. Expert Climber; Bounty 20gc.",
+        "description": 'A wolf-human hybrid, hired via the Book of the Werewolf. Expert Climber: suffers no movement penalty for climbing. Bounty (20gc): a reward awaits any warband that kills it. Requires 20gc upkeep before each game or it leaves the warband; carries no item slots.',
+    },
+    "snow_troll": {
+        "name": "Snow Troll",
+        "cost": 0,
+        "category": "specialist",
+        "source": "The Maze of Malcor",
+        "move": 4,
+        "fight": 4,
+        "shoot": 0,
+        "armour": 14,
+        "will": 2,
+        "health": 16,
+        "gear": "—",
+        "notes": "Captured (not purchased) via Troll Shackles after being dropped to 0 Health. Large; Strong (+2 damage).",
+        "description": 'A captured snow troll, joining only via Troll Shackles once dropped to 0 Health in a game. Large: suffers the -2 Large Target penalty against shooting attacks. Strong: deals +2 damage.',
+    },
+    "foulhorn": {
+        "name": "Foulhorn",
+        "cost": 200,
+        "category": "specialist",
+        "source": "The Red King",
+        "item_slots": 0,
+        "move": 7,
+        "fight": 4,
+        "shoot": 0,
+        "armour": 12,
+        "will": 5,
+        "health": 12,
+        "gear": "—",
+        "notes": "Joins via the Book of the Foulhorn (200gc). Can pick up treasure but has no item slots. Horns, Keen Senses. Risk of injuring a random warband member (-3 Health) before each game on a 16+.",
+        "description": 'A four-armed mountain predator, hired via the Book of the Foulhorn. Horns: +2 Fight when it charges into combat and fights in the same activation. Keen Senses: treats everything within 6" as being in line of sight for movement purposes. Before each game, roll a die: on a 16+ it has wounded a random warband member (-3 Health) in a brawl.',
+    },
+    "vampire": {
+        "name": "Vampire",
+        "cost": 0,
+        "category": "specialist",
+        "source": "The Red King",
+        "item_slots": 0,
+        "move": 7,
+        "fight": 4,
+        "shoot": 0,
+        "armour": 12,
+        "will": 5,
+        "health": 14,
+        "gear": "—",
+        "notes": "Undead: can carry treasure but has no item slots. Immune to Normal Weapons, Magic Attack, Mind Lock, True Sight.",
+        "description": 'A vampire fielded as a soldier rather than a wizard\'s school (see the separate playable Vampire Wizard, Blood Legacy). Undead: immune to poison, never wounded, may carry treasure tokens but has no item slots. Immune to Normal Weapons: can only be harmed by magic. Magic Attack: all its attacks count as magic. Mind Lock: immune to Mind Control and Suggestion. True Sight: ignores Beauty and Invisibility, and destroys any Illusionary Soldier it fights.',
+    },
+    "minor_demon": {
+        "name": "Minor Demon",
+        "cost": 0,
+        "category": "specialist",
+        "source": "The Red King",
+        "item_slots": 0,
+        "move": 6,
+        "fight": 3,
+        "shoot": 0,
+        "armour": 11,
+        "will": 4,
+        "health": 12,
+        "gear": "—",
+        "notes": (
+            "A permanent minor demon (distinct from summoned_minor_demon, which is a "
+            "temporary Summon Demon result). Demon: can carry treasure but has no item slots."
+        ),
+        "description": 'A minor demon that has joined the warband as a permanent member, rather than the temporary result of casting Summon Demon (see summoned_minor_demon). Demon: immune to poison, all its attacks count as magic, and it may carry treasure tokens but has no item slots.',
     },
 }
 
@@ -2317,6 +2514,7 @@ SOURCE_BOOKS = [
     "The Perilous Dark",
     "The Frostgrave Folio",
     "Grave Mutations",
+    "The Red King",
     "Blood Legacy",
     "Fireheart",
     "The Wildwoods",

@@ -604,6 +604,9 @@ def build_warband_pdf(wb: dict) -> bytes:
                 new_y="NEXT",
                 markdown=True,
             )
+            s_slot_n = expansions.soldier_item_slots(wb, s.get("type_key", ""))
+            if s_slot_n:
+                _write_item_block(pdf, left, s.get("item_slots") or [], s_slot_n, False, "Carried")
             s_mut_lines = _mutation_lines(s.get("mutations"))
             if s_mut_lines:
                 pdf.set_x(left)

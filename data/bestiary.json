@@ -770,6 +770,76 @@
   "description": "A construct animated by a dying spark of unlife. Undead and Construct simultaneously, following all rules for both types. Carries a two-handed weapon."
  },
  {
+  "name": "Blood-Marked Berserker",
+  "category": "Miscellaneous",
+  "source": "The Red King",
+  "stats": "Move 6\" · Fight +3 · Shoot +0 · Armour 10 · Will +4 · Health 14",
+  "description": "A barbarian tribesman marked as a blood-servant of the entity cracking reality. Blood-Marked, Never Wounded, Possible Self-Combustion (at the end of each turn on the table, self-combusts on a roll of 20, replaced by a Burning Man at full Health)."
+ },
+ {
+  "name": "Burning Man",
+  "category": "Miscellaneous",
+  "source": "The Red King",
+  "stats": "Move 6\" · Fight +4 · Shoot +0 · Armour 10 · Will +2 · Health 10",
+  "description": "A humanoid figure wreathed in living fire. Automatic Damage, Elemental Resistance (5), Melt Weapon, Resistant to Missile Weapons; immune to Critical Hits, Poison, and Magic Attacks."
+ },
+ {
+  "name": "Herald of the Red King",
+  "category": "Demon",
+  "source": "The Red King",
+  "stats": "Move 6\" · Fight +5 · Shoot +0 · Armour 12 · Will +8 · Health 18",
+  "description": "Aura of Pain, Demon, Elemental Blast, Elemental Resistance (3), Levitate, Spell Reflection; immune to Control Demon, Critical Hits, Mind Control, and Magic Attacks."
+ },
+ {
+  "name": "Hrut Warrior",
+  "category": "Demon",
+  "source": "The Red King",
+  "stats": "Move 7\" · Fight +3 · Shoot +0 · Armour 12 · Will +3 · Health 12",
+  "description": "A rank-and-file demon soldier from beyond a reality crack. Demon, Pain-Blink, Sense Magic. Carries a hand weapon."
+ },
+ {
+  "name": "Hrut Stinger",
+  "category": "Demon",
+  "source": "The Red King",
+  "stats": "Move 7\" · Fight +3 · Shoot +1 · Armour 11 · Will +3 · Health 12",
+  "description": "Demon, Flying, Pain-Blink, Sense Magic. Carries a crossbow (Quiver) and a hand weapon."
+ },
+ {
+  "name": "Hrut Longhammer",
+  "category": "Demon",
+  "source": "The Red King",
+  "stats": "Move 5\" · Fight +4 · Shoot +0 · Armour 13 · Will +5 · Health 14",
+  "description": "Demon, Large, Pain-Blink, Sense Magic. Carries a two-handed weapon."
+ },
+ {
+  "name": "Hrut Darter",
+  "category": "Demon",
+  "source": "The Red King",
+  "stats": "Move 7\" · Fight +1 · Shoot +3 · Armour 11 · Will +3 · Health 12",
+  "description": "Demon, Pain-Blink, Sense Magic. Carries a crossbow (Quiver) and a hand weapon."
+ },
+ {
+  "name": "Key-Master of the Red King",
+  "category": "Demon",
+  "source": "The Red King",
+  "stats": "Move 7\" · Fight +2 · Shoot +0 · Armour 12 · Will +10 · Health 16",
+  "description": "A puppet avatar functioning as a doorway between realities, without independent will of its own. Demon, Elemental Resistance (3); immune to Control Demon and Mind Control."
+ },
+ {
+  "name": "Mindshrike",
+  "category": "Miscellaneous",
+  "source": "The Red King",
+  "stats": "Move 6\" · Fight +2 · Shoot +0 · Armour 14 · Will +6 · Health 1",
+  "description": "A dreamscape-dwelling entity, aggressive toward intruders but incapable of inflicting actual harm — it forcibly ejects them instead. Levitate, Powerful, Suicide Attack; immune to Mind Control."
+ },
+ {
+  "name": "Nullman",
+  "category": "Miscellaneous",
+  "source": "The Red King",
+  "stats": "Move 6\" · Fight +1 · Shoot +0 · Armour 12 · Will +10 · Health 5",
+  "description": "A featureless, glowing, unintelligent humanoid; not undead, demon, construct, or animal, and completely immune to magic. Antithetical to Magic, Sense Magic."
+ },
+ {
   "name": "Blood-drinker Bat",
   "category": "Animal",
   "source": "Blood Legacy",

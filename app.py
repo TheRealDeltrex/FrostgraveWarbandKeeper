@@ -175,6 +175,7 @@ from warband_store import (
     remove_vault_item,
     remove_wizard_mutation,
     remove_wizard_permanent_injury,
+    random_core_wizard,
     reorder_soldiers,
     reorder_spells,
     resolve_portrait_path,
@@ -182,6 +183,7 @@ from warband_store import (
     reverse_last_captain_level_up,
     reverse_last_level_up,
     reverse_last_soldier_level_up,
+    roll_random_recruits,
     save_warband,
     sell_or_remove_base_resource,
     set_animal_feature,
@@ -190,6 +192,7 @@ from warband_store import (
     set_soldier_giant_blooded,
     set_soldier_status,
     set_wizard_state,
+    soldier_count,
     soldier_from_book_enabled,
     spend_alt_xp,
     update_homerules,
@@ -286,6 +289,7 @@ app.jinja_env.globals.update(
     LEVELUP_STATS=LEVELUP_STATS,
     level_from_xp=level_from_xp,
     captain_effective_stats=captain_effective_stats,
+    soldier_item_slots=expansions.soldier_item_slots,
     IS_FROZEN=paths.is_frozen(),
     BROWSER_MODE=BROWSER_MODE,
     # Wizard states (Lich / Beastcrafter / Demonic Pact).
@@ -538,6 +542,25 @@ def warband_new() -> str | Response:
         pentangle = False
         fire_giant = False
         vampire = False
+
+    if request.args.get("randomize"):
+        # "Random wizard" button (core rules only): generates a random, legal
+        # school + 8 starting spells server-side (random_core_wizard already
+        # self-validates), plus random warband/wizard/apprentice names. Never
+        # repeats the school currently on the page, so pressing the button
+        # again always changes it. Delivered through the same #creation-dynamic
+        # swap the school dropdown already uses (see fgRandomWizard in
+        # warband_new.html) — random_identity is read out of that swapped
+        # region by the client and copied onto the name/apprentice fields,
+        # which live outside the swap and so must not be re-rendered here.
+        rand_school, rand_keys, rand_names = random_core_wizard(
+            exclude_school=request.args.get("exclude_school") or school
+        )
+        return _render_new(
+            school=rand_school, selected=rand_keys, sources=sources,
+            pentangle=pentangle, fire_giant=fire_giant, vampire=vampire,
+            with_apprentice=True, random_identity=rand_names,
+        )
     return _render_new(school=school, sources=sources, pentangle=pentangle,
                         fire_giant=fire_giant, vampire=vampire)
 
@@ -578,6 +601,7 @@ def _render_new(
     wizard_starting_xp: int = 0,
     max_soldiers: int = MAX_SOLDIERS,
     max_specialists: int = MAX_SPECIALISTS,
+    random_identity: dict | None = None,
 ):
     sources = sources or {}
     schools = _new_schools(sources, pentangle, fire_giant, vampire)
@@ -622,6 +646,7 @@ def _render_new(
         wizard_starting_xp=wizard_starting_xp,
         max_soldiers=max_soldiers,
         max_specialists=max_specialists,
+        random_identity=random_identity,
     )
 
 
@@ -710,6 +735,22 @@ def warband_view(warband_id: str) -> str:
         for s in all_soldiers
         if s.get("status") != "dead" and s.get("type_key") in giant_blooded_eligible_keys
     ]
+    # The Red King's Ragged Warbands & Random Recruits: a single "Fill
+    # roster" control (see roll_random_recruits), same idiom as Giant-Blooded
+    # above — a warband-level toggle gates one shared control rather than a
+    # button repeated anywhere per-soldier.
+    ragged_warbands_enabled = "The Red King" in wb_sources and bool(
+        (wb.get("homerules") or {}).get("ragged_warbands_enabled")
+    )
+    ragged_warbands_have = 1 + (1 if wb.get("apprentice") else 0) + soldier_count(wb)
+    ragged_warbands_rules = next(
+        (
+            row
+            for row in load_expansion_rules().get("The Red King", [])
+            if row.get("title", "").startswith("Ragged Warbands")
+        ),
+        None,
+    )
     return render_template(
         "warband_view.html",
         wb=wb,
@@ -725,6 +766,9 @@ def warband_view(warband_id: str) -> str:
         giant_blooded_enabled=giant_blooded_enabled,
         giant_blooded_soldier=giant_blooded_soldier,
         giant_blooded_choices=giant_blooded_choices,
+        ragged_warbands_enabled=ragged_warbands_enabled,
+        ragged_warbands_have=ragged_warbands_have,
+        ragged_warbands_rules=ragged_warbands_rules,
         schools=SCHOOLS,
         learnable=learnable,
         pending_levels=limits["pending_levels"],
@@ -905,6 +949,9 @@ def _act_soldier_edit(wb: dict) -> tuple[bool, str]:
         if s.get("id") == sid:
             s["name"] = (request.form.get("soldier_name") or s.get("name", "")).strip()
             s["notes"] = request.form.get("notes") or ""
+            slot_n = expansions.soldier_item_slots(wb, s.get("type_key", ""))
+            slots = [(request.form.get(f"soldier_{sid}_slot_{i}") or "").strip() for i in range(slot_n)]
+            s["item_slots"] = normalize_item_slots(slots, slot_n)
             if request.form.get("soldier_portrait_remove") == "on":
                 remove_portrait(s, wb["id"], f"soldier_{sid}")
             f = request.files.get("soldier_portrait")
@@ -1384,6 +1431,11 @@ def _act_toggle_soldier_giant_blooded(wb: dict) -> tuple[bool, str]:
     return set_soldier_giant_blooded(
         wb, request.form.get("soldier_id") or "", _fitted_from_form()
     )
+
+
+@register_action("roll_random_recruits")
+def _act_roll_random_recruits(wb: dict) -> tuple[bool, str]:
+    return roll_random_recruits(wb, with_status=request.form.get("with_status") == "on")
 
 
 def _update_details(wb: dict) -> None:
