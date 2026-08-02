@@ -199,9 +199,7 @@ PERMANENT_INJURIES = [
         "name": "Niggling Injury",
         "text": (
             "30gc upkeep before each game, or start that game at -3 Health instead "
-            "(10gc discount per apothecary in the warband). No stat_delta — the "
-            "upkeep/per-game penalty isn't a permanent stat change, so it's shown "
-            "as text only, same as every other situational effect in this app."
+            "(10gc discount per apothecary in the warband)."
         ),
         "stat_delta": None,
         "max_stacks": 2,
