@@ -52,6 +52,7 @@ from frostgrave_data import (
     OWN_SCHOOL_SPELLS,
     PENTANGLE_SCHOOLS,
     PERMANENT_INJURIES,
+    PERMANENT_INJURY_BY_ID,
     PROMOTE_CAPTAIN_ITEM_SLOTS,
     SCHOOL_ALIGNED,
     SCHOOL_NEUTRAL,
@@ -183,6 +184,7 @@ from warband_store import (
     sell_or_remove_base_resource,
     set_animal_feature,
     set_base_location,
+    set_permanent_injury_prosthetic,
     set_soldier_status,
     set_wizard_state,
     soldier_from_book_enabled,
@@ -270,6 +272,7 @@ app.jinja_env.globals.update(
     CAPTAIN_TRICKS=CAPTAIN_TRICKS,
     CAPTAIN_TRICK_BY_ID=CAPTAIN_TRICK_BY_ID,
     PERMANENT_INJURIES=PERMANENT_INJURIES,
+    PERMANENT_INJURY_BY_ID=PERMANENT_INJURY_BY_ID,
     KNIGHTLY_ORDERS=KNIGHTLY_ORDERS,
     KNIGHTLY_ORDER_ELIGIBLE=KNIGHTLY_ORDER_ELIGIBLE,
     ILLUSION_SOURCE_CHOICES=illusion_source_choices(),
@@ -1298,6 +1301,25 @@ def _act_add_captain_permanent_injury(wb: dict) -> tuple[bool, str]:
 @register_action("remove_captain_permanent_injury")
 def _act_remove_captain_permanent_injury(wb: dict) -> tuple[bool, str]:
     return remove_captain_permanent_injury(wb, _mutation_index_from_form())
+
+
+def _fitted_from_form() -> bool:
+    return (request.form.get("fitted") or "") == "1"
+
+
+@register_action("toggle_wizard_injury_prosthetic")
+def _act_toggle_wizard_injury_prosthetic(wb: dict) -> tuple[bool, str]:
+    return set_permanent_injury_prosthetic(wb, "wizard", _mutation_index_from_form(), _fitted_from_form())
+
+
+@register_action("toggle_apprentice_injury_prosthetic")
+def _act_toggle_apprentice_injury_prosthetic(wb: dict) -> tuple[bool, str]:
+    return set_permanent_injury_prosthetic(wb, "apprentice", _mutation_index_from_form(), _fitted_from_form())
+
+
+@register_action("toggle_captain_injury_prosthetic")
+def _act_toggle_captain_injury_prosthetic(wb: dict) -> tuple[bool, str]:
+    return set_permanent_injury_prosthetic(wb, "captain", _mutation_index_from_form(), _fitted_from_form())
 
 
 @register_action("add_soldier_permanent_injury")

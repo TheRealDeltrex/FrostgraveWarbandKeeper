@@ -124,3 +124,88 @@ def test_unknown_injury_id_rejected(fresh_warband):
 def test_all_catalog_ids_resolve():
     for inj in PERMANENT_INJURIES:
         assert PERMANENT_INJURY_BY_ID[inj["id"]] is inj
+
+
+# --- Fireheart: Animated Prosthetics ---------------------------------------
+
+
+def test_fitting_a_prosthetic_removes_the_penalty_and_keeps_the_injury(fresh_warband):
+    wb = fresh_warband
+    before = wb["wizard"]["stats"]["fight"]
+    warband_store.add_wizard_permanent_injury(wb, "crushed_arm")
+    assert wb["wizard"]["stats"]["fight"] == before - 1
+
+    ok, msg = warband_store.set_permanent_injury_prosthetic(wb, "wizard", 0, True)
+    assert ok, msg
+    assert wb["wizard"]["stats"]["fight"] == before
+    assert wb["wizard"]["permanent_injuries"][0]["prosthetic"] is True
+    assert wb["wizard"]["permanent_injuries"][0]["name"] == "Crushed Arm"
+
+
+def test_removing_a_prosthetic_reapplies_the_penalty(fresh_warband):
+    wb = fresh_warband
+    before = wb["wizard"]["stats"]["fight"]
+    warband_store.add_wizard_permanent_injury(wb, "crushed_arm")
+    warband_store.set_permanent_injury_prosthetic(wb, "wizard", 0, True)
+
+    ok, msg = warband_store.set_permanent_injury_prosthetic(wb, "wizard", 0, False)
+    assert ok, msg
+    assert wb["wizard"]["stats"]["fight"] == before - 1
+    assert wb["wizard"]["permanent_injuries"][0]["prosthetic"] is False
+
+
+def test_prosthetic_composes_correctly_with_a_stacked_injury_on_the_same_stat(fresh_warband):
+    """Two Move-affecting injuries stacked, then the first is prosthetic-
+    fitted: only its own -1 should come back, not an absolute snapshot that
+    would also erase the second injury's -2."""
+    wb = fresh_warband
+    before = wb["wizard"]["stats"]["move"]
+    warband_store.add_wizard_permanent_injury(wb, "lost_toes")  # -1
+    warband_store.add_wizard_permanent_injury(wb, "smashed_leg")  # -2
+    assert wb["wizard"]["stats"]["move"] == before - 3
+
+    ok, msg = warband_store.set_permanent_injury_prosthetic(wb, "wizard", 0, True)
+    assert ok, msg
+    assert wb["wizard"]["stats"]["move"] == before - 2
+
+
+def test_prosthetic_requires_fireheart(fresh_warband):
+    wb = fresh_warband
+    warband_store.add_wizard_permanent_injury(wb, "crushed_arm")
+    wb["homerules"]["enabled_sources"]["Fireheart"] = False
+
+    ok, msg = warband_store.set_permanent_injury_prosthetic(wb, "wizard", 0, True)
+    assert not ok
+
+
+def test_prosthetic_not_available_for_soldiers(fresh_warband):
+    wb = fresh_warband
+    wb["homerules"]["soldier_permanent_injuries_enabled"] = True
+    warband_store.add_soldier(wb, "thug", "Grunt")
+    soldier = wb["soldiers"][0]
+    warband_store.add_soldier_permanent_injury(wb, soldier["id"], "never_quite_as_strong")
+
+    ok, msg = warband_store.set_permanent_injury_prosthetic(wb, "soldier", 0, True, soldier["id"])
+    assert not ok
+
+
+def test_prosthetic_not_available_for_text_only_injuries(fresh_warband):
+    wb = fresh_warband
+    warband_store.add_wizard_permanent_injury(wb, "niggling_injury")
+
+    ok, msg = warband_store.set_permanent_injury_prosthetic(wb, "wizard", 0, True)
+    assert not ok
+
+
+def test_re_suffering_a_prosthetic_fitted_injury_becomes_badly_wounded_instead(fresh_warband):
+    wb = fresh_warband
+    before = wb["wizard"]["stats"]["fight"]
+    warband_store.add_wizard_permanent_injury(wb, "crushed_arm")
+    warband_store.set_permanent_injury_prosthetic(wb, "wizard", 0, True)
+
+    ok, msg = warband_store.add_wizard_permanent_injury(wb, "crushed_arm")
+    assert ok, msg
+    assert "badly wounded" in msg.lower()
+    # No second copy of the injury, and the prosthetic-fitted stat stays intact.
+    assert len(wb["wizard"]["permanent_injuries"]) == 1
+    assert wb["wizard"]["stats"]["fight"] == before

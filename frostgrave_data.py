@@ -148,6 +148,7 @@ PERMANENT_INJURIES = [
         "text": "-1 to all Move Rolls.",
         "stat_delta": {"move": {"add": -1}},
         "max_stacks": 2,
+        "prosthetic_eligible": True,
     },
     {
         "id": "smashed_leg",
@@ -155,6 +156,7 @@ PERMANENT_INJURIES = [
         "text": "-2 Move.",
         "stat_delta": {"move": {"add": -2}},
         "max_stacks": 2,
+        "prosthetic_eligible": True,
     },
     {
         "id": "crushed_arm",
@@ -162,6 +164,7 @@ PERMANENT_INJURIES = [
         "text": "-1 Fight.",
         "stat_delta": {"fight": {"add": -1}},
         "max_stacks": 2,
+        "prosthetic_eligible": True,
     },
     {
         "id": "lost_fingers",
@@ -169,6 +172,7 @@ PERMANENT_INJURIES = [
         "text": "-1 Shoot.",
         "stat_delta": {"shoot": {"add": -1}},
         "max_stacks": 2,
+        "prosthetic_eligible": True,
     },
     {
         "id": "never_quite_as_strong",

@@ -540,24 +540,27 @@
               <div class="stat-pill"><span class="label">Will</span><span class="value">{{ format_stat(wizard_display_stats.will) }}</span></div>
               <div class="stat-pill"><span class="label">Health</span><span class="value">{{ wizard_display_stats.health }}</span></div>
             </div>
-            <h3>Wizard items ({{ wizard_item_slots }} slots)</h3>
-            <p class="muted" style="font-size:0.85rem">
-              Pick a standard item or vault loot, or type a custom name.
-              Two-handed weapons use two consecutive slots (shown on PDF as e.g. <code>2+3: Two-Handed Weapon</code>).
-              Dagger free slot: use the toggle.
-            </p>
-            <div class="checkbox-row">
-              <input id="wizard_dagger" name="wizard_dagger" type="checkbox" {% if wiz.has_dagger %}checked{% endif %} />
-              <label for="wizard_dagger" style="margin:0">Carries a dagger (free slot)</label>
-            </div>
-            {% set slots = wiz.item_slots if wiz.item_slots is defined else [] %}
-            {% set prefix = 'wizard' %}
-            {% set n = wizard_item_slots %}
-            {% include '_item_slots.html' %}
-            <div class="form-row">
-              <label for="wizard_notes">Wizard notes</label>
-              <textarea id="wizard_notes" name="wizard_notes">{{ wiz.notes }}</textarea>
-            </div>
+            <details class="ref-panel">
+              <summary>Equipment &amp; notes</summary>
+              <h3>Wizard items ({{ wizard_item_slots }} slots)</h3>
+              <p class="muted" style="font-size:0.85rem">
+                Pick a standard item or vault loot, or type a custom name.
+                Two-handed weapons use two consecutive slots (shown on PDF as e.g. <code>2+3: Two-Handed Weapon</code>).
+                Dagger free slot: use the toggle.
+              </p>
+              <div class="checkbox-row">
+                <input id="wizard_dagger" name="wizard_dagger" type="checkbox" {% if wiz.has_dagger %}checked{% endif %} />
+                <label for="wizard_dagger" style="margin:0">Carries a dagger (free slot)</label>
+              </div>
+              {% set slots = wiz.item_slots if wiz.item_slots is defined else [] %}
+              {% set prefix = 'wizard' %}
+              {% set n = wizard_item_slots %}
+              {% include '_item_slots.html' %}
+              <div class="form-row">
+                <label for="wizard_notes">Wizard notes</label>
+                <textarea id="wizard_notes" name="wizard_notes">{{ wiz.notes }}</textarea>
+              </div>
+            </details>
           </div>
         </div>
       </details>
@@ -598,19 +601,22 @@
                 <div class="stat-pill"><span class="label">Will</span><span class="value">{{ format_stat(ap.stats.will) }}</span></div>
                 <div class="stat-pill"><span class="label">Health</span><span class="value">{{ ap.stats.health }}</span></div>
               </div>
-              <h3>Apprentice items ({{ apprentice_item_slots }} slots)</h3>
-              <div class="checkbox-row">
-                <input id="apprentice_dagger" name="apprentice_dagger" type="checkbox" {% if ap.has_dagger %}checked{% endif %} />
-                <label for="apprentice_dagger" style="margin:0">Carries a dagger (free slot)</label>
-              </div>
-              {% set slots = ap.item_slots if ap.item_slots is defined else [] %}
-              {% set prefix = 'apprentice' %}
-              {% set n = apprentice_item_slots %}
-              {% include '_item_slots.html' %}
-              <div class="form-row">
-                <label for="apprentice_notes">Notes</label>
-                <textarea id="apprentice_notes" name="apprentice_notes">{{ ap.notes }}</textarea>
-              </div>
+              <details class="ref-panel">
+                <summary>Equipment &amp; notes</summary>
+                <h3>Apprentice items ({{ apprentice_item_slots }} slots)</h3>
+                <div class="checkbox-row">
+                  <input id="apprentice_dagger" name="apprentice_dagger" type="checkbox" {% if ap.has_dagger %}checked{% endif %} />
+                  <label for="apprentice_dagger" style="margin:0">Carries a dagger (free slot)</label>
+                </div>
+                {% set slots = ap.item_slots if ap.item_slots is defined else [] %}
+                {% set prefix = 'apprentice' %}
+                {% set n = apprentice_item_slots %}
+                {% include '_item_slots.html' %}
+                <div class="form-row">
+                  <label for="apprentice_notes">Notes</label>
+                  <textarea id="apprentice_notes" name="apprentice_notes">{{ ap.notes }}</textarea>
+                </div>
+              </details>
             </div>
           </div>
         </details>
@@ -636,8 +642,8 @@
         <summary>Mutations, Permanent Injuries &amp; Wizard state</summary>
         {{ mutation_picker('add_wizard_mutation', wiz.mutations, label="Wizard mutations") }}
         {% if ap %}{{ mutation_picker('add_apprentice_mutation', ap.mutations, label="Apprentice mutations") }}{% endif %}
-        {{ permanent_injury_picker('add_wizard_permanent_injury', wiz.permanent_injuries, label="Wizard permanent injuries") }}
-        {% if ap %}{{ permanent_injury_picker('add_apprentice_permanent_injury', ap.permanent_injuries, label="Apprentice permanent injuries") }}{% endif %}
+        {{ permanent_injury_picker('add_wizard_permanent_injury', wiz.permanent_injuries, label="Wizard permanent injuries", kind="wizard") }}
+        {% if ap %}{{ permanent_injury_picker('add_apprentice_permanent_injury', ap.permanent_injuries, label="Apprentice permanent injuries", kind="apprentice") }}{% endif %}
 
     {% if available_states %}
       <details class="ref-panel" {% if wizard_state_kind != STATE_NONE %}open{% endif %}>
@@ -1103,7 +1109,7 @@
         </div>
 
         {{ mutation_picker('add_captain_mutation', cap.mutations) }}
-        {{ permanent_injury_picker('add_captain_permanent_injury', cap.permanent_injuries) }}
+        {{ permanent_injury_picker('add_captain_permanent_injury', cap.permanent_injuries, kind="captain") }}
 
         {% set cap_pending = [level_from_xp(cap.xp), hr.captain_max_level]|min - cap.level %}
         <details class="ref-panel">

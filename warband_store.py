@@ -1922,6 +1922,19 @@ def add_permanent_injury(
     if row is None:
         return False, f"Unknown permanent injury ({injury_id!r})."
     existing = [r for r in entity.get("permanent_injuries") or [] if r.get("id") == injury_id]
+    if (
+        "Fireheart" in enabled_sources(wb)
+        and kind in PROSTHETIC_ELIGIBLE_KINDS
+        and row.get("prosthetic_eligible")
+        and any(r.get("prosthetic") for r in existing)
+    ):
+        text = (
+            f"{label[:1].upper() + label[1:]} already has an Animated Prosthetic fitted for {row['name']} — "
+            "per Fireheart, suffering it again becomes Badly Wounded instead of a second copy of the injury "
+            "(no additional stat penalty applied; record the Badly Wounded result as normal)."
+        )
+        add_history(wb, text)
+        return True, text
     max_stacks = row.get("max_stacks", 1)
     if len(existing) >= max_stacks:
         return False, (
@@ -1957,6 +1970,63 @@ def remove_permanent_injury(
     for stat, value in (inj.get("stat_backup") or {}).items():
         set_stat(stat, value)
     text = f"Removed {label}'s permanent injury: {inj.get('name', '?')}."
+    add_history(wb, text)
+    return True, text
+
+
+PROSTHETIC_ELIGIBLE_KINDS = {"wizard", "apprentice", "captain"}
+
+
+def set_permanent_injury_prosthetic(
+    wb: dict, kind: str, index: int, fitted: bool, soldier_id: str | None = None
+) -> tuple[bool, str]:
+    """Fireheart's Animated Prosthetics: a spellcaster/apprentice/captain (not
+    an ordinary soldier) with Lost Toes, Smashed Leg, Crushed Arm or Lost
+    Fingers may cast Animate Construct to graft a replacement limb, removing
+    the stat penalty while the injury itself stays on record (10gc upkeep
+    after every game to keep it fitted, or a fresh casting — this app doesn't
+    track per-game upkeep for anything, same as Niggling Injury above, so
+    that cost is left to the player). Reverses the toggle by re-applying the
+    exact delta it removed, not by snapshotting an absolute stat value — so it
+    composes correctly regardless of how many other injuries/mutations are
+    stacked on the same stat."""
+    if "Fireheart" not in enabled_sources(wb):
+        return False, "Fireheart is switched off; enable it under Additional Rules and Homerules first."
+    if kind not in PROSTHETIC_ELIGIBLE_KINDS:
+        return False, "Only a wizard, apprentice or captain can be fitted with an Animated Prosthetic."
+    entity, get_stat, set_stat, label = _mutation_target(wb, kind, soldier_id)
+    if entity is None:
+        return False, label
+    injuries = entity.get("permanent_injuries") or []
+    if not (0 <= index < len(injuries)):
+        return False, "Permanent injury not found."
+    inj = injuries[index]
+    row = PERMANENT_INJURY_BY_ID.get(inj.get("id"))
+    if not row or not row.get("prosthetic_eligible"):
+        return False, f"{row['name'] if row else 'This injury'} has no stat penalty an Animated Prosthetic can replace."
+    already = bool(inj.get("prosthetic"))
+    if fitted == already:
+        return False, "Already in that state."
+    delta = row.get("stat_delta") or {}
+    parts = []
+    if fitted:
+        # Undo the original penalty: add back the same magnitude it removed.
+        for stat, op in delta.items():
+            amount = -int(op.get("add", 0))
+            set_stat(stat, get_stat(stat) + amount)
+            parts.append(f"{stat.capitalize()} +{amount}" if amount >= 0 else f"{stat.capitalize()} {amount}")
+        inj["prosthetic"] = True
+        verb = "fitted with an Animated Prosthetic for"
+    else:
+        # Re-apply the original penalty (prosthetic removed/failed upkeep).
+        for stat, op in delta.items():
+            amount = int(op.get("add", 0))
+            set_stat(stat, get_stat(stat) + amount)
+            parts.append(f"{stat.capitalize()} {amount}" if amount < 0 else f"{stat.capitalize()} +{amount}")
+        inj["prosthetic"] = False
+        verb = "no longer has a prosthetic for"
+    suffix = " (" + ", ".join(parts) + ")" if parts else ""
+    text = f"{label[:1].upper() + label[1:]} is {verb} {row['name']}{suffix}."
     add_history(wb, text)
     return True, text
 
