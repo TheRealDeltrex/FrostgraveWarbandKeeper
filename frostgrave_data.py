@@ -305,6 +305,17 @@ PROSTHETIC_UPGRADES = [
 ]
 PROSTHETIC_UPGRADE_BY_ID = {u["id"]: u for u in PROSTHETIC_UPGRADES}
 
+# What to call the replacement limb itself once an Animated Prosthetic is
+# fitted to one of the four prosthetic_eligible injuries above — used in the
+# PDF export so a fitted injury reads as "Prosthetic Toes" rather than the
+# still-recorded injury name ("Lost Toes").
+PROSTHETIC_LIMB_NAME_BY_INJURY_ID = {
+    "lost_toes": "Prosthetic Toes",
+    "smashed_leg": "Prosthetic Leg",
+    "crushed_arm": "Prosthetic Arm",
+    "lost_fingers": "Prosthetic Fingers",
+}
+
 
 # --- Ragged Warbands & Random Recruits (The Red King, Chapter Two) ---------
 # Each row is (lo, hi, value); a d20 roll against Table I picks which of
@@ -2736,23 +2747,48 @@ STANDARD_CONSTRUCT_TYPE_KEYS = {"small_construct", "medium_construct", "large_co
 
 
 # Blood Legacy's Giant-Blooded modification (Chapter Three) is written for
-# "any core-rulebook standard/specialist soldier" — which already excludes
-# every animal/demon/construct/undead entry, since none of those are plain
-# Core Rules hires with no requires_spell/temporary marker (war_hound is the
-# one Core Rules animal, so it's excluded explicitly).
-GIANT_BLOODED_EXCLUDED_TYPE_KEYS = {"war_hound"}
+# "any human soldier" — every ordinary human hire across every sourcebook,
+# not just the Core Rules roster. requires_spell/temporary already rule out
+# every summoned/animated entry; this set catches the remaining non-human
+# hires that slip past that filter: plain animals (companions, War Hound,
+# Dire Hound), constructs with no requires_spell marker of their own
+# (Collegium Porter, Construct Hound), monsters (Werewolf, Snow Troll,
+# Foulhorn, Vampire, Minor Demon), the Chilopendra (a demon/human hybrid,
+# not plain human), and the Rangifer (a reindeer/human hybrid culture,
+# including every rangifer_* troop type).
+GIANT_BLOODED_EXCLUDED_TYPE_KEYS = {
+    "war_hound",
+    "dire_hound",
+    "collegium_porter",
+    "construct_hound",
+    "chilopendra",
+    "rangifer",
+    "rangifer_boar",
+    "rangifer_ambusher",
+    "rangifer_charger",
+    "rangifer_herdsman",
+    "rangifer_hewer",
+    "rangifer_hurler",
+    "rangifer_packdeer",
+    "rangifer_war_leader",
+    "werewolf",
+    "snow_troll",
+    "foulhorn",
+    "vampire",
+    "minor_demon",
+}
 
 
 def giant_blooded_eligible_type_keys() -> set[str]:
-    """Soldier type keys Giant-Blooded may be applied to: ordinary Core Rules
-    standard/specialist hires only — not animals, demons, constructs or
-    undead (see GIANT_BLOODED_EXCLUDED_TYPE_KEYS and the requires_spell/
-    temporary checks below, which rule out every summoned/animated entry)."""
+    """Soldier type keys Giant-Blooded may be applied to: any ordinary human
+    soldier hire, from any sourcebook — not animals, demons, constructs,
+    undead, or non-human hybrids (see GIANT_BLOODED_EXCLUDED_TYPE_KEYS and
+    the requires_spell/temporary checks below, which rule out every
+    summoned/animated entry)."""
     return {
         k
         for k, v in SOLDIERS.items()
-        if v.get("source", "Core Rules") == "Core Rules"
-        and not v.get("requires_spell")
+        if not v.get("requires_spell")
         and not v.get("temporary")
         and k not in GIANT_BLOODED_EXCLUDED_TYPE_KEYS
     }
@@ -2784,11 +2820,18 @@ def get_soldier(type_key: str) -> dict | None:
 
 
 # A soldier type's own companion creature (not a separate roster entry) —
-# shown smaller/indented under the soldier's row/block so it reads as
-# belonging to them rather than as its own soldier. Only the Crow Master
-# has one today; add further entries here if that changes.
+# shown smaller/indented under the soldier's row/block, with its own stat
+# line and portrait, so it reads as belonging to them rather than as its own
+# soldier. Stats from the Blood Crow bestiary entry (Thaw of the Lich Lord).
+# "portrait_key" is the default-portrait filename stem (static/portraits/
+# <portrait_key>.png), same convention as a soldier's own type_key. Only the
+# Crow Master has one today; add further entries here if that changes.
 SOLDIER_COMPANION_BY_TYPE_KEY = {
-    "crow_master": "Blood Crow",
+    "crow_master": {
+        "name": "Blood Crow",
+        "portrait_key": "companion_blood_crow",
+        "stats": {"move": 9, "fight": 0, "shoot": 0, "armour": 14, "will": 3, "health": 1},
+    },
 }
 
 

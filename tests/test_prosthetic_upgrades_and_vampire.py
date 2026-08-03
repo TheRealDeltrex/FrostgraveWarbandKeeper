@@ -2,6 +2,9 @@
 fitted injury) and Blood Legacy's "Becoming a Vampire" (an existing wizard
 transformed mid-campaign, distinct from choosing Vampire at creation)."""
 
+from copy import deepcopy
+
+import expansions
 import warband_store
 from frostgrave_data import PROSTHETIC_UPGRADE_BY_ID
 
@@ -177,3 +180,58 @@ def test_fire_giant_cannot_become_vampire(fresh_warband):
 
     ok, msg = warband_store.become_vampire(wb)
     assert not ok
+
+
+def test_become_vampire_bumps_cn_by_1_flat_not_recalculated_for_new_school(fresh_warband):
+    wb = fresh_warband
+    before = {s["id"]: s["cn"] for s in wb["wizard"]["spells"] if s["school"] != "Thaumaturge"}
+
+    ok, msg = warband_store.become_vampire(wb)
+    assert ok, msg
+    after = {s["id"]: s["cn"] for s in wb["wizard"]["spells"]}
+    assert after == {sid: cn + 1 for sid, cn in before.items()}
+    # relation/base_cn/cn_penalty are untouched — no recompute against Vampire's
+    # own school relations, exactly what the book's flat "+1 to all other
+    # Casting Numbers" describes.
+    for s in wb["wizard"]["spells"]:
+        assert s["base_cn"] + s["cn_penalty"] + 1 == s["cn"]
+
+
+def test_become_vampire_enters_wizard_state(fresh_warband):
+    wb = fresh_warband
+    ok, msg = warband_store.become_vampire(wb)
+    assert ok, msg
+    assert expansions.state_kind(wb) == expansions.STATE_VAMPIRE
+
+
+def test_revert_vampire_restores_school_spells_and_apprentice(fresh_warband):
+    wb = fresh_warband
+    warband_store.hire_apprentice(wb)
+    before_spells = deepcopy(wb["wizard"]["spells"])
+    before_apprentice = deepcopy(wb["apprentice"])
+
+    ok, msg = warband_store.become_vampire(wb)
+    assert ok, msg
+
+    ok2, msg2 = warband_store.revert_vampire(wb)
+    assert ok2, msg2
+    assert wb["wizard"]["school"] == "Elementalist"
+    assert wb["wizard"]["spells"] == before_spells
+    assert wb["apprentice"] == before_apprentice
+    assert expansions.state_kind(wb) == expansions.STATE_NONE
+
+
+def test_revert_vampire_without_becoming_one_fails(fresh_warband):
+    wb = fresh_warband
+    ok, msg = warband_store.revert_vampire(wb)
+    assert not ok
+
+
+def test_set_wizard_state_refuses_to_bypass_vampire_revert(fresh_warband):
+    wb = fresh_warband
+    warband_store.hire_apprentice(wb)
+    warband_store.become_vampire(wb)
+
+    ok, msg = warband_store.set_wizard_state(wb, expansions.STATE_NONE)
+    assert not ok
+    assert wb["wizard"]["school"] == "Vampire"

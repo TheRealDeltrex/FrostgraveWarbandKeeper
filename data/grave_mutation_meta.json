@@ -820,7 +820,7 @@
   "stat_delta": null
  },
  "255": {
-  "short": "Wereboar: +2 Health; Tusks trait (as Horns)",
+  "short": "Wereboar: +2 Health; Tusks (+2 Fight when it moves into combat and fights in the same activation)",
   "stat_delta": {
    "health": {
     "add": 2

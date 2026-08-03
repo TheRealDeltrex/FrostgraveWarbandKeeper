@@ -158,12 +158,20 @@ ALLOWED_IMAGE_EXT = {".jpg", ".jpeg", ".png", ".gif", ".webp"}
 # type_key — see scripts/build_default_portraits.py.
 DEFAULT_PORTRAIT_DIR = paths.bundle_dir() / "static" / "portraits"
 
+# A soldier type_key with no artwork of its own that should reuse another
+# type_key's picture instead of falling back to the "?" placeholder — used
+# where the two depict the same thing. The Red King's permanent "Minor Demon"
+# soldier looks the same as the Summon Minor Demon spell's temporary one.
+SOLDIER_PORTRAIT_ALIAS = {
+    "minor_demon": "summoned_minor_demon",
+}
+
 
 def default_portrait_name(kind: str, type_key: str | None = None) -> str | None:
     """Filename under static/portraits/ for a character with no custom picture,
     or None if nothing suitable ships with the app."""
-    if kind == "soldier":
-        stems = [type_key]
+    if kind in ("soldier", "companion"):
+        stems = [type_key, SOLDIER_PORTRAIT_ALIAS.get(type_key)]
     elif kind == "captain":
         # A promoted captain keeps the look of the soldier they were promoted
         # from; a hired one falls back to the generic captain artwork.
@@ -1491,6 +1499,8 @@ def warband_limits(wb: dict) -> dict:
         type_key = s.get("type_key", "")
         info = SOLDIERS.get(type_key, {})
         spent += expansions.soldier_cost(wb, info, type_key)
+        if s.get("giant_blooded"):
+            spent += GIANT_BLOODED_COST
     wiz = wb.get("wizard") or {}
     xp = int(wiz.get("xp", 0))
     level = int(wiz.get("level", 0))
@@ -1693,6 +1703,8 @@ def remove_soldier(wb: dict, soldier_id: str, refund: bool = False) -> tuple[boo
             type_key = s.get("type_key", "")
             info = get_soldier(type_key) or {}
             cost = expansions.soldier_cost(wb, info, type_key)
+            if s.get("giant_blooded"):
+                cost += GIANT_BLOODED_COST
             name = s.get("name", "Soldier")
             if refund and cost:
                 wb["gold"] = int(wb.get("gold", 0)) + cost
@@ -2108,8 +2120,8 @@ def _giant_blooded_gate(wb: dict, soldier: dict | None) -> str | None:
         return "Soldier not found."
     if soldier.get("type_key") not in giant_blooded_eligible_type_keys():
         return (
-            "Only an ordinary Core Rules standard/specialist soldier can be Giant-Blooded "
-            "(not animals, demons, constructs or undead)."
+            "Only an ordinary human soldier can be Giant-Blooded "
+            "(not animals, demons, constructs, undead, or non-human hybrids)."
         )
     return None
 
@@ -3729,25 +3741,34 @@ def has_animal_companion(wb: dict) -> bool:
 
 
 def become_vampire(wb: dict) -> tuple[bool, str]:
-    """Blood Legacy's "Becoming a Vampire" (usually accidental): converts an
-    already-created, ordinary wizard into a Vampire mid-campaign.
+    """Blood Legacy's "Becoming a Vampire" (usually accidental, page 13):
+    converts an already-created, ordinary wizard into a Vampire mid-campaign.
+
+    Folded into the wizard-state mechanic (expansions.STATE_VAMPIRE) alongside
+    Lich/Beastcrafter/Pact, rather than living outside it as a bespoke
+    school-only mutation — but unlike those three, the book's own text
+    describes concrete, one-time bookkeeping at the moment of transformation
+    (spells lost, apprentice dismissed), not just a dynamically-applied cap.
+    So entering STATE_VAMPIRE always goes through this function (see
+    expansions.can_enter_state's refusal of it via the plain dropdown), which
+    records everything it's about to change into state["vampire_savepoint"]
+    first so revert_vampire() can undo it later.
 
     Distinct from choosing Vampire as a starting school at creation (see
     empty_wizard()/playable_schools() and expansions.is_vampire()'s "school
-    marker, not a wizard state" note) — this reworks an existing wizard's
-    spellbook/apprentice in place instead of building one from scratch, so it
-    lives here as its own mutation rather than going through set_wizard_state.
+    marker" note) — that wizard never held any other state, so there's
+    nothing to save or revert.
 
-    Applies the book-keepable parts: school becomes Vampire (which makes
-    expansions.wizard_stat_caps()/casting-number relations apply from here on
-    automatically), Thaumaturge spells are dropped and every remaining spell's
-    Casting Number is recalculated for the new school relations, any stat now
-    over the Vampire's caps (Will +5, Health 22) is clamped down, and an
-    apprentice is dismissed for a 9th soldier slot. It does not attempt to
-    recompute the wizard's level for the XP a lost spell/stat point would no
-    longer justify — the same "left to the player" boundary as this app's
-    other reminder-only bookkeeping (Niggling Injury upkeep, Ragged Warbands'
-    restrictions)."""
+    Applies exactly what the book says happens, and nothing more: loses
+    Thaumaturge spells, every remaining spell's Casting Number goes up by 1
+    flat (NOT recalculated against the Vampire school's own aligned/neutral/
+    antithetical relations — the book keeps the wizard's original spell
+    relations, it just taxes every casting roll by 1), Will/Health are
+    clamped to the Vampire's caps, and an apprentice is dismissed for a 9th
+    soldier slot. It does not attempt to recompute the wizard's level for the
+    XP a lost spell/stat point would no longer justify — the same
+    "left to the player" boundary as this app's other reminder-only
+    bookkeeping (Niggling Injury upkeep, Ragged Warbands' restrictions)."""
     if "Blood Legacy" not in enabled_sources(wb):
         return False, "Becoming a Vampire needs Blood Legacy switched on under Additional Rules and Homerules first."
     wiz = wb.setdefault("wizard", {})
@@ -3758,10 +3779,21 @@ def become_vampire(wb: dict) -> tuple[bool, str]:
         return False, "A Fire Giant Wizard cannot become a Vampire."
     stats = wiz.setdefault("stats", deepcopy(WIZARD_BASE))
     spells = wiz.get("spells") or []
+
+    hr = wb.setdefault("homerules", default_homerules())
+    savepoint = {
+        "school": school,
+        "spells": deepcopy(spells),
+        "apprentice": deepcopy(wb.get("apprentice")),
+        "max_soldiers": hr.get("max_soldiers", MAX_SOLDIERS),
+    }
+
     lost = [s for s in spells if s.get("school") == "Thaumaturge"]
-    wiz["spells"] = [s for s in spells if s.get("school") != "Thaumaturge"]
+    kept = [s for s in spells if s.get("school") != "Thaumaturge"]
+    for s in kept:
+        s["cn"] = int(s.get("cn", s.get("base_cn", 10))) + 1
+    wiz["spells"] = kept
     wiz["school"] = "Vampire"
-    recompute_spell_cns(wb)
     clamped = []
     for stat, cap in expansions.wizard_stat_caps(wb).items():
         cur = int(stats.get(stat, 0))
@@ -3771,17 +3803,50 @@ def become_vampire(wb: dict) -> tuple[bool, str]:
     ap_note = ""
     if wb.get("apprentice"):
         dismiss_apprentice(wb)
-        hr = wb.setdefault("homerules", default_homerules())
-        hr["max_soldiers"] = max(int(hr.get("max_soldiers", MAX_SOLDIERS)), VAMPIRE_MIN_MAX_SOLDIERS)
         ap_note = "; lost their apprentice, gaining a 9th soldier slot instead"
-    spell_note = (
-        f"; lost {len(lost)} Thaumaturge spell(s) (remaining Casting Numbers recalculated)" if lost else ""
-    )
+    hr["max_soldiers"] = max(int(hr.get("max_soldiers", MAX_SOLDIERS)), VAMPIRE_MIN_MAX_SOLDIERS)
+
+    state = expansions.default_wizard_state()
+    state["kind"] = expansions.STATE_VAMPIRE
+    state["vampire_savepoint"] = savepoint
+    wiz["state"] = state
+
+    spell_note = f"; lost {len(lost)} Thaumaturge spell(s) (remaining Casting Numbers +1)" if lost else ""
     cap_note = f"; {', '.join(clamped)}" if clamped else ""
     text = (
         f"{wiz.get('name', 'The wizard')} became a Vampire (Blood Legacy){spell_note}{cap_note}{ap_note}. "
         "Recalculate their level for any XP a lost spell or capped stat no longer justifies."
     )
+    add_history(wb, text)
+    return True, text
+
+
+def revert_vampire(wb: dict) -> tuple[bool, str]:
+    """Undoes become_vampire() using the savepoint it recorded: restores the
+    wizard's prior school, spells (with their original Casting Numbers — no
+    recompute needed, the savepoint already has them), and apprentice (if
+    they had one), and clears the wizard's state back to none.
+
+    Does not restore stats clamped down at transformation time — the
+    savepoint only ever promised to remember school/spells/apprentice (per
+    the book, vampirism is normally a one-way accident; this app's revert is
+    the "your group decided to reverse it anyway" escape hatch, not a
+    the-transformation-never-happened undo)."""
+    wiz = wb.get("wizard") or {}
+    state = wiz.get("state") or {}
+    if state.get("kind") != expansions.STATE_VAMPIRE:
+        return False, "Your wizard is not a transformed Vampire."
+    savepoint = state.get("vampire_savepoint")
+    if not savepoint:
+        return False, "No record of what your wizard was before becoming a Vampire."
+    wiz["school"] = savepoint["school"]
+    wiz["spells"] = savepoint["spells"]
+    if savepoint.get("apprentice"):
+        wb["apprentice"] = savepoint["apprentice"]
+        hr = wb.setdefault("homerules", default_homerules())
+        hr["max_soldiers"] = savepoint.get("max_soldiers", hr.get("max_soldiers", MAX_SOLDIERS))
+    wiz["state"] = expansions.default_wizard_state()
+    text = f"{wiz.get('name', 'The wizard')} is no longer a Vampire; school, spells and apprentice restored."
     add_history(wb, text)
     return True, text
 
@@ -3804,6 +3869,8 @@ def set_wizard_state(wb: dict, kind: str) -> tuple[bool, str]:
         return False, msg
     wiz = wb.setdefault("wizard", {})
     was = expansions.state_kind(wb)
+    if was == expansions.STATE_VAMPIRE:
+        return False, "Use \"Revert from Vampire\" to leave that state — it restores what a plain state change would discard."
     if was == kind:
         return False, f"Your wizard is already {expansions.STATE_LABELS[kind].lower()}."
     state = expansions.default_wizard_state()
