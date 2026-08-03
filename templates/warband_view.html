@@ -595,12 +595,9 @@
                 <input id="wizard_name" name="wizard_name" type="text" value="{{ wiz.name }}" />
               </div>
               <div class="form-row">
-                <label for="school">School</label>
-                <select id="school" name="school">
-                  {% for s in schools %}
-                    <option value="{{ s }}" {% if s == wiz.school %}selected{% endif %}>{{ s }}</option>
-                  {% endfor %}
-                </select>
+                <label>School</label>
+                <input type="text" value="{{ wiz.school }}" disabled />
+                <span class="muted" style="font-size:0.8rem">Fixed at creation — see Wizard state / Becoming a Vampire below for the game's own ways to change it.</span>
               </div>
               <div class="form-row">
                 <label for="wizard_portrait">Change picture</label>
@@ -728,11 +725,12 @@
         {{ permanent_injury_picker('add_wizard_permanent_injury', wiz.permanent_injuries, label="Wizard permanent injuries", kind="wizard") }}
         {% if ap %}{{ permanent_injury_picker('add_apprentice_permanent_injury', ap.permanent_injuries, label="Apprentice permanent injuries", kind="apprentice") }}{% endif %}
 
-    {% if available_states %}
+    {% if available_states or wizard_state_kind == STATE_VAMPIRE or ("Blood Legacy" in enabled_source_names and wiz.school not in ("Vampire", "Fire Giant")) %}
       <details class="ref-panel" {% if wizard_state_kind != STATE_NONE %}open{% endif %}>
         <summary>Wizard state — {{ STATE_LABELS[wizard_state_kind] }}</summary>
         <p class="muted" style="font-size:0.85rem">Check lexicon for details.</p>
 
+        {% if available_states and wizard_state_kind != STATE_VAMPIRE %}
         <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" onsubmit="return confirm('Switching wizard state discards whatever state your wizard currently holds. Continue?');">
           <input type="hidden" name="action" value="set_wizard_state" />
           <div class="form-row inline">
@@ -753,6 +751,7 @@
             </div>
           </div>
         </form>
+        {% endif %}
 
         {% if wizard_state_kind == STATE_BEASTCRAFTER %}
           <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:0.5rem">
@@ -831,23 +830,33 @@
             </button>
           </form>
         {% endif %}
-      </details>
-    {% endif %}
 
-    {% if "Blood Legacy" in enabled_source_names and wiz.school not in ("Vampire", "Fire Giant") %}
-      <details class="ref-panel">
-        <summary>Becoming a Vampire (Blood Legacy)</summary>
-        <p class="muted" style="font-size:0.85rem">
-          "Usually accidental" per Blood Legacy — drops Thaumaturge spells (other Casting Numbers
-          recalculate), clamps Will to +5 and Health to 22, and trades the apprentice for a 9th
-          soldier slot. Check the lexicon for the full text; this app doesn't recompute the
-          wizard's level for the XP a lost spell/stat point no longer justifies.
-        </p>
-        {% set vampire_wizard_label = wiz.name or "your wizard" %}
-        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" onsubmit="return confirm('Turn {{ vampire_wizard_label }} into a Vampire? This drops Thaumaturge spells, clamps Will/Health to the Vampire caps, and trades the apprentice (if any) for a 9th soldier slot. This cannot be undone automatically.');">
-          <input type="hidden" name="action" value="become_vampire" />
-          <button class="btn danger small" type="submit">Become a Vampire</button>
-        </form>
+        {% if wizard_state_kind == STATE_VAMPIRE %}
+          <p class="muted" style="font-size:0.85rem">
+            Transformed via Blood Legacy's "Becoming a Vampire" — Thaumaturge spells lost, remaining
+            Casting Numbers +1 flat (not recalculated for Vampire school relations), Will/Health
+            clamped to the Vampire caps, apprentice traded for a 9th soldier slot.
+          </p>
+          {% set revert_wizard_label = wiz.name or "your wizard" %}
+          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" onsubmit="return confirm('Revert {{ revert_wizard_label }} from Vampire? Restores their school, spells and apprentice as they stood before the transformation (clamped stats are not restored).');">
+            <input type="hidden" name="action" value="revert_vampire" />
+            <button class="btn danger small" type="submit">Revert from Vampire</button>
+          </form>
+        {% elif "Blood Legacy" in enabled_source_names and wiz.school not in ("Vampire", "Fire Giant") %}
+          <p class="muted" style="font-size:0.85rem">
+            Becoming a Vampire (Blood Legacy, "usually accidental"): drops Thaumaturge spells, every
+            remaining spell's Casting Number goes up by 1 flat (kept at its original school relation,
+            not recalculated for Vampire), clamps Will to +5 and Health to 22, and trades the
+            apprentice for a 9th soldier slot. A savepoint of the wizard's school/spells/apprentice is
+            kept, so it can be reverted later from this same panel. This app doesn't recompute the
+            wizard's level for the XP a lost spell/stat point no longer justifies.
+          </p>
+          {% set vampire_wizard_label = wiz.name or "your wizard" %}
+          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" onsubmit="return confirm('Turn {{ vampire_wizard_label }} into a Vampire? This drops Thaumaturge spells, clamps Will/Health to the Vampire caps, and trades the apprentice (if any) for a 9th soldier slot. It can be reverted later from this panel.');">
+            <input type="hidden" name="action" value="become_vampire" />
+            <button class="btn danger small" type="submit">Become a Vampire</button>
+          </form>
+        {% endif %}
       </details>
     {% endif %}
       </details>
@@ -1190,26 +1199,32 @@
                 {% endif %}
                 <p class="muted" style="font-size:0.8rem">Each trick may be used once per game — purely descriptive, tracked at the table, not simulated here.</p>
               </details>
-              <h3>Captain items ({{ cap_slots_n }} slots)</h3>
-              <div class="checkbox-row">
-                <input id="captain_dagger" name="captain_dagger" type="checkbox" {% if cap.has_dagger %}checked{% endif %} />
-                <label for="captain_dagger" style="margin:0">Carries a dagger (free slot)</label>
-              </div>
-              {% set slots = cap.item_slots if cap.item_slots is defined else [] %}
-              {% set prefix = 'captain' %}
-              {% set n = cap_slots_n %}
-              {% set standard_items = full_standard_items %}
-              {% include '_item_slots.html' %}
-              <div class="form-row">
-                <label for="captain_notes">Notes</label>
-                <textarea id="captain_notes" name="captain_notes">{{ cap.notes }}</textarea>
-              </div>
+              <details class="ref-panel">
+                <summary>Equipment &amp; notes</summary>
+                <h3>Captain items ({{ cap_slots_n }} slots)</h3>
+                <div class="checkbox-row">
+                  <input id="captain_dagger" name="captain_dagger" type="checkbox" {% if cap.has_dagger %}checked{% endif %} />
+                  <label for="captain_dagger" style="margin:0">Carries a dagger (free slot)</label>
+                </div>
+                {% set slots = cap.item_slots if cap.item_slots is defined else [] %}
+                {% set prefix = 'captain' %}
+                {% set n = cap_slots_n %}
+                {% set standard_items = full_standard_items %}
+                {% include '_item_slots.html' %}
+                <div class="form-row">
+                  <label for="captain_notes">Notes</label>
+                  <textarea id="captain_notes" name="captain_notes">{{ cap.notes }}</textarea>
+                </div>
+              </details>
             </form>
           </div>
         </div>
 
-        {{ mutation_picker('add_captain_mutation', cap.mutations) }}
-        {{ permanent_injury_picker('add_captain_permanent_injury', cap.permanent_injuries, kind="captain") }}
+        <details class="ref-panel">
+          <summary>Mutations &amp; Permanent Injuries</summary>
+          {{ mutation_picker('add_captain_mutation', cap.mutations) }}
+          {{ permanent_injury_picker('add_captain_permanent_injury', cap.permanent_injuries, kind="captain") }}
+        </details>
 
         {% set cap_pending = [level_from_xp(cap.xp), hr.captain_max_level]|min - cap.level %}
         <details class="ref-panel">
@@ -1476,9 +1491,6 @@
                 </td>
                 <td>
                   <strong>{{ s.name }}</strong>{% if hr.soldier_leveling_enabled and s.level %} <span class="muted">(Lv {{ s.level }})</span>{% endif %}
-                  {% if SOLDIER_COMPANION_BY_TYPE_KEY.get(s.type_key) %}
-                    <div class="muted" style="font-size:0.75em; margin-left:0.9em">↳ {{ SOLDIER_COMPANION_BY_TYPE_KEY[s.type_key] }}</div>
-                  {% endif %}
                 </td>
                 <td>
                   {{ s.type_name }}
@@ -1688,6 +1700,46 @@
                   </div>
                 </td>
               </tr>
+              {% set companion = SOLDIER_COMPANION_BY_TYPE_KEY.get(s.type_key) %}
+              {% if companion %}
+                {% set companion_src = portrait_src((s.get('companion') or {}).get('portrait'), 'companion', companion.portrait_key) %}
+                <tr class="companion-row status-{{ s.status }}" style="font-size:0.85em">
+                  <td></td>
+                  <td></td>
+                  <td style="padding-left:1.25rem">
+                    {% if companion_src %}
+                      <img class="portrait-sm" src="{{ companion_src }}" alt="" />
+                    {% else %}
+                      <span class="portrait-placeholder" aria-hidden="true">?</span>
+                    {% endif %}
+                  </td>
+                  <td style="padding-left:1.25rem">↳ <strong>{{ companion.name }}</strong> <span class="muted">({{ s.name }}'s companion)</span></td>
+                  <td><span class="badge">animal</span></td>
+                  <td></td>
+                  <td>{{ companion.stats.move }}</td>
+                  <td>{{ format_stat(companion.stats.fight) }}</td>
+                  <td>{{ format_stat(companion.stats.shoot) }}</td>
+                  <td>{{ companion.stats.armour }}</td>
+                  <td>{{ format_stat(companion.stats.will) }}</td>
+                  <td>{{ companion.stats.health }}</td>
+                  <td></td>
+                  <td>
+                    <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" enctype="multipart/form-data" data-autosave>
+                      <input type="hidden" name="action" value="soldier_edit" />
+                      <input type="hidden" name="soldier_id" value="{{ s.id }}" />
+                      <details>
+                        <summary class="muted" style="cursor:pointer;font-size:0.85rem">Picture</summary>
+                        <div class="stack-sm" style="margin-top:0.4rem">
+                          <input name="soldier_companion_portrait" type="file" accept="image/*" />
+                          {% if (s.get('companion') or {}).get('portrait') %}
+                            <label class="muted" style="font-size:0.8rem"><input name="soldier_companion_portrait_remove" type="checkbox" /> Remove picture (revert to default)</label>
+                          {% endif %}
+                        </div>
+                      </details>
+                    </form>
+                  </td>
+                </tr>
+              {% endif %}
             {% endfor %}
           </tbody>
         </table>

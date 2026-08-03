@@ -51,14 +51,16 @@ STATE_NONE = "none"
 STATE_LICH = "lich"
 STATE_BEASTCRAFTER = "beastcrafter"
 STATE_PACT = "pact"
+STATE_VAMPIRE = "vampire"
 
-WIZARD_STATES = [STATE_NONE, STATE_LICH, STATE_BEASTCRAFTER, STATE_PACT]
+WIZARD_STATES = [STATE_NONE, STATE_LICH, STATE_BEASTCRAFTER, STATE_PACT, STATE_VAMPIRE]
 
 STATE_LABELS = {
     STATE_NONE: "Ordinary wizard",
     STATE_LICH: "Lich",
     STATE_BEASTCRAFTER: "Beastcrafter",
     STATE_PACT: "Pact-holder",
+    STATE_VAMPIRE: "Vampire (transformed)",
 }
 
 # Which source book has to be switched on for a state to be available at all.
@@ -66,6 +68,7 @@ STATE_SOURCE = {
     STATE_LICH: "Thaw of the Lich Lord",
     STATE_BEASTCRAFTER: "Into the Breeding Pits",
     STATE_PACT: "Forgotten Pacts",
+    STATE_VAMPIRE: "Blood Legacy",
 }
 
 
@@ -76,6 +79,10 @@ def default_wizard_state() -> dict:
         "feature": None,  # Beastcrafter III animal feature id
         "demon": "",  # pact: the demon whose True Name was found
         "pacts": [],  # pact: [{"sacrifice": id, "boon": id}, ...], one per tier
+        # vampire: {"school", "spells", "apprentice", "max_soldiers"} as they
+        # stood immediately before become_vampire() ran, so revert_vampire()
+        # can restore them exactly. None unless the wizard is/was a Vampire.
+        "vampire_savepoint": None,
     }
 
 
@@ -631,6 +638,8 @@ def can_enter_state(wb: dict, kind: str, sources: set[str]) -> tuple[bool, str]:
         return True, ""
     if kind not in WIZARD_STATES:
         return False, "Unknown wizard state."
+    if kind == STATE_VAMPIRE:
+        return False, "Becoming a Vampire has its own action (Blood Legacy) — pick it from the Wizard state panel."
     book = STATE_SOURCE[kind]
     if book not in sources:
         return False, f"{STATE_LABELS[kind]} comes from {book}; switch that book on first."

@@ -134,6 +134,7 @@ from warband_store import (
     apply_captain_trick,
     apply_animal_companion_crit_bonus,
     become_vampire,
+    revert_vampire,
     apply_level_up,
     apply_portrait,
     apply_soldier_level_up,
@@ -312,6 +313,7 @@ app.jinja_env.globals.update(
     STATE_LICH=expansions.STATE_LICH,
     STATE_BEASTCRAFTER=expansions.STATE_BEASTCRAFTER,
     STATE_PACT=expansions.STATE_PACT,
+    STATE_VAMPIRE=expansions.STATE_VAMPIRE,
     LICH_FAILURE_TABLE=expansions.LICH_FAILURE_TABLE,
     LICH_NOTES=expansions.LICH_NOTES,
     LICH_XP_PER_LEVEL=expansions.LICH_XP_PER_LEVEL,
@@ -969,6 +971,12 @@ def _act_soldier_edit(wb: dict) -> tuple[bool, str]:
                 remove_portrait(s, wb["id"], f"soldier_{sid}")
             f = request.files.get("soldier_portrait")
             apply_portrait(s, wb["id"], f"soldier_{sid}", f)
+            if s.get("type_key") in SOLDIER_COMPANION_BY_TYPE_KEY:
+                companion = s.setdefault("companion", {})
+                if request.form.get("soldier_companion_portrait_remove") == "on":
+                    remove_portrait(companion, wb["id"], f"soldier_{sid}_companion")
+                cf = request.files.get("soldier_companion_portrait")
+                apply_portrait(companion, wb["id"], f"soldier_{sid}_companion", cf)
             return True, f"Updated {s['name']}."
     return False, "Soldier not found."
 
@@ -1000,6 +1008,11 @@ def _act_set_wizard_state(wb: dict) -> tuple[bool, str]:
 @register_action("become_vampire")
 def _act_become_vampire(wb: dict) -> tuple[bool, str]:
     return become_vampire(wb)
+
+
+@register_action("revert_vampire")
+def _act_revert_vampire(wb: dict) -> tuple[bool, str]:
+    return revert_vampire(wb)
 
 
 @register_action("advance_beastcrafter")
@@ -1499,9 +1512,9 @@ def _update_details(wb: dict) -> None:
     wb["name"] = (request.form.get("warband_name") or wb["name"]).strip()
     wiz = wb.setdefault("wizard", {})
     wiz["name"] = (request.form.get("wizard_name") or wiz.get("name", "")).strip()
-    school = request.form.get("school") or wiz.get("school")
-    if school in SCHOOLS:
-        wiz["school"] = school
+    # The wizard's school is fixed at creation — becoming a Vampire (Blood
+    # Legacy) or another wizard state is the only in-game way to change it,
+    # each with its own dedicated action, not this general-purpose form.
     wiz["notes"] = request.form.get("wizard_notes") or ""
     wiz["has_dagger"] = request.form.get("wizard_dagger") == "on"
 

@@ -24,6 +24,8 @@ except ImportError:  # pragma: no cover - only hit if Pillow genuinely isn't ins
 
 from frostgrave_data import (
     CAPTAIN_TRICK_BY_ID,
+    PROSTHETIC_LIMB_NAME_BY_INJURY_ID,
+    PROSTHETIC_UPGRADE_BY_ID,
     SOLDIER_COMPANION_BY_TYPE_KEY,
     format_stat,
 )
@@ -119,9 +121,13 @@ def _mutation_lines(mutations: list[dict] | None) -> list[str] | None:
         prefix = f"{name}: "
         rest = short[len(prefix):] if short.startswith(prefix) else short
         if m.get("prosthetic"):
-            rest += " (Animated Prosthetic fitted — penalty removed)"
+            limb = PROSTHETIC_LIMB_NAME_BY_INJURY_ID.get(m.get("id"), "Animated Prosthetic")
+            rest += f" ({limb} fitted — penalty removed)"
         for up in m.get("upgrades") or []:
-            rest += f"; {up.get('name', '?')} Prosthetic Upgrade"
+            up_row = PROSTHETIC_UPGRADE_BY_ID.get(up.get("id")) or {}
+            up_name = up_row.get("name", up.get("name", "?"))
+            up_text = up_row.get("text")
+            rest += f"; {up_name} Prosthetic Upgrade" + (f" ({up_text})" if up_text else "")
         lines.append(_t(f"**{name}:** {rest}"))
     return lines
 
@@ -572,9 +578,16 @@ def build_warband_pdf(wb: dict) -> bytes:
             )
             companion = SOLDIER_COMPANION_BY_TYPE_KEY.get(s.get("type_key", ""))
             if companion:
+                cstats = companion["stats"]
+                cline = (
+                    f"- with {companion['name']}  "
+                    f"(Move {cstats['move']}\"  Fight {format_stat(cstats['fight'])}  "
+                    f"Shoot {format_stat(cstats['shoot'])}  Armour {cstats['armour']}  "
+                    f"Will {format_stat(cstats['will'])}  Health {cstats['health']})"
+                )
                 pdf.set_x(left + 3)
                 pdf.set_font("Helvetica", "I", 7)
-                pdf.cell(0, 3.5, _t(f"- with {companion}"), new_x="LMARGIN", new_y="NEXT")
+                pdf.cell(0, 3.5, _t(cline), new_x="LMARGIN", new_y="NEXT")
             pdf.set_x(left)
             pdf.set_font("Helvetica", "", 9)
             stats = {
