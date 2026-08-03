@@ -74,6 +74,9 @@ from frostgrave_data import (
     STARTING_GOLD,
     STARTING_SPELL_COUNT,
     TEMPORARY_MEMBER_LIMIT,
+    UNDERWORLD_LOAN_MAX,
+    UNDERWORLD_LOAN_MIN,
+    UNDERWORLD_PAYOFF_COST,
     WIZARD_BASE,
     WIZARD_ITEM_SLOTS,
     WIZARD_MIN_CASTING_NUMBER_DEFAULT,
@@ -174,15 +177,35 @@ SOLDIER_PORTRAIT_ALIAS = {
 }
 
 
-def default_portrait_name(kind: str, type_key: str | None = None) -> str | None:
+def default_portrait_name(
+    kind: str, type_key: str | None = None, gender: str | None = None, state: str | None = None
+) -> str | None:
     """Filename under static/portraits/ for a character with no custom picture,
-    or None if nothing suitable ships with the app."""
+    or None if nothing suitable ships with the app.
+
+    gender/state only apply to kind == "wizard"/"apprentice": gender picks the
+    male/female art (set once at creation/hire — see the toggle on those
+    forms), state picks "lich"/"vampire" art for a wizard currently in that
+    form (see expansions.is_lich()/is_vampire()). Falls back one axis at a
+    time (state+gender -> state -> gender -> plain) so a missing combination
+    never loses the default picture entirely."""
     if kind in ("soldier", "companion"):
         stems = [type_key, SOLDIER_PORTRAIT_ALIAS.get(type_key)]
     elif kind == "captain":
         # A promoted captain keeps the look of the soldier they were promoted
         # from; a hired one falls back to the generic captain artwork.
         stems = [type_key, "captain"]
+    elif kind in ("wizard", "apprentice"):
+        suffix = f"_{state}" if state and kind == "wizard" else ""
+        female = gender == "female"
+        stems = []
+        if suffix and female:
+            stems.append(f"{kind}{suffix}_female")
+        if suffix:
+            stems.append(f"{kind}{suffix}")
+        if female:
+            stems.append(f"{kind}_female")
+        stems.append(kind)
     else:
         stems = [kind]
     for stem in stems:
@@ -250,7 +273,7 @@ def normalize_item_slots(raw: Iterable[str], n: int) -> list[str]:
     return slots[:n]
 
 
-def empty_wizard(name: str = "", school: str = "Elementalist") -> dict:
+def empty_wizard(name: str = "", school: str = "Elementalist", gender: str = "male") -> dict:
     stats = deepcopy(FIRE_GIANT_WIZARD_BASE if school == "Fire Giant" else WIZARD_BASE)
     return {
         "name": name,
@@ -268,10 +291,13 @@ def empty_wizard(name: str = "", school: str = "Elementalist") -> dict:
         "level_history": [],
         # Lich / Beastcrafter / pact-holder. See expansions.py.
         "state": expansions.default_wizard_state(),
+        # Picks the default portrait only (see default_portrait_name()) — set
+        # once here from the creation-page toggle and never shown/editable again.
+        "gender": "female" if gender == "female" else "male",
     }
 
 
-def empty_apprentice(name: str = "") -> dict:
+def empty_apprentice(name: str = "", gender: str = "male") -> dict:
     stats = deepcopy(APPRENTICE_BASE)
     return {
         "name": name,
@@ -283,6 +309,7 @@ def empty_apprentice(name: str = "") -> dict:
         "permanent_injuries": [],
         "notes": "",
         "portrait": None,
+        "gender": "female" if gender == "female" else "male",
     }
 
 
@@ -706,6 +733,8 @@ def create_warband(
     wizard_starting_xp: int = 0,
     max_soldiers: int | None = None,
     max_specialists: int | None = None,
+    wizard_gender: str = "male",
+    apprentice_gender: str = "male",
 ) -> tuple[Warband | None, str]:
     """
     soldiers: optional list of {type_key, name} hired at creation (costs deducted).
@@ -721,6 +750,9 @@ def create_warband(
     wizard_starting_xp: house-ruled starting XP for the wizard; defaults to 0.
     max_soldiers: house-ruled roster cap; defaults to MAX_SOLDIERS (8).
     max_specialists: house-ruled specialist cap; defaults to MAX_SPECIALISTS (4).
+    wizard_gender/apprentice_gender: picks default portrait art only (see
+        empty_wizard()/empty_apprentice()) — set once here from the creation
+        page's toggle, never surfaced again afterwards.
     """
     homerules = default_homerules()
     if max_soldiers is not None:
@@ -790,7 +822,7 @@ def create_warband(
         if gold < APPRENTICE_COST:
             return None, f"Not enough gold for apprentice ({APPRENTICE_COST} gc)."
         gold -= APPRENTICE_COST
-        apprentice = empty_apprentice(apprentice_name or "Apprentice")
+        apprentice = empty_apprentice(apprentice_name or "Apprentice", apprentice_gender)
 
     # Validate soldiers before committing
     hired: list[dict] = []
@@ -837,7 +869,7 @@ def create_warband(
         "updated": _now(),
         "gold": gold,
         "notes": "",
-        "wizard": empty_wizard(wizard_name.strip() or "Wizard", school),
+        "wizard": empty_wizard(wizard_name.strip() or "Wizard", school, wizard_gender),
         "apprentice": apprentice,
         "captain": None,
         "homerules": homerules,
@@ -913,6 +945,10 @@ def list_warbands() -> list[dict]:
                 ),
                 "updated": data.get("updated", ""),
                 "portrait": (data.get("wizard") or {}).get("portrait"),
+                "gender": (data.get("wizard") or {}).get("gender"),
+                "state": "vampire" if expansions.is_vampire(data) else (
+                    "lich" if expansions.state_kind(data) == expansions.STATE_LICH else None
+                ),
             }
         )
     return items
@@ -1089,9 +1125,13 @@ def _normalize_warband(wb: dict) -> dict:
     wiz.setdefault("permanent_injuries", [])
     _resync_permanent_injury_text(wiz)
     wiz.setdefault("portrait_source_name", None)
+    if wiz.get("gender") != "female":
+        wiz["gender"] = "male"
     fd = wiz.setdefault("fin_dalka", {"owned": False, "attempts": {}})
     fd.setdefault("owned", False)
     fd.setdefault("attempts", {})
+    uf = wiz.setdefault("underworld_favors", {"markers": 0})
+    uf.setdefault("markers", 0)
     # Wizard state (Lich / Beastcrafter / pact). Backfilled per-key so a warband
     # saved before this existed loads as an ordinary wizard.
     state = wiz.setdefault("state", expansions.default_wizard_state())
@@ -1104,6 +1144,7 @@ def _normalize_warband(wb: dict) -> dict:
     if isinstance(wiz.get("spells"), str):
         wiz["spells"] = []
     wb.setdefault("vault_items", [])
+    wb.setdefault("giant_blooded_pending", False)
     horse = wb.setdefault("horse", {"owned": False, "rider": None})
     horse.setdefault("owned", False)
     horse.setdefault("rider", None)
@@ -1126,6 +1167,8 @@ def _normalize_warband(wb: dict) -> dict:
         _resync_permanent_injury_text(ap)
         ap.setdefault("portrait_source_name", None)
         ap.pop("health_current", None)
+        if ap.get("gender") != "female":
+            ap["gender"] = "male"
     hr = wb.setdefault("homerules", default_homerules())
     for k, v in default_homerules().items():
         hr.setdefault(k, v)
@@ -1440,7 +1483,11 @@ def portrait_filesystem_path(rel: str | None) -> Path | None:
 
 
 def resolve_portrait_path(
-    rel: str | None, kind: str, type_key: str | None = None
+    rel: str | None,
+    kind: str,
+    type_key: str | None = None,
+    gender: str | None = None,
+    state: str | None = None,
 ) -> Path | None:
     """The picture to actually show: the uploaded one if there is one, else the
     default that ships with the app. Used by the PDF export; the web templates go
@@ -1448,7 +1495,7 @@ def resolve_portrait_path(
     path = portrait_filesystem_path(rel)
     if path:
         return path
-    name = default_portrait_name(kind, type_key)
+    name = default_portrait_name(kind, type_key, gender, state)
     return (DEFAULT_PORTRAIT_DIR / name) if name else None
 
 
@@ -1695,16 +1742,39 @@ def add_soldier(
         if info["category"] == "specialist" and specialist_count(wb) >= spec_cap:
             return False, f"Specialist limit reached ({spec_cap})."
     cost = expansions.soldier_cost(wb, info, type_key)
+    giant_blooded_now = bool(wb.get("giant_blooded_pending")) and not _giant_blooded_homerule_gate(wb)
+    if giant_blooded_now:
+        if type_key not in giant_blooded_eligible_type_keys():
+            return False, (
+                f"{info['name']} can't be Giant-Blooded (only ordinary human soldiers are "
+                "eligible) — turn off the \"next hire is Giant-Blooded\" toggle first, or "
+                "hire an eligible type."
+            )
+        cost += GIANT_BLOODED_COST
     if wb.get("gold", 0) < cost:
         return False, f"Not enough gold (need {cost} gc, have {wb.get('gold', 0)} gc)."
 
     soldier, order_suffix, illusion_suffix = _build_soldier_record(
         wb, type_key, info, name, order, illusion_info, illusion_source
     )
+    giant_blooded_suffix = ""
+    if giant_blooded_now:
+        backup = {}
+        parts = []
+        for stat, delta in GIANT_BLOODED_STAT_DELTA.items():
+            before = int(soldier.get(stat, info.get(stat, 0)))
+            after = before + delta
+            backup[stat] = before
+            soldier[stat] = after
+            parts.append(f"{stat.capitalize()} {before} -> {after}")
+        soldier["giant_blooded"] = True
+        soldier["giant_blooded_backup"] = backup
+        wb["giant_blooded_pending"] = False
+        giant_blooded_suffix = f", Giant-Blooded ({', '.join(parts)})"
     wb["gold"] = int(wb.get("gold", 0)) - cost
     wb.setdefault("soldiers", []).append(soldier)
     wb.setdefault("history", []).append(
-        {"when": _now(), "text": f"Hired {soldier['name']} ({info['name']}{order_suffix}{illusion_suffix}) for {cost} gc."}
+        {"when": _now(), "text": f"Hired {soldier['name']} ({info['name']}{order_suffix}{illusion_suffix}{giant_blooded_suffix}) for {cost} gc."}
     )
     return True, f"Hired {soldier['name']} ({info['name']}) for {cost} gc. Treasury: {wb['gold']} gc."
 
@@ -2126,75 +2196,55 @@ def remove_construct_modification(wb: dict, soldier_id: str, index: int) -> tupl
     return True, text
 
 
-def _giant_blooded_gate(wb: dict, soldier: dict | None) -> str | None:
+def _giant_blooded_homerule_gate(wb: dict) -> str | None:
     hr = wb.get("homerules") or {}
     if "Blood Legacy" not in enabled_sources(wb) or not hr.get("giant_blooded_enabled"):
         return (
             "Giant-Blooded needs Blood Legacy and its own homerule switched on "
             "under Additional Rules and Homerules first."
         )
-    if soldier is None:
-        return "Soldier not found."
-    if soldier.get("type_key") not in giant_blooded_eligible_type_keys():
-        return (
-            "Only an ordinary human soldier can be Giant-Blooded "
-            "(not animals, demons, constructs, undead, or non-human hybrids)."
-        )
     return None
 
 
-def set_soldier_giant_blooded(wb: dict, soldier_id: str, fitted: bool) -> tuple[bool, str]:
-    """Blood Legacy's Giant-Blooded modification (Chapter Three): +50gc,
-    -1 Move, -2 Will, +2 Health, and the Giant-Blooded trait, declared for one
-    soldier in the warband. The book allows only one Giant-Blooded soldier per
-    warband, so this is exposed as a single global picker (choose which
-    hired soldier gets it) gated behind one homerule toggle, rather than a
-    "make Giant-Blooded" button repeated on every soldier's row.
-
-    Reverses the stat changes exactly on removal via a backup dict on the
-    soldier record itself — same idiom as add_construct_modification's
-    stat_backup. The 50gc fee isn't refunded on removal (declared/paid once,
-    same as the apprentice-hiring fee unless a refund is explicitly asked for)."""
-    soldiers = wb.get("soldiers") or []
-    soldier = next((s for s in soldiers if s.get("id") == soldier_id), None)
-    err = _giant_blooded_gate(wb, soldier)
+def set_giant_blooded_pending(wb: dict, pending: bool) -> tuple[bool, str]:
+    """Blood Legacy's Giant-Blooded modification (Chapter Three) is "declared
+    at hire" per the book, not applied to an existing soldier after the fact.
+    This toggle marks that the *next* eligible soldier hired should be
+    Giant-Blooded; add_soldier() consumes and clears it automatically. Only
+    one Giant-Blooded soldier per warband, so the toggle refuses to arm while
+    one is already on the roster."""
+    err = _giant_blooded_homerule_gate(wb)
     if err:
         return False, err
-    already = bool(soldier.get("giant_blooded"))
-    if fitted == already:
-        return False, "Already in that state."
-    if fitted:
-        other = next(
-            (s for s in soldiers if s.get("giant_blooded") and s.get("id") != soldier_id), None
-        )
-        if other:
-            return False, f"{other.get('name', 'Another soldier')} is already Giant-Blooded; only one per warband."
-        if int(wb.get("gold", 0)) < GIANT_BLOODED_COST:
-            return False, f"Need {GIANT_BLOODED_COST} gc for Giant-Blooded."
-        cat = get_soldier(soldier.get("type_key", "")) or {}
-        get_stat = lambda k: int(soldier.get(k, cat.get(k, 0)))  # noqa: E731
-        set_stat = lambda k, v: soldier.__setitem__(k, v)  # noqa: E731
-        backup = {}
-        parts = []
-        for stat, delta in GIANT_BLOODED_STAT_DELTA.items():
-            before = get_stat(stat)
-            after = before + delta
-            backup[stat] = before
-            set_stat(stat, after)
-            parts.append(f"{stat.capitalize()} {before} -> {after}")
-        wb["gold"] = int(wb.get("gold", 0)) - GIANT_BLOODED_COST
-        soldier["giant_blooded"] = True
-        soldier["giant_blooded_backup"] = backup
-        text = (
-            f"{soldier.get('name', 'Soldier')} became Giant-Blooded for {GIANT_BLOODED_COST}gc "
-            f"({', '.join(parts)})."
-        )
-    else:
-        backup = soldier.pop("giant_blooded_backup", {}) or {}
-        for stat, value in backup.items():
-            soldier[stat] = value
-        soldier["giant_blooded"] = False
-        text = f"{soldier.get('name', 'Soldier')} is no longer Giant-Blooded."
+    if pending:
+        existing = next((s for s in wb.get("soldiers") or [] if s.get("giant_blooded")), None)
+        if existing:
+            return False, f"{existing.get('name', 'A soldier')} is already Giant-Blooded; only one per warband."
+        wb["giant_blooded_pending"] = True
+        return True, "The next eligible soldier hired will be Giant-Blooded."
+    wb["giant_blooded_pending"] = False
+    return True, "Cancelled — the next hire will be an ordinary soldier."
+
+
+def remove_soldier_giant_blooded(wb: dict, soldier_id: str) -> tuple[bool, str]:
+    """Reverses a soldier's Giant-Blooded stat changes exactly, via the backup
+    dict recorded when it was applied at hire — same idiom as
+    add_construct_modification's stat_backup. The 50gc fee isn't refunded
+    (declared/paid once, same as the apprentice-hiring fee unless a refund is
+    explicitly asked for)."""
+    err = _giant_blooded_homerule_gate(wb)
+    if err:
+        return False, err
+    soldier = next((s for s in wb.get("soldiers") or [] if s.get("id") == soldier_id), None)
+    if soldier is None:
+        return False, "Soldier not found."
+    if not soldier.get("giant_blooded"):
+        return False, "That soldier isn't Giant-Blooded."
+    backup = soldier.pop("giant_blooded_backup", {}) or {}
+    for stat, value in backup.items():
+        soldier[stat] = value
+    soldier["giant_blooded"] = False
+    text = f"{soldier.get('name', 'Soldier')} is no longer Giant-Blooded."
     add_history(wb, text)
     return True, text
 
@@ -2620,7 +2670,7 @@ def remove_captain_permanent_injury(wb: dict, index: int) -> tuple[bool, str]:
     return remove_permanent_injury(wb, "captain", index)
 
 
-def hire_apprentice(wb: dict, name: str = "") -> tuple[bool, str]:
+def hire_apprentice(wb: dict, name: str = "", gender: str = "male") -> tuple[bool, str]:
     if wb.get("apprentice"):
         return False, "Warband already has an apprentice."
     wschool = (wb.get("wizard") or {}).get("school")
@@ -2632,7 +2682,7 @@ def hire_apprentice(wb: dict, name: str = "") -> tuple[bool, str]:
         return False, f"Need {APPRENTICE_COST} gc for an apprentice."
     wb["gold"] = int(wb["gold"]) - APPRENTICE_COST
     wizard_name = (wb.get("wizard") or {}).get("name", "Wizard")
-    wb["apprentice"] = empty_apprentice(name or f"{wizard_name}'s Apprentice")
+    wb["apprentice"] = empty_apprentice(name or f"{wizard_name}'s Apprentice", gender)
     sync_apprentice(wb)
     text = f"Hired apprentice for {APPRENTICE_COST} gc."
     wb.setdefault("history", []).append({"when": _now(), "text": text})
@@ -4072,6 +4122,143 @@ def dismount_horse(wb: dict) -> tuple[bool, str]:
         return False, "No one is mounted."
     _dismount_rider(wb, horse)
     text = "Dismounted the warband's horse."
+    add_history(wb, text)
+    return True, text
+
+
+# --- Spellcaster Magazine, Issue 3: Underworld Favours (a debt economy) -----
+#
+# Markers are tracked on the wizard. Taking an Underworld Loan or claiming a
+# free Favour adds Markers; paying one off costs UNDERWORLD_PAYOFF_COST gold.
+# After a game with Markers held, roll_underworld_debt_call() resolves the
+# book's own call-in table — the parts that are pure bookkeeping (paying
+# Markers from gold, who's owed a permanent injury) are applied automatically;
+# the parts that need a table-side choice (which soldiers sit out, which
+# magic item gets sold) stay descriptive, same as the rest of this app's
+# "doesn't roll combat/table choices for you" precedent.
+
+
+def _underworld_favors_gate(wb: dict) -> str | None:
+    if "Spellcaster Magazine" not in enabled_sources(wb):
+        return "Spellcaster Magazine is switched off; enable it under Additional Rules and Homerules first."
+    return None
+
+
+def take_underworld_loan(wb: dict, amount: int) -> tuple[bool, str]:
+    err = _underworld_favors_gate(wb)
+    if err:
+        return False, err
+    amount = int(amount)
+    if amount < UNDERWORLD_LOAN_MIN or amount > UNDERWORLD_LOAN_MAX or amount % 100 != 0:
+        return False, f"Loan amount must be a multiple of 100, between {UNDERWORLD_LOAN_MIN} and {UNDERWORLD_LOAN_MAX} gc."
+    wiz = wb.setdefault("wizard", {})
+    uf = wiz.setdefault("underworld_favors", {"markers": 0})
+    markers_cost = amount // 100
+    wb["gold"] = int(wb.get("gold", 0)) + amount
+    uf["markers"] = int(uf.get("markers", 0)) + markers_cost
+    text = f"Took an Underworld Loan of {amount}gc for {markers_cost} Marker(s) (now {uf['markers']} held)."
+    add_history(wb, text)
+    return True, text
+
+
+def claim_free_underworld_favor(wb: dict) -> tuple[bool, str]:
+    err = _underworld_favors_gate(wb)
+    if err:
+        return False, err
+    wiz = wb.setdefault("wizard", {})
+    uf = wiz.setdefault("underworld_favors", {"markers": 0})
+    level = int(wiz.get("level", 0))
+    if int(uf.get("markers", 0)) >= level:
+        return False, f"Maximum Markers held for a level {level} wizard is {level} — pay one off first."
+    uf["markers"] = int(uf.get("markers", 0)) + 1
+    text = (
+        f"Claimed a Favour for free (now {uf['markers']} Marker(s) held) — resolve whichever "
+        "Favour (Loan/Intimidation/Muscle) you're claiming at the table."
+    )
+    add_history(wb, text)
+    return True, text
+
+
+def pay_off_underworld_marker(wb: dict) -> tuple[bool, str]:
+    err = _underworld_favors_gate(wb)
+    if err:
+        return False, err
+    wiz = wb.setdefault("wizard", {})
+    uf = wiz.setdefault("underworld_favors", {"markers": 0})
+    if int(uf.get("markers", 0)) < 1:
+        return False, "No Markers held."
+    if int(wb.get("gold", 0)) < UNDERWORLD_PAYOFF_COST:
+        return False, f"Need {UNDERWORLD_PAYOFF_COST} gc to pay off a Marker."
+    wb["gold"] = int(wb.get("gold", 0)) - UNDERWORLD_PAYOFF_COST
+    uf["markers"] = int(uf.get("markers", 0)) - 1
+    text = f"Paid off a Marker for {UNDERWORLD_PAYOFF_COST}gc ({uf['markers']} remaining)."
+    add_history(wb, text)
+    return True, text
+
+
+def roll_underworld_debt_call(
+    wb: dict,
+    call_roll: int | None = None,
+    outcome_roll: int | None = None,
+    who_roll: int | None = None,
+) -> tuple[bool, str]:
+    """Resolves the post-game debt-call table. By default the app rolls for
+    you (pure bookkeeping — this isn't a table-play roll anyone's already
+    made). Pass call_roll/outcome_roll/who_roll (each 1-20) to instead record
+    dice actually rolled at the table; any left as None are still rolled by
+    the app, so a player can report as much or as little of the physical roll
+    as they want."""
+    err = _underworld_favors_gate(wb)
+    if err:
+        return False, err
+    for label, value in (("call", call_roll), ("table", outcome_roll), ("who", who_roll)):
+        if value is not None and not (1 <= int(value) <= 20):
+            return False, f"The {label} roll must be between 1 and 20."
+    wiz = wb.setdefault("wizard", {})
+    uf = wiz.setdefault("underworld_favors", {"markers": 0})
+    markers = int(uf.get("markers", 0))
+    if markers < 1:
+        return False, "No Markers held — nothing to call in."
+    call_roll = int(call_roll) if call_roll is not None else random.randint(1, 20)
+    if call_roll > markers:
+        text = f"No call this time (rolled {call_roll} vs. {markers} Marker(s) held)."
+        add_history(wb, text)
+        return True, text
+    outcome_roll = int(outcome_roll) if outcome_roll is not None else random.randint(1, 20)
+    paid_from_gold = 0
+    while outcome_roll <= 6 and uf["markers"] > 0 and int(wb.get("gold", 0)) >= UNDERWORLD_PAYOFF_COST:
+        wb["gold"] = int(wb.get("gold", 0)) - UNDERWORLD_PAYOFF_COST
+        uf["markers"] -= 1
+        paid_from_gold += 1
+    cascaded = outcome_roll <= 6 and paid_from_gold == 0
+    if outcome_roll <= 6 and not cascaded:
+        text = (
+            f"Debt called in (rolled {call_roll} vs. {markers}; table roll {outcome_roll}): "
+            f"paid off {paid_from_gold} Marker(s) from Treasury gold ({UNDERWORLD_PAYOFF_COST}gc each), "
+            f"{uf['markers']} remaining."
+        )
+    elif outcome_roll <= 12 or cascaded:
+        uf["markers"] = max(0, uf["markers"] - 1)
+        text = (
+            f"Debt called in (rolled {call_roll} vs. {markers}; table roll {outcome_roll}): "
+            "sell a magic item from the vault to cover it — 1 Marker paid off "
+            f"({uf['markers']} remaining)."
+        )
+    elif outcome_roll <= 18:
+        text = (
+            f"Debt called in (rolled {call_roll} vs. {markers}; table roll {outcome_roll}): "
+            "warband members (not the wizard) miss the next game — remove 1 Marker per full "
+            f"50gc of their combined base cost, then use \"Pay off a Marker\" to record it "
+            f"({uf['markers']} currently held)."
+        )
+    else:
+        who_roll = int(who_roll) if who_roll is not None else random.randint(1, 20)
+        target = "wizard" if who_roll <= 5 else ("apprentice" if wb.get("apprentice") else "wizard")
+        text = (
+            f"Debt called in (rolled {call_roll} vs. {markers}; table roll {outcome_roll}): "
+            f"the {target} is beaten and receives a permanent injury on top of any suffered "
+            "in-game — roll and record it as usual."
+        )
     add_history(wb, text)
     return True, text
 

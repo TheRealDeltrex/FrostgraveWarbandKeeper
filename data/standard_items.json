@@ -136,5 +136,50 @@
     "summary": "8\" shooting attack at -1 damage; -2 damage in hand-to-hand.",
     "description": "8\" shooting attack at -1 damage; -2 damage in hand-to-hand.",
     "slot_cost": 1
+  },
+  {
+    "name": "Pistol",
+    "category": "Missile",
+    "kind": "simple",
+    "source": "Spellcaster Magazine",
+    "summary": "10\" range. One-handed; doubles as a dagger. Misfire on a natural 1.",
+    "description": "Black Powder Firearms (Issue 1): 10\" range, one-handed, and doubles as a dagger (never unarmed; combines with a hand weapon for the usual +1 Fight bonus in Frostgrave). May carry as many as item slots allow. Like every firearm it's Inaccurate (-1 Shoot), Armour Piercing (+2 damage; also -2 Armour, min 10, within half range), Loud (natural 20 triggers a Random Encounter roll), and subject to Misfire on a natural 1 — see the Lexicon's Black Powder Firearms table for the misfire result and available upgrades (Double-barrelled, Axe-gun, Superior Craftsmanship, Silver Bullets).",
+    "slot_cost": 1
+  },
+  {
+    "name": "Musket",
+    "category": "Missile",
+    "kind": "simple",
+    "source": "Spellcaster Magazine",
+    "summary": "24\" range. Two-handed. Misfire on a natural 1.",
+    "description": "Black Powder Firearms (Issue 1): 24\" range, two-handed (only one carried, no shield). Usable in melee as a two-handed weapon but without the usual +2 damage bonus. Inaccurate, Armour Piercing, Loud, and subject to Misfire on a natural 1 — see the Lexicon's Black Powder Firearms table for the misfire result and available upgrades.",
+    "slot_cost": 2
+  },
+  {
+    "name": "Blunderbuss",
+    "category": "Missile",
+    "kind": "simple",
+    "source": "Spellcaster Magazine",
+    "summary": "14\" range, hits everyone within 1\" of the target. Two-handed. Misfire on a natural 1.",
+    "description": "Black Powder Firearms (Issue 1): 14\" range, two-handed. The shooting attack hits the target and every other figure within 1\" of it (a misfire on the first roll cancels the rest). Melee like a Pistol, but without the +1 Fight combo bonus. Inaccurate, Armour Piercing, Loud, and subject to Misfire on a natural 1 — see the Lexicon's Black Powder Firearms table for the misfire result and available upgrades.",
+    "slot_cost": 2
+  },
+  {
+    "name": "Axe-gun",
+    "category": "Missile",
+    "kind": "simple",
+    "source": "Spellcaster Magazine",
+    "summary": "Pistol/blunderbuss combo weapon; counts as a hand weapon (not dagger) in melee.",
+    "description": "Black Powder Firearms (Issue 1): a Pistol or Blunderbuss fitted with an axe head, counting as a hand weapon (not a dagger) in melee instead of the usual firearm melee rule. Same range/slot cost as whichever base firearm it's built from; Inaccurate, Armour Piercing, Loud, and subject to Misfire on a natural 1 — see the Lexicon's Black Powder Firearms table.",
+    "slot_cost": 1
+  },
+  {
+    "name": "Powder Horn",
+    "category": "Gear",
+    "kind": "simple",
+    "source": "Spellcaster Magazine",
+    "summary": "Optional flavor for a firearm in Frostgrave; required in Ghost Archipelago.",
+    "description": "Black Powder Firearms (Issue 1): not mechanically required to carry a firearm in Frostgrave, but the book's own pre-built Musketeer/Coachman/Duellist statlines include one, and Ghost Archipelago requires it (free, takes a slot) for the same firearm rules.",
+    "slot_cost": 1
   }
 ]

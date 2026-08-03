@@ -78,6 +78,9 @@ from frostgrave_data import (
     STARTING_GOLD,
     STARTING_SPELL_COUNT,
     TEMPORARY_MEMBER_LIMIT,
+    UNDERWORLD_LOAN_MAX,
+    UNDERWORLD_LOAN_MIN,
+    UNDERWORLD_PAYOFF_COST,
     XP_PER_LEVEL,
     all_spells_flat,
     animal_companion_type_keys,
@@ -86,7 +89,6 @@ from frostgrave_data import (
     construct_type_keys,
     fin_dalka_spell_ids,
     format_stat,
-    giant_blooded_eligible_type_keys,
     horse_rider_eligible_type_keys,
     group_soldiers_by_source,
     illusion_source_choices,
@@ -150,6 +152,10 @@ from warband_store import (
     sell_or_release_horse,
     mount_horse,
     dismount_horse,
+    take_underworld_loan,
+    claim_free_underworld_favor,
+    pay_off_underworld_marker,
+    roll_underworld_debt_call,
     apply_level_up,
     apply_portrait,
     apply_soldier_level_up,
@@ -215,7 +221,8 @@ from warband_store import (
     set_animal_feature,
     set_base_location,
     set_permanent_injury_prosthetic,
-    set_soldier_giant_blooded,
+    remove_soldier_giant_blooded,
+    set_giant_blooded_pending,
     set_soldier_status,
     set_wizard_state,
     soldier_count,
@@ -265,7 +272,13 @@ app.config["MAX_CONTENT_LENGTH"] = 8 * 1024 * 1024  # 8 MB uploads
 BROWSER_MODE = os.environ.get("FWK_BROWSER") == "1"
 
 
-def portrait_src(portrait: str | None, kind: str, type_key: str | None = None) -> str | None:
+def portrait_src(
+    portrait: str | None,
+    kind: str,
+    type_key: str | None = None,
+    gender: str | None = None,
+    state: str | None = None,
+) -> str | None:
     """URL of the picture to show for a character: their uploaded one, else the
     default artwork shipped with the app. None means neither exists, and the
     template should fall back to its "?" placeholder.
@@ -275,7 +288,7 @@ def portrait_src(portrait: str | None, kind: str, type_key: str | None = None) -
     a warband can carry a portrait reference to a file that's no longer there
     (e.g. an imported .warbands file, since portrait bytes are never included
     in the export), so the stored path can't be trusted blindly."""
-    path = resolve_portrait_path(portrait, kind, type_key)
+    path = resolve_portrait_path(portrait, kind, type_key, gender, state)
     if not path:
         return None
     if portrait and portrait_filesystem_path(portrait):
@@ -321,6 +334,9 @@ app.jinja_env.globals.update(
     FIN_DALKA_DECIPHER_COST=FIN_DALKA_DECIPHER_COST,
     FIN_DALKA_BASE_SELL=FIN_DALKA_BASE_SELL,
     FIN_DALKA_SELL_PER_SPELL=FIN_DALKA_SELL_PER_SPELL,
+    UNDERWORLD_LOAN_MIN=UNDERWORLD_LOAN_MIN,
+    UNDERWORLD_LOAN_MAX=UNDERWORLD_LOAN_MAX,
+    UNDERWORLD_PAYOFF_COST=UNDERWORLD_PAYOFF_COST,
     LEVELUP_STATS=LEVELUP_STATS,
     level_from_xp=level_from_xp,
     captain_effective_stats=captain_effective_stats,
@@ -494,6 +510,8 @@ def warband_new() -> str | Response:
             spell_keys = request.form.getlist("spells")
         with_apprentice = request.form.get("with_apprentice") == "on"
         apprentice_name = (request.form.get("apprentice_name") or "").strip()
+        wizard_gender = "female" if request.form.get("wizard_gender") == "female" else "male"
+        apprentice_gender = "female" if request.form.get("apprentice_gender") == "female" else "male"
         sources = _posted_sources(request.form)
         try:
             starting_gold = int(request.form.get("starting_gold") or STARTING_GOLD)
@@ -519,7 +537,8 @@ def warband_new() -> str | Response:
                                warband_name=name, wizard_name=wizard,
                                with_apprentice=with_apprentice, apprentice_name=apprentice_name,
                                starting_gold=starting_gold, wizard_starting_xp=wizard_starting_xp,
-                               max_soldiers=max_soldiers, max_specialists=max_specialists)
+                               max_soldiers=max_soldiers, max_specialists=max_specialists,
+                               wizard_gender=wizard_gender, apprentice_gender=apprentice_gender)
 
         # Soldiers are not hired at creation — they're recruited later on the
         # warband page (from the full roster, including supplement mercenaries).
@@ -538,6 +557,8 @@ def warband_new() -> str | Response:
             wizard_starting_xp=wizard_starting_xp,
             max_soldiers=max_soldiers,
             max_specialists=max_specialists,
+            wizard_gender=wizard_gender,
+            apprentice_gender=apprentice_gender,
         )
         if not wb:
             flash(msg, "error")
@@ -546,7 +567,8 @@ def warband_new() -> str | Response:
                                warband_name=name, wizard_name=wizard,
                                with_apprentice=with_apprentice, apprentice_name=apprentice_name,
                                starting_gold=starting_gold, wizard_starting_xp=wizard_starting_xp,
-                               max_soldiers=max_soldiers, max_specialists=max_specialists)
+                               max_soldiers=max_soldiers, max_specialists=max_specialists,
+                               wizard_gender=wizard_gender, apprentice_gender=apprentice_gender)
 
         try:
             wiz_file = request.files.get("wizard_portrait")
@@ -638,6 +660,8 @@ def _render_new(
     max_soldiers: int = MAX_SOLDIERS,
     max_specialists: int = MAX_SPECIALISTS,
     random_identity: dict | None = None,
+    wizard_gender: str = "male",
+    apprentice_gender: str = "male",
 ):
     sources = sources or {}
     schools = _new_schools(sources, pentangle, fire_giant, vampire)
@@ -683,6 +707,8 @@ def _render_new(
         max_soldiers=max_soldiers,
         max_specialists=max_specialists,
         random_identity=random_identity,
+        wizard_gender=wizard_gender,
+        apprentice_gender=apprentice_gender,
     )
 
 
@@ -756,21 +782,17 @@ def warband_view(warband_id: str) -> str:
     temporary_member_count = sum(
         1 for s in all_soldiers if s.get("status") != "dead" and _is_temporary(s)
     )
-    # Blood Legacy's Giant-Blooded: a single global picker (see
-    # set_soldier_giant_blooded) rather than a button repeated on every
-    # soldier's row, since only one soldier in the warband may take it.
+    # Blood Legacy's Giant-Blooded: declared at hire per the book, so this is
+    # a single "next hire is Giant-Blooded" toggle (see set_giant_blooded_pending)
+    # consumed automatically by add_soldier, rather than a picker that
+    # upgrades an already-hired soldier.
     giant_blooded_enabled = "Blood Legacy" in wb_sources and bool(
         (wb.get("homerules") or {}).get("giant_blooded_enabled")
     )
-    giant_blooded_eligible_keys = giant_blooded_eligible_type_keys()
     giant_blooded_soldier = next(
         (s for s in all_soldiers if s.get("giant_blooded")), None
     )
-    giant_blooded_choices = [
-        {"id": s["id"], "name": s.get("name") or "Unnamed"}
-        for s in all_soldiers
-        if s.get("status") != "dead" and s.get("type_key") in giant_blooded_eligible_keys
-    ]
+    giant_blooded_pending = bool(wb.get("giant_blooded_pending"))
     # The Red King's Ragged Warbands & Random Recruits: a single "Fill
     # roster" control (see roll_random_recruits), same idiom as Giant-Blooded
     # above — a warband-level toggle gates one shared control rather than a
@@ -812,6 +834,12 @@ def warband_view(warband_id: str) -> str:
         for s in all_soldiers
         if s.get("status") != "dead" and s.get("type_key") in horse_rider_eligible_keys
     ]
+    # Spellcaster Magazine's Underworld Favours: a debt economy tracked on
+    # wb.wizard.underworld_favors (Markers held); the loan amounts and debt
+    # call table are the same data the Lexicon shows, not a re-transcription.
+    underworld_favors_enabled = "Spellcaster Magazine" in wb_sources
+    underworld_favors = (wb.get("wizard") or {}).get("underworld_favors") or {"markers": 0}
+    underworld_wizard_level = int((wb.get("wizard") or {}).get("level", 0))
     return render_template(
         "warband_view.html",
         wb=wb,
@@ -826,12 +854,15 @@ def warband_view(warband_id: str) -> str:
         animal_companion_limit=animal_companion_limit(wb),
         giant_blooded_enabled=giant_blooded_enabled,
         giant_blooded_soldier=giant_blooded_soldier,
-        giant_blooded_choices=giant_blooded_choices,
+        giant_blooded_pending=giant_blooded_pending,
         ragged_warbands_enabled=ragged_warbands_enabled,
         ragged_warbands_have=ragged_warbands_have,
         ragged_warbands_rules=ragged_warbands_rules,
         fin_dalka_enabled=fin_dalka_enabled,
         fin_dalka_spells=fin_dalka_spells,
+        underworld_favors_enabled=underworld_favors_enabled,
+        underworld_favors=underworld_favors,
+        underworld_wizard_level=underworld_wizard_level,
         horses_enabled=horses_enabled,
         has_stable=has_stable,
         horse_rider_choices=horse_rider_choices,
@@ -852,6 +883,11 @@ def warband_view(warband_id: str) -> str:
         },
         standard_items=load_spellcaster_items(),  # no armour for wizard/apprentice UI
         full_standard_items=load_standard_items(),  # includes armour/shield: captain picker + reference list
+        item_slot_costs={
+            it["name"]: int(it.get("slot_cost", 1))
+            for it in load_standard_items()
+            if it.get("kind", "simple") == "simple"
+        },
         wizard_spells_ui=wiz_spells,
         vault_names=vault_names,
         potion_choices=load_potion_choices(),
@@ -1034,7 +1070,8 @@ def _act_soldier_edit(wb: dict) -> tuple[bool, str]:
 
 @register_action("hire_apprentice")
 def _act_hire_apprentice(wb: dict) -> tuple[bool, str]:
-    ok, msg = hire_apprentice(wb, (request.form.get("apprentice_name") or "").strip())
+    gender = "female" if request.form.get("apprentice_gender") == "female" else "male"
+    ok, msg = hire_apprentice(wb, (request.form.get("apprentice_name") or "").strip(), gender)
     if ok:
         f = request.files.get("apprentice_portrait")
         apply_portrait(wb["apprentice"], wb["id"], "apprentice", f)
@@ -1107,6 +1144,44 @@ def _act_mount_horse(wb: dict) -> tuple[bool, str]:
 @register_action("dismount_horse")
 def _act_dismount_horse(wb: dict) -> tuple[bool, str]:
     return dismount_horse(wb)
+
+
+@register_action("take_underworld_loan")
+def _act_take_underworld_loan(wb: dict) -> tuple[bool, str]:
+    try:
+        amount = int(request.form.get("amount") or 0)
+    except ValueError:
+        return False, "Invalid loan amount."
+    return take_underworld_loan(wb, amount)
+
+
+@register_action("claim_free_underworld_favor")
+def _act_claim_free_underworld_favor(wb: dict) -> tuple[bool, str]:
+    return claim_free_underworld_favor(wb)
+
+
+@register_action("pay_off_underworld_marker")
+def _act_pay_off_underworld_marker(wb: dict) -> tuple[bool, str]:
+    return pay_off_underworld_marker(wb)
+
+
+@register_action("roll_underworld_debt_call")
+def _act_roll_underworld_debt_call(wb: dict) -> tuple[bool, str]:
+    def _opt_int(name: str) -> int | None:
+        raw = (request.form.get(name) or "").strip()
+        if not raw:
+            return None
+        try:
+            return int(raw)
+        except ValueError:
+            return None
+
+    return roll_underworld_debt_call(
+        wb,
+        call_roll=_opt_int("call_roll"),
+        outcome_roll=_opt_int("outcome_roll"),
+        who_roll=_opt_int("who_roll"),
+    )
 
 
 @register_action("advance_beastcrafter")
@@ -1590,11 +1665,14 @@ def _act_remove_soldier_permanent_injury(wb: dict) -> tuple[bool, str]:
     )
 
 
-@register_action("toggle_soldier_giant_blooded")
-def _act_toggle_soldier_giant_blooded(wb: dict) -> tuple[bool, str]:
-    return set_soldier_giant_blooded(
-        wb, request.form.get("soldier_id") or "", _fitted_from_form()
-    )
+@register_action("set_giant_blooded_pending")
+def _act_set_giant_blooded_pending(wb: dict) -> tuple[bool, str]:
+    return set_giant_blooded_pending(wb, _fitted_from_form())
+
+
+@register_action("remove_soldier_giant_blooded")
+def _act_remove_soldier_giant_blooded(wb: dict) -> tuple[bool, str]:
+    return remove_soldier_giant_blooded(wb, request.form.get("soldier_id") or "")
 
 
 @register_action("roll_random_recruits")

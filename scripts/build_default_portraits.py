@@ -42,7 +42,13 @@ SOURCE_EXTS = ("*.png", "*.jpg", "*.jpeg", "*.webp")
 # Source files whose name doesn't slugify straight onto a soldier name.
 ALIASES = {
     "wizard": "wizard",
+    "female_wizard": "wizard_female",
+    "wizard_lich": "wizard_lich",
+    "female_wizard_lich": "wizard_lich_female",
+    "wizard_vampire": "wizard_vampire",
+    "female_wizard_vampire": "wizard_vampire_female",
     "wizard_s_apprentice": "apprentice",
+    "female_wizard_s_apprentice": "apprentice_female",
     "captain": "captain",
     "construct_small": "small_construct",
     "construct_medium": "medium_construct",

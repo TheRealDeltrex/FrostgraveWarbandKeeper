@@ -373,6 +373,40 @@ textarea:focus {
   width: auto;
 }
 
+/* Male/female side-by-side toggle for the wizard/apprentice creation-time
+   portrait pick — see empty_wizard()/empty_apprentice()'s gender field. */
+.gender-toggle {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+  width: fit-content;
+}
+
+.gender-toggle input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.gender-toggle label {
+  margin: 0;
+  padding: 0.4rem 1.1rem;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.gender-toggle input:checked + label {
+  background: var(--accent);
+  color: var(--bg-deep);
+}
+
+.gender-toggle input:focus-visible + label {
+  outline: 2px solid var(--accent-hover);
+  outline-offset: -2px;
+}
+
 .actions {
   display: flex;
   flex-wrap: wrap;

@@ -225,6 +225,16 @@
           <input id="wizard_portrait" name="wizard_portrait" type="file" accept="image/*" />
           {% if warband_name or wizard_name %}<p class="muted" style="font-size:0.82rem;margin:0.25rem 0 0">Please re-select the wizard picture — it wasn't kept from your last submission.</p>{% endif %}
         </div>
+        <div class="form-row">
+          <label>Portrait</label>
+          <div class="gender-toggle">
+            <input type="radio" id="wizard_gender_m" name="wizard_gender" value="male" {% if wizard_gender != 'female' %}checked{% endif %} />
+            <label for="wizard_gender_m">Male</label>
+            <input type="radio" id="wizard_gender_f" name="wizard_gender" value="female" {% if wizard_gender == 'female' %}checked{% endif %} />
+            <label for="wizard_gender_f">Female</label>
+          </div>
+          <p class="muted" style="font-size:0.78rem;margin:0.35rem 0 0">Only used if you don't upload your own picture. Fixed once the warband is created.</p>
+        </div>
       </div>
       {% if school == "Fire Giant" %}
         <p class="muted">Starting wizard stats: Move 6 · Fight 6 · Shoot 0 · Armour 14 · Will 8 · Health 22 (no armour/shield item slots)</p>
@@ -257,6 +267,16 @@
             <label for="apprentice_portrait">Apprentice picture</label>
             <input id="apprentice_portrait" name="apprentice_portrait" type="file" accept="image/*" />
             {% if with_apprentice %}<p class="muted" style="font-size:0.82rem;margin:0.25rem 0 0">Please re-select the apprentice picture — it wasn't kept from your last submission.</p>{% endif %}
+          </div>
+          <div class="form-row">
+            <label>Portrait</label>
+            <div class="gender-toggle">
+              <input type="radio" id="apprentice_gender_m" name="apprentice_gender" value="male" {% if apprentice_gender != 'female' %}checked{% endif %} />
+              <label for="apprentice_gender_m">Male</label>
+              <input type="radio" id="apprentice_gender_f" name="apprentice_gender" value="female" {% if apprentice_gender == 'female' %}checked{% endif %} />
+              <label for="apprentice_gender_f">Female</label>
+            </div>
+            <p class="muted" style="font-size:0.78rem;margin:0.35rem 0 0">Only used if you don't upload your own picture. Fixed once hired.</p>
           </div>
         </div>
       {% endif %}

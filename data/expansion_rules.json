@@ -5148,7 +5148,7 @@
   },
   {
    "title": "Giant-Blooded (implemented)",
-   "blurb": "Real soldier modification (set_soldier_giant_blooded), gated behind the \"giant_blooded_enabled\" homerule: one soldier per warband, +50gc, applies the stat changes and reverses them exactly if removed. The two convenience pre-built-cost tables in the source stay reference only — this app applies the cost/stat delta directly to any eligible hire instead.",
+   "blurb": "Real soldier modification, gated behind the \"giant_blooded_enabled\" homerule: declared at hire, matching the book — toggle \"the next hire is Giant-Blooded\" on the Soldiers card, then hire an eligible type; the app applies the +50gc cost and stat changes automatically, and reverses them exactly if removed. One soldier per warband. The two convenience pre-built-cost tables in the source stay reference only — this app applies the cost/stat delta directly to any eligible hire instead.",
    "rows": [
     {
      "name": "Giant-Blooded",
@@ -5316,10 +5316,21 @@
    "title": "New Attributes (Bestiary)",
    "blurb": "",
    "rows": [
-    {
-     "name": "New Attributes",
-     "text": "New Attributes: Burning (+2 damage on a won fight, even with no other damage) · Chilling Touch (+2 damage except vs. undead/constructs) · Giant-blooded (see above) · Harvest Blood (surviving figures in a vampire's warband heal it per warband member reduced to 0 Health that game, max one source/game) · Hunter's Will (X) (+2 Will while creature X is on table) · Hurl Rock (12\" +4 damage shooting attack) · Latch On (pushback needs damage dealt, not just a win) · Magic Attacks (X) (attacks count as magic only vs. X) · Magic Vulnerability (+1 damage from all magic attacks) · Opponent Armour Reduction (-1 Armour to a beaten light/heavy-armoured foe) · Partial Immunity to Normal Damage (halves non-magic damage, round down) · Shrouded Form (can't be seen beyond 12\"; +3 Fight vs. shooting) · Supporting Figure Maximum (max +2 supporting bonus against it) · Thaumaturgic Vulnerability (-1 Will vs. Thaumaturge spells) · Two-Headed (opponents count one fewer supporter, min 0)."
-    }
+    {"name": "Burning", "text": "+2 damage on a won fight, even with no other damage."},
+    {"name": "Chilling Touch", "text": "+2 damage except vs. undead/constructs."},
+    {"name": "Giant-blooded", "text": "See Giant-Blooded above."},
+    {"name": "Harvest Blood", "text": "Surviving figures in a vampire's warband heal it per warband member reduced to 0 Health that game, max one source/game."},
+    {"name": "Hunter's Will (X)", "text": "+2 Will while creature X is on table."},
+    {"name": "Hurl Rock", "text": "12\" +4 damage shooting attack."},
+    {"name": "Latch On", "text": "Pushback needs damage dealt, not just a win."},
+    {"name": "Magic Attacks (X)", "text": "Attacks count as magic only vs. X."},
+    {"name": "Magic Vulnerability", "text": "+1 damage from all magic attacks."},
+    {"name": "Opponent Armour Reduction", "text": "-1 Armour to a beaten light/heavy-armoured foe."},
+    {"name": "Partial Immunity to Normal Damage", "text": "Halves non-magic damage, round down."},
+    {"name": "Shrouded Form", "text": "Can't be seen beyond 12\"; +3 Fight vs. shooting."},
+    {"name": "Supporting Figure Maximum", "text": "Max +2 supporting bonus against it."},
+    {"name": "Thaumaturgic Vulnerability", "text": "-1 Will vs. Thaumaturge spells."},
+    {"name": "Two-Headed", "text": "Opponents count one fewer supporter, min 0."}
    ]
   }
  ],
@@ -5873,17 +5884,34 @@
    "title": "New Traits (Bestiary)",
    "blurb": "Wilderness games use separate Forest/Bog/Ice/Mountain random encounter tables (2 rolls: band, then specific result) instead of the core rulebook's Urban tables.",
    "rows": [
-    {
-     "name": "New Traits",
-     "text": "New Traits: Awkward on Land (half Move on land despite Amphibious) · Antlers (usable as a weapon at -1 Fight, no other unarmed penalty) · Carry Disease (Will TN10 or -2 Health next game) · Damage Maximum (X) (caps combat damage) · Elevated View (LoS to anything not directly under cover) · Feeder (removed from table on a kill; victim -1 Survival Roll) · Flee From Death (a Pack Hunter flees if a packmate hits 0 Health) · Hate Undead (+1 Fight, magic attacks, prioritizes undead targets) · Keen Senses (treats everything within 6\" as in LoS) · Latch On (pushback needs damage dealt) · Limited Teleportation (teleports into combat with a nearby treasure-carrier) · Nimble (no rough-ground penalty) · Potential Marsh Gas Cloud (15+ on death: Will TN12 or damage to everyone within 3\") · Prize Taker (bonus vs. Horns/Antlers/Bounty creatures, +5 XP for a kill) · Rock-hard Skin (natural 1 against it breaks the attacker's weapon) · Set Traps (place a 1\" trap, max 3/game, triggering figure takes +1 or rolls Move TN20 or loses its next activation) · Shooting Attack (natural ranged attack, +0 damage, 12\" range unless stated) · Surprise Attack (+4 combined with a move) · Terrain Expert (X) (see Guide) · Unaggressive Unless Startled (moves randomly until wounded or an explosive spell is cast, then acts normally) · Wilderness Survival (no supply consumption unless reduced to 0 Health)."
-    }
+    {"name": "Awkward on Land", "text": "Half Move on land despite Amphibious."},
+    {"name": "Antlers", "text": "Usable as a weapon at -1 Fight, no other unarmed penalty."},
+    {"name": "Carry Disease", "text": "Will TN10 or -2 Health next game."},
+    {"name": "Damage Maximum (X)", "text": "Caps combat damage."},
+    {"name": "Elevated View", "text": "LoS to anything not directly under cover."},
+    {"name": "Feeder", "text": "Removed from table on a kill; victim -1 Survival Roll."},
+    {"name": "Flee From Death", "text": "A Pack Hunter flees if a packmate hits 0 Health."},
+    {"name": "Hate Undead", "text": "+1 Fight, magic attacks, prioritizes undead targets."},
+    {"name": "Keen Senses", "text": "Treats everything within 6\" as in LoS."},
+    {"name": "Latch On", "text": "Pushback needs damage dealt."},
+    {"name": "Limited Teleportation", "text": "Teleports into combat with a nearby treasure-carrier."},
+    {"name": "Nimble", "text": "No rough-ground penalty."},
+    {"name": "Potential Marsh Gas Cloud", "text": "15+ on death: Will TN12 or damage to everyone within 3\"."},
+    {"name": "Prize Taker", "text": "Bonus vs. Horns/Antlers/Bounty creatures, +5 XP for a kill."},
+    {"name": "Rock-hard Skin", "text": "Natural 1 against it breaks the attacker's weapon."},
+    {"name": "Set Traps", "text": "Place a 1\" trap, max 3/game, triggering figure takes +1 or rolls Move TN20 or loses its next activation."},
+    {"name": "Shooting Attack", "text": "Natural ranged attack, +0 damage, 12\" range unless stated."},
+    {"name": "Surprise Attack", "text": "+4 combined with a move."},
+    {"name": "Terrain Expert (X)", "text": "See Guide."},
+    {"name": "Unaggressive Unless Startled", "text": "Moves randomly until wounded or an explosive spell is cast, then acts normally."},
+    {"name": "Wilderness Survival", "text": "No supply consumption unless reduced to 0 Health."}
    ]
   }
  ],
  "Spellcaster Magazine": [
   {
-   "title": "Black Powder Firearms (Issue 1 — deferred mechanic, reference only)",
-   "blurb": "Optional rules for firearms in Frostgrave and Ghost Archipelago. Firearms use bow/crossbow rules for LoS and cover; reloading costs an action (can replace the mandatory move); never usable In Combat. In Ghost Archipelago a firearm also requires a powder horn (free, takes a slot). Every firearm is Inaccurate (-1 Shoot), Armour Piercing (+2 damage; also -2 Armour, min 10, within half range), Loud (natural 20 triggers a Random Encounter roll), and subject to Misfire on a natural 1.",
+   "title": "Black Powder Firearms (Issue 1 — items purchasable)",
+   "blurb": "Pistol, Musket, Blunderbuss, Axe-gun, and Powder Horn are real catalog items now — pick them from the item-slot dropdown on a wizard/apprentice/captain/soldier like any other weapon (Musket and Blunderbuss correctly take two slots). Optional rules for firearms in Frostgrave and Ghost Archipelago: firearms use bow/crossbow rules for LoS and cover; reloading costs an action (can replace the mandatory move); never usable In Combat. In Ghost Archipelago a firearm also requires a powder horn (free, takes a slot). Every firearm is Inaccurate (-1 Shoot), Armour Piercing (+2 damage; also -2 Armour, min 10, within half range), Loud (natural 20 triggers a Random Encounter roll), and subject to Misfire on a natural 1 — the misfire table and gc-cost upgrades (Double-barrelled, Superior Craftsmanship, Silver Bullets) below are table-time detail this app doesn't simulate.",
    "rows": [
     {
      "name": "1–5",
@@ -6167,8 +6195,8 @@
    ]
   },
   {
-   "title": "Underworld Favours: A Debt Economy (Issue 3 — deferred mechanic, reference only)",
-   "blurb": "",
+   "title": "Underworld Favours: A Debt Economy (Issue 3 — implemented)",
+   "blurb": "Markers are tracked on the wizard card (Spellcaster Magazine). Taking an Underworld Loan or claiming a free Favour adds Markers; paying one off costs 150gc any time. Rolling for a post-game debt call resolves the call-in table itself — the pure bookkeeping parts (paying Markers from gold, who owes a permanent injury) are applied automatically, while the parts that need a table-side choice (which soldiers sit out, which magic item to sell) are reported for you to apply. Intimidation and Hired Muscle stay table-time detail this app doesn't simulate.",
    "rows": [
     {
      "name": "Loan",
