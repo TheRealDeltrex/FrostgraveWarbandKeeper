@@ -1558,5 +1558,35 @@
   "name": "Wraith Bow",
   "source": "The Red King",
   "effect": "Artefact (unlock: post-game Will Roll TN16). +1 damage bow; once/game, fire through terrain (target gets +1 Fight as intervening terrain); risk of a Curse effect (Casting Roll 14) on a failed Will Roll after use."
+ },
+ {
+  "name": "Eyes of Eternity",
+  "source": "The Wizards' Conclave",
+  "effect": "Once ever, re-roll a Dead result on the Survival Table (second roll is final). Sells for 500gc."
+ },
+ {
+  "name": "Eyes of Runic Light",
+  "source": "The Wizards' Conclave",
+  "effect": "+2 to any attempt to cast Write Scroll. Sells for 250gc."
+ },
+ {
+  "name": "The Armour of Redwar",
+  "source": "The Wizards' Conclave",
+  "effect": "Ancient magic mail; +1 Move and +1 Fight on combat rolls made against shooting attacks."
+ },
+ {
+  "name": "The Betrayer's Blade",
+  "source": "The Wizards' Conclave",
+  "effect": "Wizards only; +2 Fight. In multi-figure combats where the wielder is attacker or declared target, supporting figures grant only +1 each instead of +2."
+ },
+ {
+  "name": "The Blade of Barael",
+  "source": "The Wizards' Conclave",
+  "effect": "Hand-and-a-half sword, wizards/apprentices only (no dagger or shield alongside it); +1 Fight, +2 damage. The bearer can never be targeted by an attack or spell from beyond 12\" (friendly or enemy), and is immune to Glow (though Cordial of Clearsight still works normally against them). A natural 20 in melee lets the bearer immediately take another action (needn't be a move)."
+ },
+ {
+  "name": "The Boon of Sargosh",
+  "source": "The Wizards' Conclave",
+  "effect": "Counts as a Staff of Casting, except the wielder chooses which spell it benefits instead of rolling randomly."
  }
 ]

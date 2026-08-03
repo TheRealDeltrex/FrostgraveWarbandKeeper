@@ -160,6 +160,8 @@
           book's endgame campaign mode. The surrounding restrictions (no spending gold, no
           hiring/dismissing outside this roll, no Vault storage, a soldier lost on a 1-8 survival
           roll) are shown there as reminder text — this app doesn't enforce them for you.
+          Switching this on also switches on "Ordinary soldiers can take permanent injuries"
+          below, since the Random Recruit Status Table can inflict one on any recruited soldier.
         </p>
         <label class="checkbox-row" style="margin-top:0.6rem">
           <input name="edition2_soldier_costs" type="checkbox" {% if hr.edition2_soldier_costs %}checked{% endif %} />
@@ -860,6 +862,61 @@
       </details>
     {% endif %}
       </details>
+
+    {% if fin_dalka_enabled %}
+      <details class="ref-panel">
+        <summary>Grimoire of Fin Dalka (Blood Legacy){% if wiz.fin_dalka.owned %} — owned{% endif %}</summary>
+        <p class="muted" style="font-size:0.85rem">
+          A ciphered tome of all 8 Fire Giant spells, open to any wizard. Deciphering one spell costs
+          {{ FIN_DALKA_DECIPHER_COST }}gc + a Will Roll (TN20, plus any bonus below) rolled at the
+          table — report the outcome here. A natural 1 locks that spell forever for this wizard; any
+          other failure adds a cumulative +1 bonus to future attempts on it.
+        </p>
+        {% if not wiz.fin_dalka.owned %}
+          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
+            <input type="hidden" name="action" value="acquire_fin_dalka_grimoire" />
+            <button class="btn secondary small" type="submit">Acquire the grimoire</button>
+          </form>
+        {% else %}
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Spell</th><th>Status</th><th>Report roll</th></tr></thead>
+              <tbody>
+                {% for sp in fin_dalka_spells %}
+                  <tr>
+                    <td><strong>{{ sp.name }}</strong></td>
+                    <td class="muted">
+                      {% if sp.known %}already known
+                      {% elif sp.locked %}locked (natural 1)
+                      {% elif sp.learned %}learned
+                      {% else %}+{{ sp.bonus }} bonus so far
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if not sp.known and not sp.locked and not sp.learned %}
+                        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
+                          <input type="hidden" name="action" value="fin_dalka_decipher" />
+                          <input type="hidden" name="spell_id" value="{{ sp.id }}" />
+                          <button class="btn small gold" type="submit" name="outcome" value="success" {% if wb.gold < FIN_DALKA_DECIPHER_COST %}disabled{% endif %}>Succeeded</button>
+                          <button class="btn small" type="submit" name="outcome" value="fail" {% if wb.gold < FIN_DALKA_DECIPHER_COST %}disabled{% endif %}>Failed</button>
+                          <button class="btn danger small" type="submit" name="outcome" value="nat1" {% if wb.gold < FIN_DALKA_DECIPHER_COST %}disabled{% endif %}>Natural 1</button>
+                        </form>
+                      {% endif %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:0.5rem" onsubmit="return confirm('Sell the Grimoire of Fin Dalka?');">
+            <input type="hidden" name="action" value="sell_fin_dalka_grimoire" />
+            <button class="btn danger small" type="submit">
+              Sell grimoire ({{ [FIN_DALKA_BASE_SELL - FIN_DALKA_SELL_PER_SPELL * (fin_dalka_spells | selectattr('learned') | list | length), 0] | max }}gc)
+            </button>
+          </form>
+        {% endif %}
+      </details>
+    {% endif %}
 
     <details class="ref-panel">
       <summary>Level up wizard {% if pending_levels %}({{ pending_levels }} ready){% endif %}</summary>
@@ -2044,7 +2101,7 @@
       {% endif %}
 
       <h3>Buy resource</h3>
-      <p class="muted">Treasury: <span class="gold">{{ wb.gold }} gc</span>. Each type once only.</p>
+      <p class="muted">Treasury: <span class="gold">{{ wb.gold }} gc</span>. Each type once only, except where noted repeatable.</p>
       <div class="table-wrap">
         <table>
           <thead>
@@ -2053,16 +2110,16 @@
           <tbody>
             {% for key, res in base_resources.items() %}
               {% set owned = key in (wb.base.resources if wb.base is defined else []) or key in base.resources|map(attribute='key')|list %}
-              <tr {% if owned %}style="opacity:0.45"{% endif %}>
+              <tr {% if owned and not res.repeatable %}style="opacity:0.45"{% endif %}>
                 <td><strong>{{ res.name }}</strong></td>
                 <td class="gold">{{ res.cost }}</td>
                 <td class="muted">{{ res.effects }}</td>
                 <td>
-                  {% if not owned %}
+                  {% if not owned or res.repeatable %}
                     <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
                       <input type="hidden" name="action" value="buy_base_resource" />
                       <input type="hidden" name="resource" value="{{ key }}" />
-                      <button class="btn small gold" type="submit" {% if wb.gold < res.cost %}disabled{% endif %}>Buy</button>
+                      <button class="btn small gold" type="submit" {% if wb.gold < res.cost %}disabled{% endif %}>Buy{% if res.repeatable %} another{% endif %}</button>
                     </form>
                   {% else %}
                     <span class="badge">owned</span>
@@ -2073,6 +2130,64 @@
           </tbody>
         </table>
       </div>
+
+      {% if horses_enabled %}
+        <h3>Horse (Spellcaster Magazine, Issue 1)</h3>
+        {% if not has_stable %}
+          <p class="muted">Needs a Stable (above) first.</p>
+        {% elif not wb.horse.owned %}
+          <p class="muted">Mounted Modifiers on the rider: Move +{{ HORSE_MOUNT_STAT_DELTA.move }}, Fight +{{ HORSE_MOUNT_STAT_DELTA.fight }}, Armour {{ HORSE_MOUNT_STAT_DELTA.armour }}.</p>
+          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
+            <input type="hidden" name="action" value="buy_horse" />
+            <button class="btn secondary small" type="submit" {% if wb.gold < HORSE_COST %}disabled{% endif %}>Buy a horse ({{ HORSE_COST }}gc)</button>
+          </form>
+        {% else %}
+          <p class="muted">
+            {% if wb.horse.rider %}
+              Currently ridden
+              {% if wb.horse.rider.kind == 'wizard' %}by {{ wiz.name or 'the wizard' }}
+              {% elif wb.horse.rider.kind == 'apprentice' %}by {{ (wb.apprentice or {}).name or 'the apprentice' }}
+              {% elif wb.horse.rider.kind == 'captain' %}by {{ (wb.captain or {}).name or 'the captain' }}
+              {% else %}by a soldier
+              {% endif %}.
+            {% else %}
+              No one is mounted.
+            {% endif %}
+          </p>
+          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="form-row inline">
+            <input type="hidden" name="action" value="mount_horse" />
+            <div>
+              <label for="horse_rider_kind">Mount</label>
+              <select id="horse_rider_kind" name="rider_kind" onchange="document.getElementById('horse_rider_soldier').style.display = (this.value === 'soldier') ? '' : 'none'">
+                <option value="wizard">Wizard</option>
+                {% if wb.apprentice %}<option value="apprentice">Apprentice</option>{% endif %}
+                {% if wb.captain %}<option value="captain">Captain</option>{% endif %}
+                {% if horse_rider_choices %}<option value="soldier">Soldier…</option>{% endif %}
+              </select>
+            </div>
+            <div id="horse_rider_soldier" style="display:none">
+              <label for="horse_rider_soldier_id">Which soldier</label>
+              <select id="horse_rider_soldier_id" name="soldier_id">
+                {% for s in horse_rider_choices %}<option value="{{ s.id }}">{{ s.name }}</option>{% endfor %}
+              </select>
+            </div>
+            <div>
+              <label>&nbsp;</label>
+              <button class="btn secondary small" type="submit">Mount</button>
+            </div>
+          </form>
+          {% if wb.horse.rider %}
+            <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:0.4rem">
+              <input type="hidden" name="action" value="dismount_horse" />
+              <button class="btn small" type="submit">Dismount</button>
+            </form>
+          {% endif %}
+          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:0.4rem" onsubmit="return confirm('Release the warband horse?');">
+            <input type="hidden" name="action" value="sell_horse" />
+            <button class="btn danger small" type="submit">Release horse</button>
+          </form>
+        {% endif %}
+      {% endif %}
     {% endif %}
   </details>
 

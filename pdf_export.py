@@ -580,14 +580,27 @@ def build_warband_pdf(wb: dict) -> bytes:
             if companion:
                 cstats = companion["stats"]
                 cline = (
-                    f"- with {companion['name']}  "
+                    f"with {companion['name']}  "
                     f"(Move {cstats['move']}\"  Fight {format_stat(cstats['fight'])}  "
                     f"Shoot {format_stat(cstats['shoot'])}  Armour {cstats['armour']}  "
                     f"Will {format_stat(cstats['will'])}  Health {cstats['health']})"
                 )
-                pdf.set_x(left + 3)
+                comp_size = 9.0
+                comp_y0 = pdf.get_y()
+                comp_x = left + 3
+                _draw_portrait(
+                    pdf,
+                    (s.get("companion") or {}).get("portrait"),
+                    comp_x,
+                    comp_y0,
+                    comp_size,
+                    "companion",
+                    companion.get("portrait_key"),
+                )
+                pdf.set_xy(comp_x + comp_size + 1.5, comp_y0 + (comp_size - 3.5) / 2)
                 pdf.set_font("Helvetica", "I", 7)
-                pdf.cell(0, 3.5, _t(cline), new_x="LMARGIN", new_y="NEXT")
+                pdf.cell(0, 3.5, _t(f"- {cline}"), new_x="LMARGIN", new_y="NEXT")
+                pdf.set_y(comp_y0 + comp_size + 1)
             pdf.set_x(left)
             pdf.set_font("Helvetica", "", 9)
             stats = {

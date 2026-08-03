@@ -662,7 +662,8 @@ BASE_RESOURCES: dict[str, dict] = {
         "source": "Spellcaster Magazine",
         "effects": (
             "Lets the warband keep one horse (200gc, one per warband); doesn't affect the "
-            "warband size limit. The mounted-combat rules themselves are a deferred mechanic."
+            "warband size limit. Enables the horse-buying and mounting controls on the "
+            "Base card and the wizard/apprentice/captain/soldier cards."
         ),
     },
     "breeding_cages": {
@@ -687,6 +688,7 @@ BASE_RESOURCES: dict[str, dict] = {
         "cost": 100,
         "source": "Thaw of the Lich Lord",
         "effects": "Required to hire a Crow Master. One roost per Crow Master.",
+        "repeatable": True,
     },
     "gondola_repair_shop": {
         "name": "Gondola Repair Shop",
@@ -2587,6 +2589,7 @@ SOURCE_BOOKS = [
     "Into the Breeding Pits",
     "Forgotten Pacts",
     "The Maze of Malcor",
+    "The Wizards' Conclave",
     "The Perilous Dark",
     "The Frostgrave Folio",
     "Grave Mutations",
@@ -2792,6 +2795,53 @@ def giant_blooded_eligible_type_keys() -> set[str]:
         and not v.get("temporary")
         and k not in GIANT_BLOODED_EXCLUDED_TYPE_KEYS
     }
+
+
+# --- Spellcaster Magazine, Issue 1: Horses in Frostgrave ---------------------
+# Requires the Stable base resource (BASE_RESOURCES["stable"]); a horse then
+# costs HORSE_COST, one per warband. Mounted Modifiers are added to the rider.
+HORSE_COST = 200
+HORSE_MOUNT_STAT_DELTA = {"move": 2, "fight": 1, "armour": -2}
+RIDERLESS_HORSE_STATS = {"move": 7, "fight": 1, "armour": 10, "will": 0, "health": 10}
+
+# "Any model may ride except Animals, Undead, Demons, and Constructs." This
+# catalog has no single creature-type tag to test that directly, so this
+# combines the two categories already resolvable in code (Animal-Companion-
+# spell summons, Animate-Construct-spell constructs) with a small hand-curated
+# set for the remaining animal/undead/demon hires — the same gap
+# GIANT_BLOODED_EXCLUDED_TYPE_KEYS papers over for a similar rule.
+HORSE_RIDER_EXCLUDED_TYPE_KEYS = {
+    "war_hound",
+    "dire_hound",
+    "collegium_porter",
+    "construct_hound",
+    "vampire",
+    "minor_demon",
+}
+
+
+def horse_rider_eligible_type_keys() -> set[str]:
+    """Soldier type keys that may ride the warband's horse."""
+    excluded = (
+        animal_companion_type_keys() | construct_type_keys() | HORSE_RIDER_EXCLUDED_TYPE_KEYS
+    )
+    return {k for k, v in SOLDIERS.items() if k not in excluded and not v.get("temporary")}
+
+
+# --- Blood Legacy: The Grimoire of Fin Dalka ---------------------------------
+# A ciphered tome of all 8 Fire Giant spells. Deciphering one spell costs
+# FIN_DALKA_DECIPHER_COST + a Will Roll (TN20, not rolled by this app) —
+# success learns it, failure adds a cumulative bonus to future attempts on
+# that spell, a natural 1 permanently locks it for that wizard. Sells for
+# FIN_DALKA_BASE_SELL minus FIN_DALKA_SELL_PER_SPELL per spell already learned
+# from it.
+FIN_DALKA_DECIPHER_COST = 100
+FIN_DALKA_BASE_SELL = 1000
+FIN_DALKA_SELL_PER_SPELL = 100
+
+
+def fin_dalka_spell_ids() -> list[str]:
+    return [spell_id("Fire Giant", sp["name"]) for sp in SPELLS.get("Fire Giant", [])]
 
 
 # Core soldier types an Illusionary Soldier may copy Move/Fight/Shoot/Armour/

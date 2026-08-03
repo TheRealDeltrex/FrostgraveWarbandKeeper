@@ -42,7 +42,13 @@ from frostgrave_data import (
     CAPTAIN_MODE_OPTIONS,
     CAPTAIN_TRICK_BY_ID,
     CAPTAIN_TRICKS,
+    FIN_DALKA_BASE_SELL,
+    FIN_DALKA_DECIPHER_COST,
+    FIN_DALKA_SELL_PER_SPELL,
     GIANT_BLOODED_COST,
+    HORSE_COST,
+    HORSE_MOUNT_STAT_DELTA,
+    RIDERLESS_HORSE_STATS,
     KNIGHTLY_ORDER_ELIGIBLE,
     KNIGHTLY_ORDERS,
     LEVEL_UP_OPTIONS,
@@ -78,8 +84,10 @@ from frostgrave_data import (
     bonus_choice_amount,
     cn_penalty,
     construct_type_keys,
+    fin_dalka_spell_ids,
     format_stat,
     giant_blooded_eligible_type_keys,
+    horse_rider_eligible_type_keys,
     group_soldiers_by_source,
     illusion_source_choices,
     level_from_xp,
@@ -135,6 +143,13 @@ from warband_store import (
     apply_animal_companion_crit_bonus,
     become_vampire,
     revert_vampire,
+    acquire_fin_dalka_grimoire,
+    sell_fin_dalka_grimoire,
+    fin_dalka_decipher,
+    buy_horse,
+    sell_or_release_horse,
+    mount_horse,
+    dismount_horse,
     apply_level_up,
     apply_portrait,
     apply_soldier_level_up,
@@ -300,6 +315,12 @@ app.jinja_env.globals.update(
     CONSTRUCT_TYPE_KEYS=construct_type_keys(),
     STANDARD_CONSTRUCT_TYPE_KEYS=STANDARD_CONSTRUCT_TYPE_KEYS,
     GIANT_BLOODED_COST=GIANT_BLOODED_COST,
+    HORSE_COST=HORSE_COST,
+    HORSE_MOUNT_STAT_DELTA=HORSE_MOUNT_STAT_DELTA,
+    RIDERLESS_HORSE_STATS=RIDERLESS_HORSE_STATS,
+    FIN_DALKA_DECIPHER_COST=FIN_DALKA_DECIPHER_COST,
+    FIN_DALKA_BASE_SELL=FIN_DALKA_BASE_SELL,
+    FIN_DALKA_SELL_PER_SPELL=FIN_DALKA_SELL_PER_SPELL,
     LEVELUP_STATS=LEVELUP_STATS,
     level_from_xp=level_from_xp,
     captain_effective_stats=captain_effective_stats,
@@ -766,6 +787,31 @@ def warband_view(warband_id: str) -> str:
         ),
         None,
     )
+    # Blood Legacy's Grimoire of Fin Dalka: per-spell decipher state lives on
+    # wb.wizard.fin_dalka, merged here with the 8 Fire Giant spells so the
+    # template doesn't have to cross-reference SPELLS itself.
+    fin_dalka_enabled = "Blood Legacy" in wb_sources
+    fd = (wb.get("wizard") or {}).get("fin_dalka") or {"owned": False, "attempts": {}}
+    known_spell_ids_set = {s.get("id") for s in (wb.get("wizard") or {}).get("spells") or []}
+    fin_dalka_spells = [
+        {
+            "id": sid,
+            "name": sid.split("::", 1)[1],
+            "known": sid in known_spell_ids_set,
+            **fd.get("attempts", {}).get(sid, {"bonus": 0, "locked": False, "learned": False}),
+        }
+        for sid in fin_dalka_spell_ids()
+    ]
+    # Spellcaster Magazine's Horses in Frostgrave: one horse per warband, one
+    # rider at a time, gated on the Stable base resource (see buy_horse).
+    horses_enabled = "Spellcaster Magazine" in wb_sources
+    has_stable = "stable" in ((wb.get("base") or {}).get("resources") or [])
+    horse_rider_eligible_keys = horse_rider_eligible_type_keys()
+    horse_rider_choices = [
+        {"id": s["id"], "name": s.get("name") or "Unnamed"}
+        for s in all_soldiers
+        if s.get("status") != "dead" and s.get("type_key") in horse_rider_eligible_keys
+    ]
     return render_template(
         "warband_view.html",
         wb=wb,
@@ -784,6 +830,11 @@ def warband_view(warband_id: str) -> str:
         ragged_warbands_enabled=ragged_warbands_enabled,
         ragged_warbands_have=ragged_warbands_have,
         ragged_warbands_rules=ragged_warbands_rules,
+        fin_dalka_enabled=fin_dalka_enabled,
+        fin_dalka_spells=fin_dalka_spells,
+        horses_enabled=horses_enabled,
+        has_stable=has_stable,
+        horse_rider_choices=horse_rider_choices,
         schools=SCHOOLS,
         learnable=learnable,
         pending_levels=limits["pending_levels"],
@@ -1013,6 +1064,49 @@ def _act_become_vampire(wb: dict) -> tuple[bool, str]:
 @register_action("revert_vampire")
 def _act_revert_vampire(wb: dict) -> tuple[bool, str]:
     return revert_vampire(wb)
+
+
+@register_action("acquire_fin_dalka_grimoire")
+def _act_acquire_fin_dalka_grimoire(wb: dict) -> tuple[bool, str]:
+    return acquire_fin_dalka_grimoire(wb)
+
+
+@register_action("sell_fin_dalka_grimoire")
+def _act_sell_fin_dalka_grimoire(wb: dict) -> tuple[bool, str]:
+    return sell_fin_dalka_grimoire(wb)
+
+
+@register_action("fin_dalka_decipher")
+def _act_fin_dalka_decipher(wb: dict) -> tuple[bool, str]:
+    return fin_dalka_decipher(
+        wb,
+        request.form.get("spell_id") or "",
+        request.form.get("outcome") or "",
+    )
+
+
+@register_action("buy_horse")
+def _act_buy_horse(wb: dict) -> tuple[bool, str]:
+    return buy_horse(wb)
+
+
+@register_action("sell_horse")
+def _act_sell_horse(wb: dict) -> tuple[bool, str]:
+    return sell_or_release_horse(wb)
+
+
+@register_action("mount_horse")
+def _act_mount_horse(wb: dict) -> tuple[bool, str]:
+    return mount_horse(
+        wb,
+        request.form.get("rider_kind") or "",
+        request.form.get("soldier_id") or None,
+    )
+
+
+@register_action("dismount_horse")
+def _act_dismount_horse(wb: dict) -> tuple[bool, str]:
+    return dismount_horse(wb)
 
 
 @register_action("advance_beastcrafter")
