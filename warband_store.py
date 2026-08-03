@@ -39,9 +39,14 @@ from frostgrave_data import (
     CAPTAIN_TRICK_BY_ID,
     CAPTAIN_TRICK_IDS,
     CAPTAIN_TRICKS,
+    FIN_DALKA_BASE_SELL,
+    FIN_DALKA_DECIPHER_COST,
+    FIN_DALKA_SELL_PER_SPELL,
     FIRE_GIANT_WIZARD_BASE,
     GIANT_BLOODED_COST,
     GIANT_BLOODED_STAT_DELTA,
+    HORSE_COST,
+    HORSE_MOUNT_STAT_DELTA,
     VAMPIRE_MIN_MAX_SOLDIERS,
     KNIGHTLY_ORDER_BY_ID,
     KNIGHTLY_ORDER_ELIGIBLE,
@@ -84,8 +89,10 @@ from frostgrave_data import (
     cn_penalty,
     construct_type_keys,
     find_spell,
+    fin_dalka_spell_ids,
     get_soldier,
     giant_blooded_eligible_type_keys,
+    horse_rider_eligible_type_keys,
     illusion_source_choices,
     level_from_xp,
     permanent_injury_by_roll,
@@ -1082,6 +1089,9 @@ def _normalize_warband(wb: dict) -> dict:
     wiz.setdefault("permanent_injuries", [])
     _resync_permanent_injury_text(wiz)
     wiz.setdefault("portrait_source_name", None)
+    fd = wiz.setdefault("fin_dalka", {"owned": False, "attempts": {}})
+    fd.setdefault("owned", False)
+    fd.setdefault("attempts", {})
     # Wizard state (Lich / Beastcrafter / pact). Backfilled per-key so a warband
     # saved before this existed loads as an ordinary wizard.
     state = wiz.setdefault("state", expansions.default_wizard_state())
@@ -1094,6 +1104,9 @@ def _normalize_warband(wb: dict) -> dict:
     if isinstance(wiz.get("spells"), str):
         wiz["spells"] = []
     wb.setdefault("vault_items", [])
+    horse = wb.setdefault("horse", {"owned": False, "rider": None})
+    horse.setdefault("owned", False)
+    horse.setdefault("rider", None)
     if not isinstance(wb.get("base"), dict):
         wb["base"] = empty_base()
     else:
@@ -1711,6 +1724,10 @@ def remove_soldier(wb: dict, soldier_id: str, refund: bool = False) -> tuple[boo
                 text = f"Dismissed {name} and refunded {cost} gc."
             else:
                 text = f"Removed {name} from the roster."
+            horse = wb.get("horse") or {}
+            rider = horse.get("rider")
+            if rider and rider.get("kind") == "soldier" and rider.get("soldier_id") == soldier_id:
+                horse["rider"] = None
             soldiers.pop(i)
             wb["soldiers"] = soldiers
             wb.setdefault("history", []).append({"when": _now(), "text": text})
@@ -2662,6 +2679,7 @@ def update_homerules(wb: dict, form: "ImmutableMultiDict") -> tuple[bool, str]:
     """Parse and apply the per-warband homerule settings form."""
     hr = wb.setdefault("homerules", default_homerules())
     try:
+        ragged_warbands_enabled = form.get("ragged_warbands_enabled") == "on"
         new_hr = {
             "max_soldiers": max(1, int(form.get("max_soldiers") or hr.get("max_soldiers", MAX_SOLDIERS))),
             "max_specialists": max(
@@ -2703,7 +2721,9 @@ def update_homerules(wb: dict, form: "ImmutableMultiDict") -> tuple[bool, str]:
             "soldier_leveling_enabled": form.get("soldier_leveling_enabled") == "on",
             "soldier_leveling_animal_companions": form.get("soldier_leveling_animal_companions") == "on",
             "soldier_leveling_constructs": form.get("soldier_leveling_constructs") == "on",
-            "soldier_permanent_injuries_enabled": form.get("soldier_permanent_injuries_enabled") == "on",
+            "soldier_permanent_injuries_enabled": (
+                form.get("soldier_permanent_injuries_enabled") == "on" or ragged_warbands_enabled
+            ),
             "soldier_max_levels": int(form.get("soldier_max_levels") or hr["soldier_max_levels"]),
             "soldier_stat_caps": _parse_stat_caps(form, "soldier", hr["soldier_stat_caps"]),
             "promote_captain_cost": int(
@@ -2732,7 +2752,7 @@ def update_homerules(wb: dict, form: "ImmutableMultiDict") -> tuple[bool, str]:
             "fire_giant_wizard_playable": form.get("fire_giant_wizard_playable") == "on",
             "vampire_wizard_playable": form.get("vampire_wizard_playable") == "on",
             "giant_blooded_enabled": form.get("giant_blooded_enabled") == "on",
-            "ragged_warbands_enabled": form.get("ragged_warbands_enabled") == "on",
+            "ragged_warbands_enabled": ragged_warbands_enabled,
             "edition2_soldier_costs": form.get("edition2_soldier_costs") == "on",
             "spellcaster_magazine_soldiers": form.get("spellcaster_magazine_soldiers") == "on",
             "knightly_orders_enabled": form.get("knightly_orders_enabled") == "on",
@@ -3851,6 +3871,211 @@ def revert_vampire(wb: dict) -> tuple[bool, str]:
     return True, text
 
 
+# --- Blood Legacy: The Grimoire of Fin Dalka --------------------------------
+#
+# This app doesn't roll dice for the player, so the Will Roll (TN20) itself
+# happens at the table; these actions apply whatever the player reports as its
+# outcome. Available to any wizard (the grimoire is found/bought treasure, not
+# tied to being a Fire Giant), which is also why it isn't folded into the
+# wizard-state mechanic used by Lich/Beastcrafter/Pact/Vampire.
+
+
+def _fin_dalka_gate(wb: dict) -> str | None:
+    if "Blood Legacy" not in enabled_sources(wb):
+        return "Blood Legacy is switched off; enable it under Additional Rules and Homerules first."
+    return None
+
+
+def acquire_fin_dalka_grimoire(wb: dict) -> tuple[bool, str]:
+    err = _fin_dalka_gate(wb)
+    if err:
+        return False, err
+    wiz = wb.setdefault("wizard", {})
+    fd = wiz.setdefault("fin_dalka", {"owned": False, "attempts": {}})
+    if fd.get("owned"):
+        return False, "Already owns the Grimoire of Fin Dalka."
+    fd["owned"] = True
+    text = f"{wiz.get('name', 'The wizard')} now owns the Grimoire of Fin Dalka."
+    add_history(wb, text)
+    return True, text
+
+
+def _fin_dalka_sell_price(fd: dict) -> int:
+    learned = sum(1 for a in (fd.get("attempts") or {}).values() if a.get("learned"))
+    return max(0, FIN_DALKA_BASE_SELL - FIN_DALKA_SELL_PER_SPELL * learned)
+
+
+def sell_fin_dalka_grimoire(wb: dict) -> tuple[bool, str]:
+    wiz = wb.setdefault("wizard", {})
+    fd = wiz.setdefault("fin_dalka", {"owned": False, "attempts": {}})
+    if not fd.get("owned"):
+        return False, "Doesn't own the Grimoire of Fin Dalka."
+    price = _fin_dalka_sell_price(fd)
+    fd["owned"] = False
+    wb["gold"] = int(wb.get("gold", 0)) + price
+    text = f"Sold the Grimoire of Fin Dalka for {price} gc."
+    add_history(wb, text)
+    return True, text
+
+
+def fin_dalka_decipher(wb: dict, target_spell_id: str, outcome: str) -> tuple[bool, str]:
+    """One decipher attempt against a single Fire Giant spell on the grimoire.
+
+    outcome is "success" | "fail" | "nat1", reported by the player after
+    rolling the Will Roll (TN20 + any cumulative bonus already recorded here)
+    at the table. Costs FIN_DALKA_DECIPHER_COST regardless of outcome (the
+    book's own wording — you pay to attempt, not to succeed)."""
+    err = _fin_dalka_gate(wb)
+    if err:
+        return False, err
+    if outcome not in ("success", "fail", "nat1"):
+        return False, "Unknown outcome."
+    wiz = wb.setdefault("wizard", {})
+    fd = wiz.setdefault("fin_dalka", {"owned": False, "attempts": {}})
+    if not fd.get("owned"):
+        return False, "Doesn't own the Grimoire of Fin Dalka."
+    if target_spell_id not in fin_dalka_spell_ids():
+        return False, "Not a Fire Giant spell."
+    attempts = fd.setdefault("attempts", {})
+    rec = attempts.setdefault(target_spell_id, {"bonus": 0, "locked": False, "learned": False})
+    if rec.get("locked"):
+        return False, "That spell is permanently locked for this wizard (a prior natural 1)."
+    if rec.get("learned"):
+        return False, "Already learned that spell from the grimoire."
+    known_ids = {s.get("id") for s in wiz.get("spells") or []}
+    if target_spell_id in known_ids:
+        return False, "Spell already known."
+    if int(wb.get("gold", 0)) < FIN_DALKA_DECIPHER_COST:
+        return False, f"Need {FIN_DALKA_DECIPHER_COST} gc to attempt deciphering."
+    wb["gold"] = int(wb.get("gold", 0)) - FIN_DALKA_DECIPHER_COST
+    sp = find_spell(target_spell_id)
+    name = sp["name"] if sp else target_spell_id
+    if outcome == "nat1":
+        rec["locked"] = True
+        text = f"Deciphering {name} failed badly (natural 1) — permanently locked for {wiz.get('name', 'the wizard')}."
+    elif outcome == "fail":
+        rec["bonus"] = int(rec.get("bonus", 0)) + 1
+        text = (
+            f"Deciphering {name} failed; +{rec['bonus']} cumulative bonus recorded for the next attempt."
+        )
+    else:
+        wschool = wiz.get("school") or "Elementalist"
+        pen = cn_penalty(wschool, sp["school"])
+        eff = int(sp["cn"]) + pen
+        wiz.setdefault("spells", []).append(
+            {
+                "id": sp["id"],
+                "name": sp["name"],
+                "school": sp["school"],
+                "base_cn": int(sp["cn"]),
+                "cn_penalty": pen,
+                "cn_improve": 0,
+                "cn": eff,
+                "type": sp["type"],
+                "relation": school_relation(wschool, sp["school"]),
+            }
+        )
+        rec["learned"] = True
+        text = f"Deciphered and learned {name} from the Grimoire of Fin Dalka (effective CN {eff})."
+    add_history(wb, text)
+    return True, text
+
+
+# --- Spellcaster Magazine, Issue 1: Horses in Frostgrave --------------------
+#
+# Requires the Stable base resource (bought via buy_base_resource, gated
+# generically by BASE_RESOURCES["stable"]["source"]); these apply once a
+# Stable is owned. Only one horse per warband, and only one rider at a time —
+# mounting someone new automatically dismounts whoever had it.
+
+
+def _horse_gate(wb: dict) -> str | None:
+    if "Spellcaster Magazine" not in enabled_sources(wb):
+        return "Spellcaster Magazine is switched off; enable it under Additional Rules and Homerules first."
+    return None
+
+
+def buy_horse(wb: dict) -> tuple[bool, str]:
+    err = _horse_gate(wb)
+    if err:
+        return False, err
+    if "stable" not in ((wb.get("base") or {}).get("resources") or []):
+        return False, "Needs a Stable (base resource) first."
+    horse = wb.setdefault("horse", {"owned": False, "rider": None})
+    if horse.get("owned"):
+        return False, "Already own a horse."
+    if int(wb.get("gold", 0)) < HORSE_COST:
+        return False, f"Need {HORSE_COST} gc for a horse."
+    wb["gold"] = int(wb.get("gold", 0)) - HORSE_COST
+    horse["owned"] = True
+    text = f"Bought a horse for {HORSE_COST} gc."
+    add_history(wb, text)
+    return True, text
+
+
+def _dismount_rider(wb: dict, horse: dict) -> None:
+    rider = horse.get("rider")
+    if not rider:
+        return
+    entity, _get_stat, set_stat, _label = _mutation_target(wb, rider["kind"], rider.get("soldier_id"))
+    if entity is not None and set_stat is not None:
+        for stat, value in (rider.get("backup") or {}).items():
+            set_stat(stat, value)
+    horse["rider"] = None
+
+
+def sell_or_release_horse(wb: dict) -> tuple[bool, str]:
+    horse = wb.setdefault("horse", {"owned": False, "rider": None})
+    if not horse.get("owned"):
+        return False, "Doesn't own a horse."
+    _dismount_rider(wb, horse)
+    horse["owned"] = False
+    text = "Released the warband's horse."
+    add_history(wb, text)
+    return True, text
+
+
+def mount_horse(wb: dict, kind: str, soldier_id: str | None = None) -> tuple[bool, str]:
+    err = _horse_gate(wb)
+    if err:
+        return False, err
+    horse = wb.setdefault("horse", {"owned": False, "rider": None})
+    if not horse.get("owned"):
+        return False, "The warband doesn't own a horse."
+    if kind == "soldier":
+        soldiers = wb.get("soldiers") or []
+        soldier = next((s for s in soldiers if s.get("id") == soldier_id), None)
+        if soldier is None:
+            return False, "Soldier not found."
+        if soldier.get("type_key") not in horse_rider_eligible_type_keys():
+            return False, "Only a non-Animal, non-Undead, non-Demon, non-Construct model may ride."
+    entity, get_stat, set_stat, label = _mutation_target(wb, kind, soldier_id)
+    if entity is None:
+        return False, label
+    rider = horse.get("rider")
+    if rider and rider["kind"] == kind and rider.get("soldier_id") == soldier_id:
+        return False, f"{label} is already mounted."
+    if rider:
+        _dismount_rider(wb, horse)
+    backup = {stat: get_stat(stat) for stat in HORSE_MOUNT_STAT_DELTA}
+    for stat, delta in HORSE_MOUNT_STAT_DELTA.items():
+        set_stat(stat, backup[stat] + delta)
+    horse["rider"] = {"kind": kind, "soldier_id": soldier_id, "backup": backup}
+    text = f"{label} mounted the warband's horse."
+    add_history(wb, text)
+    return True, text
+
+
+def dismount_horse(wb: dict) -> tuple[bool, str]:
+    horse = wb.setdefault("horse", {"owned": False, "rider": None})
+    if not horse.get("rider"):
+        return False, "No one is mounted."
+    _dismount_rider(wb, horse)
+    text = "Dismounted the warband's horse."
+    add_history(wb, text)
+    return True, text
+
+
 # --- Wizard states (Lich / Beastcrafter / Demonic Pact) ---------------------
 #
 # expansions.py holds the rules and the validation; these apply the result and
@@ -4030,14 +4255,16 @@ def buy_base_resource(wb: dict, resource_key: str) -> tuple[bool, str]:
     if base.get("location", "none") == "none":
         return False, "Establish a base location first (free)."
     owned = base.setdefault("resources", [])
-    if resource_key in owned:
+    if resource_key in owned and not info.get("repeatable"):
         return False, f"Already own {info['name']} (each type once)."
     cost = int(info["cost"])
     if int(wb.get("gold", 0)) < cost:
         return False, f"Need {cost} gc for {info['name']}."
     wb["gold"] = int(wb["gold"]) - cost
     owned.append(resource_key)
-    text = f"Purchased base resource {info['name']} for {cost} gc."
+    count = owned.count(resource_key)
+    suffix = f" (now own {count})" if info.get("repeatable") and count > 1 else ""
+    text = f"Purchased base resource {info['name']} for {cost} gc{suffix}."
     add_history(wb, text)
     return True, text
 

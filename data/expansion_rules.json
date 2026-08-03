@@ -345,6 +345,212 @@
    ]
   }
  ],
+ "The Wizards' Conclave": [
+  {
+   "title": "Mimics",
+   "blurb": "From Catch Me If You Can (Alex Buchel). Treasure tokens that fight back — a fully generic \"any treasure token might be a mimic\" subsystem, reusable in any scenario. Each shape should only be used once per game.",
+   "rows": [
+    {
+     "name": "Behavior",
+     "text": "Mimics ignore the standard uncontrolled-creature rules and only teleport or fight when a warband member attacks them. At the start of each creature phase, each mimic within 8\" of an enemy teleports a random distance toward whichever table edge is furthest from it, ignoring intervening models/scenery. Reduced to 0 Health, a mimic becomes a standard treasure token."
+    },
+    {
+     "name": "Chest",
+     "text": "Formidable bite — does double damage."
+    },
+    {
+     "name": "Table",
+     "text": "Long legs dodge most attacks — treat Fight as +6 when targeted by a shooting attack."
+    },
+    {
+     "name": "Desk",
+     "text": "Big and sturdy — counts as Large, Armour 15, 12 Health."
+    },
+    {
+     "name": "Broom",
+     "text": "Casts lightning after teleporting — resolves a +0 magic shooting attack against the closest enemy within 24\" and in LoS."
+    },
+    {
+     "name": "Cabinet",
+     "text": "Big and sturdy (Large, Armour 15, 12 Health); acts as a portal — releases an imp (rulebook p.117) before teleporting."
+    },
+    {
+     "name": "Bag",
+     "text": "Absorbs magic — each time targeted/affected by a spell, roll a die: 10+ cancels the spell and restores the bag to full Health."
+    },
+    {
+     "name": "Alembic",
+     "text": "Full of unstable liquid — anyone who damages it in melee is sprayed with acid for 3 damage."
+    },
+    {
+     "name": "Chair",
+     "text": "Agile but weak — Fight +6, but only deals half damage (round up)."
+    },
+    {
+     "name": "Grimoire",
+     "text": "Hypnotic floating words — at the start of each creature phase, all models within 8\" need a Will Roll (TN12) or are capped at one action next activation."
+    },
+    {
+     "name": "Bookcase",
+     "text": "Stats as a large construct (rulebook p.117) and acts as one in the creature phase (no teleport); a wizard/apprentice within 4\" may spend an action to read its shed pages for +20 XP, once per game."
+    },
+    {
+     "name": "Mimic (Construct)",
+     "text": "M3 F+3 S+1 A13 W+8 H8 — Magic Attack, Teleport, Animated Treasure Token, Construct."
+    }
+   ]
+  },
+  {
+   "title": "Generic Scenario Mechanics",
+   "blurb": "Subsystems built by their authors to be reusable outside their original scenario — drop any of these into an unrelated game.",
+   "entries": [
+    {
+     "name": "The Alarm",
+     "tag": "The Stone Deep",
+     "text": "Stealth/noise tracker for any infiltration scenario. A D10 starts at 1; every Fight Roll made by anyone (hit or miss) increases it by 1. At 10, a guard (as Thief) appears at the exit and it resets to 1, continuing to climb. The guard beelines for the source of the most recent Fight Roll instead of moving randomly. Optional \"Maximum Security\" variant: add the weapon's damage modifier to the increase too (e.g. a Two-Handed Weapon adds 3, a Dagger only adds 0 net — allowing silent kills)."
+    },
+    {
+     "name": "The Mirrors",
+     "tag": "A Maze of Mirrors",
+     "text": "Carryable magic mirrors (treat as Fight +2, Armour 6, Health 3 as objects). Carrying one halves Move and gives −3 Fight. Dropped or on a losing natural-1 Fight Roll while carried, roll on the Mirror Powers or Bad Luck tables (see Hazard & Loot Tables)."
+    },
+    {
+     "name": "Zones of Magic",
+     "tag": "Escape from the Tower of Sargosh",
+     "text": "Divide the table into zones and roll a random environmental-magic effect per zone (see Hazard & Loot Tables): casting bonuses with backlash risk, +Armour/−Move fields, +Move/−Fight-and-Shoot fields, or a \"creature spawns on death in this zone\" hazard. Fully portable to any multi-room dungeon crawl."
+    },
+    {
+     "name": "Destiny Stone Duel",
+     "tag": "The House of Tempests",
+     "text": "Two-player secret-bid casting bonus. Each turn, both wizards secretly choose to spend (or not spend) a 3-way token (red/yellow/blue) before initiative. Neither spent: both get +4 to one Casting Roll. Both spent: both get +2, then compare colours (red>yellow>blue>red) — the loser takes 2 damage. Only one spent: that wizard gets +6 but must pay 2 Health or the token is spent for nothing. A generic risk/reward secret-bidding mechanic, reskinnable to any two-wizard duel."
+    },
+    {
+     "name": "Cabinet Enslavement",
+     "tag": "The Cabinet of Calixia Malus",
+     "text": "A random monster spawner (see Hazard & Loot Tables) whose summoned creature is claimed by whichever player controls the most \"enslavement mechanism\" tokens at the moment it arrives (control = a warband member within 1\" of a token, uncontested). Ties mean it acts as a normal uncontrolled creature. A generic \"control zones decide who commands the spawn\" contest, portable to any summoning-themed scenario."
+    },
+    {
+     "name": "Waking Up",
+     "tag": "They Mostly Come at Night",
+     "text": "Ambush/ready-check mechanic: on the turn an ambush begins, defenders need a Will Roll (TN15 turn 1, TN12 turn 2, TN9 turn 3, automatic from turn 4) to be combat-ready; if attacked before then, Armour and Fight both take −2. Killed attackers can be \"topped back up\" from a reinforcement pool to keep pressure on. Also pairs with a generic reduced-visibility rule (16\" max LoS, ignored by Glow) for any night scenario."
+    },
+    {
+     "name": "Four-Player Alliance Framework",
+     "tag": "Strange Alliances",
+     "text": "A 3-scenario, 4-player campaign structure: teams of two reshuffle each scenario so everyone partners with everyone once. Picking up a treasure token for the first time triggers a random encounter on 12+. If a player's wizard and apprentice are both killed, another warband member becomes the new key-holder. Each scenario varies the \"insert a key to open the vault\" objective (simultaneous two-statue insertion; an anti-magic zone around the vault; a hidden-information \"check with your neighbour\" key-matching puzzle) — all reusable templates for any team-vs-team vault heist."
+    },
+    {
+     "name": "Sacred Flames Boss Gate",
+     "tag": "The Betrayer's Blade",
+     "text": "A boss (the Betrayer Prince, see Bestiary) is immune to all damage while at least one of several \"sacred flames\" remains lit. Extinguishing one costs an action and a Will Roll (TN12, empowerable like a spell); failure burns the extinguisher for 2 damage. A generic \"disable the guardian totems before the boss can be hurt\" gate, portable to any boss encounter."
+    }
+   ]
+  },
+  {
+   "title": "Hazard & Loot Tables",
+   "blurb": "Random tables built generic enough to reuse outside their source scenario.",
+   "rows": [
+    {
+     "name": "Zone of Magic Effect (d20)",
+     "text": "1-5 The Waves of Cruxix: +2 to Casting Rolls in this zone, but any spell failure deals double damage. 6-10 The Compact of Thoseluem: +2 Armour, −1 Move. 11-15 The Maltron Velocity: +1 Move, −1 Fight in melee; shooting attacks suffer −2 but deal +2 damage on a hit. 16-20 The Necrovortex of Shamans: when a model dies here, roll a die — 1-5 nothing, 6-19 a wraith (if the dead model was a spellcaster) or skeleton (if not) appears in its place, natural 20 summons a vampire instead."
+    },
+    {
+     "name": "Mirror Power (d20)",
+     "text": "1 Mirror Monster attacks the spellcaster (see Bestiary). 2 Just a common mirror — worth 40gc if secured. 3 Small crack — re-roll (1-3 only); every subsequent use risks shattering (1-4 on a d20, roll on Bad Luck). 4 Reflect on your soul — Will Roll TN12: success grants +2 to the next Casting Roll, failure costs −1 Will for the rest of the scenario. 5 Reflections of Truth — dispels all Illusionist spells within 12\". 6-8 Highly Polished Surface — usable as a Wizard Eye; can be covered/uncovered as an action. 9 Mirror-gazing Secret — casts Reveal Secret once, Casting Number 6. 10-13 Mirror Walk — a spellcaster may enter and re-emerge from any other intact mirror on the table (including one carried by another figure). 14 Your Eyes are Mine! — casts Mind Control through the mirror, Casting Number 10, at any soldier/creature not adjacent to or carrying a mirror. 15-16 Mirror, Mirror on the Wall — immediate Beauty spell effect at Casting Roll 16; ends if the mirror shatters. 17 Reflect Light — immune to Blinding Light and Glow while carrying, ends if shattered. 18-20 Reflect Magic — reflects an incoming Elemental Ball/Curse/Elemental Bolt/Forget Spell/Petrify back at its caster (re-rolled with the original Casting Number); each use risks shattering (1-4 on a d20)."
+    },
+    {
+     "name": "Bad Luck — mirror shatters (d20)",
+     "text": "1 Chain Reaction — roll for every other mirror on the table; 1-3 shatters it too. 2-3 A Mirror Monster spawns and attacks whoever broke it. 4-7 The breaker suffers an immediate +3 attack. 8-11 The breaker forgets a spell (opponent's choice) for the rest of the game, or takes a +3 attack if not a spellcaster. 12-16 The breaker's warband loses 20gc from all post-game gold-crown treasure rolls. 17-18 The breaker takes 3 damage immediately. 19-20 The breaker suffers a Permanent Injury (rulebook p.51); a soldier is instead reduced to 0 Health."
+    },
+    {
+     "name": "Prison Cell / Marker Result (d20)",
+     "text": "1-4 Empty. 5-11 Equipment — roll on the Prison Equipment table. 12-17 Prisoner — a captive (or reanimated corpse) that can join the opening warband for the rest of the game. 18-20 Treasure token (capped at 3 for this scenario; re-roll extras)."
+    },
+    {
+     "name": "Prison Equipment (d20)",
+     "text": "1-5 Dagger. 6-10 Hand Weapon. 11-12 Leather Armour. 13-14 Shield. 15-16 Two-Handed Weapon. 17 Bow. 18 Crossbow. 19-20 Hoard — choose any three other results on this table (not Hoard again)."
+    },
+    {
+     "name": "Missing Armour Modifiers (cumulative)",
+     "text": "Leather Armour: −1 Armour. Mail Armour: −2 Armour, +1 Move. Shield: −1 Armour. For scenarios that start warbands stripped of gear: apply the modifier for each piece equipped before disarming, and reverse it once that piece is recovered."
+    },
+    {
+     "name": "Cabinet Creature Spawn (d20)",
+     "text": "1-4 Giant Rat. 5-8 Ice Spider. 9-10 Boar. 11-12 Bear. 13-14 Snow Leopard. 15 White Gorilla. 16 Rangifer. 17 Frost Giant. 18 Snow Troll. 19 Giant Worm. 20 Major Demon (a possessed corpse)."
+    },
+    {
+     "name": "Gem/Statue Result (d20)",
+     "text": "1-2 Figure overcome — a wizard/apprentice loses the rest of this turn and their next activation; a soldier becomes an uncontrolled creature for the rest of the game. 3-4 Releases a Wraith within 3\", as a normal uncontrolled creature. 5-6 Gems explode — a +5 shooting attack against anyone within 3\". 7-8 Statue animates — a Medium (1-10) or Large (11-20) Construct, uncontrolled. 9-11 Gems worth d20×20gc, nothing else. 12-14 +100 experience points (stacks with normal scenario XP). 15-16 Eyes of Runic Light (see New Treasure). 17-18 The wizard gains a level and a new spell from the Random Spell Table. 19-20 Eyes of Eternity (see New Treasure). Prying gems loose requires an 11+ roll while in contact (Thieves +1, Treasure Hunters +2) — a reusable skill-gated loot mechanic."
+    }
+   ]
+  },
+  {
+   "title": "New Treasure & Magic Items (reference only — not added as purchasable app content)",
+   "blurb": "Unique items explicitly kept in the winning wizard's vault for future games.",
+   "rows": [
+    {
+     "name": "The Boon of Sargosh",
+     "text": "Counts as a Staff of Casting, except the wielder chooses which spell it benefits instead of rolling randomly."
+    },
+    {
+     "name": "The Blade of Barael",
+     "text": "Hand-and-a-half sword, wizards/apprentices only (no dagger or shield alongside it); +1 Fight, +2 damage. The bearer can never be targeted by an attack or spell from beyond 12\" (friendly or enemy), and is immune to Glow (though Cordial of Clearsight still works normally against them). A natural 20 in melee lets the bearer immediately take another action (needn't be a move)."
+    },
+    {
+     "name": "The Armour of Redwar",
+     "text": "Ancient magic mail; +1 Move and +1 Fight on combat rolls made against shooting attacks."
+    },
+    {
+     "name": "Eyes of Runic Light",
+     "text": "+2 to any attempt to cast Write Scroll. Sells for 250gc."
+    },
+    {
+     "name": "Eyes of Eternity",
+     "text": "Once ever, re-roll a \"Dead\" result on the Survival Table (second roll is final). Sells for 500gc."
+    },
+    {
+     "name": "The Betrayer's Blade",
+     "text": "Wizards only; +2 Fight. In multi-figure combats where the wielder is attacker or declared target, supporting figures grant only +1 each instead of +2."
+    }
+   ]
+  },
+  {
+   "title": "Bestiary (reference only — scenario bosses, not added as hireable/summonable creatures)",
+   "blurb": "",
+   "entries": [
+    {
+     "name": "Mimic",
+     "tag": "Construct",
+     "text": "M3 F+3 S+1 A13 W+8 H8 — Magic Attack, Teleport, Animated Treasure Token, Construct. See Mimics above for the ten mimic-type variants."
+    },
+    {
+     "name": "Guardian Construct",
+     "tag": "Construct, Large",
+     "text": "M4 F+4 S+0 A14 W+2 H20 — Construct, Large, Huge Weapon (treat as two-handed). Prioritizes models in contact with its control panel, then treasure-carriers, then the closest trespasser. A wizard/apprentice adjacent to the panel and unengaged may spend an action to directly order one of its actions. Destroyed, it returns to full Health on a roll of 13+ at the end of each turn."
+    },
+    {
+     "name": "The Tormented Half-Breed",
+     "tag": "Demon",
+     "text": "M6 F+3 S+0 A11 W+4 H16 — Demon, Immune to Bind Demon, Immune to non-magic attacks, Tormented, Blinding, Unholy Vigour. Blinding: a shooting attack or spell targeting it needs a Will Roll (TN10) first, or the attacker is reduced to Fight and Shoot +0 for the rest of the turn and the attack/spell auto-fails without dealing damage. Defeated (not killed) here, it flees to return as the Enraged Half-Breed."
+    },
+    {
+     "name": "The Enraged Half-Breed",
+     "tag": "Demon",
+     "text": "M6 F+4 S+0 A11 W+4 H1 — Demon, Immune to Bind Demon, Blinding, Boundless Fury. Only melee attacks from a figure wielding the Blade of Barael can damage it; other attacks may still apply their other effects. Same Blinding rule as the Tormented Half-Breed."
+    },
+    {
+     "name": "Mirror Monster",
+     "tag": "Demon",
+     "text": "No fixed stat line — it copies whichever figure's reflection summoned it: same stats, equipment, and special abilities, but cannot cast spells. If it kills the figure it's duplicating, it gains +2 Fight for the rest of the game."
+    },
+    {
+     "name": "The Betrayer Prince",
+     "tag": "Large",
+     "text": "M6 F+6 S+0 A15 W+6 H20 — Large, Huge Weapon (treat as two-handed), Deceiver (supporting figures grant only +1 each against it instead of +2), immune to all damage while at least one sacred flame remains lit (see Sacred Flames Boss Gate). Killed in melee, the killer immediately gains the Betrayer's Blade (even with no free item slot or hand-weapon proficiency); killed at range, a special treasure marker is left in its place instead."
+    }
+   ]
+  }
+ ],
  "The Perilous Dark": [
   {
    "title": "Solo & co-op toolkit",
@@ -4921,8 +5127,8 @@
  ],
  "Blood Legacy": [
   {
-   "title": "Vampire Wizard (deferred mechanic — reference only)",
-   "blurb": "",
+   "title": "Vampire Wizard (implemented — wizard-state mechanic)",
+   "blurb": "Becoming a Vampire is a real, reversible wizard-state (become_vampire/revert_vampire — see Wizard states below): drops Thaumaturge spells, +1 flat to remaining Casting Numbers, clamps Will/Health, trades the apprentice for a 9th soldier slot, and keeps a savepoint to revert. Creating a Vampire from scratch as a full PC/NPC (its own 8 spells, Unnatural Health economy, Sun Damage) and the GM-technique guidance for running one are still reference only.",
    "rows": [
     {
      "name": "Creating & running a Vampire",
@@ -4931,8 +5137,8 @@
    ]
   },
   {
-   "title": "Fire Giant Wizard (deferred mechanic — reference only)",
-   "blurb": "",
+   "title": "Fire Giant Wizard (implemented)",
+   "blurb": "Playable from creation via the \"fire_giant_wizard_playable\" homerule (Additional Rules and Homerules) — stat line, item-slot restrictions, school relations, level cost/Health cap and empowering cost are all tracked. Deciphering the Grimoire of Fin Dalka to learn a Fire Giant spell mid-campaign is a separate, also-implemented mechanic — see below.",
    "rows": [
     {
      "name": "Creating & running a Fire Giant Wizard",
@@ -4941,8 +5147,8 @@
    ]
   },
   {
-   "title": "Giant-Blooded (soldier modification — deferred mechanic)",
-   "blurb": "",
+   "title": "Giant-Blooded (implemented)",
+   "blurb": "Real soldier modification (set_soldier_giant_blooded), gated behind the \"giant_blooded_enabled\" homerule: one soldier per warband, +50gc, applies the stat changes and reverses them exactly if removed. The two convenience pre-built-cost tables in the source stay reference only — this app applies the cost/stat delta directly to any eligible hire instead.",
    "rows": [
     {
      "name": "Giant-Blooded",
@@ -5097,8 +5303,8 @@
    ]
   },
   {
-   "title": "The Grimoire of Fin Dalka (deferred mechanic — reference only)",
-   "blurb": "",
+   "title": "The Grimoire of Fin Dalka (implemented)",
+   "blurb": "Any wizard can acquire the grimoire and attempt to decipher any of the 8 Fire Giant spells from the wizard card (Blood Legacy) — the app doesn't roll the Will Roll itself, but tracks the cumulative bonus on failure, the permanent lock on a natural 1, learning the spell on success, and the declining sale price.",
    "rows": [
     {
      "name": "Deciphering the grimoire",
@@ -5119,8 +5325,8 @@
  ],
  "Fireheart": [
   {
-   "title": "Construct Modification (deferred mechanic — reference only)",
-   "blurb": "Animate Construct is Out of Game (B) for a first warband, but usually (A) afterward; each spellcaster may cast it once between games (repair/re-animation below has its own separate limit). A scroll can animate a \"standard\" small/medium/large construct with no roll, or modify an existing one — but scrolls can never animate-with-modification simultaneously, and never repair/re-animate. Constructs can't drink or receive potions unless a potion explicitly allows it. Repair & Re-Animation via Animate Construct: fixing a permanent injury is -4 to the roll (pre-game); reviving a \"dead\" construct is -6 (post-game only, by its own wizard) — success revives it, a natural 1 destroys it forever, any other failure leaves it inanimate for another attempt after a later game (no need to be the very next game, unlike Miraculous Cure). Only \"standard\" (small/medium/large) constructs can ever be modified; bestiary constructs from other books can't be (they're already modified).",
+   "title": "Construct Modification (implemented)",
+   "blurb": "Real add/remove picker on any standard small/medium/large construct (add_construct_modification/remove_construct_modification), applying each modification's stat effect and item-slot cost and reversing it exactly on removal; Animated Prosthetics are a related, also-implemented mechanic on the wizard/apprentice/captain's permanent injuries. The Animate Construct casting roll itself (and Repair & Re-Animation's roll modifiers below) isn't simulated — same as every other spellcasting roll in this app.",
    "rows": [
     {
      "name": "Construct Modification rules",
@@ -5750,8 +5956,8 @@
    ]
   },
   {
-   "title": "Horses in Frostgrave (Issue 1 — deferred mechanic, reference only)",
-   "blurb": "A full optional mounted-combat subsystem. Requires the Stable base resource (300gc, keeps one horse, doesn't affect warband limit); a horse then costs 200gc. Only one horse per warband at a time. Any model may ride except Animals, Undead, Demons, and Constructs; models start mounted by default and take a horse as a 1-slot item. Rider+horse count as one Large model for size purposes.",
+   "title": "Horses in Frostgrave (Issue 1 — implemented)",
+   "blurb": "Buying the Stable base resource, buying/releasing the warband's one horse, and mounting/dismounting the wizard, apprentice, captain, or an eligible soldier (with the Mounted Modifiers applied and reverted automatically) are all real, tracked mechanics now — see the Base card. Taking a horse as a 1-slot item and the \"counts as one Large model\" table-footprint rule are table-play details this app doesn't need to track and stay reference only.",
    "rows": [
     {
      "name": "Mounted Modifiers (added to rider)",
