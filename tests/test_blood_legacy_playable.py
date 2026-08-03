@@ -36,32 +36,31 @@ def test_giant_blooded_eligibility_excludes_animals_constructs_demons_undead():
 
 def test_giant_blooded_requires_homerule_enabled(fresh_warband):
     wb = fresh_warband
-    ok, msg = warband_store.add_soldier(wb, "thug", "Grunt")
-    assert ok, msg
-    soldier = wb["soldiers"][0]
-
-    ok, msg = warband_store.set_soldier_giant_blooded(wb, soldier["id"], True)
+    ok, msg = warband_store.set_giant_blooded_pending(wb, True)
     assert not ok
     assert "homerule" in msg.lower()
 
 
-def test_giant_blooded_apply_and_remove(fresh_warband):
+def test_giant_blooded_declared_at_hire_and_remove(fresh_warband):
     wb = fresh_warband
     wb["homerules"]["giant_blooded_enabled"] = True
+    ok, msg = warband_store.set_giant_blooded_pending(wb, True)
+    assert ok, msg
+    assert wb["giant_blooded_pending"] is True
+    before_gold = wb["gold"]
+
     ok, msg = warband_store.add_soldier(wb, "thug", "Grunt")
     assert ok, msg
     soldier = wb["soldiers"][0]
-    before_gold = wb["gold"]
-
-    ok, msg = warband_store.set_soldier_giant_blooded(wb, soldier["id"], True)
-    assert ok, msg
     assert soldier["giant_blooded"] is True
     assert soldier["move"] == 6 - 1
     assert soldier["will"] == -1 - 2
     assert soldier["health"] == 10 + 2
     assert wb["gold"] == before_gold - GIANT_BLOODED_COST
+    # Consumed automatically — the next hire is ordinary again.
+    assert wb["giant_blooded_pending"] is False
 
-    ok, msg = warband_store.set_soldier_giant_blooded(wb, soldier["id"], False)
+    ok, msg = warband_store.remove_soldier_giant_blooded(wb, soldier["id"])
     assert ok, msg
     assert soldier["giant_blooded"] is False
     assert soldier["move"] == 6
@@ -71,29 +70,26 @@ def test_giant_blooded_apply_and_remove(fresh_warband):
     assert wb["gold"] == before_gold - GIANT_BLOODED_COST
 
 
-def test_giant_blooded_only_one_per_warband(fresh_warband):
+def test_giant_blooded_pending_refuses_while_one_already_on_roster(fresh_warband):
     wb = fresh_warband
     wb["homerules"]["giant_blooded_enabled"] = True
+    warband_store.set_giant_blooded_pending(wb, True)
     warband_store.add_soldier(wb, "thug", "Grunt")
-    warband_store.add_soldier(wb, "thief", "Sneak")
-    s1, s2 = wb["soldiers"]
 
-    ok, msg = warband_store.set_soldier_giant_blooded(wb, s1["id"], True)
-    assert ok, msg
-    ok, msg = warband_store.set_soldier_giant_blooded(wb, s2["id"], True)
+    ok, msg = warband_store.set_giant_blooded_pending(wb, True)
     assert not ok
     assert "only one" in msg.lower()
 
 
-def test_giant_blooded_rejects_ineligible_soldier(fresh_warband):
+def test_giant_blooded_pending_rejects_ineligible_hire(fresh_warband):
     wb = fresh_warband
     wb["homerules"]["giant_blooded_enabled"] = True
-    ok, msg = warband_store.add_soldier(wb, "war_hound", "Fang")
-    assert ok, msg
-    soldier = wb["soldiers"][0]
+    warband_store.set_giant_blooded_pending(wb, True)
 
-    ok, msg = warband_store.set_soldier_giant_blooded(wb, soldier["id"], True)
+    ok, msg = warband_store.add_soldier(wb, "war_hound", "Fang")
     assert not ok
+    # The pending toggle stays armed — the hire itself was rejected, nothing consumed it.
+    assert wb["giant_blooded_pending"] is True
 
 
 # --- Fire Giant Wizard --------------------------------------------------------

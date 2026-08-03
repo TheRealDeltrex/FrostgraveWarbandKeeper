@@ -4,17 +4,27 @@
  * 2H weapons occupy two slots; unselect clears both.
  */
 (function () {
-  // Kept in sync by hand with item_slot_cost()'s two-handed detection in
-  // game_content.py (B5.5) — that Python function is the server-side source of
-  // truth; this is a client-side mirror for instant feedback before posting.
-  function isTwoHandedName(name) {
-    const n = (name || "").trim().toLowerCase();
-    return (
-      n === "two-handed weapon" ||
-      /two-?handed/.test(n) ||
-      /\b2h\b/.test(n) ||
-      /2-?handed/.test(n)
-    );
+  // Catalog items (Musket, Blunderbuss, ...) carry their real slot_cost via
+  // fg-item-slotcost-data (see warband_view.html / game_content.item_slot_cost,
+  // the server-side source of truth); free-text/custom items have no catalog
+  // entry, so the name-pattern regex stays as a fallback for those.
+  function makeIsTwoHandedName(itemSlotCosts) {
+    return function isTwoHandedName(name) {
+      const n = (name || "").trim();
+      if (!n) return false;
+      for (const key in itemSlotCosts) {
+        if (key.toLowerCase() === n.toLowerCase()) {
+          return itemSlotCosts[key] >= 2;
+        }
+      }
+      const lower = n.toLowerCase();
+      return (
+        lower === "two-handed weapon" ||
+        /two-?handed/.test(lower) ||
+        /\b2h\b/.test(lower) ||
+        /2-?handed/.test(lower)
+      );
+    };
   }
 
   function readJson(id) {
@@ -35,6 +45,7 @@
     // than once per block, which used to repeat the full spell list per block.
     const potions = readJson("fg-potion-data");
     const spells = readJson("fg-spell-data");
+    const isTwoHandedName = makeIsTwoHandedName(readJson("fg-item-slotcost-data"));
     const picks = [...root.querySelectorAll(".item-slot-pick")];
     const details = [...root.querySelectorAll(".item-slot-detail")];
     const texts = [...root.querySelectorAll(".item-slot-text")];

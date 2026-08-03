@@ -180,6 +180,8 @@ def _draw_portrait(
     size: float = 26,
     kind: str = "",
     type_key: str | None = None,
+    gender: str | None = None,
+    state: str | None = None,
 ) -> None:
     """Framed portrait; crop-to-fit (no stretch). Falls back to the default
     artwork shipped with the app, then to an empty frame if there is none."""
@@ -188,7 +190,7 @@ def _draw_portrait(
     pdf.set_fill_color(245, 248, 252)
     pdf.rect(x, y, size, size, style="DF")
 
-    path = resolve_portrait_path(rel, kind, type_key)
+    path = resolve_portrait_path(rel, kind, type_key, gender, state)
     if path:
         cropped = _crop_to_square(path)
         # fpdf2 itself hard-requires Pillow to embed any image at all (it raises
@@ -320,15 +322,22 @@ def build_warband_pdf(wb: dict) -> bytes:
     # --- Wizard ---
     _next_section("Wizard")
     y0 = pdf.get_y()
-    _draw_portrait(pdf, wiz.get("portrait"), pdf.l_margin, y0, wiz_size, "wizard")
+    school = wiz.get("school", "")
+    # Lich / Beastcrafter / pact-holder, if any — it changes how the wizard levels
+    # and what they may field, so it belongs on the printed sheet. Vampire and
+    # Lich are also the two states with their own default portrait art.
+    state_kind = expansions.state_kind(wb)
+    portrait_state = "vampire" if school == "Vampire" else (
+        "lich" if state_kind == expansions.STATE_LICH else None
+    )
+    _draw_portrait(
+        pdf, wiz.get("portrait"), pdf.l_margin, y0, wiz_size, "wizard",
+        gender=wiz.get("gender"), state=portrait_state,
+    )
     left = pdf.l_margin + wiz_size + portrait_gap
     pdf.set_xy(left, y0)
     pdf.set_font("Helvetica", "B", 12)
     wstats = wizard_effective_stats(wb)
-    school = wiz.get("school", "")
-    # Lich / Beastcrafter / pact-holder, if any — it changes how the wizard levels
-    # and what they may field, so it belongs on the printed sheet.
-    state_kind = expansions.state_kind(wb)
     state_note = ""
     if state_kind != expansions.STATE_NONE:
         state_note = f"  -  {expansions.STATE_LABELS[state_kind]}"
@@ -386,7 +395,9 @@ def build_warband_pdf(wb: dict) -> bytes:
     if ap:
         _next_section("Apprentice")
         y0 = pdf.get_y()
-        _draw_portrait(pdf, ap.get("portrait"), pdf.l_margin, y0, wiz_size, "apprentice")
+        _draw_portrait(
+            pdf, ap.get("portrait"), pdf.l_margin, y0, wiz_size, "apprentice", gender=ap.get("gender")
+        )
         left = pdf.l_margin + wiz_size + portrait_gap
         pdf.set_xy(left, y0)
         pdf.set_font("Helvetica", "B", 12)

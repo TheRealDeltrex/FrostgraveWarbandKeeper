@@ -24,6 +24,7 @@
      (initBlock reads these same three fixed ids). #}
   <script type="application/json" id="fg-potion-data">{{ potion_choices | tojson }}</script>
   <script type="application/json" id="fg-spell-data">{{ spell_names | tojson }}</script>
+  <script type="application/json" id="fg-item-slotcost-data">{{ item_slot_costs | tojson }}</script>
   <datalist id="fg-item-suggestions">
     {% for it in full_standard_items if it.kind == 'simple' %}
       <option value="{{ it.name }}"></option>
@@ -44,7 +45,8 @@
 
   <section class="hero">
     <div class="hero-with-portrait">
-      {% set wiz_src = portrait_src(wiz.portrait, 'wizard') %}
+      {% set wiz_state = 'vampire' if wiz.school == 'Vampire' else ('lich' if wizard_state_kind == STATE_LICH else None) %}
+      {% set wiz_src = portrait_src(wiz.portrait, 'wizard', None, wiz.gender, wiz_state) %}
       {% if wiz_src %}
         <img class="portrait-lg" src="{{ wiz_src }}" alt="{{ wiz.name }}" />
       {% endif %}
@@ -651,7 +653,7 @@
         <details class="ref-panel" open>
           <summary>Apprentice — {{ ap.name }} · {{ wiz.school }}</summary>
           <div class="char-block">
-            {% set ap_src = portrait_src(ap.portrait, 'apprentice') %}
+            {% set ap_src = portrait_src(ap.portrait, 'apprentice', None, ap.gender) %}
             {% if ap_src %}
               <img class="portrait-md" src="{{ ap_src }}" alt="" />
             {% else %}
@@ -918,6 +920,46 @@
       </details>
     {% endif %}
 
+    {% if underworld_favors_enabled %}
+      <details class="ref-panel">
+        <summary>Underworld Favours (Spellcaster Magazine) — {{ underworld_favors.markers }} Marker{{ 's' if underworld_favors.markers != 1 }} held</summary>
+        <p class="muted" style="font-size:0.85rem">
+          A debt economy: take an Underworld Loan for gold now and Markers owed later, or claim a
+          Favour for free before a game (max Markers held = wizard level, currently
+          {{ underworld_wizard_level }}). Pay a Marker off for {{ UNDERWORLD_PAYOFF_COST }}gc any
+          time, or roll for a debt call after a game with any held.
+        </p>
+        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
+          <input type="hidden" name="action" value="take_underworld_loan" />
+          <select name="amount" required>
+            {% for amt in range(UNDERWORLD_LOAN_MIN, UNDERWORLD_LOAN_MAX + 1, 100) %}
+              <option value="{{ amt }}">{{ amt }}gc ({{ amt // 100 }} Marker{{ 's' if amt // 100 != 1 }})</option>
+            {% endfor %}
+          </select>
+          <button class="btn secondary small" type="submit">Take a Loan</button>
+        </form>
+        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form" style="margin-top:0.4rem">
+          <input type="hidden" name="action" value="claim_free_underworld_favor" />
+          <button class="btn secondary small" type="submit" {% if underworld_favors.markers >= underworld_wizard_level %}disabled{% endif %}>Claim a Favour for free</button>
+        </form>
+        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form" style="margin-top:0.4rem">
+          <input type="hidden" name="action" value="pay_off_underworld_marker" />
+          <button class="btn secondary small" type="submit" {% if underworld_favors.markers < 1 or wb.gold < UNDERWORLD_PAYOFF_COST %}disabled{% endif %}>Pay off a Marker ({{ UNDERWORLD_PAYOFF_COST }}gc)</button>
+        </form>
+        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form" style="margin-top:0.4rem">
+          <input type="hidden" name="action" value="roll_underworld_debt_call" />
+          <input type="number" name="call_roll" min="1" max="20" placeholder="Call (d20)" style="width:6.5rem" />
+          <input type="number" name="outcome_roll" min="1" max="20" placeholder="Table (d20)" style="width:6.5rem" />
+          <input type="number" name="who_roll" min="1" max="20" placeholder="Who (d20, if 19-20)" style="width:9rem" />
+          <button class="btn small" type="submit" {% if underworld_favors.markers < 1 %}disabled{% endif %}>Roll for a debt call (post-game)</button>
+        </form>
+        <p class="muted" style="font-size:0.78rem;margin:0.2rem 0 0">
+          Leave a field blank to have the app roll it for you, or fill in dice you already rolled at
+          the table to record them instead.
+        </p>
+      </details>
+    {% endif %}
+
     <details class="ref-panel">
       <summary>Level up wizard {% if pending_levels %}({{ pending_levels }} ready){% endif %}</summary>
       <p class="muted">
@@ -1052,6 +1094,15 @@
           <div>
             <label for="new_apprentice_portrait">Picture</label>
             <input id="new_apprentice_portrait" name="apprentice_portrait" type="file" accept="image/*" />
+          </div>
+          <div>
+            <label>Portrait</label>
+            <div class="gender-toggle">
+              <input type="radio" id="new_apprentice_gender_m" name="apprentice_gender" value="male" checked />
+              <label for="new_apprentice_gender_m">Male</label>
+              <input type="radio" id="new_apprentice_gender_f" name="apprentice_gender" value="female" />
+              <label for="new_apprentice_gender_f">Female</label>
+            </div>
           </div>
           <div>
             <label>&nbsp;</label>
@@ -1435,36 +1486,33 @@
       <details class="ref-panel">
         <summary>Giant-Blooded (Blood Legacy)</summary>
         <p class="muted" style="font-size:0.85rem">
-          One ordinary soldier in the warband may be Giant-Blooded: +{{ GIANT_BLOODED_COST }}gc,
-          -1 Move, -2 Will, +2 Health, and the Giant-Blooded trait (+1 melee damage, +4 to
-          TN-based Fight rolls, includes Large). Animals, demons, constructs and undead aren't
-          eligible. A single control here, not a button on every soldier's row — only one
-          soldier may take it.
+          Declared at hire, per the book: +{{ GIANT_BLOODED_COST }}gc, -1 Move, -2 Will,
+          +2 Health, and the Giant-Blooded trait (+1 melee damage, +4 to TN-based Fight
+          rolls, includes Large). Animals, demons, constructs and undead aren't eligible.
+          Only one soldier in the warband may have it.
         </p>
         {% if giant_blooded_soldier %}
           <p>
             <strong>{{ giant_blooded_soldier.name }}</strong> is Giant-Blooded.
           </p>
           <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" onsubmit="return confirm('Remove Giant-Blooded from {{ giant_blooded_soldier.name }}? The stat changes will be reversed (the {{ GIANT_BLOODED_COST }}gc fee is not refunded).');">
-            <input type="hidden" name="action" value="toggle_soldier_giant_blooded" />
+            <input type="hidden" name="action" value="remove_soldier_giant_blooded" />
             <input type="hidden" name="soldier_id" value="{{ giant_blooded_soldier.id }}" />
-            <input type="hidden" name="fitted" value="0" />
             <button class="btn secondary small" type="submit">Remove Giant-Blooded</button>
           </form>
-        {% elif giant_blooded_choices %}
+        {% elif giant_blooded_pending %}
+          <p>Next eligible soldier hired will be Giant-Blooded.</p>
           <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
-            <input type="hidden" name="action" value="toggle_soldier_giant_blooded" />
-            <input type="hidden" name="fitted" value="1" />
-            <select name="soldier_id" required>
-              <option value="">— pick a soldier —</option>
-              {% for c in giant_blooded_choices %}
-                <option value="{{ c.id }}">{{ c.name }}</option>
-              {% endfor %}
-            </select>
-            <button class="btn secondary small" type="submit">Make Giant-Blooded</button>
+            <input type="hidden" name="action" value="set_giant_blooded_pending" />
+            <input type="hidden" name="fitted" value="0" />
+            <button class="btn secondary small" type="submit">Cancel</button>
           </form>
         {% else %}
-          <p class="empty">No eligible soldier hired yet (needs an ordinary Core Rules standard/specialist soldier).</p>
+          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
+            <input type="hidden" name="action" value="set_giant_blooded_pending" />
+            <input type="hidden" name="fitted" value="1" />
+            <button class="btn secondary small" type="submit">Declare next hire Giant-Blooded</button>
+          </form>
         {% endif %}
       </details>
     {% endif %}

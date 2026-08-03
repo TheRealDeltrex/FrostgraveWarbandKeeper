@@ -2844,6 +2844,16 @@ def fin_dalka_spell_ids() -> list[str]:
     return [spell_id("Fire Giant", sp["name"]) for sp in SPELLS.get("Fire Giant", [])]
 
 
+# --- Spellcaster Magazine, Issue 3: Underworld Favours (a debt economy) -----
+# A wizard may take an Underworld Loan (gold now, Markers owed later) or bank
+# a Marker for free once per game via the "claim a Favour" note, capped by
+# wizard level. Markers can be paid off directly for gold, and after any game
+# with Markers held there's a chance the debt gets called in.
+UNDERWORLD_LOAN_MIN = 100
+UNDERWORLD_LOAN_MAX = 1000
+UNDERWORLD_PAYOFF_COST = 150
+
+
 # Core soldier types an Illusionary Soldier may copy Move/Fight/Shoot/Armour/
 # Will from — every Core Rules standard/specialist soldier except the
 # Apothecary (its stat line wouldn't make sense on a combat illusion).
