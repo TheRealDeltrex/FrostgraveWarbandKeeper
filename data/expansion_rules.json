@@ -6237,9 +6237,25 @@
    ]
   },
   {
-   "title": "Monster Hunting: For Fun and Profit (Issue 5 — deferred mechanic, not transcribed)",
-   "blurb": "Assigns XP values and harvestable components/bounties to every published Frostgrave monster, replacing the flat +5 XP from Experience Table II (Maze of Malcor) but not scenario-specific rewards. Harvesting: the killer claims the listed item free (if not In Combat), or any later figure may claim it via contact + action; claimed items never take a slot. gc-value items sell for that amount; +1 items are spell/potion components — max one dose per kill, usable for +1 to a matching Casting Roll (or 25gc off a Brew Potion component cost). Every spellcaster has a 3-component pouch free; a Spell Component Bag (5gc, 1 slot) holds 10 more. Only one component may be used per roll.",
+   "title": "Monster Hunting: For Fun and Profit (Issue 5 — implemented)",
+   "blurb": "Assigns an individual XP value to every published Frostgrave monster, replacing the flat +5 XP from Experience Table II (Maze of Malcor) — this does not replace scenario-specific XP rewards, which are usually higher. The full 92-row Master Monster Table lives on the reference page rather than here; this panel covers the harvesting and component rules it depends on.",
    "rows": [
+    {
+     "name": "Harvesting a kill",
+     "text": "If a figure kills a monster, it may immediately claim the listed item as a free action, so long as it is not in combat with any other figure. If it doesn't (or can't), the body stays on the table; any figure may claim the item later by moving into contact and spending an action, so long as it is not in combat. Once claimed, the item is removed and never takes an item slot."
+    },
+    {
+     "name": "gc-value items",
+     "text": "Items listed with a gc value can be sold for that amount after the game."
+    },
+    {
+     "name": "Spell and potion components",
+     "text": "Items listed with a +1 are spell or potion components. If a spellcaster attempts to cast a spell (or, using the Frostgrave Folio's optional potion rules, brew a potion) for which he has a matching component, he may declare he is using it before the Casting Roll and gains +1 to that roll; a matching potion component also reduces that potion's component cost by 25gc. A figure can gain a maximum of one dose of any component per kill, and a maximum of one component may be used on any single Casting Roll."
+    },
+    {
+     "name": "Carrying components",
+     "text": "Components picked up during a game never take an item slot. Each spellcaster has a component pouch that holds three of them for free. A Spell Component Bag (5gc, purchased after any scenario, 1 item slot) holds up to 10 more in addition to the pouch. Non-spellcasters may only carry components they personally pick up during a game."
+    },
     {
      "name": "Errata (Issue 7)",
      "text": "* Errata (Issue 7, Second Edition): Monstrous Form no longer exists in Second Edition — the Chilopendra Horn's effect changes to +10gc instead. † Rangifer's 0 XP is intentional (killing one is a detriment, not a reward). Source codes: FRB=Rulebook, TLL=Thaw of the Lich Lord, IBP=Into the Breeding Pits, FP=Forgotten Pacts, FF=The Frostgrave Folio, MM=Maze of Malcor, PD=Perilous Dark."

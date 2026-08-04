@@ -42,37 +42,42 @@ from frostgrave_data import (
     CAPTAIN_MODE_OPTIONS,
     CAPTAIN_TRICK_BY_ID,
     CAPTAIN_TRICKS,
+    COMPONENT_POUCH_CAPACITY,
     FIN_DALKA_BASE_SELL,
     FIN_DALKA_DECIPHER_COST,
     FIN_DALKA_SELL_PER_SPELL,
     GIANT_BLOODED_COST,
     HORSE_COST,
     HORSE_MOUNT_STAT_DELTA,
-    RIDERLESS_HORSE_STATS,
     KNIGHTLY_ORDER_ELIGIBLE,
     KNIGHTLY_ORDERS,
     LEVEL_UP_OPTIONS,
     LEVELUP_STATS,
     MAX_SOLDIERS,
     MAX_SPECIALISTS,
+    MONSTER_HUNTER_COMPONENTS_PER_KILL,
+    MONSTER_HUNTER_PRIZE_BONUS,
     NEUTRAL_SPELLS,
     OWN_SCHOOL_SPELLS,
     PENTANGLE_SCHOOLS,
     PERMANENT_INJURIES,
     PERMANENT_INJURY_BY_ID,
-    PROSTHETIC_UPGRADES,
-    PROSTHETIC_UPGRADE_BY_ID,
     PROMOTE_CAPTAIN_ITEM_SLOTS,
+    PROSTHETIC_UPGRADE_BY_ID,
+    PROSTHETIC_UPGRADES,
+    RIDERLESS_HORSE_STATS,
     SCHOOL_ALIGNED,
     SCHOOL_NEUTRAL,
     SCHOOL_OPPOSED,
     SCHOOL_RELATIONS,
     SCHOOLS,
-    SOLDIERS,
     SOLDIER_COMPANION_BY_TYPE_KEY,
+    SOLDIERS,
     SOURCE_BOOK_BY_SLUG,
     SOURCE_BOOK_OPTIONS,
     SOURCE_BOOKS,
+    SPELL_COMPONENT_BAG_CAPACITY,
+    SPELL_COMPONENT_BAG_NAME,
     SPELLS,
     STANDARD_CONSTRUCT_TYPE_KEYS,
     STARTING_GOLD,
@@ -89,8 +94,8 @@ from frostgrave_data import (
     construct_type_keys,
     fin_dalka_spell_ids,
     format_stat,
-    horse_rider_eligible_type_keys,
     group_soldiers_by_source,
+    horse_rider_eligible_type_keys,
     illusion_source_choices,
     level_from_xp,
     soldier_list_for_ui,
@@ -107,6 +112,7 @@ from game_content import (
     load_grave_mutations,
     load_loot_tables,
     load_magic_items,
+    load_monster_hunting,
     load_potion_choices,
     load_potion_choices_detailed,
     load_quick_reference,
@@ -121,10 +127,13 @@ from game_content import (
 from idle_watchdog import note_closing, note_heartbeat
 from warband_store import (
     ALT_XP_CONVERSIONS,
+    acquire_fin_dalka_grimoire,
     add_apprentice_mutation,
     add_apprentice_permanent_injury,
+    add_apprentice_prosthetic_upgrade,
     add_captain_mutation,
     add_captain_permanent_injury,
+    add_captain_prosthetic_upgrade,
     add_captain_xp,
     add_construct_modification,
     add_history,
@@ -136,42 +145,38 @@ from warband_store import (
     add_vault_item,
     add_wizard_mutation,
     add_wizard_permanent_injury,
+    add_wizard_prosthetic_upgrade,
     add_wizard_xp,
     adjust_gold,
     advance_beastcrafter,
     animal_companion_limit,
+    apply_animal_companion_crit_bonus,
     apply_captain_level_up,
     apply_captain_trick,
-    apply_animal_companion_crit_bonus,
-    become_vampire,
-    revert_vampire,
-    acquire_fin_dalka_grimoire,
-    sell_fin_dalka_grimoire,
-    fin_dalka_decipher,
-    buy_horse,
-    sell_or_release_horse,
-    mount_horse,
-    dismount_horse,
-    take_underworld_loan,
-    claim_free_underworld_favor,
-    pay_off_underworld_marker,
-    roll_underworld_debt_call,
     apply_level_up,
+    apply_monster_hunting_results,
     apply_portrait,
     apply_soldier_level_up,
     base_summary,
+    become_vampire,
     break_wizard_pact,
     buy_base_resource,
+    buy_horse,
     captain_effective_stats,
+    claim_free_underworld_favor,
+    claim_monster_prize,
     create_warband,
     delete_warband,
+    discard_component,
     dismiss_all_temporary_members,
     dismiss_apprentice,
     dismiss_captain,
+    dismount_horse,
     duplicate_warband,
     enabled_sources,
     enrich_soldier,
     export_warband_json,
+    fin_dalka_decipher,
     has_animal_companion,
     hire_apprentice,
     hire_captain,
@@ -181,54 +186,61 @@ from warband_store import (
     list_unreadable_warbands,
     list_warbands,
     load_warband,
+    mount_horse,
     normalize_item_slots,
+    pay_off_underworld_marker,
     portrait_filesystem_path,
     portraits_root_dir,
     promote_soldier_to_captain,
     raise_revenant,
+    random_core_wizard,
     recompute_spell_cns,
     record_game_loot,
+    record_monster_kill,
     remove_apprentice_mutation,
     remove_apprentice_permanent_injury,
+    remove_apprentice_prosthetic_upgrade,
     remove_captain_mutation,
     remove_captain_permanent_injury,
+    remove_captain_prosthetic_upgrade,
     remove_construct_modification,
+    remove_monster_kill,
     remove_portrait,
     remove_revenant,
     remove_soldier,
+    remove_soldier_giant_blooded,
     remove_soldier_mutation,
     remove_soldier_permanent_injury,
     remove_vault_item,
     remove_wizard_mutation,
     remove_wizard_permanent_injury,
-    random_core_wizard,
+    remove_wizard_prosthetic_upgrade,
     reorder_soldiers,
     reorder_spells,
     resolve_portrait_path,
     restore_portraits_by_name,
     reverse_last_captain_level_up,
     reverse_last_level_up,
-    add_apprentice_prosthetic_upgrade,
-    add_captain_prosthetic_upgrade,
-    add_wizard_prosthetic_upgrade,
-    remove_apprentice_prosthetic_upgrade,
-    remove_captain_prosthetic_upgrade,
-    remove_wizard_prosthetic_upgrade,
     reverse_last_soldier_level_up,
+    revert_vampire,
     roll_random_recruits,
+    roll_underworld_debt_call,
     save_warband,
+    sell_fin_dalka_grimoire,
+    sell_or_release_horse,
     sell_or_remove_base_resource,
     set_animal_feature,
     set_base_location,
-    set_permanent_injury_prosthetic,
-    remove_soldier_giant_blooded,
     set_giant_blooded_pending,
+    set_permanent_injury_prosthetic,
     set_soldier_status,
     set_wizard_state,
     soldier_count,
     soldier_from_book_enabled,
     spend_alt_xp,
+    take_underworld_loan,
     update_homerules,
+    use_component,
     warband_dir,
     warband_limits,
     wizard_effective_stats,
@@ -337,6 +349,11 @@ app.jinja_env.globals.update(
     UNDERWORLD_LOAN_MIN=UNDERWORLD_LOAN_MIN,
     UNDERWORLD_LOAN_MAX=UNDERWORLD_LOAN_MAX,
     UNDERWORLD_PAYOFF_COST=UNDERWORLD_PAYOFF_COST,
+    MONSTER_HUNTER_PRIZE_BONUS=MONSTER_HUNTER_PRIZE_BONUS,
+    MONSTER_HUNTER_COMPONENTS_PER_KILL=MONSTER_HUNTER_COMPONENTS_PER_KILL,
+    SPELL_COMPONENT_BAG_NAME=SPELL_COMPONENT_BAG_NAME,
+    COMPONENT_POUCH_CAPACITY=COMPONENT_POUCH_CAPACITY,
+    SPELL_COMPONENT_BAG_CAPACITY=SPELL_COMPONENT_BAG_CAPACITY,
     LEVELUP_STATS=LEVELUP_STATS,
     level_from_xp=level_from_xp,
     captain_effective_stats=captain_effective_stats,
@@ -446,6 +463,7 @@ def reference() -> str:
         potion_choices=load_potion_choices(),
         potions_detailed=load_potion_choices_detailed(),
         bestiary=load_bestiary(),
+        monster_hunting=sorted(load_monster_hunting(), key=lambda r: r["monster"]),
         traits=load_traits(),
         quick_reference=load_quick_reference(),
         core_rules=load_core_rules(),
@@ -840,6 +858,24 @@ def warband_view(warband_id: str) -> str:
     underworld_favors_enabled = "Spellcaster Magazine" in wb_sources
     underworld_favors = (wb.get("wizard") or {}).get("underworld_favors") or {"markers": 0}
     underworld_wizard_level = int((wb.get("wizard") or {}).get("level", 0))
+    # Spellcaster Magazine's Monster Hunting: For Fun and Profit (Issue 5): a
+    # per-game kill log (see record_monster_kill/claim_monster_prize) that
+    # settles into XP/gold via apply_monster_hunting_results, plus a
+    # component inventory on the wizard/apprentice (expansions.component_capacity).
+    monster_hunting_enabled = "Spellcaster Magazine" in wb_sources and bool(
+        (wb.get("homerules") or {}).get("monster_hunting_enabled")
+    )
+    monster_hunting = wb.get("monster_hunting") or {"kills": [], "prizes": []}
+    monster_hunter_active = expansions.monster_hunter_active(wb)
+    monster_hunting_table = sorted(load_monster_hunting(), key=lambda r: r["monster"])
+    monster_hunting_pending_xp = sum(int(k.get("xp", 0)) for k in monster_hunting.get("kills") or [])
+    monster_hunting_pending_gold = sum(int(p.get("gold", 0)) for p in monster_hunting.get("prizes") or [])
+    wizard_components = (wb.get("wizard") or {}).get("components") or []
+    wizard_component_capacity = expansions.component_capacity(wb, wb.get("wizard") or {})
+    apprentice_components = (wb.get("apprentice") or {}).get("components") or []
+    apprentice_component_capacity = (
+        expansions.component_capacity(wb, wb["apprentice"]) if wb.get("apprentice") else 0
+    )
     return render_template(
         "warband_view.html",
         wb=wb,
@@ -866,6 +902,17 @@ def warband_view(warband_id: str) -> str:
         horses_enabled=horses_enabled,
         has_stable=has_stable,
         horse_rider_choices=horse_rider_choices,
+        monster_hunting_enabled=monster_hunting_enabled,
+        monster_hunting_table=monster_hunting_table,
+        monster_hunting_kills=monster_hunting.get("kills") or [],
+        monster_hunting_prizes=monster_hunting.get("prizes") or [],
+        monster_hunting_pending_xp=monster_hunting_pending_xp,
+        monster_hunting_pending_gold=monster_hunting_pending_gold,
+        monster_hunter_active=monster_hunter_active,
+        wizard_components=wizard_components,
+        wizard_component_capacity=wizard_component_capacity,
+        apprentice_components=apprentice_components,
+        apprentice_component_capacity=apprentice_component_capacity,
         schools=SCHOOLS,
         learnable=learnable,
         pending_levels=limits["pending_levels"],
@@ -1182,6 +1229,36 @@ def _act_roll_underworld_debt_call(wb: dict) -> tuple[bool, str]:
         outcome_roll=_opt_int("outcome_roll"),
         who_roll=_opt_int("who_roll"),
     )
+
+
+@register_action("record_monster_kill")
+def _act_record_monster_kill(wb: dict) -> tuple[bool, str]:
+    return record_monster_kill(wb, request.form.get("monster") or "")
+
+
+@register_action("remove_monster_kill")
+def _act_remove_monster_kill(wb: dict) -> tuple[bool, str]:
+    return remove_monster_kill(wb, request.form.get("kill_id") or "")
+
+
+@register_action("claim_monster_prize")
+def _act_claim_monster_prize(wb: dict) -> tuple[bool, str]:
+    return claim_monster_prize(wb, request.form.get("kill_id") or "", request.form.get("holder") or "")
+
+
+@register_action("use_component")
+def _act_use_component(wb: dict) -> tuple[bool, str]:
+    return use_component(wb, request.form.get("holder") or "", request.form.get("component_id") or "")
+
+
+@register_action("discard_component")
+def _act_discard_component(wb: dict) -> tuple[bool, str]:
+    return discard_component(wb, request.form.get("holder") or "", request.form.get("component_id") or "")
+
+
+@register_action("apply_monster_hunting_results")
+def _act_apply_monster_hunting_results(wb: dict) -> tuple[bool, str]:
+    return apply_monster_hunting_results(wb)
 
 
 @register_action("advance_beastcrafter")

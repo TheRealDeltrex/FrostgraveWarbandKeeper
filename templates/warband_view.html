@@ -166,6 +166,16 @@
           below, since the Random Recruit Status Table can inflict one on any recruited soldier.
         </p>
         <label class="checkbox-row" style="margin-top:0.6rem">
+          <input name="monster_hunting_enabled" type="checkbox" {% if hr.monster_hunting_enabled %}checked{% endif %} />
+          Monster Hunting: For Fun and Profit (Spellcaster Magazine, Issue 5)
+        </label>
+        <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0">
+          Needs Spellcaster Magazine. Adds a per-game kill log to "After the game" below: record
+          a kill for its Master Monster Table XP, then claim its prize (sold for gold, or a spell/
+          potion component for the wizard or apprentice). See the Lexicon for the full 92-row
+          table.
+        </p>
+        <label class="checkbox-row" style="margin-top:0.6rem">
           <input name="edition2_soldier_costs" type="checkbox" {% if hr.edition2_soldier_costs %}checked{% endif %} />
           Adjust soldiers to edition 2
         </label>
@@ -553,6 +563,83 @@
       </div>
       <button class="btn gold" type="submit">Record loot</button>
     </form>
+
+    {% if monster_hunting_enabled %}
+      <details class="ref-panel" style="margin-top:0.6rem">
+        <summary>Monster Hunting (Spellcaster Magazine, Issue 5) — {{ monster_hunting_pending_xp }} XP / {{ monster_hunting_pending_gold }}gc pending</summary>
+        <p class="muted" style="font-size:0.85rem">
+          Record each monster your warband killed for its Master Monster Table XP, then optionally
+          claim its prize — sold for gold, or a spell/potion component for the wizard or
+          apprentice. When you're done, apply the results to bank the pending XP and gold at once.
+        </p>
+        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
+          <input type="hidden" name="action" value="record_monster_kill" />
+          <select name="monster" required>
+            {% for row in monster_hunting_table %}
+              <option value="{{ row.monster }}">{{ row.monster }} ({{ row.source }}, {{ row.xp }} XP)</option>
+            {% endfor %}
+          </select>
+          <button class="btn secondary small" type="submit">Record a kill</button>
+        </form>
+        {% if monster_hunting_kills %}
+          <div class="table-wrap" style="margin-top:0.5rem">
+          <table>
+            <thead>
+              <tr><th>Monster</th><th>XP</th><th>Prize</th><th></th></tr>
+            </thead>
+            <tbody>
+              {% for kill in monster_hunting_kills %}
+                <tr>
+                  <td>{{ kill.monster }}</td>
+                  <td>{{ kill.xp }}</td>
+                  <td>
+                    {% if kill.claimed %}
+                      <span class="muted">claimed</span>
+                    {% elif kill.prize.kind == "none" %}
+                      <span class="muted">no prize</span>
+                    {% elif kill.prize.kind == "gold" %}
+                      <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
+                        <input type="hidden" name="action" value="claim_monster_prize" />
+                        <input type="hidden" name="kill_id" value="{{ kill.id }}" />
+                        <input type="hidden" name="holder" value="sell" />
+                        <button class="btn secondary small" type="submit">Sell {{ kill.prize.name }} ({{ kill.prize.gold }}gc{% if monster_hunter_active %}+{{ MONSTER_HUNTER_PRIZE_BONUS }}{% endif %})</button>
+                      </form>
+                    {% else %}
+                      <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
+                        <input type="hidden" name="action" value="claim_monster_prize" />
+                        <input type="hidden" name="kill_id" value="{{ kill.id }}" />
+                        <input type="hidden" name="holder" value="wizard" />
+                        <button class="btn secondary small" type="submit" title="+1 {{ kill.prize.target }}{% if not kill.prize.known %} (1E only){% endif %}">{{ kill.prize.name }} → wizard</button>
+                      </form>
+                      {% if ap %}
+                        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
+                          <input type="hidden" name="action" value="claim_monster_prize" />
+                          <input type="hidden" name="kill_id" value="{{ kill.id }}" />
+                          <input type="hidden" name="holder" value="apprentice" />
+                          <button class="btn secondary small" type="submit" title="+1 {{ kill.prize.target }}{% if not kill.prize.known %} (1E only){% endif %}">→ apprentice</button>
+                        </form>
+                      {% endif %}
+                    {% endif %}
+                  </td>
+                  <td>
+                    <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
+                      <input type="hidden" name="action" value="remove_monster_kill" />
+                      <input type="hidden" name="kill_id" value="{{ kill.id }}" />
+                      <button class="btn danger small" type="submit" title="Remove this recorded kill">✕</button>
+                    </form>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          </div>
+          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form" style="margin-top:0.4rem">
+            <input type="hidden" name="action" value="apply_monster_hunting_results" />
+            <button class="btn gold small" type="submit">Apply {{ monster_hunting_pending_xp }} XP and {{ monster_hunting_pending_gold }}gc, clear the log</button>
+          </form>
+        {% endif %}
+      </details>
+    {% endif %}
   </details>
 
   {# ---- Wizard & apprentice details ---- #}
@@ -957,6 +1044,45 @@
           Leave a field blank to have the app roll it for you, or fill in dice you already rolled at
           the table to record them instead.
         </p>
+      </details>
+    {% endif %}
+
+    {% if monster_hunting_enabled %}
+      <details class="ref-panel">
+        <summary>Spell &amp; potion components (Monster Hunting)</summary>
+        <p class="muted" style="font-size:0.85rem">
+          A free pouch holds {{ COMPONENT_POUCH_CAPACITY }} components; a {{ SPELL_COMPONENT_BAG_NAME }}
+          in an item slot holds {{ SPELL_COMPONENT_BAG_CAPACITY }} more. Claim components from the kill
+          log below. Using one gives +1 to a matching Casting Roll (or brewing that potion); a badge
+          marks a component with no matching spell/potion in this app's 2E data — still usable, just
+          not tied to anything here.
+        </p>
+        {% for holder, figure, components, capacity in [("wizard", wiz, wizard_components, wizard_component_capacity)] + ([("apprentice", ap, apprentice_components, apprentice_component_capacity)] if ap else []) %}
+          <p style="margin:0.5rem 0 0.2rem"><strong>{{ figure.name or holder.capitalize() }}</strong> — {{ components | length }}/{{ capacity }} held</p>
+          {% if components %}
+            <div class="stack-sm">
+              {% for c in components %}
+                <div class="inline-form">
+                  <span>{{ c.name }}{% if c.target %} (+1 {{ c.target }}{% if not c.known %} — <span class="badge">1E only</span>{% endif %}){% endif %}</span>
+                  {% if c.target %}
+                    <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
+                      <input type="hidden" name="action" value="use_component" />
+                      <input type="hidden" name="holder" value="{{ holder }}" />
+                      <input type="hidden" name="component_id" value="{{ c.id }}" />
+                      <button class="btn secondary small" type="submit">Use</button>
+                    </form>
+                  {% endif %}
+                  <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
+                    <input type="hidden" name="action" value="discard_component" />
+                    <input type="hidden" name="holder" value="{{ holder }}" />
+                    <input type="hidden" name="component_id" value="{{ c.id }}" />
+                    <button class="btn danger small" type="submit">Discard</button>
+                  </form>
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endfor %}
       </details>
     {% endif %}
 

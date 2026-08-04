@@ -132,6 +132,22 @@ def _mutation_lines(mutations: list[dict] | None) -> list[str] | None:
     return lines
 
 
+def _component_lines(components: list[dict] | None) -> list[str] | None:
+    """One line per held Monster Hunting component (Spellcaster Magazine,
+    Issue 5) — name plus what it's a +1 to, same layout as _mutation_lines.
+    None if there's nothing held, so a figure with an empty pouch gets no
+    block at all."""
+    if not components:
+        return None
+    lines = []
+    for c in components:
+        name = c.get("name", "")
+        target = c.get("target")
+        suffix = f" +1 {target}" if target else ""
+        lines.append(_t(f"**{name}:**{suffix}"))
+    return lines
+
+
 def _revenant_line(is_revenant: bool) -> str | None:
     """Short rules-reminder for a soldier reanimated with the Revenant spell —
     same one-line-at-the-table treatment as _mutations_line. None if the
@@ -388,6 +404,13 @@ def build_warband_pdf(wb: dict) -> bytes:
         for line in wiz_inj_lines:
             pdf.set_x(left)
             pdf.multi_cell(0, 4.5, line, new_x="LMARGIN", new_y="NEXT", markdown=True)
+    wiz_comp_lines = _component_lines(wiz.get("components"))
+    if wiz_comp_lines:
+        pdf.set_x(left)
+        pdf.multi_cell(0, 4.5, _t("**Components:**"), new_x="LMARGIN", new_y="NEXT", markdown=True)
+        for line in wiz_comp_lines:
+            pdf.set_x(left)
+            pdf.multi_cell(0, 4.5, line, new_x="LMARGIN", new_y="NEXT", markdown=True)
     pdf.set_y(max(pdf.get_y(), y0 + wiz_size + 2))
     pdf.ln(2)
 
@@ -442,6 +465,13 @@ def build_warband_pdf(wb: dict) -> bytes:
             pdf.set_x(left)
             pdf.multi_cell(0, 4.5, _t("**Permanent Injuries:**"), new_x="LMARGIN", new_y="NEXT", markdown=True)
             for line in ap_inj_lines:
+                pdf.set_x(left)
+                pdf.multi_cell(0, 4.5, line, new_x="LMARGIN", new_y="NEXT", markdown=True)
+        ap_comp_lines = _component_lines(ap.get("components"))
+        if ap_comp_lines:
+            pdf.set_x(left)
+            pdf.multi_cell(0, 4.5, _t("**Components:**"), new_x="LMARGIN", new_y="NEXT", markdown=True)
+            for line in ap_comp_lines:
                 pdf.set_x(left)
                 pdf.multi_cell(0, 4.5, line, new_x="LMARGIN", new_y="NEXT", markdown=True)
         pdf.set_y(max(pdf.get_y(), y0 + wiz_size + 2))

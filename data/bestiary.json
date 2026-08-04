@@ -1181,5 +1181,54 @@
   "source": "Spellcaster Magazine",
   "stats": "Move 7\" · Fight +8 · Shoot — · Armour 15 · Will +10 · Health 30",
   "description": "A fully reusable, named Old-Dragon-class monster with its own AI priority list for unplayed use. Large, Flying, Strong (+2 melee damage), Magic Attacks, Immune to Poison, Elemental Resistance +3, Breathe Fire (replaces its move; +5 elemental attack, 2\" radius, 18\" range), Horrific (Will TN10 or its activation ends), Immune to Critical Hits and Mind Control, Too Large to Contain (never counted as locked in combat), Protect the Hoard (treasure theft within 12\" triggers a retaliatory tail lash [+6] or fire breath [+5 elemental, 2\" radius] on a roll of a d20: 1-13 tail lash, 14-20 fire breath). Spells: Banish (8), Combat Awareness (10), True Sight (8), Spelleater (8), Steal Health (10), Telekinesis (8). Unplayed AI priority: breathes on the nearest treasure-carrier in line of sight (or the closest figure); otherwise Spelleaters the most recent spell on itself; otherwise casts True Sight if anyone is invisible; otherwise Steal Health on the nearest warband member; otherwise Banishes any demon in line of sight; otherwise moves toward the closest warband member in line of sight, never straying more than 6\" from its treasure pile."
+ },
+ {
+  "name": "Alentha Lemedes, Spiritualist (Wizard Shade)",
+  "category": "Undead",
+  "source": "The Maze of Malcor",
+  "stats": "Move 6\" · Fight +3 · Shoot +0 · Armour 10 · Will +3 · Health 12",
+  "description": "The shade of a former Collegium academic wizard, Malcor's rival for the headmastership, recalled from the necropolis beneath the Collegium to fight for him. It has the Undead trait, is Immaterial (moves through terrain), Magic Attacks, Immune to non-magic weapons, Immune to Mind Control, Immune to Control Undead, and Immune to critical hits. Spells: Bone Dart, Call Wraith, Shield."
+ },
+ {
+  "name": "Florissa Undine, Sonancer (Wizard Shade)",
+  "category": "Undead",
+  "source": "The Maze of Malcor",
+  "stats": "Move 6\" · Fight +3 · Shoot +0 · Armour 10 · Will +2 · Health 14",
+  "description": "The shade of a Collegium Sonancer, recalled by Malcor to serve him. It has the Undead trait, is Immaterial (moves through terrain), Magic Attacks, Immune to non-magic weapons, Immune to Mind Control, Immune to Control Undead, and Immune to critical hits. Spells: Sound Cloud, Sound Wave, Steal Voice."
+ },
+ {
+  "name": "Kalish Kareen, Distortionist (Wizard Shade)",
+  "category": "Undead",
+  "source": "The Maze of Malcor",
+  "stats": "Move 6\" · Fight +5 · Shoot +0 · Armour 10 · Will +8 · Health 15",
+  "description": "The shade of a violently unstable Distortionist, the last staff appointment Malcor made before the fall of Felstad, recalled by him to fight. It has the Undead trait, is Immaterial (moves through terrain), Magic Attacks, Immune to non-magic weapons, Immune to Mind Control, Immune to Control Undead, and Immune to critical hits. Spells: Break Armour, Collapse, Fracture, Implode/Explode, Misstep, Whiplash."
+ },
+ {
+  "name": "Ordovacer Nords, Fatecaster (Wizard Shade)",
+  "category": "Undead",
+  "source": "The Maze of Malcor",
+  "stats": "Move 6\" · Fight +3 · Shoot +0 · Armour 10 · Will +5 · Health 15",
+  "description": "The shade of a former lead teacher of the Pentangle schools under Malcor, questionable in ethics but favoured by him and recalled to fight in his service. It has the Undead trait, is Immaterial (moves through terrain), Magic Attacks, Immune to non-magic weapons, Immune to Mind Control, Immune to Control Undead, and Immune to critical hits. Spells: Blood Wager, Fickle Finger, Mischance, Scatter, Serendipity, True Gold."
+ },
+ {
+  "name": "Tuvith Reginold, Astromancer (Wizard Shade)",
+  "category": "Undead",
+  "source": "The Maze of Malcor",
+  "stats": "Move 6\" · Fight +3 · Shoot +0 · Armour 10 · Will +5 · Health 15",
+  "description": "The shade of the last pupil of the great Astromancer Brycho Tarran and former head of Astromancy at the Collegium, recalled by Malcor to fight for him. It has the Undead trait, is Immaterial (moves through terrain), Magic Attacks, Immune to non-magic weapons, Immune to Mind Control, Immune to Control Undead, and Immune to critical hits. Spells: Alignment, Meteor Strike, Misalignment, Shape Starfire Elemental, Starfall, Starfire Bolt."
+ },
+ {
+  "name": "Vapour Snake (small)",
+  "category": "Miscellaneous",
+  "source": "The Perilous Dark",
+  "stats": "Move 6\" · Fight +1 · Shoot +0 · Armour 11 · Will +0 · Health 10",
+  "description": "A strange, smoky entity formed by the alchemical refinement processes that once lit and heated Felstad; composed of little more than wispy fumes. It has Shooting Attack Damage Maximum (bow, crossbow, javelin, and equivalent spell attacks do a maximum of 1 point of damage to it), is Flammable (set on fire, rather than destroyed, by an elemental hit that doesn't kill it, dealing 2 damage to any figure it fights while burning), and is Immune to Mind Control."
+ },
+ {
+  "name": "Vapour Snake (large)",
+  "category": "Miscellaneous",
+  "source": "The Perilous Dark",
+  "stats": "Move 5\" · Fight +3 · Shoot +0 · Armour 12 · Will +0 · Health 12",
+  "description": "A larger vapour snake, otherwise identical in nature to its smaller kin. It has Shooting Attack Damage Maximum (bow, crossbow, javelin, and equivalent spell attacks do a maximum of 1 point of damage to it), is Flammable (set on fire, rather than destroyed, by an elemental hit that doesn't kill it, dealing 2 damage to any figure it fights while burning), and is Immune to Mind Control."
  }
 ]
