@@ -651,15 +651,58 @@ def build_expansion_rules_spellcaster(doc: str) -> dict:
         crit_notes[0] if crit_notes else "",
     )
 
-    # --- Issue 5 --- (Legendary Soldiers are hireable soldiers; the harvest
-    # economy itself is the deferred item — a large, ~80-row data lift with its
-    # own follow-up plan, so only its scope is described here, not transcribed)
-    ch = section(doc, "i5-monsters")
-    mh_notes = notes(ch)
+    # --- Issue 5 --- Monster Hunting is implemented: the 92-row Master Monster
+    # Table lives in data/monster_hunting.json (built from the source PDF by
+    # scripts/extract_monster_hunting.py — this HTML reference has the Special
+    # column shifted by one row from partway through the table, so it can't be
+    # used for that part). The harvesting/component rules below are hand-
+    # transcribed from the PDF rather than pulled from `ch`, since this doc's
+    # prose for them doesn't match the published wording closely enough to
+    # extract programmatically.
     add(
-        "Monster Hunting: For Fun and Profit (Issue 5 — deferred mechanic, not transcribed)",
-        mh_notes[0] if mh_notes else "",
-        rows=[("Errata (Issue 7)", mh_notes[-1])] if len(mh_notes) > 1 else [],
+        "Monster Hunting: For Fun and Profit (Issue 5 — implemented)",
+        "Assigns an individual XP value to every published Frostgrave monster, replacing the "
+        "flat +5 XP from Experience Table II (Maze of Malcor) — this does not replace "
+        "scenario-specific XP rewards, which are usually higher. The full 92-row Master "
+        "Monster Table lives on the reference page rather than here; this panel covers the "
+        "harvesting and component rules it depends on.",
+        rows=[
+            (
+                "Harvesting a kill",
+                "If a figure kills a monster, it may immediately claim the listed item as a "
+                "free action, so long as it is not in combat with any other figure. If it "
+                "doesn't (or can't), the body stays on the table; any figure may claim the "
+                "item later by moving into contact and spending an action, so long as it is "
+                "not in combat. Once claimed, the item is removed and never takes an item slot.",
+            ),
+            ("gc-value items", "Items listed with a gc value can be sold for that amount after the game."),
+            (
+                "Spell and potion components",
+                "Items listed with a +1 are spell or potion components. If a spellcaster "
+                "attempts to cast a spell (or, using the Frostgrave Folio's optional potion "
+                "rules, brew a potion) for which he has a matching component, he may declare "
+                "he is using it before the Casting Roll and gains +1 to that roll; a matching "
+                "potion component also reduces that potion's component cost by 25gc. A figure "
+                "can gain a maximum of one dose of any component per kill, and a maximum of "
+                "one component may be used on any single Casting Roll.",
+            ),
+            (
+                "Carrying components",
+                "Components picked up during a game never take an item slot. Each spellcaster "
+                "has a component pouch that holds three of them for free. A Spell Component "
+                "Bag (5gc, purchased after any scenario, 1 item slot) holds up to 10 more in "
+                "addition to the pouch. Non-spellcasters may only carry components they "
+                "personally pick up during a game.",
+            ),
+            (
+                "Errata (Issue 7)",
+                "* Errata (Issue 7, Second Edition): Monstrous Form no longer exists in Second "
+                "Edition — the Chilopendra Horn's effect changes to +10gc instead. † Rangifer's "
+                "0 XP is intentional (killing one is a detriment, not a reward). Source codes: "
+                "FRB=Rulebook, TLL=Thaw of the Lich Lord, IBP=Into the Breeding Pits, "
+                "FP=Forgotten Pacts, FF=The Frostgrave Folio, MM=Maze of Malcor, PD=Perilous Dark.",
+            ),
+        ],
     )
 
     # --- Issue 7 ---

@@ -76,6 +76,20 @@ def load_bestiary() -> list[dict]:
 
 
 @lru_cache(maxsize=1)
+def load_monster_hunting() -> list[dict]:
+    """The Master Monster Table (Spellcaster Magazine, Issue 5): per-monster
+    XP and harvestable prize, {monster, rules, source, xp, bestiary_name,
+    prize: {name, kind, target, gold, known}}. Built from the source PDF by
+    scripts/extract_monster_hunting.py — see that script's docstring for why
+    the HTML reference other supplement content is extracted from can't be
+    used for this table."""
+    path = DATA / "monster_hunting.json"
+    if not path.is_file():
+        return []
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+@lru_cache(maxsize=1)
 def load_traits() -> list[dict]:
     """Creature traits glossary (Undead, Burrowing, Large, ...), {name, text}.
     Transcribed from the Core Rules' "Creature Traits" appendix. Reference

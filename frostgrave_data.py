@@ -2177,12 +2177,16 @@ SOLDIERS: dict[str, dict] = {
         "will": 2,
         "health": 8,
         "gear": "—",
-        "notes": "Part of a rangifer \"hide\" (Issue 3). Animal; cannot carry items or treasure.",
-        "description": 'A tamed boar from rangifer culture (Spellcaster Magazine, Issue 3), part of a hired "hide" of up to 5 rangifer troops. Animal: cannot carry items or treasure.',
+        "notes": (
+            "Part of a rangifer \"hide\" (Issue 3). Animal; cannot carry items or treasure. "
+            "Not directly hireable — the Book of the Rangifer only lets a wizard field the "
+            "other rangifer troop types."
+        ),
+        "description": 'A tamed boar from rangifer culture (Spellcaster Magazine, Issue 3), part of a hired "hide" of up to 5 rangifer troops. Animal: cannot carry items or treasure. Not directly hireable in this app — the Book of the Rangifer only fields the other rangifer troop types.',
     },
     "rangifer_ambusher": {
         "name": "Rangifer Ambusher",
-        "cost": 20,
+        "cost": 100,
         "category": "standard",
         "source": "Spellcaster Magazine",
         "move": 7,
@@ -2195,13 +2199,14 @@ SOLDIERS: dict[str, dict] = {
         "notes": (
             "Part of a rangifer \"hide\" (Issue 3). Hate Undead, Antlers, Flint Weapons "
             "(destroyed on any natural 1 rolled in combat). All Trap Expert abilities "
-            "(Into the Breeding Pits)."
+            "(Into the Breeding Pits). Requires the Book of the Rangifer (Thaw of the Lich "
+            "Lord) in the vault."
         ),
         "description": 'A rangifer scout skilled with traps (Spellcaster Magazine, Issue 3), part of a hired "hide" of up to 5 rangifer troops. Cultural traits shared by all rangifer: Hate Undead (+1 Fight vs. undead, magic attacks, only while armed with antlers/flint/wood), Antlers (never unarmed; -1 Fight if antlers are the only weapon), Flint Weapons (destroyed on any natural 1 rolled in combat). Also has all of a Trap Expert\'s abilities (Into the Breeding Pits).',
     },
     "rangifer_charger": {
         "name": "Rangifer Charger",
-        "cost": 30,
+        "cost": 110,
         "category": "standard",
         "source": "Spellcaster Magazine",
         "move": 7,
@@ -2211,12 +2216,16 @@ SOLDIERS: dict[str, dict] = {
         "will": 4,
         "health": 12,
         "gear": "—",
-        "notes": "Part of a rangifer \"hide\" (Issue 3). Hate Undead, Antlers (no Fight penalty when armed only with antlers), Flint Weapons.",
+        "notes": (
+            "Part of a rangifer \"hide\" (Issue 3). Hate Undead, Antlers (no Fight penalty "
+            "when armed only with antlers), Flint Weapons. Requires the Book of the "
+            "Rangifer (Thaw of the Lich Lord) in the vault."
+        ),
         "description": 'A rangifer shock-fighter (Spellcaster Magazine, Issue 3), part of a hired "hide" of up to 5 rangifer troops. Hate Undead, Antlers (suffers no Fight penalty when armed only with its antlers, unlike other rangifer), Flint Weapons.',
     },
     "rangifer_herdsman": {
         "name": "Rangifer Herdsman",
-        "cost": 20,
+        "cost": 100,
         "category": "standard",
         "source": "Spellcaster Magazine",
         "move": 7,
@@ -2226,12 +2235,15 @@ SOLDIERS: dict[str, dict] = {
         "will": 3,
         "health": 12,
         "gear": "Flint hand weapon",
-        "notes": "Part of a rangifer \"hide\" (Issue 3). Hate Undead, Antlers, Flint Weapons.",
+        "notes": (
+            "Part of a rangifer \"hide\" (Issue 3). Hate Undead, Antlers, Flint Weapons. "
+            "Requires the Book of the Rangifer (Thaw of the Lich Lord) in the vault."
+        ),
         "description": 'A rangifer herder-warrior (Spellcaster Magazine, Issue 3), part of a hired "hide" of up to 5 rangifer troops. Hate Undead, Antlers, Flint Weapons.',
     },
     "rangifer_hewer": {
         "name": "Rangifer Hewer",
-        "cost": 60,
+        "cost": 140,
         "category": "standard",
         "source": "Spellcaster Magazine",
         "move": 7,
@@ -2241,12 +2253,15 @@ SOLDIERS: dict[str, dict] = {
         "will": 4,
         "health": 14,
         "gear": "Flint two-handed weapon",
-        "notes": "Part of a rangifer \"hide\" (Issue 3). Hate Undead, Antlers, Flint Weapons.",
+        "notes": (
+            "Part of a rangifer \"hide\" (Issue 3). Hate Undead, Antlers, Flint Weapons. "
+            "Requires the Book of the Rangifer (Thaw of the Lich Lord) in the vault."
+        ),
         "description": 'A rangifer heavy fighter (Spellcaster Magazine, Issue 3), part of a hired "hide" of up to 5 rangifer troops. Hate Undead, Antlers, Flint Weapons.',
     },
     "rangifer_hurler": {
         "name": "Rangifer Hurler",
-        "cost": 30,
+        "cost": 110,
         "category": "standard",
         "source": "Spellcaster Magazine",
         "move": 7,
@@ -2258,13 +2273,14 @@ SOLDIERS: dict[str, dict] = {
         "gear": "Flint throwing spear, flint hand weapon",
         "notes": (
             "Part of a rangifer \"hide\" (Issue 3). Hate Undead, Antlers, Flint Weapons. "
-            "Throwing spear: once/game, a 12\" shooting attack with no damage modifier."
+            "Throwing spear: once/game, a 12\" shooting attack with no damage modifier. "
+            "Requires the Book of the Rangifer (Thaw of the Lich Lord) in the vault."
         ),
         "description": 'A rangifer skirmisher (Spellcaster Magazine, Issue 3), part of a hired "hide" of up to 5 rangifer troops. Hate Undead, Antlers, Flint Weapons. Once per game may throw its flint spear as a 12" shooting attack with no damage modifier.',
     },
     "rangifer_packdeer": {
         "name": "Rangifer Packdeer",
-        "cost": 20,
+        "cost": 100,
         "category": "standard",
         "source": "Spellcaster Magazine",
         "move": 7,
@@ -2275,12 +2291,16 @@ SOLDIERS: dict[str, dict] = {
         "health": 12,
         "gear": "—",
         "item_slots": 3,
-        "notes": "Part of a rangifer \"hide\" (Issue 3). Hate Undead, Antlers, Flint Weapons. 3 item slots; all Pack Mule abilities (Thaw of the Lich Lord).",
+        "notes": (
+            "Part of a rangifer \"hide\" (Issue 3). Hate Undead, Antlers, Flint Weapons. 3 "
+            "item slots; all Pack Mule abilities (Thaw of the Lich Lord). Requires the "
+            "Book of the Rangifer (Thaw of the Lich Lord) in the vault."
+        ),
         "description": 'A burden-bearing rangifer (Spellcaster Magazine, Issue 3), part of a hired "hide" of up to 5 rangifer troops. Hate Undead, Antlers, Flint Weapons. Carries 3 item slots and has all of a Pack Mule\'s abilities (Thaw of the Lich Lord).',
     },
     "rangifer_war_leader": {
         "name": "Rangifer War-Leader",
-        "cost": 100,
+        "cost": 180,
         "category": "specialist",
         "source": "Spellcaster Magazine",
         "move": 7,
@@ -2294,7 +2314,8 @@ SOLDIERS: dict[str, dict] = {
             "Part of a rangifer \"hide\" (Issue 3). Hate Undead, Antlers, Flint Weapons. Free "
             "flint hand weapon, no shield/armour, Move never above 7. Uses the Captain rules "
             "(The Frostgrave Folio) in place of the warband's own Captain — the actual "
-            "Captain-replacement mechanic is deferred; hires here as a stat-block soldier."
+            "Captain-replacement mechanic is deferred; hires here as a stat-block soldier. "
+            "Requires the Book of the Rangifer (Thaw of the Lich Lord) in the vault."
         ),
         "description": 'The chieftain of a rangifer "hide" (Spellcaster Magazine, Issue 3), who leads using the Captain rules (The Frostgrave Folio) in place of a warband\'s own Captain — never carries a shield or armour, and Move never rises above 7 regardless of bonuses. The actual Captain-replacement mechanic (fielding a War-Leader instead of hiring/promoting a Captain) is a deferred feature; for now this hires as an ordinary specialist stat-block.',
     },
@@ -2461,12 +2482,12 @@ SOLDIERS: dict[str, dict] = {
         "item_slots": 2,
         "notes": (
             "Legendary Soldier (Issue 5) — the by-wizard-level hiring cap is a deferred "
-            "mechanic, as is the Monster Hunting harvest-economy this soldier ties into. "
-            "+1 Fight/+1 Shoot vs. uncontrolled creatures; claims two components per kill, "
-            "+5gc extra when selling a monster prize. May place a Monster Trap within 8\" "
-            "of setup. 2 item slots."
+            "mechanic. +1 Fight/+1 Shoot vs. uncontrolled creatures; with Monster Hunting "
+            "enabled, claims two components per kill instead of one and +5gc extra when "
+            "selling a monster prize. May place a Monster Trap within 8\" of setup. 2 item "
+            "slots."
         ),
-        "description": 'A hunter specialized against monsters ("Legendary Soldier", Spellcaster Magazine Issue 5). +1 Fight and +1 Shoot against uncontrolled creatures. Ties into the Monster Hunting harvest economy (claims two components per kill, +5gc extra selling a monster prize) — that whole economy is a deferred mechanic, described in the Additional Rules reference. May place a Monster Trap within 8" of table setup (Deadfall, Spring-loaded Spike, or Net).',
+        "description": 'A hunter specialized against monsters ("Legendary Soldier", Spellcaster Magazine Issue 5). +1 Fight and +1 Shoot against uncontrolled creatures. With the Monster Hunting homerule enabled, claims two components per kill instead of one, and +5gc extra when selling a monster prize. May place a Monster Trap within 8" of table setup (Deadfall, Spring-loaded Spike, or Net). The Legendary Soldier hiring cap is a deferred mechanic.',
     },
     "potion_master": {
         "name": "Potion Master",
@@ -2483,12 +2504,12 @@ SOLDIERS: dict[str, dict] = {
         "item_slots": 4,
         "notes": (
             "Legendary Soldier (Issues 5 & 6, reprinted) — the by-wizard-level hiring cap "
-            "is a deferred mechanic. Doubles the wizard's Brew Potion component bonus "
-            "(+2 casting, 50gc off). Drinks potions as a free action. 4 item slots (3 "
-            "potions only). Applies potions to nearby figures. Wizard may reroll one "
-            "potion-table roll per game."
+            "is a deferred mechanic. With Monster Hunting enabled, doubles the wizard's "
+            "Brew Potion component bonus (+2 casting, 50gc off). Drinks potions as a free "
+            "action. 4 item slots (3 potions only). Applies potions to nearby figures. "
+            "Wizard may reroll one potion-table roll per game."
         ),
-        "description": 'A potion specialist ("Legendary Soldier", Spellcaster Magazine Issues 5 and 6). Doubles the wizard\'s Brew Potion component bonus (+2 to the Casting Roll, 50gc off ingredient cost). Drinks potions as a free action, and may apply a potion to a nearby figure. Carries 4 item slots, but only for potions (max 3). The wizard may reroll one potion-table roll per game while this soldier is on the roster. The Legendary Soldier hiring cap is a deferred mechanic.',
+        "description": 'A potion specialist ("Legendary Soldier", Spellcaster Magazine Issues 5 and 6). With the Monster Hunting homerule enabled, doubles the wizard\'s Brew Potion component bonus (+2 to the Casting Roll, 50gc off ingredient cost). Drinks potions as a free action, and may apply a potion to a nearby figure. Carries 4 item slots, but only for potions (max 3). The wizard may reroll one potion-table roll per game while this soldier is on the roster. The Legendary Soldier hiring cap is a deferred mechanic.',
     },
     # --- Bestiary creatures hireable as soldiers, previously reference-only ---
     # Added for Ragged Warbands & Random Recruits (The Red King, Chapter Two),
@@ -2852,6 +2873,22 @@ def fin_dalka_spell_ids() -> list[str]:
 UNDERWORLD_LOAN_MIN = 100
 UNDERWORLD_LOAN_MAX = 1000
 UNDERWORLD_PAYOFF_COST = 150
+
+
+# --- Spellcaster Magazine, Issue 5: Monster Hunting: For Fun and Profit ------
+# Assigns per-monster XP (see data/monster_hunting.json, the Master Monster
+# Table) and lets figures harvest a gc-value prize or a +1 spell/potion
+# component from each kill. Components are carried in a free pouch per
+# spellcaster, or a purchasable bag for more capacity — see
+# expansions.component_capacity() and warband_store's monster-hunting actions.
+COMPONENT_POUCH_CAPACITY = 3  # free, doesn't take an item slot
+SPELL_COMPONENT_BAG_NAME = "Spell Component Bag"
+SPELL_COMPONENT_BAG_COST = 5
+SPELL_COMPONENT_BAG_CAPACITY = 10  # in addition to the pouch
+MONSTER_HUNTER_TYPE_KEY = "monster_hunter"
+POTION_MASTER_TYPE_KEY = "potion_master"
+MONSTER_HUNTER_PRIZE_BONUS = 5  # extra gc per sellable prize, with a Monster Hunter on the roster
+MONSTER_HUNTER_COMPONENTS_PER_KILL = 2  # vs. 1 normally
 
 
 # Core soldier types an Illusionary Soldier may copy Move/Fight/Shoot/Armour/

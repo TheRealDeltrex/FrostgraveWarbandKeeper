@@ -279,6 +279,43 @@
   </details>
 
   <details class="card">
+    <summary><span class="card-title">Master Monster Table ({{ monster_hunting|length }})</span></summary>
+    <p class="muted">Spellcaster Magazine, Issue 5 — "Monster Hunting: For Fun and Profit". Per-monster
+      XP (replacing the flat +5 from Experience Table II), plus what can be harvested from the body:
+      a gc-value prize to sell, or a +1 spell/potion component. See the Additional Rules and
+      Homerules card on a warband to switch this on and start a kill log.</p>
+    {% if monster_hunting %}
+      <div class="item-list-detail">
+        <div class="item-list-head" aria-hidden="true">
+          <span class="col-name">Monster</span>
+          <span class="col-cat">Source</span>
+          <span class="col-summary">XP / Prize</span>
+          <span class="col-info"></span>
+        </div>
+        {% for row in monster_hunting %}
+          <div class="item-row">
+            <span class="col-name"><strong>{{ row.monster }}</strong></span>
+            <span class="col-cat"><span class="badge">{{ row.source }}</span></span>
+            <span class="col-summary muted">
+              {{ row.xp }} XP —
+              {% if row.prize.kind == "none" %}
+                no prize
+              {% elif row.prize.kind == "gold" %}
+                {{ row.prize.name }} ({{ row.prize.gold }}gc)
+              {% else %}
+                {{ row.prize.name }} (+1 {{ row.prize.target }}{% if not row.prize.known %}, 1E only{% endif %})
+              {% endif %}
+            </span>
+            <span class="col-info"></span>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="empty">No Monster Hunting data loaded.</p>
+    {% endif %}
+  </details>
+
+  <details class="card">
     <summary><span class="card-title">Traits ({{ traits|length }})</span></summary>
     <p class="muted">Every trait a creature or mutation can carry — Undead, Burrowing, Large, and the
       rest — with the exact rule each one grants.</p>

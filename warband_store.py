@@ -47,7 +47,6 @@ from frostgrave_data import (
     GIANT_BLOODED_STAT_DELTA,
     HORSE_COST,
     HORSE_MOUNT_STAT_DELTA,
-    VAMPIRE_MIN_MAX_SOLDIERS,
     KNIGHTLY_ORDER_BY_ID,
     KNIGHTLY_ORDER_ELIGIBLE,
     KNIGHTLY_ORDER_IDS,
@@ -55,6 +54,8 @@ from frostgrave_data import (
     MAX_SOLDIERS,
     MAX_SPECIALISTS,
     MAX_WIZARD_LEVEL,
+    MONSTER_HUNTER_COMPONENTS_PER_KILL,
+    MONSTER_HUNTER_PRIZE_BONUS,
     OWN_SCHOOL_SPELLS,
     PENTANGLE_SCHOOLS,
     PERMANENT_INJURY_BY_ID,
@@ -63,6 +64,10 @@ from frostgrave_data import (
     PROMOTE_CAPTAIN_ITEM_SLOTS,
     PROMOTE_CAPTAIN_TRICKS,
     PROSTHETIC_UPGRADE_BY_ID,
+    RANDOM_RECRUIT_STATUS_TABLE,
+    RANDOM_RECRUIT_TABLE_I,
+    RANDOM_RECRUIT_TABLE_II,
+    RANDOM_RECRUIT_TABLE_III,
     SCHOOL_RELATIONS,
     SCHOOLS,
     SOLDIER_MAX_LEVELS,
@@ -77,22 +82,19 @@ from frostgrave_data import (
     UNDERWORLD_LOAN_MAX,
     UNDERWORLD_LOAN_MIN,
     UNDERWORLD_PAYOFF_COST,
+    VAMPIRE_MIN_MAX_SOLDIERS,
     WIZARD_BASE,
     WIZARD_ITEM_SLOTS,
     WIZARD_MIN_CASTING_NUMBER_DEFAULT,
     WIZARD_STAT_LIMITS_DEFAULT,
-    RANDOM_RECRUIT_STATUS_TABLE,
-    RANDOM_RECRUIT_TABLE_I,
-    RANDOM_RECRUIT_TABLE_II,
-    RANDOM_RECRUIT_TABLE_III,
     XP_PER_LEVEL,
     all_spells_flat,
     animal_companion_type_keys,
     bonus_choice_amount,
     cn_penalty,
     construct_type_keys,
-    find_spell,
     fin_dalka_spell_ids,
+    find_spell,
     get_soldier,
     giant_blooded_eligible_type_keys,
     horse_rider_eligible_type_keys,
@@ -108,6 +110,7 @@ from game_content import (
     construct_modifications,
     equipment_bonuses,
     grave_mutations_by_number,
+    load_monster_hunting,
     load_potion_choices,
     magic_items_for_sources,
 )
@@ -389,6 +392,12 @@ def default_homerules() -> dict:
         # survival roll) are shown as reminder text only, same as this app's
         # other per-game upkeep rules. See roll_random_recruits() below.
         "ragged_warbands_enabled": False,
+        # Spellcaster Magazine's Monster Hunting: For Fun and Profit (Issue 5):
+        # per-monster XP (see data/monster_hunting.json, the Master Monster
+        # Table) plus harvestable gc prizes and +1 spell/potion components.
+        # Off by default; needs Spellcaster Magazine switched on to have any
+        # effect. See _monster_hunting_gate() and the functions below it.
+        "monster_hunting_enabled": False,
         # House correction for six supplement soldiers costed closer to 1st
         # edition than the rest of the 2e tables. On by default; see
         # expansions.EDITION_2_SOLDIER_COSTS.
@@ -1132,6 +1141,9 @@ def _normalize_warband(wb: dict) -> dict:
     fd.setdefault("attempts", {})
     uf = wiz.setdefault("underworld_favors", {"markers": 0})
     uf.setdefault("markers", 0)
+    # Monster Hunting (Issue 5): spell/potion components the wizard is
+    # carrying — see expansions.component_capacity() for the holding limit.
+    wiz.setdefault("components", [])
     # Wizard state (Lich / Beastcrafter / pact). Backfilled per-key so a warband
     # saved before this existed loads as an ordinary wizard.
     state = wiz.setdefault("state", expansions.default_wizard_state())
@@ -1145,6 +1157,9 @@ def _normalize_warband(wb: dict) -> dict:
         wiz["spells"] = []
     wb.setdefault("vault_items", [])
     wb.setdefault("giant_blooded_pending", False)
+    mh = wb.setdefault("monster_hunting", {"kills": [], "prizes": []})
+    mh.setdefault("kills", [])
+    mh.setdefault("prizes", [])
     horse = wb.setdefault("horse", {"owned": False, "rider": None})
     horse.setdefault("owned", False)
     horse.setdefault("rider", None)
@@ -1169,6 +1184,7 @@ def _normalize_warband(wb: dict) -> dict:
         ap.pop("health_current", None)
         if ap.get("gender") != "female":
             ap["gender"] = "male"
+        ap.setdefault("components", [])
     hr = wb.setdefault("homerules", default_homerules())
     for k, v in default_homerules().items():
         hr.setdefault(k, v)
@@ -1599,6 +1615,12 @@ def enrich_soldier(wb: dict, s: dict) -> dict:
     # to the current settings, not a value frozen at hire time.
     out["cost"] = expansions.soldier_cost(wb, cat, type_key) if cat else s.get("cost", 0)
     out["knightly_order_info"] = KNIGHTLY_ORDER_BY_ID.get(s.get("knightly_order") or "")
+    # Armour/Move bonuses from an equipped Shield/Armour item — same idiom as
+    # captain_effective_stats(); computed fresh from item_slots every time so
+    # it can't drift from whatever the soldier currently has equipped.
+    bonus = equipment_bonuses(s.get("item_slots") or [])
+    out["armour"] = int(out.get("armour", 0)) + bonus["armour"]
+    out["move"] = int(out.get("move", 0)) + bonus["move"]
     return out
 
 
@@ -2803,6 +2825,7 @@ def update_homerules(wb: dict, form: "ImmutableMultiDict") -> tuple[bool, str]:
             "vampire_wizard_playable": form.get("vampire_wizard_playable") == "on",
             "giant_blooded_enabled": form.get("giant_blooded_enabled") == "on",
             "ragged_warbands_enabled": ragged_warbands_enabled,
+            "monster_hunting_enabled": form.get("monster_hunting_enabled") == "on",
             "edition2_soldier_costs": form.get("edition2_soldier_costs") == "on",
             "spellcaster_magazine_soldiers": form.get("spellcaster_magazine_soldiers") == "on",
             "knightly_orders_enabled": form.get("knightly_orders_enabled") == "on",
@@ -4261,6 +4284,199 @@ def roll_underworld_debt_call(
         )
     add_history(wb, text)
     return True, text
+
+
+# --- Spellcaster Magazine, Issue 5: Monster Hunting: For Fun and Profit -----
+#
+# The Master Monster Table (data/monster_hunting.json, via
+# game_content.load_monster_hunting()) gives each monster an XP value and a
+# harvestable prize — a gc-value item to sell, or a +1 spell/potion
+# component. A kill is recorded first (its XP sits pending), then its prize
+# may be claimed separately (sold, or given to the wizard/apprentice's
+# component inventory) — a kill can be logged for the XP alone without ever
+# claiming a prize. apply_monster_hunting_results() is the single settle-up
+# button that banks the pending XP/gold and clears the log, the same way a
+# player would tally results once after the game.
+
+
+def _monster_hunting_gate(wb: dict) -> str | None:
+    if "Spellcaster Magazine" not in enabled_sources(wb):
+        return "Spellcaster Magazine is switched off; enable it under Additional Rules and Homerules first."
+    hr = wb.get("homerules") or {}
+    if not hr.get("monster_hunting_enabled"):
+        return (
+            "Monster Hunting needs its own homerule switched on under Additional Rules and "
+            "Homerules first."
+        )
+    return None
+
+
+def _monster_hunting_row(monster: str) -> dict | None:
+    monster = (monster or "").strip().lower()
+    for row in load_monster_hunting():
+        if row["monster"].strip().lower() == monster:
+            return row
+    return None
+
+
+def record_monster_kill(wb: dict, monster: str) -> tuple[bool, str]:
+    err = _monster_hunting_gate(wb)
+    if err:
+        return False, err
+    row = _monster_hunting_row(monster)
+    if row is None:
+        return False, f"Unknown monster: {monster!r}."
+    mh = wb.setdefault("monster_hunting", {"kills": [], "prizes": []})
+    entry = {
+        "id": uuid.uuid4().hex[:8],
+        "monster": row["monster"],
+        "xp": row["xp"],
+        "prize": row["prize"],
+        "claimed": False,
+    }
+    mh.setdefault("kills", []).append(entry)
+    text = f"Recorded a kill: {row['monster']} ({row['xp']:+d} XP pending)."
+    add_history(wb, text)
+    return True, text
+
+
+def remove_monster_kill(wb: dict, kill_id: str) -> tuple[bool, str]:
+    err = _monster_hunting_gate(wb)
+    if err:
+        return False, err
+    mh = wb.setdefault("monster_hunting", {"kills": [], "prizes": []})
+    kills = mh.setdefault("kills", [])
+    for i, k in enumerate(kills):
+        if k.get("id") == kill_id:
+            kills.pop(i)
+            text = f"Removed the recorded {k['monster']} kill."
+            add_history(wb, text)
+            return True, text
+    return False, "Kill not found."
+
+
+def claim_monster_prize(wb: dict, kill_id: str, holder: str) -> tuple[bool, str]:
+    """holder is "wizard"/"apprentice" for a component prize, or "sell" for a
+    gc prize (gold prizes always go to the pending pool regardless of which
+    of those three is passed, since there's nowhere else for them to go —
+    "sell" is simply what the UI sends for a gold row)."""
+    err = _monster_hunting_gate(wb)
+    if err:
+        return False, err
+    if holder not in ("wizard", "apprentice", "sell"):
+        return False, "Invalid holder."
+    mh = wb.setdefault("monster_hunting", {"kills": [], "prizes": []})
+    kill = next((k for k in mh.get("kills", []) if k.get("id") == kill_id), None)
+    if kill is None:
+        return False, "Kill not found."
+    if kill.get("claimed"):
+        return False, "This kill's prize has already been claimed."
+    prize = kill.get("prize") or {}
+    kind = prize.get("kind", "none")
+    if kind == "none":
+        return False, f"{kill['monster']} has no harvestable prize."
+
+    if kind == "gold":
+        bonus = MONSTER_HUNTER_PRIZE_BONUS if expansions.monster_hunter_active(wb) else 0
+        amount = int(prize.get("gold", 0)) + bonus
+        mh.setdefault("prizes", []).append(
+            {"id": uuid.uuid4().hex[:8], "name": prize.get("name") or kill["monster"], "gold": amount}
+        )
+        kill["claimed"] = True
+        text = f"Claimed {prize.get('name') or kill['monster']} — {amount}gc pending settle-up."
+        add_history(wb, text)
+        return True, text
+
+    # Spell/potion component.
+    if holder == "sell":
+        return False, "This prize is a component, not a sellable item."
+    figure = wb.get("wizard") if holder == "wizard" else wb.get("apprentice")
+    if not figure:
+        return False, f"No {holder} on this warband."
+    doses = MONSTER_HUNTER_COMPONENTS_PER_KILL if expansions.monster_hunter_active(wb) else 1
+    capacity = expansions.component_capacity(wb, figure)
+    components = figure.setdefault("components", [])
+    if len(components) + doses > capacity:
+        return False, (
+            f"{holder.capitalize()}'s component pouch can't hold {doses} more "
+            f"(has {len(components)}/{capacity})."
+        )
+    for _ in range(doses):
+        components.append(
+            {
+                "id": uuid.uuid4().hex[:8],
+                "name": prize.get("name") or kill["monster"],
+                "kind": kind,
+                "target": prize.get("target"),
+                "known": prize.get("known", True),
+            }
+        )
+    kill["claimed"] = True
+    text = f"Claimed {doses} dose(s) of {prize.get('name')} for the {holder} (+1 to {prize.get('target')})."
+    add_history(wb, text)
+    return True, text
+
+
+def _component_holder(wb: dict, holder: str) -> dict | None:
+    if holder == "wizard":
+        return wb.get("wizard")
+    if holder == "apprentice":
+        return wb.get("apprentice")
+    return None
+
+
+def use_component(wb: dict, holder: str, component_id: str) -> tuple[bool, str]:
+    err = _monster_hunting_gate(wb)
+    if err:
+        return False, err
+    figure = _component_holder(wb, holder)
+    if not figure:
+        return False, f"No {holder} on this warband."
+    components = figure.setdefault("components", [])
+    for i, c in enumerate(components):
+        if c.get("id") == component_id:
+            components.pop(i)
+            text = f"Used {c['name']} for +1 to {c.get('target') or 'the roll'}."
+            add_history(wb, text)
+            return True, text
+    return False, "Component not found."
+
+
+def discard_component(wb: dict, holder: str, component_id: str) -> tuple[bool, str]:
+    err = _monster_hunting_gate(wb)
+    if err:
+        return False, err
+    figure = _component_holder(wb, holder)
+    if not figure:
+        return False, f"No {holder} on this warband."
+    components = figure.setdefault("components", [])
+    for i, c in enumerate(components):
+        if c.get("id") == component_id:
+            components.pop(i)
+            text = f"Discarded {c['name']}."
+            add_history(wb, text)
+            return True, text
+    return False, "Component not found."
+
+
+def apply_monster_hunting_results(wb: dict) -> tuple[bool, str]:
+    """Settles the pending kill log: banks the total XP (via record_game_loot,
+    so it goes through the same level-up/reversal path as any other after-game
+    XP) and the total pending prize gold, then clears both lists."""
+    err = _monster_hunting_gate(wb)
+    if err:
+        return False, err
+    mh = wb.setdefault("monster_hunting", {"kills": [], "prizes": []})
+    kills = mh.get("kills", [])
+    prizes = mh.get("prizes", [])
+    if not kills and not prizes:
+        return False, "No monster kills or prizes to apply yet."
+    total_xp = sum(int(k.get("xp", 0)) for k in kills)
+    total_gold = sum(int(p.get("gold", 0)) for p in prizes)
+    summary = record_game_loot(wb, total_gold, [], xp=total_xp)
+    mh["kills"] = []
+    mh["prizes"] = []
+    return True, f"Monster Hunting settled: {summary}"
 
 
 # --- Wizard states (Lich / Beastcrafter / Demonic Pact) ---------------------

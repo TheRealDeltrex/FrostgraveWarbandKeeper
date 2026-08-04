@@ -1,0 +1,1290 @@
+[
+ {
+  "monster": "Acrisbird",
+  "rules": "MM75",
+  "source": "The Maze of Malcor",
+  "xp": 5,
+  "bestiary_name": "Acrisbird",
+  "prize": {
+   "name": "Acrisbird feather",
+   "kind": "spell",
+   "target": "Potion of Ironmind",
+   "gold": 0,
+   "known": false
+  }
+ },
+ {
+  "monster": "Advisory Council",
+  "rules": "MM75",
+  "source": "The Maze of Malcor",
+  "xp": 8,
+  "bestiary_name": "Advisory Council",
+  "prize": {
+   "name": "Council Dust",
+   "kind": "potion",
+   "target": "Ethereal Vacuum",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Alchemical Monstrosity",
+  "rules": "FF42",
+  "source": "The Frostgrave Folio",
+  "xp": 16,
+  "bestiary_name": "The Alchemical Monstrosity",
+  "prize": {
+   "name": "Lashing tentacle",
+   "kind": "potion",
+   "target": "Potion of Toughness",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Alentha Lemedes",
+  "rules": "MM75",
+  "source": "The Maze of Malcor",
+  "xp": 25,
+  "bestiary_name": "Alentha Lemedes, Spiritualist (Wizard Shade)",
+  "prize": {
+   "name": "Alentha Dust",
+   "kind": "potion",
+   "target": "Bottle of Dreams and Nightmares",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Ambronax",
+  "rules": "FP64",
+  "source": "Forgotten Pacts",
+  "xp": 40,
+  "bestiary_name": "Ambronnax, Endower of Senescence",
+  "prize": {
+   "name": "Ambronax Fur",
+   "kind": "potion",
+   "target": "Elixir of Life",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Amplipede",
+  "rules": "IBP55",
+  "source": "Into the Breeding Pits",
+  "xp": 2,
+  "bestiary_name": "Amplipede",
+  "prize": {
+   "name": "Amplipede Venom",
+   "kind": "spell",
+   "target": "Poison Potion",
+   "gold": 0,
+   "known": false
+  }
+ },
+ {
+  "monster": "Armoured Skeleton",
+  "rules": "FRB111",
+  "source": "Core Rules",
+  "xp": 2,
+  "bestiary_name": "Armoured Skeleton",
+  "prize": {
+   "name": null,
+   "kind": "none",
+   "target": null,
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Balkren",
+  "rules": "FP65",
+  "source": "Forgotten Pacts",
+  "xp": 15,
+  "bestiary_name": "Balkren, Barbarian Summoner",
+  "prize": {
+   "name": null,
+   "kind": "none",
+   "target": null,
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Ballista II",
+  "rules": "PD87",
+  "source": "The Perilous Dark",
+  "xp": 10,
+  "bestiary_name": "Ballista II",
+  "prize": {
+   "name": "Ballista splinter",
+   "kind": "spell",
+   "target": "Scatter Shot",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Banshee",
+  "rules": "TLL54",
+  "source": "Thaw of the Lich Lord",
+  "xp": 8,
+  "bestiary_name": "Banshee",
+  "prize": {
+   "name": "Banshee dust",
+   "kind": "spell",
+   "target": "Reveal Death",
+   "gold": 0,
+   "known": false
+  }
+ },
+ {
+  "monster": "Barbarian",
+  "rules": "FP66",
+  "source": "Forgotten Pacts",
+  "xp": 5,
+  "bestiary_name": "Barbarian",
+  "prize": {
+   "name": null,
+   "kind": "none",
+   "target": null,
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Basilisk",
+  "rules": "IBP55",
+  "source": "Into the Breeding Pits",
+  "xp": 8,
+  "bestiary_name": "Basilisk",
+  "prize": {
+   "name": "Basilisk scales",
+   "kind": "spell",
+   "target": "Petrify",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Bear",
+  "rules": "FRB113",
+  "source": "Core Rules",
+  "xp": 8,
+  "bestiary_name": "Bear",
+  "prize": {
+   "name": "Bear claw",
+   "kind": "spell",
+   "target": "Animal Companion",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Bile Hound",
+  "rules": "FP67",
+  "source": "Forgotten Pacts",
+  "xp": 5,
+  "bestiary_name": "Bile Hound",
+  "prize": {
+   "name": "Bile",
+   "kind": "spell",
+   "target": "Elemental Ball",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Blood Crow",
+  "rules": "TLL54",
+  "source": "Thaw of the Lich Lord",
+  "xp": 2,
+  "bestiary_name": "Blood Crow",
+  "prize": {
+   "name": null,
+   "kind": "none",
+   "target": null,
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Bloodwave",
+  "rules": "MM79",
+  "source": "The Maze of Malcor",
+  "xp": 6,
+  "bestiary_name": "Bloodwave",
+  "prize": {
+   "name": "Waveblood",
+   "kind": "spell",
+   "target": "Heal",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Boar",
+  "rules": "FRB113",
+  "source": "Core Rules",
+  "xp": 3,
+  "bestiary_name": "Boar",
+  "prize": {
+   "name": "Boar tusk",
+   "kind": "gold",
+   "target": null,
+   "gold": 10,
+   "known": true
+  }
+ },
+ {
+  "monster": "Bog Man",
+  "rules": "MM79",
+  "source": "The Maze of Malcor",
+  "xp": 5,
+  "bestiary_name": "Bog Man",
+  "prize": {
+   "name": "Bog gas",
+   "kind": "spell",
+   "target": "Destructive Sphere",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Borock",
+  "rules": "PD87",
+  "source": "The Perilous Dark",
+  "xp": 12,
+  "bestiary_name": "Borock",
+  "prize": {
+   "name": "Borock horn",
+   "kind": "potion",
+   "target": "Potion of Strength",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Burning Skeleton",
+  "rules": "FF43",
+  "source": "The Frostgrave Folio",
+  "xp": 3,
+  "bestiary_name": "Burning Skeleton",
+  "prize": {
+   "name": "Burnt Bone",
+   "kind": "potion",
+   "target": "Potion of Fire Breath",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Chilopendra",
+  "rules": "FP67",
+  "source": "Forgotten Pacts",
+  "xp": 12,
+  "bestiary_name": "Chilopendra",
+  "prize": {
+   "name": "Chilopendra horn",
+   "kind": "gold",
+   "target": null,
+   "gold": 10,
+   "known": true
+  }
+ },
+ {
+  "monster": "Coal Man",
+  "rules": "MM80",
+  "source": "The Maze of Malcor",
+  "xp": 6,
+  "bestiary_name": "Coal Man",
+  "prize": {
+   "name": "Enchanted Coal",
+   "kind": "potion",
+   "target": "Potion of Elemental Absorption",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Collegium Porter",
+  "rules": "MM80",
+  "source": "The Maze of Malcor",
+  "xp": 6,
+  "bestiary_name": "Collegium Porter",
+  "prize": {
+   "name": "Porter glass",
+   "kind": "spell",
+   "target": "Shirking Potion",
+   "gold": 0,
+   "known": false
+  }
+ },
+ {
+  "monster": "Cronohound",
+  "rules": "PD88",
+  "source": "The Perilous Dark",
+  "xp": 6,
+  "bestiary_name": "Chronohound",
+  "prize": {
+   "name": null,
+   "kind": "none",
+   "target": null,
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Death Cultist",
+  "rules": "TLL55",
+  "source": "Thaw of the Lich Lord",
+  "xp": 3,
+  "bestiary_name": "Death Cultist",
+  "prize": {
+   "name": null,
+   "kind": "none",
+   "target": null,
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Devourer",
+  "rules": "IBP56",
+  "source": "Into the Breeding Pits",
+  "xp": 20,
+  "bestiary_name": "Devourer",
+  "prize": {
+   "name": "Devourer larva",
+   "kind": "potion",
+   "target": "Potion of Invulnerability",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Dying Construct",
+  "rules": "FF71",
+  "source": "The Frostgrave Folio",
+  "xp": 12,
+  "bestiary_name": "Dying Construct",
+  "prize": {
+   "name": null,
+   "kind": "none",
+   "target": null,
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Failing Wretch",
+  "rules": "FP67",
+  "source": "Forgotten Pacts",
+  "xp": 5,
+  "bestiary_name": "Failing Wretch",
+  "prize": {
+   "name": "Failing wretch nails",
+   "kind": "spell",
+   "target": "Draining Word",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Florissa Undine",
+  "rules": "MM82",
+  "source": "The Maze of Malcor",
+  "xp": 25,
+  "bestiary_name": "Florissa Undine, Sonancer (Wizard Shade)",
+  "prize": {
+   "name": "Florissa Dust",
+   "kind": "potion",
+   "target": "Elixir of the Chameleon",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Fireflinger",
+  "rules": "FF42",
+  "source": "The Frostgrave Folio",
+  "xp": 6,
+  "bestiary_name": "Fire-Flinger",
+  "prize": {
+   "name": "Fire fuel",
+   "kind": "potion",
+   "target": "Explosive Cocktail",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Foulhorn",
+  "rules": "FF59",
+  "source": "The Frostgrave Folio",
+  "xp": 8,
+  "bestiary_name": "Foulhorn",
+  "prize": {
+   "name": "Foulhorn horn",
+   "kind": "gold",
+   "target": null,
+   "gold": 25,
+   "known": true
+  }
+ },
+ {
+  "monster": "Frost Giant",
+  "rules": "FRB118",
+  "source": "Core Rules",
+  "xp": 18,
+  "bestiary_name": "Frost Giant",
+  "prize": {
+   "name": null,
+   "kind": "none",
+   "target": null,
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Frost Wraith",
+  "rules": "TLL56",
+  "source": "Thaw of the Lich Lord",
+  "xp": 5,
+  "bestiary_name": "Frost Wraith",
+  "prize": {
+   "name": "Frost wraith dust",
+   "kind": "spell",
+   "target": "Decay",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Ghoul",
+  "rules": "FRB112",
+  "source": "Core Rules",
+  "xp": 3,
+  "bestiary_name": "Ghoul",
+  "prize": {
+   "name": null,
+   "kind": "none",
+   "target": null,
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Ghoul King",
+  "rules": "TLL",
+  "source": "Thaw of the Lich Lord",
+  "xp": 6,
+  "bestiary_name": "The Ghoul King",
+  "prize": {
+   "name": null,
+   "kind": "none",
+   "target": null,
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Giant Rat",
+  "rules": "FRB114",
+  "source": "Core Rules",
+  "xp": 2,
+  "bestiary_name": "Giant Rat",
+  "prize": {
+   "name": null,
+   "kind": "none",
+   "target": null,
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Giant Worm",
+  "rules": "FRB119",
+  "source": "Core Rules",
+  "xp": 12,
+  "bestiary_name": "Giant Worm",
+  "prize": {
+   "name": "Giant worm tooth",
+   "kind": "potion",
+   "target": "Bottle of Burrowing",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Glass Spider",
+  "rules": "MM83",
+  "source": "The Maze of Malcor",
+  "xp": 4,
+  "bestiary_name": "Glass Spider",
+  "prize": {
+   "name": null,
+   "kind": "none",
+   "target": null,
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Gnoll",
+  "rules": "IBP57",
+  "source": "Into the Breeding Pits",
+  "xp": 5,
+  "bestiary_name": null,
+  "prize": {
+   "name": null,
+   "kind": "none",
+   "target": null,
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Grakyura",
+  "rules": "FP68",
+  "source": "Forgotten Pacts",
+  "xp": 8,
+  "bestiary_name": "Grakyura",
+  "prize": {
+   "name": "Grakyura Shell",
+   "kind": "potion",
+   "target": "Cordial of Clearsight",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Granite Golem",
+  "rules": "FF8",
+  "source": "The Frostgrave Folio",
+  "xp": 12,
+  "bestiary_name": "Granite Golem",
+  "prize": {
+   "name": "Charged Granite",
+   "kind": "potion",
+   "target": "Shatterstar Draught",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Hellcrow",
+  "rules": "PD89",
+  "source": "The Perilous Dark",
+  "xp": 4,
+  "bestiary_name": "Hellcrow",
+  "prize": {
+   "name": "Hellcrow feather",
+   "kind": "spell",
+   "target": "Wizard Eye",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Hydra",
+  "rules": "IBP59",
+  "source": "Into the Breeding Pits",
+  "xp": 12,
+  "bestiary_name": "Hydra",
+  "prize": {
+   "name": "Hydra teeth",
+   "kind": "potion",
+   "target": "Potion of Restoration",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Hyena",
+  "rules": "IBP60",
+  "source": "Into the Breeding Pits",
+  "xp": 3,
+  "bestiary_name": "Hyena",
+  "prize": {
+   "name": null,
+   "kind": "none",
+   "target": null,
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Ice Spider",
+  "rules": "FRB114",
+  "source": "Core Rules",
+  "xp": 3,
+  "bestiary_name": "Ice Spider",
+  "prize": {
+   "name": "Ice spider venom",
+   "kind": "spell",
+   "target": "Poison Dart",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Ice Toad",
+  "rules": "FRB114",
+  "source": "Core Rules",
+  "xp": 5,
+  "bestiary_name": "Ice Toad",
+  "prize": {
+   "name": "Webbed feet",
+   "kind": "spell",
+   "target": "Brew Potion",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Imp",
+  "rules": "FRB117",
+  "source": "Core Rules",
+  "xp": 3,
+  "bestiary_name": "Imp",
+  "prize": {
+   "name": null,
+   "kind": "none",
+   "target": null,
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Kalish Kareen",
+  "rules": "MM84",
+  "source": "The Maze of Malcor",
+  "xp": 25,
+  "bestiary_name": "Kalish Kareen, Distortionist (Wizard Shade)",
+  "prize": {
+   "name": "Kalish Dust",
+   "kind": "potion",
+   "target": "Cordial of Empowerment",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Kaylakid",
+  "rules": "FP68",
+  "source": "Forgotten Pacts",
+  "xp": 5,
+  "bestiary_name": "Kaylakid",
+  "prize": {
+   "name": "Kaylakid tentacle",
+   "kind": "spell",
+   "target": "Elemental Hammer",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Kornovik",
+  "rules": "FP69",
+  "source": "Forgotten Pacts",
+  "xp": 12,
+  "bestiary_name": "Kornovik, Barbarian Outcast",
+  "prize": {
+   "name": null,
+   "kind": "none",
+   "target": null,
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Large Construct",
+  "rules": "FRB118",
+  "source": "Core Rules",
+  "xp": 8,
+  "bestiary_name": "Large Construct",
+  "prize": {
+   "name": null,
+   "kind": "none",
+   "target": null,
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Lourrent",
+  "rules": "FF71",
+  "source": "The Frostgrave Folio",
+  "xp": 25,
+  "bestiary_name": "Lourrent, Vampiric Chronomancer",
+  "prize": {
+   "name": "Lourrent fang",
+   "kind": "potion",
+   "target": "Potion of Preservation",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Magmite",
+  "rules": "PD90",
+  "source": "The Perilous Dark",
+  "xp": 6,
+  "bestiary_name": "Magmite",
+  "prize": {
+   "name": "Magmite claw",
+   "kind": "spell",
+   "target": "Embed Enchantment",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Major Demon",
+  "rules": "FRB118",
+  "source": "Core Rules",
+  "xp": 10,
+  "bestiary_name": "Major Demon",
+  "prize": {
+   "name": "Demon blood",
+   "kind": "spell",
+   "target": "Possess",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Manaworm",
+  "rules": "PD90",
+  "source": "The Perilous Dark",
+  "xp": 3,
+  "bestiary_name": "Manaworm",
+  "prize": {
+   "name": "Mana Worm Teeth",
+   "kind": "gold",
+   "target": null,
+   "gold": 3,
+   "known": true
+  }
+ },
+ {
+  "monster": "Mantodeus",
+  "rules": "MM85",
+  "source": "The Maze of Malcor",
+  "xp": 6,
+  "bestiary_name": "Mantodeus",
+  "prize": {
+   "name": "Mantodeus barb",
+   "kind": "spell",
+   "target": "Familiar",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Matriarch",
+  "rules": "PD91",
+  "source": "The Perilous Dark",
+  "xp": 15,
+  "bestiary_name": "Matriarch",
+  "prize": {
+   "name": "Matriarch ichor",
+   "kind": "spell",
+   "target": "Heal",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Medium Construct",
+  "rules": "FRB117",
+  "source": "Core Rules",
+  "xp": 5,
+  "bestiary_name": "Medium Construct",
+  "prize": {
+   "name": null,
+   "kind": "none",
+   "target": null,
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Minor Demon",
+  "rules": "FRB117",
+  "source": "Core Rules",
+  "xp": 5,
+  "bestiary_name": "Minor Demon",
+  "prize": {
+   "name": "Demon hair",
+   "kind": "spell",
+   "target": "Planar Tear",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Minotaur",
+  "rules": "IBP60",
+  "source": "Into the Breeding Pits",
+  "xp": 10,
+  "bestiary_name": "Minotaur",
+  "prize": {
+   "name": "Minotaur Horn",
+   "kind": "potion",
+   "target": "Philtre of Fury",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Nullmen",
+  "rules": "FF29",
+  "source": "The Frostgrave Folio",
+  "xp": 5,
+  "bestiary_name": "Nullmen",
+  "prize": {
+   "name": "Calcified null",
+   "kind": "potion",
+   "target": "Bottle of Null",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Ordovacer Nords",
+  "rules": "MM86",
+  "source": "The Maze of Malcor",
+  "xp": 25,
+  "bestiary_name": "Ordovacer Nords, Fatecaster (Wizard Shade)",
+  "prize": {
+   "name": "Ordovacer Dust",
+   "kind": "spell",
+   "target": "Miraculous Cure",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Phase Cat",
+  "rules": "MM87",
+  "source": "The Maze of Malcor",
+  "xp": 3,
+  "bestiary_name": "Phase Cat",
+  "prize": {
+   "name": "Phase cat whisker",
+   "kind": "potion",
+   "target": "Potion of Teleportation",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Planar Lurker",
+  "rules": "PD93",
+  "source": "The Perilous Dark",
+  "xp": 25,
+  "bestiary_name": "Planar Lurker",
+  "prize": {
+   "name": null,
+   "kind": "none",
+   "target": null,
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Rangifer",
+  "rules": "TLL57",
+  "source": "Thaw of the Lich Lord",
+  "xp": 0,
+  "bestiary_name": "Rangifer",
+  "prize": {
+   "name": "Rangifer antler",
+   "kind": "spell",
+   "target": "Strike Dead",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Reaver Wight",
+  "rules": "PD94",
+  "source": "The Perilous Dark",
+  "xp": 8,
+  "bestiary_name": "Reaver Wight",
+  "prize": {
+   "name": "Reaver Wight Dust",
+   "kind": "spell",
+   "target": "Circle of Protection",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Sewer Slime",
+  "rules": "IBP",
+  "source": "Into the Breeding Pits",
+  "xp": 6,
+  "bestiary_name": "Sewer Slime",
+  "prize": {
+   "name": "Sewer slime",
+   "kind": "potion",
+   "target": "Construct Oil",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Shrieking Wolf",
+  "rules": "MM88",
+  "source": "The Maze of Malcor",
+  "xp": 8,
+  "bestiary_name": "Shrieking Wolf",
+  "prize": {
+   "name": "Shrieking Wolf Tooth",
+   "kind": "potion",
+   "target": "Potion of Toughness",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Skeleton",
+  "rules": "FRB111",
+  "source": "Core Rules",
+  "xp": 2,
+  "bestiary_name": "Skeleton",
+  "prize": {
+   "name": null,
+   "kind": "none",
+   "target": null,
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Small Construct",
+  "rules": "FRB116",
+  "source": "Core Rules",
+  "xp": 4,
+  "bestiary_name": "Small Construct",
+  "prize": {
+   "name": null,
+   "kind": "none",
+   "target": null,
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Snow Leopard",
+  "rules": "FRB115",
+  "source": "Core Rules",
+  "xp": 5,
+  "bestiary_name": "Snow Leopard",
+  "prize": {
+   "name": null,
+   "kind": "none",
+   "target": null,
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Snow Troll",
+  "rules": "FRB119",
+  "source": "Core Rules",
+  "xp": 10,
+  "bestiary_name": "Snow Troll",
+  "prize": {
+   "name": "Troll fur",
+   "kind": "spell",
+   "target": "Strength",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Spectre",
+  "rules": "TLL58",
+  "source": "Thaw of the Lich Lord",
+  "xp": 6,
+  "bestiary_name": "Spectre",
+  "prize": {
+   "name": "Spectre dust",
+   "kind": "spell",
+   "target": "Spell Eater",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Starfire Elemental",
+  "rules": "FF59",
+  "source": "The Frostgrave Folio",
+  "xp": 5,
+  "bestiary_name": "Starfire Elemental",
+  "prize": {
+   "name": null,
+   "kind": "none",
+   "target": null,
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Tiszirain",
+  "rules": "FP70",
+  "source": "Forgotten Pacts",
+  "xp": 40,
+  "bestiary_name": "Tiszirain",
+  "prize": {
+   "name": "Tiszirain horn",
+   "kind": "spell",
+   "target": "Bind Demon",
+   "gold": 0,
+   "known": false
+  }
+ },
+ {
+  "monster": "Toravor",
+  "rules": "FP70",
+  "source": "Forgotten Pacts",
+  "xp": 5,
+  "bestiary_name": "Toravor",
+  "prize": {
+   "name": "Toravor teeth",
+   "kind": "spell",
+   "target": "Crumble",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Tuvith Reginold",
+  "rules": "MM90",
+  "source": "The Maze of Malcor",
+  "xp": 25,
+  "bestiary_name": "Tuvith Reginold, Astromancer (Wizard Shade)",
+  "prize": {
+   "name": "Tuvith Reginold Dust",
+   "kind": "potion",
+   "target": "Potion of Invisibility",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Two-Headed Troll",
+  "rules": "IBP61",
+  "source": "Into the Breeding Pits",
+  "xp": 10,
+  "bestiary_name": "Two-Headed Troll",
+  "prize": {
+   "name": "Troll fur",
+   "kind": "spell",
+   "target": "Strength",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Vampire",
+  "rules": "FRB113",
+  "source": "Core Rules",
+  "xp": 12,
+  "bestiary_name": "Vampire",
+  "prize": {
+   "name": "Vampire fangs",
+   "kind": "spell",
+   "target": "Steal Health",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Vaplorhine",
+  "rules": "IBP62",
+  "source": "Into the Breeding Pits",
+  "xp": 3,
+  "bestiary_name": "Vaplorhine",
+  "prize": {
+   "name": "Vaplorhine fur",
+   "kind": "potion",
+   "target": "Elixir of Speed",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Vapour Snake (small)",
+  "rules": "PD96",
+  "source": "The Perilous Dark",
+  "xp": 4,
+  "bestiary_name": "Vapour Snake (small)",
+  "prize": {
+   "name": null,
+   "kind": "none",
+   "target": null,
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Vapour Snake Large",
+  "rules": "PD96",
+  "source": "The Perilous Dark",
+  "xp": 6,
+  "bestiary_name": "Vapour Snake (large)",
+  "prize": {
+   "name": null,
+   "kind": "none",
+   "target": null,
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Violent Fungus",
+  "rules": "IBP62",
+  "source": "Into the Breeding Pits",
+  "xp": 5,
+  "bestiary_name": "Violent Fungus",
+  "prize": {
+   "name": "Fungus Spores",
+   "kind": "spell",
+   "target": "Reveal Secret",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "White Gorilla",
+  "rules": "FRB115",
+  "source": "Core Rules",
+  "xp": 8,
+  "bestiary_name": "White Gorilla",
+  "prize": {
+   "name": "Gorilla fur",
+   "kind": "spell",
+   "target": "Control Animal",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Wild Dog",
+  "rules": "FRB116",
+  "source": "Core Rules",
+  "xp": 3,
+  "bestiary_name": "Wild Dog",
+  "prize": {
+   "name": null,
+   "kind": "none",
+   "target": null,
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Werewolf",
+  "rules": "FRB120",
+  "source": "Core Rules",
+  "xp": 8,
+  "bestiary_name": "Werewolf",
+  "prize": {
+   "name": "Werewolf head",
+   "kind": "gold",
+   "target": null,
+   "gold": 20,
+   "known": true
+  }
+ },
+ {
+  "monster": "Wolf",
+  "rules": "FRB116",
+  "source": "Core Rules",
+  "xp": 3,
+  "bestiary_name": "Wolf",
+  "prize": {
+   "name": null,
+   "kind": "none",
+   "target": null,
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Wraith",
+  "rules": "FRB112",
+  "source": "Core Rules",
+  "xp": 8,
+  "bestiary_name": "Wraith",
+  "prize": {
+   "name": "Wraith dust",
+   "kind": "spell",
+   "target": "Control Undead",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Wraith Knight",
+  "rules": "TLL58",
+  "source": "Thaw of the Lich Lord",
+  "xp": 8,
+  "bestiary_name": "Wraith Knight",
+  "prize": {
+   "name": "Wraith knight dust",
+   "kind": "spell",
+   "target": "Reveal Death",
+   "gold": 0,
+   "known": false
+  }
+ },
+ {
+  "monster": "Wraith of Malcor",
+  "rules": "MM92",
+  "source": "The Maze of Malcor",
+  "xp": 50,
+  "bestiary_name": "The Wraith of Malcor",
+  "prize": {
+   "name": "Malcor Dust",
+   "kind": "potion",
+   "target": "Bottle of Darkness",
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Zombie",
+  "rules": "FRB112",
+  "source": "Core Rules",
+  "xp": 3,
+  "bestiary_name": "Zombie",
+  "prize": {
+   "name": null,
+   "kind": "none",
+   "target": null,
+   "gold": 0,
+   "known": true
+  }
+ },
+ {
+  "monster": "Zombie Troll",
+  "rules": "TLL58",
+  "source": "Thaw of the Lich Lord",
+  "xp": 6,
+  "bestiary_name": "Zombie Troll",
+  "prize": {
+   "name": "Zombie troll bones",
+   "kind": "spell",
+   "target": "Raise Zombie",
+   "gold": 0,
+   "known": true
+  }
+ }
+]

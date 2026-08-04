@@ -20,6 +20,7 @@ from __future__ import annotations
 
 from frostgrave_data import (
     APPRENTICE_ITEM_SLOTS,
+    COMPONENT_POUCH_CAPACITY,
     FIRE_GIANT_HEALTH_CAP,
     FIRE_GIANT_WIZARD_BASE,
     FIRE_GIANT_XP_PER_LEVEL,
@@ -27,7 +28,11 @@ from frostgrave_data import (
     MAX_SOLDIERS,
     MAX_SPECIALISTS,
     MAX_WIZARD_LEVEL,
+    MONSTER_HUNTER_TYPE_KEY,
+    POTION_MASTER_TYPE_KEY,
     SOLDIER_ITEM_SLOTS,
+    SPELL_COMPONENT_BAG_CAPACITY,
+    SPELL_COMPONENT_BAG_NAME,
     VAMPIRE_HEALTH_CAP,
     VAMPIRE_WILL_CAP,
     VAMPIRE_XP_PER_LEVEL,
@@ -325,9 +330,24 @@ PACT_BOON_SOLDIERS = {"chilopendra": BOON_EXTRA_SOLDIER}
 
 # Soldiers that join only because a particular item is in the vault. Matched the
 # same loose way as the True Name, since vault items are typed by hand.
+#
+# The rangifer troop types (Spellcaster Magazine, Issue 3) are only fieldable
+# via the Book of the Rangifer (Thaw of the Lich Lord). The Rangifer Boar is
+# excluded here — it's part of a hide's own composition, not something the
+# book lets a wizard field directly — and is blocked outright below instead.
 VAULT_ITEM_SOLDIERS = {
     "collegium_porter": "Porter Control Rod",
+    "rangifer_ambusher": "Book of the Rangifer",
+    "rangifer_charger": "Book of the Rangifer",
+    "rangifer_herdsman": "Book of the Rangifer",
+    "rangifer_hewer": "Book of the Rangifer",
+    "rangifer_hurler": "Book of the Rangifer",
+    "rangifer_packdeer": "Book of the Rangifer",
+    "rangifer_war_leader": "Book of the Rangifer",
 }
+
+# Never hireable on its own — see the VAULT_ITEM_SOLDIERS comment above.
+NEVER_HIREABLE_SOLDIERS = {"rangifer_boar"}
 
 # Reanimating a dead soldier (Thaw of the Lich Lord). Keeps their stats; Will
 # becomes +0. Unlimited revenants per warband.
@@ -579,6 +599,8 @@ def soldier_state_block(wb: dict, type_key: str) -> str | None:
         return "A Rangifer will not serve an undead wizard — your wizard is a Lich."
     if type_key in LICH_BLOCKED_SOLDIERS and is_vampire(wb):
         return "A Rangifer will not serve an undead wizard — your wizard is a Vampire."
+    if type_key in NEVER_HIREABLE_SOLDIERS:
+        return "The Rangifer Boar isn't hireable on its own — it only comes as part of a hide."
     need_tier = BEASTCRAFTER_COMPANIONS.get(type_key)
     if need_tier and beastcrafter_tier(wb) < need_tier:
         name = BEASTCRAFTER_TIER_BY_N[need_tier]["name"]
@@ -691,3 +713,44 @@ def pact_break_penalty(wb: dict) -> dict:
     """Breaking a pact costs 1 level and 1 Health per Sacrifice held."""
     n = sum(1 for p in pact_tiers(wb) if p.get("sacrifice"))
     return {"levels": n, "health": n}
+
+
+# --- Spellcaster Magazine, Issue 5: Monster Hunting --------------------------
+
+
+def component_capacity(wb: dict, figure: dict) -> int:
+    """How many spell/potion components `figure` (the wizard or apprentice
+    dict) can hold: the free pouch, plus the Spell Component Bag's capacity if
+    one is in their item slots."""
+    cap = COMPONENT_POUCH_CAPACITY
+    slots = figure.get("item_slots") or []
+    if any((slot or "").strip().lower() == SPELL_COMPONENT_BAG_NAME.lower() for slot in slots):
+        cap += SPELL_COMPONENT_BAG_CAPACITY
+    return cap
+
+
+def _has_active_soldier_of_type(wb: dict, type_key: str) -> bool:
+    return any(
+        s.get("type_key") == type_key and s.get("status") != "dead"
+        for s in (wb.get("soldiers") or [])
+    )
+
+
+def monster_hunter_active(wb: dict) -> bool:
+    """Whether an active Monster Hunter is on the roster — grants an extra
+    component per kill and +5gc on sellable prizes (Issue 5)."""
+    return _has_active_soldier_of_type(wb, MONSTER_HUNTER_TYPE_KEY)
+
+
+def potion_master_active(wb: dict) -> bool:
+    """Whether an active Potion Master is on the roster — doubles the Brew
+    Potion component bonus (Issue 5)."""
+    return _has_active_soldier_of_type(wb, POTION_MASTER_TYPE_KEY)
+
+
+def brew_potion_component_bonus(wb: dict) -> tuple[int, int]:
+    """(Casting Roll bonus, gc discount) a matching component gives when
+    brewing a potion — doubled by an active Potion Master."""
+    if potion_master_active(wb):
+        return 2, 50
+    return 1, 25
