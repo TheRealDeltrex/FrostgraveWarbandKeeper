@@ -10,8 +10,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from frostgrave_data import SCHOOLS, SPELLS  # noqa: E402
 from pypdf import PdfReader  # noqa: E402
+
+from frostgrave_data import SCHOOLS, SPELLS  # noqa: E402
 
 CORE = Path(r"E:\RPG\Tabletop\Frostgrave\Frostgrave - 2e - Core Rules.pdf")
 CARDS = Path(r"E:\RPG\Tabletop\Frostgrave\FG2E - Spellcards_2nd-1.pdf")

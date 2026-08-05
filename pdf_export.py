@@ -10,8 +10,6 @@ from fpdf import FPDF
 
 import expansions
 
-logger = logging.getLogger(__name__)
-
 try:
     from PIL import Image
 except ImportError:  # pragma: no cover - only hit if Pillow genuinely isn't installed
@@ -23,23 +21,17 @@ except ImportError:  # pragma: no cover - only hit if Pillow genuinely isn't ins
     Image = None
 
 from frostgrave_data import (
+    CAPTAIN_ITEM_SLOTS,
     CAPTAIN_TRICK_BY_ID,
+    PROMOTE_CAPTAIN_ITEM_SLOTS,
     PROSTHETIC_LIMB_NAME_BY_INJURY_ID,
     PROSTHETIC_UPGRADE_BY_ID,
     SOLDIER_COMPANION_BY_TYPE_KEY,
     format_stat,
 )
 from game_content import item_slot_cost
-
-# The on-screen trick picker uses the full rules text, but "Coup de Grâce" and
-# "Leadership" wrap onto a second line in the PDF's tighter column. Shortened
-# for print only (full effect + declare inline); the canonical rules text in
-# CAPTAIN_TRICKS is unchanged.
-PDF_TRICK_LINE_OVERRIDES = {
-    "coup_de_grace": "+2 Damage in melee attack that has dealt 1< Damage (After damage calculation)",
-    "leadership": "Group Activation allows up to three soldiers (Upon activation)",
-}
 from warband_store import (
+    base_summary,
     captain_effective_stats,
     enrich_soldier,
     normalize_item_slots,
@@ -49,9 +41,26 @@ from warband_store import (
     wizard_effective_stats,
 )
 
+# The on-screen trick picker uses the full rules text, but "Coup de Grâce" and
+# "Leadership" wrap onto a second line in the PDF's tighter column. Shortened
+# for print only (full effect + declare inline); the canonical rules text in
+# CAPTAIN_TRICKS is unchanged.
+PDF_TRICK_LINE_OVERRIDES = {
+    "coup_de_grace": "+2 Damage in melee attack that has dealt 1< Damage (After damage calculation)",
+    "leadership": "Group Activation allows up to three soldiers (Upon activation)",
+}
+
+logger = logging.getLogger(__name__)
+
+# Pillow raises this for an absurdly large image rather than an OSError, and it
+# has to be resolvable even on the no-Pillow path above, where _crop_to_square's
+# except clause would otherwise be an AttributeError waiting to happen.
+DecompressionBombError = getattr(Image, "DecompressionBombError", OSError) if Image else OSError
+
 # Apprentice casts with -2 to the roll => effective difficulty is wizard CN + 2
 APPRENTICE_CAST_PENALTY = 2
-EMPTY_SLOT = ""
+# What an empty item slot prints as, after its bold "**N:**" label.
+EMPTY_SLOT = " -"
 
 
 class RosterPDF(FPDF):
@@ -181,9 +190,12 @@ def _crop_to_square(path: Path) -> BytesIO | None:
         img.save(buf, format="JPEG", quality=90)
         buf.seek(0)
         return buf
-    except OSError as exc:
+    except (OSError, ValueError, DecompressionBombError) as exc:
         # Corrupt/truncated file or a format Pillow can't identify
-        # (UnidentifiedImageError is itself a subclass of OSError).
+        # (UnidentifiedImageError is itself a subclass of OSError). ValueError
+        # and DecompressionBombError cover a malformed or absurdly large image
+        # — a portrait is arbitrary user-supplied bytes, and failing to crop
+        # one should drop back to the empty frame, not 500 the whole export.
         logger.warning("Could not crop portrait %s for PDF export: %s", path, exc)
         return None
 
@@ -240,8 +252,8 @@ def _spell_cn_pair(sp: dict) -> str:
 
 
 def _format_slots(slots: list[str], n: int, has_dagger: bool = False) -> str:
-    """Format item slots (bold slot numbers, render with markdown=True); empty as ___;
-    2-slot items as e.g. **2+3:** Two-Handed Weapon."""
+    """Format item slots (bold slot numbers, render with markdown=True); empty
+    slots as EMPTY_SLOT; 2-slot items as e.g. **2+3:** Two-Handed Weapon."""
     normalized = normalize_item_slots(slots, n)
     parts = []
     if has_dagger:
@@ -261,7 +273,7 @@ def _format_slots(slots: list[str], n: int, has_dagger: bool = False) -> str:
                 parts.append(f"**{i + 1}+{i + 2}:** {val}")
                 i += 2
                 continue
-        parts.append(f"**{i + 1}:**{val}")
+        parts.append(f"**{i + 1}:** {val}")
         i += 1
     return "  ".join(parts)
 
@@ -519,8 +531,10 @@ def build_warband_pdf(wb: dict) -> bytes:
     # Captain (if any) shares a fresh page with the Soldiers roster, above them.
     if cap:
         pdf.add_page()
-        cap_slot_key = "promote_captain_item_slots" if cap.get("origin") == "promoted" else "captain_item_slots"
-        cap_slots_n = int(homerules.get(cap_slot_key, 6))
+        promoted = cap.get("origin") == "promoted"
+        cap_slot_key = "promote_captain_item_slots" if promoted else "captain_item_slots"
+        cap_slot_default = PROMOTE_CAPTAIN_ITEM_SLOTS if promoted else CAPTAIN_ITEM_SLOTS
+        cap_slots_n = int(homerules.get(cap_slot_key, cap_slot_default))
         _next_section("Captain")
         y0 = pdf.get_y()
         _draw_portrait(pdf, cap.get("portrait"), pdf.l_margin, y0, wiz_size, "captain", cap.get("type_key"))
@@ -713,8 +727,6 @@ def build_warband_pdf(wb: dict) -> bytes:
             pdf.ln(1.5)
 
     # --- Base & Vault — always the last page; Vault always shown (see below) ---
-    from warband_store import base_summary
-
     base = base_summary(wb)
     has_location = base.get("location_key") not in (None, "", "none")
     has_resources = bool(base.get("resources"))

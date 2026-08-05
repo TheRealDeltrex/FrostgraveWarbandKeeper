@@ -2,6 +2,7 @@
 Giant and Vampire Wizard playable builds, plus The Grimoire of Fin Dalka
 magic item."""
 
+import expansions
 import warband_store
 from frostgrave_data import (
     FIRE_GIANT_HEALTH_CAP,
@@ -17,8 +18,6 @@ from frostgrave_data import (
     spell_id,
 )
 from game_content import load_magic_items, magic_items_for_sources
-import expansions
-
 
 # --- Giant-Blooded -----------------------------------------------------------
 

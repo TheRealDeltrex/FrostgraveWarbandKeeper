@@ -4,6 +4,7 @@ and the Ragged Warbands & Random Recruits roller."""
 
 import random
 
+import expansions
 import warband_store
 from frostgrave_data import (
     RANDOM_RECRUIT_TABLE_II,
@@ -11,8 +12,6 @@ from frostgrave_data import (
     SOLDIERS,
     permanent_injury_by_roll,
 )
-import expansions
-
 
 # --- Soldier item slots (Phase A/B prerequisite) -----------------------------
 

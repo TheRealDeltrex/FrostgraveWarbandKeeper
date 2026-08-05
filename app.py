@@ -135,6 +135,7 @@ from game_content import (
 from idle_watchdog import note_closing, note_heartbeat
 from warband_store import (
     ALT_XP_CONVERSIONS,
+    InvalidUpload,
     acquire_fin_dalka_grimoire,
     add_apprentice_mutation,
     add_apprentice_permanent_injury,
@@ -293,6 +294,9 @@ app = Flask(
 )
 app.secret_key = os.environ.get("SECRET_KEY") or paths.get_or_create_secret_key()
 app.config["MAX_CONTENT_LENGTH"] = 8 * 1024 * 1024  # 8 MB uploads
+# Belt to _reject_cross_site()'s braces: keeps the session cookie off
+# cross-site requests in browsers that honour it.
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 
 # Set by the in-browser (Pyodide) build. When on, the UI drops the desktop-only
 # Settings/native-folder-picker affordance and shows a "session only — export to
@@ -409,6 +413,76 @@ app.jinja_env.globals.update(
     PACT_TIER_LEVELS=expansions.PACT_TIER_LEVELS,
     PACT_MAX_TIERS=expansions.PACT_MAX_TIERS,
 )
+
+
+# --- Local-only request guards ---------------------------------------------
+#
+# This app has no accounts, so it never asks "who are you" — but it does listen
+# on a predictable http://127.0.0.1:5000 while the user browses the rest of the
+# web. Two consequences, both handled here rather than with a CSRF-token
+# library (there is no session to protect, and ~60 forms would each need a
+# hidden field):
+#
+#  * Any page in any tab can POST a cross-origin HTML form at us — those are
+#    not subject to CORS preflight, so without a check a malicious site could
+#    silently repoint the data folder via /settings, or edit a warband.
+#  * A hostile DNS name can be pointed at 127.0.0.1 (DNS rebinding), which
+#    makes a remote page same-origin with us and able to *read* warbands. Only
+#    the Host header distinguishes that from a genuine local request.
+
+_ALLOWED_HOSTS = {"127.0.0.1", "localhost", "::1"}
+
+
+def _host_is_local(host: str) -> bool:
+    """Whether a "host[:port]" is one we're actually served on. Matches the
+    127.0.0.1 bind in main() — the app never listens on a LAN address, so
+    anything else arriving here came via a name pointed at us."""
+    if not host:
+        return False
+    host = host.strip()
+    if host.startswith("["):  # bracketed IPv6, e.g. "[::1]:5000"
+        hostname = host[1:].partition("]")[0]
+    else:
+        hostname = host.partition(":")[0]
+    return hostname.lower() in _ALLOWED_HOSTS
+
+
+@app.before_request
+def _reject_cross_site() -> Response | None:
+    """Block DNS-rebinding reads and cross-site writes.
+
+    BROWSER_MODE is exempt: the Pyodide build serves the app from the page's
+    own origin (a github.io URL) with no network hop at all, so neither threat
+    applies and the host allowlist would reject every request."""
+    if BROWSER_MODE:
+        return None
+    if not _host_is_local(request.host):
+        logger.warning("Rejected request with non-local Host header: %r", request.host)
+        abort(403)
+    if request.method in ("GET", "HEAD", "OPTIONS"):
+        return None
+    # Origin is sent on every cross-origin POST; Referer is the fallback for
+    # the same-origin form posts of browsers that omit Origin. Neither present
+    # means a non-browser client (curl, a test), which can't be a CSRF victim.
+    source = request.headers.get("Origin") or request.headers.get("Referer")
+    if source:
+        from urllib.parse import urlparse
+
+        if not _host_is_local(urlparse(source).netloc):
+            logger.warning("Rejected cross-site %s %s from %r", request.method, request.path, source)
+            abort(403)
+    return None
+
+
+@app.after_request
+def _security_headers(resp: Response) -> Response:
+    """Stop another page framing the app (clickjacking on controls that need no
+    confirmation) and stop content-type sniffing on uploaded portraits."""
+    resp.headers.setdefault("X-Content-Type-Options", "nosniff")
+    resp.headers.setdefault("X-Frame-Options", "DENY")
+    resp.headers.setdefault("Referrer-Policy", "same-origin")
+    resp.headers.setdefault("Content-Security-Policy", "frame-ancestors 'none'")
+    return resp
 
 
 def _require_warband(warband_id: str) -> dict:
@@ -795,7 +869,7 @@ def warband_view(warband_id: str) -> str:
     vault_names = []
     seen = set()
     for it in wb.get("vault_items") or []:
-        name = (it.get("name") if isinstance(it, dict) else str(it) or "").strip()
+        name = ((it.get("name") if isinstance(it, dict) else str(it)) or "").strip()
         if name and name not in seen:
             seen.add(name)
             vault_names.append(name)
@@ -1084,6 +1158,11 @@ def warband_update(warband_id: str) -> Response:
                 flash(msg, "success" if ok else "error")
             if ok:
                 save_warband(wb)
+    except InvalidUpload as exc:
+        # Checked before the ValueError catch-all below (it's a subclass), so a
+        # rejected image reports what's actually wrong instead of being
+        # mislabelled as a bad number.
+        flash(str(exc), "error")
     except ValueError:
         flash("Please enter a valid number.", "error")
 
@@ -1995,9 +2074,15 @@ def settings() -> str | Response:
         new_dir = (request.form.get("data_dir") or "").strip()
         if not new_dir:
             flash("Enter a folder path.", "error")
-        else:
-            paths.set_user_data_dir(new_dir)
+        elif paths.set_user_data_dir(new_dir):
             flash(f"Data folder set to “{new_dir}”.", "success")
+        else:
+            flash(
+                "FWK_DATA_DIR is set in this environment and always wins, so the "
+                "data folder can't be changed here. Unset it and restart to use "
+                "this setting.",
+                "error",
+            )
         return redirect(url_for("settings"))
     return render_template(
         "settings.html",
@@ -2093,7 +2178,12 @@ def main() -> None:
 
         threading.Event().wait()  # keep the main thread alive; idle_watchdog exits the process
     else:
-        app.run(debug=True, host="127.0.0.1", port=port)
+        # The auto-reloader is the part that's useful day to day; the debugger
+        # is an interactive Python console for anyone who can reach a traceback,
+        # so it stays opt-in via FWK_DEBUG=1 rather than being on by default for
+        # everyone who runs from source per README.md.
+        debug = os.environ.get("FWK_DEBUG") == "1"
+        app.run(debug=debug, use_reloader=True, host="127.0.0.1", port=port)
 
 
 if __name__ == "__main__":

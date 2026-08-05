@@ -3,8 +3,8 @@ G4: reversing a level-up must not be blocked by a stat that was independently
 lowered below its starting value (e.g. by a mutation).
 G5: breaking a pact must actually cost XP and report the true Health delta."""
 
-import warband_store
 import expansions
+import warband_store
 
 
 def test_after_game_negative_xp_clamps_and_reverses(fresh_warband):

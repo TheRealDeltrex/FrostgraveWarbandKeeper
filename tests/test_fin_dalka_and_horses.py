@@ -5,7 +5,6 @@ interactive mechanics."""
 import warband_store
 from frostgrave_data import BASE_LOCATIONS, fin_dalka_spell_ids
 
-
 # --- Grimoire of Fin Dalka ----------------------------------------------------
 
 

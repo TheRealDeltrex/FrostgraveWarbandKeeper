@@ -2,7 +2,7 @@
 the supplement schools (Vampire, Fire Giant, Rangifer, Pentangle) that only
 declare relations from their own side."""
 
-from frostgrave_data import SCHOOLS, PENTANGLE_SCHOOLS, school_relation
+from frostgrave_data import PENTANGLE_SCHOOLS, SCHOOLS, school_relation
 
 
 def test_school_relation_is_symmetric():
