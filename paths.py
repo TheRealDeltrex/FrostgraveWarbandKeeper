@@ -73,10 +73,23 @@ def user_data_dir() -> Path:
     return default_user_data_dir()
 
 
-def set_user_data_dir(path: Path | str) -> None:
+def set_user_data_dir(path: Path | str) -> bool:
+    """Persist the chosen data folder. Returns False (writing nothing) when
+    FWK_DATA_DIR is set.
+
+    The env var already wins on read, so writing the config in that case would
+    have no effect on this process — but config.json lives in %APPDATA%, outside
+    whatever FWK_DATA_DIR points at, so it *would* silently overwrite the real
+    install's setting. That makes the sandbox one-way: a test or script that
+    reaches /settings could repoint the user's actual data folder. Same rule
+    get_or_create_secret_key() follows — nothing here should ever touch a real
+    install's files by accident."""
+    if os.environ.get("FWK_DATA_DIR"):
+        return False
     cfg = load_config()
     cfg["data_dir"] = str(path)
     save_config(cfg)
+    return True
 
 
 def get_or_create_secret_key() -> str:

@@ -8,7 +8,6 @@ import expansions
 import warband_store
 from frostgrave_data import PROSTHETIC_UPGRADE_BY_ID
 
-
 # --- Fireheart: Prosthetic Upgrades ------------------------------------------
 
 
@@ -219,6 +218,34 @@ def test_revert_vampire_restores_school_spells_and_apprentice(fresh_warband):
     assert wb["wizard"]["spells"] == before_spells
     assert wb["apprentice"] == before_apprentice
     assert expansions.state_kind(wb) == expansions.STATE_NONE
+
+
+def test_revert_vampire_restores_max_soldiers_without_an_apprentice(fresh_warband):
+    """become_vampire() raises max_soldiers to the Vampire's 9-soldier floor
+    whether or not there was an apprentice to trade for it, so the restore has
+    to be unconditional too — it used to sit inside the apprentice branch,
+    stranding an apprentice-less wizard on the raised cap forever."""
+    wb = fresh_warband
+    assert wb.get("apprentice") is None
+    before = wb["homerules"]["max_soldiers"]
+
+    ok, msg = warband_store.become_vampire(wb)
+    assert ok, msg
+    assert wb["homerules"]["max_soldiers"] == warband_store.VAMPIRE_MIN_MAX_SOLDIERS
+
+    ok2, msg2 = warband_store.revert_vampire(wb)
+    assert ok2, msg2
+    assert wb["homerules"]["max_soldiers"] == before
+
+
+def test_revert_vampire_restores_max_soldiers_with_an_apprentice(fresh_warband):
+    wb = fresh_warband
+    warband_store.hire_apprentice(wb)
+    before = wb["homerules"]["max_soldiers"]
+
+    warband_store.become_vampire(wb)
+    warband_store.revert_vampire(wb)
+    assert wb["homerules"]["max_soldiers"] == before
 
 
 def test_revert_vampire_without_becoming_one_fails(fresh_warband):

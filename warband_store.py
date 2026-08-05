@@ -159,6 +159,15 @@ class Warband(TypedDict, total=False):
     history: list[dict]
 
 
+class InvalidUpload(ValueError):
+    """An uploaded file the user needs to fix (wrong image type, etc.).
+
+    Subclasses ValueError so existing callers that catch that still do, but
+    lets app.py tell "this message is meant for the user" apart from a bare
+    int() parse failure — warband_update catches ValueError across every
+    action handler, and reported both as "Please enter a valid number."."""
+
+
 def warband_dir() -> Path:
     """Writable warbands folder — resolved (and created) fresh on every call
     rather than once at import time (B4), so changing the data folder under
@@ -869,7 +878,11 @@ def create_warband(
                 specs += 1
                 if specs > spec_cap:
                     return None, f"Max {spec_cap} specialists."
-            cost = int(info["cost"])
+            # Same cost rule every other hiring path uses (add_soldier,
+            # enrich_soldier, warband_limits) rather than the raw catalog
+            # figure — the Edition 2 correction, Beastcrafter surcharge and
+            # base-resource discount all apply here too.
+            cost = expansions.soldier_cost({"homerules": homerules}, info, type_key)
             if gold < cost:
                 return None, f"Not enough gold for {info['name']} (need {cost} gc)."
             gold -= cost
@@ -981,8 +994,16 @@ def list_warbands() -> list[dict]:
 
 def _sanitize_filename(s: str) -> str:
     """Strip everything but the safe filename charset, for building paths out
-    of user-supplied ids/roles (warband id, portrait role)."""
-    return re.sub(r"[^a-zA-Z0-9._-]", "", s)
+    of user-supplied ids/roles (warband id, portrait role).
+
+    The charset keeps ".", so it alone would pass "." and ".." straight
+    through — and portrait_dir("..") resolves to the data-dir root, one level
+    above portraits/. Nothing reaches that today (Werkzeug normalises ".." out
+    of a URL path before routing, so such a warband is simply unreachable), but
+    an id also arrives from imported JSON via restore_portraits_by_name(), so
+    those two names are rejected outright rather than relying on that."""
+    safe = re.sub(r"[^a-zA-Z0-9._-]", "", s)
+    return "warband" if safe in ("", ".", "..") else safe
 
 
 def warband_path(warband_id: str) -> Path:
@@ -1131,6 +1152,81 @@ def _resync_permanent_injury_text(entity: dict) -> None:
             inj["short"] = row["text"]
 
 
+def _as_int(value: object, fallback: int) -> int:
+    """int(value), or `fallback` if it isn't one. Warband files are exchanged
+    between users and hand-edited, so a field that must be a number can arrive
+    as a string, null, or anything else."""
+    try:
+        return int(value)  # type: ignore[arg-type]
+    except (TypeError, ValueError):
+        return fallback
+
+
+def _coerce_numeric_homerules(hr: dict) -> None:
+    """Force every homerule that defaults to a number back to a number, one
+    level of nesting deep (captain_base_stats, wizard_stat_limits, the
+    {limit, unlimited} cap grids). Driven off default_homerules() rather than a
+    hand-kept list, so a numeric homerule added later is covered automatically.
+
+    Without this a single bad value bricks a warband permanently: nothing
+    validates an imported file's homerules, and expansions.max_soldiers() calls
+    int() on one during warband_limits(), which warband_view calls unguarded —
+    so the import succeeds and every later view of that warband is a 500, with
+    the delete button living on the page that crashes."""
+    for key, default in default_homerules().items():
+        if isinstance(default, bool):  # bool is an int subclass — check first
+            continue
+        if isinstance(default, int):
+            hr[key] = _as_int(hr.get(key), default)
+        elif isinstance(default, dict):
+            stored = hr.get(key)
+            if not isinstance(stored, dict):
+                hr[key] = deepcopy(default)
+                continue
+            for sub_key, sub_default in default.items():
+                if isinstance(sub_default, bool) or not isinstance(sub_default, int):
+                    continue
+                stored[sub_key] = _as_int(stored.get(sub_key), sub_default)
+
+
+def _safe_portrait_ref(rel: object) -> str | None:
+    """A stored portrait reference, or None if it isn't one this app could have
+    written. Portrait fields survive an export/import round trip untouched, so
+    they're untrusted: an absolute path would escape the portraits folder
+    entirely (see portrait_filesystem_path). Cleaned here as well as checked on
+    read, so a bad reference is dropped once rather than re-checked forever."""
+    if not isinstance(rel, str) or not rel.strip():
+        return None
+    path = Path(rel)
+    if path.is_absolute() or ".." in path.parts or path.suffix.lower() not in ALLOWED_IMAGE_EXT:
+        return None
+    return rel
+
+
+def _normalize_vault_items(items: object) -> list[dict]:
+    """Vault entries as {id, name, notes, source} dicts with string values.
+    A nameless entry is dropped rather than kept as None — the warband page
+    calls .strip() on every vault name."""
+    if not isinstance(items, list):
+        return []
+    out = []
+    for it in items:
+        if isinstance(it, dict):
+            name = it.get("name")
+        else:
+            name = it
+        if not isinstance(name, str) or not name.strip():
+            continue
+        src = it if isinstance(it, dict) else {}
+        out.append({
+            "id": str(src.get("id") or uuid.uuid4().hex[:8]),
+            "name": name.strip(),
+            "notes": str(src.get("notes") or ""),
+            "source": str(src.get("source") or "vault"),
+        })
+    return out
+
+
 def _normalize_warband(wb: dict) -> dict:
     """Backfill defaults and run migrations on a freshly-parsed warband dict —
     shared by load_warband() and import_warband_json() (B3) so an imported
@@ -1140,9 +1236,23 @@ def _normalize_warband(wb: dict) -> dict:
     Backfill defensively, per-key, everywhere below — not version-gated,
     since new optional fields get added over time and every load should
     still see sane defaults for them regardless of a file's schema_version.
+
+    Also the one place a warband's *types* are enforced. Both callers take
+    semi-untrusted input (.warbands files are the exchange format), and a
+    wrong-typed field would otherwise flow straight into arithmetic and
+    filesystem paths downstream.
     """
-    wiz = wb.setdefault("wizard", empty_wizard())
-    wiz.setdefault("stats", deepcopy(WIZARD_BASE))
+    if not isinstance(wb.get("wizard"), dict):
+        wb["wizard"] = empty_wizard()
+    wiz = wb["wizard"]
+    wb["gold"] = _as_int(wb.get("gold"), STARTING_GOLD)
+    wiz["xp"] = _as_int(wiz.get("xp"), 0)
+    wiz["level"] = _as_int(wiz.get("level"), 0)
+    wiz["portrait"] = _safe_portrait_ref(wiz.get("portrait"))
+    if not isinstance(wiz.get("stats"), dict):
+        wiz["stats"] = deepcopy(WIZARD_BASE)
+    for stat, value in WIZARD_BASE.items():
+        wiz["stats"][stat] = _as_int(wiz["stats"].get(stat, value), value)
     wiz["stats"].setdefault("health", 14)
     wiz.pop("health_current", None)
     wiz.setdefault("has_dagger", True)
@@ -1170,9 +1280,9 @@ def _normalize_warband(wb: dict) -> dict:
         state.setdefault(key, value)
     if state.get("kind") not in expansions.WIZARD_STATES:
         state["kind"] = expansions.STATE_NONE
-    if isinstance(wiz.get("spells"), str):
+    if not isinstance(wiz.get("spells"), list):
         wiz["spells"] = []
-    wb.setdefault("vault_items", [])
+    wb["vault_items"] = _normalize_vault_items(wb.get("vault_items"))
     wb.setdefault("giant_blooded_pending", False)
     mh = wb.setdefault("monster_hunting", {"kills": [], "prizes": [], "bags_bought": 0})
     mh.setdefault("kills", [])
@@ -1196,8 +1306,11 @@ def _normalize_warband(wb: dict) -> dict:
         wb["base"]["resources"] = [
             r for r in wb["base"]["resources"] if r in BASE_RESOURCES
         ]
+    if not isinstance(wb.get("apprentice"), dict):
+        wb["apprentice"] = None
     if wb.get("apprentice"):
         ap = wb["apprentice"]
+        ap["portrait"] = _safe_portrait_ref(ap.get("portrait"))
         ap.setdefault("has_dagger", True)
         ap.setdefault("mutations", [])
         ap.setdefault("permanent_injuries", [])
@@ -1208,16 +1321,25 @@ def _normalize_warband(wb: dict) -> dict:
             ap["gender"] = "male"
         ap.setdefault("components", [])
         ap.setdefault("component_bags_held", 0)
-    hr = wb.setdefault("homerules", default_homerules())
+    if not isinstance(wb.get("homerules"), dict):
+        wb["homerules"] = default_homerules()
+    hr = wb["homerules"]
     for k, v in default_homerules().items():
         hr.setdefault(k, v)
-    es = hr.setdefault("enabled_sources", {})
+    _coerce_numeric_homerules(hr)
+    if not isinstance(hr.get("enabled_sources"), dict):
+        hr["enabled_sources"] = {}
+    es = hr["enabled_sources"]
     for book in SOURCE_BOOKS:
         es.setdefault(book, False)
-    wb.setdefault("captain", None)
+    if not isinstance(wb.get("captain"), dict):
+        wb["captain"] = None
     if wb.get("captain"):
         cap = wb["captain"]
         cap.pop("bonus_choice", None)  # removed: fixed +3F/+2S hire bonus no longer exists
+        cap["portrait"] = _safe_portrait_ref(cap.get("portrait"))
+        cap["xp"] = _as_int(cap.get("xp"), 0)
+        cap["level"] = _as_int(cap.get("level"), 0)
         cap.setdefault("bonus_extra_stat", None)
         cap.setdefault("xp", 0)
         cap.setdefault("level_history", [])
@@ -1235,8 +1357,14 @@ def _normalize_warband(wb: dict) -> dict:
         if cap.get("origin") == "promoted":
             n = int(hr.get("promote_captain_item_slots", PROMOTE_CAPTAIN_ITEM_SLOTS))
         cap["item_slots"] = normalize_item_slots(cap.get("item_slots"), n)
-    for s in wb.get("soldiers") or []:
-        s.setdefault("portrait", None)
+    if not isinstance(wb.get("soldiers"), list):
+        wb["soldiers"] = []
+    wb["soldiers"] = [s for s in wb["soldiers"] if isinstance(s, dict)]
+    for s in wb["soldiers"]:
+        s["portrait"] = _safe_portrait_ref(s.get("portrait"))
+        s["xp"] = _as_int(s.get("xp"), 0)
+        s["level"] = _as_int(s.get("level"), 0)
+        s.setdefault("id", uuid.uuid4().hex[:10])
         s.setdefault("portrait_source_name", None)
         s.setdefault("mutations", [])
         s.setdefault("modifications", [])
@@ -1473,7 +1601,7 @@ def save_portrait(warband_id: str, role: str, file_storage: "FileStorage | None"
         return None
     ext = Path(file_storage.filename).suffix.lower()
     if ext not in ALLOWED_IMAGE_EXT:
-        raise ValueError("Image must be jpg, png, gif, or webp.")
+        raise InvalidUpload("Image must be jpg, png, gif, or webp.")
     safe_role = _sanitize_filename(role)
     dest = portrait_dir(warband_id) / f"{safe_role}{ext}"
     # Remove old portraits for same role
@@ -1511,13 +1639,25 @@ def remove_portrait(entity: dict, warband_id: str, role: str) -> None:
 
 
 def portrait_filesystem_path(rel: str | None) -> Path | None:
+    """Resolve a stored portrait reference to a real file inside the portraits
+    folder, or None. Portrait fields come out of imported .warbands files, so
+    `rel` is untrusted: an absolute path would silently escape containment,
+    because pathlib's `/` discards the left operand when the right is absolute
+    (portraits_root / "C:/x.png" is just "C:/x.png"). Flag checks alone can't
+    catch every shape of that (symlinks, drive-relative "C:foo"), so the final
+    path is resolved and checked for containment as well."""
     if not rel:
         return None
     parts = Path(rel)
-    # prevent traversal
-    if ".." in parts.parts:
+    if parts.is_absolute() or ".." in parts.parts:
         return None
-    path = portraits_root_dir() / parts
+    root = portraits_root_dir().resolve()
+    try:
+        path = (root / parts).resolve()
+    except OSError:
+        return None
+    if not path.is_relative_to(root):
+        return None
     return path if path.is_file() else None
 
 
@@ -2794,7 +2934,6 @@ def update_homerules(wb: dict, form: "ImmutableMultiDict") -> tuple[bool, str]:
     """Parse and apply the per-warband homerule settings form."""
     hr = wb.setdefault("homerules", default_homerules())
     try:
-        ragged_warbands_enabled = form.get("ragged_warbands_enabled") == "on"
         new_hr = {
             "max_soldiers": max(1, int(form.get("max_soldiers") or hr.get("max_soldiers", MAX_SOLDIERS))),
             "max_specialists": max(
@@ -2836,8 +2975,13 @@ def update_homerules(wb: dict, form: "ImmutableMultiDict") -> tuple[bool, str]:
             "soldier_leveling_enabled": form.get("soldier_leveling_enabled") == "on",
             "soldier_leveling_animal_companions": form.get("soldier_leveling_animal_companions") == "on",
             "soldier_leveling_constructs": form.get("soldier_leveling_constructs") == "on",
+            # Its own checkbox, nothing else. Ragged Warbands used to force this
+            # on, which made the checkbox silently revert on every save; the
+            # Random Recruit Status Table doesn't need it anyway — it goes
+            # through add_permanent_injury() directly, and the homerule gate
+            # lives only in the add_soldier_permanent_injury() wrapper.
             "soldier_permanent_injuries_enabled": (
-                form.get("soldier_permanent_injuries_enabled") == "on" or ragged_warbands_enabled
+                form.get("soldier_permanent_injuries_enabled") == "on"
             ),
             "soldier_max_levels": int(form.get("soldier_max_levels") or hr["soldier_max_levels"]),
             "soldier_stat_caps": _parse_stat_caps(form, "soldier", hr["soldier_stat_caps"]),
@@ -2867,7 +3011,7 @@ def update_homerules(wb: dict, form: "ImmutableMultiDict") -> tuple[bool, str]:
             "fire_giant_wizard_playable": form.get("fire_giant_wizard_playable") == "on",
             "vampire_wizard_playable": form.get("vampire_wizard_playable") == "on",
             "giant_blooded_enabled": form.get("giant_blooded_enabled") == "on",
-            "ragged_warbands_enabled": ragged_warbands_enabled,
+            "ragged_warbands_enabled": form.get("ragged_warbands_enabled") == "on",
             "monster_hunting_enabled": form.get("monster_hunting_enabled") == "on",
             "wildwoods_supplies_enabled": form.get("wildwoods_supplies_enabled") == "on",
             "edition2_soldier_costs": form.get("edition2_soldier_costs") == "on",
@@ -3978,10 +4122,14 @@ def revert_vampire(wb: dict) -> tuple[bool, str]:
         return False, "No record of what your wizard was before becoming a Vampire."
     wiz["school"] = savepoint["school"]
     wiz["spells"] = savepoint["spells"]
+    # become_vampire() raises max_soldiers unconditionally (the Vampire's 9-soldier
+    # floor applies whether or not there was an apprentice to trade for it), so the
+    # restore has to be unconditional too — not nested under the apprentice branch,
+    # which would strand a wizard who transformed without one on the raised cap.
+    hr = wb.setdefault("homerules", default_homerules())
+    hr["max_soldiers"] = savepoint.get("max_soldiers", hr.get("max_soldiers", MAX_SOLDIERS))
     if savepoint.get("apprentice"):
         wb["apprentice"] = savepoint["apprentice"]
-        hr = wb.setdefault("homerules", default_homerules())
-        hr["max_soldiers"] = savepoint.get("max_soldiers", hr.get("max_soldiers", MAX_SOLDIERS))
     wiz["state"] = expansions.default_wizard_state()
     text = f"{wiz.get('name', 'The wizard')} is no longer a Vampire; school, spells and apprentice restored."
     add_history(wb, text)
@@ -4477,6 +4625,10 @@ def roll_underworld_debt_call(
         return True, text
     outcome_roll = int(outcome_roll) if outcome_roll is not None else random.randint(1, 20)
     paid_from_gold = 0
+    # "Pay what you owe" (1-6) really does clear as many Markers as the Treasury
+    # can cover, not just one: "The warband must immediately pay off as many
+    # Underworld Markers (at 150gc each) as possible with the gold in its
+    # Treasury" (Issue 3, Underworld Debts Table) — hence the loop.
     while outcome_roll <= 6 and uf["markers"] > 0 and int(wb.get("gold", 0)) >= UNDERWORLD_PAYOFF_COST:
         wb["gold"] = int(wb.get("gold", 0)) - UNDERWORLD_PAYOFF_COST
         uf["markers"] -= 1
