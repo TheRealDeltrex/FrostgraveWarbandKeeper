@@ -20,10 +20,15 @@ from __future__ import annotations
 
 from frostgrave_data import (
     APPRENTICE_ITEM_SLOTS,
+    CARGO_TRANSPORT_BASE_CAPACITY,
+    CARGO_TRANSPORT_UPGRADES,
     COMPONENT_POUCH_CAPACITY,
     FIRE_GIANT_HEALTH_CAP,
     FIRE_GIANT_WIZARD_BASE,
     FIRE_GIANT_XP_PER_LEVEL,
+    LEGENDARY_SOLDIER_BASE_MAX,
+    LEGENDARY_SOLDIER_LEVEL_STEP,
+    LEGENDARY_SOLDIER_MAX_CAP,
     LEVEL_UP_OPTIONS,
     MAX_SOLDIERS,
     MAX_SPECIALISTS,
@@ -32,7 +37,7 @@ from frostgrave_data import (
     POTION_MASTER_TYPE_KEY,
     SOLDIER_ITEM_SLOTS,
     SPELL_COMPONENT_BAG_CAPACITY,
-    SPELL_COMPONENT_BAG_NAME,
+    SUPPLY_CARRY_CAPACITY_BASE,
     VAMPIRE_HEALTH_CAP,
     VAMPIRE_WILL_CAP,
     VAMPIRE_XP_PER_LEVEL,
@@ -499,6 +504,16 @@ def max_specialists(wb: dict) -> int:
     return base + extra
 
 
+def max_legendary_soldiers(wb: dict) -> int:
+    """Legendary Soldier cap (Spellcaster Magazine, Issue 4): every warband may
+    field LEGENDARY_SOLDIER_BASE_MAX regardless of level, +1 more per full
+    LEGENDARY_SOLDIER_LEVEL_STEP wizard levels, capped at
+    LEGENDARY_SOLDIER_MAX_CAP. A wizard who drops in level keeps any Legendary
+    Soldiers already hired — the cap only blocks hiring *more* while under it."""
+    extra = wizard_level(wb) // LEGENDARY_SOLDIER_LEVEL_STEP
+    return min(LEGENDARY_SOLDIER_MAX_CAP, LEGENDARY_SOLDIER_BASE_MAX + extra)
+
+
 def _hlw_item_slot_bonus(wb: dict) -> int:
     if not _hlw_active(wb, "hlw_item_slots"):
         return 0
@@ -720,13 +735,11 @@ def pact_break_penalty(wb: dict) -> dict:
 
 def component_capacity(wb: dict, figure: dict) -> int:
     """How many spell/potion components `figure` (the wizard or apprentice
-    dict) can hold: the free pouch, plus the Spell Component Bag's capacity if
-    one is in their item slots."""
-    cap = COMPONENT_POUCH_CAPACITY
-    slots = figure.get("item_slots") or []
-    if any((slot or "").strip().lower() == SPELL_COMPONENT_BAG_NAME.lower() for slot in slots):
-        cap += SPELL_COMPONENT_BAG_CAPACITY
-    return cap
+    dict) can hold: the free pouch, plus 10 more per Spell Component Bag
+    assigned to them (bought and assigned via warband_store's
+    buy_component_bag()/assign_component_bag(), not a normal item slot)."""
+    held = int(figure.get("component_bags_held", 0))
+    return COMPONENT_POUCH_CAPACITY + SPELL_COMPONENT_BAG_CAPACITY * held
 
 
 def _has_active_soldier_of_type(wb: dict, type_key: str) -> bool:
@@ -754,3 +767,25 @@ def brew_potion_component_bonus(wb: dict) -> tuple[int, int]:
     if potion_master_active(wb):
         return 2, 50
     return 1, 25
+
+
+# --- The Wildwoods: Supplies & Cargo Transports ------------------------------
+
+
+def cargo_transport_owned(wb: dict) -> bool:
+    return bool((wb.get("cargo_transport") or {}).get("owned"))
+
+
+def supply_carry_capacity(wb: dict) -> int:
+    """How much sp the warband can carry: SUPPLY_CARRY_CAPACITY_BASE unaided,
+    plus a Cargo Transport's base capacity and any capacity-raising upgrades
+    (currently just Additional Cargo Capacity) once owned."""
+    cap = SUPPLY_CARRY_CAPACITY_BASE
+    transport = wb.get("cargo_transport") or {}
+    if transport.get("owned"):
+        cap += CARGO_TRANSPORT_BASE_CAPACITY
+        for key in transport.get("upgrades") or []:
+            info = CARGO_TRANSPORT_UPGRADES.get(key)
+            if info:
+                cap += int(info.get("capacity", 0))
+    return cap

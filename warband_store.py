@@ -39,6 +39,9 @@ from frostgrave_data import (
     CAPTAIN_TRICK_BY_ID,
     CAPTAIN_TRICK_IDS,
     CAPTAIN_TRICKS,
+    CARGO_TRANSPORT_COST,
+    CARGO_TRANSPORT_UPGRADES,
+    COMPONENT_POUCH_CAPACITY,
     FIN_DALKA_BASE_SELL,
     FIN_DALKA_DECIPHER_COST,
     FIN_DALKA_SELL_PER_SPELL,
@@ -50,6 +53,7 @@ from frostgrave_data import (
     KNIGHTLY_ORDER_BY_ID,
     KNIGHTLY_ORDER_ELIGIBLE,
     KNIGHTLY_ORDER_IDS,
+    LEGENDARY_SOLDIER_TYPE_KEYS,
     LEVELUP_STATS,
     MAX_SOLDIERS,
     MAX_SPECIALISTS,
@@ -75,14 +79,21 @@ from frostgrave_data import (
     SOLDIERS,
     SOURCE_BOOK_BY_SLUG,
     SOURCE_BOOKS,
+    SPELL_COMPONENT_BAG_CAPACITY,
+    SPELL_COMPONENT_BAG_COST,
+    SPELL_COMPONENT_BAG_LIMIT,
+    SPELL_COMPONENT_BAG_NAME,
     STANDARD_CONSTRUCT_TYPE_KEYS,
     STARTING_GOLD,
     STARTING_SPELL_COUNT,
+    SUPPLY_POINT_BUY_RATE,
+    SUPPLY_POINT_SELL_RATE,
     TEMPORARY_MEMBER_LIMIT,
     UNDERWORLD_LOAN_MAX,
     UNDERWORLD_LOAN_MIN,
     UNDERWORLD_PAYOFF_COST,
     VAMPIRE_MIN_MAX_SOLDIERS,
+    WILDERNESS_SUPPLY_CONSUMPTION_PER_MEMBER,
     WIZARD_BASE,
     WIZARD_ITEM_SLOTS,
     WIZARD_MIN_CASTING_NUMBER_DEFAULT,
@@ -398,6 +409,11 @@ def default_homerules() -> dict:
         # Off by default; needs Spellcaster Magazine switched on to have any
         # effect. See _monster_hunting_gate() and the functions below it.
         "monster_hunting_enabled": False,
+        # The Wildwoods' Supply Points (sp) economy + the optional Cargo
+        # Transport asset for wilderness campaigns. Off by default; needs
+        # The Wildwoods switched on to have any effect. See
+        # _wildwoods_supplies_gate() and the functions below it.
+        "wildwoods_supplies_enabled": False,
         # House correction for six supplement soldiers costed closer to 1st
         # edition than the rest of the 2e tables. On by default; see
         # expansions.EDITION_2_SOLDIER_COSTS.
@@ -1144,6 +1160,7 @@ def _normalize_warband(wb: dict) -> dict:
     # Monster Hunting (Issue 5): spell/potion components the wizard is
     # carrying — see expansions.component_capacity() for the holding limit.
     wiz.setdefault("components", [])
+    wiz.setdefault("component_bags_held", 0)
     # Wizard state (Lich / Beastcrafter / pact). Backfilled per-key so a warband
     # saved before this existed loads as an ordinary wizard.
     state = wiz.setdefault("state", expansions.default_wizard_state())
@@ -1157,12 +1174,17 @@ def _normalize_warband(wb: dict) -> dict:
         wiz["spells"] = []
     wb.setdefault("vault_items", [])
     wb.setdefault("giant_blooded_pending", False)
-    mh = wb.setdefault("monster_hunting", {"kills": [], "prizes": []})
+    mh = wb.setdefault("monster_hunting", {"kills": [], "prizes": [], "bags_bought": 0})
     mh.setdefault("kills", [])
     mh.setdefault("prizes", [])
+    mh.setdefault("bags_bought", 0)
     horse = wb.setdefault("horse", {"owned": False, "rider": None})
     horse.setdefault("owned", False)
     horse.setdefault("rider", None)
+    wb.setdefault("supply_points", 0)
+    transport = wb.setdefault("cargo_transport", {"owned": False, "upgrades": []})
+    transport.setdefault("owned", False)
+    transport["upgrades"] = [k for k in transport.get("upgrades") or [] if k in CARGO_TRANSPORT_UPGRADES]
     if not isinstance(wb.get("base"), dict):
         wb["base"] = empty_base()
     else:
@@ -1185,6 +1207,7 @@ def _normalize_warband(wb: dict) -> dict:
         if ap.get("gender") != "female":
             ap["gender"] = "male"
         ap.setdefault("components", [])
+        ap.setdefault("component_bags_held", 0)
     hr = wb.setdefault("homerules", default_homerules())
     for k, v in default_homerules().items():
         hr.setdefault(k, v)
@@ -1561,6 +1584,12 @@ def specialist_count(wb: dict) -> int:
     return count_specialists(wb) + (1 if wb.get("captain") else 0)
 
 
+def legendary_soldier_count(wb: dict) -> int:
+    """Active Legendary Soldiers on the roster (Spellcaster Magazine, Issue 4)
+    — see expansions.max_legendary_soldiers() for the wizard-level-gated cap."""
+    return sum(1 for s in active_soldiers(wb) if s.get("type_key") in LEGENDARY_SOLDIER_TYPE_KEYS)
+
+
 def warband_limits(wb: dict) -> dict:
     soldiers = active_soldiers(wb)
     n_soldiers = soldier_count(wb)
@@ -1583,6 +1612,8 @@ def warband_limits(wb: dict) -> dict:
     per_level = expansions.xp_per_level(wb)
     cap = expansions.max_soldiers(wb)
     spec_cap = expansions.max_specialists(wb)
+    legendary = legendary_soldier_count(wb)
+    legendary_cap = expansions.max_legendary_soldiers(wb)
     return {
         "soldiers": n_soldiers,
         "max_soldiers": cap,
@@ -1590,6 +1621,9 @@ def warband_limits(wb: dict) -> dict:
         "max_specialists": spec_cap,
         "soldiers_ok": n_soldiers <= cap,
         "specialists_ok": specs <= spec_cap,
+        "legendary_soldiers": legendary,
+        "max_legendary_soldiers": legendary_cap,
+        "legendary_soldiers_ok": legendary <= legendary_cap,
         "has_apprentice": wb.get("apprentice") is not None,
         "apprentice_cost": APPRENTICE_COST,
         "starting_gold": STARTING_GOLD,
@@ -1763,6 +1797,15 @@ def add_soldier(
         spec_cap = expansions.max_specialists(wb)
         if info["category"] == "specialist" and specialist_count(wb) >= spec_cap:
             return False, f"Specialist limit reached ({spec_cap})."
+        if type_key in LEGENDARY_SOLDIER_TYPE_KEYS:
+            if any(s.get("type_key") == type_key for s in active_soldiers(wb)):
+                return False, f"Only one {info['name']} may be on the roster at a time."
+            leg_cap = expansions.max_legendary_soldiers(wb)
+            if legendary_soldier_count(wb) >= leg_cap:
+                return False, (
+                    f"Legendary Soldier limit reached ({leg_cap} at wizard level "
+                    f"{expansions.wizard_level(wb)}) — level up to hire more."
+                )
     cost = expansions.soldier_cost(wb, info, type_key)
     giant_blooded_now = bool(wb.get("giant_blooded_pending")) and not _giant_blooded_homerule_gate(wb)
     if giant_blooded_now:
@@ -2826,6 +2869,7 @@ def update_homerules(wb: dict, form: "ImmutableMultiDict") -> tuple[bool, str]:
             "giant_blooded_enabled": form.get("giant_blooded_enabled") == "on",
             "ragged_warbands_enabled": ragged_warbands_enabled,
             "monster_hunting_enabled": form.get("monster_hunting_enabled") == "on",
+            "wildwoods_supplies_enabled": form.get("wildwoods_supplies_enabled") == "on",
             "edition2_soldier_costs": form.get("edition2_soldier_costs") == "on",
             "spellcaster_magazine_soldiers": form.get("spellcaster_magazine_soldiers") == "on",
             "knightly_orders_enabled": form.get("knightly_orders_enabled") == "on",
@@ -4149,6 +4193,190 @@ def dismount_horse(wb: dict) -> tuple[bool, str]:
     return True, text
 
 
+# --- The Wildwoods: Supplies & Cargo Transports ------------------------------
+#
+# Supply Points (sp) are bought/sold for gold and consumed by the warband
+# after every wilderness scenario (WILDERNESS_SUPPLY_CONSUMPTION_PER_MEMBER
+# per member). A warband can carry SUPPLY_CARRY_CAPACITY_BASE unaided; a
+# Cargo Transport (bought once, max one/warband) and its upgrades raise that
+# — see expansions.supply_carry_capacity(). The transport's on-table
+# push/combat rules are reference-only (this app doesn't simulate movement),
+# same as Horses' mounted stat deltas are the only mechanical part modelled.
+
+# Guide, Trapper and Trophy Hunter (frostgrave_data.SOLDIERS) carry the
+# Wilderness Survival trait ("never consumes Supply Points" / "no Supply
+# Point upkeep unless reduced to 0 Health") — this app has no per-game "was
+# reduced to 0 Health" state to check, so they're treated as always exempt.
+WILDWOODS_SUPPLY_EXEMPT_TYPE_KEYS = frozenset({"guide", "trapper", "trophy_hunter"})
+
+
+def _wildwoods_supplies_gate(wb: dict) -> str | None:
+    if "The Wildwoods" not in enabled_sources(wb):
+        return "The Wildwoods is switched off; enable it under Additional Rules and Homerules first."
+    hr = wb.get("homerules") or {}
+    if not hr.get("wildwoods_supplies_enabled"):
+        return (
+            "Supplies & Cargo Transports needs its own homerule switched on under "
+            "Additional Rules and Homerules first."
+        )
+    return None
+
+
+def buy_supply_points(wb: dict, amount: int) -> tuple[bool, str]:
+    err = _wildwoods_supplies_gate(wb)
+    if err:
+        return False, err
+    amount = int(amount)
+    if amount <= 0:
+        return False, "Enter a positive amount of sp to buy."
+    cap = expansions.supply_carry_capacity(wb)
+    current = int(wb.get("supply_points", 0))
+    if current + amount > cap:
+        return False, f"Can't carry more than {cap}sp (have {current}sp)."
+    cost = amount * SUPPLY_POINT_BUY_RATE
+    if int(wb.get("gold", 0)) < cost:
+        return False, f"Need {cost} gc for {amount}sp."
+    wb["gold"] = int(wb["gold"]) - cost
+    wb["supply_points"] = current + amount
+    text = f"Bought {amount}sp for {cost} gc."
+    add_history(wb, text)
+    return True, text
+
+
+def sell_supply_points(wb: dict, amount: int) -> tuple[bool, str]:
+    err = _wildwoods_supplies_gate(wb)
+    if err:
+        return False, err
+    amount = int(amount)
+    if amount <= 0:
+        return False, "Enter a positive amount of sp to sell."
+    current = int(wb.get("supply_points", 0))
+    if amount > current:
+        return False, f"Only have {current}sp."
+    proceeds = amount // SUPPLY_POINT_SELL_RATE
+    if proceeds <= 0:
+        return False, f"Need at least {SUPPLY_POINT_SELL_RATE}sp to sell for gold."
+    spent = proceeds * SUPPLY_POINT_SELL_RATE
+    wb["supply_points"] = current - spent
+    wb["gold"] = int(wb.get("gold", 0)) + proceeds
+    text = f"Sold {spent}sp for {proceeds} gc."
+    add_history(wb, text)
+    return True, text
+
+
+def _wildwoods_supply_eating_members(wb: dict) -> int:
+    """Warband members who consume Supply Points post-scenario: wizard +
+    apprentice + every active soldier except those with Wilderness Survival
+    (see WILDWOODS_SUPPLY_EXEMPT_TYPE_KEYS)."""
+    eating_soldiers = sum(
+        1 for s in active_soldiers(wb) if s.get("type_key") not in WILDWOODS_SUPPLY_EXEMPT_TYPE_KEYS
+    )
+    return 1 + (1 if wb.get("apprentice") else 0) + eating_soldiers
+
+
+def consume_wilderness_supplies(wb: dict) -> tuple[bool, str]:
+    """Post-scenario upkeep: each warband member eats
+    WILDERNESS_SUPPLY_CONSUMPTION_PER_MEMBER sp. Applying the resulting
+    "hungry"/"very hungry" penalties to individual figures is left to the
+    player (same as this app's other reminder-only per-game upkeep rules) —
+    this just settles the sp math and reports the shortfall, if any."""
+    err = _wildwoods_supplies_gate(wb)
+    if err:
+        return False, err
+    members = _wildwoods_supply_eating_members(wb)
+    needed = members * WILDERNESS_SUPPLY_CONSUMPTION_PER_MEMBER
+    current = int(wb.get("supply_points", 0))
+    consumed = min(current, needed)
+    wb["supply_points"] = current - consumed
+    shortfall = needed - consumed
+    if shortfall <= 0:
+        text = f"Consumed {consumed}sp feeding {members} member(s). Everyone is fed."
+    else:
+        text = (
+            f"Consumed {consumed}sp feeding {members} member(s), {shortfall}sp short. "
+            "Choose who goes hungry (-2 Health/-1 Will next game) or very hungry "
+            "(-5 Health/-2 Will next game) and record it on their notes."
+        )
+    add_history(wb, text)
+    return True, text
+
+
+def buy_cargo_transport(wb: dict) -> tuple[bool, str]:
+    err = _wildwoods_supplies_gate(wb)
+    if err:
+        return False, err
+    transport = wb.setdefault("cargo_transport", {"owned": False, "upgrades": []})
+    if transport.get("owned"):
+        return False, "Already own a Cargo Transport."
+    if int(wb.get("gold", 0)) < CARGO_TRANSPORT_COST:
+        return False, f"Need {CARGO_TRANSPORT_COST} gc for a Cargo Transport."
+    wb["gold"] = int(wb.get("gold", 0)) - CARGO_TRANSPORT_COST
+    transport["owned"] = True
+    transport.setdefault("upgrades", [])
+    text = f"Bought a Cargo Transport for {CARGO_TRANSPORT_COST} gc."
+    add_history(wb, text)
+    return True, text
+
+
+def sell_cargo_transport(wb: dict) -> tuple[bool, str]:
+    transport = wb.setdefault("cargo_transport", {"owned": False, "upgrades": []})
+    if not transport.get("owned"):
+        return False, "Doesn't own a Cargo Transport."
+    transport["owned"] = False
+    transport["upgrades"] = []
+    excess = int(wb.get("supply_points", 0)) - expansions.supply_carry_capacity(wb)
+    if excess > 0:
+        wb["supply_points"] = int(wb["supply_points"]) - excess
+    text = "Sold/scrapped the warband's Cargo Transport."
+    add_history(wb, text)
+    return True, text
+
+
+def buy_cargo_transport_upgrade(wb: dict, upgrade_key: str) -> tuple[bool, str]:
+    err = _wildwoods_supplies_gate(wb)
+    if err:
+        return False, err
+    info = CARGO_TRANSPORT_UPGRADES.get(upgrade_key)
+    if not info:
+        return False, "Unknown Cargo Transport upgrade."
+    transport = wb.setdefault("cargo_transport", {"owned": False, "upgrades": []})
+    if not transport.get("owned"):
+        return False, "Buy a Cargo Transport first."
+    upgrades = transport.setdefault("upgrades", [])
+    if upgrade_key in upgrades:
+        return False, f"Already own {info['name']} (each upgrade once)."
+    cost = int(info["cost"])
+    if int(wb.get("gold", 0)) < cost:
+        return False, f"Need {cost} gc for {info['name']}."
+    wb["gold"] = int(wb["gold"]) - cost
+    upgrades.append(upgrade_key)
+    text = f"Fitted the Cargo Transport with {info['name']} for {cost} gc."
+    add_history(wb, text)
+    return True, text
+
+
+def wildwoods_summary(wb: dict) -> dict:
+    transport = wb.get("cargo_transport") or {}
+    upgrades = [
+        {"key": k, **CARGO_TRANSPORT_UPGRADES[k]}
+        for k in transport.get("upgrades") or []
+        if k in CARGO_TRANSPORT_UPGRADES
+    ]
+    members = _wildwoods_supply_eating_members(wb)
+    return {
+        "supply_points": int(wb.get("supply_points", 0)),
+        "capacity": expansions.supply_carry_capacity(wb),
+        "transport_owned": bool(transport.get("owned")),
+        "transport_upgrades": upgrades,
+        "available_upgrades": [
+            {"key": k, **v}
+            for k, v in CARGO_TRANSPORT_UPGRADES.items()
+            if k not in (transport.get("upgrades") or [])
+        ],
+        "consumption_per_scenario": members * WILDERNESS_SUPPLY_CONSUMPTION_PER_MEMBER,
+    }
+
+
 # --- Spellcaster Magazine, Issue 3: Underworld Favours (a debt economy) -----
 #
 # Markers are tracked on the wizard. Taking an Underworld Loan or claiming a
@@ -4319,23 +4547,43 @@ def _monster_hunting_row(monster: str) -> dict | None:
     return None
 
 
-def record_monster_kill(wb: dict, monster: str) -> tuple[bool, str]:
+MONSTER_HUNTING_RECORD_MODES = ("killed", "no_loot", "loot_only")
+
+
+def record_monster_kill(wb: dict, monster: str, mode: str = "killed") -> tuple[bool, str]:
+    """mode "killed" (default) records the full row: XP plus a claimable
+    prize. "no_loot" is a kill that went unlooted (someone/something else got
+    to the body first, you ran out of time, etc.) — XP only, no prize.
+    "loot_only" is a prize harvested from a monster your warband didn't kill
+    itself — the prize, claimable as normal, but no XP."""
     err = _monster_hunting_gate(wb)
     if err:
         return False, err
+    if mode not in MONSTER_HUNTING_RECORD_MODES:
+        return False, "Unknown recording mode."
     row = _monster_hunting_row(monster)
     if row is None:
         return False, f"Unknown monster: {monster!r}."
-    mh = wb.setdefault("monster_hunting", {"kills": [], "prizes": []})
+    mh = wb.setdefault("monster_hunting", {"kills": [], "prizes": [], "bags_bought": 0})
+    xp = 0 if mode == "loot_only" else row["xp"]
+    if mode == "no_loot":
+        prize = {"name": None, "kind": "none", "target": None, "gold": 0, "known": True}
+    else:
+        prize = row["prize"]
     entry = {
         "id": uuid.uuid4().hex[:8],
         "monster": row["monster"],
-        "xp": row["xp"],
-        "prize": row["prize"],
+        "xp": xp,
+        "prize": prize,
         "claimed": False,
     }
     mh.setdefault("kills", []).append(entry)
-    text = f"Recorded a kill: {row['monster']} ({row['xp']:+d} XP pending)."
+    if mode == "no_loot":
+        text = f"Recorded a kill: {row['monster']} ({xp:+d} XP pending, not looted)."
+    elif mode == "loot_only":
+        text = f"Recorded loot from {row['monster']} (looted, not killed by this warband — no XP)."
+    else:
+        text = f"Recorded a kill: {row['monster']} ({xp:+d} XP pending)."
     add_history(wb, text)
     return True, text
 
@@ -4344,7 +4592,7 @@ def remove_monster_kill(wb: dict, kill_id: str) -> tuple[bool, str]:
     err = _monster_hunting_gate(wb)
     if err:
         return False, err
-    mh = wb.setdefault("monster_hunting", {"kills": [], "prizes": []})
+    mh = wb.setdefault("monster_hunting", {"kills": [], "prizes": [], "bags_bought": 0})
     kills = mh.setdefault("kills", [])
     for i, k in enumerate(kills):
         if k.get("id") == kill_id:
@@ -4365,7 +4613,7 @@ def claim_monster_prize(wb: dict, kill_id: str, holder: str) -> tuple[bool, str]
         return False, err
     if holder not in ("wizard", "apprentice", "sell"):
         return False, "Invalid holder."
-    mh = wb.setdefault("monster_hunting", {"kills": [], "prizes": []})
+    mh = wb.setdefault("monster_hunting", {"kills": [], "prizes": [], "bags_bought": 0})
     kill = next((k for k in mh.get("kills", []) if k.get("id") == kill_id), None)
     if kill is None:
         return False, "Kill not found."
@@ -4425,6 +4673,67 @@ def _component_holder(wb: dict, holder: str) -> dict | None:
     return None
 
 
+def buy_component_bag(wb: dict) -> tuple[bool, str]:
+    """Buys one Spell Component Bag into the warband's shared pool (not yet
+    assigned to anyone — see assign_component_bag()). Capped at
+    SPELL_COMPONENT_BAG_LIMIT bags per warband, per the book."""
+    err = _monster_hunting_gate(wb)
+    if err:
+        return False, err
+    mh = wb.setdefault("monster_hunting", {"kills": [], "prizes": [], "bags_bought": 0})
+    bought = int(mh.get("bags_bought", 0))
+    if bought >= SPELL_COMPONENT_BAG_LIMIT:
+        return False, f"Already own the maximum {SPELL_COMPONENT_BAG_LIMIT} {SPELL_COMPONENT_BAG_NAME}s."
+    if wb.get("gold", 0) < SPELL_COMPONENT_BAG_COST:
+        return False, f"Not enough gold (need {SPELL_COMPONENT_BAG_COST} gc, have {wb.get('gold', 0)} gc)."
+    wb["gold"] = int(wb.get("gold", 0)) - SPELL_COMPONENT_BAG_COST
+    mh["bags_bought"] = bought + 1
+    text = (
+        f"Bought a {SPELL_COMPONENT_BAG_NAME} for {SPELL_COMPONENT_BAG_COST}gc "
+        f"({bought + 1}/{SPELL_COMPONENT_BAG_LIMIT} owned)."
+    )
+    add_history(wb, text)
+    return True, text
+
+
+def assign_component_bag(wb: dict, holder: str, delta: int) -> tuple[bool, str]:
+    """Moves one already-bought bag onto (`delta=1`) or off (`delta=-1`) the
+    wizard or apprentice — wizard + apprentice held bags together can never
+    exceed how many the warband has bought."""
+    err = _monster_hunting_gate(wb)
+    if err:
+        return False, err
+    if delta not in (1, -1):
+        return False, "Invalid adjustment."
+    figure = _component_holder(wb, holder)
+    if not figure:
+        return False, f"No {holder} on this warband."
+    mh = wb.setdefault("monster_hunting", {"kills": [], "prizes": [], "bags_bought": 0})
+    bought = int(mh.get("bags_bought", 0))
+    held = int(figure.get("component_bags_held", 0))
+    if delta > 0:
+        total_held = sum(
+            int((wb.get(h) or {}).get("component_bags_held", 0)) for h in ("wizard", "apprentice")
+        )
+        if total_held >= bought:
+            return False, f"No spare {SPELL_COMPONENT_BAG_NAME}s to assign — buy more first."
+        figure["component_bags_held"] = held + 1
+        text = f"Gave a {SPELL_COMPONENT_BAG_NAME} to the {holder}."
+    else:
+        if held <= 0:
+            return False, f"The {holder} isn't carrying a {SPELL_COMPONENT_BAG_NAME}."
+        new_capacity = COMPONENT_POUCH_CAPACITY + SPELL_COMPONENT_BAG_CAPACITY * (held - 1)
+        if len(figure.get("components") or []) > new_capacity:
+            return False, (
+                f"The {holder} is holding too many components to give up a bag — "
+                "use or discard some first."
+            )
+        figure["component_bags_held"] = held - 1
+        text = f"Took a {SPELL_COMPONENT_BAG_NAME} back from the {holder}."
+    add_history(wb, text)
+    return True, text
+
+
 def use_component(wb: dict, holder: str, component_id: str) -> tuple[bool, str]:
     err = _monster_hunting_gate(wb)
     if err:
@@ -4466,7 +4775,7 @@ def apply_monster_hunting_results(wb: dict) -> tuple[bool, str]:
     err = _monster_hunting_gate(wb)
     if err:
         return False, err
-    mh = wb.setdefault("monster_hunting", {"kills": [], "prizes": []})
+    mh = wb.setdefault("monster_hunting", {"kills": [], "prizes": [], "bags_bought": 0})
     kills = mh.get("kills", [])
     prizes = mh.get("prizes", [])
     if not kills and not prizes:

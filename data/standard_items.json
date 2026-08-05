@@ -188,7 +188,7 @@
   "kind": "simple",
   "source": "Spellcaster Magazine",
   "summary": "Monster Hunting (Issue 5): holds 10 more spell/potion components.",
-  "description": "Monster Hunting (Issue 5): every spellcaster has a free 3-component pouch that doesn't take a slot; this bag costs 5gc and takes one item slot, but holds up to 10 more components in addition to the pouch.",
+  "description": "Monster Hunting (Issue 5): every spellcaster has a free 3-component pouch; each bag costs 5gc (10 per warband, max) and holds 10 more components in addition to the pouch. Bought and assigned to the wizard or apprentice from the Spell & potion components panel, not carried as a normal item slot.",
   "slot_cost": 1
  }
 ]

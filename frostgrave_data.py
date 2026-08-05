@@ -2289,7 +2289,7 @@ SOLDIERS: dict[str, dict] = {
         "armour": 12,
         "will": 3,
         "health": 12,
-        "gear": "—",
+        "gear": "Flint hand weapon",
         "item_slots": 3,
         "notes": (
             "Part of a rangifer \"hide\" (Issue 3). Hate Undead, Antlers, Flint Weapons. 3 "
@@ -2331,16 +2331,15 @@ SOLDIERS: dict[str, dict] = {
         "armour": 10,
         "will": 5,
         "health": 14,
-        "gear": "—",
+        "gear": "Hand weapon",
         "item_slots": 3,
         "notes": (
-            "Legendary Soldier (Issue 4) — the by-wizard-level hiring cap is a deferred "
-            "mechanic; hires here like an ordinary Specialist Soldier. Immune to Critical "
+            "Legendary Soldier (Issue 4). Immune to Critical "
             "Hits; caps damage from one attack at 10; never triggers Explosive Runes; may "
             "reroll grimoire results on the Random Spell Table; sells grimoires for 270gc; "
             "+1 to one Out of Game Casting Roll per game. 3 item slots."
         ),
-        "description": 'A rare, expensive scholar-troop ("Legendary Soldier", Spellcaster Magazine Issue 4). Immune to Critical Hits; caps damage taken from any single attack at 10; never triggers Explosive Runes; may reroll grimoire results on the Random Spell Table; sells grimoires for 270gc; grants +1 to one Out of Game Casting Roll each game. The book\'s wizard-level-gated hiring cap for Legendary Soldiers is a deferred mechanic — this hires uncapped for now, like any Specialist Soldier.',
+        "description": 'A rare, expensive scholar-troop ("Legendary Soldier", Spellcaster Magazine Issue 4). Immune to Critical Hits; caps damage taken from any single attack at 10; never triggers Explosive Runes; may reroll grimoire results on the Random Spell Table; sells grimoires for 270gc; grants +1 to one Out of Game Casting Roll each game.',
     },
     "dire_hound": {
         "name": "Dire Hound",
@@ -2356,11 +2355,10 @@ SOLDIERS: dict[str, dict] = {
         "gear": "—",
         "item_slots": 0,
         "notes": (
-            "Legendary Soldier (Issue 4) — the by-wizard-level hiring cap is a deferred "
-            "mechanic. Animal, Leap (up to 6\" of any move as a leap in any direction), "
-            "Powerful Jaws (+2 damage). Cannot carry items or treasure."
+            "Legendary Soldier (Issue 4). Animal, Leap (up to 6\" of any move as a leap "
+            "in any direction), Powerful Jaws (+2 damage). Cannot carry items or treasure."
         ),
-        "description": 'A massive hunting hound ("Legendary Soldier", Spellcaster Magazine Issue 4). Animal, Leap (up to 6" of any move may be a leap in any direction), Powerful Jaws (+2 damage); cannot carry items or treasure. The Legendary Soldier hiring cap is a deferred mechanic.',
+        "description": 'A massive hunting hound ("Legendary Soldier", Spellcaster Magazine Issue 4). Animal, Leap (up to 6" of any move may be a leap in any direction), Powerful Jaws (+2 damage); cannot carry items or treasure.',
     },
     "elemental_archer": {
         "name": "Elemental Archer",
@@ -2373,15 +2371,15 @@ SOLDIERS: dict[str, dict] = {
         "armour": 11,
         "will": 4,
         "health": 12,
-        "gear": "Bow, up to 3 magic arrows (free)",
+        "gear": "Hand weapon, bow, leather armour, up to 3 magic arrows (free)",
         "item_slots": 2,
         "notes": (
-            "Legendary Soldier (Issue 4) — the by-wizard-level hiring cap is a deferred "
-            "mechanic. All shooting attacks count as magic. May \"steady aim\" (an action, "
-            "can replace the move) for -1 Fight on the target's defence if it shoots the "
-            "same activation. 2 item slots plus up to 3 free magic arrows."
+            "Legendary Soldier (Issue 4). All shooting attacks count as magic. May "
+            "\"steady aim\" (an action, can replace the move) for -1 Fight on the target's "
+            "defence if it shoots the same activation. 2 item slots plus up to 3 free magic "
+            "arrows."
         ),
-        "description": 'An archer whose every shot is magical ("Legendary Soldier", Spellcaster Magazine Issue 4). All shooting attacks count as magic. May "steady aim" — an action that can replace its move — to impose -1 Fight on the target\'s defence if it also shoots that activation. The Legendary Soldier hiring cap is a deferred mechanic.',
+        "description": 'An archer whose every shot is magical ("Legendary Soldier", Spellcaster Magazine Issue 4). All shooting attacks count as magic. May "steady aim" — an action that can replace its move — to impose -1 Fight on the target\'s defence if it also shoots that activation.',
     },
     "graverobber": {
         "name": "Graverobber",
@@ -2394,15 +2392,14 @@ SOLDIERS: dict[str, dict] = {
         "armour": 11,
         "will": 4,
         "health": 14,
-        "gear": "—",
+        "gear": "Hand weapon, two-handed weapon, leather armour",
         "item_slots": 2,
         "notes": (
-            "Legendary Soldier (Issue 4) — the by-wizard-level hiring cap is a deferred "
-            "mechanic. +2 Fight vs. undead, magic attacks vs. undead. Immune to Drain Life "
-            "Force, Reveal Death, Strike Dead. Raise Zombie may add a ghoul instead. +5 vs. "
-            "Trap Numbers. 2 item slots."
+            "Legendary Soldier (Issue 4). +2 Fight vs. undead, magic attacks vs. undead. "
+            "Immune to Drain Life Force, Reveal Death, Strike Dead. Raise Zombie may add a "
+            "ghoul instead. +5 vs. Trap Numbers. 2 item slots."
         ),
-        "description": 'A tomb-raiding specialist ("Legendary Soldier", Spellcaster Magazine Issue 4). +2 Fight against undead, and its attacks count as magic against them. Immune to Drain Life Force, Reveal Death, and Strike Dead. When Raise Zombie targets the warband, a ghoul may be added instead. +5 to resist Trap Numbers. The Legendary Soldier hiring cap is a deferred mechanic.',
+        "description": 'A tomb-raiding specialist ("Legendary Soldier", Spellcaster Magazine Issue 4). +2 Fight against undead, and its attacks count as magic against them. Immune to Drain Life Force, Reveal Death, and Strike Dead. When Raise Zombie targets the warband, a ghoul may be added instead. +5 to resist Trap Numbers.',
     },
     "shadow_walker": {
         "name": "Shadow-Walker",
@@ -2415,14 +2412,14 @@ SOLDIERS: dict[str, dict] = {
         "armour": 10,
         "will": 5,
         "health": 12,
-        "gear": "Poisoned weapons",
+        "gear": "Hand weapon (poisoned)",
         "notes": (
-            "Legendary Soldier (Issue 4) — the by-wizard-level hiring cap is a deferred "
-            "mechanic. Out-of-LoS activation may teleport anywhere else out of enemy line "
-            "of sight (not while carrying treasure); can't be targeted from beyond 12\". "
-            "+2 Fight when shot at. Poisoned weapons; immune to poison."
+            "Legendary Soldier (Issue 4). Out-of-LoS activation may teleport anywhere "
+            "else out of enemy line of sight (not while carrying treasure); can't be "
+            "targeted from beyond 12\". +2 Fight when shot at. Poisoned weapons; immune to "
+            "poison."
         ),
-        "description": 'An assassin who moves between shadows ("Legendary Soldier", Spellcaster Magazine Issue 4). When activating out of enemy line of sight, may instead teleport anywhere else out of enemy line of sight (not while carrying treasure); can\'t be targeted by shooting beyond 12", and gains +2 Fight when shot at. Poisoned weapons; immune to poison. The Legendary Soldier hiring cap is a deferred mechanic.',
+        "description": 'An assassin who moves between shadows ("Legendary Soldier", Spellcaster Magazine Issue 4). When activating out of enemy line of sight, may instead teleport anywhere else out of enemy line of sight (not while carrying treasure); can\'t be targeted by shooting beyond 12", and gains +2 Fight when shot at. Poisoned weapons; immune to poison.',
     },
     "telekinetic": {
         "name": "Telekinetic",
@@ -2435,15 +2432,14 @@ SOLDIERS: dict[str, dict] = {
         "armour": 11,
         "will": 7,
         "health": 12,
-        "gear": "—",
+        "gear": "Hand weapon, leather armour",
         "item_slots": 2,
         "notes": (
-            "Legendary Soldier (Issue 4) — the by-wizard-level hiring cap is a deferred "
-            "mechanic. Once per activation: move a visible treasure token 3\", or move "
-            "itself 4\" (either may replace the move action). Immune to Mind Control. "
-            "2 item slots."
+            "Legendary Soldier (Issue 4). Once per activation: move a visible treasure "
+            "token 3\", or move itself 4\" (either may replace the move action). Immune to "
+            "Mind Control. 2 item slots."
         ),
-        "description": 'A mind-over-matter specialist ("Legendary Soldier", Spellcaster Magazine Issue 4). Once per activation may move a visible treasure token 3", or move itself 4" — either can replace its move action. Immune to Mind Control. The Legendary Soldier hiring cap is a deferred mechanic.',
+        "description": 'A mind-over-matter specialist ("Legendary Soldier", Spellcaster Magazine Issue 4). Once per activation may move a visible treasure token 3", or move itself 4" — either can replace its move action. Immune to Mind Control.',
     },
     "whip_master": {
         "name": "Whip-Master",
@@ -2456,16 +2452,15 @@ SOLDIERS: dict[str, dict] = {
         "armour": 11,
         "will": 3,
         "health": 14,
-        "gear": "Whip",
+        "gear": "Whip, hand weapon, leather armour",
         "item_slots": 2,
         "notes": (
-            "Legendary Soldier (Issue 4) — the by-wizard-level hiring cap is a deferred "
-            "mechanic. Whip: 3\" range shooting attack (max +2); on a hit, target drops "
-            "treasure and needs a Move Roll (TN18) or is reeled in 2\". Falling more than "
-            "3\": a Move Roll (TN16) catches terrain with the whip to soften the landing. "
-            "2 item slots."
+            "Legendary Soldier (Issue 4). Whip: 3\" range shooting attack (max +2); on a "
+            "hit, target drops treasure and needs a Move Roll (TN18) or is reeled in 2\". "
+            "Falling more than 3\": a Move Roll (TN16) catches terrain with the whip to "
+            "soften the landing. 2 item slots."
         ),
-        "description": 'A whip-fighting specialist ("Legendary Soldier", Spellcaster Magazine Issue 4). Its whip makes a 3" range shooting attack (max +2); on a hit the target drops any carried treasure and must pass a Move Roll (TN18) or be reeled in 2". When falling more than 3", a Move Roll (TN16) lets it catch terrain with the whip to soften the landing. The Legendary Soldier hiring cap is a deferred mechanic.',
+        "description": 'A whip-fighting specialist ("Legendary Soldier", Spellcaster Magazine Issue 4). Its whip makes a 3" range shooting attack (max +2); on a hit the target drops any carried treasure and must pass a Move Roll (TN18) or be reeled in 2". When falling more than 3", a Move Roll (TN16) lets it catch terrain with the whip to soften the landing.',
     },
     "monster_hunter": {
         "name": "Monster Hunter",
@@ -2478,16 +2473,15 @@ SOLDIERS: dict[str, dict] = {
         "armour": 11,
         "will": 2,
         "health": 14,
-        "gear": "—",
+        "gear": "Hand weapon, dagger, crossbow, leather armour",
         "item_slots": 2,
         "notes": (
-            "Legendary Soldier (Issue 5) — the by-wizard-level hiring cap is a deferred "
-            "mechanic. +1 Fight/+1 Shoot vs. uncontrolled creatures; with Monster Hunting "
-            "enabled, claims two components per kill instead of one and +5gc extra when "
-            "selling a monster prize. May place a Monster Trap within 8\" of setup. 2 item "
-            "slots."
+            "Legendary Soldier (Issue 5). +1 Fight/+1 Shoot vs. uncontrolled creatures; "
+            "with Monster Hunting enabled, claims two components per kill instead of one "
+            "and +5gc extra when selling a monster prize. May place a Monster Trap within "
+            "8\" of setup. 2 item slots."
         ),
-        "description": 'A hunter specialized against monsters ("Legendary Soldier", Spellcaster Magazine Issue 5). +1 Fight and +1 Shoot against uncontrolled creatures. With the Monster Hunting homerule enabled, claims two components per kill instead of one, and +5gc extra when selling a monster prize. May place a Monster Trap within 8" of table setup (Deadfall, Spring-loaded Spike, or Net). The Legendary Soldier hiring cap is a deferred mechanic.',
+        "description": 'A hunter specialized against monsters ("Legendary Soldier", Spellcaster Magazine Issue 5). +1 Fight and +1 Shoot against uncontrolled creatures. With the Monster Hunting homerule enabled, claims two components per kill instead of one, and +5gc extra when selling a monster prize. May place a Monster Trap within 8" of table setup (Deadfall, Spring-loaded Spike, or Net).',
     },
     "potion_master": {
         "name": "Potion Master",
@@ -2500,16 +2494,15 @@ SOLDIERS: dict[str, dict] = {
         "armour": 11,
         "will": 5,
         "health": 14,
-        "gear": "—",
+        "gear": "Two-handed weapon, leather armour",
         "item_slots": 4,
         "notes": (
-            "Legendary Soldier (Issues 5 & 6, reprinted) — the by-wizard-level hiring cap "
-            "is a deferred mechanic. With Monster Hunting enabled, doubles the wizard's "
-            "Brew Potion component bonus (+2 casting, 50gc off). Drinks potions as a free "
-            "action. 4 item slots (3 potions only). Applies potions to nearby figures. "
-            "Wizard may reroll one potion-table roll per game."
+            "Legendary Soldier (Issues 5 & 6, reprinted). With Monster Hunting enabled, "
+            "doubles the wizard's Brew Potion component bonus (+2 casting, 50gc off). "
+            "Drinks potions as a free action. 4 item slots (3 potions only). Applies "
+            "potions to nearby figures. Wizard may reroll one potion-table roll per game."
         ),
-        "description": 'A potion specialist ("Legendary Soldier", Spellcaster Magazine Issues 5 and 6). With the Monster Hunting homerule enabled, doubles the wizard\'s Brew Potion component bonus (+2 to the Casting Roll, 50gc off ingredient cost). Drinks potions as a free action, and may apply a potion to a nearby figure. Carries 4 item slots, but only for potions (max 3). The wizard may reroll one potion-table roll per game while this soldier is on the roster. The Legendary Soldier hiring cap is a deferred mechanic.',
+        "description": 'A potion specialist ("Legendary Soldier", Spellcaster Magazine Issues 5 and 6). With the Monster Hunting homerule enabled, doubles the wizard\'s Brew Potion component bonus (+2 to the Casting Roll, 50gc off ingredient cost). Drinks potions as a free action, and may apply a potion to a nearby figure. Carries 4 item slots, but only for potions (max 3). The wizard may reroll one potion-table roll per game while this soldier is on the roster.',
     },
     # --- Bestiary creatures hireable as soldiers, previously reference-only ---
     # Added for Ragged Warbands & Random Recruits (The Red King, Chapter Two),
@@ -2601,6 +2594,26 @@ SOLDIERS: dict[str, dict] = {
         "description": 'A minor demon that has joined the warband as a permanent member, rather than the temporary result of casting Summon Demon (see summoned_minor_demon). Demon: immune to poison, all its attacks count as magic, and it may carry treasure tokens but has no item slots.',
     },
 }
+
+# Legendary Soldiers (Spellcaster Magazine, Issue 4): a rare troop category
+# limited by wizard level rather than freely hired. Never more than one of
+# each type at a time; the count only ever grows via level, so a wizard who
+# drops in level keeps any Legendary Soldiers already hired but can't add
+# more until the level is regained (see expansions.max_legendary_soldiers()).
+LEGENDARY_SOLDIER_TYPE_KEYS = frozenset({
+    "bookhound",
+    "dire_hound",
+    "elemental_archer",
+    "graverobber",
+    "shadow_walker",
+    "telekinetic",
+    "whip_master",
+    "monster_hunter",
+    "potion_master",
+})
+LEGENDARY_SOLDIER_BASE_MAX = 1  # every warband may field 1 regardless of level
+LEGENDARY_SOLDIER_LEVEL_STEP = 10  # +1 more per 10 full wizard levels
+LEGENDARY_SOLDIER_MAX_CAP = 8  # hard ceiling, reached at level 70+
 
 # Extra source books whose soldiers / creatures / rules can be toggled on per
 # warband from the "Additional Rules and Homerules" tab. Core Rules content is
@@ -2884,11 +2897,137 @@ UNDERWORLD_PAYOFF_COST = 150
 COMPONENT_POUCH_CAPACITY = 3  # free, doesn't take an item slot
 SPELL_COMPONENT_BAG_NAME = "Spell Component Bag"
 SPELL_COMPONENT_BAG_COST = 5
-SPELL_COMPONENT_BAG_CAPACITY = 10  # in addition to the pouch
+SPELL_COMPONENT_BAG_CAPACITY = 10  # in addition to the pouch, per bag held
+SPELL_COMPONENT_BAG_LIMIT = 10  # most bags a warband may ever buy
 MONSTER_HUNTER_TYPE_KEY = "monster_hunter"
 POTION_MASTER_TYPE_KEY = "potion_master"
 MONSTER_HUNTER_PRIZE_BONUS = 5  # extra gc per sellable prize, with a Monster Hunter on the roster
 MONSTER_HUNTER_COMPONENTS_PER_KILL = 2  # vs. 1 normally
+
+
+# --- The Wildwoods: Supplies & Cargo Transports ------------------------------
+# A wilderness-campaign resource economy: Supply Points (sp) are bought/sold
+# for gold and consumed by the warband after every wilderness scenario, plus
+# an optional Cargo Transport asset (and its upgrades) that raises how much sp
+# the warband can carry. See expansions.supply_carry_capacity() and
+# warband_store's Wildwoods actions.
+SUPPLY_POINT_BUY_RATE = 1  # gc per sp bought
+SUPPLY_POINT_SELL_RATE = 2  # sp sold per gc received
+SUPPLY_CARRY_CAPACITY_BASE = 50  # sp a warband can carry unaided, no transport
+WILDERNESS_SUPPLY_CONSUMPTION_PER_MEMBER = 2  # sp each warband member eats post-scenario
+OUT_OF_GAME_SPELL_SP_COST = 1  # sp per Out of Game casting (reference only; not auto-charged)
+CARGO_TRANSPORT_COST = 100
+CARGO_TRANSPORT_BASE_CAPACITY = 100  # sp capacity of a bare transport
+
+# Cargo Transport upgrades: each type may only be bought once. "capacity" adds
+# to the transport's sp capacity; other effects are reference text only (the
+# app doesn't simulate on-table movement/combat).
+CARGO_TRANSPORT_UPGRADES = {
+    "additional_capacity": {
+        "name": "Additional Cargo Capacity",
+        "cost": 100,
+        "capacity": 50,
+        "effect": "Capacity 150sp instead of 100sp.",
+    },
+    "faster": {
+        "name": "Faster",
+        "cost": 100,
+        "capacity": 0,
+        "effect": "Moves 1.5\" per push instead of 1\".",
+    },
+    "self_propelled": {
+        "name": "Self-propelled",
+        "cost": 800,
+        "capacity": 0,
+        "effect": "Activates like a soldier, moves up to 2\" on its own.",
+    },
+    "climber": {
+        "name": "Climber",
+        "cost": 300,
+        "capacity": 0,
+        "effect": "Can climb over obstacles.",
+    },
+    "built_in_defence": {
+        "name": "Built-in Defence",
+        "cost": 200,
+        "capacity": 0,
+        "effect": "Deals damage on a won combat (normally it never does).",
+    },
+    "elemental_armour": {
+        "name": "Elemental Armour",
+        "cost": 200,
+        "capacity": 0,
+        "effect": "Armour 18 vs. elemental attacks.",
+    },
+    "travel_cauldron": {
+        "name": "Travel Cauldron",
+        "cost": 150,
+        "capacity": 0,
+        "effect": "+1 to Brew Potion (wizard only).",
+    },
+    "enchanters_travel_tools": {
+        "name": "Enchanters Travel Tools",
+        "cost": 250,
+        "capacity": 0,
+        "effect": "+1 to Animate Construct & Embed Enchantment (wizard only).",
+    },
+    "travel_writing_desk": {
+        "name": "Travel Writing Desk",
+        "cost": 100,
+        "capacity": 0,
+        "effect": "+1 to Write Scroll (wizard only).",
+    },
+    "giant_cook_pot": {
+        "name": "Giant Cook Pot",
+        "cost": 40,
+        "capacity": 0,
+        "effect": "+2sp after every game.",
+    },
+    "summoning_salts": {
+        "name": "Summoning Salts",
+        "cost": 125,
+        "capacity": 0,
+        "effect": "Adds an Out of Game (B) option to Summon+Control Demon before a game; "
+        "a natural 1 on either casting uses it up.",
+    },
+    "personal_crystal_ball": {
+        "name": "Personal Crystal Ball",
+        "cost": 150,
+        "capacity": 0,
+        "effect": "+1 to Reveal Secret (wizard only).",
+    },
+    "small_arcane_candle": {
+        "name": "Small Arcane/Summoning Candle",
+        "cost": 75,
+        "capacity": 0,
+        "effect": "+1 to Control Demon cast Out of Game (wizard only).",
+    },
+    "reading_glass": {
+        "name": "Reading Glass / Personal Totem",
+        "cost": 125,
+        "capacity": 0,
+        "effect": "+1 to Summon Demon cast Out of Game (wizard only).",
+    },
+    "silver_mirror": {
+        "name": "Silver Mirror / Travel Shrine / Bag of Bones",
+        "cost": 125,
+        "capacity": 0,
+        "effect": "+1 to Absorb Knowledge / Miraculous Cure-type effects (exact pairing "
+        "uncertain from source extraction; effects and prices are accurate).",
+    },
+    "extra_ammunition": {
+        "name": "Extra Ammunition",
+        "cost": 250,
+        "capacity": 0,
+        "effect": "Adjacent bow/crossbow/javelin shots do +1 damage.",
+    },
+    "amphibious": {
+        "name": "Amphibious",
+        "cost": 250,
+        "capacity": 0,
+        "effect": "Moves through water, usable as a 4-capacity small boat.",
+    },
+}
 
 
 # Core soldier types an Illusionary Soldier may copy Move/Fight/Shoot/Armour/

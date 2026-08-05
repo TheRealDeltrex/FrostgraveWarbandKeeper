@@ -176,6 +176,17 @@
           table.
         </p>
         <label class="checkbox-row" style="margin-top:0.6rem">
+          <input name="wildwoods_supplies_enabled" type="checkbox" {% if hr.wildwoods_supplies_enabled %}checked{% endif %} />
+          Supplies &amp; Cargo Transports (The Wildwoods)
+        </label>
+        <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0">
+          Needs The Wildwoods. Adds a Supply Points (sp) economy for wilderness campaigns and a
+          purchasable Cargo Transport to the Wizard &amp; apprentice card below: buy/sell sp
+          (1gc/sp, 2sp/gc), settle post-scenario consumption, and fit the transport with
+          upgrades. The transport's on-table push/combat rules are shown as reference text —
+          this app doesn't simulate tabletop movement.
+        </p>
+        <label class="checkbox-row" style="margin-top:0.6rem">
           <input name="edition2_soldier_costs" type="checkbox" {% if hr.edition2_soldier_costs %}checked{% endif %} />
           Adjust soldiers to edition 2
         </label>
@@ -579,6 +590,11 @@
               <option value="{{ row.monster }}">{{ row.monster }} ({{ row.source }}, {{ row.xp }} XP)</option>
             {% endfor %}
           </select>
+          <select name="mode" title="Killed &amp; lootable: XP plus a claimable prize. Not looted: XP only, no prize. Looted, not killed: the prize, but no XP.">
+            <option value="killed">Killed &amp; lootable</option>
+            <option value="no_loot">Killed, not looted (XP only)</option>
+            <option value="loot_only">Looted, not killed (loot only)</option>
+          </select>
           <button class="btn secondary small" type="submit">Record a kill</button>
         </form>
         {% if monster_hunting_kills %}
@@ -688,7 +704,6 @@
               <div class="form-row">
                 <label>School</label>
                 <input type="text" value="{{ wiz.school }}" disabled />
-                <span class="muted" style="font-size:0.8rem">Fixed at creation — see Wizard state / Becoming a Vampire below for the game's own ways to change it.</span>
               </div>
               <div class="form-row">
                 <label for="wizard_portrait">Change picture</label>
@@ -1051,14 +1066,34 @@
       <details class="ref-panel">
         <summary>Spell &amp; potion components (Monster Hunting)</summary>
         <p class="muted" style="font-size:0.85rem">
-          A free pouch holds {{ COMPONENT_POUCH_CAPACITY }} components; a {{ SPELL_COMPONENT_BAG_NAME }}
-          in an item slot holds {{ SPELL_COMPONENT_BAG_CAPACITY }} more. Claim components from the kill
-          log below. Using one gives +1 to a matching Casting Roll (or brewing that potion); a badge
-          marks a component with no matching spell/potion in this app's 2E data — still usable, just
-          not tied to anything here.
+          A free pouch holds {{ COMPONENT_POUCH_CAPACITY }} components. Each {{ SPELL_COMPONENT_BAG_NAME }}
+          bought below holds {{ SPELL_COMPONENT_BAG_CAPACITY }} more — assign a bought bag to the wizard or
+          apprentice to grow their capacity. Claim components from the kill log above. Using one gives +1
+          to a matching Casting Roll (or brewing that potion); a badge marks a component with no matching
+          spell/potion in this app's 2E data — still usable, just not tied to anything here.
         </p>
-        {% for holder, figure, components, capacity in [("wizard", wiz, wizard_components, wizard_component_capacity)] + ([("apprentice", ap, apprentice_components, apprentice_component_capacity)] if ap else []) %}
-          <p style="margin:0.5rem 0 0.2rem"><strong>{{ figure.name or holder.capitalize() }}</strong> — {{ components | length }}/{{ capacity }} held</p>
+        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
+          <input type="hidden" name="action" value="buy_component_bag" />
+          <button class="btn secondary small" type="submit" {% if component_bags_bought >= SPELL_COMPONENT_BAG_LIMIT %}disabled{% endif %}>Buy {{ SPELL_COMPONENT_BAG_NAME }} ({{ SPELL_COMPONENT_BAG_COST }}gc)</button>
+          <span class="muted">{{ component_bags_bought }}/{{ SPELL_COMPONENT_BAG_LIMIT }} bought, {{ component_bags_spare }} spare</span>
+        </form>
+        {% for holder, figure, components, capacity, bags_held in [("wizard", wiz, wizard_components, wizard_component_capacity, wizard_bags_held)] + ([("apprentice", ap, apprentice_components, apprentice_component_capacity, apprentice_bags_held)] if ap else []) %}
+          <div class="inline-form" style="margin:0.5rem 0 0.2rem">
+            <strong>{{ figure.name or holder.capitalize() }}</strong> — {{ components | length }}/{{ capacity }} held
+            ({{ bags_held }} bag{{ 's' if bags_held != 1 }})
+            <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
+              <input type="hidden" name="action" value="assign_component_bag" />
+              <input type="hidden" name="holder" value="{{ holder }}" />
+              <input type="hidden" name="delta" value="1" />
+              <button class="btn secondary small" type="submit" {% if component_bags_spare < 1 %}disabled{% endif %} title="Give this figure a bought bag">+ bag</button>
+            </form>
+            <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
+              <input type="hidden" name="action" value="assign_component_bag" />
+              <input type="hidden" name="holder" value="{{ holder }}" />
+              <input type="hidden" name="delta" value="-1" />
+              <button class="btn secondary small" type="submit" {% if bags_held < 1 %}disabled{% endif %} title="Take a bag back from this figure">- bag</button>
+            </form>
+          </div>
           {% if components %}
             <div class="stack-sm">
               {% for c in components %}
@@ -1605,6 +1640,11 @@
       <div class="limit {% if not limits.specialists_ok %}bad{% endif %}">
         Specialists: {{ limits.specialists }} / {{ limits.max_specialists }}
       </div>
+      {% if legendary_soldiers_enabled %}
+        <div class="limit {% if not limits.legendary_soldiers_ok %}bad{% endif %}" title="Spellcaster Magazine, Issue 4: 1 base, +1 per 10 full wizard levels, capped at 8; never more than one of each type.">
+          Legendary Soldiers: {{ limits.legendary_soldiers }} / {{ limits.max_legendary_soldiers }}
+        </div>
+      {% endif %}
       <div class="limit">Treasury: <span class="gold">{{ wb.gold }} gc</span></div>
     </div>
 
@@ -1746,6 +1786,16 @@
                     <details class="actions-cell-persistent">
                       <summary class="muted" style="cursor:pointer;font-size:0.85rem">Info</summary>
                       <p class="muted" style="font-size:0.85rem;margin:0.4rem 0 0;max-width:32rem">{{ s.description }}</p>
+                    </details>
+                  {% endif %}
+                  {% set carried = (s.item_slots or []) | select | list %}
+                  {% if (s.gear and s.gear != '—') or carried %}
+                    <details class="actions-cell-persistent">
+                      <summary class="muted" style="cursor:pointer;font-size:0.85rem">Equipment</summary>
+                      <p class="muted" style="font-size:0.85rem;margin:0.4rem 0 0;max-width:32rem">
+                        {% if s.gear and s.gear != '—' %}{{ s.gear }}{% else %}No starting gear.{% endif %}
+                        {% if carried %}<br />Carrying: {{ carried|join(', ') }}{% endif %}
+                      </p>
                     </details>
                   {% endif %}
                   <div class="stack-sm">
@@ -2082,7 +2132,10 @@
               {% set within_soldiers = limits.soldiers < limits.max_soldiers %}
               {% set within_specialists = c.category != 'specialist' or limits.specialists < limits.max_specialists %}
               {% set companion_blocked = c.requires_spell == 'Animal Companion' and has_animal_companion %}
-              {% set can_hire = can_afford and within_soldiers and within_specialists and not companion_blocked %}
+              {% set is_legendary = c.key in LEGENDARY_SOLDIER_TYPE_KEYS %}
+              {% set legendary_duplicate = is_legendary and c.key in legendary_type_keys_held %}
+              {% set legendary_capped = is_legendary and not legendary_duplicate and limits.legendary_soldiers >= limits.max_legendary_soldiers %}
+              {% set can_hire = can_afford and within_soldiers and within_specialists and not companion_blocked and not legendary_duplicate and not legendary_capped %}
               {% set ns = namespace(hire_reason='') %}
               {% if not can_afford %}
                 {% set ns.hire_reason = "Needs " ~ c.cost ~ " gc (have " ~ wb.gold ~ ")." %}
@@ -2090,6 +2143,10 @@
                 {% set ns.hire_reason = "Soldier limit reached (" ~ limits.max_soldiers ~ ")." %}
               {% elif not within_specialists %}
                 {% set ns.hire_reason = "Specialist limit reached (" ~ limits.max_specialists ~ ")." %}
+              {% elif legendary_duplicate %}
+                {% set ns.hire_reason = "Only one " ~ c.name ~ " may be on the roster at a time." %}
+              {% elif legendary_capped %}
+                {% set ns.hire_reason = "Legendary Soldier limit reached (" ~ limits.max_legendary_soldiers ~ " at wizard level " ~ limits.level ~ ") — level up to hire more." %}
               {% elif companion_blocked %}
                 {% set ns.hire_reason = "You may only have one Animal Companion at a time — hire an apprentice to field a second (one per spellcaster)." if animal_companion_limit == 1 else "You may only have " ~ animal_companion_limit ~ " Animal Companions at a time (one per spellcaster)." %}
               {% endif %}
@@ -2364,6 +2421,89 @@
       {% endif %}
     {% endif %}
   </details>
+
+  {% if wildwoods_enabled %}
+  {# ---- The Wildwoods: Supplies & Cargo Transports ---- #}
+  <details class="card" id="wildwoods-supplies">
+    <summary><span class="card-title">Supplies &amp; Cargo Transports <span class="gold">{{ wildwoods.supply_points }} / {{ wildwoods.capacity }} sp</span></span></summary>
+    <div class="grid-2">
+      <div>
+        <h3>Supply Points</h3>
+        <p class="muted">
+          Buy at {{ SUPPLY_POINT_BUY_RATE }}gc/sp, sell at {{ SUPPLY_POINT_SELL_RATE }}sp/gc. The
+          warband eats {{ wildwoods.consumption_per_scenario }}sp after every wilderness
+          scenario ({{ WILDERNESS_SUPPLY_CONSUMPTION_PER_MEMBER }}sp/member). Carry capacity
+          {{ wildwoods.capacity }}sp{% if wildwoods.transport_owned %} (with Cargo Transport){% else %} (no transport){% endif %}.
+        </p>
+        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="form-row inline">
+          <input type="hidden" name="action" value="buy_supply_points" />
+          <div>
+            <label for="sp_buy_amount">Buy sp</label>
+            <input id="sp_buy_amount" name="amount" type="number" min="1" value="10" />
+          </div>
+          <div>
+            <label>&nbsp;</label>
+            <button class="btn secondary small" type="submit">Buy</button>
+          </div>
+        </form>
+        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="form-row inline" style="margin-top:0.4rem">
+          <input type="hidden" name="action" value="sell_supply_points" />
+          <div>
+            <label for="sp_sell_amount">Sell sp</label>
+            <input id="sp_sell_amount" name="amount" type="number" min="1" value="10" />
+          </div>
+          <div>
+            <label>&nbsp;</label>
+            <button class="btn small" type="submit">Sell</button>
+          </div>
+        </form>
+        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:0.6rem">
+          <input type="hidden" name="action" value="consume_wilderness_supplies" />
+          <button class="btn small" type="submit">Settle post-scenario consumption</button>
+        </form>
+      </div>
+      <div>
+        <h3>Cargo Transport</h3>
+        {% if not wildwoods.transport_owned %}
+          <p class="muted">
+            {{ CARGO_TRANSPORT_BASE_CAPACITY }}sp capacity, max one per warband. Pushable by an
+            adjacent figure on the table (~2"×4" footprint) — see the Lexicon for the full
+            push/combat rules; this app tracks ownership, sp capacity, and upgrades only.
+          </p>
+          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
+            <input type="hidden" name="action" value="buy_cargo_transport" />
+            <button class="btn secondary small" type="submit" {% if wb.gold < CARGO_TRANSPORT_COST %}disabled{% endif %}>Buy a Cargo Transport ({{ CARGO_TRANSPORT_COST }}gc)</button>
+          </form>
+        {% else %}
+          {% if wildwoods.transport_upgrades %}
+            <p class="muted">Fitted with: {{ wildwoods.transport_upgrades|map(attribute='name')|join(', ') }}.</p>
+          {% endif %}
+          {% if wildwoods.available_upgrades %}
+            <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="form-row inline">
+              <input type="hidden" name="action" value="buy_cargo_transport_upgrade" />
+              <div>
+                <label for="cargo_upgrade_key">Add upgrade</label>
+                <select id="cargo_upgrade_key" name="upgrade_key">
+                  {% for u in wildwoods.available_upgrades %}
+                    <option value="{{ u.key }}">{{ u.name }} ({{ u.cost }}gc) — {{ u.effect }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div>
+                <label>&nbsp;</label>
+                <button class="btn secondary small" type="submit">Buy</button>
+              </div>
+            </form>
+          {% endif %}
+          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:0.4rem" onsubmit="return confirm('Sell/scrap the Cargo Transport? Its upgrades are lost.');">
+            <input type="hidden" name="action" value="sell_cargo_transport" />
+            <button class="btn danger small" type="submit">Sell/scrap transport</button>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+  </details>
+  {% endif %}
 
   {# ---- Treasury & vault ---- #}
   <details class="card" id="treasury-vault">

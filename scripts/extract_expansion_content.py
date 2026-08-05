@@ -505,13 +505,13 @@ def build_expansion_rules_2(doc: str) -> dict:
         ),
     )
 
-    # Supply Points economy + the Cargo Transport unit are deferred mechanics
-    # (see the implementation plan) — stored as detailed reference text only.
+    # Supply Points economy + the Cargo Transport unit — see
+    # warband_store.py's "The Wildwoods: Supplies & Cargo Transports" section.
     ch = section(doc, "wild-supplies")
     supply_notes = notes(ch)
     add(
         "The Wildwoods",
-        "Supplies & Cargo Transports (deferred mechanic — reference only)",
+        "Supplies & Cargo Transports (implemented)",
         "",
         rows=(
             [("Supply Points (sp)", supply_notes[0])] if len(supply_notes) > 0 else []
