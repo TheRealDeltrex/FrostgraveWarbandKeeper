@@ -8,7 +8,8 @@ import warband_store
 from frostgrave_data import (
     MONSTER_HUNTER_COMPONENTS_PER_KILL,
     MONSTER_HUNTER_PRIZE_BONUS,
-    SPELL_COMPONENT_BAG_NAME,
+    SPELL_COMPONENT_BAG_COST,
+    SPELL_COMPONENT_BAG_LIMIT,
 )
 
 
@@ -145,7 +146,10 @@ def test_pouch_caps_at_three_and_bag_raises_it_to_thirteen(fresh_warband):
     assert not ok
     assert "can't hold" in msg.lower()
 
-    wb["wizard"]["item_slots"] = [SPELL_COMPONENT_BAG_NAME]
+    ok, msg = warband_store.buy_component_bag(wb)
+    assert ok, msg
+    ok, msg = warband_store.assign_component_bag(wb, "wizard", 1)
+    assert ok, msg
     assert expansions.component_capacity(wb, wb["wizard"]) == 13
     ok, msg = warband_store.claim_monster_prize(wb, kill_id, "wizard")
     assert ok, msg
@@ -212,3 +216,95 @@ def test_remove_monster_kill(fresh_warband):
     ok, msg = warband_store.remove_monster_kill(wb, kill_id)
     assert ok, msg
     assert wb["monster_hunting"]["kills"] == []
+
+
+def test_no_loot_kill_gives_xp_but_no_prize(fresh_warband):
+    wb = fresh_warband
+    _enable(wb)
+    ok, msg = warband_store.record_monster_kill(wb, "Wraith", mode="no_loot")
+    assert ok, msg
+    kill = wb["monster_hunting"]["kills"][-1]
+    assert kill["xp"] == 8
+    assert kill["prize"]["kind"] == "none"
+    assert not kill["claimed"]
+
+
+def test_loot_only_kill_gives_prize_but_no_xp(fresh_warband):
+    wb = fresh_warband
+    _enable(wb)
+    ok, msg = warband_store.record_monster_kill(wb, "Wraith", mode="loot_only")
+    assert ok, msg
+    kill = wb["monster_hunting"]["kills"][-1]
+    assert kill["xp"] == 0
+    assert kill["prize"]["kind"] == "spell"
+    kill_id = kill["id"]
+    ok, msg = warband_store.claim_monster_prize(wb, kill_id, "wizard")
+    assert ok, msg
+    assert len(wb["wizard"]["components"]) == 1
+
+
+def test_record_monster_kill_rejects_unknown_mode(fresh_warband):
+    wb = fresh_warband
+    _enable(wb)
+    ok, msg = warband_store.record_monster_kill(wb, "Boar", mode="bogus")
+    assert not ok
+
+
+def test_buy_component_bag_costs_gold_and_caps_at_the_limit(fresh_warband):
+    wb = fresh_warband
+    _enable(wb)
+    before_gold = wb["gold"]
+    ok, msg = warband_store.buy_component_bag(wb)
+    assert ok, msg
+    assert wb["gold"] == before_gold - SPELL_COMPONENT_BAG_COST
+    assert wb["monster_hunting"]["bags_bought"] == 1
+
+    for _ in range(SPELL_COMPONENT_BAG_LIMIT - 1):
+        ok, msg = warband_store.buy_component_bag(wb)
+        assert ok, msg
+    assert wb["monster_hunting"]["bags_bought"] == SPELL_COMPONENT_BAG_LIMIT
+
+    ok, msg = warband_store.buy_component_bag(wb)
+    assert not ok
+    assert "maximum" in msg.lower()
+
+
+def test_assign_component_bag_shares_the_bought_pool(fresh_warband):
+    wb = fresh_warband
+    _enable(wb)
+    wb["apprentice"] = warband_store.empty_wizard("Ap")
+    warband_store.buy_component_bag(wb)
+
+    ok, msg = warband_store.assign_component_bag(wb, "wizard", 1)
+    assert ok, msg
+    assert wb["wizard"]["component_bags_held"] == 1
+    assert expansions.component_capacity(wb, wb["wizard"]) == 13
+
+    # No spare bags left for the apprentice.
+    ok, msg = warband_store.assign_component_bag(wb, "apprentice", 1)
+    assert not ok
+    assert "spare" in msg.lower()
+
+    ok, msg = warband_store.assign_component_bag(wb, "wizard", -1)
+    assert ok, msg
+    assert wb["wizard"]["component_bags_held"] == 0
+    ok, msg = warband_store.assign_component_bag(wb, "apprentice", 1)
+    assert ok, msg
+    assert wb["apprentice"]["component_bags_held"] == 1
+
+
+def test_cannot_unassign_a_bag_that_would_overflow_held_components(fresh_warband):
+    wb = fresh_warband
+    _enable(wb)
+    warband_store.buy_component_bag(wb)
+    warband_store.assign_component_bag(wb, "wizard", 1)
+    for _ in range(5):
+        warband_store.record_monster_kill(wb, "Wraith")
+        kill_id = [k for k in wb["monster_hunting"]["kills"] if not k["claimed"]][-1]["id"]
+        ok, msg = warband_store.claim_monster_prize(wb, kill_id, "wizard")
+        assert ok, msg
+    assert len(wb["wizard"]["components"]) == 5
+
+    ok, msg = warband_store.assign_component_bag(wb, "wizard", -1)
+    assert not ok
+    assert "too many components" in msg.lower()

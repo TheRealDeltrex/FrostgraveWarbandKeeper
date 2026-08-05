@@ -42,6 +42,8 @@ from frostgrave_data import (
     CAPTAIN_MODE_OPTIONS,
     CAPTAIN_TRICK_BY_ID,
     CAPTAIN_TRICKS,
+    CARGO_TRANSPORT_BASE_CAPACITY,
+    CARGO_TRANSPORT_COST,
     COMPONENT_POUCH_CAPACITY,
     FIN_DALKA_BASE_SELL,
     FIN_DALKA_DECIPHER_COST,
@@ -51,6 +53,7 @@ from frostgrave_data import (
     HORSE_MOUNT_STAT_DELTA,
     KNIGHTLY_ORDER_ELIGIBLE,
     KNIGHTLY_ORDERS,
+    LEGENDARY_SOLDIER_TYPE_KEYS,
     LEVEL_UP_OPTIONS,
     LEVELUP_STATS,
     MAX_SOLDIERS,
@@ -77,15 +80,20 @@ from frostgrave_data import (
     SOURCE_BOOK_OPTIONS,
     SOURCE_BOOKS,
     SPELL_COMPONENT_BAG_CAPACITY,
+    SPELL_COMPONENT_BAG_COST,
+    SPELL_COMPONENT_BAG_LIMIT,
     SPELL_COMPONENT_BAG_NAME,
     SPELLS,
     STANDARD_CONSTRUCT_TYPE_KEYS,
     STARTING_GOLD,
     STARTING_SPELL_COUNT,
+    SUPPLY_POINT_BUY_RATE,
+    SUPPLY_POINT_SELL_RATE,
     TEMPORARY_MEMBER_LIMIT,
     UNDERWORLD_LOAN_MAX,
     UNDERWORLD_LOAN_MIN,
     UNDERWORLD_PAYOFF_COST,
+    WILDERNESS_SUPPLY_CONSUMPTION_PER_MEMBER,
     XP_PER_LEVEL,
     all_spells_flat,
     animal_companion_type_keys,
@@ -157,14 +165,20 @@ from warband_store import (
     apply_monster_hunting_results,
     apply_portrait,
     apply_soldier_level_up,
+    assign_component_bag,
     base_summary,
     become_vampire,
     break_wizard_pact,
     buy_base_resource,
+    buy_cargo_transport,
+    buy_cargo_transport_upgrade,
+    buy_component_bag,
     buy_horse,
+    buy_supply_points,
     captain_effective_stats,
     claim_free_underworld_favor,
     claim_monster_prize,
+    consume_wilderness_supplies,
     create_warband,
     delete_warband,
     discard_component,
@@ -226,9 +240,11 @@ from warband_store import (
     roll_random_recruits,
     roll_underworld_debt_call,
     save_warband,
+    sell_cargo_transport,
     sell_fin_dalka_grimoire,
     sell_or_release_horse,
     sell_or_remove_base_resource,
+    sell_supply_points,
     set_animal_feature,
     set_base_location,
     set_giant_blooded_pending,
@@ -243,6 +259,7 @@ from warband_store import (
     use_component,
     warband_dir,
     warband_limits,
+    wildwoods_summary,
     wizard_effective_stats,
 )
 
@@ -335,6 +352,7 @@ app.jinja_env.globals.update(
     SOLDIER_COMPANION_BY_TYPE_KEY=SOLDIER_COMPANION_BY_TYPE_KEY,
     KNIGHTLY_ORDERS=KNIGHTLY_ORDERS,
     KNIGHTLY_ORDER_ELIGIBLE=KNIGHTLY_ORDER_ELIGIBLE,
+    LEGENDARY_SOLDIER_TYPE_KEYS=LEGENDARY_SOLDIER_TYPE_KEYS,
     ILLUSION_SOURCE_CHOICES=illusion_source_choices(),
     ANIMAL_COMPANION_TYPE_KEYS=animal_companion_type_keys(),
     CONSTRUCT_TYPE_KEYS=construct_type_keys(),
@@ -343,6 +361,11 @@ app.jinja_env.globals.update(
     HORSE_COST=HORSE_COST,
     HORSE_MOUNT_STAT_DELTA=HORSE_MOUNT_STAT_DELTA,
     RIDERLESS_HORSE_STATS=RIDERLESS_HORSE_STATS,
+    SUPPLY_POINT_BUY_RATE=SUPPLY_POINT_BUY_RATE,
+    SUPPLY_POINT_SELL_RATE=SUPPLY_POINT_SELL_RATE,
+    WILDERNESS_SUPPLY_CONSUMPTION_PER_MEMBER=WILDERNESS_SUPPLY_CONSUMPTION_PER_MEMBER,
+    CARGO_TRANSPORT_COST=CARGO_TRANSPORT_COST,
+    CARGO_TRANSPORT_BASE_CAPACITY=CARGO_TRANSPORT_BASE_CAPACITY,
     FIN_DALKA_DECIPHER_COST=FIN_DALKA_DECIPHER_COST,
     FIN_DALKA_BASE_SELL=FIN_DALKA_BASE_SELL,
     FIN_DALKA_SELL_PER_SPELL=FIN_DALKA_SELL_PER_SPELL,
@@ -354,6 +377,8 @@ app.jinja_env.globals.update(
     SPELL_COMPONENT_BAG_NAME=SPELL_COMPONENT_BAG_NAME,
     COMPONENT_POUCH_CAPACITY=COMPONENT_POUCH_CAPACITY,
     SPELL_COMPONENT_BAG_CAPACITY=SPELL_COMPONENT_BAG_CAPACITY,
+    SPELL_COMPONENT_BAG_COST=SPELL_COMPONENT_BAG_COST,
+    SPELL_COMPONENT_BAG_LIMIT=SPELL_COMPONENT_BAG_LIMIT,
     LEVELUP_STATS=LEVELUP_STATS,
     level_from_xp=level_from_xp,
     captain_effective_stats=captain_effective_stats,
@@ -811,6 +836,15 @@ def warband_view(warband_id: str) -> str:
         (s for s in all_soldiers if s.get("giant_blooded")), None
     )
     giant_blooded_pending = bool(wb.get("giant_blooded_pending"))
+    # Legendary Soldiers (Spellcaster Magazine, Issue 4): only worth showing the
+    # limit bar / hire-cap messaging when that book is actually on for this
+    # warband — see expansions.max_legendary_soldiers() for the cap itself.
+    legendary_soldiers_enabled = "Spellcaster Magazine" in wb_sources
+    legendary_type_keys_held = {
+        s.get("type_key")
+        for s in all_soldiers
+        if s.get("status") != "dead" and s.get("type_key") in LEGENDARY_SOLDIER_TYPE_KEYS
+    }
     # The Red King's Ragged Warbands & Random Recruits: a single "Fill
     # roster" control (see roll_random_recruits), same idiom as Giant-Blooded
     # above — a warband-level toggle gates one shared control rather than a
@@ -865,17 +899,27 @@ def warband_view(warband_id: str) -> str:
     monster_hunting_enabled = "Spellcaster Magazine" in wb_sources and bool(
         (wb.get("homerules") or {}).get("monster_hunting_enabled")
     )
-    monster_hunting = wb.get("monster_hunting") or {"kills": [], "prizes": []}
+    monster_hunting = wb.get("monster_hunting") or {"kills": [], "prizes": [], "bags_bought": 0}
     monster_hunter_active = expansions.monster_hunter_active(wb)
     monster_hunting_table = sorted(load_monster_hunting(), key=lambda r: r["monster"])
     monster_hunting_pending_xp = sum(int(k.get("xp", 0)) for k in monster_hunting.get("kills") or [])
     monster_hunting_pending_gold = sum(int(p.get("gold", 0)) for p in monster_hunting.get("prizes") or [])
     wizard_components = (wb.get("wizard") or {}).get("components") or []
     wizard_component_capacity = expansions.component_capacity(wb, wb.get("wizard") or {})
+    wizard_bags_held = int((wb.get("wizard") or {}).get("component_bags_held", 0))
     apprentice_components = (wb.get("apprentice") or {}).get("components") or []
     apprentice_component_capacity = (
         expansions.component_capacity(wb, wb["apprentice"]) if wb.get("apprentice") else 0
     )
+    apprentice_bags_held = int((wb.get("apprentice") or {}).get("component_bags_held", 0))
+    component_bags_bought = int(monster_hunting.get("bags_bought", 0))
+    component_bags_spare = component_bags_bought - wizard_bags_held - apprentice_bags_held
+    # The Wildwoods' Supply Points (sp) economy + optional Cargo Transport for
+    # wilderness campaigns — see warband_store.wildwoods_summary().
+    wildwoods_enabled = "The Wildwoods" in wb_sources and bool(
+        (wb.get("homerules") or {}).get("wildwoods_supplies_enabled")
+    )
+    wildwoods = wildwoods_summary(wb)
     return render_template(
         "warband_view.html",
         wb=wb,
@@ -889,6 +933,8 @@ def warband_view(warband_id: str) -> str:
         has_animal_companion=has_animal_companion(wb),
         animal_companion_limit=animal_companion_limit(wb),
         giant_blooded_enabled=giant_blooded_enabled,
+        legendary_soldiers_enabled=legendary_soldiers_enabled,
+        legendary_type_keys_held=legendary_type_keys_held,
         giant_blooded_soldier=giant_blooded_soldier,
         giant_blooded_pending=giant_blooded_pending,
         ragged_warbands_enabled=ragged_warbands_enabled,
@@ -911,8 +957,14 @@ def warband_view(warband_id: str) -> str:
         monster_hunter_active=monster_hunter_active,
         wizard_components=wizard_components,
         wizard_component_capacity=wizard_component_capacity,
+        wizard_bags_held=wizard_bags_held,
         apprentice_components=apprentice_components,
         apprentice_component_capacity=apprentice_component_capacity,
+        apprentice_bags_held=apprentice_bags_held,
+        component_bags_bought=component_bags_bought,
+        component_bags_spare=component_bags_spare,
+        wildwoods_enabled=wildwoods_enabled,
+        wildwoods=wildwoods,
         schools=SCHOOLS,
         learnable=learnable,
         pending_levels=limits["pending_levels"],
@@ -1193,6 +1245,44 @@ def _act_dismount_horse(wb: dict) -> tuple[bool, str]:
     return dismount_horse(wb)
 
 
+@register_action("buy_supply_points")
+def _act_buy_supply_points(wb: dict) -> tuple[bool, str]:
+    try:
+        amount = int(request.form.get("amount") or 0)
+    except ValueError:
+        return False, "Invalid amount."
+    return buy_supply_points(wb, amount)
+
+
+@register_action("sell_supply_points")
+def _act_sell_supply_points(wb: dict) -> tuple[bool, str]:
+    try:
+        amount = int(request.form.get("amount") or 0)
+    except ValueError:
+        return False, "Invalid amount."
+    return sell_supply_points(wb, amount)
+
+
+@register_action("consume_wilderness_supplies")
+def _act_consume_wilderness_supplies(wb: dict) -> tuple[bool, str]:
+    return consume_wilderness_supplies(wb)
+
+
+@register_action("buy_cargo_transport")
+def _act_buy_cargo_transport(wb: dict) -> tuple[bool, str]:
+    return buy_cargo_transport(wb)
+
+
+@register_action("sell_cargo_transport")
+def _act_sell_cargo_transport(wb: dict) -> tuple[bool, str]:
+    return sell_cargo_transport(wb)
+
+
+@register_action("buy_cargo_transport_upgrade")
+def _act_buy_cargo_transport_upgrade(wb: dict) -> tuple[bool, str]:
+    return buy_cargo_transport_upgrade(wb, request.form.get("upgrade_key") or "")
+
+
 @register_action("take_underworld_loan")
 def _act_take_underworld_loan(wb: dict) -> tuple[bool, str]:
     try:
@@ -1233,7 +1323,9 @@ def _act_roll_underworld_debt_call(wb: dict) -> tuple[bool, str]:
 
 @register_action("record_monster_kill")
 def _act_record_monster_kill(wb: dict) -> tuple[bool, str]:
-    return record_monster_kill(wb, request.form.get("monster") or "")
+    return record_monster_kill(
+        wb, request.form.get("monster") or "", request.form.get("mode") or "killed"
+    )
 
 
 @register_action("remove_monster_kill")
@@ -1259,6 +1351,20 @@ def _act_discard_component(wb: dict) -> tuple[bool, str]:
 @register_action("apply_monster_hunting_results")
 def _act_apply_monster_hunting_results(wb: dict) -> tuple[bool, str]:
     return apply_monster_hunting_results(wb)
+
+
+@register_action("buy_component_bag")
+def _act_buy_component_bag(wb: dict) -> tuple[bool, str]:
+    return buy_component_bag(wb)
+
+
+@register_action("assign_component_bag")
+def _act_assign_component_bag(wb: dict) -> tuple[bool, str]:
+    try:
+        delta = int(request.form.get("delta") or 0)
+    except ValueError:
+        delta = 0
+    return assign_component_bag(wb, request.form.get("holder") or "", delta)
 
 
 @register_action("advance_beastcrafter")
