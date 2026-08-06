@@ -446,11 +446,19 @@ def demon_hunter_surcharge(wb: dict) -> int:
     return surcharge
 
 
-def soldier_cost(wb: dict, info: dict, type_key: str = "") -> int:
+def soldier_cost(wb: dict, info: dict, type_key: str = "", include_discount: bool = True) -> int:
     """What hiring this soldier type actually costs this warband, after any
     Edition 2 cost adjustment, the Demon Hunter's variable surcharge, the
     Beastcrafter surcharge, and any base-resource discount. Never negative,
-    and free soldiers (thug, thief, summoned members) stay free."""
+    and free soldiers (thug, thief, summoned members) stay free.
+
+    include_discount=False drops soldier_discount() (Carrier Pigeons: -10gc)
+    from the total. Carrier Pigeons cuts the cost of *hiring*, not a standing
+    price break on the roster — callers pricing an already-hired soldier
+    (roster display, refund-on-dismiss, cost-estimate totals) pass False so
+    buying Carrier Pigeons after the fact doesn't retroactively cheapen
+    soldiers already paid for. New-hire pricing (the hireable list, the
+    actual hire transaction) keeps the default True."""
     base = int(info.get("cost", 0))
     if base <= 0:
         return 0
@@ -458,7 +466,8 @@ def soldier_cost(wb: dict, info: dict, type_key: str = "") -> int:
         base = EDITION_2_SOLDIER_COSTS[type_key]
     if type_key == "demon_hunter":
         base += demon_hunter_surcharge(wb)
-    return max(0, base + soldier_surcharge(wb) - soldier_discount(wb))
+    discount = soldier_discount(wb) if include_discount else 0
+    return max(0, base + soldier_surcharge(wb) - discount)
 
 
 def max_soldiers(wb: dict) -> int:
@@ -769,8 +778,6 @@ def can_enter_state(wb: dict, kind: str, sources: set[str]) -> tuple[bool, str]:
         return True, ""
     if kind not in WIZARD_STATES:
         return False, "Unknown wizard state."
-    if kind == STATE_VAMPIRE:
-        return False, "Becoming a Vampire has its own action (Blood Legacy) — pick it from the Wizard state panel."
     book = STATE_SOURCE[kind]
     if book not in sources:
         return False, f"{STATE_LABELS[kind]} comes from {book}; switch that book on first."
@@ -822,6 +829,66 @@ def pact_break_penalty(wb: dict) -> dict:
     """Breaking a pact costs 1 level and 1 Health per Sacrifice held."""
     n = sum(1 for p in pact_tiers(wb) if p.get("sacrifice"))
     return {"levels": n, "health": n}
+
+
+# --- Vault-gated items (bought firearms, found artefacts) -------------------
+
+
+def equipped_item_holders(wb: dict) -> dict[str, list[str]]:
+    """Maps each equipped item name (lowercased, stripped) to the display
+    name of every figure — wizard, apprentice, captain, each soldier —
+    currently holding a copy in an item slot, one list entry per slot
+    occupied. Used to gate the item-slot picker to however many of that name
+    the warband actually owns (a vault_items count) and to tell the player
+    who already holds the copies that are spoken for."""
+    holders: dict[str, list[str]] = {}
+    figures: list[tuple[str, dict]] = []
+    wiz = wb.get("wizard")
+    if wiz:
+        figures.append((wiz.get("name") or "the wizard", wiz))
+    ap = wb.get("apprentice")
+    if ap:
+        figures.append((ap.get("name") or "the apprentice", ap))
+    cap = wb.get("captain")
+    if cap:
+        figures.append((cap.get("name") or "the captain", cap))
+    for s in wb.get("soldiers") or []:
+        figures.append((s.get("name") or "a soldier", s))
+    for label, figure in figures:
+        for slot in (figure or {}).get("item_slots") or []:
+            name = (slot or "").strip()
+            if not name:
+                continue
+            holders.setdefault(name.lower(), []).append(label)
+    return holders
+
+
+# --- Black Powder Firearms upgrades (Spellcaster Magazine, Issue 1) ---------
+#
+# An upgrade (Double-barrelled, Axe-gun, Superior Craftsmanship, Silver
+# Bullets) is commissioned onto an already-owned Pistol/Musket/Blunderbuss at
+# the Treasury, Vault and Workshop card. Rather than living alongside the
+# base gun in a second item slot, commissioning one consumes the base
+# firearm from the vault and replaces it with a combined item — "Pistol" +
+# Double-barrelled becomes "Pistol (Double-barrelled)" — so an upgraded
+# firearm is a single vault-gated item like any other.
+
+FIREARM_BASE_NAMES = ("Pistol", "Musket", "Blunderbuss")
+
+_FIREARM_NAME_RE = re.compile(r"^(Pistol|Musket|Blunderbuss)(?: \((.+)\))?$")
+
+
+def parse_firearm_name(name: str) -> tuple[str, list[str]] | None:
+    """Splits a firearm's vault/item-slot name into (base, upgrades already
+    applied), or None if `name` isn't a Pistol/Musket/Blunderbuss at all —
+    e.g. "Pistol (Double-barrelled, Silver Bullets)" -> ("Pistol",
+    ["Double-barrelled", "Silver Bullets"])."""
+    m = _FIREARM_NAME_RE.match((name or "").strip())
+    if not m:
+        return None
+    base = m.group(1)
+    upgrades = [u.strip() for u in m.group(2).split(",")] if m.group(2) else []
+    return base, upgrades
 
 
 # --- Spellcaster Magazine, Issue 5: Monster Hunting --------------------------

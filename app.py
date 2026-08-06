@@ -176,6 +176,7 @@ from warband_store import (
     buy_cargo_transport_upgrade,
     buy_component_bag,
     buy_horse,
+    buy_standard_item,
     buy_supply_points,
     captain_effective_stats,
     claim_free_underworld_favor,
@@ -257,7 +258,9 @@ from warband_store import (
     soldier_from_book_enabled,
     spend_alt_xp,
     take_underworld_loan,
+    unlock_fin_dalka_spell,
     update_homerules,
+    upgrade_firearm,
     use_component,
     warband_dir,
     warband_limits,
@@ -869,11 +872,51 @@ def warband_view(warband_id: str) -> str:
     learnable = enrich_spells_with_descriptions(learnable)
     vault_names = []
     seen = set()
+    vault_owned_counts: dict[str, int] = {}
+    vault_display_names: dict[str, str] = {}
     for it in wb.get("vault_items") or []:
         name = ((it.get("name") if isinstance(it, dict) else str(it)) or "").strip()
-        if name and name not in seen:
+        if not name:
+            continue
+        if name not in seen:
             seen.add(name)
             vault_names.append(name)
+        key = name.lower()
+        vault_owned_counts[key] = vault_owned_counts.get(key, 0) + 1
+        vault_display_names.setdefault(key, name)
+    # How many of each vault-recorded item (bought firearms, found artefacts,
+    # any other loot) are still free to equip vs. already spoken for — the
+    # item-slot picker (_item_slots.html) uses this to grey out options the
+    # warband doesn't have a spare copy of, with a tooltip naming who holds
+    # the rest. See expansions.equipped_item_holders().
+    equipped_item_holders = expansions.equipped_item_holders(wb)
+    gated_items = {
+        key: {
+            "name": vault_display_names[key],
+            "owned": owned,
+            "holders": equipped_item_holders.get(key, []),
+            "available": owned - len(equipped_item_holders.get(key, [])),
+        }
+        for key, owned in vault_owned_counts.items()
+    }
+    # Owned firearms (base or already partway upgraded) that still have at
+    # least one compatible, not-yet-applied upgrade — drives the "Upgrade a
+    # firearm" table on the Treasury, Vault and Workshop card. See
+    # warband_store.upgrade_firearm(): commissioning one consumes the vault
+    # copy of `name` and adds the combined item back in its place.
+    upgrade_catalog = [it for it in load_standard_items() if it.get("compatible_bases")]
+    owned_firearms = []
+    for key, owned in vault_owned_counts.items():
+        parsed = expansions.parse_firearm_name(vault_display_names[key])
+        if not parsed:
+            continue
+        base, applied = parsed
+        options = [
+            u for u in upgrade_catalog
+            if base in u["compatible_bases"] and u["name"].removesuffix(" (Firearm Upgrade)") not in applied
+        ]
+        if options:
+            owned_firearms.append({"name": vault_display_names[key], "owned": owned, "options": options})
     # Only what this warband can actually hire: books it has switched on, the
     # spell-summoned members its wizard knows the spell for, and nothing its
     # wizard's state forbids. Filtering here rather than in the template keeps
@@ -1072,6 +1115,8 @@ def warband_view(warband_id: str) -> str:
         },
         wizard_spells_ui=wiz_spells,
         vault_names=vault_names,
+        gated_items=gated_items,
+        owned_firearms=owned_firearms,
         potion_choices=load_potion_choices(),
         # Scroll / Grimoire item slots list spell names, so they follow the same
         # source gating as everything else — a warband with a book off should not
@@ -1312,6 +1357,11 @@ def _act_fin_dalka_decipher(wb: dict) -> tuple[bool, str]:
         request.form.get("spell_id") or "",
         request.form.get("outcome") or "",
     )
+
+
+@register_action("unlock_fin_dalka_spell")
+def _act_unlock_fin_dalka_spell(wb: dict) -> tuple[bool, str]:
+    return unlock_fin_dalka_spell(wb, request.form.get("spell_id") or "")
 
 
 @register_action("buy_horse")
@@ -1689,6 +1739,20 @@ def _act_add_vault_item(wb: dict) -> tuple[bool, str]:
         return False, "Item name required."
     add_vault_item(wb, name, request.form.get("item_notes") or "", "manual")
     return True, f"Added “{name}” to vault."
+
+
+@register_action("buy_standard_item")
+def _act_buy_standard_item(wb: dict) -> tuple[bool, str]:
+    return buy_standard_item(wb, request.form.get("item_name") or "")
+
+
+@register_action("upgrade_firearm")
+def _act_upgrade_firearm(wb: dict) -> tuple[bool, str]:
+    return upgrade_firearm(
+        wb,
+        request.form.get("item_name") or "",
+        request.form.get("upgrade_name") or "",
+    )
 
 
 @register_action("upload_wizard_portrait")

@@ -138,8 +138,9 @@
     <summary><span class="card-title">Arms, armour &amp; consumables</span></summary>
     <p class="muted">General Arms and Armour List from Frostgrave 2e, plus a few notable supplement
       weapons and potion / scroll / grimoire types. Most of this is free starting equipment per the
-      core rules; a handful of supplement items (currently the black powder firearms and their
-      upgrades) are commissioned for real gold instead — each Info panel below says which.</p>
+      core rules; the black powder firearms and their upgrades are commissioned for real gold instead,
+      and the Spell Component Bag is bought separately for a small fee — each Info panel below says
+      which.</p>
     <div class="item-list-detail">
       <div class="item-list-head" aria-hidden="true">
         <span class="col-name">Item</span>
@@ -158,10 +159,23 @@
             </summary>
             <p class="item-desc-body">
               {{ it.description }}
-              {% if it.cost is defined %}
-                <strong>Acquiring it:</strong> commissioned/bought separately for {{ it.cost }}gc.
+              {% if it.compatible_bases %}
+                <strong>Acquiring it:</strong> commissioned at the Treasury, Vault and Workshop card for
+                {{ it.cost }}gc onto an already-owned {{ it.compatible_bases|join('/') }} — this consumes
+                that firearm and adds the upgraded item to the vault in its place, rather than being
+                bought or equipped on its own.
+              {% elif it.cost is defined %}
+                <strong>Acquiring it:</strong> bought at the Treasury, Vault and Workshop card for
+                {{ it.cost }}gc — must be bought there before it can be equipped.
+              {% elif it.name == SPELL_COMPONENT_BAG_NAME %}
+                <strong>Acquiring it:</strong> bought from the Wizard &amp; apprentice card's Spell
+                &amp; potion components panel for {{ SPELL_COMPONENT_BAG_COST }}gc each, capped at
+                {{ SPELL_COMPONENT_BAG_LIMIT }} per warband.
+              {% elif it.issued_only %}
+                <strong>Acquiring it:</strong> issued starting equipment for its class only — not sold
+                separately on the arms list.
               {% else %}
-                <strong>Acquiring it:</strong> free starting equipment — no cost is tracked for it here.
+                <strong>Acquiring it:</strong> free starting equipment for any eligible figure.
               {% endif %}
             </p>
           </details>
