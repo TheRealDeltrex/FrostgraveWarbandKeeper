@@ -19,7 +19,12 @@ def load_standard_items() -> list[dict]:
     Unlike spells/soldiers/magic items, standard items are deliberately NOT
     filtered by enabled_sources — mundane gear (e.g. Ghost Archipelago's
     Throwing Knife) is available regardless of which source books are
-    switched on for a warband. The `source` field here is informational only."""
+    switched on for a warband. The `source` field here is informational only
+    for those. The black-powder firearms and their upgrades (the only
+    entries with a `cost`) are the exception: they're real source- and
+    purchase-gated items — see warband_store.buy_standard_item() and
+    CLAUDE.md — this loader still returns them unfiltered since it also
+    backs the unconditional Lexicon reference list."""
     path = DATA / "standard_items.json"
     if not path.is_file():
         return []
@@ -30,6 +35,8 @@ def load_standard_items() -> list[dict]:
         it.setdefault("spellcaster_allowed", True)
         it.setdefault("caster_only", False)
         it.setdefault("source", "Core Rules")
+        it.setdefault("issued_only", False)
+        it.setdefault("compatible_bases", [])
     return items
 
 

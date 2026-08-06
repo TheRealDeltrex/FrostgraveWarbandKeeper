@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, TypedDict
 
 import expansions
+import game_content
 import paths
 from frostgrave_data import (
     ALIGNED_SCHOOL_SPELLS,
@@ -1803,7 +1804,7 @@ def warband_limits(wb: dict) -> dict:
     for s in soldiers:
         type_key = s.get("type_key", "")
         info = SOLDIERS.get(type_key, {})
-        spent += expansions.soldier_cost(wb, info, type_key)
+        spent += expansions.soldier_cost(wb, info, type_key, include_discount=False)
         if s.get("giant_blooded"):
             spent += GIANT_BLOODED_COST
     wiz = wb.get("wizard") or {}
@@ -1845,9 +1846,14 @@ def enrich_soldier(wb: dict, s: dict) -> dict:
     out["category"] = "specialist" if _soldier_is_specialist(s) else cat.get("category", "standard")
     # Live cost, not what was paid at hire time — same rule as everywhere else
     # cost is computed (hireable list, warband_limits): homerule adjustments
-    # (Edition 2 toggle, Beastcrafter surcharge, base discount) always apply
-    # to the current settings, not a value frozen at hire time.
-    out["cost"] = expansions.soldier_cost(wb, cat, type_key) if cat else s.get("cost", 0)
+    # (Edition 2 toggle, Beastcrafter surcharge) always apply to the current
+    # settings, not a value frozen at hire time. Carrier Pigeons' discount is
+    # the one exception (include_discount=False): it cuts the cost of hiring,
+    # not a standing price break on the roster, so it must not retroactively
+    # cheapen a soldier already paid for in full.
+    out["cost"] = (
+        expansions.soldier_cost(wb, cat, type_key, include_discount=False) if cat else s.get("cost", 0)
+    )
     out["gear"] = expansions.free_dagger_gear(wb, type_key, out.get("gear", ""))
     out["knightly_order_info"] = KNIGHTLY_ORDER_BY_ID.get(s.get("knightly_order") or "")
     # Armour/Move bonuses from an equipped Shield/Armour item — same idiom as
@@ -2051,7 +2057,10 @@ def remove_soldier(wb: dict, soldier_id: str, refund: bool = False) -> tuple[boo
         if s.get("id") == soldier_id:
             type_key = s.get("type_key", "")
             info = get_soldier(type_key) or {}
-            cost = expansions.soldier_cost(wb, info, type_key)
+            # No Carrier Pigeons discount here (see enrich_soldier): a refund
+            # should reflect what this soldier is actually worth, not be cut
+            # by a discount that only applies to new hires.
+            cost = expansions.soldier_cost(wb, info, type_key, include_discount=False)
             if s.get("giant_blooded"):
                 cost += GIANT_BLOODED_COST
             name = s.get("name", "Soldier")
@@ -3752,6 +3761,80 @@ def add_vault_item(wb: dict, name: str, notes: str = "", source: str = "loot") -
     )
 
 
+def buy_standard_item(wb: dict, item_name: str) -> tuple[bool, str]:
+    """Buys a costed standard item — currently the black-powder firearms,
+    the only entries in standard_items.json with a real `cost` that aren't
+    an upgrade — into the vault, same slot the After-the-Game loot picker
+    fills. Ordinary starting gear (dagger, bow, armour, ...) has no cost and
+    is never bought this way — it stays free to pick straight into an item
+    slot. Firearm upgrades aren't bought standalone either — see
+    upgrade_firearm() — since they only mean anything applied to an owned
+    gun. Once bought, the item-slot picker offers exactly as many copies as
+    the vault holds (see expansions.equipped_item_holders())."""
+    catalog = {it["name"]: it for it in game_content.load_standard_items()}
+    info = catalog.get(item_name)
+    if not info or "cost" not in info:
+        return False, "Not a purchasable item."
+    if info.get("compatible_bases"):
+        return False, "Firearm upgrades are commissioned onto an owned firearm below, not bought alone."
+    src = info.get("source", "Core Rules")
+    if src not in enabled_sources(wb):
+        return False, f"{item_name} is from {src}; enable that source under Additional Rules and Homerules first."
+    cost = int(info["cost"])
+    gold = int(wb.get("gold", 0))
+    if gold < cost:
+        return False, f"Need {cost} gc to buy {item_name} (have {gold} gc)."
+    wb["gold"] = gold - cost
+    add_vault_item(wb, item_name, source="bought")
+    text = f"Bought {item_name} for {cost} gc."
+    add_history(wb, text)
+    return True, text
+
+
+def upgrade_firearm(wb: dict, item_name: str, upgrade_name: str) -> tuple[bool, str]:
+    """Commissions a firearm upgrade onto an already-owned Pistol/Musket/
+    Blunderbuss (or an already-upgraded one, to stack a second upgrade).
+    Consumes one vault-owned copy of `item_name` and adds the combined item
+    in its place — e.g. "Pistol" + Double-barrelled -> "Pistol
+    (Double-barrelled)" — rather than requiring the base gun to sit equipped
+    in a separate item slot alongside the upgrade (see
+    expansions.parse_firearm_name())."""
+    parsed = expansions.parse_firearm_name(item_name)
+    if not parsed:
+        return False, f"{item_name} isn't a firearm."
+    base, upgrades = parsed
+    catalog = {it["name"]: it for it in game_content.load_standard_items()}
+    info = catalog.get(upgrade_name)
+    if not info or "cost" not in info or not info.get("compatible_bases"):
+        return False, "Not a firearm upgrade."
+    if base not in info["compatible_bases"]:
+        return False, f"{info['name']} can't be fitted to a {base}."
+    short_name = info["name"].removesuffix(" (Firearm Upgrade)")
+    if short_name in upgrades:
+        return False, f"This {item_name} already has {short_name}."
+    src = info.get("source", "Core Rules")
+    if src not in enabled_sources(wb):
+        return False, (
+            f"{info['name']} is from {src}; enable that source under Additional Rules and Homerules first."
+        )
+    cost = int(info["cost"])
+    gold = int(wb.get("gold", 0))
+    if gold < cost:
+        return False, f"Need {cost} gc to commission {info['name']} (have {gold} gc)."
+    vault = wb.get("vault_items") or []
+    idx = next((i for i, it in enumerate(vault) if (it.get("name") or "").strip() == item_name), None)
+    if idx is None:
+        return False, f"Don't own a {item_name}."
+    vault.pop(idx)
+    wb["vault_items"] = vault
+    wb["gold"] = gold - cost
+    new_name = f"{base} ({', '.join([*upgrades, short_name])})"
+    add_vault_item(wb, new_name, source="bought")
+    text = f"Commissioned {info['name']} for {cost} gc, turning a {item_name} into a {new_name}."
+    add_history(wb, text)
+    return True, text
+
+
 def remove_vault_item(wb: dict, item_id: str) -> bool:
     items = wb.get("vault_items") or []
     for i, it in enumerate(items):
@@ -4173,10 +4256,11 @@ def become_vampire(wb: dict) -> tuple[bool, str]:
     school-only mutation — but unlike those three, the book's own text
     describes concrete, one-time bookkeeping at the moment of transformation
     (spells lost, apprentice dismissed), not just a dynamically-applied cap.
-    So entering STATE_VAMPIRE always goes through this function (see
-    expansions.can_enter_state's refusal of it via the plain dropdown), which
-    records everything it's about to change into state["vampire_savepoint"]
-    first so revert_vampire() can undo it later.
+    So entering STATE_VAMPIRE always goes through this function — picked from
+    the same wizard-state dropdown as the other three, but set_wizard_state()
+    delegates to it immediately rather than running the generic assignment —
+    which records everything it's about to change into
+    state["vampire_savepoint"] first so revert_vampire() can undo it later.
 
     Distinct from choosing Vampire as a starting school at creation (see
     empty_wizard()/playable_schools() and expansions.is_vampire()'s "school
@@ -4385,6 +4469,25 @@ def fin_dalka_decipher(wb: dict, target_spell_id: str, outcome: str) -> tuple[bo
         )
         rec["learned"] = True
         text = f"Deciphered and learned {name} from the Grimoire of Fin Dalka (effective CN {eff})."
+    add_history(wb, text)
+    return True, text
+
+
+def unlock_fin_dalka_spell(wb: dict, target_spell_id: str) -> tuple[bool, str]:
+    """Clears a natural-1 lock on one spell. Not a rules mechanic — the book
+    has no way to undo a natural 1 — this exists purely as a misclick safety
+    net for the "Natural 1" button, since that lock is otherwise permanent
+    and unrecoverable through the UI."""
+    wiz = wb.setdefault("wizard", {})
+    fd = wiz.setdefault("fin_dalka", {"owned": False, "attempts": {}})
+    attempts = fd.get("attempts") or {}
+    rec = attempts.get(target_spell_id)
+    if not rec or not rec.get("locked"):
+        return False, "That spell isn't locked."
+    rec["locked"] = False
+    sp = find_spell(target_spell_id)
+    name = sp["name"] if sp else target_spell_id
+    text = f"Unlocked {name} on the Grimoire of Fin Dalka (misclick correction)."
     add_history(wb, text)
     return True, text
 
@@ -5056,10 +5159,16 @@ def apply_monster_hunting_results(wb: dict) -> tuple[bool, str]:
 def set_wizard_state(wb: dict, kind: str) -> tuple[bool, str]:
     """Put the wizard into a state, replacing whatever they were in before.
 
-    The three states are mutually exclusive by the rules, so this is a plain
-    assignment rather than an accumulation — taking one clears the others, which
-    is exactly what Forgotten Pacts describes happening to an existing pact.
+    The three plain states are mutually exclusive by the rules, so this is a
+    plain assignment rather than an accumulation — taking one clears the
+    others, which is exactly what Forgotten Pacts describes happening to an
+    existing pact. Vampire is picked from this same dropdown but, unlike the
+    other three, needs the one-time bookkeeping become_vampire() performs
+    (spells lost, apprentice dismissed, a savepoint for revert_vampire()), so
+    it's delegated there rather than handled by the generic assignment below.
     """
+    if kind == expansions.STATE_VAMPIRE:
+        return become_vampire(wb)
     ok, msg = expansions.can_enter_state(wb, kind, enabled_sources(wb))
     if not ok:
         return False, msg

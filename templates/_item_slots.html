@@ -1,13 +1,21 @@
 {#
   Item slot editor with short primary list + secondary detail for Potion/Scroll/Grimoire.
-  Expects: prefix, n, slots, standard_items, vault_names (optional)
+  Expects: prefix, n, slots, standard_items, vault_names (optional), gated_items (optional)
 
   The potion list, spell list, and item-suggestions datalist are the same on
   every block on the page (wizard/apprentice/captain/soldier), so they are
   emitted once at page level with fixed ids (fg-potion-data, fg-spell-data,
   fg-item-suggestions — see warband_view.html) instead of once per block here.
+
+  Items with a real gold cost (currently the black-powder firearms and their
+  upgrades) are excluded from the primary per-category list below — they
+  must be bought first (Treasury, Vault and Workshop card) and then appear,
+  like any other vault-recorded item, in the "Vault / recorded loot" group,
+  capped to however many the warband actually owns (gated_items, computed in
+  app.py from expansions.equipped_item_holders()).
 #}
 {% set vault_names = vault_names or [] %}
+{% set gated_items = gated_items or {} %}
 {% set cat_order = ['Weapon', 'Missile', 'Armour', 'Gear', 'Consumable'] %}
 
 <div class="item-slots" data-prefix="{{ prefix }}" data-count="{{ n }}">
@@ -23,7 +31,7 @@
         >
           <option value="">— empty / custom —</option>
           {% for cat in cat_order %}
-            {% set group = standard_items|selectattr('category', 'equalto', cat)|list %}
+            {% set group = standard_items|selectattr('category', 'equalto', cat)|rejectattr('cost', 'defined')|list %}
             {% if group %}
               <optgroup label="{{ cat }}">
                 {% for it in group %}
@@ -45,8 +53,19 @@
           {% if vault_names %}
             <optgroup label="Vault / recorded loot">
               {% for name in vault_names %}
-                <option value="{{ name }}" data-slots="1" data-kind="vault">
-                  {{ name }}
+                {% set g = gated_items.get(name.lower()) %}
+                {% set is_current = cur.strip().lower() == name.lower() %}
+                {% set out_of_stock = g and g.available <= 0 and not is_current %}
+                <option
+                  value="{{ name }}"
+                  data-slots="1"
+                  data-kind="vault"
+                  {% if out_of_stock %}
+                    disabled
+                    title="All {{ g.owned }} owned {{ 'copy is' if g.owned == 1 else 'copies are' }} already equipped — on {{ g.holders|join(', ') }}."
+                  {% endif %}
+                >
+                  {{ name }}{% if out_of_stock %} (in use){% endif %}
                 </option>
               {% endfor %}
             </optgroup>

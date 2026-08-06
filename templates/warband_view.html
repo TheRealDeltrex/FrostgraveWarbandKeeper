@@ -99,7 +99,7 @@
       <input type="hidden" name="action" value="update_homerules" />
 
       <details class="ref-panel" open>
-        <summary>Source books</summary>
+        <summary>General Rules</summary>
         <p class="muted" style="font-size:0.85rem">
           Switch on the supplements you play with. Enabled books add their mercenaries to the Hire soldier
           list. Every creature is always browsable in the <a href="{{ url_for('reference') }}">Frostgrave Lexicon</a>.
@@ -151,6 +151,10 @@
           Needs Blood Legacy. Lets one ordinary soldier in the warband become Giant-Blooded
           (+50gc, -1 Move, -2 Will, +2 Health) — picked from a single control on the Soldiers
           card below rather than a button on every soldier's row, since only one may take it.
+        </p>
+        <p class="muted" style="font-size:0.82rem;margin:0.6rem 0 0">
+          Needs Blood Legacy. The Grimoire of Fin Dalka — acquiring it, deciphering its 8 Fire Giant
+          spells, and selling it — is all done from the Treasury, Vault and Workshop card.
         </p>
         <label class="checkbox-row" style="margin-top:0.6rem">
           <input name="ragged_warbands_enabled" type="checkbox" {% if hr.ragged_warbands_enabled %}checked{% endif %} />
@@ -222,8 +226,9 @@
         <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0">
           Needs "allow its soldiers" above also switched on. On by default. Governs whether the
           Musketeer, Coachman and Duellist appear in Hire soldier — both toggles must be on for
-          them to show up. Doesn't affect the standalone Pistol/Musket/Blunderbuss items, which
-          stay available regardless (standard items are never source-gated).
+          them to show up. Doesn't affect the standalone Pistol/Musket/Blunderbuss items and their
+          upgrades — those are bought separately at the Treasury, Vault and Workshop card (needs
+          Spellcaster Magazine switched on above, same as everything else on this row).
         </p>
         <label class="checkbox-row" style="margin-top:0.6rem">
           <input name="knightly_orders_enabled" type="checkbox" {% if hr.knightly_orders_enabled %}checked{% endif %} />
@@ -234,6 +239,10 @@
           Templar, lets you pick an Order that trades 1 point of Fight or Health for a special
           ability — adds an order picker to their row in Hire soldier below.
         </p>
+        <div class="checkbox-row" style="margin-top:0.6rem">
+          <input id="free_dagger_enabled" name="free_dagger_enabled" type="checkbox" {% if hr.free_dagger_enabled %}checked{% endif %} />
+          <label for="free_dagger_enabled" style="margin:0">Every ordinary soldier gets a free backup dagger (a single dagger costs no item slot) — skips anyone already carrying a hand weapon and a dagger, two hand weapons, or two daggers; upgrades a lone dagger to two</label>
+        </div>
         <script>
           // Tick/untick every source book at once, then save immediately —
           // same as ticking each checkbox by hand on this autosaving form.
@@ -246,6 +255,85 @@
             });
           });
         </script>
+
+        <details class="ref-panel">
+          <summary>High-Level Wizards (Blood Legacy)</summary>
+          <p class="muted" style="font-size:0.85rem">
+            Needs Blood Legacy switched on above. The book treats each of these as its own optional
+            rule to agree on separately, so each has its own toggle here rather than one bundled switch.
+          </p>
+          <div class="actions" style="margin-bottom:0.5rem">
+            <button class="btn small secondary" type="button" data-toggle-hlw="on">Enable all</button>
+            <button class="btn small secondary" type="button" data-toggle-hlw="off">Disable all</button>
+          </div>
+          <div id="hlw-toggles">
+            <label class="checkbox-row" style="margin-top:0.4rem">
+              <input name="hlw_specialist_allowance" type="checkbox" {% if hr.hlw_specialist_allowance %}checked{% endif %} />
+              Increased Specialist Soldier Allowance
+            </label>
+            <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0.6rem">
+              +1 specialist slot per full 20 wizard levels (5 at level 20, up to 8 at level 80+).
+            </p>
+            <label class="checkbox-row">
+              <input name="hlw_item_slots" type="checkbox" {% if hr.hlw_item_slots %}checked{% endif %} />
+              Increased Item Slots
+            </label>
+            <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0.6rem">
+              Wizard and apprentice each gain +1 item slot at level 30, +1 more at level 70 (max +2).
+            </p>
+            <label class="checkbox-row">
+              <input name="hlw_max_health" type="checkbox" {% if hr.hlw_max_health %}checked{% endif %} />
+              Increased Maximum Health
+            </label>
+            <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0.6rem">
+              Wizard's maximum potential Health Stat rises +1 per full 10 levels (max +10, so 30 at level
+              100+). Stacks on top of any Health cap from another wizard state the same way.
+            </p>
+            <label class="checkbox-row">
+              <input name="hlw_casting_min" type="checkbox" {% if hr.hlw_casting_min %}checked{% endif %} />
+              Lower Casting Number Minimum
+            </label>
+            <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0.6rem">
+              A level 100+ wizard may improve a Casting Number down to 4 instead of the normal floor of 5.
+            </p>
+            <label class="checkbox-row">
+              <input name="hlw_alt_xp" type="checkbox" {% if hr.hlw_alt_xp %}checked{% endif %} />
+              Alternate Experience Point Expenditure
+            </label>
+            <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0">
+              Adds a "Spend XP" option on the Wizard card for trading banked XP for gold or a one-off bonus
+              instead of a level — no level requirement of its own, unlike the other four.
+            </p>
+          </div>
+          <script>
+            // Tick/untick every High-Level Wizards toggle at once, then save
+            // immediately — same pattern as the source books' Enable/Disable all.
+            document.querySelectorAll('[data-toggle-hlw]').forEach(function (btn) {
+              btn.addEventListener('click', function () {
+                var on = btn.dataset.toggleHlw === 'on';
+                var boxes = document.querySelectorAll('#hlw-toggles input[type="checkbox"]');
+                boxes.forEach(function (box) { box.checked = on; });
+                if (boxes.length) boxes[0].dispatchEvent(new Event('change', { bubbles: true }));
+              });
+            });
+            // Switching Blood Legacy on defaults all five High-Level Wizards
+            // toggles on too, so turning on the book actually turns on its
+            // headline chapter instead of leaving five more boxes to tick by
+            // hand. Attached directly to the checkbox (not via document
+            // delegation) so it runs before the autosave listener submits the
+            // form. Only fires on and, not off — turning Blood Legacy back off
+            // doesn't fight the player over toggles they set by hand.
+            var bloodLegacyBox = document.querySelector('input[name="source_enabled_blood-legacy"]');
+            if (bloodLegacyBox) {
+              bloodLegacyBox.addEventListener('change', function () {
+                if (!bloodLegacyBox.checked) return;
+                document.querySelectorAll('#hlw-toggles input[type="checkbox"]').forEach(function (box) {
+                  box.checked = true;
+                });
+              });
+            }
+          </script>
+        </details>
       </details>
 
       <details class="ref-panel">
@@ -266,85 +354,6 @@
             <input id="hr_max_specialists" name="max_specialists" type="number" min="0" step="1" value="{{ hr.max_specialists }}" />
           </div>
         </div>
-      </details>
-
-      <details class="ref-panel">
-        <summary>High-Level Wizards (Blood Legacy)</summary>
-        <p class="muted" style="font-size:0.85rem">
-          Needs Blood Legacy switched on above. The book treats each of these as its own optional
-          rule to agree on separately, so each has its own toggle here rather than one bundled switch.
-        </p>
-        <div class="actions" style="margin-bottom:0.5rem">
-          <button class="btn small secondary" type="button" data-toggle-hlw="on">Enable all</button>
-          <button class="btn small secondary" type="button" data-toggle-hlw="off">Disable all</button>
-        </div>
-        <div id="hlw-toggles">
-          <label class="checkbox-row" style="margin-top:0.4rem">
-            <input name="hlw_specialist_allowance" type="checkbox" {% if hr.hlw_specialist_allowance %}checked{% endif %} />
-            Increased Specialist Soldier Allowance
-          </label>
-          <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0.6rem">
-            +1 specialist slot per full 20 wizard levels (5 at level 20, up to 8 at level 80+).
-          </p>
-          <label class="checkbox-row">
-            <input name="hlw_item_slots" type="checkbox" {% if hr.hlw_item_slots %}checked{% endif %} />
-            Increased Item Slots
-          </label>
-          <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0.6rem">
-            Wizard and apprentice each gain +1 item slot at level 30, +1 more at level 70 (max +2).
-          </p>
-          <label class="checkbox-row">
-            <input name="hlw_max_health" type="checkbox" {% if hr.hlw_max_health %}checked{% endif %} />
-            Increased Maximum Health
-          </label>
-          <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0.6rem">
-            Wizard's maximum potential Health Stat rises +1 per full 10 levels (max +10, so 30 at level
-            100+). Stacks on top of any Health cap from another wizard state the same way.
-          </p>
-          <label class="checkbox-row">
-            <input name="hlw_casting_min" type="checkbox" {% if hr.hlw_casting_min %}checked{% endif %} />
-            Lower Casting Number Minimum
-          </label>
-          <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0.6rem">
-            A level 100+ wizard may improve a Casting Number down to 4 instead of the normal floor of 5.
-          </p>
-          <label class="checkbox-row">
-            <input name="hlw_alt_xp" type="checkbox" {% if hr.hlw_alt_xp %}checked{% endif %} />
-            Alternate Experience Point Expenditure
-          </label>
-          <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0">
-            Adds a "Spend XP" option on the Wizard card for trading banked XP for gold or a one-off bonus
-            instead of a level — no level requirement of its own, unlike the other four.
-          </p>
-        </div>
-        <script>
-          // Tick/untick every High-Level Wizards toggle at once, then save
-          // immediately — same pattern as the source books' Enable/Disable all.
-          document.querySelectorAll('[data-toggle-hlw]').forEach(function (btn) {
-            btn.addEventListener('click', function () {
-              var on = btn.dataset.toggleHlw === 'on';
-              var boxes = document.querySelectorAll('#hlw-toggles input[type="checkbox"]');
-              boxes.forEach(function (box) { box.checked = on; });
-              if (boxes.length) boxes[0].dispatchEvent(new Event('change', { bubbles: true }));
-            });
-          });
-          // Switching Blood Legacy on defaults all five High-Level Wizards
-          // toggles on too, so turning on the book actually turns on its
-          // headline chapter instead of leaving five more boxes to tick by
-          // hand. Attached directly to the checkbox (not via document
-          // delegation) so it runs before the autosave listener submits the
-          // form. Only fires on and, not off — turning Blood Legacy back off
-          // doesn't fight the player over toggles they set by hand.
-          var bloodLegacyBox = document.querySelector('input[name="source_enabled_blood-legacy"]');
-          if (bloodLegacyBox) {
-            bloodLegacyBox.addEventListener('change', function () {
-              if (!bloodLegacyBox.checked) return;
-              document.querySelectorAll('#hlw-toggles input[type="checkbox"]').forEach(function (box) {
-                box.checked = true;
-              });
-            });
-          }
-        </script>
       </details>
 
       <details class="ref-panel" id="captain-rules-card">
@@ -497,10 +506,6 @@
         <div class="checkbox-row">
           <input id="soldier_permanent_injuries_enabled" name="soldier_permanent_injuries_enabled" type="checkbox" {% if hr.soldier_permanent_injuries_enabled %}checked{% endif %} />
           <label for="soldier_permanent_injuries_enabled" style="margin:0">Ordinary soldiers can take permanent injuries (Permanent Injury Table, page 77 — normally only the wizard/apprentice/captain's Survival Roll uses it)</label>
-        </div>
-        <div class="checkbox-row">
-          <input id="free_dagger_enabled" name="free_dagger_enabled" type="checkbox" {% if hr.free_dagger_enabled %}checked{% endif %} />
-          <label for="free_dagger_enabled" style="margin:0">Every ordinary soldier gets a free backup dagger (a single dagger costs no item slot) — skips anyone already carrying a hand weapon and a dagger, two hand weapons, or two daggers; upgrades a lone dagger to two</label>
         </div>
         <div class="form-row">
           <label for="soldier_max_levels">Max levels gained (per soldier)</label>
@@ -828,6 +833,13 @@
               </details>
             </div>
           </div>
+          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="actions" style="margin-top:0.75rem">
+            <input type="hidden" name="action" value="dismiss_apprentice" />
+            <label class="checkbox-row" style="margin:0">
+              <input type="checkbox" name="refund" /> Refund {{ APPRENTICE_COST }} gc
+            </label>
+            <button class="btn danger small" type="submit" onclick="return confirm('Dismiss apprentice?');">Dismiss apprentice</button>
+          </form>
         </details>
       {% endif %}
 
@@ -840,13 +852,16 @@
        nesting in the main details form above: each control posts its own
        action, and forms cannot be nested. Permanent injuries (Core Rules,
        page 77) always show — unlike mutations they're not gated by a source
-       book; wizard state is only shown when at least one of the three books
+       book; wizard state is only shown when at least one of the four books
        that introduce one is switched on, and what each state does lives in
        the Lexicon, not here. #}
     {% set available_states = [] %}
     {% for kind in [STATE_LICH, STATE_BEASTCRAFTER, STATE_PACT] %}
       {% if STATE_SOURCE[kind] in enabled_source_names %}{% set _ = available_states.append(kind) %}{% endif %}
     {% endfor %}
+    {% if "Blood Legacy" in enabled_source_names and wiz.school not in ("Vampire", "Fire Giant") %}
+      {% set _ = available_states.append(STATE_VAMPIRE) %}
+    {% endif %}
       <details class="ref-panel">
         <summary>Mutations, Permanent Injuries &amp; Wizard state</summary>
         {{ mutation_picker('add_wizard_mutation', wiz.mutations, label="Wizard mutations") }}
@@ -854,7 +869,7 @@
         {{ permanent_injury_picker('add_wizard_permanent_injury', wiz.permanent_injuries, label="Wizard permanent injuries", kind="wizard") }}
         {% if ap %}{{ permanent_injury_picker('add_apprentice_permanent_injury', ap.permanent_injuries, label="Apprentice permanent injuries", kind="apprentice") }}{% endif %}
 
-    {% if available_states or wizard_state_kind == STATE_VAMPIRE or ("Blood Legacy" in enabled_source_names and wiz.school not in ("Vampire", "Fire Giant")) %}
+    {% if available_states or wizard_state_kind == STATE_VAMPIRE %}
       <details class="ref-panel" {% if wizard_state_kind != STATE_NONE %}open{% endif %}>
         <summary>Wizard state — {{ STATE_LABELS[wizard_state_kind] }}</summary>
         <p class="muted" style="font-size:0.85rem">Check lexicon for details.</p>
@@ -971,7 +986,7 @@
             <input type="hidden" name="action" value="revert_vampire" />
             <button class="btn danger small" type="submit">Revert from Vampire</button>
           </form>
-        {% elif "Blood Legacy" in enabled_source_names and wiz.school not in ("Vampire", "Fire Giant") %}
+        {% elif STATE_VAMPIRE in available_states %}
           <p class="muted" style="font-size:0.85rem">
             Becoming a Vampire (Blood Legacy, "usually accidental"): drops Thaumaturge spells, every
             remaining spell's Casting Number goes up by 1 flat (kept at its original school relation,
@@ -980,70 +995,10 @@
             kept, so it can be reverted later from this same panel. Recalculate the wizard's level
             afterward for any XP a lost spell or capped stat no longer justifies.
           </p>
-          {% set vampire_wizard_label = wiz.name or "your wizard" %}
-          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" onsubmit="return confirm('Turn {{ vampire_wizard_label }} into a Vampire? This drops Thaumaturge spells, clamps Will/Health to the Vampire caps, and trades the apprentice (if any) for a 9th soldier slot. It can be reverted later from this panel.');">
-            <input type="hidden" name="action" value="become_vampire" />
-            <button class="btn danger small" type="submit">Become a Vampire</button>
-          </form>
         {% endif %}
       </details>
     {% endif %}
       </details>
-
-    {% if fin_dalka_enabled %}
-      <details class="ref-panel">
-        <summary>Grimoire of Fin Dalka (Blood Legacy){% if wiz.fin_dalka.owned %} — owned{% endif %}</summary>
-        <p class="muted" style="font-size:0.85rem">
-          A ciphered tome of all 8 Fire Giant spells, open to any wizard. Deciphering one spell costs
-          {{ FIN_DALKA_DECIPHER_COST }}gc + a Will Roll (TN20, plus any bonus below) rolled at the
-          table — report the outcome here. A natural 1 locks that spell forever for this wizard; any
-          other failure adds a cumulative +1 bonus to future attempts on it.
-        </p>
-        {% if not wiz.fin_dalka.owned %}
-          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
-            <input type="hidden" name="action" value="acquire_fin_dalka_grimoire" />
-            <button class="btn secondary small" type="submit">Acquire the grimoire</button>
-          </form>
-        {% else %}
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>Spell</th><th>Status</th><th>Report roll</th></tr></thead>
-              <tbody>
-                {% for sp in fin_dalka_spells %}
-                  <tr>
-                    <td><strong>{{ sp.name }}</strong></td>
-                    <td class="muted">
-                      {% if sp.known %}already known
-                      {% elif sp.locked %}locked (natural 1)
-                      {% elif sp.learned %}learned
-                      {% else %}+{{ sp.bonus }} bonus so far
-                      {% endif %}
-                    </td>
-                    <td>
-                      {% if not sp.known and not sp.locked and not sp.learned %}
-                        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
-                          <input type="hidden" name="action" value="fin_dalka_decipher" />
-                          <input type="hidden" name="spell_id" value="{{ sp.id }}" />
-                          <button class="btn small gold" type="submit" name="outcome" value="success" {% if wb.gold < FIN_DALKA_DECIPHER_COST %}disabled{% endif %}>Succeeded</button>
-                          <button class="btn small" type="submit" name="outcome" value="fail" {% if wb.gold < FIN_DALKA_DECIPHER_COST %}disabled{% endif %}>Failed</button>
-                          <button class="btn danger small" type="submit" name="outcome" value="nat1" {% if wb.gold < FIN_DALKA_DECIPHER_COST %}disabled{% endif %}>Natural 1</button>
-                        </form>
-                      {% endif %}
-                    </td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:0.5rem" onsubmit="return confirm('Sell the Grimoire of Fin Dalka?');">
-            <input type="hidden" name="action" value="sell_fin_dalka_grimoire" />
-            <button class="btn danger small" type="submit">
-              Sell grimoire ({{ [FIN_DALKA_BASE_SELL - FIN_DALKA_SELL_PER_SPELL * (fin_dalka_spells | selectattr('learned') | list | length), 0] | max }}gc)
-            </button>
-          </form>
-        {% endif %}
-      </details>
-    {% endif %}
 
     {% if underworld_favors_enabled %}
       <details class="ref-panel">
@@ -1288,13 +1243,6 @@
         </div>
       </form>
     {% else %}
-      <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="actions" style="margin-top:0.75rem">
-        <input type="hidden" name="action" value="dismiss_apprentice" />
-        <label class="checkbox-row" style="margin:0">
-          <input type="checkbox" name="refund" /> Refund {{ APPRENTICE_COST }} gc
-        </label>
-        <button class="btn danger small" type="submit" onclick="return confirm('Dismiss apprentice?');">Dismiss apprentice</button>
-      </form>
       {% if wiz.level >= 6 %}
         <p class="muted" style="font-size:0.85rem;margin-top:0.75rem">
           If the wizard dies (core rules, p.103): a level 6+ wizard's apprentice may take over as
@@ -1440,7 +1388,7 @@
   {% if hr.captain_mode != 'off' or cap %}
     {# ---- Captain ---- #}
     <details class="card" id="captain">
-      <summary><span class="card-title">Captain</span>{% if cap and legendary_soldiers_enabled %} <span class="badge legendary" title="Spellcaster Magazine, Issue 4: the Captain is a Legendary Soldier, subject to the Legendary Soldier limit instead of the Specialist limit.">legendary</span>{% endif %}</summary>
+      <summary><span class="card-title">Captain</span></summary>
       {% if cap %}
         {% set cap_slots_n = hr.promote_captain_item_slots if cap.origin == 'promoted' else hr.captain_item_slots %}
         {% set cap_dismiss_cost = hr.promote_captain_cost if cap.origin == 'promoted' else hr.captain_hiring_cost %}
@@ -1451,6 +1399,11 @@
             <img class="portrait-md" src="{{ cap_src }}" alt="" />
           {% else %}
             <span class="portrait-placeholder portrait-md-ph" aria-hidden="true">?</span>
+          {% endif %}
+          {% if legendary_soldiers_enabled %}
+            <div style="text-align:center;margin-top:0.3rem">
+              <span class="badge legendary" title="Spellcaster Magazine, Issue 4: the Captain is a Legendary Soldier, subject to the Legendary Soldier limit instead of the Specialist limit.">legendary</span>
+            </div>
           {% endif %}
           <div class="char-body">
             <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" enctype="multipart/form-data" data-autosave>
@@ -2309,6 +2262,225 @@
     </details>
   </details>
 
+  {# ---- Treasury, Vault and Workshop ---- #}
+  <details class="card" id="treasury-vault">
+    <summary><span class="card-title">Treasury, Vault and Workshop <span class="gold">{{ wb.gold }} gc</span></span></summary>
+    <div class="grid-2">
+      <div>
+        <h3>Treasury</h3>
+        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
+          <input type="hidden" name="action" value="adjust_gold" />
+          <div class="form-row inline">
+            <div>
+              <label for="delta">Change (+/−)</label>
+              <input id="delta" name="delta" type="text" inputmode="numeric" pattern="[+-]?[0-9]+" required title="Enter a number, e.g. 20 or -5" />
+            </div>
+            <div>
+              <label for="reason">Reason</label>
+              <input id="reason" name="reason" type="text" />
+            </div>
+          </div>
+          <button class="btn gold" type="submit">Apply</button>
+        </form>
+      </div>
+      <div>
+        <h3>Vault items</h3>
+        {% if wb["vault_items"] %}
+          <ul class="list-plain">
+            {% for it in wb["vault_items"] %}
+              <li>
+                <strong>{{ it.name }}</strong>
+                {% if it.notes %}<span class="muted"> — {{ it.notes }}</span>{% endif %}
+                <form class="inline-form" method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" onsubmit="return confirm('Remove “{{ it.name }}” from the vault?');">
+                  <input type="hidden" name="action" value="remove_vault_item" />
+                  <input type="hidden" name="item_id" value="{{ it.id }}" />
+                  <button class="btn danger small" type="submit">×</button>
+                </form>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="empty">No vault items yet. Add via post-game loot.</p>
+        {% endif %}
+        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:0.75rem">
+          <input type="hidden" name="action" value="add_vault_item" />
+          <div class="form-row">
+            <label>Pick from a rulebook (fills the field below — still editable)</label>
+            <div class="loot-picker">
+              {{ loot_picker_row('vault', target_id='item_name') }}
+            </div>
+          </div>
+          <div class="form-row inline">
+            <div>
+              <label for="item_name">Add item</label>
+              {# Suggestions only — still a free-text box, so anything can be banked. #}
+              <input id="item_name" name="item_name" type="text" required list="magic-item-names" />
+              {% if magic_item_names %}
+                <datalist id="magic-item-names">
+                  {% for name in magic_item_names %}<option value="{{ name }}"></option>{% endfor %}
+                </datalist>
+              {% endif %}
+            </div>
+            <div>
+              <label>&nbsp;</label>
+              <button class="btn secondary" type="submit">Add</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+    {% set purchasable_items = full_standard_items|selectattr('cost', 'defined')|rejectattr('compatible_bases')|list %}
+    {% if purchasable_items %}
+      <div style="margin-top:1rem">
+        <h3>Workshop — Firearms</h3>
+        <p class="muted" style="font-size:0.85rem">
+          Black Powder Firearms (Spellcaster Magazine) are the only standard items with a real gold
+          cost — everything else on the Arms &amp; Armour list is free starting gear. Buying one here
+          adds it to the vault; the item-slot picker then offers exactly as many copies as the
+          warband owns.
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Item</th><th>Cost</th><th>Owned</th><th></th></tr></thead>
+            <tbody>
+              {% for it in purchasable_items %}
+                {% set owned = (gated_items.get(it.name.lower()) or {}).get('owned', 0) %}
+                {% set src_ok = it.source in enabled_source_names %}
+                <tr>
+                  <td>
+                    <strong>{{ it.name }}</strong>
+                    <div class="muted" style="font-size:0.8rem">{{ it.summary }}</div>
+                  </td>
+                  <td>{{ it.cost }}gc</td>
+                  <td>{{ owned }}</td>
+                  <td>
+                    <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
+                      <input type="hidden" name="action" value="buy_standard_item" />
+                      <input type="hidden" name="item_name" value="{{ it.name }}" />
+                      <button class="btn secondary small" type="submit" {% if not src_ok or wb.gold < it.cost %}disabled{% endif %}>Buy</button>
+                    </form>
+                    {% if not src_ok %}<span class="muted" style="font-size:0.8rem">needs {{ it.source }}</span>{% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    {% endif %}
+    {% if owned_firearms %}
+      <div style="margin-top:1rem">
+        <h3>Workshop — Upgrade a firearm</h3>
+        <p class="muted" style="font-size:0.85rem">
+          Commissioning an upgrade consumes the firearm it's applied to and adds the upgraded item to
+          the vault in its place — e.g. Pistol + Double-barrelled becomes "Pistol (Double-barrelled)"
+          — rather than sitting in a second item slot. A firearm can take more than one upgrade this
+          way, one commission at a time.
+        </p>
+        {% for fa in owned_firearms %}
+          <div class="table-wrap" style="margin-top:0.5rem">
+            <table>
+              <thead><tr><th>{{ fa.name }} ({{ fa.owned }} owned)</th><th>Cost</th><th></th></tr></thead>
+              <tbody>
+                {% for u in fa.options %}
+                  {% set src_ok = u.source in enabled_source_names %}
+                  <tr>
+                    <td>
+                      {{ u.name.split(' (Firearm Upgrade)')[0] }}
+                      <div class="muted" style="font-size:0.8rem">{{ u.summary }}</div>
+                    </td>
+                    <td>{{ u.cost }}gc</td>
+                    <td>
+                      <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
+                        <input type="hidden" name="action" value="upgrade_firearm" />
+                        <input type="hidden" name="item_name" value="{{ fa.name }}" />
+                        <input type="hidden" name="upgrade_name" value="{{ u.name }}" />
+                        <button class="btn secondary small" type="submit" {% if not src_ok or wb.gold < u.cost %}disabled{% endif %}>Upgrade</button>
+                      </form>
+                      {% if not src_ok %}<span class="muted" style="font-size:0.8rem">needs {{ u.source }}</span>{% endif %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    {% if fin_dalka_enabled %}
+      <div style="margin-top:1rem">
+        <h3>Workshop — Grimoire of Fin Dalka (Blood Legacy)</h3>
+        {% if wiz.fin_dalka.owned %}
+          <p class="muted" style="font-size:0.85rem">
+            Owned by {{ wiz.name or "your wizard" }}. A ciphered tome of all 8 Fire Giant spells.
+            Deciphering one spell costs {{ FIN_DALKA_DECIPHER_COST }}gc + a Will Roll (TN20, plus any
+            bonus below) rolled at the table — report the outcome here. A natural 1 locks that spell
+            forever for this wizard; any other failure adds a cumulative +1 bonus to future attempts
+            on it.
+          </p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Spell</th><th>Status</th><th>Report roll</th></tr></thead>
+              <tbody>
+                {% for sp in fin_dalka_spells %}
+                  <tr>
+                    <td><strong>{{ sp.name }}</strong></td>
+                    <td class="muted">
+                      {% if sp.known %}already known
+                      {% elif sp.locked %}locked (natural 1)
+                      {% elif sp.learned %}learned
+                      {% else %}+{{ sp.bonus }} bonus so far
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if not sp.known and not sp.locked and not sp.learned %}
+                        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
+                          <input type="hidden" name="action" value="fin_dalka_decipher" />
+                          <input type="hidden" name="spell_id" value="{{ sp.id }}" />
+                          <button class="btn small gold" type="submit" name="outcome" value="success" {% if wb.gold < FIN_DALKA_DECIPHER_COST %}disabled{% endif %}>Succeeded</button>
+                          <button class="btn small" type="submit" name="outcome" value="fail" {% if wb.gold < FIN_DALKA_DECIPHER_COST %}disabled{% endif %}>Failed</button>
+                          <button class="btn danger small" type="submit" name="outcome" value="nat1" {% if wb.gold < FIN_DALKA_DECIPHER_COST %}disabled{% endif %}>Natural 1</button>
+                        </form>
+                      {% elif sp.locked %}
+                        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form" onsubmit="return confirm('Unlock {{ sp.name }}? Only do this to correct a misclick — the book itself never lets a natural 1 be undone.');">
+                          <input type="hidden" name="action" value="unlock_fin_dalka_spell" />
+                          <input type="hidden" name="spell_id" value="{{ sp.id }}" />
+                          <button class="btn secondary small" type="submit">Unlock (misclick)</button>
+                        </form>
+                      {% endif %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:0.5rem" onsubmit="return confirm('Sell the Grimoire of Fin Dalka?');">
+            <input type="hidden" name="action" value="sell_fin_dalka_grimoire" />
+            <button class="btn danger small" type="submit">
+              Sell grimoire ({{ [FIN_DALKA_BASE_SELL - FIN_DALKA_SELL_PER_SPELL * (fin_dalka_spells | selectattr('learned') | list | length), 0] | max }}gc)
+            </button>
+          </form>
+        {% else %}
+          <p class="muted" style="font-size:0.85rem">
+            A ciphered tome of all 8 Fire Giant spells, open to any wizard once acquired.
+          </p>
+          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
+            <input type="hidden" name="action" value="acquire_fin_dalka_grimoire" />
+            <button class="btn secondary small" type="submit">Acquire the grimoire</button>
+          </form>
+        {% endif %}
+      </div>
+    {% endif %}
+    <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:1rem">
+      <input type="hidden" name="action" value="set_notes" />
+      <div class="form-row">
+        <label for="notes">Warband notes</label>
+        <textarea id="notes" name="notes">{{ wb.notes }}</textarea>
+      </div>
+      <button class="btn" type="submit">Save notes</button>
+    </form>
+  </details>
+
   {# ---- Base ---- #}
   <details class="card" id="base">
     <summary><span class="card-title">Home base</span></summary>
@@ -2539,83 +2711,6 @@
     </div>
   </details>
   {% endif %}
-
-  {# ---- Treasury & vault ---- #}
-  <details class="card" id="treasury-vault">
-    <summary><span class="card-title">Treasury and Vault <span class="gold">{{ wb.gold }} gc</span></span></summary>
-    <div class="grid-2">
-      <div>
-        <h3>Treasury</h3>
-        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
-          <input type="hidden" name="action" value="adjust_gold" />
-          <div class="form-row inline">
-            <div>
-              <label for="delta">Change (+/−)</label>
-              <input id="delta" name="delta" type="text" inputmode="numeric" pattern="[+-]?[0-9]+" required title="Enter a number, e.g. 20 or -5" />
-            </div>
-            <div>
-              <label for="reason">Reason</label>
-              <input id="reason" name="reason" type="text" />
-            </div>
-          </div>
-          <button class="btn gold" type="submit">Apply</button>
-        </form>
-      </div>
-      <div>
-        <h3>Vault items</h3>
-        {% if wb["vault_items"] %}
-          <ul class="list-plain">
-            {% for it in wb["vault_items"] %}
-              <li>
-                <strong>{{ it.name }}</strong>
-                {% if it.notes %}<span class="muted"> — {{ it.notes }}</span>{% endif %}
-                <form class="inline-form" method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" onsubmit="return confirm('Remove “{{ it.name }}” from the vault?');">
-                  <input type="hidden" name="action" value="remove_vault_item" />
-                  <input type="hidden" name="item_id" value="{{ it.id }}" />
-                  <button class="btn danger small" type="submit">×</button>
-                </form>
-              </li>
-            {% endfor %}
-          </ul>
-        {% else %}
-          <p class="empty">No vault items yet. Add via post-game loot.</p>
-        {% endif %}
-        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:0.75rem">
-          <input type="hidden" name="action" value="add_vault_item" />
-          <div class="form-row">
-            <label>Pick from a rulebook (fills the field below — still editable)</label>
-            <div class="loot-picker">
-              {{ loot_picker_row('vault', target_id='item_name') }}
-            </div>
-          </div>
-          <div class="form-row inline">
-            <div>
-              <label for="item_name">Add item</label>
-              {# Suggestions only — still a free-text box, so anything can be banked. #}
-              <input id="item_name" name="item_name" type="text" required list="magic-item-names" />
-              {% if magic_item_names %}
-                <datalist id="magic-item-names">
-                  {% for name in magic_item_names %}<option value="{{ name }}"></option>{% endfor %}
-                </datalist>
-              {% endif %}
-            </div>
-            <div>
-              <label>&nbsp;</label>
-              <button class="btn secondary" type="submit">Add</button>
-            </div>
-          </div>
-        </form>
-      </div>
-    </div>
-    <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:1rem">
-      <input type="hidden" name="action" value="set_notes" />
-      <div class="form-row">
-        <label for="notes">Warband notes</label>
-        <textarea id="notes" name="notes">{{ wb.notes }}</textarea>
-      </div>
-      <button class="btn" type="submit">Save notes</button>
-    </form>
-  </details>
 
   {# Campaign log — hidden from the UI for now, kept here in case it's wanted back later.
   <details class="card">
