@@ -125,6 +125,7 @@ from game_content import (
     load_potion_choices_detailed,
     load_quick_reference,
     load_random_encounters,
+    load_soldier_capable_items,
     load_spell_descriptions,
     load_spell_names,
     load_spellcaster_items,
@@ -166,7 +167,7 @@ from warband_store import (
     apply_monster_hunting_results,
     apply_portrait,
     apply_soldier_level_up,
-    assign_component_bag,
+    apprentice_takes_over,
     base_summary,
     become_vampire,
     break_wizard_pact,
@@ -885,7 +886,7 @@ def warband_view(warband_id: str) -> str:
         {**c, "cost": expansions.soldier_cost(wb, c, c["key"])}
         for c in soldier_list_for_ui()
         if c["source"] in wb_sources
-        and soldier_from_book_enabled(wb, c["source"])
+        and soldier_from_book_enabled(wb, c["source"], c["key"])
         and (c.get("temporary") or not c.get("requires_spell") or c["requires_spell"] in wb_spells)
         and expansions.soldier_state_block(wb, c["key"]) is None
     ]
@@ -911,9 +912,10 @@ def warband_view(warband_id: str) -> str:
     )
     giant_blooded_pending = bool(wb.get("giant_blooded_pending"))
     # Legendary Soldiers (Spellcaster Magazine, Issue 4): only worth showing the
-    # limit bar / hire-cap messaging when that book is actually on for this
-    # warband — see expansions.max_legendary_soldiers() for the cap itself.
-    legendary_soldiers_enabled = "Spellcaster Magazine" in wb_sources
+    # limit bar / hire-cap messaging when that book AND its own Legendary
+    # Soldiers sub-toggle are on — see expansions.max_legendary_soldiers()
+    # for the cap itself, expansions.legendary_soldiers_enabled() for the gate.
+    legendary_soldiers_enabled = expansions.legendary_soldiers_enabled(wb)
     legendary_type_keys_held = {
         s.get("type_key")
         for s in all_soldiers
@@ -979,15 +981,20 @@ def warband_view(warband_id: str) -> str:
     monster_hunting_pending_xp = sum(int(k.get("xp", 0)) for k in monster_hunting.get("kills") or [])
     monster_hunting_pending_gold = sum(int(p.get("gold", 0)) for p in monster_hunting.get("prizes") or [])
     wizard_components = (wb.get("wizard") or {}).get("components") or []
-    wizard_component_capacity = expansions.component_capacity(wb, wb.get("wizard") or {})
-    wizard_bags_held = int((wb.get("wizard") or {}).get("component_bags_held", 0))
+    wizard_component_capacity = expansions.component_capacity(wb, wb.get("wizard") or {}, "wizard")
+    wizard_bags_equipped = expansions.equipped_component_bags(wb.get("wizard") or {})
+    wizard_bags_credited = expansions.component_bag_credit(wb, "wizard")
     apprentice_components = (wb.get("apprentice") or {}).get("components") or []
     apprentice_component_capacity = (
-        expansions.component_capacity(wb, wb["apprentice"]) if wb.get("apprentice") else 0
+        expansions.component_capacity(wb, wb["apprentice"], "apprentice") if wb.get("apprentice") else 0
     )
-    apprentice_bags_held = int((wb.get("apprentice") or {}).get("component_bags_held", 0))
+    apprentice_bags_equipped = (
+        expansions.equipped_component_bags(wb["apprentice"]) if wb.get("apprentice") else 0
+    )
+    apprentice_bags_credited = (
+        expansions.component_bag_credit(wb, "apprentice") if wb.get("apprentice") else 0
+    )
     component_bags_bought = int(monster_hunting.get("bags_bought", 0))
-    component_bags_spare = component_bags_bought - wizard_bags_held - apprentice_bags_held
     # The Wildwoods' Supply Points (sp) economy + optional Cargo Transport for
     # wilderness campaigns — see warband_store.wildwoods_summary().
     wildwoods_enabled = "The Wildwoods" in wb_sources and bool(
@@ -1031,12 +1038,13 @@ def warband_view(warband_id: str) -> str:
         monster_hunter_active=monster_hunter_active,
         wizard_components=wizard_components,
         wizard_component_capacity=wizard_component_capacity,
-        wizard_bags_held=wizard_bags_held,
+        wizard_bags_equipped=wizard_bags_equipped,
+        wizard_bags_credited=wizard_bags_credited,
         apprentice_components=apprentice_components,
         apprentice_component_capacity=apprentice_component_capacity,
-        apprentice_bags_held=apprentice_bags_held,
+        apprentice_bags_equipped=apprentice_bags_equipped,
+        apprentice_bags_credited=apprentice_bags_credited,
         component_bags_bought=component_bags_bought,
-        component_bags_spare=component_bags_spare,
         wildwoods_enabled=wildwoods_enabled,
         wildwoods=wildwoods,
         schools=SCHOOLS,
@@ -1055,7 +1063,8 @@ def warband_view(warband_id: str) -> str:
             or key in ((wb.get("base") or {}).get("resources") or [])
         },
         standard_items=load_spellcaster_items(),  # no armour for wizard/apprentice UI
-        full_standard_items=load_standard_items(),  # includes armour/shield: captain picker + reference list
+        full_standard_items=load_standard_items(),  # unfiltered: page-wide item-suggestions datalist
+        soldier_capable_items=load_soldier_capable_items(),  # captain/soldier picker: armour, no caster gear
         item_slot_costs={
             it["name"]: int(it.get("slot_cost", 1))
             for it in load_standard_items()
@@ -1261,6 +1270,11 @@ def _act_dismiss_apprentice(wb: dict) -> tuple[bool, str]:
     return dismiss_apprentice(wb, refund=request.form.get("refund") == "on")
 
 
+@register_action("apprentice_takes_over")
+def _act_apprentice_takes_over(wb: dict) -> tuple[bool, str]:
+    return apprentice_takes_over(wb)
+
+
 @register_action("update_homerules")
 def _act_update_homerules(wb: dict) -> tuple[bool, str]:
     return update_homerules(wb, request.form)
@@ -1435,15 +1449,6 @@ def _act_apply_monster_hunting_results(wb: dict) -> tuple[bool, str]:
 @register_action("buy_component_bag")
 def _act_buy_component_bag(wb: dict) -> tuple[bool, str]:
     return buy_component_bag(wb)
-
-
-@register_action("assign_component_bag")
-def _act_assign_component_bag(wb: dict) -> tuple[bool, str]:
-    try:
-        delta = int(request.form.get("delta") or 0)
-    except ValueError:
-        delta = 0
-    return assign_component_bag(wb, request.form.get("holder") or "", delta)
 
 
 @register_action("advance_beastcrafter")

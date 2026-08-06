@@ -161,9 +161,9 @@
           random recruits up to 10 members and bypassing the usual gold/roster caps, per the
           book's endgame campaign mode. The surrounding restrictions (no spending gold, no
           hiring/dismissing outside this roll, no Vault storage, a soldier lost on a 1-8 survival
-          roll) are shown there as reminder text — this app doesn't enforce them for you.
-          Switching this on also switches on "Ordinary soldiers can take permanent injuries"
-          below, since the Random Recruit Status Table can inflict one on any recruited soldier.
+          roll) are shown there as reminder text. The Random Recruit Status Table can inflict a
+          permanent injury on any recruited soldier — turn on "Ordinary soldiers can take
+          permanent injuries" below too if your group wants that to actually apply.
         </p>
         <label class="checkbox-row" style="margin-top:0.6rem">
           <input name="monster_hunting_enabled" type="checkbox" {% if hr.monster_hunting_enabled %}checked{% endif %} />
@@ -183,8 +183,7 @@
           Needs The Wildwoods. Adds a Supply Points (sp) economy for wilderness campaigns and a
           purchasable Cargo Transport to the Wizard &amp; apprentice card below: buy/sell sp
           (1gc/sp, 2sp/gc), settle post-scenario consumption, and fit the transport with
-          upgrades. The transport's on-table push/combat rules are shown as reference text —
-          this app doesn't simulate tabletop movement.
+          upgrades. The transport's on-table push/combat rules are shown as reference text.
         </p>
         <label class="checkbox-row" style="margin-top:0.6rem">
           <input name="edition2_soldier_costs" type="checkbox" {% if hr.edition2_soldier_costs %}checked{% endif %} />
@@ -197,12 +196,34 @@
         </p>
         <label class="checkbox-row" style="margin-top:0.6rem">
           <input name="spellcaster_magazine_soldiers" type="checkbox" {% if hr.spellcaster_magazine_soldiers %}checked{% endif %} />
-          Spellcaster Magazine: allow its soldiers
+          Spellcaster Magazine: allow its soldiers (non-Legendary)
         </label>
         <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0">
-          Needs Spellcaster Magazine switched on above. Off by default; the magazine's troop stat
-          lines read as unbalanced to some groups — tick this to opt in to hiring them, while its
-          spells, treasure and bestiary entries stay available either way.
+          Needs Spellcaster Magazine switched on above. On by default; some groups find the
+          magazine's troop stat lines unbalanced — untick to drop just its hireable soldiers while
+          its spells, treasure and bestiary entries stay available either way. Covers every
+          Spellcaster Magazine soldier except Legendary Soldiers (its own toggle below).
+        </p>
+        <label class="checkbox-row" style="margin-top:0.6rem">
+          <input name="spellcaster_magazine_legendary_soldiers" type="checkbox" {% if hr.spellcaster_magazine_legendary_soldiers %}checked{% endif %} />
+          Spellcaster Magazine: allow Legendary Soldiers
+        </label>
+        <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0">
+          Needs Spellcaster Magazine switched on above. On by default. Legendary Soldiers (Issue 4)
+          are a separate, more expensive troop category limited by wizard level rather than freely
+          hired (1 base, +1 per 10 full wizard levels, max 8) — see the Legendary Soldiers limit bar
+          in the roster once enabled. Fielding one caps ordinary Specialists at 3. Also makes the
+          Captain a Legendary Soldier, subject to the same limit instead of the Specialist cap.
+        </p>
+        <label class="checkbox-row" style="margin-top:0.6rem">
+          <input name="firearms_rules_enabled" type="checkbox" {% if hr.firearms_rules_enabled %}checked{% endif %} />
+          Spellcaster Magazine: Firearms Rules
+        </label>
+        <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0">
+          Needs "allow its soldiers" above also switched on. On by default. Governs whether the
+          Musketeer, Coachman and Duellist appear in Hire soldier — both toggles must be on for
+          them to show up. Doesn't affect the standalone Pistol/Musket/Blunderbuss items, which
+          stay available regardless (standard items are never source-gated).
         </p>
         <label class="checkbox-row" style="margin-top:0.6rem">
           <input name="knightly_orders_enabled" type="checkbox" {% if hr.knightly_orders_enabled %}checked{% endif %} />
@@ -477,6 +498,10 @@
           <input id="soldier_permanent_injuries_enabled" name="soldier_permanent_injuries_enabled" type="checkbox" {% if hr.soldier_permanent_injuries_enabled %}checked{% endif %} />
           <label for="soldier_permanent_injuries_enabled" style="margin:0">Ordinary soldiers can take permanent injuries (Permanent Injury Table, page 77 — normally only the wizard/apprentice/captain's Survival Roll uses it)</label>
         </div>
+        <div class="checkbox-row">
+          <input id="free_dagger_enabled" name="free_dagger_enabled" type="checkbox" {% if hr.free_dagger_enabled %}checked{% endif %} />
+          <label for="free_dagger_enabled" style="margin:0">Every ordinary soldier gets a free backup dagger (a single dagger costs no item slot) — skips anyone already carrying a hand weapon and a dagger, two hand weapons, or two daggers; upgrades a lone dagger to two</label>
+        </div>
         <div class="form-row">
           <label for="soldier_max_levels">Max levels gained (per soldier)</label>
           <input id="soldier_max_levels" name="soldier_max_levels" type="number" min="0" value="{{ hr.soldier_max_levels }}" />
@@ -669,22 +694,20 @@
           <p class="muted" style="font-size:0.85rem">
             Blood Legacy's Fire Giant Wizard: Large, Strong, Elemental Resistance (2). No armour/
             shield item slots, no apprentice. Health cap 30; 200xp per level (book caps spending
-            at 400xp/game — untracked here, same as other per-game limits). Can't learn Chronomancer
-            spells or Write Scroll. A found magic weapon is giant-usable only on a roll of 16+;
-            potions/items are human-sized unless resized at the table — this app doesn't resolve
-            that, just tracks what's owned.
+            at 400xp/game). Can't learn Chronomancer spells or Write Scroll. A found magic weapon
+            is giant-usable only on a roll of 16+; potions/items are human-sized unless resized
+            at the table.
           </p>
         {% elif wiz.school == "Vampire" %}
           <p class="muted" style="font-size:0.85rem">
             Blood Legacy's Vampire Wizard: Undead, Immune to Control Undead, Magic Attacks, Mind
             Lock, Thaumaturgic Vulnerability, True Sight, Partial Immunity to Normal Damage. No
             apprentice (a 9-soldier roster instead — 4 specialist, unchanged). Will capped at 5,
-            Health cap 22; 120xp per level (book caps spending at 300xp/game — untracked here,
-            same as other per-game limits). Thaumaturge spells are never learnable, nor is
-            Transcendence. Never fields a Rangifer. Sun Damage, the Unnatural Health economy
-            (post-game healing costs 5gc/Health or a warband member's blood instead of the
-            ordinary rules), and regaining Health from damaging giants are house rules to apply
-            at the table — this app doesn't track per-game upkeep like that anywhere.
+            Health cap 22; 120xp per level (book caps spending at 300xp/game). Thaumaturge spells
+            are never learnable, nor is Transcendence. Never fields a Rangifer. Sun Damage, the
+            Unnatural Health economy (post-game healing costs 5gc/Health or a warband member's
+            blood instead of the ordinary rules), and regaining Health from damaging giants are
+            house rules to apply at the table.
           </p>
         {% endif %}
         <div class="char-block">
@@ -954,8 +977,8 @@
             remaining spell's Casting Number goes up by 1 flat (kept at its original school relation,
             not recalculated for Vampire), clamps Will to +5 and Health to 22, and trades the
             apprentice for a 9th soldier slot. A savepoint of the wizard's school/spells/apprentice is
-            kept, so it can be reverted later from this same panel. This app doesn't recompute the
-            wizard's level for the XP a lost spell/stat point no longer justifies.
+            kept, so it can be reverted later from this same panel. Recalculate the wizard's level
+            afterward for any XP a lost spell or capped stat no longer justifies.
           </p>
           {% set vampire_wizard_label = wiz.name or "your wizard" %}
           <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" onsubmit="return confirm('Turn {{ vampire_wizard_label }} into a Vampire? This drops Thaumaturge spells, clamps Will/Health to the Vampire caps, and trades the apprentice (if any) for a 9th soldier slot. It can be reverted later from this panel.');">
@@ -1066,33 +1089,26 @@
       <details class="ref-panel">
         <summary>Spell &amp; potion components (Monster Hunting)</summary>
         <p class="muted" style="font-size:0.85rem">
-          A free pouch holds {{ COMPONENT_POUCH_CAPACITY }} components. Each {{ SPELL_COMPONENT_BAG_NAME }}
-          bought below holds {{ SPELL_COMPONENT_BAG_CAPACITY }} more — assign a bought bag to the wizard or
-          apprentice to grow their capacity. Claim components from the kill log above. Using one gives +1
-          to a matching Casting Roll (or brewing that potion); a badge marks a component with no matching
-          spell/potion in this app's 2E data — still usable, just not tied to anything here.
+          A free pouch holds {{ COMPONENT_POUCH_CAPACITY }} components. Buy a {{ SPELL_COMPONENT_BAG_NAME }}
+          below, then carry it by writing "{{ SPELL_COMPONENT_BAG_NAME }}" into a wizard or apprentice item
+          slot — each one held that way adds {{ SPELL_COMPONENT_BAG_CAPACITY }} capacity, up to however many
+          the warband has bought. Claim components from the kill log above; using one gives +1 to a matching
+          Casting Roll (or brewing that potion). A <span class="badge">1E only</span> badge marks a component
+          with no matching spell/potion in this app's 2E data.
         </p>
         <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
           <input type="hidden" name="action" value="buy_component_bag" />
           <button class="btn secondary small" type="submit" {% if component_bags_bought >= SPELL_COMPONENT_BAG_LIMIT %}disabled{% endif %}>Buy {{ SPELL_COMPONENT_BAG_NAME }} ({{ SPELL_COMPONENT_BAG_COST }}gc)</button>
-          <span class="muted">{{ component_bags_bought }}/{{ SPELL_COMPONENT_BAG_LIMIT }} bought, {{ component_bags_spare }} spare</span>
+          <span class="muted">{{ component_bags_bought }}/{{ SPELL_COMPONENT_BAG_LIMIT }} bought</span>
         </form>
-        {% for holder, figure, components, capacity, bags_held in [("wizard", wiz, wizard_components, wizard_component_capacity, wizard_bags_held)] + ([("apprentice", ap, apprentice_components, apprentice_component_capacity, apprentice_bags_held)] if ap else []) %}
+        {% set holders = [("wizard", wiz, wizard_components, wizard_component_capacity, wizard_bags_equipped, wizard_bags_credited)] %}
+        {% if ap %}
+          {% set holders = holders + [("apprentice", ap, apprentice_components, apprentice_component_capacity, apprentice_bags_equipped, apprentice_bags_credited)] %}
+        {% endif %}
+        {% for holder, figure, components, capacity, bags_equipped, bags_credited in holders %}
           <div class="inline-form" style="margin:0.5rem 0 0.2rem">
             <strong>{{ figure.name or holder.capitalize() }}</strong> — {{ components | length }}/{{ capacity }} held
-            ({{ bags_held }} bag{{ 's' if bags_held != 1 }})
-            <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
-              <input type="hidden" name="action" value="assign_component_bag" />
-              <input type="hidden" name="holder" value="{{ holder }}" />
-              <input type="hidden" name="delta" value="1" />
-              <button class="btn secondary small" type="submit" {% if component_bags_spare < 1 %}disabled{% endif %} title="Give this figure a bought bag">+ bag</button>
-            </form>
-            <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
-              <input type="hidden" name="action" value="assign_component_bag" />
-              <input type="hidden" name="holder" value="{{ holder }}" />
-              <input type="hidden" name="delta" value="-1" />
-              <button class="btn secondary small" type="submit" {% if bags_held < 1 %}disabled{% endif %} title="Take a bag back from this figure">- bag</button>
-            </form>
+            ({{ bags_equipped }} {{ SPELL_COMPONENT_BAG_NAME }}{{ 's' if bags_equipped != 1 }} equipped{% if bags_equipped > bags_credited %}, only {{ bags_credited }} funded — buy more{% endif %})
           </div>
           {% if components %}
             <div class="stack-sm">
@@ -1279,6 +1295,25 @@
         </label>
         <button class="btn danger small" type="submit" onclick="return confirm('Dismiss apprentice?');">Dismiss apprentice</button>
       </form>
+      {% if wiz.level >= 6 %}
+        <p class="muted" style="font-size:0.85rem;margin-top:0.75rem">
+          If the wizard dies (core rules, p.103): a level 6+ wizard's apprentice may take over as
+          the new wizard, keeping their current stats, at the old wizard's level minus 6. The old
+          wizard's spellbook and gear are lost; the new wizard starts with no spells known.
+        </p>
+        {% set old_wizard_label = wiz.name or "The wizard" %}
+        {% set new_wizard_label = ap.name or "The apprentice" %}
+        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:0.4rem" onsubmit="return confirm('{{ old_wizard_label }} has died and {{ new_wizard_label }} takes over as the new wizard at level {{ wiz.level - 6 }}. The old wizard spellbook and gear are lost. Continue?');">
+          <input type="hidden" name="action" value="apprentice_takes_over" />
+          <button class="btn danger small" type="submit">Wizard died — apprentice takes over</button>
+        </form>
+      {% else %}
+        <p class="muted" style="font-size:0.85rem;margin-top:0.75rem">
+          If the wizard dies (core rules, p.103): at level {{ wiz.level }} (5 or below), the book
+          says to discard this warband entirely and create a new one — the apprentice cannot take
+          over until the wizard reaches level 6.
+        </p>
+      {% endif %}
     {% endif %}
   </details>
 
@@ -1405,7 +1440,7 @@
   {% if hr.captain_mode != 'off' or cap %}
     {# ---- Captain ---- #}
     <details class="card" id="captain">
-      <summary><span class="card-title">Captain</span></summary>
+      <summary><span class="card-title">Captain</span>{% if cap and legendary_soldiers_enabled %} <span class="badge legendary" title="Spellcaster Magazine, Issue 4: the Captain is a Legendary Soldier, subject to the Legendary Soldier limit instead of the Specialist limit.">legendary</span>{% endif %}</summary>
       {% if cap %}
         {% set cap_slots_n = hr.promote_captain_item_slots if cap.origin == 'promoted' else hr.captain_item_slots %}
         {% set cap_dismiss_cost = hr.promote_captain_cost if cap.origin == 'promoted' else hr.captain_hiring_cost %}
@@ -1451,7 +1486,7 @@
                   · Starting bonus: +{{ bonus_choice_amount(cap.bonus_extra_stat) }} {{ cap.bonus_extra_stat|capitalize }}
                 {% endif %}
                 {% if hr.captain_mind_control != 'none' %}
-                  · {{ CAPTAIN_MIND_CONTROL_LABELS[hr.captain_mind_control] }} (homerule note — not simulated)
+                  · {{ CAPTAIN_MIND_CONTROL_LABELS[hr.captain_mind_control] }}
                 {% endif %}
               </p>
               <details class="ref-panel">
@@ -1466,7 +1501,7 @@
                 {% else %}
                   <p class="empty">No tricks known.</p>
                 {% endif %}
-                <p class="muted" style="font-size:0.8rem">Each trick may be used once per game — purely descriptive, tracked at the table, not simulated here.</p>
+                <p class="muted" style="font-size:0.8rem">Each trick may be used once per game.</p>
               </details>
               <details class="ref-panel">
                 <summary>Equipment &amp; notes</summary>
@@ -1478,7 +1513,7 @@
                 {% set slots = cap.item_slots if cap.item_slots is defined else [] %}
                 {% set prefix = 'captain' %}
                 {% set n = cap_slots_n %}
-                {% set standard_items = full_standard_items %}
+                {% set standard_items = soldier_capable_items %}
                 {% include '_item_slots.html' %}
                 <div class="form-row">
                   <label for="captain_notes">Notes</label>
@@ -1695,7 +1730,7 @@
         </p>
         {% if ragged_warbands_rules %}
           <details>
-            <summary class="muted" style="cursor:pointer;font-size:0.85rem">Campaign reminders (not enforced by this app)</summary>
+            <summary class="muted" style="cursor:pointer;font-size:0.85rem">Campaign reminders</summary>
             <div class="stack-sm" style="margin-top:0.4rem">
               {% for row in ragged_warbands_rules.rows %}
                 <p class="muted" style="font-size:0.82rem"><strong>{{ row.name }}:</strong> {{ row.text }}</p>
@@ -1853,7 +1888,7 @@
                             {% set prefix = 'soldier_' ~ s.id %}
                             {% set n = soldier_slot_n %}
                             {% set slots = s.item_slots if s.item_slots is defined else [] %}
-                            {% set standard_items = full_standard_items %}
+                            {% set standard_items = soldier_capable_items %}
                             {% include '_item_slots.html' %}
                           </div>
                         </details>

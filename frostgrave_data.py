@@ -1558,8 +1558,8 @@ SOLDIERS: dict[str, dict] = {
         "will": 1,
         "health": 12,
         "gear": "Two daggers, light armour",
-        "notes": "Once per game, may treat the first initiative roll of 1 as a 2 for the purpose of springing a trap.",
-        "description": "Someone who has survived the city's traps often enough to read the warning signs. Once per game, treats the first initiative roll of 1 as a 2 for the purpose of springing a trap, giving the party one extra chance to avoid it.",
+        "notes": "Once per game, may treat the first initiative roll of 2 as a 1 for the purpose of springing a trap.",
+        "description": "Someone who has survived the city's traps often enough to read the warning signs. Once per game, treats the first initiative roll of 2 as a 1 for the purpose of springing a trap, giving the party one extra chance to avoid it.",
     },
     "tunnel_fighter": {
         "name": "Tunnel Fighter",
@@ -1936,7 +1936,7 @@ SOLDIERS: dict[str, dict] = {
     "guide": {
         "name": "Guide",
         "cost": 75,
-        "category": "specialist",
+        "category": "standard",
         "source": "The Wildwoods",
         "move": 6,
         "fight": 1,
@@ -1944,15 +1944,34 @@ SOLDIERS: dict[str, dict] = {
         "armour": 11,
         "will": 1,
         "health": 12,
-        "gear": "Hand weapon",
+        "gear": "Staff, dagger, light armour",
         "notes": (
             "Picks a Terrain Expertise (Mountain/Bog/Ice/Forest); never consumes Supply "
             "Points. In a wilderness game matching that terrain, gains Nimble and the "
-            "warband gains +2 Initiative and +2sp post-game. An Expert Guide costs 125gc "
-            "(+2 Fight/+2 Shoot in matching terrain instead of +0/+0); only one guide's "
-            "bonus applies per game even with multiple in the warband."
+            "warband gains +2 Initiative and +2sp post-game; only one guide's bonus "
+            "applies per game even with multiple in the warband."
         ),
-        "description": 'A wilderness scout (The Wildwoods) who knows one kind of terrain intimately. Picks a Terrain Expertise (Mountain, Bog, Ice, or Forest) at hire; never consumes Supply Points. In a wilderness game whose dominant terrain matches, gains the Nimble trait (no rough-ground movement penalty) and the whole warband gains +2 to its Initiative Roll and +2 Supply Points after the game. Costs 125gc as an "Expert" (+2 Fight/+2 Shoot instead of +0/+0 in matching terrain). Multiple Guides may be hired, but only one grants its bonus in any given game.',
+        "description": 'A wilderness scout (The Wildwoods) who knows one kind of terrain intimately. Picks a Terrain Expertise (Mountain, Bog, Ice, or Forest) at hire; never consumes Supply Points. In a wilderness game whose dominant terrain matches, gains the Nimble trait (no rough-ground movement penalty) and the whole warband gains +2 to its Initiative Roll and +2 Supply Points after the game. Multiple Guides may be hired, but only one grants its bonus in any given game.',
+    },
+    "expert_guide": {
+        "name": "Expert Guide",
+        "cost": 125,
+        "category": "specialist",
+        "source": "The Wildwoods",
+        "move": 6,
+        "fight": 1,
+        "shoot": 2,
+        "armour": 11,
+        "will": 1,
+        "health": 12,
+        "gear": "Staff, bow, quiver, dagger, light armour",
+        "notes": (
+            "Picks a Terrain Expertise (Mountain/Bog/Ice/Forest); never consumes Supply "
+            "Points. In a wilderness game matching that terrain, gains Nimble and the "
+            "warband gains +2 Initiative and +2sp post-game; only one guide's bonus "
+            "applies per game even with multiple in the warband."
+        ),
+        "description": 'A higher-trained wilderness scout (The Wildwoods) than an ordinary Guide, gaining +2 Fight and +2 Shoot in matching terrain instead of +0/+0. Picks a Terrain Expertise (Mountain, Bog, Ice, or Forest) at hire; never consumes Supply Points. In a wilderness game whose dominant terrain matches, also gains the Nimble trait (no rough-ground movement penalty) and the whole warband gains +2 to its Initiative Roll and +2 Supply Points after the game. Multiple Guides may be hired, but only one grants its bonus in any given game.',
     },
     "trapper": {
         "name": "Trapper",
@@ -1980,7 +1999,7 @@ SOLDIERS: dict[str, dict] = {
         "armour": 11,
         "will": 0,
         "health": 12,
-        "gear": "Hand weapon",
+        "gear": "Hand weapon, bow, quiver, dagger, light armour",
         "notes": (
             "Wilderness Survival. Prize Taker: +1 Fight/Shoot vs. Horns/Antlers/Bounty "
             "creatures, +5 XP for personally killing one (once/game). House rule: cannot "
@@ -2001,7 +2020,7 @@ SOLDIERS: dict[str, dict] = {
         "armour": 10,
         "will": 0,
         "health": 12,
-        "gear": "—",
+        "gear": "Hand weapon, Vial of Blood",
         "notes": "Starts with a Vial of Blood. Adjacent to a vampire with no enemies within 1\", may hand it off to heal the vampire up to 5 Health.",
         "description": 'A supplier to the undead nobility (Blood Legacy), keeping a vampire fed away from the hunt. Starts with a Vial of Blood; while adjacent to a vampire with no enemies within 1", may give it up as an action to heal that vampire up to 5 Health.',
     },
@@ -2016,7 +2035,7 @@ SOLDIERS: dict[str, dict] = {
         "armour": 11,
         "will": 1,
         "health": 12,
-        "gear": "Hand weapon",
+        "gear": "Hand weapon, dagger, light armour",
         "notes": "Supporting Figure Maximum (opponents gain at most +2 from supporting figures against it). Opponent Armour Reduction: -1 Armour to a light/heavy-armoured foe it beats in combat.",
         "description": 'A blade specialist (Blood Legacy) who thrives against groups. Supporting Figure Maximum limits any opponent to at most +2 Fight from supporting figures when fighting the Swordmaster. Opponent Armour Reduction: a light- or heavy-armoured foe it beats in combat suffers -1 Armour.',
     },
@@ -2031,7 +2050,7 @@ SOLDIERS: dict[str, dict] = {
         "armour": 11,
         "will": 2,
         "health": 12,
-        "gear": "Hand weapon",
+        "gear": "Hand weapon, crossbow, quiver, light armour",
         "notes": "Magic Attacks vs. Undead. Hunter's Will: +2 Will while a vampire is on the table. Immune to Energy Drain.",
         "description": "A specialist (Blood Legacy) trained specifically to hunt the undead nobility. All attacks count as magic when fighting Undead. Hunter's Will: gains +2 Will for as long as a vampire is on the table. Immune to Energy Drain.",
     },
@@ -2131,8 +2150,8 @@ SOLDIERS: dict[str, dict] = {
         "will": 1,
         "health": 10,
         "gear": "Musket, powder horn, leather armour, hand weapon",
-        "notes": "Specialist Soldier (2E errata). Firearm rules (range, reload, Misfire table) are a deferred mechanic.",
-        "description": 'A black-powder marksman (Spellcaster Magazine, Issue 1). Carries a Musket — a two-handed firearm, only one at a time, no shield; usable in melee as a two-handed weapon but without the usual +2 damage bonus. The full firearm subsystem (Inaccurate/Armour Piercing/Loud traits, reload actions, the Misfire table) is a deferred mechanic — see the Additional Rules reference for the full rules text.',
+        "notes": "Specialist Soldier (2E errata). Musket and Powder Horn are real catalog items — assign them from this soldier's item slots after hiring.",
+        "description": 'A black-powder marksman (Spellcaster Magazine, Issue 1). Carries a Musket — a two-handed firearm, only one at a time, no shield; usable in melee as a two-handed weapon but without the usual +2 damage bonus. See the Lexicon\'s Black Powder Firearms table for the full firearm rules (Inaccurate/Armour Piercing/Loud traits, reload actions, the Misfire table) and its purchasable upgrades.',
     },
     "coachman": {
         "name": "Coachman",
@@ -2146,8 +2165,8 @@ SOLDIERS: dict[str, dict] = {
         "will": 1,
         "health": 10,
         "gear": "Blunderbuss, powder horn, leather armour, hand weapon",
-        "notes": "Specialist Soldier (2E errata). Firearm rules (range, reload, Misfire table) are a deferred mechanic.",
-        "description": 'A shotgun-armed guard (Spellcaster Magazine, Issue 1). Carries a Blunderbuss — a two-handed firearm whose shooting attack normally hits the target and every other figure within 1" of it; usable in melee like a pistol, but without the +1 Fight combo bonus. The full firearm subsystem is a deferred mechanic — see the Additional Rules reference for the full rules text.',
+        "notes": "Specialist Soldier (2E errata). Blunderbuss and Powder Horn are real catalog items — assign them from this soldier's item slots after hiring.",
+        "description": 'A shotgun-armed guard (Spellcaster Magazine, Issue 1). Carries a Blunderbuss — a two-handed firearm whose shooting attack normally hits the target and every other figure within 1" of it; usable in melee like a pistol, but without the +1 Fight combo bonus. See the Lexicon\'s Black Powder Firearms table for the full firearm rules and its purchasable upgrades.',
     },
     "duellist": {
         "name": "Duellist",
@@ -2161,8 +2180,8 @@ SOLDIERS: dict[str, dict] = {
         "will": 2,
         "health": 12,
         "gear": "2 pistols, powder horn, leather armour, hand weapon",
-        "notes": "Specialist Soldier (2E errata). Firearm rules (range, reload, Misfire table) are a deferred mechanic.",
-        "description": 'A two-pistol gunfighter (Spellcaster Magazine, Issue 1). Carries a pair of Pistols — one-handed firearms that double as daggers (never counts as unarmed) and grant +1 Fight when paired with a hand weapon in Frostgrave. The full firearm subsystem is a deferred mechanic — see the Additional Rules reference for the full rules text.',
+        "notes": "Specialist Soldier (2E errata). Pistols and Powder Horn are real catalog items — assign them from this soldier's item slots after hiring.",
+        "description": 'A two-pistol gunfighter (Spellcaster Magazine, Issue 1). Carries a pair of Pistols — one-handed firearms that double as daggers (never counts as unarmed) and grant +1 Fight when paired with a hand weapon in Frostgrave. See the Lexicon\'s Black Powder Firearms table for the full firearm rules and its purchasable upgrades.',
     },
     # --- Spellcaster Magazine: Issue 3 rangifer troop types ---
     "rangifer_boar": {
@@ -2323,7 +2342,7 @@ SOLDIERS: dict[str, dict] = {
     "bookhound": {
         "name": "Bookhound",
         "cost": 300,
-        "category": "specialist",
+        "category": "legendary",
         "source": "Spellcaster Magazine",
         "move": 6,
         "fight": 2,
@@ -2344,7 +2363,7 @@ SOLDIERS: dict[str, dict] = {
     "dire_hound": {
         "name": "Dire Hound",
         "cost": 200,
-        "category": "specialist",
+        "category": "legendary",
         "source": "Spellcaster Magazine",
         "move": 8,
         "fight": 3,
@@ -2363,7 +2382,7 @@ SOLDIERS: dict[str, dict] = {
     "elemental_archer": {
         "name": "Elemental Archer",
         "cost": 300,
-        "category": "specialist",
+        "category": "legendary",
         "source": "Spellcaster Magazine",
         "move": 6,
         "fight": 2,
@@ -2384,7 +2403,7 @@ SOLDIERS: dict[str, dict] = {
     "graverobber": {
         "name": "Graverobber",
         "cost": 300,
-        "category": "specialist",
+        "category": "legendary",
         "source": "Spellcaster Magazine",
         "move": 6,
         "fight": 3,
@@ -2404,7 +2423,7 @@ SOLDIERS: dict[str, dict] = {
     "shadow_walker": {
         "name": "Shadow-Walker",
         "cost": 300,
-        "category": "specialist",
+        "category": "legendary",
         "source": "Spellcaster Magazine",
         "move": 7,
         "fight": 4,
@@ -2424,7 +2443,7 @@ SOLDIERS: dict[str, dict] = {
     "telekinetic": {
         "name": "Telekinetic",
         "cost": 300,
-        "category": "specialist",
+        "category": "legendary",
         "source": "Spellcaster Magazine",
         "move": 6,
         "fight": 3,
@@ -2444,7 +2463,7 @@ SOLDIERS: dict[str, dict] = {
     "whip_master": {
         "name": "Whip-Master",
         "cost": 300,
-        "category": "specialist",
+        "category": "legendary",
         "source": "Spellcaster Magazine",
         "move": 6,
         "fight": 3,
@@ -2465,7 +2484,7 @@ SOLDIERS: dict[str, dict] = {
     "monster_hunter": {
         "name": "Monster Hunter",
         "cost": 300,
-        "category": "specialist",
+        "category": "legendary",
         "source": "Spellcaster Magazine",
         "move": 6,
         "fight": 3,
@@ -2486,7 +2505,7 @@ SOLDIERS: dict[str, dict] = {
     "potion_master": {
         "name": "Potion Master",
         "cost": 300,
-        "category": "specialist",
+        "category": "legendary",
         "source": "Spellcaster Magazine",
         "move": 6,
         "fight": 2,
@@ -2614,6 +2633,14 @@ LEGENDARY_SOLDIER_TYPE_KEYS = frozenset({
 LEGENDARY_SOLDIER_BASE_MAX = 1  # every warband may field 1 regardless of level
 LEGENDARY_SOLDIER_LEVEL_STEP = 10  # +1 more per 10 full wizard levels
 LEGENDARY_SOLDIER_MAX_CAP = 8  # hard ceiling, reached at level 70+
+
+# Firearm-armed soldiers (Spellcaster Magazine, Issue 1's Black Powder
+# Firearms): gated behind both the ordinary Spellcaster Magazine soldiers
+# toggle and their own Firearms Rules toggle — see
+# warband_store.soldier_from_book_enabled(). Doesn't gate the standalone
+# Pistol/Musket/Blunderbuss items themselves (standard items are
+# deliberately never source-gated).
+FIREARM_SOLDIER_TYPE_KEYS = frozenset({"musketeer", "coachman", "duellist"})
 
 # Extra source books whose soldiers / creatures / rules can be toggled on per
 # warband from the "Additional Rules and Homerules" tab. Core Rules content is

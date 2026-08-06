@@ -137,7 +137,9 @@
   <details class="card">
     <summary><span class="card-title">Arms, armour &amp; consumables</span></summary>
     <p class="muted">General Arms and Armour List from Frostgrave 2e, plus a few notable supplement
-      weapons and potion / scroll / grimoire types.</p>
+      weapons and potion / scroll / grimoire types. Most of this is free starting equipment per the
+      core rules; a handful of supplement items (currently the black powder firearms and their
+      upgrades) are commissioned for real gold instead — each Info panel below says which.</p>
     <div class="item-list-detail">
       <div class="item-list-head" aria-hidden="true">
         <span class="col-name">Item</span>
@@ -154,7 +156,14 @@
               <span class="col-summary muted">{{ it.summary }}</span>
               <span class="col-info item-desc-toggle">Info</span>
             </summary>
-            <p class="item-desc-body">{{ it.description }}</p>
+            <p class="item-desc-body">
+              {{ it.description }}
+              {% if it.cost is defined %}
+                <strong>Acquiring it:</strong> commissioned/bought separately for {{ it.cost }}gc.
+              {% else %}
+                <strong>Acquiring it:</strong> free starting equipment — no cost is tracked for it here.
+              {% endif %}
+            </p>
           </details>
         </div>
       {% endfor %}
@@ -178,7 +187,11 @@
                   <span class="col-summary"></span>
                   <span class="col-info item-desc-toggle">Info</span>
                 </summary>
-                <p class="item-desc-body">{{ p.description }}</p>
+                <p class="item-desc-body">
+                  {{ p.description }}
+                  <strong>Acquiring it:</strong> found as treasure (see the Loot tables card below) —
+                  not purchased directly.
+                </p>
               </details>
             </div>
           {% endfor %}
@@ -368,7 +381,9 @@
     <summary><span class="card-title">Magic items &amp; treasure ({{ magic_item_count }})</span></summary>
     <p class="muted">Treasure from the core rules and the supplements. A book's items only become
       suggestions in a warband's vault once that book is switched on under its Additional Rules and
-      Homerules — but everything is browsable here.</p>
+      Homerules — but everything is browsable here. Acquiring them: found as treasure during play
+      (see the Loot tables card below for how each book distributes them) — none of these are bought
+      directly, so no gc cost is listed.</p>
     {% for group in magic_item_groups %}
       <details class="ref-panel">
         <summary>{{ group.source }} ({{ group.rows|length }})</summary>
@@ -420,8 +435,7 @@
     <summary><span class="card-title">Expansion rules</span></summary>
     <p class="muted">The table rules each supplement adds beyond its soldiers, spells and creatures —
       traps, demonic attributes, underground play, the optional core-rule updates, the solo/co-op
-      toolkit. Reference only: these govern play at the table, so the app shows them rather than
-      tracking them.</p>
+      toolkit.</p>
     {% for book, sections in expansion_rules.items() %}
       <details class="ref-panel">
         <summary>{{ book }}</summary>
@@ -528,9 +542,9 @@
       <p class="muted" style="font-size:0.85rem">
         Forged at wizard level {{ PACT_TIER_LEVELS|join(', ') }} (max {{ PACT_MAX_TIERS }} pacts), each
         needing a demon's True Name in the vault by the book — the app only checks the level
-        requirement, since items are optional to track and can be handled at the table. Each pact
-        pairs one Sacrifice (a recurring cost) with one Boon (a permanent benefit). Breaking a pact
-        costs 1 level and 1 Health per Sacrifice held.
+        requirement, so track the True Name yourself. Each pact pairs one Sacrifice (a recurring
+        cost) with one Boon (a permanent benefit). Breaking a pact costs 1 level and 1 Health per
+        Sacrifice held.
       </p>
       <p style="margin:0.6rem 0 0.2rem"><strong>Sacrifices:</strong></p>
       <ul style="margin:0.2rem 0">
@@ -548,7 +562,7 @@
     <summary><span class="card-title">Ghost Archipelago</span></summary>
     <p class="muted">A separate Osprey ruleset, not a Frostgrave supplement — a Heritor and a Warden
       lead a Crew across the Lost Isles instead of a Wizard leading a Warband. Nothing here is
-      hireable and it has no source-book toggle; it is carried purely for reference.</p>
+      hireable and it has no source-book toggle.</p>
     {% if ghost.intro %}<p class="muted">{{ ghost.intro }}</p>{% endif %}
     {% for sec in ghost.sections %}
       <details class="ref-panel">

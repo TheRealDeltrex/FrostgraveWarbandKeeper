@@ -582,13 +582,78 @@ def build_expansion_rules_spellcaster(doc: str) -> dict:
         if payload.get("rows") or payload.get("entries"):
             out[SPELLCASTER_BOOK].append(payload)
 
-    # --- Issue 1 ---
-    ch = section(doc, "i1-firearms")
-    fa_notes = notes(ch)
+    # --- Issue 1 --- Black Powder Firearms is implemented: Pistol, Musket,
+    # Blunderbuss and Powder Horn are real catalog items (data/standard_items.json),
+    # as are the four commissioned upgrades (Double-barrelled, Axe-gun, Superior
+    # Craftsmanship, Silver Bullets — each its own Gear-category item, written into
+    # a slot alongside the firearm it upgrades). This section is hand-authored
+    # rather than pulled from `ch`/`two_col_rows` — the raw HTML's two-column
+    # layout doesn't carry gc costs alongside each row the way the hand-tuned
+    # blurb/rows below do, and the extracted title would otherwise call this a
+    # "deferred mechanic" it no longer is.
     add(
-        "Black Powder Firearms (Issue 1 — deferred mechanic, reference only)",
-        fa_notes[0] if fa_notes else "",
-        rows=two_col_rows(ch) + ([("Weather variant", fa_notes[1])] if len(fa_notes) > 1 else []),
+        "Black Powder Firearms (Issue 1 — items purchasable)",
+        (
+            "Pistol, Musket, Blunderbuss, and Powder Horn are real catalog items — pick them "
+            "from the item-slot dropdown on a wizard/apprentice/captain/soldier like any other "
+            "weapon (Musket and Blunderbuss correctly take two slots). Double-barrelled, "
+            "Axe-gun, Superior Craftsmanship and Silver Bullets are commissioned upgrades for "
+            "an already-owned firearm — also real catalog items (Gear), written into a "
+            "separate item slot alongside the firearm they upgrade; each may only be bought "
+            "once per firearm, but a firearm may carry as many different upgrades as can be "
+            "afforded. Optional rules for firearms in Frostgrave and Ghost Archipelago: "
+            "firearms use bow/crossbow rules for LoS and cover; reloading costs an action "
+            "(can replace the mandatory move); never usable In Combat. In Ghost Archipelago a "
+            "firearm also requires a powder horn (free, takes a slot). Every firearm is "
+            "Inaccurate (-1 Shoot), Armour Piercing (+2 damage; also -2 Armour, min 10, "
+            "within half range), Loud (natural 20 triggers a Random Encounter roll), and "
+            "subject to Misfire on a natural 1 — see the misfire table below for the roll "
+            "result."
+        ),
+        rows=[
+            ("1–5", "Snap: must be reloaded before firing again."),
+            ("6–10", "Dud: spend an action cleaning the barrel, then another to reload."),
+            ("11–14", "Wild Shot: immediate +0 Shoot attack against the closest figure to the shooter."),
+            ("15–16", "Small Explosion: firearm destroyed."),
+            ("17–18", "Explosion: +1 attack against the firer; firearm destroyed."),
+            ("19–20+", "Explosion: +5 attack against the firer; firearm destroyed."),
+            (
+                "Pistol",
+                "50gc - 10″ - One-handed; doubles as a dagger (never unarmed; +1 Fight for "
+                "a hand weapon too, Frostgrave only). May carry as many as item slots allow.",
+            ),
+            (
+                "Musket",
+                "100gc - 24″ - Two-handed; only one carried, no shield. Usable in melee as "
+                "a two-handed weapon but without the usual +2 damage.",
+            ),
+            (
+                "Blunderbuss",
+                "100gc - 14″ - Two-handed; shooting attack hits the target and every other "
+                "figure within 1\" of it (misfire on the first roll cancels the rest). Melee "
+                "like a pistol, but no +1 Fight combo bonus.",
+            ),
+            (
+                "Double-barrelled",
+                "400gc - Any firearm; fire twice before reloading (each shot an action; full "
+                "reload = two actions). Misfires get +2 to the roll.",
+            ),
+            ("Axe-gun", "250gc - Pistols/blunderbusses only; counts as a hand weapon (not dagger) in melee."),
+            ("Superior Craftsmanship", "300gc - Any firearm; -1 on misfire rolls."),
+            (
+                "Silver Bullets",
+                "250gc - Any firearm; counts as magical and +2 extra damage (total +4) vs. "
+                "werewolves and vampires.",
+            ),
+            ("Musketeer", "60gc - 6 - +2 - +2 - 11 - +1 - 10 - Musket, Powder Horn, Leather Armour, Hand Weapon"),
+            ("Coachman", "60gc - 6 - +2 - +2 - 11 - +1 - 10 - Blunderbuss, Powder Horn, Leather Armour, Hand Weapon"),
+            ("Duellist", "100gc - 6 - +3 - +2 - 11 - +2 - 12 - 2 Pistols, Powder Horn, Leather Armour, Hand Weapon"),
+            (
+                "Weather variant",
+                "Optional: in scenarios explicitly raining or snowing, misfire on a 1 or 2. "
+                "Lost/destroyed firearms are replaced free after the game.",
+            ),
+        ],
     )
     ch = section(doc, "i1-horses")
     horse_notes = notes(ch)

@@ -5911,7 +5911,7 @@
  "Spellcaster Magazine": [
   {
    "title": "Black Powder Firearms (Issue 1 — items purchasable)",
-   "blurb": "Pistol, Musket, Blunderbuss, Axe-gun, and Powder Horn are real catalog items now — pick them from the item-slot dropdown on a wizard/apprentice/captain/soldier like any other weapon (Musket and Blunderbuss correctly take two slots). Optional rules for firearms in Frostgrave and Ghost Archipelago: firearms use bow/crossbow rules for LoS and cover; reloading costs an action (can replace the mandatory move); never usable In Combat. In Ghost Archipelago a firearm also requires a powder horn (free, takes a slot). Every firearm is Inaccurate (-1 Shoot), Armour Piercing (+2 damage; also -2 Armour, min 10, within half range), Loud (natural 20 triggers a Random Encounter roll), and subject to Misfire on a natural 1 — the misfire table and gc-cost upgrades (Double-barrelled, Superior Craftsmanship, Silver Bullets) below are table-time detail this app doesn't simulate.",
+   "blurb": "Pistol, Musket, Blunderbuss, and Powder Horn are real catalog items — pick them from the item-slot dropdown on a wizard/apprentice/captain/soldier like any other weapon (Musket and Blunderbuss correctly take two slots). Double-barrelled, Axe-gun, Superior Craftsmanship and Silver Bullets are commissioned upgrades for an already-owned firearm — also real catalog items (Gear), written into a separate item slot alongside the firearm they upgrade; each may only be bought once per firearm, but a firearm may carry as many different upgrades as can be afforded. Optional rules for firearms in Frostgrave and Ghost Archipelago: firearms use bow/crossbow rules for LoS and cover; reloading costs an action (can replace the mandatory move); never usable In Combat. In Ghost Archipelago a firearm also requires a powder horn (free, takes a slot). Every firearm is Inaccurate (-1 Shoot), Armour Piercing (+2 damage; also -2 Armour, min 10, within half range), Loud (natural 20 triggers a Random Encounter roll), and subject to Misfire on a natural 1 — see the misfire table below for the roll result.",
    "rows": [
     {
      "name": "1–5",
@@ -5951,7 +5951,7 @@
     },
     {
      "name": "Double-barrelled",
-     "text": "400gc - Fire twice before reloading (each shot an action; full reload = two actions). Misfires get +2 to the roll."
+     "text": "400gc - Any firearm; fire twice before reloading (each shot an action; full reload = two actions). Misfires get +2 to the roll."
     },
     {
      "name": "Axe-gun",
@@ -5963,7 +5963,7 @@
     },
     {
      "name": "Silver Bullets",
-     "text": "250gc - Counts as magical and +2 extra damage (total +4) vs. werewolves and vampires."
+     "text": "250gc - Any firearm; counts as magical and +2 extra damage (total +4) vs. werewolves and vampires."
     },
     {
      "name": "Musketeer",

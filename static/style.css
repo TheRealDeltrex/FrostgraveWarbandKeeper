@@ -586,6 +586,11 @@ tr.status-dead {
   border-color: var(--border);
 }
 
+.badge.legendary {
+  border-color: rgba(224, 184, 78, 0.5);
+  color: var(--gold);
+}
+
 .badge.temporary {
   border-color: rgba(200, 148, 224, 0.45);
   color: #c894e0;

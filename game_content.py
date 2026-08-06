@@ -28,6 +28,7 @@ def load_standard_items() -> list[dict]:
         it.setdefault("slot_cost", 1)
         it.setdefault("kind", "simple")
         it.setdefault("spellcaster_allowed", True)
+        it.setdefault("caster_only", False)
         it.setdefault("source", "Core Rules")
     return items
 
@@ -35,6 +36,15 @@ def load_standard_items() -> list[dict]:
 def load_spellcaster_items() -> list[dict]:
     """Items shown on wizard/apprentice slots (no armour/shield; unarmed not listed)."""
     return [it for it in load_standard_items() if it.get("spellcaster_allowed", True)]
+
+
+def load_soldier_capable_items() -> list[dict]:
+    """Items shown on captain/soldier slots — the full catalog (armour/shield
+    included, unlike load_spellcaster_items()) minus anything marked
+    caster_only (the Spell Component Bag: only a wizard or apprentice has
+    anywhere to put its contents, so it's meaningless gear for a captain or
+    soldier to carry)."""
+    return [it for it in load_standard_items() if not it.get("caster_only")]
 
 
 @lru_cache(maxsize=1)

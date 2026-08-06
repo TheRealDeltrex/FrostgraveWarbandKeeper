@@ -41,11 +41,11 @@ from frostgrave_data import (
     CAPTAIN_TRICKS,
     CARGO_TRANSPORT_COST,
     CARGO_TRANSPORT_UPGRADES,
-    COMPONENT_POUCH_CAPACITY,
     FIN_DALKA_BASE_SELL,
     FIN_DALKA_DECIPHER_COST,
     FIN_DALKA_SELL_PER_SPELL,
     FIRE_GIANT_WIZARD_BASE,
+    FIREARM_SOLDIER_TYPE_KEYS,
     GIANT_BLOODED_COST,
     GIANT_BLOODED_STAT_DELTA,
     HORSE_COST,
@@ -79,7 +79,6 @@ from frostgrave_data import (
     SOLDIERS,
     SOURCE_BOOK_BY_SLUG,
     SOURCE_BOOKS,
-    SPELL_COMPONENT_BAG_CAPACITY,
     SPELL_COMPONENT_BAG_COST,
     SPELL_COMPONENT_BAG_LIMIT,
     SPELL_COMPONENT_BAG_NAME,
@@ -367,6 +366,13 @@ def default_homerules() -> dict:
         # soldiers to shrug off a Survival Roll with a lasting injury instead
         # ticks this on.
         "soldier_permanent_injuries_enabled": False,
+        # General house rule, off by default and not tied to any specific
+        # source book: every ordinary human soldier hire (the same "not an
+        # animal, construct, demon, or non-human troop type" filter as
+        # Giant-Blooded eligibility) gets a free backup dagger, since a
+        # single dagger costs no item slot under the core rules. Gear-text
+        # only — never touches item_slots. See expansions.free_dagger_gear().
+        "free_dagger_enabled": False,
         "soldier_max_levels": SOLDIER_MAX_LEVELS,
         "soldier_stat_caps": deepcopy(SOLDIER_STAT_CAPS),
         "promote_captain_cost": PROMOTE_CAPTAIN_COST,
@@ -427,11 +433,26 @@ def default_homerules() -> dict:
         # edition than the rest of the 2e tables. On by default; see
         # expansions.EDITION_2_SOLDIER_COSTS.
         "edition2_soldier_costs": True,
-        # Spellcaster Magazine's troop stat lines read as unbalanced; this lets
-        # a warband keep the book's spells/items/bestiary switched on while
-        # dropping just its hireable soldiers. Off by default — a group opts
-        # in to the soldiers rather than opting out.
-        "spellcaster_magazine_soldiers": False,
+        # Spellcaster Magazine's troop stat lines read as unbalanced to some
+        # groups; this lets a warband keep the book's spells/items/bestiary
+        # switched on while dropping just its hireable soldiers. On by
+        # default, same as every other source-book content toggle — a group
+        # opts out rather than in. Split into three independent toggles:
+        # this one covers every non-Legendary, non-firearm soldier; the
+        # other two below cover Legendary Soldiers and firearm-armed
+        # soldiers separately. See soldier_from_book_enabled().
+        "spellcaster_magazine_soldiers": True,
+        # Legendary Soldiers (Issue 4) — a distinct, more expensive troop
+        # category with its own wizard-level-gated hiring limit (see
+        # expansions.max_legendary_soldiers()). On by default, same as the
+        # book's other soldiers.
+        "spellcaster_magazine_legendary_soldiers": True,
+        # Black Powder Firearms (Issue 1): the Musketeer/Coachman/Duellist
+        # only appear once BOTH this and spellcaster_magazine_soldiers above
+        # are on. Doesn't gate the standalone Pistol/Musket/Blunderbuss items
+        # — standard items are deliberately never source-gated. On by
+        # default.
+        "firearms_rules_enabled": True,
         # Knightly Orders (Spellcaster Magazine, Issue 1). Needs Spellcaster
         # Magazine switched on in enabled_sources too.
         "knightly_orders_enabled": True,
@@ -483,14 +504,20 @@ def enabled_sources(wb: dict) -> set[str]:
     return {"Core Rules"} | {book for book in SOURCE_BOOKS if es.get(book)}
 
 
-def soldier_from_book_enabled(wb: dict, source: str) -> bool:
+def soldier_from_book_enabled(wb: dict, source: str, type_key: str = "") -> bool:
     """Whether soldiers from a source book may be hired, beyond the book
     itself being switched on. Only Spellcaster Magazine has its own
-    soldiers-only toggle so far — see default_homerules()."""
-    if source == "Spellcaster Magazine":
-        hr = wb.get("homerules") or {}
-        return hr.get("spellcaster_magazine_soldiers", True)
-    return True
+    soldiers-only toggles so far — see default_homerules(). Split three ways:
+    Legendary Soldiers and firearm-armed soldiers each need their own extra
+    toggle on top of (for firearms) the book's ordinary-soldiers toggle."""
+    if source != "Spellcaster Magazine":
+        return True
+    hr = wb.get("homerules") or {}
+    if type_key in LEGENDARY_SOLDIER_TYPE_KEYS:
+        return hr.get("spellcaster_magazine_legendary_soldiers", True)
+    if type_key in FIREARM_SOLDIER_TYPE_KEYS:
+        return hr.get("spellcaster_magazine_soldiers", True) and hr.get("firearms_rules_enabled", True)
+    return hr.get("spellcaster_magazine_soldiers", True)
 
 
 def soldier_source_allowed(wb: dict, type_key: str) -> bool:
@@ -499,7 +526,7 @@ def soldier_source_allowed(wb: dict, type_key: str) -> bool:
     if not info:
         return False
     src = info.get("source", "Core Rules")
-    return src in enabled_sources(wb) and soldier_from_book_enabled(wb, src)
+    return src in enabled_sources(wb) and soldier_from_book_enabled(wb, src, type_key)
 
 
 def empty_captain(name: str = "", homerules: dict | None = None, origin: str = "hired") -> dict:
@@ -1019,7 +1046,7 @@ def portrait_dir(warband_id: str) -> Path:
     return d
 
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 # Bump this and append a new (version, function) pair to MIGRATIONS whenever a
 # future format change needs one-time cleanup on old files. Each migration
 # only runs once per file: files with no "schema_version" are treated as
@@ -1113,6 +1140,29 @@ def _migrate_soldier_items_string_to_list(wb: dict) -> None:
             )
 
 
+def _migrate_component_bags_to_item_slots(wb: dict) -> None:
+    """component_bags_held (a separate assign/unassign count) is replaced by
+    physically carrying "Spell Component Bag" in an item slot — see
+    expansions.component_capacity(). Bags already assigned to the wizard or
+    apprentice are written into their first empty slot(s) so a warband that
+    used the old assign buttons doesn't silently lose that capacity; any that
+    don't fit in a free slot are lost, same as any other item over-capacity."""
+    for key in ("wizard", "apprentice"):
+        figure = wb.get(key)
+        if not isinstance(figure, dict):
+            continue
+        held = int(figure.pop("component_bags_held", 0) or 0)
+        if held <= 0:
+            continue
+        slots = figure.setdefault("item_slots", [])
+        for i, val in enumerate(slots):
+            if held <= 0:
+                break
+            if not (val or "").strip():
+                slots[i] = SPELL_COMPONENT_BAG_NAME
+                held -= 1
+
+
 MIGRATIONS: list[tuple[int, Callable[[dict], None]]] = [
     (1, _migrate_wizard_health_2e),
     (1, _migrate_item_slots),
@@ -1121,6 +1171,7 @@ MIGRATIONS: list[tuple[int, Callable[[dict], None]]] = [
     (1, _migrate_captain_mode_flags),
     (1, _migrate_captain_levelup_counts),
     (1, _migrate_soldier_items_string_to_list),
+    (2, _migrate_component_bags_to_item_slots),
 ]
 
 
@@ -1268,9 +1319,9 @@ def _normalize_warband(wb: dict) -> dict:
     uf = wiz.setdefault("underworld_favors", {"markers": 0})
     uf.setdefault("markers", 0)
     # Monster Hunting (Issue 5): spell/potion components the wizard is
-    # carrying — see expansions.component_capacity() for the holding limit.
+    # carrying — see expansions.component_capacity() for the holding limit
+    # (driven by Spell Component Bag entries in item_slots, not a field here).
     wiz.setdefault("components", [])
-    wiz.setdefault("component_bags_held", 0)
     # Wizard state (Lich / Beastcrafter / pact). Backfilled per-key so a warband
     # saved before this existed loads as an ordinary wizard.
     state = wiz.setdefault("state", expansions.default_wizard_state())
@@ -1320,7 +1371,6 @@ def _normalize_warband(wb: dict) -> dict:
         if ap.get("gender") != "female":
             ap["gender"] = "male"
         ap.setdefault("components", [])
-        ap.setdefault("component_bags_held", 0)
     if not isinstance(wb.get("homerules"), dict):
         wb["homerules"] = default_homerules()
     hr = wb["homerules"]
@@ -1720,14 +1770,24 @@ def soldier_count(wb: dict) -> int:
 
 def specialist_count(wb: dict) -> int:
     """Specialist soldiers plus the Captain (if any) — a Captain always counts
-    as a specialist, regardless of what type they were hired/promoted as."""
-    return count_specialists(wb) + (1 if wb.get("captain") else 0)
+    as a specialist, regardless of what type they were hired/promoted as,
+    UNLESS Legendary Soldiers are enabled: the book then makes the Captain a
+    Legendary Soldier instead (see expansions.legendary_soldiers_enabled()
+    and legendary_soldier_count() below), so they stop occupying a
+    specialist slot and occupy a Legendary one instead."""
+    captain_is_specialist = bool(wb.get("captain")) and not expansions.legendary_soldiers_enabled(wb)
+    return count_specialists(wb) + (1 if captain_is_specialist else 0)
 
 
 def legendary_soldier_count(wb: dict) -> int:
-    """Active Legendary Soldiers on the roster (Spellcaster Magazine, Issue 4)
-    — see expansions.max_legendary_soldiers() for the wizard-level-gated cap."""
-    return sum(1 for s in active_soldiers(wb) if s.get("type_key") in LEGENDARY_SOLDIER_TYPE_KEYS)
+    """Active Legendary Soldiers on the roster (Spellcaster Magazine, Issue 4),
+    plus the Captain if Legendary Soldiers are enabled (the book: "Captains
+    ... are now considered Legendary Soldiers") — see
+    expansions.max_legendary_soldiers() for the wizard-level-gated cap."""
+    count = sum(1 for s in active_soldiers(wb) if s.get("type_key") in LEGENDARY_SOLDIER_TYPE_KEYS)
+    if wb.get("captain") and expansions.legendary_soldiers_enabled(wb):
+        count += 1
+    return count
 
 
 def warband_limits(wb: dict) -> dict:
@@ -1788,6 +1848,7 @@ def enrich_soldier(wb: dict, s: dict) -> dict:
     # (Edition 2 toggle, Beastcrafter surcharge, base discount) always apply
     # to the current settings, not a value frozen at hire time.
     out["cost"] = expansions.soldier_cost(wb, cat, type_key) if cat else s.get("cost", 0)
+    out["gear"] = expansions.free_dagger_gear(wb, type_key, out.get("gear", ""))
     out["knightly_order_info"] = KNIGHTLY_ORDER_BY_ID.get(s.get("knightly_order") or "")
     # Armour/Move bonuses from an equipped Shield/Armour item — same idiom as
     # captain_effective_stats(); computed fresh from item_slots every time so
@@ -1886,7 +1947,7 @@ def add_soldier(
     src = info.get("source", "Core Rules")
     if src not in enabled_sources(wb):
         return False, f"{info['name']} is from {src}; enable that source under Additional Rules and Homerules first."
-    if not soldier_from_book_enabled(wb, src):
+    if not soldier_from_book_enabled(wb, src, type_key):
         return False, f"{info['name']}'s soldiers are switched off for {src} under Additional Rules and Homerules (its spells/items/bestiary can stay on)."
     illusion_source = (illusion_source or "").strip()
     illusion_info = None
@@ -2484,7 +2545,7 @@ def _roll_recruit_type_key(wb: dict) -> str | None:
         if not info:
             continue
         src = info.get("source", "Core Rules")
-        if src not in sources or not soldier_from_book_enabled(wb, src):
+        if src not in sources or not soldier_from_book_enabled(wb, src, type_key):
             continue
         if expansions.soldier_state_block(wb, type_key):
             continue
@@ -2907,6 +2968,61 @@ def dismiss_apprentice(wb: dict, refund: bool = False) -> tuple[bool, str]:
     return True, text
 
 
+def apprentice_takes_over(wb: dict) -> tuple[bool, str]:
+    """Core rules (p.103, "New Wizards"): what happens when the wizard dies.
+
+    The book: if the wizard was level 5 or below, discard the whole warband
+    and start over — nothing to do here but refuse, since there's no lesser
+    state to fall back to. If level 6+, the apprentice may become the new
+    wizard: move them to the wizard slot keeping their current stats, at the
+    old wizard's level minus 6 (so a level 6 wizard's apprentice becomes
+    level 0; a level 15 wizard's apprentice becomes level 9). The former
+    wizard's own gear is lost; the new wizard (the former apprentice) keeps
+    their own gear, mutations, and permanent injuries. The new wizard is
+    "treated exactly like any other wizard" — no spells, no special state
+    (Lich/Beastcrafter/Pact/Vampire all die with the old wizard), and may
+    hire an apprentice of their own afterward.
+    """
+    ap = wb.get("apprentice")
+    if not ap:
+        return False, "No apprentice to take over — the book says to discard this warband and create a new one."
+    wiz = wb.get("wizard") or {}
+    old_level = int(wiz.get("level", 0))
+    if old_level < 6:
+        return False, (
+            f"The wizard was only level {old_level} (level 5 or below) — the book says to discard this "
+            "warband entirely and create a new one; the apprentice cannot take over."
+        )
+    new_level = old_level - 6
+    per_level = expansions.xp_per_level(wb)
+    old_wizard_name = wiz.get("name") or "The wizard"
+    new_wizard = {
+        "name": ap.get("name") or f"{old_wizard_name}'s former apprentice",
+        "school": wiz.get("school", "Elementalist"),
+        "level": new_level,
+        "xp": new_level * per_level,
+        "stats": deepcopy(ap.get("stats") or APPRENTICE_BASE),
+        "item_slots": normalize_item_slots(ap.get("item_slots") or [], expansions.wizard_item_slots(wb)),
+        "has_dagger": ap.get("has_dagger", True),
+        "spells": [],
+        "mutations": deepcopy(ap.get("mutations") or []),
+        "permanent_injuries": deepcopy(ap.get("permanent_injuries") or []),
+        "notes": ap.get("notes", ""),
+        "portrait": ap.get("portrait"),
+        "level_history": [],
+        "state": expansions.default_wizard_state(),
+        "gender": ap.get("gender", "male"),
+    }
+    wb["wizard"] = new_wizard
+    wb["apprentice"] = None
+    text = (
+        f"{old_wizard_name} died. {new_wizard['name']} takes over as the new wizard at level {new_level} "
+        "(no spells known yet — the old wizard's spellbook and gear are lost)."
+    )
+    add_history(wb, text)
+    return True, text
+
+
 def _parse_stat_caps(form: "ImmutableMultiDict", prefix: str, current: dict) -> dict:
     """Parse the 4-stat {limit, unlimited} grid submitted as
     {prefix}_cap_{stat}_limit / {prefix}_cap_{stat}_unlimited."""
@@ -2983,6 +3099,7 @@ def update_homerules(wb: dict, form: "ImmutableMultiDict") -> tuple[bool, str]:
             "soldier_permanent_injuries_enabled": (
                 form.get("soldier_permanent_injuries_enabled") == "on"
             ),
+            "free_dagger_enabled": form.get("free_dagger_enabled") == "on",
             "soldier_max_levels": int(form.get("soldier_max_levels") or hr["soldier_max_levels"]),
             "soldier_stat_caps": _parse_stat_caps(form, "soldier", hr["soldier_stat_caps"]),
             "promote_captain_cost": int(
@@ -3016,6 +3133,10 @@ def update_homerules(wb: dict, form: "ImmutableMultiDict") -> tuple[bool, str]:
             "wildwoods_supplies_enabled": form.get("wildwoods_supplies_enabled") == "on",
             "edition2_soldier_costs": form.get("edition2_soldier_costs") == "on",
             "spellcaster_magazine_soldiers": form.get("spellcaster_magazine_soldiers") == "on",
+            "spellcaster_magazine_legendary_soldiers": (
+                form.get("spellcaster_magazine_legendary_soldiers") == "on"
+            ),
+            "firearms_rules_enabled": form.get("firearms_rules_enabled") == "on",
             "knightly_orders_enabled": form.get("knightly_orders_enabled") == "on",
             "hlw_specialist_allowance": form.get("hlw_specialist_allowance") == "on",
             "hlw_item_slots": form.get("hlw_item_slots") == "on",
@@ -3101,15 +3222,26 @@ def hire_captain(
     ok, msg = _validate_tricks(tricks, n_tricks)
     if not ok:
         return False, msg
-    # A Captain occupies both a soldier slot and a specialist slot, same as any
-    # specialist soldier would — check both caps before adding one (wb has no
-    # captain yet at this point, so these counts are the pre-hire baseline).
+    # A Captain always occupies a soldier slot, same as any specialist soldier
+    # would — check before adding one (wb has no captain yet at this point,
+    # so these counts are the pre-hire baseline). Which *other* cap applies
+    # depends on Legendary Soldiers: off, a Captain is an ordinary specialist;
+    # on, the book makes the Captain a Legendary Soldier instead (see
+    # expansions.legendary_soldiers_enabled()), governed by that limit.
     soldier_cap = expansions.max_soldiers(wb)
     if soldier_count(wb) >= soldier_cap:
         return False, f"Soldier limit reached ({soldier_cap})."
-    spec_cap = expansions.max_specialists(wb)
-    if specialist_count(wb) >= spec_cap:
-        return False, f"Specialist limit reached ({spec_cap})."
+    if expansions.legendary_soldiers_enabled(wb):
+        leg_cap = expansions.max_legendary_soldiers(wb)
+        if legendary_soldier_count(wb) >= leg_cap:
+            return False, (
+                f"A Captain is a Legendary Soldier (Spellcaster Magazine, Issue 4) — limit reached "
+                f"({leg_cap} at wizard level {expansions.wizard_level(wb)}) — level up to hire more."
+            )
+    else:
+        spec_cap = expansions.max_specialists(wb)
+        if specialist_count(wb) >= spec_cap:
+            return False, f"Specialist limit reached ({spec_cap})."
     cost = int(hr.get("captain_hiring_cost", CAPTAIN_HIRING_COST))
     if int(wb.get("gold", 0)) < cost:
         return False, f"Need {cost} gc for a captain."
@@ -3422,12 +3554,23 @@ def promote_soldier_to_captain(
 
     info = get_soldier(soldier.get("type_key", "")) or {}
     # The promoted soldier leaves the roster (a wash on the soldier-count cap —
-    # one member out, the Captain in), but a Captain always counts as a
-    # specialist regardless of what they were promoted from, so promoting a
-    # non-specialist can still push the specialist count over the cap.
-    spec_cap = expansions.max_specialists(wb)
-    if not _soldier_is_specialist(soldier) and specialist_count(wb) >= spec_cap:
-        return False, f"Specialist limit reached ({spec_cap})."
+    # one member out, the Captain in). Which cap the new Captain is checked
+    # against depends on Legendary Soldiers, same as hire_captain(): off, a
+    # Captain always counts as a specialist regardless of what they were
+    # promoted from, so promoting a non-specialist can still push the
+    # specialist count over the cap; on, the Captain is a Legendary Soldier
+    # instead (see expansions.legendary_soldiers_enabled()).
+    if expansions.legendary_soldiers_enabled(wb):
+        leg_cap = expansions.max_legendary_soldiers(wb)
+        if legendary_soldier_count(wb) >= leg_cap:
+            return False, (
+                f"A Captain is a Legendary Soldier (Spellcaster Magazine, Issue 4) — limit reached "
+                f"({leg_cap} at wizard level {expansions.wizard_level(wb)}) — level up to hire more."
+            )
+    else:
+        spec_cap = expansions.max_specialists(wb)
+        if not _soldier_is_specialist(soldier) and specialist_count(wb) >= spec_cap:
+            return False, f"Specialist limit reached ({spec_cap})."
     # Soldiers don't normally persist move/armour at all (they're read from the
     # catalog at display time) until a mutation writes them — so all six stats
     # must fall back to the catalog the same way, or mutation-driven move/armour
@@ -4355,7 +4498,7 @@ def dismount_horse(wb: dict) -> tuple[bool, str]:
 # Wilderness Survival trait ("never consumes Supply Points" / "no Supply
 # Point upkeep unless reduced to 0 Health") — this app has no per-game "was
 # reduced to 0 Health" state to check, so they're treated as always exempt.
-WILDWOODS_SUPPLY_EXEMPT_TYPE_KEYS = frozenset({"guide", "trapper", "trophy_hunter"})
+WILDWOODS_SUPPLY_EXEMPT_TYPE_KEYS = frozenset({"guide", "expert_guide", "trapper", "trophy_hunter"})
 
 
 def _wildwoods_supplies_gate(wb: dict) -> str | None:
@@ -4794,7 +4937,7 @@ def claim_monster_prize(wb: dict, kill_id: str, holder: str) -> tuple[bool, str]
     if not figure:
         return False, f"No {holder} on this warband."
     doses = MONSTER_HUNTER_COMPONENTS_PER_KILL if expansions.monster_hunter_active(wb) else 1
-    capacity = expansions.component_capacity(wb, figure)
+    capacity = expansions.component_capacity(wb, figure, holder)
     components = figure.setdefault("components", [])
     if len(components) + doses > capacity:
         return False, (
@@ -4826,9 +4969,11 @@ def _component_holder(wb: dict, holder: str) -> dict | None:
 
 
 def buy_component_bag(wb: dict) -> tuple[bool, str]:
-    """Buys one Spell Component Bag into the warband's shared pool (not yet
-    assigned to anyone — see assign_component_bag()). Capped at
-    SPELL_COMPONENT_BAG_LIMIT bags per warband, per the book."""
+    """Buys one Spell Component Bag into the warband's shared bought-budget.
+    Capped at SPELL_COMPONENT_BAG_LIMIT bags per warband, per the book. Carry
+    a bought bag by writing "Spell Component Bag" into the wizard's or
+    apprentice's own item slots (like any other piece of gear) — see
+    expansions.component_bag_credit() for how that's capped by this count."""
     err = _monster_hunting_gate(wb)
     if err:
         return False, err
@@ -4844,44 +4989,6 @@ def buy_component_bag(wb: dict) -> tuple[bool, str]:
         f"Bought a {SPELL_COMPONENT_BAG_NAME} for {SPELL_COMPONENT_BAG_COST}gc "
         f"({bought + 1}/{SPELL_COMPONENT_BAG_LIMIT} owned)."
     )
-    add_history(wb, text)
-    return True, text
-
-
-def assign_component_bag(wb: dict, holder: str, delta: int) -> tuple[bool, str]:
-    """Moves one already-bought bag onto (`delta=1`) or off (`delta=-1`) the
-    wizard or apprentice — wizard + apprentice held bags together can never
-    exceed how many the warband has bought."""
-    err = _monster_hunting_gate(wb)
-    if err:
-        return False, err
-    if delta not in (1, -1):
-        return False, "Invalid adjustment."
-    figure = _component_holder(wb, holder)
-    if not figure:
-        return False, f"No {holder} on this warband."
-    mh = wb.setdefault("monster_hunting", {"kills": [], "prizes": [], "bags_bought": 0})
-    bought = int(mh.get("bags_bought", 0))
-    held = int(figure.get("component_bags_held", 0))
-    if delta > 0:
-        total_held = sum(
-            int((wb.get(h) or {}).get("component_bags_held", 0)) for h in ("wizard", "apprentice")
-        )
-        if total_held >= bought:
-            return False, f"No spare {SPELL_COMPONENT_BAG_NAME}s to assign — buy more first."
-        figure["component_bags_held"] = held + 1
-        text = f"Gave a {SPELL_COMPONENT_BAG_NAME} to the {holder}."
-    else:
-        if held <= 0:
-            return False, f"The {holder} isn't carrying a {SPELL_COMPONENT_BAG_NAME}."
-        new_capacity = COMPONENT_POUCH_CAPACITY + SPELL_COMPONENT_BAG_CAPACITY * (held - 1)
-        if len(figure.get("components") or []) > new_capacity:
-            return False, (
-                f"The {holder} is holding too many components to give up a bag — "
-                "use or discard some first."
-            )
-        figure["component_bags_held"] = held - 1
-        text = f"Took a {SPELL_COMPONENT_BAG_NAME} back from the {holder}."
     add_history(wb, text)
     return True, text
 

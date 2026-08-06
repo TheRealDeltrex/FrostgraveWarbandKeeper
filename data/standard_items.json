@@ -142,8 +142,9 @@
   "category": "Missile",
   "kind": "simple",
   "source": "Spellcaster Magazine",
-  "summary": "10\" range. One-handed; doubles as a dagger. Misfire on a natural 1.",
-  "description": "Black Powder Firearms (Issue 1): 10\" range, one-handed, and doubles as a dagger (never unarmed; combines with a hand weapon for the usual +1 Fight bonus in Frostgrave). May carry as many as item slots allow. Like every firearm it's Inaccurate (-1 Shoot), Armour Piercing (+2 damage; also -2 Armour, min 10, within half range), Loud (natural 20 triggers a Random Encounter roll), and subject to Misfire on a natural 1 — see the Lexicon's Black Powder Firearms table for the misfire result and available upgrades (Double-barrelled, Axe-gun, Superior Craftsmanship, Silver Bullets).",
+  "cost": 50,
+  "summary": "50gc. 10\" range. One-handed; doubles as a dagger. Misfire on a natural 1.",
+  "description": "Black Powder Firearms (Issue 1): 50gc, 10\" range, one-handed, and doubles as a dagger (never unarmed; combines with a hand weapon for the usual +1 Fight bonus in Frostgrave). May carry as many as item slots allow. Like every firearm it's Inaccurate (-1 Shoot), Armour Piercing (+2 damage; also -2 Armour, min 10, within half range), Loud (natural 20 triggers a Random Encounter roll), and subject to Misfire on a natural 1 — see the Lexicon's Black Powder Firearms table for the misfire result. Double-barrelled, Superior Craftsmanship, Silver Bullets and (pistols/blunderbusses only) Axe-gun are commissioned upgrades, each a separate catalog item written into its own slot alongside this one.",
   "slot_cost": 1
  },
  {
@@ -151,8 +152,9 @@
   "category": "Missile",
   "kind": "simple",
   "source": "Spellcaster Magazine",
-  "summary": "24\" range. Two-handed. Misfire on a natural 1.",
-  "description": "Black Powder Firearms (Issue 1): 24\" range, two-handed (only one carried, no shield). Usable in melee as a two-handed weapon but without the usual +2 damage bonus. Inaccurate, Armour Piercing, Loud, and subject to Misfire on a natural 1 — see the Lexicon's Black Powder Firearms table for the misfire result and available upgrades.",
+  "cost": 100,
+  "summary": "100gc. 24\" range. Two-handed. Misfire on a natural 1.",
+  "description": "Black Powder Firearms (Issue 1): 100gc, 24\" range, two-handed (only one carried, no shield). Usable in melee as a two-handed weapon but without the usual +2 damage bonus. Inaccurate, Armour Piercing, Loud, and subject to Misfire on a natural 1 — see the Lexicon's Black Powder Firearms table for the misfire result. Double-barrelled and Superior Craftsmanship and Silver Bullets (any firearm, not just pistols/blunderbusses) are commissioned upgrades, each a separate catalog item written into its own slot alongside this one.",
   "slot_cost": 2
  },
  {
@@ -160,17 +162,49 @@
   "category": "Missile",
   "kind": "simple",
   "source": "Spellcaster Magazine",
-  "summary": "14\" range, hits everyone within 1\" of the target. Two-handed. Misfire on a natural 1.",
-  "description": "Black Powder Firearms (Issue 1): 14\" range, two-handed. The shooting attack hits the target and every other figure within 1\" of it (a misfire on the first roll cancels the rest). Melee like a Pistol, but without the +1 Fight combo bonus. Inaccurate, Armour Piercing, Loud, and subject to Misfire on a natural 1 — see the Lexicon's Black Powder Firearms table for the misfire result and available upgrades.",
+  "cost": 100,
+  "summary": "100gc. 14\" range, hits everyone within 1\" of the target. Two-handed. Misfire on a natural 1.",
+  "description": "Black Powder Firearms (Issue 1): 100gc, 14\" range, two-handed. The shooting attack hits the target and every other figure within 1\" of it (a misfire on the first roll cancels the rest). Melee like a Pistol, but without the +1 Fight combo bonus. Inaccurate, Armour Piercing, Loud, and subject to Misfire on a natural 1 — see the Lexicon's Black Powder Firearms table for the misfire result. Double-barrelled, Axe-gun, Superior Craftsmanship and Silver Bullets are commissioned upgrades, each a separate catalog item written into its own slot alongside this one.",
   "slot_cost": 2
  },
  {
-  "name": "Axe-gun",
-  "category": "Missile",
+  "name": "Double-barrelled (Firearm Upgrade)",
+  "category": "Gear",
   "kind": "simple",
   "source": "Spellcaster Magazine",
-  "summary": "Pistol/blunderbuss combo weapon; counts as a hand weapon (not dagger) in melee.",
-  "description": "Black Powder Firearms (Issue 1): a Pistol or Blunderbuss fitted with an axe head, counting as a hand weapon (not a dagger) in melee instead of the usual firearm melee rule. Same range/slot cost as whichever base firearm it's built from; Inaccurate, Armour Piercing, Loud, and subject to Misfire on a natural 1 — see the Lexicon's Black Powder Firearms table.",
+  "cost": 400,
+  "summary": "400gc. Any firearm fires twice before reloading; misfires get +2 to the roll.",
+  "description": "Black Powder Firearms (Issue 1): 400gc, commissioned for an already-owned Pistol, Musket or Blunderbuss. Fire the weapon twice before it needs reloading (each shot still its own action; a full reload after both shots costs two actions instead of one). More volatile: any time it misfires, add +2 to the misfire roll. Write it into its own item slot alongside the firearm it upgrades.",
+  "slot_cost": 1
+ },
+ {
+  "name": "Axe-gun (Firearm Upgrade)",
+  "category": "Gear",
+  "kind": "simple",
+  "source": "Spellcaster Magazine",
+  "cost": 250,
+  "summary": "250gc. Pistol/Blunderbuss only; counts as a hand weapon (not dagger) in melee.",
+  "description": "Black Powder Firearms (Issue 1): 250gc, commissioned for an already-owned Pistol or Blunderbuss (not a Musket). Fits the underside with an axe-head, so the firearm counts as a hand weapon rather than a dagger in melee — the usual firearm melee rule is replaced by this, not added to it. Write it into its own item slot alongside the firearm it upgrades.",
+  "slot_cost": 1
+ },
+ {
+  "name": "Superior Craftsmanship (Firearm Upgrade)",
+  "category": "Gear",
+  "kind": "simple",
+  "source": "Spellcaster Magazine",
+  "cost": 300,
+  "summary": "300gc. Any firearm; -1 on misfire rolls.",
+  "description": "Black Powder Firearms (Issue 1): 300gc, commissioned for an already-owned Pistol, Musket or Blunderbuss. A better-made firearm misfires less: -1 on its misfire roll. Write it into its own item slot alongside the firearm it upgrades.",
+  "slot_cost": 1
+ },
+ {
+  "name": "Silver Bullets (Firearm Upgrade)",
+  "category": "Gear",
+  "kind": "simple",
+  "source": "Spellcaster Magazine",
+  "cost": 250,
+  "summary": "250gc. Any firearm; counts as magical, +2 extra damage vs. werewolves and vampires.",
+  "description": "Black Powder Firearms (Issue 1): 250gc, commissioned for an already-owned Pistol, Musket or Blunderbuss — a small supply of balls or bullets cast in silver. Counts as a magical attack and does +2 extra damage (so +4 total) against werewolves and vampires. Write it into its own item slot alongside the firearm it upgrades.",
   "slot_cost": 1
  },
  {
@@ -187,8 +221,9 @@
   "category": "Gear",
   "kind": "simple",
   "source": "Spellcaster Magazine",
+  "caster_only": true,
   "summary": "Monster Hunting (Issue 5): holds 10 more spell/potion components.",
-  "description": "Monster Hunting (Issue 5): every spellcaster has a free 3-component pouch; each bag costs 5gc (10 per warband, max) and holds 10 more components in addition to the pouch. Bought and assigned to the wizard or apprentice from the Spell & potion components panel, not carried as a normal item slot.",
+  "description": "Monster Hunting (Issue 5): every spellcaster has a free 3-component pouch; each bag costs 5gc (10 per warband, max — buy it from the Spell & potion components panel) and holds 10 more components in addition to the pouch. Carried the same way as any other gear: write it into a wizard's or apprentice's own item slot to hold one, up to however many the warband has bought. Only a wizard or apprentice has anywhere to put its contents, so it doesn't appear on a captain's or soldier's item list.",
   "slot_cost": 1
  }
 ]
