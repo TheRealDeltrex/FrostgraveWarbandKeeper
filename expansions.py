@@ -18,6 +18,8 @@ and returns values. warband_store owns the mutations and the campaign log.
 
 from __future__ import annotations
 
+import re
+
 from frostgrave_data import (
     APPRENTICE_ITEM_SLOTS,
     CARGO_TRANSPORT_BASE_CAPACITY,
@@ -29,6 +31,7 @@ from frostgrave_data import (
     LEGENDARY_SOLDIER_BASE_MAX,
     LEGENDARY_SOLDIER_LEVEL_STEP,
     LEGENDARY_SOLDIER_MAX_CAP,
+    LEGENDARY_SOLDIER_TYPE_KEYS,
     LEVEL_UP_OPTIONS,
     MAX_SOLDIERS,
     MAX_SPECIALISTS,
@@ -37,6 +40,7 @@ from frostgrave_data import (
     POTION_MASTER_TYPE_KEY,
     SOLDIER_ITEM_SLOTS,
     SPELL_COMPONENT_BAG_CAPACITY,
+    SPELL_COMPONENT_BAG_NAME,
     SUPPLY_CARRY_CAPACITY_BASE,
     VAMPIRE_HEALTH_CAP,
     VAMPIRE_WILL_CAP,
@@ -48,6 +52,7 @@ from frostgrave_data import (
     animal_companion_type_keys,
     construct_type_keys,
     get_soldier,
+    giant_blooded_eligible_type_keys,
 )
 
 # Internal sentinel for an "unlimited" wizard level cap — plain int rather than
@@ -419,16 +424,40 @@ def edition2_enabled(wb: dict) -> bool:
     return bool((wb.get("homerules") or {}).get("edition2_soldier_costs", True))
 
 
+# Forgotten Pacts: any one of these known by the wizard adds to the Demon
+# Hunter's variable cost (see demon_hunter_surcharge()).
+DEMON_HUNTER_TRIGGER_SPELLS = {"Summon Demon", "Imp", "Possess"}
+
+
+def demon_hunter_surcharge(wb: dict) -> int:
+    """Forgotten Pacts' variable Demon Hunter cost: +25gc if the wizard knows
+    Summon Demon, Imp, or Possess, +25gc if the wizard is a Summoner, +50gc if
+    the base owns a Summoning Circle. Stacks on top of whichever base cost
+    applies (100gc, or 125gc under the Edition 2 soldier costs homerule)."""
+    wizard = wb.get("wizard") or {}
+    surcharge = 0
+    known = {s.get("name") for s in wizard.get("spells") or [] if s.get("name")}
+    if known & DEMON_HUNTER_TRIGGER_SPELLS:
+        surcharge += 25
+    if wizard.get("school") == "Summoner":
+        surcharge += 25
+    if "summoning_circle" in ((wb.get("base") or {}).get("resources") or []):
+        surcharge += 50
+    return surcharge
+
+
 def soldier_cost(wb: dict, info: dict, type_key: str = "") -> int:
     """What hiring this soldier type actually costs this warband, after any
-    Edition 2 cost adjustment, the Beastcrafter surcharge, and any base-
-    resource discount. Never negative, and free soldiers (thug, thief,
-    summoned members) stay free."""
+    Edition 2 cost adjustment, the Demon Hunter's variable surcharge, the
+    Beastcrafter surcharge, and any base-resource discount. Never negative,
+    and free soldiers (thug, thief, summoned members) stay free."""
     base = int(info.get("cost", 0))
     if base <= 0:
         return 0
     if type_key and edition2_enabled(wb) and type_key in EDITION_2_SOLDIER_COSTS:
         base = EDITION_2_SOLDIER_COSTS[type_key]
+    if type_key == "demon_hunter":
+        base += demon_hunter_surcharge(wb)
     return max(0, base + soldier_surcharge(wb) - soldier_discount(wb))
 
 
@@ -492,16 +521,49 @@ def wizard_level(wb: dict) -> int:
     return int((wb.get("wizard") or {}).get("level", 0))
 
 
+def legendary_soldiers_enabled(wb: dict) -> bool:
+    """Spellcaster Magazine's Legendary Soldiers (Issue 4) — needs Spellcaster
+    Magazine switched on and its own soldiers-only sub-toggle, split apart
+    from the book's other (non-legendary, non-firearm) soldiers. See
+    warband_store.soldier_from_book_enabled(). When on, the book also makes
+    the Captain a Legendary Soldier ("Captains ... are now considered
+    Legendary Soldiers and are thus subject to the hiring restrictions
+    presented above. Otherwise, their rules are unchanged") — see
+    warband_store.specialist_count()/legendary_soldier_count()."""
+    hr = wb.get("homerules") or {}
+    es = hr.get("enabled_sources") or {}
+    return bool(es.get("Spellcaster Magazine")) and bool(hr.get("spellcaster_magazine_legendary_soldiers", True))
+
+
+def _has_legendary_soldier(wb: dict) -> bool:
+    """Whether the warband currently fields at least one Legendary Soldier,
+    including a legendary Captain — feeds max_specialists()'s house-rule cap
+    below (not from the book: fielding one shrinks the ordinary specialist
+    allowance to make room for the more powerful hire)."""
+    if any(
+        s.get("type_key") in LEGENDARY_SOLDIER_TYPE_KEYS
+        for s in wb.get("soldiers") or []
+        if s.get("status") != "dead"
+    ):
+        return True
+    return bool(wb.get("captain")) and legendary_soldiers_enabled(wb)
+
+
 def max_specialists(wb: dict) -> int:
     """Specialist-soldier cap: the group's own base (settable at warband
     creation, default MAX_SPECIALISTS — see default_homerules()), raised by
     Increased Specialist Soldier Allowance: +1 per full 20 wizard levels,
-    capped at +4 (8 total at level 80+ on top of the default base)."""
+    capped at +4 (8 total at level 80+ on top of the default base). House
+    rule: fielding a Legendary Soldier (including a legendary Captain) caps
+    this at 3, regardless of the above — see _has_legendary_soldier()."""
     hr = wb.get("homerules") or {}
     base_raw = hr.get("max_specialists")
     base = int(base_raw) if base_raw is not None else MAX_SPECIALISTS
     extra = min(4, wizard_level(wb) // 20) if _hlw_active(wb, "hlw_specialist_allowance") else 0
-    return base + extra
+    cap = base + extra
+    if _has_legendary_soldier(wb):
+        cap = min(cap, 3)
+    return cap
 
 
 def max_legendary_soldiers(wb: dict) -> int:
@@ -548,6 +610,38 @@ def soldier_item_slots(wb: dict, type_key: str) -> int:
     if info.get("temporary"):
         return 0
     return SOLDIER_ITEM_SLOTS
+
+
+def _count_gear_item(gear: str, phrase: str) -> int:
+    """How many of `phrase` (e.g. "dagger", "hand weapon") a catalog gear
+    string mentions, honoring a leading quantity word ("two"/"2") or English
+    plural ("daggers")."""
+    count = 0
+    for m in re.finditer(rf'(?:\b(two|2)\s+)?\b{phrase}s?\b', gear, re.IGNORECASE):
+        count += 2 if m.group(1) else 1
+    return count
+
+
+def free_dagger_gear(wb: dict, type_key: str, gear: str) -> str:
+    """The Free Dagger homerule: every ordinary human soldier hire (reusing
+    Giant-Blooded's "not an animal, construct, demon, or non-human troop
+    type" eligibility) gets a backup dagger, since a single dagger costs no
+    item slot under the core rules. Anyone already carrying the equivalent
+    of two close-combat weapons (a hand weapon and a dagger, two hand
+    weapons, or two daggers) is left alone; anyone with exactly one dagger
+    and no hand weapon gets it upgraded to two. Gear-text only — this never
+    touches item_slots, matching how "gear" is descriptive everywhere else."""
+    if not (wb.get("homerules") or {}).get("free_dagger_enabled"):
+        return gear
+    if type_key not in giant_blooded_eligible_type_keys():
+        return gear
+    daggers = _count_gear_item(gear, "dagger")
+    hand_weapons = _count_gear_item(gear, "hand weapon")
+    if daggers >= 2 or hand_weapons >= 2 or (daggers >= 1 and hand_weapons >= 1):
+        return gear
+    if daggers == 1:
+        return re.sub(r'\bdaggers?\b', '2 daggers', gear, count=1, flags=re.IGNORECASE)
+    return f"{gear}, dagger" if gear and gear != "—" else "Dagger"
 
 
 def casting_number_minimum(wb: dict) -> int:
@@ -733,13 +827,40 @@ def pact_break_penalty(wb: dict) -> dict:
 # --- Spellcaster Magazine, Issue 5: Monster Hunting --------------------------
 
 
-def component_capacity(wb: dict, figure: dict) -> int:
+def equipped_component_bags(figure: dict) -> int:
+    """How many Spell Component Bag entries `figure` (the wizard or apprentice
+    dict) is physically carrying — counted straight from its item slots, same
+    as any other piece of gear, rather than a separate assign/unassign count."""
+    name = SPELL_COMPONENT_BAG_NAME.strip().lower()
+    return sum(
+        1 for slot in (figure or {}).get("item_slots") or []
+        if (slot or "").strip().lower() == name
+    )
+
+
+def component_bag_credit(wb: dict, holder: str) -> int:
+    """How many of `holder`'s ("wizard" or "apprentice") equipped Spell
+    Component Bags actually count towards capacity — capped by the warband's
+    shared bags_bought budget (buy_component_bag(), warband_store.py), since
+    writing "Spell Component Bag" into a slot doesn't itself cost gold (no
+    item slot entry ever does — see CLAUDE.md). The wizard draws from the
+    shared budget first; the apprentice gets whatever's left. Equipping more
+    bags than the warband has ever bought is otherwise harmless, same as any
+    other item slot over a soft limit — the excess just grants no capacity."""
+    bought = int((wb.get("monster_hunting") or {}).get("bags_bought", 0))
+    wizard_credit = min(equipped_component_bags(wb.get("wizard") or {}), bought)
+    if holder == "wizard":
+        return wizard_credit
+    apprentice_equipped = equipped_component_bags(wb.get("apprentice") or {})
+    return min(apprentice_equipped, max(0, bought - wizard_credit))
+
+
+def component_capacity(wb: dict, figure: dict, holder: str) -> int:
     """How many spell/potion components `figure` (the wizard or apprentice
-    dict) can hold: the free pouch, plus 10 more per Spell Component Bag
-    assigned to them (bought and assigned via warband_store's
-    buy_component_bag()/assign_component_bag(), not a normal item slot)."""
-    held = int(figure.get("component_bags_held", 0))
-    return COMPONENT_POUCH_CAPACITY + SPELL_COMPONENT_BAG_CAPACITY * held
+    dict) can hold: the free pouch, plus 10 more per Spell Component Bag it's
+    actually carrying, up to however many the warband has bought (see
+    component_bag_credit())."""
+    return COMPONENT_POUCH_CAPACITY + SPELL_COMPONENT_BAG_CAPACITY * component_bag_credit(wb, holder)
 
 
 def _has_active_soldier_of_type(wb: dict, type_key: str) -> bool:

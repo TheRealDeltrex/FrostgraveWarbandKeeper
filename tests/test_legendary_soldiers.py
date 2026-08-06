@@ -10,6 +10,7 @@ import warband_store
 def _enable(wb: dict) -> None:
     wb["homerules"]["enabled_sources"]["Spellcaster Magazine"] = True
     wb["homerules"]["spellcaster_magazine_soldiers"] = True
+    wb["homerules"]["spellcaster_magazine_legendary_soldiers"] = True
 
 
 def test_max_legendary_soldiers_scales_with_wizard_level_and_caps_at_8(fresh_warband):

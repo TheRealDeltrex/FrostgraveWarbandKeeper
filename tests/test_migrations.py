@@ -98,6 +98,59 @@ def test_captain_homerule_and_levelup_count_migrate():
     assert "fight_levelup_count" not in cap
 
 
+def test_component_bags_held_migrates_into_item_slots():
+    """component_bags_held (the old separate assign/unassign count) is
+    replaced by physically carrying "Spell Component Bag" in an item slot —
+    an existing assignment gets written into the wizard's/apprentice's first
+    empty slot(s) on load so it isn't silently lost."""
+    from frostgrave_data import SPELL_COMPONENT_BAG_NAME
+
+    _write_old_warband("old-5", {
+        "id": "old-5",
+        "name": "Old Warband 5",
+        "gold": 0,
+        "schema_version": 1,
+        "wizard": {
+            "name": "W", "school": "Elementalist", "level": 0, "xp": 0,
+            "stats": {"move": 6, "fight": 2, "shoot": 0, "armour": 10, "will": 4, "health": 14},
+            "item_slots": ["Staff", "", "", "", ""],
+            "component_bags_held": 2,
+            "spells": [],
+        },
+        "apprentice": {
+            "name": "Ap", "level": 0,
+            "stats": {"move": 6, "fight": 0, "shoot": 0, "armour": 10, "will": 2, "health": 12},
+            "item_slots": ["", ""],
+            "component_bags_held": 1,
+        },
+    })
+    wb = ws.load_warband("old-5")
+    assert wb["schema_version"] == ws.SCHEMA_VERSION
+    assert "component_bags_held" not in wb["wizard"]
+    assert "component_bags_held" not in wb["apprentice"]
+    assert wb["wizard"]["item_slots"].count(SPELL_COMPONENT_BAG_NAME) == 2
+    assert wb["apprentice"]["item_slots"].count(SPELL_COMPONENT_BAG_NAME) == 1
+    # The pre-existing "Staff" in slot 0 must survive — bags only fill empty slots.
+    assert wb["wizard"]["item_slots"][0] == "Staff"
+
+
+def test_no_component_bags_held_is_a_clean_noop():
+    _write_old_warband("old-6", {
+        "id": "old-6",
+        "name": "Old Warband 6",
+        "gold": 0,
+        "schema_version": 1,
+        "wizard": {
+            "name": "W", "school": "Elementalist", "level": 0, "xp": 0,
+            "stats": {"move": 6, "fight": 2, "shoot": 0, "armour": 10, "will": 4, "health": 14},
+            "spells": [],
+        },
+    })
+    wb = ws.load_warband("old-6")
+    assert wb["schema_version"] == ws.SCHEMA_VERSION
+    assert "component_bags_held" not in wb["wizard"]
+
+
 def test_second_load_is_stable_noop():
     _write_old_warband("old-3", {
         "id": "old-3",
