@@ -239,9 +239,9 @@
         <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0">
           Needs "allow its soldiers" above also switched on. On by default. Governs whether the
           Musketeer, Coachman and Duellist appear in Hire soldier — both toggles must be on for
-          them to show up. Doesn't affect the standalone Pistol/Musket/Blunderbuss items and their
-          upgrades — those are bought separately at the Treasury, Vault and Workshop card (needs
-          Spellcaster Magazine switched on above, same as everything else on this row).
+          them to show up. Also gates the standalone Pistol/Musket/Blunderbuss items and their
+          upgrades: switch this off and the Workshop — Firearms panel disappears, and any already
+          in item slots stay put but can't be bought or upgraded again until it's back on.
         </p>
         <label class="checkbox-row" style="margin-top:0.6rem">
           <input name="knightly_orders_enabled" type="checkbox" {% if hr.knightly_orders_enabled %}checked{% endif %} />

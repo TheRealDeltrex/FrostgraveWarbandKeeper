@@ -850,6 +850,10 @@ def _filtered_standard_items(items: list[dict], hr: dict) -> list[dict]:
     out = []
     for it in items:
         name = it["name"]
+        if not hr.get("firearms_rules_enabled", True) and (
+            name in expansions.FIREARM_BASE_NAMES or it.get("compatible_bases")
+        ):
+            continue
         if name == "Javelin" and not hr.get("javelin_enabled", True):
             continue
         if name == "Throwing Knife" and not hr.get("throwing_knife_enabled", True):
@@ -970,7 +974,9 @@ def warband_view(warband_id: str) -> str:
     # firearm" table on the Treasury, Vault and Workshop card. See
     # warband_store.upgrade_firearm(): commissioning one consumes the vault
     # copy of `name` and adds the combined item back in its place.
-    upgrade_catalog = [it for it in load_standard_items() if it.get("compatible_bases")]
+    upgrade_catalog = [
+        it for it in _filtered_standard_items(load_standard_items(), hr) if it.get("compatible_bases")
+    ]
     owned_firearms = []
     # Tally of owned modded copies per base firearm (Pistol/Musket/Blunderbuss)
     # — every vault entry that parses to that base with at least one upgrade

@@ -93,3 +93,59 @@ def test_soldier_capable_items_still_includes_armour_and_firearms():
     assert "Shield" in names
     assert "Pistol" in names
     assert "Musket" in names
+
+
+def test_buy_standard_item_needs_firearms_rules_enabled(fresh_warband):
+    """firearms_rules_enabled gates purchases the same as the source-book
+    toggle does — switching it off must not leave base firearms buyable."""
+    import warband_store
+
+    wb = fresh_warband
+    wb["homerules"]["enabled_sources"]["Spellcaster Magazine"] = True
+    wb["homerules"]["firearms_rules_enabled"] = False
+    wb["gold"] = 1000
+    ok, msg = warband_store.buy_standard_item(wb, "Pistol")
+    assert not ok
+    assert "Firearms Rules" in msg
+
+    wb["homerules"]["firearms_rules_enabled"] = True
+    ok, msg = warband_store.buy_standard_item(wb, "Pistol")
+    assert ok
+
+
+def test_upgrade_firearm_needs_firearms_rules_enabled(fresh_warband):
+    import warband_store
+
+    wb = fresh_warband
+    wb["homerules"]["enabled_sources"]["Spellcaster Magazine"] = True
+    wb["gold"] = 1000
+    ok, _ = warband_store.buy_standard_item(wb, "Pistol")
+    assert ok
+
+    wb["homerules"]["firearms_rules_enabled"] = False
+    ok, msg = warband_store.upgrade_firearm(wb, "Pistol", "Double-barrelled (Firearm Upgrade)")
+    assert not ok
+    assert "Firearms Rules" in msg
+
+
+def test_filtered_standard_items_hides_firearms_when_rules_disabled(fresh_warband):
+    """app.py's _filtered_standard_items() drives the Workshop panel, the
+    upgrade table, and the item-slot picker's primary list alike — the
+    firearm base items and their upgrade items must all disappear together."""
+    import app as app_module
+
+    wb = fresh_warband
+    hr = wb["homerules"]
+    hr["firearms_rules_enabled"] = False
+    items = app_module._filtered_standard_items(game_content.load_standard_items(), hr)
+    names = [it["name"] for it in items]
+    assert "Pistol" not in names
+    assert "Musket" not in names
+    assert "Blunderbuss" not in names
+    assert "Double-barrelled (Firearm Upgrade)" not in names
+
+    hr["firearms_rules_enabled"] = True
+    items = app_module._filtered_standard_items(game_content.load_standard_items(), hr)
+    names = [it["name"] for it in items]
+    assert "Pistol" in names
+    assert "Double-barrelled (Firearm Upgrade)" in names
