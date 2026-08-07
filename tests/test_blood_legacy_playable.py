@@ -35,6 +35,7 @@ def test_giant_blooded_eligibility_excludes_animals_constructs_demons_undead():
 
 def test_giant_blooded_requires_homerule_enabled(fresh_warband):
     wb = fresh_warband
+    wb["homerules"]["giant_blooded_enabled"] = False
     ok, msg = warband_store.set_giant_blooded_pending(wb, True)
     assert not ok
     assert "homerule" in msg.lower()

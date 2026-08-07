@@ -92,6 +92,16 @@ def load_bestiary() -> list[dict]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+OTHER_CREATURE_ROW = {
+    "monster": "Other Creature",
+    "rules": "",
+    "source": "Spellcaster Magazine",
+    "xp": 5,
+    "bestiary_name": None,
+    "prize": {"name": None, "kind": "none", "target": None, "gold": 0, "known": True},
+}
+
+
 @lru_cache(maxsize=1)
 def load_monster_hunting() -> list[dict]:
     """The Master Monster Table (Spellcaster Magazine, Issue 5): per-monster
@@ -99,11 +109,14 @@ def load_monster_hunting() -> list[dict]:
     prize: {name, kind, target, gold, known}}. Built from the source PDF by
     scripts/extract_monster_hunting.py — see that script's docstring for why
     the HTML reference other supplement content is extracted from can't be
-    used for this table."""
+    used for this table. Prepends OTHER_CREATURE_ROW, a catch-all for a kill
+    that isn't actually on the book's table — 5 XP (the table's own lowest
+    tier), no prize — kept here rather than in the extracted JSON so the
+    extractor never silently drops it."""
     path = DATA / "monster_hunting.json"
     if not path.is_file():
-        return []
-    return json.loads(path.read_text(encoding="utf-8"))
+        return [OTHER_CREATURE_ROW]
+    return [OTHER_CREATURE_ROW] + json.loads(path.read_text(encoding="utf-8"))
 
 
 @lru_cache(maxsize=1)

@@ -217,8 +217,10 @@
           textAt(i + 1).classList.add("item-slot-linked");
           pickAt(i + 1).classList.add("item-slot-linked");
           detailAt(i + 1).classList.add("item-slot-linked");
-          // sync UI of paired slot
-          pickAt(i + 1).value = "Two-Handed Weapon";
+          // sync UI of paired slot — the actual paired item's name (e.g.
+          // "Bladed Staff"), not a hardcoded generic label; two-slot items
+          // other than the catalog's own "Two-Handed Weapon" entry exist too.
+          pickAt(i + 1).value = a;
           showMode(i + 1, "text");
           i += 2;
           continue;
@@ -324,7 +326,7 @@
         }
         if (isTwoHandedName(val) && i + 1 < n) {
           setText(i + 1, val);
-          pickAt(i + 1).value = "Two-Handed Weapon";
+          pickAt(i + 1).value = val;
           showMode(i + 1, "text");
         }
         refreshLinked();

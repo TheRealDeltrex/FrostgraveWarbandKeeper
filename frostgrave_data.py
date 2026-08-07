@@ -662,8 +662,8 @@ BASE_RESOURCES: dict[str, dict] = {
         "source": "Spellcaster Magazine",
         "effects": (
             "Lets the warband keep one horse (200gc, one per warband); doesn't affect the "
-            "warband size limit. Enables the horse-buying and mounting controls on the "
-            "Base card and the wizard/apprentice/captain/soldier cards."
+            "warband size limit. Enables the Horse sub-card on the Treasury, Vault and "
+            "Workshop card, where it's bought, mounted, and upgraded."
         ),
     },
     "breeding_cages": {
@@ -2864,6 +2864,45 @@ def giant_blooded_eligible_type_keys() -> set[str]:
 HORSE_COST = 200
 HORSE_MOUNT_STAT_DELTA = {"move": 2, "fight": 1, "armour": -2}
 RIDERLESS_HORSE_STATS = {"move": 7, "fight": 1, "armour": 10, "will": 0, "health": 10}
+# Advanced Horsemanship: purchasable, stacking, one-off upgrades for the
+# warband's horse. Melee Training/Sure-footed/Charger only grant a trait or
+# table-roll adjustment this app doesn't simulate (reference text only, hence
+# no deltas); Aggressive/Loyal/Barding have a real stat effect — see
+# expansions.horse_riderless_stats()/horse_mount_delta(), which fold an owned
+# upgrade's deltas into the base RIDERLESS_HORSE_STATS/HORSE_MOUNT_STAT_DELTA.
+HORSE_UPGRADES = [
+    {
+        "id": "melee_training", "name": "Melee Training", "cost": 200,
+        "summary": "Gains 'Two Heads' (Forgotten Pacts p.17).",
+        "riderless_delta": {}, "mount_delta": {},
+    },
+    {
+        "id": "sure_footed", "name": "Sure-footed", "cost": 250,
+        "summary": "-2 to Stumble Table rolls.",
+        "riderless_delta": {}, "mount_delta": {},
+    },
+    {
+        "id": "aggressive", "name": "Aggressive", "cost": 400,
+        "summary": "+1 Fight to Riderless profile and Mounted Modifiers.",
+        "riderless_delta": {"fight": 1}, "mount_delta": {"fight": 1},
+    },
+    {
+        "id": "loyal", "name": "Loyal", "cost": 400,
+        "summary": "+3 Will to Riderless profile; can never be rustled.",
+        "riderless_delta": {"will": 3}, "mount_delta": {},
+    },
+    {
+        "id": "barding", "name": "Barding", "cost": 600,
+        "summary": "+2 Armour, -2 Move to both profiles.",
+        "riderless_delta": {"armour": 2, "move": -2}, "mount_delta": {"armour": 2, "move": -2},
+    },
+    {
+        "id": "charger", "name": "Charger", "cost": 500,
+        "summary": "Gains 'Horns' (Forgotten Pacts p.16).",
+        "riderless_delta": {}, "mount_delta": {},
+    },
+]
+HORSE_UPGRADE_BY_ID = {u["id"]: u for u in HORSE_UPGRADES}
 
 # "Any model may ride except Animals, Undead, Demons, and Constructs." This
 # catalog has no single creature-type tag to test that directly, so this
@@ -2899,6 +2938,11 @@ def horse_rider_eligible_type_keys() -> set[str]:
 FIN_DALKA_DECIPHER_COST = 100
 FIN_DALKA_BASE_SELL = 1000
 FIN_DALKA_SELL_PER_SPELL = 100
+# Matches the magic_items.json entry — found/bought like any other magic
+# item, through the Treasury, Vault and Workshop card's normal vault-item
+# route rather than a dedicated "acquire" button. See
+# expansions.fin_dalka_owned().
+FIN_DALKA_ITEM_NAME = "The Grimoire of Fin Dalka"
 
 
 def fin_dalka_spell_ids() -> list[str]:
@@ -2930,6 +2974,13 @@ MONSTER_HUNTER_TYPE_KEY = "monster_hunter"
 POTION_MASTER_TYPE_KEY = "potion_master"
 MONSTER_HUNTER_PRIZE_BONUS = 5  # extra gc per sellable prize, with a Monster Hunter on the roster
 MONSTER_HUNTER_COMPONENTS_PER_KILL = 2  # vs. 1 normally
+# A handful of Master Monster Table prizes target a spell/potion this app has
+# no record of (flagged "known": False by scripts/extract_monster_hunting.py
+# — likely a 1st-edition-only spell/potion never carried into the 2e lists
+# this app uses). The "Replace Edition 1 Loot with Gold" homerule swaps those
+# for a flat gc prize instead of a component for a spell that doesn't exist
+# anywhere in the app. See warband_store.record_monster_kill().
+EDITION1_LOOT_GOLD_VALUE = 5
 
 
 # --- The Wildwoods: Supplies & Cargo Transports ------------------------------

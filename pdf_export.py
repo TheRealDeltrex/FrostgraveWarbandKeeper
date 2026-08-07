@@ -95,18 +95,57 @@ def _t(text: object) -> str:
     return s.encode("latin-1", errors="replace").decode("latin-1")
 
 
-def _stat_line(stats: dict, include_health: bool = False) -> str:
-    """Combat stats with bold labels; render with markdown=True. Health optional (soldiers)."""
+def _stat_line(stats: dict, include_health: bool = False, unmounted: dict | None = None) -> str:
+    """Combat stats with bold labels; render with markdown=True. Health optional
+    (soldiers). unmounted, if given, is this figure's Move/Fight/Armour before
+    the warband horse's mount bonus — shown in brackets behind the current
+    (mounted) value, matching the web UI."""
+
+    move_bracket = f" ({unmounted['move']})" if unmounted else ""
+    fight_bracket = f" ({format_stat(int(unmounted['fight']))})" if unmounted else ""
+    armour_bracket = f" ({unmounted['armour']})" if unmounted else ""
     parts = [
-        f"**Move:** {stats.get('move', 0)}",
-        f"**Fight:** {format_stat(int(stats.get('fight', 0)))}",
+        f"**Move:** {stats.get('move', 0)}{move_bracket}",
+        f"**Fight:** {format_stat(int(stats.get('fight', 0)))}{fight_bracket}",
         f"**Shoot:** {format_stat(int(stats.get('shoot', 0)))}",
-        f"**Armour:** {stats.get('armour', 10)}",
+        f"**Armour:** {stats.get('armour', 10)}{armour_bracket}",
         f"**Will:** {format_stat(int(stats.get('will', 0)))}",
     ]
     if include_health:
         parts.append(f"**Health:** {stats.get('health', 0)}")
     return _t("   ".join(parts))
+
+
+def _horse_rider_match(wb: dict, kind: str, soldier_id: str | None = None) -> bool:
+    rider = (wb.get("horse") or {}).get("rider")
+    if not rider or rider.get("kind") != kind:
+        return False
+    return rider.get("soldier_id") == soldier_id if kind == "soldier" else True
+
+
+def _unmounted_overlay(wb: dict, current: dict) -> dict:
+    """current minus the warband horse's Mounted Modifiers (including any
+    Advanced Horsemanship upgrade's effect on them) — the figure's own stats
+    before it climbed on, for _stat_line's bracket display."""
+    delta = expansions.horse_mount_delta(wb)
+    return {
+        "move": int(current.get("move", 0)) - delta["move"],
+        "fight": int(current.get("fight", 0)) - delta["fight"],
+        "armour": int(current.get("armour", 0)) - delta["armour"],
+    }
+
+
+def _horse_companion_line(wb: dict) -> str:
+    """The Riderless Horse profile (with any Advanced Horsemanship upgrade's
+    effect folded in), formatted the same way SOLDIER_COMPANION_BY_TYPE_KEY's
+    Blood Crow line is (see the Crow Master) — no portrait asset exists for
+    it, so this is text-only."""
+    s = expansions.horse_riderless_stats(wb)
+    return (
+        f"riding the warband's horse  "
+        f"(Move {s['move']}\"  Fight {format_stat(s['fight'])}  "
+        f"Armour {s['armour']}  Will {format_stat(s['will'])}  Health {s['health']})"
+    )
 
 
 def _health_line(max_health: object) -> str:
@@ -386,13 +425,25 @@ def build_warband_pdf(wb: dict) -> bytes:
         new_x="LMARGIN",
         new_y="NEXT",
     )
+    wiz_mounted = _horse_rider_match(wb, "wizard")
+    if wiz_mounted:
+        pdf.set_x(left)
+        pdf.set_font("Helvetica", "I", 8)
+        pdf.cell(0, 4, _t(_horse_companion_line(wb)), new_x="LMARGIN", new_y="NEXT")
     pdf.set_x(left)
     pdf.set_font("Helvetica", "", 10)
     pdf.cell(
         0, 5, _health_line(wstats.get("health", 14)), new_x="LMARGIN", new_y="NEXT", markdown=True
     )
     pdf.set_x(left)
-    pdf.cell(0, 5, _stat_line(wstats), new_x="LMARGIN", new_y="NEXT", markdown=True)
+    pdf.cell(
+        0,
+        5,
+        _stat_line(wstats, unmounted=_unmounted_overlay(wb, wstats) if wiz_mounted else None),
+        new_x="LMARGIN",
+        new_y="NEXT",
+        markdown=True,
+    )
     slots = wiz.get("item_slots", wiz.get("items") or [])
     _write_item_block(
         pdf,
@@ -444,6 +495,11 @@ def build_warband_pdf(wb: dict) -> bytes:
             new_x="LMARGIN",
             new_y="NEXT",
         )
+        ap_mounted = _horse_rider_match(wb, "apprentice")
+        if ap_mounted:
+            pdf.set_x(left)
+            pdf.set_font("Helvetica", "I", 8)
+            pdf.cell(0, 4, _t(_horse_companion_line(wb)), new_x="LMARGIN", new_y="NEXT")
         pdf.set_x(left)
         pdf.set_font("Helvetica", "", 10)
         pdf.cell(
@@ -455,7 +511,14 @@ def build_warband_pdf(wb: dict) -> bytes:
             markdown=True,
         )
         pdf.set_x(left)
-        pdf.cell(0, 5, _stat_line(astats), new_x="LMARGIN", new_y="NEXT", markdown=True)
+        pdf.cell(
+            0,
+            5,
+            _stat_line(astats, unmounted=_unmounted_overlay(wb, astats) if ap_mounted else None),
+            new_x="LMARGIN",
+            new_y="NEXT",
+            markdown=True,
+        )
         ap_slots = ap.get("item_slots", ap.get("items") or [])
         _write_item_block(
             pdf,
@@ -548,6 +611,11 @@ def build_warband_pdf(wb: dict) -> bytes:
             new_x="LMARGIN",
             new_y="NEXT",
         )
+        cap_mounted = _horse_rider_match(wb, "captain")
+        if cap_mounted:
+            pdf.set_x(left)
+            pdf.set_font("Helvetica", "I", 8)
+            pdf.cell(0, 4, _t(_horse_companion_line(wb)), new_x="LMARGIN", new_y="NEXT")
         pdf.set_x(left)
         pdf.set_font("Helvetica", "", 10)
         cstats = cap.get("stats") or {}
@@ -556,7 +624,14 @@ def build_warband_pdf(wb: dict) -> bytes:
             0, 5, _health_line(cstats.get("health", 14)), new_x="LMARGIN", new_y="NEXT", markdown=True
         )
         pdf.set_x(left)
-        pdf.cell(0, 5, _stat_line(cstats_eff), new_x="LMARGIN", new_y="NEXT", markdown=True)
+        pdf.cell(
+            0,
+            5,
+            _stat_line(cstats_eff, unmounted=_unmounted_overlay(wb, cstats_eff) if cap_mounted else None),
+            new_x="LMARGIN",
+            new_y="NEXT",
+            markdown=True,
+        )
         cap_slots = cap.get("item_slots") or []
         _write_item_block(
             pdf, left, cap_slots, cap_slots_n, bool(cap.get("has_dagger")), "Equipment"
@@ -656,6 +731,11 @@ def build_warband_pdf(wb: dict) -> bytes:
                 pdf.set_font("Helvetica", "I", 7)
                 pdf.cell(0, 3.5, _t(f"- {cline}"), new_x="LMARGIN", new_y="NEXT")
                 pdf.set_y(comp_y0 + comp_size + 1)
+            s_mounted = _horse_rider_match(wb, "soldier", s.get("id"))
+            if s_mounted:
+                pdf.set_x(left)
+                pdf.set_font("Helvetica", "I", 7)
+                pdf.cell(0, 3.5, _t(_horse_companion_line(wb)), new_x="LMARGIN", new_y="NEXT")
             pdf.set_x(left)
             pdf.set_font("Helvetica", "", 9)
             stats = {
@@ -674,12 +754,13 @@ def build_warband_pdf(wb: dict) -> bytes:
                 new_y="NEXT",
                 markdown=True,
             )
+            s_unmounted = _unmounted_overlay(wb, stats) if s_mounted else None
             pdf.set_x(left)
             pdf.multi_cell(
                 0,
                 4.5,
                 _t(
-                    f"{_stat_line(stats)}  -  "
+                    f"{_stat_line(stats, unmounted=s_unmounted)}  -  "
                     f"{s.get('category', '')} - {s.get('cost', 0)} gc"
                 ),
                 new_x="LMARGIN",

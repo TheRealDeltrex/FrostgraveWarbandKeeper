@@ -26,7 +26,7 @@
     <div class="container">
       <nav class="nav">
         <a class="brand" href="{{ url_for('home') }}">
-          Frostgrave<span>Warband Keeper</span>
+          Frostgrave<span>Warband Keeper</span>{% if APP_VERSION %}<span class="brand-version">v{{ APP_VERSION }}</span>{% endif %}
         </a>
         <ul class="nav-links">
           <li>

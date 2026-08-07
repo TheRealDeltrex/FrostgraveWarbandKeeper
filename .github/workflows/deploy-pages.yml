@@ -53,6 +53,11 @@ jobs:
           mkdir -p /tmp/fwk-ci-data-2
           FWK_DATA_DIR=/tmp/fwk-ci-data-2 python scripts/build_preview_pages.py
 
+      - name: Stamp the landing page's per-download version badges
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python scripts/stamp_landing_page_versions.py
+
       - name: Check the synced copies didn't drift (A5 drift check)
         run: |
           diff static/style.css docs/static/style.css
