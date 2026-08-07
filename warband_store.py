@@ -3834,6 +3834,9 @@ def buy_standard_item(wb: dict, item_name: str) -> tuple[bool, str]:
         return False, "Firearm upgrades are commissioned onto an owned firearm below, not bought alone."
     if item_name == SPELL_COMPONENT_BAG_NAME:
         return False, "Spell Component Bags are bought from the Spell & potion components panel instead."
+    hr = wb.get("homerules") or {}
+    if item_name in expansions.FIREARM_BASE_NAMES and not hr.get("firearms_rules_enabled", True):
+        return False, "Switch on Spellcaster Magazine: Firearms Rules under Additional Rules and Homerules."
     src = info.get("source", "Core Rules")
     if src not in enabled_sources(wb):
         return False, f"{item_name} is from {src}; enable that source under Additional Rules and Homerules first."
@@ -3859,6 +3862,9 @@ def upgrade_firearm(wb: dict, item_name: str, upgrade_name: str) -> tuple[bool, 
     parsed = expansions.parse_firearm_name(item_name)
     if not parsed:
         return False, f"{item_name} isn't a firearm."
+    hr = wb.get("homerules") or {}
+    if not hr.get("firearms_rules_enabled", True):
+        return False, "Switch on Spellcaster Magazine: Firearms Rules under Additional Rules and Homerules."
     base, upgrades = parsed
     catalog = {it["name"]: it for it in game_content.load_standard_items()}
     info = catalog.get(upgrade_name)
