@@ -99,8 +99,9 @@ def test_other_soldier_costs_unaffected_by_demon_hunter_logic(fresh_warband):
 # --- Free Dagger homerule -----------------------------------------------------
 
 
-def test_free_dagger_off_by_default_leaves_gear_untouched(fresh_warband):
+def test_free_dagger_disabled_leaves_gear_untouched(fresh_warband):
     wb = fresh_warband
+    wb["homerules"]["free_dagger_enabled"] = False
     assert expansions.free_dagger_gear(wb, "thug", "Hand weapon") == "Hand weapon"
 
 
@@ -123,14 +124,21 @@ def test_free_dagger_skips_hand_weapon_and_dagger(fresh_warband):
     assert expansions.free_dagger_gear(wb, "knight", gear) == gear
 
 
-def test_free_dagger_skips_two_hand_weapons_and_two_daggers(fresh_warband):
+def test_free_dagger_skips_two_daggers(fresh_warband):
+    wb = fresh_warband
+    wb["homerules"]["free_dagger_enabled"] = True
+    assert expansions.free_dagger_gear(wb, "trap_expert", "Two daggers, light armour") == (
+        "Two daggers, light armour"
+    )
+
+
+def test_free_dagger_adds_to_two_hand_weapons(fresh_warband):
+    # Two hand weapons isn't a dagger substitute, unlike a hand weapon + dagger
+    # or two daggers — this soldier still gets the backup dagger added.
     wb = fresh_warband
     wb["homerules"]["free_dagger_enabled"] = True
     assert expansions.free_dagger_gear(wb, "tunnel_fighter", "Two hand weapons, leather armour") == (
-        "Two hand weapons, leather armour"
-    )
-    assert expansions.free_dagger_gear(wb, "trap_expert", "Two daggers, light armour") == (
-        "Two daggers, light armour"
+        "Two hand weapons, leather armour, dagger"
     )
 
 

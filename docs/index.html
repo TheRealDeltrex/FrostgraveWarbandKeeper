@@ -69,6 +69,16 @@
     align-items: center;
     gap: 0.5rem;
   }
+  .version-badge {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--muted);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.1rem 0.55rem;
+    letter-spacing: 0.02em;
+  }
   .card p.sub { color: var(--muted); font-size: 0.88rem; margin: 0 0 1.1rem; }
   .btn {
     display: inline-flex;
@@ -138,7 +148,10 @@
     </section>
 
     <div class="section" style="border-color: var(--accent); background: linear-gradient(145deg, var(--surface-2) 0%, #101d31 100%);">
-      <h2 style="color: var(--ice);">▶ Play online — no download</h2>
+      <h2 style="color: var(--ice); display:flex; align-items:center; gap:0.5rem">
+        ▶ Play online — no download
+        <span class="version-badge" data-version-badge="online">vDEV</span>
+      </h2>
       <p style="color:var(--muted);font-size:0.92rem;margin:0 0 1rem">
         Run the full app right in your browser. It works exactly like the desktop version — including
         custom pictures — and your warbands are saved in this browser, so closing the tab or
@@ -153,7 +166,7 @@
 
     <div class="cards">
       <div class="card">
-        <h2>🪟 Windows</h2>
+        <h2>🪟 Windows <span class="version-badge" data-version-badge="windows">vDEV</span></h2>
         <p class="sub">No Python install needed.</p>
         <a class="btn" href="https://github.com/TheRealDeltrex/FrostgraveWarbandKeeper/releases/latest/download/FrostgraveWarbandKeeper-win64.zip">
           Download for Windows
@@ -171,7 +184,7 @@
       </div>
 
       <div class="card">
-        <h2>🐧 Linux</h2>
+        <h2>🐧 Linux <span class="version-badge" data-version-badge="linux">vDEV</span></h2>
         <p class="sub">No Python install needed.</p>
         <a class="btn" href="https://github.com/TheRealDeltrex/FrostgraveWarbandKeeper/releases/latest/download/FrostgraveWarbandKeeper-linux-x64.tar.gz">
           Download for Linux
@@ -213,7 +226,7 @@
         <li><strong>Create a warband</strong>: wizard, spells with casting numbers (own/aligned/neutral/opposed), and an optional apprentice.</li>
         <li><strong>Autosave</strong>: most fields save the instant you change them, keeping your scroll position and open cards intact — no Save button to remember.</li>
         <li><strong>Wizard states</strong>: Lich, Beastcrafter, and Demonic Pacts, plus grave mutations for wizard, apprentice, captain, and soldiers.</li>
-        <li><strong>Between games</strong>: level up (reversible), record post-game loot with a rulebook &rarr; item picker, and manage a combined <strong>Treasury and Vault</strong> card.</li>
+        <li><strong>Between games</strong>: level up (reversible), record post-game loot with a rulebook &rarr; item picker, and manage a combined <strong>Treasury, Vault and Workshop</strong> card.</li>
         <li><strong>Soldiers</strong>: hire from the full 2e roster on the warband page, track status, reorder, optionally level up, with an optional Edition-2 cost/gear house rule.</li>
         <li><strong>Captains</strong>: an optional, fully-tunable house rule for hiring or promoting a Captain, tricks, and absolute stat limits.</li>
         <li><strong>Home base</strong> locations and resources, the full <strong>Frostgrave Lexicon</strong> (spells, arms &amp; armour, bestiary, magic items, loot &amp; random encounter tables), and a clean <strong>PDF roster export</strong> plus JSON export/import.</li>

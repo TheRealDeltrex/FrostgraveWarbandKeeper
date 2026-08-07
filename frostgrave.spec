@@ -24,6 +24,7 @@ from pathlib import Path
 datas = [
     ("templates", "templates"),
     ("static", "static"),
+    ("pyproject.toml", "."),
 ] + [(str(p), "data") for p in sorted(Path("data").glob("*.json"))]
 
 a = Analysis(

@@ -42,15 +42,17 @@ from frostgrave_data import (
     CAPTAIN_TRICKS,
     CARGO_TRANSPORT_COST,
     CARGO_TRANSPORT_UPGRADES,
+    EDITION1_LOOT_GOLD_VALUE,
     FIN_DALKA_BASE_SELL,
     FIN_DALKA_DECIPHER_COST,
+    FIN_DALKA_ITEM_NAME,
     FIN_DALKA_SELL_PER_SPELL,
     FIRE_GIANT_WIZARD_BASE,
     FIREARM_SOLDIER_TYPE_KEYS,
     GIANT_BLOODED_COST,
     GIANT_BLOODED_STAT_DELTA,
     HORSE_COST,
-    HORSE_MOUNT_STAT_DELTA,
+    HORSE_UPGRADE_BY_ID,
     KNIGHTLY_ORDER_BY_ID,
     KNIGHTLY_ORDER_ELIGIBLE,
     KNIGHTLY_ORDER_IDS,
@@ -367,13 +369,13 @@ def default_homerules() -> dict:
         # soldiers to shrug off a Survival Roll with a lasting injury instead
         # ticks this on.
         "soldier_permanent_injuries_enabled": False,
-        # General house rule, off by default and not tied to any specific
+        # General house rule, on by default and not tied to any specific
         # source book: every ordinary human soldier hire (the same "not an
         # animal, construct, demon, or non-human troop type" filter as
         # Giant-Blooded eligibility) gets a free backup dagger, since a
         # single dagger costs no item slot under the core rules. Gear-text
         # only — never touches item_slots. See expansions.free_dagger_gear().
-        "free_dagger_enabled": False,
+        "free_dagger_enabled": True,
         "soldier_max_levels": SOLDIER_MAX_LEVELS,
         "soldier_stat_caps": deepcopy(SOLDIER_STAT_CAPS),
         "promote_captain_cost": PROMOTE_CAPTAIN_COST,
@@ -390,45 +392,58 @@ def default_homerules() -> dict:
         # available rather than opting in book by book.
         "enabled_sources": {book: True for book in SOURCE_BOOKS},
         # The Maze of Malcor says the Pentangle schools are scroll-only, then
-        # gives rules for playing them properly "if a group agrees". Off by
-        # default; needs The Maze of Malcor switched on to have any effect.
-        "pentangle_schools_playable": False,
+        # gives rules for playing them properly "if a group agrees". On by
+        # default, same as every other General Rules toggle; needs The Maze
+        # of Malcor switched on to have any effect.
+        "pentangle_schools_playable": True,
         # Blood Legacy's Fire Giant Wizard (Chapter Three) — the book frames
         # it as a build for very hard/large encounters rather than balanced
-        # campaign play, so it's opt-in like Pentangle. Off by default; needs
-        # Blood Legacy switched on to have any effect. Only affects newly
-        # created warbands — see playable_schools()/create_warband().
-        "fire_giant_wizard_playable": False,
+        # campaign play, but is opt-in the same way as the rest of this card.
+        # On by default; needs Blood Legacy switched on to have any effect.
+        # Only affects newly created warbands — see playable_schools()/
+        # create_warband().
+        "fire_giant_wizard_playable": True,
         # Blood Legacy's Vampire Wizard (Chapter Three) — the book frames it
-        # as a GM/NPC villain build "or PC by group agreement", so it's
-        # opt-in the same way. Off by default; needs Blood Legacy switched
-        # on to have any effect. Only affects newly created warbands.
-        "vampire_wizard_playable": False,
+        # as a GM/NPC villain build "or PC by group agreement". On by
+        # default; needs Blood Legacy switched on to have any effect. Only
+        # affects newly created warbands.
+        "vampire_wizard_playable": True,
         # Blood Legacy's Giant-Blooded soldier modification (Chapter Three):
         # one soldier per warband may take it (+50gc, -1 Move, -2 Will,
-        # +2 Health, Giant-Blooded trait). Off by default; needs Blood Legacy
+        # +2 Health, Giant-Blooded trait). On by default; needs Blood Legacy
         # switched on to have any effect. See giant_blooded_eligible_type_keys()
         # and set_soldier_giant_blooded() below.
-        "giant_blooded_enabled": False,
+        "giant_blooded_enabled": True,
         # The Red King's Ragged Warbands & Random Recruits (endgame campaign
         # mode): fills the roster to 10 members with Random Recruit Table
         # rolls, bypassing gold/cap checks the way the book allows. Off by
-        # default; needs The Red King switched on to have any effect. Only
-        # the roster-filling roll is implemented — the surrounding campaign
-        # restrictions (no spending, no dismissing, soldiers lost on a poor
-        # survival roll) are shown as reminder text only, same as this app's
-        # other per-game upkeep rules. See roll_random_recruits() below.
+        # default (the one General Rules toggle that stays opt-in — it's an
+        # endgame mode, not a baseline rule); needs The Red King switched on
+        # to have any effect. Only the roster-filling roll is implemented —
+        # the surrounding campaign restrictions (no spending, no dismissing,
+        # soldiers lost on a poor survival roll) are shown as reminder text
+        # only, same as this app's other per-game upkeep rules. See
+        # roll_random_recruits() below.
         "ragged_warbands_enabled": False,
         # Spellcaster Magazine's Monster Hunting: For Fun and Profit (Issue 5):
         # per-monster XP (see data/monster_hunting.json, the Master Monster
         # Table) plus harvestable gc prizes and +1 spell/potion components.
-        # Off by default; needs Spellcaster Magazine switched on to have any
-        # effect. See _monster_hunting_gate() and the functions below it.
-        "monster_hunting_enabled": False,
+        # On by default, same as every other General Rules toggle; needs
+        # Spellcaster Magazine switched on to have any effect. See
+        # _monster_hunting_gate() and the functions below it.
+        "monster_hunting_enabled": True,
+        # Sub-toggle of the above: swaps a Master Monster Table prize that
+        # targets a spell/potion this app has no record of (a likely
+        # 1st-edition-only component — see frostgrave_data.EDITION1_LOOT_
+        # GOLD_VALUE) for a flat gc prize instead, at the point the kill is
+        # recorded. On by default, same as monster_hunting_enabled itself.
+        "monster_hunting_edition1_loot_gold": True,
         # The Wildwoods' Supply Points (sp) economy + the optional Cargo
-        # Transport asset for wilderness campaigns. Off by default; needs
-        # The Wildwoods switched on to have any effect. See
-        # _wildwoods_supplies_gate() and the functions below it.
+        # Transport asset for wilderness campaigns. Off by default (the other
+        # General Rules toggle that stays opt-in, alongside Ragged Warbands
+        # — it's a wilderness-campaign-specific resource economy rather than
+        # a baseline rule); needs The Wildwoods switched on to have any
+        # effect. See _wildwoods_supplies_gate() and the functions below it.
         "wildwoods_supplies_enabled": False,
         # House correction for six supplement soldiers costed closer to 1st
         # edition than the rest of the 2e tables. On by default; see
@@ -451,12 +466,27 @@ def default_homerules() -> dict:
         # Black Powder Firearms (Issue 1): the Musketeer/Coachman/Duellist
         # only appear once BOTH this and spellcaster_magazine_soldiers above
         # are on. Doesn't gate the standalone Pistol/Musket/Blunderbuss items
-        # — standard items are deliberately never source-gated. On by
+        # — those are separately purchase-gated (buy_standard_item(), needs
+        # Spellcaster Magazine switched on) regardless of this toggle. On by
         # default.
         "firearms_rules_enabled": True,
         # Knightly Orders (Spellcaster Magazine, Issue 1). Needs Spellcaster
         # Magazine switched on in enabled_sources too.
         "knightly_orders_enabled": True,
+        # Additional Weapons sub-card: independent on/off switches for three
+        # standard weapons that are otherwise deliberately not source-gated
+        # (see game_content.load_standard_items()) — a group that doesn't
+        # want the Javelineer's/Monk's issued weapon or Ghost Archipelago's
+        # Throwing Knife showing up in the item-slot picker turns it off
+        # here instead. On by default, same as the rest of this card. See
+        # app.py's _filtered_standard_items().
+        "javelin_enabled": True,
+        "throwing_knife_enabled": True,
+        "bladed_staff_enabled": True,
+        # Bladed Staff's slot cost isn't specified consistently between
+        # printings — on by default at 2 slots (the more common reading);
+        # untick for the 1-slot reading instead.
+        "bladed_staff_two_slots": True,
         # Blood Legacy's "High-Level Wizards" optional rules (Chapter Three).
         # Each needs Blood Legacy switched on in enabled_sources *and* its own
         # toggle here — the book insists each is agreed to separately. On by
@@ -1047,7 +1077,7 @@ def portrait_dir(warband_id: str) -> Path:
     return d
 
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 # Bump this and append a new (version, function) pair to MIGRATIONS whenever a
 # future format change needs one-time cleanup on old files. Each migration
 # only runs once per file: files with no "schema_version" are treated as
@@ -1164,6 +1194,22 @@ def _migrate_component_bags_to_item_slots(wb: dict) -> None:
                 held -= 1
 
 
+def _migrate_fin_dalka_owned_flag_to_vault(wb: dict) -> None:
+    """fin_dalka.owned (a manually-toggled flag, set by the now-removed
+    acquire_fin_dalka_grimoire()) is replaced by treating The Grimoire of
+    Fin Dalka as an ordinary vault item — see expansions.fin_dalka_owned().
+    A warband that already owned it gets a vault entry added so it isn't
+    silently lost; the stale flag itself is discarded either way."""
+    wiz = wb.get("wizard")
+    if not isinstance(wiz, dict):
+        return
+    fd = wiz.get("fin_dalka")
+    if not isinstance(fd, dict):
+        return
+    if fd.pop("owned", False) and not expansions.fin_dalka_owned(wb):
+        add_vault_item(wb, FIN_DALKA_ITEM_NAME, source="migrated")
+
+
 MIGRATIONS: list[tuple[int, Callable[[dict], None]]] = [
     (1, _migrate_wizard_health_2e),
     (1, _migrate_item_slots),
@@ -1173,6 +1219,7 @@ MIGRATIONS: list[tuple[int, Callable[[dict], None]]] = [
     (1, _migrate_captain_levelup_counts),
     (1, _migrate_soldier_items_string_to_list),
     (2, _migrate_component_bags_to_item_slots),
+    (3, _migrate_fin_dalka_owned_flag_to_vault),
 ]
 
 
@@ -1314,8 +1361,7 @@ def _normalize_warband(wb: dict) -> dict:
     wiz.setdefault("portrait_source_name", None)
     if wiz.get("gender") != "female":
         wiz["gender"] = "male"
-    fd = wiz.setdefault("fin_dalka", {"owned": False, "attempts": {}})
-    fd.setdefault("owned", False)
+    fd = wiz.setdefault("fin_dalka", {"attempts": {}})
     fd.setdefault("attempts", {})
     uf = wiz.setdefault("underworld_favors", {"markers": 0})
     uf.setdefault("markers", 0)
@@ -1343,6 +1389,7 @@ def _normalize_warband(wb: dict) -> dict:
     horse = wb.setdefault("horse", {"owned": False, "rider": None})
     horse.setdefault("owned", False)
     horse.setdefault("rider", None)
+    horse.setdefault("upgrades", [])
     wb.setdefault("supply_points", 0)
     transport = wb.setdefault("cargo_transport", {"owned": False, "upgrades": []})
     transport.setdefault("owned", False)
@@ -3139,6 +3186,9 @@ def update_homerules(wb: dict, form: "ImmutableMultiDict") -> tuple[bool, str]:
             "giant_blooded_enabled": form.get("giant_blooded_enabled") == "on",
             "ragged_warbands_enabled": form.get("ragged_warbands_enabled") == "on",
             "monster_hunting_enabled": form.get("monster_hunting_enabled") == "on",
+            "monster_hunting_edition1_loot_gold": (
+                form.get("monster_hunting_edition1_loot_gold") == "on"
+            ),
             "wildwoods_supplies_enabled": form.get("wildwoods_supplies_enabled") == "on",
             "edition2_soldier_costs": form.get("edition2_soldier_costs") == "on",
             "spellcaster_magazine_soldiers": form.get("spellcaster_magazine_soldiers") == "on",
@@ -3147,6 +3197,10 @@ def update_homerules(wb: dict, form: "ImmutableMultiDict") -> tuple[bool, str]:
             ),
             "firearms_rules_enabled": form.get("firearms_rules_enabled") == "on",
             "knightly_orders_enabled": form.get("knightly_orders_enabled") == "on",
+            "javelin_enabled": form.get("javelin_enabled") == "on",
+            "throwing_knife_enabled": form.get("throwing_knife_enabled") == "on",
+            "bladed_staff_enabled": form.get("bladed_staff_enabled") == "on",
+            "bladed_staff_two_slots": form.get("bladed_staff_slots") != "1",
             "hlw_specialist_allowance": form.get("hlw_specialist_allowance") == "on",
             "hlw_item_slots": form.get("hlw_item_slots") == "on",
             "hlw_max_health": form.get("hlw_max_health") == "on",
@@ -3762,21 +3816,24 @@ def add_vault_item(wb: dict, name: str, notes: str = "", source: str = "loot") -
 
 
 def buy_standard_item(wb: dict, item_name: str) -> tuple[bool, str]:
-    """Buys a costed standard item — currently the black-powder firearms,
-    the only entries in standard_items.json with a real `cost` that aren't
-    an upgrade — into the vault, same slot the After-the-Game loot picker
-    fills. Ordinary starting gear (dagger, bow, armour, ...) has no cost and
-    is never bought this way — it stays free to pick straight into an item
-    slot. Firearm upgrades aren't bought standalone either — see
-    upgrade_firearm() — since they only mean anything applied to an owned
-    gun. Once bought, the item-slot picker offers exactly as many copies as
-    the vault holds (see expansions.equipped_item_holders())."""
+    """Buys a costed standard item — the black-powder firearms — into the
+    vault, same slot the After-the-Game loot picker fills. Ordinary starting
+    gear (dagger, bow, armour, ...) has no cost and is never bought this way
+    — it stays free to pick straight into an item slot. Firearm upgrades
+    aren't bought standalone either — see upgrade_firearm() — since they
+    only mean anything applied to an owned gun. The Spell Component Bag also
+    has a `cost` (so it's excluded from the free-starting-gear picker too)
+    but is bought through its own panel/cap instead — see
+    buy_component_bag(). Once bought, the item-slot picker offers exactly as
+    many copies as the vault holds (see expansions.equipped_item_holders())."""
     catalog = {it["name"]: it for it in game_content.load_standard_items()}
     info = catalog.get(item_name)
     if not info or "cost" not in info:
         return False, "Not a purchasable item."
     if info.get("compatible_bases"):
         return False, "Firearm upgrades are commissioned onto an owned firearm below, not bought alone."
+    if item_name == SPELL_COMPONENT_BAG_NAME:
+        return False, "Spell Component Bags are bought from the Spell & potion components panel instead."
     src = info.get("source", "Core Rules")
     if src not in enabled_sources(wb):
         return False, f"{item_name} is from {src}; enable that source under Additional Rules and Homerules first."
@@ -4369,7 +4426,10 @@ def revert_vampire(wb: dict) -> tuple[bool, str]:
 # happens at the table; these actions apply whatever the player reports as its
 # outcome. Available to any wizard (the grimoire is found/bought treasure, not
 # tied to being a Fire Giant), which is also why it isn't folded into the
-# wizard-state mechanic used by Lich/Beastcrafter/Pact/Vampire.
+# wizard-state mechanic used by Lich/Beastcrafter/Pact/Vampire. Ownership
+# itself isn't tracked by a dedicated action — it's found/bought like any
+# other magic item, through the Treasury, Vault and Workshop card's normal
+# vault-item route; see expansions.fin_dalka_owned().
 
 
 def _fin_dalka_gate(wb: dict) -> str | None:
@@ -4378,32 +4438,23 @@ def _fin_dalka_gate(wb: dict) -> str | None:
     return None
 
 
-def acquire_fin_dalka_grimoire(wb: dict) -> tuple[bool, str]:
-    err = _fin_dalka_gate(wb)
-    if err:
-        return False, err
-    wiz = wb.setdefault("wizard", {})
-    fd = wiz.setdefault("fin_dalka", {"owned": False, "attempts": {}})
-    if fd.get("owned"):
-        return False, "Already owns the Grimoire of Fin Dalka."
-    fd["owned"] = True
-    text = f"{wiz.get('name', 'The wizard')} now owns the Grimoire of Fin Dalka."
-    add_history(wb, text)
-    return True, text
-
-
 def _fin_dalka_sell_price(fd: dict) -> int:
     learned = sum(1 for a in (fd.get("attempts") or {}).values() if a.get("learned"))
     return max(0, FIN_DALKA_BASE_SELL - FIN_DALKA_SELL_PER_SPELL * learned)
 
 
 def sell_fin_dalka_grimoire(wb: dict) -> tuple[bool, str]:
-    wiz = wb.setdefault("wizard", {})
-    fd = wiz.setdefault("fin_dalka", {"owned": False, "attempts": {}})
-    if not fd.get("owned"):
+    if not expansions.fin_dalka_owned(wb):
         return False, "Doesn't own the Grimoire of Fin Dalka."
+    wiz = wb.setdefault("wizard", {})
+    fd = wiz.setdefault("fin_dalka", {"attempts": {}})
     price = _fin_dalka_sell_price(fd)
-    fd["owned"] = False
+    name = FIN_DALKA_ITEM_NAME.lower()
+    wb["vault_items"] = [
+        it
+        for it in wb.get("vault_items") or []
+        if ((it.get("name") if isinstance(it, dict) else str(it)) or "").strip().lower() != name
+    ]
     wb["gold"] = int(wb.get("gold", 0)) + price
     text = f"Sold the Grimoire of Fin Dalka for {price} gc."
     add_history(wb, text)
@@ -4422,10 +4473,10 @@ def fin_dalka_decipher(wb: dict, target_spell_id: str, outcome: str) -> tuple[bo
         return False, err
     if outcome not in ("success", "fail", "nat1"):
         return False, "Unknown outcome."
-    wiz = wb.setdefault("wizard", {})
-    fd = wiz.setdefault("fin_dalka", {"owned": False, "attempts": {}})
-    if not fd.get("owned"):
+    if not expansions.fin_dalka_owned(wb):
         return False, "Doesn't own the Grimoire of Fin Dalka."
+    wiz = wb.setdefault("wizard", {})
+    fd = wiz.setdefault("fin_dalka", {"attempts": {}})
     if target_spell_id not in fin_dalka_spell_ids():
         return False, "Not a Fire Giant spell."
     attempts = fd.setdefault("attempts", {})
@@ -4479,7 +4530,7 @@ def unlock_fin_dalka_spell(wb: dict, target_spell_id: str) -> tuple[bool, str]:
     net for the "Natural 1" button, since that lock is otherwise permanent
     and unrecoverable through the UI."""
     wiz = wb.setdefault("wizard", {})
-    fd = wiz.setdefault("fin_dalka", {"owned": False, "attempts": {}})
+    fd = wiz.setdefault("fin_dalka", {"attempts": {}})
     attempts = fd.get("attempts") or {}
     rec = attempts.get(target_spell_id)
     if not rec or not rec.get("locked"):
@@ -4541,7 +4592,34 @@ def sell_or_release_horse(wb: dict) -> tuple[bool, str]:
         return False, "Doesn't own a horse."
     _dismount_rider(wb, horse)
     horse["owned"] = False
+    horse["upgrades"] = []
     text = "Released the warband's horse."
+    add_history(wb, text)
+    return True, text
+
+
+def buy_horse_upgrade(wb: dict, upgrade_id: str) -> tuple[bool, str]:
+    """Advanced Horsemanship: a one-off, stacking purchase per upgrade. See
+    expansions.horse_riderless_stats()/horse_mount_delta() for how an owned
+    upgrade's stat effect (if any) is folded into the horse's two profiles."""
+    err = _horse_gate(wb)
+    if err:
+        return False, err
+    horse = wb.setdefault("horse", {"owned": False, "rider": None, "upgrades": []})
+    if not horse.get("owned"):
+        return False, "The warband doesn't own a horse."
+    upgrade = HORSE_UPGRADE_BY_ID.get(upgrade_id)
+    if not upgrade:
+        return False, "Unknown horse upgrade."
+    owned = horse.setdefault("upgrades", [])
+    if upgrade_id in owned:
+        return False, f"Already bought {upgrade['name']}."
+    cost = int(upgrade["cost"])
+    if int(wb.get("gold", 0)) < cost:
+        return False, f"Need {cost} gc for {upgrade['name']}."
+    wb["gold"] = int(wb.get("gold", 0)) - cost
+    owned.append(upgrade_id)
+    text = f"Bought {upgrade['name']} for the warband's horse ({cost} gc)."
     add_history(wb, text)
     return True, text
 
@@ -4568,8 +4646,9 @@ def mount_horse(wb: dict, kind: str, soldier_id: str | None = None) -> tuple[boo
         return False, f"{label} is already mounted."
     if rider:
         _dismount_rider(wb, horse)
-    backup = {stat: get_stat(stat) for stat in HORSE_MOUNT_STAT_DELTA}
-    for stat, delta in HORSE_MOUNT_STAT_DELTA.items():
+    mount_delta = expansions.horse_mount_delta(wb)
+    backup = {stat: get_stat(stat) for stat in mount_delta}
+    for stat, delta in mount_delta.items():
         set_stat(stat, backup[stat] + delta)
     horse["rider"] = {"kind": kind, "soldier_id": soldier_id, "backup": backup}
     text = f"{label} mounted the warband's horse."
@@ -4953,7 +5032,12 @@ def record_monster_kill(wb: dict, monster: str, mode: str = "killed") -> tuple[b
     prize. "no_loot" is a kill that went unlooted (someone/something else got
     to the body first, you ran out of time, etc.) — XP only, no prize.
     "loot_only" is a prize harvested from a monster your warband didn't kill
-    itself — the prize, claimable as normal, but no XP."""
+    itself — the prize, claimable as normal, but no XP.
+
+    With the "Replace Edition 1 Loot with Gold" homerule on, a prize the
+    extractor flagged "known": False (targets a spell/potion this app has no
+    record of) is swapped for a flat EDITION1_LOOT_GOLD_VALUE gc prize here,
+    at record time, rather than at claim time."""
     err = _monster_hunting_gate(wb)
     if err:
         return False, err
@@ -4968,6 +5052,19 @@ def record_monster_kill(wb: dict, monster: str, mode: str = "killed") -> tuple[b
         prize = {"name": None, "kind": "none", "target": None, "gold": 0, "known": True}
     else:
         prize = row["prize"]
+        hr = wb.get("homerules") or {}
+        if (
+            hr.get("monster_hunting_edition1_loot_gold")
+            and prize.get("kind") in ("spell", "potion")
+            and not prize.get("known", True)
+        ):
+            prize = {
+                "name": prize.get("name") or f"{row['monster']} (Edition 1 loot)",
+                "kind": "gold",
+                "target": None,
+                "gold": EDITION1_LOOT_GOLD_VALUE,
+                "known": True,
+            }
     entry = {
         "id": uuid.uuid4().hex[:8],
         "monster": row["monster"],

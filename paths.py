@@ -30,6 +30,22 @@ def bundle_dir() -> Path:
     return Path(__file__).resolve().parent
 
 
+def app_version() -> str:
+    """The single-sourced version from pyproject.toml's [project] table (see
+    CLAUDE.md — bumped in its own commit before a release). Bundled into both
+    PyInstaller specs and the Pyodide browser bundle (scripts/
+    build_browser_bundle.py) so this resolves the same way in every build;
+    "" if pyproject.toml isn't present (shouldn't happen outside a broken
+    bundle) rather than raising, since this only feeds a UI label."""
+    import tomllib
+
+    try:
+        data = tomllib.loads((bundle_dir() / "pyproject.toml").read_text(encoding="utf-8"))
+        return str(data.get("project", {}).get("version", ""))
+    except (OSError, tomllib.TOMLDecodeError):
+        return ""
+
+
 def _config_path() -> Path:
     appdata = os.environ.get("APPDATA")
     base = Path(appdata) if appdata else Path.home() / ".config"

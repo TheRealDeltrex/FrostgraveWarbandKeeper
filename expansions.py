@@ -25,9 +25,12 @@ from frostgrave_data import (
     CARGO_TRANSPORT_BASE_CAPACITY,
     CARGO_TRANSPORT_UPGRADES,
     COMPONENT_POUCH_CAPACITY,
+    FIN_DALKA_ITEM_NAME,
     FIRE_GIANT_HEALTH_CAP,
     FIRE_GIANT_WIZARD_BASE,
     FIRE_GIANT_XP_PER_LEVEL,
+    HORSE_MOUNT_STAT_DELTA,
+    HORSE_UPGRADE_BY_ID,
     LEGENDARY_SOLDIER_BASE_MAX,
     LEGENDARY_SOLDIER_LEVEL_STEP,
     LEGENDARY_SOLDIER_MAX_CAP,
@@ -38,6 +41,7 @@ from frostgrave_data import (
     MAX_WIZARD_LEVEL,
     MONSTER_HUNTER_TYPE_KEY,
     POTION_MASTER_TYPE_KEY,
+    RIDERLESS_HORSE_STATS,
     SOLDIER_ITEM_SLOTS,
     SPELL_COMPONENT_BAG_CAPACITY,
     SPELL_COMPONENT_BAG_NAME,
@@ -635,18 +639,19 @@ def free_dagger_gear(wb: dict, type_key: str, gear: str) -> str:
     """The Free Dagger homerule: every ordinary human soldier hire (reusing
     Giant-Blooded's "not an animal, construct, demon, or non-human troop
     type" eligibility) gets a backup dagger, since a single dagger costs no
-    item slot under the core rules. Anyone already carrying the equivalent
-    of two close-combat weapons (a hand weapon and a dagger, two hand
-    weapons, or two daggers) is left alone; anyone with exactly one dagger
-    and no hand weapon gets it upgraded to two. Gear-text only — this never
-    touches item_slots, matching how "gear" is descriptive everywhere else."""
+    item slot under the core rules. Anyone already carrying a hand weapon
+    and a dagger, or two daggers, is left alone (already has the backup);
+    anyone with exactly one dagger and no hand weapon gets it upgraded to
+    two. Everyone else — including two hand weapons, which isn't a dagger
+    substitute — gets one added. Gear-text only — this never touches
+    item_slots, matching how "gear" is descriptive everywhere else."""
     if not (wb.get("homerules") or {}).get("free_dagger_enabled"):
         return gear
     if type_key not in giant_blooded_eligible_type_keys():
         return gear
     daggers = _count_gear_item(gear, "dagger")
     hand_weapons = _count_gear_item(gear, "hand weapon")
-    if daggers >= 2 or hand_weapons >= 2 or (daggers >= 1 and hand_weapons >= 1):
+    if daggers >= 2 or (daggers >= 1 and hand_weapons >= 1):
         return gear
     if daggers == 1:
         return re.sub(r'\bdaggers?\b', '2 daggers', gear, count=1, flags=re.IGNORECASE)
@@ -832,6 +837,51 @@ def pact_break_penalty(wb: dict) -> dict:
 
 
 # --- Vault-gated items (bought firearms, found artefacts) -------------------
+
+
+def fin_dalka_owned(wb: dict) -> bool:
+    """Whether the warband currently holds The Grimoire of Fin Dalka —
+    found/bought like any other magic item via the Treasury, Vault and
+    Workshop card's vault-item route, so ownership is just "is it in the
+    vault" rather than a separate manually-toggled flag."""
+    name = FIN_DALKA_ITEM_NAME.lower()
+    return any(
+        ((it.get("name") if isinstance(it, dict) else str(it)) or "").strip().lower() == name
+        for it in wb.get("vault_items") or []
+    )
+
+
+# --- Spellcaster Magazine, Issue 1: Horses in Frostgrave (Advanced Horsemanship) ---
+
+
+def horse_riderless_stats(wb: dict) -> dict:
+    """RIDERLESS_HORSE_STATS with any owned Advanced Horsemanship upgrade's
+    riderless_delta folded in (Aggressive/Loyal/Barding; the other three
+    upgrades grant a trait or table-roll adjustment this app doesn't
+    simulate, so they contribute no delta)."""
+    stats = dict(RIDERLESS_HORSE_STATS)
+    for upgrade_id in (wb.get("horse") or {}).get("upgrades") or []:
+        upgrade = HORSE_UPGRADE_BY_ID.get(upgrade_id)
+        if not upgrade:
+            continue
+        for stat, delta in upgrade["riderless_delta"].items():
+            stats[stat] = stats.get(stat, 0) + delta
+    return stats
+
+
+def horse_mount_delta(wb: dict) -> dict:
+    """HORSE_MOUNT_STAT_DELTA with any owned upgrade's mount_delta folded in.
+    Only applied going forward by mount_horse() — buying an upgrade doesn't
+    retroactively adjust an already-mounted rider's bonus, same as any other
+    homerule/purchase that only affects future actions."""
+    delta = dict(HORSE_MOUNT_STAT_DELTA)
+    for upgrade_id in (wb.get("horse") or {}).get("upgrades") or []:
+        upgrade = HORSE_UPGRADE_BY_ID.get(upgrade_id)
+        if not upgrade:
+            continue
+        for stat, amount in upgrade["mount_delta"].items():
+            delta[stat] = delta.get(stat, 0) + amount
+    return delta
 
 
 def equipped_item_holders(wb: dict) -> dict[str, list[str]]:

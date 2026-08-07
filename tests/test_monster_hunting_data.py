@@ -7,8 +7,8 @@ from frostgrave_data import SOURCE_BOOKS, SPELLS
 from game_content import load_bestiary, load_monster_hunting, load_potion_choices
 
 
-def test_row_count_is_ninety_two():
-    assert len(load_monster_hunting()) == 92
+def test_row_count_is_ninety_two_book_rows_plus_other_creature():
+    assert len(load_monster_hunting()) == 93
 
 
 def test_every_row_has_the_expected_shape():

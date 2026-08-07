@@ -26,7 +26,7 @@
   <script type="application/json" id="fg-spell-data">{{ spell_names | tojson }}</script>
   <script type="application/json" id="fg-item-slotcost-data">{{ item_slot_costs | tojson }}</script>
   <datalist id="fg-item-suggestions">
-    {% for it in full_standard_items if it.kind == 'simple' %}
+    {% for it in full_standard_items if it.kind == 'simple' and it.cost is not defined %}
       <option value="{{ it.name }}"></option>
     {% endfor %}
     {% for name in potion_choices %}
@@ -42,6 +42,9 @@
   </datalist>
   {% set cap = wb.captain %}
   {% set hr = wb.homerules %}
+  {% set horse_rider = wb.horse.rider %}
+  {% set hrs = horse_riderless_stats(wb) %}
+  {% set hmd = horse_mount_delta(wb) %}
 
   <section class="hero">
     <div class="hero-with-portrait">
@@ -98,7 +101,7 @@
     <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" data-autosave>
       <input type="hidden" name="action" value="update_homerules" />
 
-      <details class="ref-panel" open>
+      <details class="ref-panel" id="general-rules-panel" open>
         <summary>General Rules</summary>
         <p class="muted" style="font-size:0.85rem">
           Switch on the supplements you play with. Enabled books add their mercenaries to the Hire soldier
@@ -153,8 +156,9 @@
           card below rather than a button on every soldier's row, since only one may take it.
         </p>
         <p class="muted" style="font-size:0.82rem;margin:0.6rem 0 0">
-          Needs Blood Legacy. The Grimoire of Fin Dalka — acquiring it, deciphering its 8 Fire Giant
-          spells, and selling it — is all done from the Treasury, Vault and Workshop card.
+          Needs Blood Legacy. The Grimoire of Fin Dalka is found/bought like any other magic item
+          (add it via the Treasury, Vault and Workshop card's Vault items) — once owned, deciphering
+          its 8 Fire Giant spells and selling it are also done there.
         </p>
         <label class="checkbox-row" style="margin-top:0.6rem">
           <input name="ragged_warbands_enabled" type="checkbox" {% if hr.ragged_warbands_enabled %}checked{% endif %} />
@@ -177,7 +181,16 @@
           Needs Spellcaster Magazine. Adds a per-game kill log to "After the game" below: record
           a kill for its Master Monster Table XP, then claim its prize (sold for gold, or a spell/
           potion component for the wizard or apprentice). See the Lexicon for the full 92-row
-          table.
+          table plus "Other Creature", a catch-all for anything not on it.
+        </p>
+        <label class="checkbox-row" style="margin-top:0.4rem;margin-left:1.8rem">
+          <input name="monster_hunting_edition1_loot_gold" type="checkbox" {% if hr.monster_hunting_edition1_loot_gold %}checked{% endif %} />
+          Replace Edition 1 Loot with Gold
+        </label>
+        <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0 1.8rem">
+          Needs the toggle above. A handful of the table's prizes target a spell/potion this app
+          has no record of (likely 1st-edition-only) — this swaps those for a flat
+          {{ EDITION1_LOOT_GOLD_VALUE }}gc prize instead, at the point the kill is recorded.
         </p>
         <label class="checkbox-row" style="margin-top:0.6rem">
           <input name="wildwoods_supplies_enabled" type="checkbox" {% if hr.wildwoods_supplies_enabled %}checked{% endif %} />
@@ -241,7 +254,7 @@
         </p>
         <div class="checkbox-row" style="margin-top:0.6rem">
           <input id="free_dagger_enabled" name="free_dagger_enabled" type="checkbox" {% if hr.free_dagger_enabled %}checked{% endif %} />
-          <label for="free_dagger_enabled" style="margin:0">Every ordinary soldier gets a free backup dagger (a single dagger costs no item slot) — skips anyone already carrying a hand weapon and a dagger, two hand weapons, or two daggers; upgrades a lone dagger to two</label>
+          <label for="free_dagger_enabled" style="margin:0">Every ordinary soldier gets a free backup dagger (a single dagger costs no item slot) — skips anyone already carrying a hand weapon and a dagger, or two daggers; upgrades a lone dagger to two, and two hand weapons still gets one added</label>
         </div>
         <script>
           // Tick/untick every source book at once, then save immediately —
@@ -256,7 +269,37 @@
           });
         </script>
 
-        <details class="ref-panel">
+        <details class="ref-panel" id="additional-weapons-panel">
+          <summary>Additional Weapons</summary>
+          <p class="muted" style="font-size:0.85rem">
+            Javelin, Bladed Staff and Throwing Knife are class-issued or lightly-supported standard
+            weapons that stay available regardless of enabled source books (see the Lexicon) — turn
+            any of them off here if your group doesn't use it.
+          </p>
+          <label class="checkbox-row" style="margin-top:0.4rem">
+            <input name="javelin_enabled" type="checkbox" {% if hr.javelin_enabled %}checked{% endif %} />
+            Javelin (Thaw of the Lich Lord — the Javelineer's issued weapon)
+          </label>
+          <label class="checkbox-row">
+            <input name="throwing_knife_enabled" type="checkbox" {% if hr.throwing_knife_enabled %}checked{% endif %} />
+            Throwing Knife (Ghost Archipelago)
+          </label>
+          <label class="checkbox-row">
+            <input name="bladed_staff_enabled" type="checkbox" {% if hr.bladed_staff_enabled %}checked{% endif %} />
+            Bladed Staff (Forgotten Pacts — the Monk's issued weapon)
+          </label>
+          <div style="margin:0.3rem 0 0.6rem 1.8rem">
+            <label style="display:block;margin:0 0 0.3rem;color:var(--muted);font-size:0.85rem">Bladed Staff item slots</label>
+            <div class="gender-toggle">
+              <input type="radio" id="bladed_staff_slots_1" name="bladed_staff_slots" value="1" {% if not hr.bladed_staff_two_slots %}checked{% endif %} />
+              <label for="bladed_staff_slots_1">1 slot</label>
+              <input type="radio" id="bladed_staff_slots_2" name="bladed_staff_slots" value="2" {% if hr.bladed_staff_two_slots %}checked{% endif %} />
+              <label for="bladed_staff_slots_2">2 slots</label>
+            </div>
+          </div>
+        </details>
+
+        <details class="ref-panel" id="high-level-wizards-panel">
           <summary>High-Level Wizards (Blood Legacy)</summary>
           <p class="muted" style="font-size:0.85rem">
             Needs Blood Legacy switched on above. The book treats each of these as its own optional
@@ -336,7 +379,7 @@
         </details>
       </details>
 
-      <details class="ref-panel">
+      <details class="ref-panel" id="roster-caps-panel">
         <summary>Roster caps</summary>
         <p class="muted" style="font-size:0.85rem">
           2e core defaults to {{ MAX_SOLDIERS }} soldiers / {{ MAX_SPECIALISTS }} specialists.
@@ -367,7 +410,7 @@
           {% endfor %}
         </select>
       </div>
-      <details class="ref-panel">
+      <details class="ref-panel" id="captain-settings-panel">
         <summary>Captain settings</summary>
         <div class="grid-2">
           <div class="form-row">
@@ -439,7 +482,7 @@
         </div>
       </details>
 
-      <details class="ref-panel">
+      <details class="ref-panel" id="promote-captain-panel">
         <summary>Promote Captain</summary>
         <p class="muted" style="font-size:0.85rem">
           Enabled via the Captain mode select above ("Promote only" or "Hire or promote"). Settings below apply whenever promotion is allowed.
@@ -485,7 +528,7 @@
 
       </details>
 
-      <details class="ref-panel">
+      <details class="ref-panel" id="soldier-leveling-panel">
         <summary>Soldier Leveling</summary>
         <p class="muted" style="font-size:0.85rem">
           Soldiers get 20xp for participating in a match and 20xp for surviving a match without
@@ -525,7 +568,7 @@
         </div>
       </details>
 
-      <details class="ref-panel">
+      <details class="ref-panel" id="wizard-stat-limits-panel">
         <summary>Wizard stat limits</summary>
         <p class="muted" style="font-size:0.85rem">
           Hard ceilings the wizard's own level-ups run into (2e core defaults below). Blood
@@ -606,7 +649,7 @@
     </form>
 
     {% if monster_hunting_enabled %}
-      <details class="ref-panel" style="margin-top:0.6rem">
+      <details class="ref-panel" id="monster-hunting-panel" style="margin-top:0.6rem" {% if monster_hunting_kills or monster_hunting_prizes %}open{% endif %}>
         <summary>Monster Hunting (Spellcaster Magazine, Issue 5) — {{ monster_hunting_pending_xp }} XP / {{ monster_hunting_pending_gold }}gc pending</summary>
         <p class="muted" style="font-size:0.85rem">
           Record each monster your warband killed for its Master Monster Table XP, then optionally
@@ -689,11 +732,11 @@
   </details>
 
   {# ---- Wizard & apprentice details ---- #}
-  <details class="card" open>
+  <details class="card" id="wizard-apprentice-card" open>
     <summary><span class="card-title">Wizard &amp; apprentice</span></summary>
     <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" enctype="multipart/form-data" data-autosave>
       <input type="hidden" name="action" value="details" />
-      <details class="ref-panel" open>
+      <details class="ref-panel" id="wizard-panel" open>
         <summary>Wizard — {{ wiz.name }} · {{ wiz.school }}</summary>
         {% if wiz.school == "Fire Giant" %}
           <p class="muted" style="font-size:0.85rem">
@@ -744,17 +787,19 @@
                 <label for="wizard_portrait_remove" style="margin:0">Remove picture (revert to default)</label>
               </div>
             {% endif %}
+            {% set wiz_mounted = horse_rider and horse_rider.kind == 'wizard' %}
+            {% if wiz_mounted %}<span class="badge" title="Riding the warband's horse: Move +{{ hmd.move }}, Fight +{{ hmd.fight }}, Armour {{ hmd.armour }}">mounted</span>{% endif %}
             <div class="stat-row">
               {# wizard_display_stats, not wiz.stats: a Beastcrafter III's Animal
                  Feature (Fast / Scales) is folded in, marked with a * below. #}
-              <div class="stat-pill"><span class="label">Move</span><span class="value">{{ wizard_display_stats.move }}{% if wizard_state_bonus.move %}*{% endif %}</span></div>
-              <div class="stat-pill"><span class="label">Fight</span><span class="value">{{ format_stat(wizard_display_stats.fight) }}</span></div>
+              <div class="stat-pill"><span class="label">Move</span><span class="value">{{ wizard_display_stats.move }}{% if wizard_state_bonus.move %}*{% endif %}{% if wiz_mounted %} <span class="muted">({{ wizard_display_stats.move - hmd.move }})</span>{% endif %}</span></div>
+              <div class="stat-pill"><span class="label">Fight</span><span class="value">{{ format_stat(wizard_display_stats.fight) }}{% if wiz_mounted %} <span class="muted">({{ format_stat(wizard_display_stats.fight - hmd.fight) }})</span>{% endif %}</span></div>
               <div class="stat-pill"><span class="label">Shoot</span><span class="value">{{ format_stat(wizard_display_stats.shoot) }}</span></div>
-              <div class="stat-pill"><span class="label">Armour</span><span class="value">{{ wizard_display_stats.armour }}{% if wizard_state_bonus.armour %}*{% endif %}</span></div>
+              <div class="stat-pill"><span class="label">Armour</span><span class="value">{{ wizard_display_stats.armour }}{% if wizard_state_bonus.armour %}*{% endif %}{% if wiz_mounted %} <span class="muted">({{ wizard_display_stats.armour - hmd.armour }})</span>{% endif %}</span></div>
               <div class="stat-pill"><span class="label">Will</span><span class="value">{{ format_stat(wizard_display_stats.will) }}</span></div>
               <div class="stat-pill"><span class="label">Health</span><span class="value">{{ wizard_display_stats.health }}</span></div>
             </div>
-            <details class="ref-panel">
+            <details class="ref-panel" id="wizard-equipment-notes-panel">
               <summary>Equipment &amp; notes</summary>
               <h3>Wizard items ({{ wizard_item_slots }} slots)</h3>
               <p class="muted" style="font-size:0.85rem">
@@ -780,7 +825,7 @@
       </details>
 
       {% if ap %}
-        <details class="ref-panel" open>
+        <details class="ref-panel" id="apprentice-panel" open>
           <summary>Apprentice — {{ ap.name }} · {{ wiz.school }}</summary>
           <div class="char-block">
             {% set ap_src = portrait_src(ap.portrait, 'apprentice', None, ap.gender) %}
@@ -807,15 +852,17 @@
                 </div>
               {% endif %}
               <p class="muted">Stats synced from wizard (starting H12 when wizard is H14)</p>
+              {% set ap_mounted = horse_rider and horse_rider.kind == 'apprentice' %}
+              {% if ap_mounted %}<span class="badge" title="Riding the warband's horse: Move +{{ hmd.move }}, Fight +{{ hmd.fight }}, Armour {{ hmd.armour }}">mounted</span>{% endif %}
               <div class="stat-row">
-                <div class="stat-pill"><span class="label">Move</span><span class="value">{{ ap.stats.move }}</span></div>
-                <div class="stat-pill"><span class="label">Fight</span><span class="value">{{ format_stat(ap.stats.fight) }}</span></div>
+                <div class="stat-pill"><span class="label">Move</span><span class="value">{{ ap.stats.move }}{% if ap_mounted %} <span class="muted">({{ horse_rider.backup.move }})</span>{% endif %}</span></div>
+                <div class="stat-pill"><span class="label">Fight</span><span class="value">{{ format_stat(ap.stats.fight) }}{% if ap_mounted %} <span class="muted">({{ format_stat(horse_rider.backup.fight) }})</span>{% endif %}</span></div>
                 <div class="stat-pill"><span class="label">Shoot</span><span class="value">{{ format_stat(ap.stats.shoot) }}</span></div>
-                <div class="stat-pill"><span class="label">Armour</span><span class="value">{{ ap.stats.armour }}</span></div>
+                <div class="stat-pill"><span class="label">Armour</span><span class="value">{{ ap.stats.armour }}{% if ap_mounted %} <span class="muted">({{ horse_rider.backup.armour }})</span>{% endif %}</span></div>
                 <div class="stat-pill"><span class="label">Will</span><span class="value">{{ format_stat(ap.stats.will) }}</span></div>
                 <div class="stat-pill"><span class="label">Health</span><span class="value">{{ ap.stats.health }}</span></div>
               </div>
-              <details class="ref-panel">
+              <details class="ref-panel" id="apprentice-equipment-notes-panel">
                 <summary>Equipment &amp; notes</summary>
                 <h3>Apprentice items ({{ apprentice_item_slots }} slots)</h3>
                 <div class="checkbox-row">
@@ -862,7 +909,7 @@
     {% if "Blood Legacy" in enabled_source_names and wiz.school not in ("Vampire", "Fire Giant") %}
       {% set _ = available_states.append(STATE_VAMPIRE) %}
     {% endif %}
-      <details class="ref-panel">
+      <details class="ref-panel" id="wizard-mutations-state-panel">
         <summary>Mutations, Permanent Injuries &amp; Wizard state</summary>
         {{ mutation_picker('add_wizard_mutation', wiz.mutations, label="Wizard mutations") }}
         {% if ap %}{{ mutation_picker('add_apprentice_mutation', ap.mutations, label="Apprentice mutations") }}{% endif %}
@@ -870,7 +917,7 @@
         {% if ap %}{{ permanent_injury_picker('add_apprentice_permanent_injury', ap.permanent_injuries, label="Apprentice permanent injuries", kind="apprentice") }}{% endif %}
 
     {% if available_states or wizard_state_kind == STATE_VAMPIRE %}
-      <details class="ref-panel" {% if wizard_state_kind != STATE_NONE %}open{% endif %}>
+      <details class="ref-panel" id="wizard-state-panel" {% if wizard_state_kind != STATE_NONE %}open{% endif %}>
         <summary>Wizard state — {{ STATE_LABELS[wizard_state_kind] }}</summary>
         <p class="muted" style="font-size:0.85rem">Check lexicon for details.</p>
 
@@ -1001,7 +1048,7 @@
       </details>
 
     {% if underworld_favors_enabled %}
-      <details class="ref-panel">
+      <details class="ref-panel" id="underworld-favours-panel">
         <summary>Underworld Favours (Spellcaster Magazine) — {{ underworld_favors.markers }} Marker{{ 's' if underworld_favors.markers != 1 }} held</summary>
         <p class="muted" style="font-size:0.85rem">
           A debt economy: take an Underworld Loan for gold now and Markers owed later, or claim a
@@ -1041,7 +1088,7 @@
     {% endif %}
 
     {% if monster_hunting_enabled %}
-      <details class="ref-panel">
+      <details class="ref-panel" id="components-panel">
         <summary>Spell &amp; potion components (Monster Hunting)</summary>
         <p class="muted" style="font-size:0.85rem">
           A free pouch holds {{ COMPONENT_POUCH_CAPACITY }} components. Buy a {{ SPELL_COMPONENT_BAG_NAME }}
@@ -1092,7 +1139,7 @@
       </details>
     {% endif %}
 
-    <details class="ref-panel">
+    <details class="ref-panel" id="level-up-wizard-panel">
       <summary>Level up wizard {% if pending_levels %}({{ pending_levels }} ready){% endif %}</summary>
       <p class="muted">
         XP is tracked on the wizard. When you have enough XP ({{ 100 }} per level), spend level-ups here.
@@ -1145,9 +1192,17 @@
           <div class="form-row">
             <label>Choose improvement ({{ pending_levels }} available)</label>
             {# Not LEVEL_UP_OPTIONS: a Lich may never raise Fight or Shoot. #}
+            {% set first_available = wizard_level_up_options|rejectattr('id', 'in', wizard_level_up_blocked.keys())|map(attribute='id')|first %}
             <select name="choice" id="level-choice" required>
               {% for opt in wizard_level_up_options %}
-                <option value="{{ opt.id }}">{{ opt.label }}</option>
+                {% set reason = wizard_level_up_blocked.get(opt.id) %}
+                <option
+                  value="{{ opt.id }}"
+                  {% if reason %}disabled{% endif %}
+                  {% if opt.id == first_available %}selected{% endif %}
+                >
+                  {{ opt.label }}{% if reason %} — unavailable ({{ reason }}){% endif %}
+                </option>
               {% endfor %}
             </select>
           </div>
@@ -1266,7 +1321,7 @@
   </details>
 
   {# ---- Spells ---- #}
-  <details class="card">
+  <details class="card" id="spells-card">
     <summary><span class="card-title">Spells (wizard &amp; apprentice)</span></summary>
     <p class="muted">
       Difficulty is shown as <strong>Wizard CN / Apprentice CN</strong>
@@ -1394,17 +1449,19 @@
         {% set cap_dismiss_cost = hr.promote_captain_cost if cap.origin == 'promoted' else hr.captain_hiring_cost %}
         {% set cap_eff = captain_effective_stats(cap) %}
         <div class="char-block">
-          {% set cap_src = portrait_src(cap.portrait, 'captain', cap.type_key) %}
-          {% if cap_src %}
-            <img class="portrait-md" src="{{ cap_src }}" alt="" />
-          {% else %}
-            <span class="portrait-placeholder portrait-md-ph" aria-hidden="true">?</span>
-          {% endif %}
-          {% if legendary_soldiers_enabled %}
-            <div style="text-align:center;margin-top:0.3rem">
-              <span class="badge legendary" title="Spellcaster Magazine, Issue 4: the Captain is a Legendary Soldier, subject to the Legendary Soldier limit instead of the Specialist limit.">legendary</span>
-            </div>
-          {% endif %}
+          <div style="display:flex;flex-direction:column;align-items:center">
+            {% set cap_src = portrait_src(cap.portrait, 'captain', cap.type_key) %}
+            {% if cap_src %}
+              <img class="portrait-md" src="{{ cap_src }}" alt="" />
+            {% else %}
+              <span class="portrait-placeholder portrait-md-ph" aria-hidden="true">?</span>
+            {% endif %}
+            {% if legendary_soldiers_enabled %}
+              <div style="text-align:center;margin-top:0.3rem">
+                <span class="badge legendary" title="Spellcaster Magazine, Issue 4: the Captain is a Legendary Soldier, subject to the Legendary Soldier limit instead of the Specialist limit.">legendary</span>
+              </div>
+            {% endif %}
+          </div>
           <div class="char-body">
             <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" enctype="multipart/form-data" data-autosave>
               <input type="hidden" name="action" value="captain_edit" />
@@ -1424,11 +1481,13 @@
                   <label for="captain_portrait_remove" style="margin:0">Remove picture (revert to default)</label>
                 </div>
               {% endif %}
+              {% set cap_mounted = horse_rider and horse_rider.kind == 'captain' %}
+              {% if cap_mounted %}<span class="badge" title="Riding the warband's horse: Move +{{ hmd.move }}, Fight +{{ hmd.fight }}, Armour {{ hmd.armour }}">mounted</span>{% endif %}
               <div class="stat-row">
-                <div class="stat-pill"><span class="label">Move</span><span class="value">{{ cap_eff.move }}</span></div>
-                <div class="stat-pill"><span class="label">Fight</span><span class="value">{{ format_stat(cap.stats.fight) }}</span></div>
+                <div class="stat-pill"><span class="label">Move</span><span class="value">{{ cap_eff.move }}{% if cap_mounted %} <span class="muted">({{ cap_eff.move - hmd.move }})</span>{% endif %}</span></div>
+                <div class="stat-pill"><span class="label">Fight</span><span class="value">{{ format_stat(cap.stats.fight) }}{% if cap_mounted %} <span class="muted">({{ format_stat(cap.stats.fight - hmd.fight) }})</span>{% endif %}</span></div>
                 <div class="stat-pill"><span class="label">Shoot</span><span class="value">{{ format_stat(cap.stats.shoot) }}</span></div>
-                <div class="stat-pill"><span class="label">Armour</span><span class="value">{{ cap_eff.armour }}</span></div>
+                <div class="stat-pill"><span class="label">Armour</span><span class="value">{{ cap_eff.armour }}{% if cap_mounted %} <span class="muted">({{ cap_eff.armour - hmd.armour }})</span>{% endif %}</span></div>
                 <div class="stat-pill"><span class="label">Will</span><span class="value">{{ format_stat(cap.stats.will) }}</span></div>
                 <div class="stat-pill"><span class="label">Health</span><span class="value">{{ cap.stats.health }}</span></div>
               </div>
@@ -1442,7 +1501,7 @@
                   · {{ CAPTAIN_MIND_CONTROL_LABELS[hr.captain_mind_control] }}
                 {% endif %}
               </p>
-              <details class="ref-panel">
+              <details class="ref-panel" id="captain-tricks-panel">
                 <summary>Tricks of the Trade ({{ cap.known_tricks|length }})</summary>
                 {% if cap.known_tricks %}
                   <ul class="list-plain">
@@ -1456,7 +1515,7 @@
                 {% endif %}
                 <p class="muted" style="font-size:0.8rem">Each trick may be used once per game.</p>
               </details>
-              <details class="ref-panel">
+              <details class="ref-panel" id="captain-equipment-notes-panel">
                 <summary>Equipment &amp; notes</summary>
                 <h3>Captain items ({{ cap_slots_n }} slots)</h3>
                 <div class="checkbox-row">
@@ -1477,14 +1536,14 @@
           </div>
         </div>
 
-        <details class="ref-panel">
+        <details class="ref-panel" id="captain-mutations-panel">
           <summary>Mutations &amp; Permanent Injuries</summary>
           {{ mutation_picker('add_captain_mutation', cap.mutations) }}
           {{ permanent_injury_picker('add_captain_permanent_injury', cap.permanent_injuries, kind="captain") }}
         </details>
 
         {% set cap_pending = [level_from_xp(cap.xp), hr.captain_max_level]|min - cap.level %}
-        <details class="ref-panel">
+        <details class="ref-panel" id="level-up-captain-panel">
           <summary>Level up captain {% if cap_pending > 0 %}({{ cap_pending }} ready){% endif %}</summary>
           <p class="muted" style="font-size:0.85rem">
             Flat 100 XP per level, same as the wizard, up to level {{ hr.captain_max_level }}. Per-stat caps are set in Homerules.
@@ -1637,7 +1696,7 @@
     </div>
 
     {% if giant_blooded_enabled %}
-      <details class="ref-panel">
+      <details class="ref-panel" id="giant-blooded-panel">
         <summary>Giant-Blooded (Blood Legacy)</summary>
         <p class="muted" style="font-size:0.85rem">
           Declared at hire, per the book: +{{ GIANT_BLOODED_COST }}gc, -1 Move, -2 Will,
@@ -1672,7 +1731,7 @@
     {% endif %}
 
     {% if ragged_warbands_enabled %}
-      <details class="ref-panel">
+      <details class="ref-panel" id="ragged-warbands-panel">
         <summary>Ragged Warbands &amp; Random Recruits (The Red King)</summary>
         <p class="muted" style="font-size:0.85rem">
           Rolls random recruits (Random Recruit Tables I-III) up to the book's ten members,
@@ -1759,13 +1818,15 @@
                     {% if s.mutations %}<span class="badge" title="{{ s.mutations|length }} Grave Mutation{{ 's' if s.mutations|length != 1 }}">mutated</span>{% endif %}
                     {% if s.giant_blooded %}<span class="badge" title="Blood Legacy's Giant-Blooded: -1 Move, -2 Will, +2 Health, Giant-Blooded trait">giant-blooded</span>{% endif %}
                     {% if s.knightly_order_info %}<span class="badge" title="{{ s.knightly_order_info.ability }}">{{ s.knightly_order_info.name }}</span>{% endif %}
+                    {% set s_mounted = horse_rider and horse_rider.kind == 'soldier' and horse_rider.soldier_id == s.id %}
+                    {% if s_mounted %}<span class="badge" title="Riding the warband's horse: Move +{{ hmd.move }}, Fight +{{ hmd.fight }}, Armour {{ hmd.armour }}">mounted</span>{% endif %}
                   </div>
                 </td>
                 <td><span class="badge {{ s.status }}">{{ s.status }}</span></td>
-                <td>{{ s.move }}</td>
-                <td>{{ format_stat(s.fight) }}</td>
+                <td>{{ s.move }}{% if s_mounted %} <span class="muted">({{ horse_rider.backup.move }})</span>{% endif %}</td>
+                <td>{{ format_stat(s.fight) }}{% if s_mounted %} <span class="muted">({{ format_stat(horse_rider.backup.fight) }})</span>{% endif %}</td>
                 <td>{{ format_stat(s.shoot) }}</td>
-                <td>{{ s.armour }}</td>
+                <td>{{ s.armour }}{% if s_mounted %} <span class="muted">({{ horse_rider.backup.armour }})</span>{% endif %}</td>
                 <td>{{ format_stat(s.will) }}</td>
                 <td>{{ s.health }}</td>
                 <td class="gold">{{ s.cost }}</td>
@@ -2284,25 +2345,8 @@
         </form>
       </div>
       <div>
-        <h3>Vault items</h3>
-        {% if wb["vault_items"] %}
-          <ul class="list-plain">
-            {% for it in wb["vault_items"] %}
-              <li>
-                <strong>{{ it.name }}</strong>
-                {% if it.notes %}<span class="muted"> — {{ it.notes }}</span>{% endif %}
-                <form class="inline-form" method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" onsubmit="return confirm('Remove “{{ it.name }}” from the vault?');">
-                  <input type="hidden" name="action" value="remove_vault_item" />
-                  <input type="hidden" name="item_id" value="{{ it.id }}" />
-                  <button class="btn danger small" type="submit">×</button>
-                </form>
-              </li>
-            {% endfor %}
-          </ul>
-        {% else %}
-          <p class="empty">No vault items yet. Add via post-game loot.</p>
-        {% endif %}
-        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:0.75rem">
+        <h3>Add vault item</h3>
+        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
           <input type="hidden" name="action" value="add_vault_item" />
           <div class="form-row">
             <label>Pick from a rulebook (fills the field below — still editable)</label>
@@ -2329,15 +2373,34 @@
         </form>
       </div>
     </div>
-    {% set purchasable_items = full_standard_items|selectattr('cost', 'defined')|rejectattr('compatible_bases')|list %}
+    <div style="margin-top:1rem">
+      <h3>Vault items</h3>
+      {% if wb["vault_items"] %}
+        <ul class="list-plain" style="columns:2;column-gap:1.5rem">
+          {% for it in wb["vault_items"] %}
+            <li style="break-inside:avoid">
+              <strong>{{ it.name }}</strong>
+              {% if it.notes %}<span class="muted"> — {{ it.notes }}</span>{% endif %}
+              <form class="inline-form" method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" onsubmit="return confirm('Remove “{{ it.name }}” from the vault?');">
+                <input type="hidden" name="action" value="remove_vault_item" />
+                <input type="hidden" name="item_id" value="{{ it.id }}" />
+                <button class="btn danger small" type="submit">×</button>
+              </form>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="empty">No vault items yet. Add via post-game loot.</p>
+      {% endif %}
+    </div>
+    {% set purchasable_items = full_standard_items|selectattr('cost', 'defined')|rejectattr('compatible_bases')|rejectattr('name', 'equalto', SPELL_COMPONENT_BAG_NAME)|list %}
     {% if purchasable_items %}
       <div style="margin-top:1rem">
         <h3>Workshop — Firearms</h3>
         <p class="muted" style="font-size:0.85rem">
-          Black Powder Firearms (Spellcaster Magazine) are the only standard items with a real gold
-          cost — everything else on the Arms &amp; Armour list is free starting gear. Buying one here
-          adds it to the vault; the item-slot picker then offers exactly as many copies as the
-          warband owns.
+          Black Powder Firearms (Spellcaster Magazine) are the only items on the Arms &amp; Armour list
+          with a real gold cost — everything else there is free starting gear. Buying one here adds
+          it to the vault; the item-slot picker then offers exactly as many copies as the warband owns.
         </p>
         <div class="table-wrap">
           <table>
@@ -2352,7 +2415,7 @@
                     <div class="muted" style="font-size:0.8rem">{{ it.summary }}</div>
                   </td>
                   <td>{{ it.cost }}gc</td>
-                  <td>{{ owned }}</td>
+                  <td>{{ owned }} <span class="muted" style="font-size:0.8rem">({{ firearm_modded_counts.get(it.name, 0) }} owned modded)</span></td>
                   <td>
                     <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
                       <input type="hidden" name="action" value="buy_standard_item" />
@@ -2369,83 +2432,211 @@
       </div>
     {% endif %}
     {% if owned_firearms %}
-      <div style="margin-top:1rem">
-        <h3>Workshop — Upgrade a firearm</h3>
+      <details class="ref-panel" id="firearm-upgrade-panel" style="margin-top:1rem">
+        <summary>Workshop — Upgrade a firearm</summary>
         <p class="muted" style="font-size:0.85rem">
           Commissioning an upgrade consumes the firearm it's applied to and adds the upgraded item to
           the vault in its place — e.g. Pistol + Double-barrelled becomes "Pistol (Double-barrelled)"
           — rather than sitting in a second item slot. A firearm can take more than one upgrade this
           way, one commission at a time.
         </p>
+        {% if owned_firearms|length > 1 %}
+          <div class="form-row">
+            <label for="firearm-upgrade-select">Firearm to upgrade</label>
+            <select id="firearm-upgrade-select">
+              {% for fa in owned_firearms %}
+                <option value="firearm-upgrade-block-{{ loop.index0 }}">{{ fa.name }} ({{ fa.owned }} owned)</option>
+              {% endfor %}
+            </select>
+          </div>
+        {% endif %}
         {% for fa in owned_firearms %}
-          <div class="table-wrap" style="margin-top:0.5rem">
+          <div class="firearm-upgrade-block" id="firearm-upgrade-block-{{ loop.index0 }}" {% if not loop.first %}hidden{% endif %}>
+            <div class="table-wrap" style="margin-top:0.5rem">
+              <table>
+                <thead><tr><th>{{ fa.name }} ({{ fa.owned }} owned)</th><th>Cost</th><th></th></tr></thead>
+                <tbody>
+                  {% for u in fa.options %}
+                    {% set src_ok = u.source in enabled_source_names %}
+                    <tr>
+                      <td>
+                        {{ u.name.split(' (Firearm Upgrade)')[0] }}
+                        <div class="muted" style="font-size:0.8rem">{{ u.summary }}</div>
+                      </td>
+                      <td>{{ u.cost }}gc</td>
+                      <td>
+                        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
+                          <input type="hidden" name="action" value="upgrade_firearm" />
+                          <input type="hidden" name="item_name" value="{{ fa.name }}" />
+                          <input type="hidden" name="upgrade_name" value="{{ u.name }}" />
+                          <button class="btn secondary small" type="submit" {% if not src_ok or wb.gold < u.cost %}disabled{% endif %}>Upgrade</button>
+                        </form>
+                        {% if not src_ok %}<span class="muted" style="font-size:0.8rem">needs {{ u.source }}</span>{% endif %}
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        {% endfor %}
+        {% if owned_firearms|length > 1 %}
+          <script>
+            (function () {
+              var sel = document.getElementById("firearm-upgrade-select");
+              if (!sel) return;
+              sel.addEventListener("change", function () {
+                document.querySelectorAll(".firearm-upgrade-block").forEach(function (b) {
+                  b.hidden = b.id !== sel.value;
+                });
+              });
+            })();
+          </script>
+        {% endif %}
+      </details>
+    {% endif %}
+    {% if fin_dalka_enabled and fin_dalka_owned %}
+      <details class="ref-panel" id="fin-dalka-panel" style="margin-top:1rem" open>
+        <summary>Workshop — Grimoire of Fin Dalka (Blood Legacy) — owned</summary>
+        <p class="muted" style="font-size:0.85rem">
+          Owned by {{ wiz.name or "your wizard" }}. A ciphered tome of all 8 Fire Giant spells.
+          Deciphering one spell costs {{ FIN_DALKA_DECIPHER_COST }}gc + a Will Roll (TN20, plus any
+          bonus below) rolled at the table — report the outcome here. A natural 1 locks that spell
+          forever for this wizard; any other failure adds a cumulative +1 bonus to future attempts
+          on it.
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Spell</th><th>Status</th><th>Report roll</th></tr></thead>
+            <tbody>
+              {% for sp in fin_dalka_spells %}
+                <tr>
+                  <td><strong>{{ sp.name }}</strong></td>
+                  <td class="muted">
+                    {% if sp.known %}already known
+                    {% elif sp.locked %}locked (natural 1)
+                    {% elif sp.learned %}learned
+                    {% else %}+{{ sp.bonus }} bonus so far
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if not sp.known and not sp.locked and not sp.learned %}
+                      <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
+                        <input type="hidden" name="action" value="fin_dalka_decipher" />
+                        <input type="hidden" name="spell_id" value="{{ sp.id }}" />
+                        <button class="btn small gold" type="submit" name="outcome" value="success" {% if wb.gold < FIN_DALKA_DECIPHER_COST %}disabled{% endif %}>Succeeded</button>
+                        <button class="btn small" type="submit" name="outcome" value="fail" {% if wb.gold < FIN_DALKA_DECIPHER_COST %}disabled{% endif %}>Failed</button>
+                        <button class="btn danger small" type="submit" name="outcome" value="nat1" {% if wb.gold < FIN_DALKA_DECIPHER_COST %}disabled{% endif %}>Natural 1</button>
+                      </form>
+                    {% elif sp.locked %}
+                      <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form" onsubmit="return confirm('Unlock {{ sp.name }}? Only do this to correct a misclick — the book itself never lets a natural 1 be undone.');">
+                        <input type="hidden" name="action" value="unlock_fin_dalka_spell" />
+                        <input type="hidden" name="spell_id" value="{{ sp.id }}" />
+                        <button class="btn secondary small" type="submit">Unlock (misclick)</button>
+                      </form>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:0.5rem" onsubmit="return confirm('Sell the Grimoire of Fin Dalka?');">
+          <input type="hidden" name="action" value="sell_fin_dalka_grimoire" />
+          <button class="btn danger small" type="submit">
+            Sell grimoire ({{ [FIN_DALKA_BASE_SELL - FIN_DALKA_SELL_PER_SPELL * (fin_dalka_spells | selectattr('learned') | list | length), 0] | max }}gc)
+          </button>
+        </form>
+      </details>
+    {% endif %}
+    {% if horses_enabled and has_stable %}
+      <details class="ref-panel" id="horse-panel" style="margin-top:1rem">
+        <summary>Workshop — Horse (Spellcaster Magazine, Issue 1){% if wb.horse.owned %} — owned{% endif %}</summary>
+        {% if not wb.horse.owned %}
+          <p class="muted" style="font-size:0.85rem">
+            Riderless: Move {{ hrs.move }}, Fight {{ format_stat(hrs.fight) }},
+            Armour {{ hrs.armour }}, Will {{ format_stat(hrs.will) }},
+            Health {{ hrs.health }}. Mounted, it instead grants the rider
+            Move +{{ hmd.move }}, Fight +{{ hmd.fight }},
+            Armour {{ hmd.armour }}.
+          </p>
+          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
+            <input type="hidden" name="action" value="buy_horse" />
+            <button class="btn secondary small" type="submit" {% if wb.gold < HORSE_COST %}disabled{% endif %}>Buy a horse ({{ HORSE_COST }}gc)</button>
+          </form>
+        {% else %}
+          <p class="muted" style="font-size:0.85rem">
+            Riderless: Move {{ hrs.move }}, Fight {{ format_stat(hrs.fight) }},
+            Armour {{ hrs.armour }}, Will {{ format_stat(hrs.will) }},
+            Health {{ hrs.health }}.
+            {% if wb.horse.rider %}
+              Currently ridden
+              {% if wb.horse.rider.kind == 'wizard' %}by {{ wiz.name or 'the wizard' }}
+              {% elif wb.horse.rider.kind == 'apprentice' %}by {{ (wb.apprentice or {}).name or 'the apprentice' }}
+              {% elif wb.horse.rider.kind == 'captain' %}by {{ (wb.captain or {}).name or 'the captain' }}
+              {% else %}by a soldier
+              {% endif %}.
+            {% else %}
+              No one is mounted.
+            {% endif %}
+          </p>
+          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="form-row inline">
+            <input type="hidden" name="action" value="mount_horse" />
+            <div>
+              <label for="horse_rider_kind">Mount</label>
+              <select id="horse_rider_kind" name="rider_kind" onchange="document.getElementById('horse_rider_soldier').style.display = (this.value === 'soldier') ? '' : 'none'">
+                <option value="wizard">Wizard</option>
+                {% if wb.apprentice %}<option value="apprentice">Apprentice</option>{% endif %}
+                {% if wb.captain %}<option value="captain">Captain</option>{% endif %}
+                {% if horse_rider_choices %}<option value="soldier">Soldier…</option>{% endif %}
+              </select>
+            </div>
+            <div id="horse_rider_soldier" style="display:none">
+              <label for="horse_rider_soldier_id">Which soldier</label>
+              <select id="horse_rider_soldier_id" name="soldier_id">
+                {% for s in horse_rider_choices %}<option value="{{ s.id }}">{{ s.name }}</option>{% endfor %}
+              </select>
+            </div>
+            <div>
+              <label>&nbsp;</label>
+              <button class="btn secondary small" type="submit">Mount</button>
+            </div>
+          </form>
+          {% if wb.horse.rider %}
+            <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:0.4rem">
+              <input type="hidden" name="action" value="dismount_horse" />
+              <button class="btn small" type="submit">Dismount</button>
+            </form>
+          {% endif %}
+          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:0.4rem" onsubmit="return confirm('Release the warband horse?');">
+            <input type="hidden" name="action" value="sell_horse" />
+            <button class="btn danger small" type="submit">Release horse</button>
+          </form>
+          <h3 style="margin-top:1rem">Advanced Horsemanship</h3>
+          <p class="muted" style="font-size:0.85rem">
+            One-off, stacking upgrades. Aggressive/Loyal/Barding change the stats above;
+            the rest grant a trait or table-roll adjustment this app doesn't simulate.
+          </p>
+          <div class="table-wrap">
             <table>
-              <thead><tr><th>{{ fa.name }} ({{ fa.owned }} owned)</th><th>Cost</th><th></th></tr></thead>
+              <thead><tr><th>Upgrade</th><th>Cost</th><th></th></tr></thead>
               <tbody>
-                {% for u in fa.options %}
-                  {% set src_ok = u.source in enabled_source_names %}
+                {% for u in HORSE_UPGRADES %}
+                  {% set owned_upgrade = u.id in (wb.horse.upgrades or []) %}
                   <tr>
                     <td>
-                      {{ u.name.split(' (Firearm Upgrade)')[0] }}
+                      <strong>{{ u.name }}</strong>
                       <div class="muted" style="font-size:0.8rem">{{ u.summary }}</div>
                     </td>
                     <td>{{ u.cost }}gc</td>
                     <td>
-                      <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
-                        <input type="hidden" name="action" value="upgrade_firearm" />
-                        <input type="hidden" name="item_name" value="{{ fa.name }}" />
-                        <input type="hidden" name="upgrade_name" value="{{ u.name }}" />
-                        <button class="btn secondary small" type="submit" {% if not src_ok or wb.gold < u.cost %}disabled{% endif %}>Upgrade</button>
-                      </form>
-                      {% if not src_ok %}<span class="muted" style="font-size:0.8rem">needs {{ u.source }}</span>{% endif %}
-                    </td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-        {% endfor %}
-      </div>
-    {% endif %}
-    {% if fin_dalka_enabled %}
-      <div style="margin-top:1rem">
-        <h3>Workshop — Grimoire of Fin Dalka (Blood Legacy)</h3>
-        {% if wiz.fin_dalka.owned %}
-          <p class="muted" style="font-size:0.85rem">
-            Owned by {{ wiz.name or "your wizard" }}. A ciphered tome of all 8 Fire Giant spells.
-            Deciphering one spell costs {{ FIN_DALKA_DECIPHER_COST }}gc + a Will Roll (TN20, plus any
-            bonus below) rolled at the table — report the outcome here. A natural 1 locks that spell
-            forever for this wizard; any other failure adds a cumulative +1 bonus to future attempts
-            on it.
-          </p>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>Spell</th><th>Status</th><th>Report roll</th></tr></thead>
-              <tbody>
-                {% for sp in fin_dalka_spells %}
-                  <tr>
-                    <td><strong>{{ sp.name }}</strong></td>
-                    <td class="muted">
-                      {% if sp.known %}already known
-                      {% elif sp.locked %}locked (natural 1)
-                      {% elif sp.learned %}learned
-                      {% else %}+{{ sp.bonus }} bonus so far
-                      {% endif %}
-                    </td>
-                    <td>
-                      {% if not sp.known and not sp.locked and not sp.learned %}
+                      {% if owned_upgrade %}
+                        <span class="badge">owned</span>
+                      {% else %}
                         <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
-                          <input type="hidden" name="action" value="fin_dalka_decipher" />
-                          <input type="hidden" name="spell_id" value="{{ sp.id }}" />
-                          <button class="btn small gold" type="submit" name="outcome" value="success" {% if wb.gold < FIN_DALKA_DECIPHER_COST %}disabled{% endif %}>Succeeded</button>
-                          <button class="btn small" type="submit" name="outcome" value="fail" {% if wb.gold < FIN_DALKA_DECIPHER_COST %}disabled{% endif %}>Failed</button>
-                          <button class="btn danger small" type="submit" name="outcome" value="nat1" {% if wb.gold < FIN_DALKA_DECIPHER_COST %}disabled{% endif %}>Natural 1</button>
-                        </form>
-                      {% elif sp.locked %}
-                        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form" onsubmit="return confirm('Unlock {{ sp.name }}? Only do this to correct a misclick — the book itself never lets a natural 1 be undone.');">
-                          <input type="hidden" name="action" value="unlock_fin_dalka_spell" />
-                          <input type="hidden" name="spell_id" value="{{ sp.id }}" />
-                          <button class="btn secondary small" type="submit">Unlock (misclick)</button>
+                          <input type="hidden" name="action" value="buy_horse_upgrade" />
+                          <input type="hidden" name="upgrade_id" value="{{ u.id }}" />
+                          <button class="btn secondary small" type="submit" {% if wb.gold < u.cost %}disabled{% endif %}>Buy</button>
                         </form>
                       {% endif %}
                     </td>
@@ -2454,22 +2645,8 @@
               </tbody>
             </table>
           </div>
-          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:0.5rem" onsubmit="return confirm('Sell the Grimoire of Fin Dalka?');">
-            <input type="hidden" name="action" value="sell_fin_dalka_grimoire" />
-            <button class="btn danger small" type="submit">
-              Sell grimoire ({{ [FIN_DALKA_BASE_SELL - FIN_DALKA_SELL_PER_SPELL * (fin_dalka_spells | selectattr('learned') | list | length), 0] | max }}gc)
-            </button>
-          </form>
-        {% else %}
-          <p class="muted" style="font-size:0.85rem">
-            A ciphered tome of all 8 Fire Giant spells, open to any wizard once acquired.
-          </p>
-          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
-            <input type="hidden" name="action" value="acquire_fin_dalka_grimoire" />
-            <button class="btn secondary small" type="submit">Acquire the grimoire</button>
-          </form>
         {% endif %}
-      </div>
+      </details>
     {% endif %}
     <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:1rem">
       <input type="hidden" name="action" value="set_notes" />
@@ -2569,63 +2746,6 @@
         </table>
       </div>
 
-      {% if horses_enabled %}
-        <h3>Horse (Spellcaster Magazine, Issue 1)</h3>
-        {% if not has_stable %}
-          <p class="muted">Needs a Stable (above) first.</p>
-        {% elif not wb.horse.owned %}
-          <p class="muted">Mounted Modifiers on the rider: Move +{{ HORSE_MOUNT_STAT_DELTA.move }}, Fight +{{ HORSE_MOUNT_STAT_DELTA.fight }}, Armour {{ HORSE_MOUNT_STAT_DELTA.armour }}.</p>
-          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
-            <input type="hidden" name="action" value="buy_horse" />
-            <button class="btn secondary small" type="submit" {% if wb.gold < HORSE_COST %}disabled{% endif %}>Buy a horse ({{ HORSE_COST }}gc)</button>
-          </form>
-        {% else %}
-          <p class="muted">
-            {% if wb.horse.rider %}
-              Currently ridden
-              {% if wb.horse.rider.kind == 'wizard' %}by {{ wiz.name or 'the wizard' }}
-              {% elif wb.horse.rider.kind == 'apprentice' %}by {{ (wb.apprentice or {}).name or 'the apprentice' }}
-              {% elif wb.horse.rider.kind == 'captain' %}by {{ (wb.captain or {}).name or 'the captain' }}
-              {% else %}by a soldier
-              {% endif %}.
-            {% else %}
-              No one is mounted.
-            {% endif %}
-          </p>
-          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="form-row inline">
-            <input type="hidden" name="action" value="mount_horse" />
-            <div>
-              <label for="horse_rider_kind">Mount</label>
-              <select id="horse_rider_kind" name="rider_kind" onchange="document.getElementById('horse_rider_soldier').style.display = (this.value === 'soldier') ? '' : 'none'">
-                <option value="wizard">Wizard</option>
-                {% if wb.apprentice %}<option value="apprentice">Apprentice</option>{% endif %}
-                {% if wb.captain %}<option value="captain">Captain</option>{% endif %}
-                {% if horse_rider_choices %}<option value="soldier">Soldier…</option>{% endif %}
-              </select>
-            </div>
-            <div id="horse_rider_soldier" style="display:none">
-              <label for="horse_rider_soldier_id">Which soldier</label>
-              <select id="horse_rider_soldier_id" name="soldier_id">
-                {% for s in horse_rider_choices %}<option value="{{ s.id }}">{{ s.name }}</option>{% endfor %}
-              </select>
-            </div>
-            <div>
-              <label>&nbsp;</label>
-              <button class="btn secondary small" type="submit">Mount</button>
-            </div>
-          </form>
-          {% if wb.horse.rider %}
-            <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:0.4rem">
-              <input type="hidden" name="action" value="dismount_horse" />
-              <button class="btn small" type="submit">Dismount</button>
-            </form>
-          {% endif %}
-          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:0.4rem" onsubmit="return confirm('Release the warband horse?');">
-            <input type="hidden" name="action" value="sell_horse" />
-            <button class="btn danger small" type="submit">Release horse</button>
-          </form>
-        {% endif %}
-      {% endif %}
     {% endif %}
   </details>
 

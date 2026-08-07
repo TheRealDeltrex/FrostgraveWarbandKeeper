@@ -45,12 +45,13 @@ from frostgrave_data import (
     CARGO_TRANSPORT_BASE_CAPACITY,
     CARGO_TRANSPORT_COST,
     COMPONENT_POUCH_CAPACITY,
+    EDITION1_LOOT_GOLD_VALUE,
     FIN_DALKA_BASE_SELL,
     FIN_DALKA_DECIPHER_COST,
     FIN_DALKA_SELL_PER_SPELL,
     GIANT_BLOODED_COST,
     HORSE_COST,
-    HORSE_MOUNT_STAT_DELTA,
+    HORSE_UPGRADES,
     KNIGHTLY_ORDER_ELIGIBLE,
     KNIGHTLY_ORDERS,
     LEGENDARY_SOLDIER_TYPE_KEYS,
@@ -68,7 +69,6 @@ from frostgrave_data import (
     PROMOTE_CAPTAIN_ITEM_SLOTS,
     PROSTHETIC_UPGRADE_BY_ID,
     PROSTHETIC_UPGRADES,
-    RIDERLESS_HORSE_STATS,
     SCHOOL_ALIGNED,
     SCHOOL_NEUTRAL,
     SCHOOL_OPPOSED,
@@ -137,7 +137,6 @@ from idle_watchdog import note_closing, note_heartbeat
 from warband_store import (
     ALT_XP_CONVERSIONS,
     InvalidUpload,
-    acquire_fin_dalka_grimoire,
     add_apprentice_mutation,
     add_apprentice_permanent_injury,
     add_apprentice_prosthetic_upgrade,
@@ -176,6 +175,7 @@ from warband_store import (
     buy_cargo_transport_upgrade,
     buy_component_bag,
     buy_horse,
+    buy_horse_upgrade,
     buy_standard_item,
     buy_supply_points,
     captain_effective_stats,
@@ -337,6 +337,7 @@ app.jinja_env.globals.update(
     portrait_src=portrait_src,
     bonus_choice_amount=bonus_choice_amount,
     format_stat=format_stat,
+    APP_VERSION=paths.app_version(),
     STARTING_GOLD=STARTING_GOLD,
     APPRENTICE_COST=APPRENTICE_COST,
     MAX_SOLDIERS=MAX_SOLDIERS,
@@ -367,8 +368,9 @@ app.jinja_env.globals.update(
     STANDARD_CONSTRUCT_TYPE_KEYS=STANDARD_CONSTRUCT_TYPE_KEYS,
     GIANT_BLOODED_COST=GIANT_BLOODED_COST,
     HORSE_COST=HORSE_COST,
-    HORSE_MOUNT_STAT_DELTA=HORSE_MOUNT_STAT_DELTA,
-    RIDERLESS_HORSE_STATS=RIDERLESS_HORSE_STATS,
+    HORSE_UPGRADES=HORSE_UPGRADES,
+    horse_riderless_stats=expansions.horse_riderless_stats,
+    horse_mount_delta=expansions.horse_mount_delta,
     SUPPLY_POINT_BUY_RATE=SUPPLY_POINT_BUY_RATE,
     SUPPLY_POINT_SELL_RATE=SUPPLY_POINT_SELL_RATE,
     WILDERNESS_SUPPLY_CONSUMPTION_PER_MEMBER=WILDERNESS_SUPPLY_CONSUMPTION_PER_MEMBER,
@@ -382,6 +384,7 @@ app.jinja_env.globals.update(
     UNDERWORLD_PAYOFF_COST=UNDERWORLD_PAYOFF_COST,
     MONSTER_HUNTER_PRIZE_BONUS=MONSTER_HUNTER_PRIZE_BONUS,
     MONSTER_HUNTER_COMPONENTS_PER_KILL=MONSTER_HUNTER_COMPONENTS_PER_KILL,
+    EDITION1_LOOT_GOLD_VALUE=EDITION1_LOOT_GOLD_VALUE,
     SPELL_COMPONENT_BAG_NAME=SPELL_COMPONENT_BAG_NAME,
     COMPONENT_POUCH_CAPACITY=COMPONENT_POUCH_CAPACITY,
     SPELL_COMPONENT_BAG_CAPACITY=SPELL_COMPONENT_BAG_CAPACITY,
@@ -835,6 +838,56 @@ def _render_new(
 
 # ---- View / maintain ------------------------------------------------------
 
+# Javelin, Throwing Knife and Bladed Staff are otherwise deliberately not
+# source-gated (see game_content.load_standard_items()) — General Rules'
+# "Additional Weapons" sub-card gives each its own on/off switch instead, plus
+# a 1-slot/2-slot choice for Bladed Staff. Applied here rather than in the
+# loader since the loader's list is @lru_cache'd and shared across warbands;
+# mutating those dicts in place would corrupt the cache, so disabled entries
+# are dropped and Bladed Staff gets a shallow copy when its slot cost differs
+# from the catalog default.
+def _filtered_standard_items(items: list[dict], hr: dict) -> list[dict]:
+    out = []
+    for it in items:
+        name = it["name"]
+        if name == "Javelin" and not hr.get("javelin_enabled", True):
+            continue
+        if name == "Throwing Knife" and not hr.get("throwing_knife_enabled", True):
+            continue
+        if name == "Bladed Staff":
+            if not hr.get("bladed_staff_enabled", True):
+                continue
+            slot_cost = 2 if hr.get("bladed_staff_two_slots", True) else 1
+            if slot_cost != it.get("slot_cost", 1):
+                it = {**it, "slot_cost": slot_cost}
+        out.append(it)
+    return out
+
+
+# Why a wizard's level-up choice can't be spent right now, so the picker can
+# gray it out instead of letting the pick fail with a flash message after the
+# fact. Mirrors the checks apply_level_up() itself makes.
+def _wizard_level_up_blocked(wb: dict, options: list[dict], learnable: list[dict]) -> dict[str, str]:
+    stats = (wb.get("wizard") or {}).get("stats") or {}
+    caps = expansions.wizard_stat_caps(wb)
+    known_spells = (wb.get("wizard") or {}).get("spells") or []
+    min_cn = expansions.casting_number_minimum(wb)
+    blocked: dict[str, str] = {}
+    for opt in options:
+        oid = opt["id"]
+        if opt.get("stat"):
+            cap = caps.get(oid)
+            if cap is not None and int(stats.get(oid, 0)) >= cap:
+                blocked[oid] = f"capped at {cap}"
+        elif oid == "learn_spell" and not learnable:
+            blocked[oid] = "no learnable spells available"
+        elif oid == "improve_spell" and (
+            not known_spells or all(int(s.get("cn", 999)) <= min_cn for s in known_spells)
+        ):
+            blocked[oid] = "no spell left to improve"
+    return blocked
+
+
 @app.route("/warband/<warband_id>")
 def warband_view(warband_id: str) -> str:
     wb = _require_warband(warband_id)
@@ -854,6 +907,7 @@ def warband_view(warband_id: str) -> str:
     known = known_spell_ids(wb)
     wschool = (wb.get("wizard") or {}).get("school") or "Elementalist"
     wb_sources = enabled_sources(wb)
+    hr = wb.get("homerules") or {}
     grave_mutations_enabled = "Grave Mutations" in wb_sources
     mutation_picker_data = load_grave_mutations() if grave_mutations_enabled else []
     fireheart_enabled = "Fireheart" in wb_sources
@@ -884,6 +938,18 @@ def warband_view(warband_id: str) -> str:
         key = name.lower()
         vault_owned_counts[key] = vault_owned_counts.get(key, 0) + 1
         vault_display_names.setdefault(key, name)
+    # Spell Component Bags are bought into a separate count (monster_hunting
+    # .bags_bought, see warband_store.buy_component_bag()) rather than
+    # wb.vault_items, but still need to be gated in the item-slot picker like
+    # any other bought item — fold that count into the same owned pool.
+    component_bags_bought = int((wb.get("monster_hunting") or {}).get("bags_bought", 0))
+    if component_bags_bought:
+        bag_key = SPELL_COMPONENT_BAG_NAME.lower()
+        if bag_key not in seen:
+            seen.add(bag_key)
+            vault_names.append(SPELL_COMPONENT_BAG_NAME)
+        vault_owned_counts[bag_key] = component_bags_bought
+        vault_display_names.setdefault(bag_key, SPELL_COMPONENT_BAG_NAME)
     # How many of each vault-recorded item (bought firearms, found artefacts,
     # any other loot) are still free to equip vs. already spoken for — the
     # item-slot picker (_item_slots.html) uses this to grey out options the
@@ -906,11 +972,18 @@ def warband_view(warband_id: str) -> str:
     # copy of `name` and adds the combined item back in its place.
     upgrade_catalog = [it for it in load_standard_items() if it.get("compatible_bases")]
     owned_firearms = []
+    # Tally of owned modded copies per base firearm (Pistol/Musket/Blunderbuss)
+    # — every vault entry that parses to that base with at least one upgrade
+    # applied, regardless of which upgrade(s) — drives the Firearms table's
+    # "Owned modded" row.
+    firearm_modded_counts: dict[str, int] = {}
     for key, owned in vault_owned_counts.items():
         parsed = expansions.parse_firearm_name(vault_display_names[key])
         if not parsed:
             continue
         base, applied = parsed
+        if applied:
+            firearm_modded_counts[base] = firearm_modded_counts.get(base, 0) + owned
         options = [
             u for u in upgrade_catalog
             if base in u["compatible_bases"] and u["name"].removesuffix(" (Firearm Upgrade)") not in applied
@@ -984,7 +1057,8 @@ def warband_view(warband_id: str) -> str:
     # wb.wizard.fin_dalka, merged here with the 8 Fire Giant spells so the
     # template doesn't have to cross-reference SPELLS itself.
     fin_dalka_enabled = "Blood Legacy" in wb_sources
-    fd = (wb.get("wizard") or {}).get("fin_dalka") or {"owned": False, "attempts": {}}
+    fin_dalka_owned = expansions.fin_dalka_owned(wb)
+    fd = (wb.get("wizard") or {}).get("fin_dalka") or {"attempts": {}}
     known_spell_ids_set = {s.get("id") for s in (wb.get("wizard") or {}).get("spells") or []}
     fin_dalka_spells = [
         {
@@ -1020,7 +1094,11 @@ def warband_view(warband_id: str) -> str:
     )
     monster_hunting = wb.get("monster_hunting") or {"kills": [], "prizes": [], "bags_bought": 0}
     monster_hunter_active = expansions.monster_hunter_active(wb)
-    monster_hunting_table = sorted(load_monster_hunting(), key=lambda r: r["monster"])
+    # "Other Creature" (a catch-all not on the book's own table) sorts first,
+    # ahead of the alphabetical Master Monster Table rows.
+    monster_hunting_table = sorted(
+        load_monster_hunting(), key=lambda r: (r["monster"] != "Other Creature", r["monster"])
+    )
     monster_hunting_pending_xp = sum(int(k.get("xp", 0)) for k in monster_hunting.get("kills") or [])
     monster_hunting_pending_gold = sum(int(p.get("gold", 0)) for p in monster_hunting.get("prizes") or [])
     wizard_components = (wb.get("wizard") or {}).get("components") or []
@@ -1037,7 +1115,6 @@ def warband_view(warband_id: str) -> str:
     apprentice_bags_credited = (
         expansions.component_bag_credit(wb, "apprentice") if wb.get("apprentice") else 0
     )
-    component_bags_bought = int(monster_hunting.get("bags_bought", 0))
     # The Wildwoods' Supply Points (sp) economy + optional Cargo Transport for
     # wilderness campaigns — see warband_store.wildwoods_summary().
     wildwoods_enabled = "The Wildwoods" in wb_sources and bool(
@@ -1065,6 +1142,7 @@ def warband_view(warband_id: str) -> str:
         ragged_warbands_have=ragged_warbands_have,
         ragged_warbands_rules=ragged_warbands_rules,
         fin_dalka_enabled=fin_dalka_enabled,
+        fin_dalka_owned=fin_dalka_owned,
         fin_dalka_spells=fin_dalka_spells,
         underworld_favors_enabled=underworld_favors_enabled,
         underworld_favors=underworld_favors,
@@ -1105,18 +1183,22 @@ def warband_view(warband_id: str) -> str:
             if info.get("source", "Core Rules") in wb_sources
             or key in ((wb.get("base") or {}).get("resources") or [])
         },
-        standard_items=load_spellcaster_items(),  # no armour for wizard/apprentice UI
-        full_standard_items=load_standard_items(),  # unfiltered: page-wide item-suggestions datalist
-        soldier_capable_items=load_soldier_capable_items(),  # captain/soldier picker: armour, no caster gear
+        # no armour for wizard/apprentice UI
+        standard_items=_filtered_standard_items(load_spellcaster_items(), hr),
+        # unfiltered aside from the Additional Weapons toggles: page-wide item-suggestions datalist
+        full_standard_items=_filtered_standard_items(load_standard_items(), hr),
+        # captain/soldier picker: armour, no caster gear
+        soldier_capable_items=_filtered_standard_items(load_soldier_capable_items(), hr),
         item_slot_costs={
             it["name"]: int(it.get("slot_cost", 1))
-            for it in load_standard_items()
+            for it in _filtered_standard_items(load_standard_items(), hr)
             if it.get("kind", "simple") == "simple"
         },
         wizard_spells_ui=wiz_spells,
         vault_names=vault_names,
         gated_items=gated_items,
         owned_firearms=owned_firearms,
+        firearm_modded_counts=firearm_modded_counts,
         potion_choices=load_potion_choices(),
         # Scroll / Grimoire item slots list spell names, so they follow the same
         # source gating as everything else — a warband with a book off should not
@@ -1139,6 +1221,7 @@ def warband_view(warband_id: str) -> str:
         can_add_pact_tier=expansions.can_add_pact_tier(wb),
         pact_break_penalty=expansions.pact_break_penalty(wb),
         wizard_level_up_options=expansions.level_up_options(wb),
+        wizard_level_up_blocked=_wizard_level_up_blocked(wb, expansions.level_up_options(wb), learnable),
         # Blood Legacy: High-Level Wizards (per-wizard-level bonuses, each its
         # own homerule toggle — see expansions.py).
         wizard_item_slots=expansions.wizard_item_slots(wb),
@@ -1340,11 +1423,6 @@ def _act_revert_vampire(wb: dict) -> tuple[bool, str]:
     return revert_vampire(wb)
 
 
-@register_action("acquire_fin_dalka_grimoire")
-def _act_acquire_fin_dalka_grimoire(wb: dict) -> tuple[bool, str]:
-    return acquire_fin_dalka_grimoire(wb)
-
-
 @register_action("sell_fin_dalka_grimoire")
 def _act_sell_fin_dalka_grimoire(wb: dict) -> tuple[bool, str]:
     return sell_fin_dalka_grimoire(wb)
@@ -1367,6 +1445,11 @@ def _act_unlock_fin_dalka_spell(wb: dict) -> tuple[bool, str]:
 @register_action("buy_horse")
 def _act_buy_horse(wb: dict) -> tuple[bool, str]:
     return buy_horse(wb)
+
+
+@register_action("buy_horse_upgrade")
+def _act_buy_horse_upgrade(wb: dict) -> tuple[bool, str]:
+    return buy_horse_upgrade(wb, request.form.get("upgrade_id") or "")
 
 
 @register_action("sell_horse")

@@ -101,6 +101,10 @@ def collect() -> dict[str, str]:
     for rel in STATIC_FILES:
         files[rel] = (ROOT / rel).read_text(encoding="utf-8")
 
+    # paths.app_version() reads this the same way in every build (dev,
+    # PyInstaller-frozen, and here) — see CLAUDE.md's single-sourced-version rule.
+    files["pyproject.toml"] = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
+
     # Empty placeholders, NOT the real image bytes (see PORTRAITS_SRC/PORTRAITS_OUT
     # above) — warband_store.default_portrait_name() decides whether a character
     # has default art by checking the file exists on disk (Path.is_file()), so
