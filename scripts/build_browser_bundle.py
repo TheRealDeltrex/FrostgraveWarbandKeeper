@@ -75,6 +75,12 @@ STATIC_FILES = [
     "static/style.css",
     "static/item_slots.js",
     "static/filter.js",
+    # Nothing links to this — it ships because the OFL requires the licence to
+    # travel with the font, and the font itself is a base64 data URI inside
+    # style.css (see scripts/build_display_font.py). Plain text, so it passes
+    # the read_text() channel above; needs no renderPage() rule for the same
+    # reason nothing links to it.
+    "static/fonts/OFL-Spectral.txt",
 ]
 
 # Default character artwork is mirrored as real sibling files next to

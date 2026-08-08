@@ -8,17 +8,18 @@
     {% if BROWSER_MODE %}
       <style>
         .session-warning {
-          margin: 0 0 1rem;
+          margin: 0 0 var(--sp-4);
           padding: 0.7rem 1rem;
-          border: 1px solid #b8862b;
-          border-left: 4px solid #e0a93a;
-          border-radius: 8px;
-          background: rgba(224, 169, 58, 0.12);
-          color: #f0d9a6;
-          font-size: 0.9rem;
+          border: 1px solid rgb(var(--gold-rgb) / 0.55);
+          border-left: 4px solid var(--warn);
+          border-radius: var(--radius-md);
+          background: rgb(var(--gold-rgb) / 0.12);
+          color: var(--gold);
+          font-size: var(--fs-lg);
           line-height: 1.4;
+          box-shadow: var(--rim);
         }
-        .session-warning a { color: #ffd479; }
+        .session-warning a { color: var(--accent-hover); }
       </style>
     {% endif %}
   </head>
