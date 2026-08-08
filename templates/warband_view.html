@@ -107,167 +107,283 @@
           Switch on the supplements you play with. Enabled books add their mercenaries to the Hire soldier
           list. Every creature is always browsable in the <a href="{{ url_for('reference') }}">Frostgrave Lexicon</a>.
         </p>
-        <div class="actions" style="margin-bottom:0.5rem">
-          <button class="btn small secondary" type="button" data-toggle-sources="on">Enable all</button>
-          <button class="btn small secondary" type="button" data-toggle-sources="off">Disable all</button>
-        </div>
-        <div class="stat-row" id="source-books">
-          {% for book in source_books %}
-            <label class="checkbox-row" style="margin:0.2rem 0">
-              <input name="source_enabled_{{ book.slug }}" type="checkbox" {% if hr.enabled_sources.get(book.name) %}checked{% endif %} />
-              {{ book.name }}
-            </label>
-          {% endfor %}
-        </div>
-        <label class="checkbox-row" style="margin-top:0.6rem">
-          <input name="pentangle_schools_playable" type="checkbox" {% if hr.pentangle_schools_playable %}checked{% endif %} />
-          Pentangle schools playable
-        </label>
-        <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0">
-          Needs The Maze of Malcor. Its five lost schools are scroll-only by the book; this is the
-          optional rule for running them as real schools. Only affects newly created warbands —
-          a wizard's own school is fixed once chosen.
-        </p>
-        <label class="checkbox-row" style="margin-top:0.6rem">
-          <input name="fire_giant_wizard_playable" type="checkbox" {% if hr.fire_giant_wizard_playable %}checked{% endif %} />
-          Fire Giant Wizard playable (Blood Legacy)
-        </label>
-        <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0">
-          Needs Blood Legacy. The book frames the Fire Giant Wizard as a build for very hard/large
-          encounters rather than balanced campaign play — this opts it in as a choosable wizard
-          school. Only affects newly created warbands — a wizard's own school is fixed once chosen.
-        </p>
-        <label class="checkbox-row" style="margin-top:0.6rem">
-          <input name="vampire_wizard_playable" type="checkbox" {% if hr.vampire_wizard_playable %}checked{% endif %} />
-          Vampire Wizard playable (Blood Legacy)
-        </label>
-        <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0">
-          Needs Blood Legacy. The book frames the Vampire Wizard as a GM/NPC villain build "or PC
-          by group agreement" — this opts it in as a choosable wizard school. Only affects newly
-          created warbands — a wizard's own school is fixed once chosen.
-        </p>
-        <label class="checkbox-row" style="margin-top:0.6rem">
-          <input name="giant_blooded_enabled" type="checkbox" {% if hr.giant_blooded_enabled %}checked{% endif %} />
-          Giant-Blooded soldier modification (Blood Legacy)
-        </label>
-        <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0">
-          Needs Blood Legacy. Lets one ordinary soldier in the warband become Giant-Blooded
-          (+50gc, -1 Move, -2 Will, +2 Health) — picked from a single control on the Soldiers
-          card below rather than a button on every soldier's row, since only one may take it.
-        </p>
-        <p class="muted" style="font-size:0.82rem;margin:0.6rem 0 0">
-          Needs Blood Legacy. The Grimoire of Fin Dalka is found/bought like any other magic item
-          (add it via the Treasury, Vault and Workshop card's Vault items) — once owned, deciphering
-          its 8 Fire Giant spells and selling it are also done there.
-        </p>
-        <label class="checkbox-row" style="margin-top:0.6rem">
-          <input name="ragged_warbands_enabled" type="checkbox" {% if hr.ragged_warbands_enabled %}checked{% endif %} />
-          Ragged Warbands &amp; Random Recruits (The Red King)
-        </label>
-        <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0">
-          Needs The Red King. Adds a "Fill roster" control to the Soldiers card below, rolling
-          random recruits up to 10 members and bypassing the usual gold/roster caps, per the
-          book's endgame campaign mode. The surrounding restrictions (no spending gold, no
-          hiring/dismissing outside this roll, no Vault storage, a soldier lost on a 1-8 survival
-          roll) are shown there as reminder text. The Random Recruit Status Table can inflict a
-          permanent injury on any recruited soldier — turn on "Ordinary soldiers can take
-          permanent injuries" below too if your group wants that to actually apply.
-        </p>
-        <label class="checkbox-row" style="margin-top:0.6rem">
-          <input name="monster_hunting_enabled" type="checkbox" {% if hr.monster_hunting_enabled %}checked{% endif %} />
-          Monster Hunting: For Fun and Profit (Spellcaster Magazine, Issue 5)
-        </label>
-        <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0">
-          Needs Spellcaster Magazine. Adds a per-game kill log to "After the game" below: record
-          a kill for its Master Monster Table XP, then claim its prize (sold for gold, or a spell/
-          potion component for the wizard or apprentice). See the Lexicon for the full 92-row
-          table plus "Other Creature", a catch-all for anything not on it.
-        </p>
-        <label class="checkbox-row" style="margin-top:0.4rem;margin-left:1.8rem">
-          <input name="monster_hunting_edition1_loot_gold" type="checkbox" {% if hr.monster_hunting_edition1_loot_gold %}checked{% endif %} />
-          Replace Edition 1 Loot with Gold
-        </label>
-        <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0 1.8rem">
-          Needs the toggle above. A handful of the table's prizes target a spell/potion this app
-          has no record of (likely 1st-edition-only) — this swaps those for a flat
-          {{ EDITION1_LOOT_GOLD_VALUE }}gc prize instead, at the point the kill is recorded.
-        </p>
-        <label class="checkbox-row" style="margin-top:0.6rem">
-          <input name="wildwoods_supplies_enabled" type="checkbox" {% if hr.wildwoods_supplies_enabled %}checked{% endif %} />
-          Supplies &amp; Cargo Transports (The Wildwoods)
-        </label>
-        <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0">
-          Needs The Wildwoods. Adds a Supply Points (sp) economy for wilderness campaigns and a
-          purchasable Cargo Transport to the Wizard &amp; apprentice card below: buy/sell sp
-          (1gc/sp, 2sp/gc), settle post-scenario consumption, and fit the transport with
-          upgrades. The transport's on-table push/combat rules are shown as reference text.
-        </p>
-        <label class="checkbox-row" style="margin-top:0.6rem">
-          <input name="edition2_soldier_costs" type="checkbox" {% if hr.edition2_soldier_costs %}checked{% endif %} />
-          Adjust soldiers to edition 2
-        </label>
-        <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0">
-          Assassin, Demon Hunter, Monk and Mystic Warrior read as costed closer to 1st edition than
-          the rest of the 2e tables. On by default, this bumps their hiring cost (Assassin 100gc,
-          Demon Hunter/Monk/Mystic Warrior 125gc). Applies to future hires only.
-        </p>
-        <label class="checkbox-row" style="margin-top:0.6rem">
-          <input name="spellcaster_magazine_soldiers" type="checkbox" {% if hr.spellcaster_magazine_soldiers %}checked{% endif %} />
-          Spellcaster Magazine: allow its soldiers (non-Legendary)
-        </label>
-        <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0">
-          Needs Spellcaster Magazine switched on above. On by default; some groups find the
-          magazine's troop stat lines unbalanced — untick to drop just its hireable soldiers while
-          its spells, treasure and bestiary entries stay available either way. Covers every
-          Spellcaster Magazine soldier except Legendary Soldiers (its own toggle below).
-        </p>
-        <label class="checkbox-row" style="margin-top:0.6rem">
-          <input name="spellcaster_magazine_legendary_soldiers" type="checkbox" {% if hr.spellcaster_magazine_legendary_soldiers %}checked{% endif %} />
-          Spellcaster Magazine: allow Legendary Soldiers
-        </label>
-        <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0">
-          Needs Spellcaster Magazine switched on above. On by default. Legendary Soldiers (Issue 4)
-          are a separate, more expensive troop category limited by wizard level rather than freely
-          hired (1 base, +1 per 10 full wizard levels, max 8) — see the Legendary Soldiers limit bar
-          in the roster once enabled. Fielding one caps ordinary Specialists at 3. Also makes the
-          Captain a Legendary Soldier, subject to the same limit instead of the Specialist cap.
-        </p>
-        <label class="checkbox-row" style="margin-top:0.6rem">
-          <input name="firearms_rules_enabled" type="checkbox" {% if hr.firearms_rules_enabled %}checked{% endif %} />
-          Spellcaster Magazine: Firearms Rules
-        </label>
-        <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0">
-          Needs "allow its soldiers" above also switched on. On by default. Governs whether the
-          Musketeer, Coachman and Duellist appear in Hire soldier — both toggles must be on for
-          them to show up. Also gates the standalone Pistol/Musket/Blunderbuss items and their
-          upgrades: switch this off and the Workshop — Firearms panel disappears, and any already
-          in item slots stay put but can't be bought or upgraded again until it's back on.
-        </p>
-        <label class="checkbox-row" style="margin-top:0.6rem">
-          <input name="knightly_orders_enabled" type="checkbox" {% if hr.knightly_orders_enabled %}checked{% endif %} />
-          Spellcaster Magazine: Knightly Orders
-        </label>
-        <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0">
-          Needs Spellcaster Magazine switched on above. On by default. When hiring a Knight or
-          Templar, lets you pick an Order that trades 1 point of Fight or Health for a special
-          ability — adds an order picker to their row in Hire soldier below.
-        </p>
-        <div class="checkbox-row" style="margin-top:0.6rem">
-          <input id="free_dagger_enabled" name="free_dagger_enabled" type="checkbox" {% if hr.free_dagger_enabled %}checked{% endif %} />
-          <label for="free_dagger_enabled" style="margin:0">Every ordinary soldier gets a free backup dagger (a single dagger costs no item slot) — skips anyone already carrying a hand weapon and a dagger, or two daggers; upgrades a lone dagger to two, and two hand weapons still gets one added</label>
-        </div>
-        <script>
-          // Tick/untick every source book at once, then save immediately —
-          // same as ticking each checkbox by hand on this autosaving form.
-          document.querySelectorAll("[data-toggle-sources]").forEach(function (btn) {
-            btn.addEventListener("click", function () {
-              var on = btn.dataset.toggleSources === "on";
-              var boxes = document.querySelectorAll('#source-books input[type="checkbox"]');
-              boxes.forEach(function (box) { box.checked = on; });
-              if (boxes.length) boxes[0].dispatchEvent(new Event("change", { bubbles: true }));
-            });
-          });
-        </script>
+        <details class="ref-panel hr-group" id="hr-group-sources" open>
+          <summary>Source books<span class="hr-count"></span></summary>
+          <div class="actions" style="margin-bottom:0.5rem">
+            <button class="btn small secondary" type="button" data-toggle-sources="on">Enable all</button>
+            <button class="btn small secondary" type="button" data-toggle-sources="off">Disable all</button>
+          </div>
+          <div class="stat-row" id="source-books">
+            {% for book in source_books %}
+              <label class="checkbox-row" style="margin:0.2rem 0">
+                <input name="source_enabled_{{ book.slug }}" type="checkbox" {% if hr.enabled_sources.get(book.name) %}checked{% endif %} />
+                {{ book.name }}
+              </label>
+            {% endfor %}
+          </div>
+        </details>
+        <details class="ref-panel hr-group" id="hr-group-blood-legacy">
+          <summary>Blood Legacy<span class="hr-count"></span></summary>
+          <p class="muted" style="font-size:0.85rem">
+            Needs Blood Legacy switched on in Source books.
+          </p>
+          <div class="hr-row">
+            <input id="hr_fire_giant_wizard_playable" name="fire_giant_wizard_playable" type="checkbox" {% if hr.fire_giant_wizard_playable %}checked{% endif %} />
+            <details class="hr-note" id="hrnote-fire_giant_wizard_playable">
+              <summary>Fire Giant Wizard playable</summary>
+              <p class="hr-note-body">
+                The book frames the Fire Giant Wizard as a build for very hard/large encounters
+                rather than balanced campaign play — this opts it in as a choosable wizard school.
+                Only affects newly created warbands — a wizard's own school is fixed once chosen.
+              </p>
+            </details>
+          </div>
+          <div class="hr-row">
+            <input id="hr_vampire_wizard_playable" name="vampire_wizard_playable" type="checkbox" {% if hr.vampire_wizard_playable %}checked{% endif %} />
+            <details class="hr-note" id="hrnote-vampire_wizard_playable">
+              <summary>Vampire Wizard playable</summary>
+              <p class="hr-note-body">
+                The book frames the Vampire Wizard as a GM/NPC villain build "or PC by group
+                agreement" — this opts it in as a choosable wizard school. Only affects newly
+                created warbands — a wizard's own school is fixed once chosen.
+              </p>
+            </details>
+          </div>
+          <div class="hr-row">
+            <input id="hr_giant_blooded_enabled" name="giant_blooded_enabled" type="checkbox" {% if hr.giant_blooded_enabled %}checked{% endif %} />
+            <details class="hr-note" id="hrnote-giant_blooded_enabled">
+              <summary>Giant-Blooded soldier modification</summary>
+              <p class="hr-note-body">
+                Lets one ordinary soldier in the warband become Giant-Blooded (+50gc, -1 Move,
+                -2 Will, +2 Health) — picked from a single control on the Soldiers card below
+                rather than a button on every soldier's row, since only one may take it.
+              </p>
+            </details>
+          </div>
+          <p class="muted" style="font-size:0.82rem;margin:0.6rem 0 0">
+            The Grimoire of Fin Dalka is found/bought like any other magic item (add it via the
+            Treasury, Vault and Workshop card's Vault items) — once owned, deciphering its 8 Fire
+            Giant spells and selling it are also done there.
+          </p>
+
+          <details class="ref-panel" id="high-level-wizards-panel">
+            <summary>High-Level Wizards</summary>
+            <p class="muted" style="font-size:0.85rem">
+              The book treats each of these as its own optional rule to agree on separately, so each
+              has its own toggle here rather than one bundled switch.
+            </p>
+            <div class="actions" style="margin-bottom:0.5rem">
+              <button class="btn small secondary" type="button" data-toggle-hlw="on">Enable all</button>
+              <button class="btn small secondary" type="button" data-toggle-hlw="off">Disable all</button>
+            </div>
+            <div id="hlw-toggles">
+              <div class="hr-row">
+                <input id="hr_hlw_specialist_allowance" name="hlw_specialist_allowance" type="checkbox" {% if hr.hlw_specialist_allowance %}checked{% endif %} />
+                <details class="hr-note" id="hrnote-hlw_specialist_allowance">
+                  <summary>Increased Specialist Soldier Allowance</summary>
+                  <p class="hr-note-body">
+                    +1 specialist slot per full 20 wizard levels (5 at level 20, up to 8 at level 80+).
+                  </p>
+                </details>
+              </div>
+              <div class="hr-row">
+                <input id="hr_hlw_item_slots" name="hlw_item_slots" type="checkbox" {% if hr.hlw_item_slots %}checked{% endif %} />
+                <details class="hr-note" id="hrnote-hlw_item_slots">
+                  <summary>Increased Item Slots</summary>
+                  <p class="hr-note-body">
+                    Wizard and apprentice each gain +1 item slot at level 30, +1 more at level 70 (max +2).
+                  </p>
+                </details>
+              </div>
+              <div class="hr-row">
+                <input id="hr_hlw_max_health" name="hlw_max_health" type="checkbox" {% if hr.hlw_max_health %}checked{% endif %} />
+                <details class="hr-note" id="hrnote-hlw_max_health">
+                  <summary>Increased Maximum Health</summary>
+                  <p class="hr-note-body">
+                    Wizard's maximum potential Health Stat rises +1 per full 10 levels (max +10, so 30
+                    at level 100+). Stacks on top of any Health cap from another wizard state the same way.
+                  </p>
+                </details>
+              </div>
+              <div class="hr-row">
+                <input id="hr_hlw_casting_min" name="hlw_casting_min" type="checkbox" {% if hr.hlw_casting_min %}checked{% endif %} />
+                <details class="hr-note" id="hrnote-hlw_casting_min">
+                  <summary>Lower Casting Number Minimum</summary>
+                  <p class="hr-note-body">
+                    A level 100+ wizard may improve a Casting Number down to 4 instead of the normal floor of 5.
+                  </p>
+                </details>
+              </div>
+              <div class="hr-row">
+                <input id="hr_hlw_alt_xp" name="hlw_alt_xp" type="checkbox" {% if hr.hlw_alt_xp %}checked{% endif %} />
+                <details class="hr-note" id="hrnote-hlw_alt_xp">
+                  <summary>Alternate Experience Point Expenditure</summary>
+                  <p class="hr-note-body">
+                    Adds a "Spend XP" option on the Wizard card for trading banked XP for gold or a
+                    one-off bonus instead of a level — no level requirement of its own, unlike the other four.
+                  </p>
+                </details>
+              </div>
+            </div>
+          </details>
+        </details>
+
+        <details class="ref-panel hr-group" id="hr-group-spellcaster">
+          <summary>Spellcaster Magazine<span class="hr-count"></span></summary>
+          <p class="muted" style="font-size:0.85rem">
+            Needs Spellcaster Magazine switched on in Source books. All on by default.
+          </p>
+          <div class="hr-row">
+            <input id="hr_spellcaster_magazine_soldiers" name="spellcaster_magazine_soldiers" type="checkbox" {% if hr.spellcaster_magazine_soldiers %}checked{% endif %} />
+            <details class="hr-note" id="hrnote-spellcaster_magazine_soldiers">
+              <summary>Allow its soldiers (non-Legendary)</summary>
+              <p class="hr-note-body">
+                Some groups find the magazine's troop stat lines unbalanced — untick to drop just
+                its hireable soldiers while its spells, treasure and bestiary entries stay available
+                either way. Covers every Spellcaster Magazine soldier except Legendary Soldiers
+                (its own toggle below).
+              </p>
+            </details>
+          </div>
+          <div class="hr-row">
+            <input id="hr_spellcaster_magazine_legendary_soldiers" name="spellcaster_magazine_legendary_soldiers" type="checkbox" {% if hr.spellcaster_magazine_legendary_soldiers %}checked{% endif %} />
+            <details class="hr-note" id="hrnote-spellcaster_magazine_legendary_soldiers">
+              <summary>Allow Legendary Soldiers</summary>
+              <p class="hr-note-body">
+                Legendary Soldiers (Issue 4) are a separate, more expensive troop category limited by
+                wizard level rather than freely hired (1 base, +1 per 10 full wizard levels, max 8) —
+                see the Legendary Soldiers limit bar in the roster once enabled. Fielding one caps
+                ordinary Specialists at 3. Also makes the Captain a Legendary Soldier, subject to the
+                same limit instead of the Specialist cap.
+              </p>
+            </details>
+          </div>
+          <div class="hr-row">
+            <input id="hr_firearms_rules_enabled" name="firearms_rules_enabled" type="checkbox" {% if hr.firearms_rules_enabled %}checked{% endif %} />
+            <details class="hr-note" id="hrnote-firearms_rules_enabled">
+              <summary>Firearms Rules</summary>
+              <p class="hr-note-body">
+                Needs "Allow its soldiers" above also switched on. Governs whether the Musketeer,
+                Coachman and Duellist appear in Hire soldier — both toggles must be on for them to
+                show up. Also gates the standalone Pistol/Musket/Blunderbuss items and their
+                upgrades: switch this off and the Workshop — Firearms panel disappears, and any
+                already in item slots stay put but can't be bought or upgraded again until it's back on.
+              </p>
+            </details>
+          </div>
+          <div class="hr-row">
+            <input id="hr_knightly_orders_enabled" name="knightly_orders_enabled" type="checkbox" {% if hr.knightly_orders_enabled %}checked{% endif %} />
+            <details class="hr-note" id="hrnote-knightly_orders_enabled">
+              <summary>Knightly Orders</summary>
+              <p class="hr-note-body">
+                When hiring a Knight or Templar, lets you pick an Order that trades 1 point of Fight
+                or Health for a special ability — adds an order picker to their row in Hire soldier below.
+              </p>
+            </details>
+          </div>
+          <div class="hr-row">
+            <input id="hr_monster_hunting_enabled" name="monster_hunting_enabled" type="checkbox" {% if hr.monster_hunting_enabled %}checked{% endif %} />
+            <details class="hr-note" id="hrnote-monster_hunting_enabled">
+              <summary>Monster Hunting: For Fun and Profit (Issue 5)</summary>
+              <p class="hr-note-body">
+                Adds a per-game kill log to "After the game" below: record a kill for its Master
+                Monster Table XP, then claim its prize (sold for gold, or a spell/potion component
+                for the wizard or apprentice). See the Lexicon for the full 92-row table plus
+                "Other Creature", a catch-all for anything not on it.
+              </p>
+            </details>
+          </div>
+          <div class="hr-row hr-child">
+            <input id="hr_monster_hunting_edition1_loot_gold" name="monster_hunting_edition1_loot_gold" type="checkbox" {% if hr.monster_hunting_edition1_loot_gold %}checked{% endif %} />
+            <details class="hr-note" id="hrnote-monster_hunting_edition1_loot_gold">
+              <summary>Replace Edition 1 Loot with Gold</summary>
+              <p class="hr-note-body">
+                Needs the toggle above. A handful of the table's prizes target a spell/potion this app
+                has no record of (likely 1st-edition-only) — this swaps those for a flat
+                {{ EDITION1_LOOT_GOLD_VALUE }}gc prize instead, at the point the kill is recorded.
+              </p>
+            </details>
+          </div>
+        </details>
+
+        <details class="ref-panel hr-group" id="hr-group-supplements">
+          <summary>Other supplements<span class="hr-count"></span></summary>
+          <div class="hr-row">
+            <input id="hr_pentangle_schools_playable" name="pentangle_schools_playable" type="checkbox" {% if hr.pentangle_schools_playable %}checked{% endif %} />
+            <details class="hr-note" id="hrnote-pentangle_schools_playable">
+              <summary>Pentangle schools playable (The Maze of Malcor)</summary>
+              <p class="hr-note-body">
+                Its five lost schools are scroll-only by the book; this is the optional rule for
+                running them as real schools. Only affects newly created warbands — a wizard's own
+                school is fixed once chosen.
+              </p>
+            </details>
+          </div>
+          <div class="hr-row">
+            <input id="hr_ragged_warbands_enabled" name="ragged_warbands_enabled" type="checkbox" {% if hr.ragged_warbands_enabled %}checked{% endif %} />
+            <details class="hr-note" id="hrnote-ragged_warbands_enabled">
+              <summary>Ragged Warbands &amp; Random Recruits (The Red King)</summary>
+              <p class="hr-note-body">
+                Adds a "Fill roster" control to the Soldiers card below, rolling random recruits up
+                to 10 members and bypassing the usual gold/roster caps, per the book's endgame
+                campaign mode. The surrounding restrictions (no spending gold, no hiring/dismissing
+                outside this roll, no Vault storage, a soldier lost on a 1-8 survival roll) are shown
+                there as reminder text. The Random Recruit Status Table can inflict a permanent
+                injury on any recruited soldier — turn on "Ordinary soldiers can take permanent
+                injuries" below too if your group wants that to actually apply.
+              </p>
+            </details>
+          </div>
+          <div class="hr-row">
+            <input id="hr_wildwoods_supplies_enabled" name="wildwoods_supplies_enabled" type="checkbox" {% if hr.wildwoods_supplies_enabled %}checked{% endif %} />
+            <details class="hr-note" id="hrnote-wildwoods_supplies_enabled">
+              <summary>Supplies &amp; Cargo Transports (The Wildwoods)</summary>
+              <p class="hr-note-body">
+                Adds a Supply Points (sp) economy for wilderness campaigns and a purchasable Cargo
+                Transport to the Wizard &amp; apprentice card below: buy/sell sp (1gc/sp, 2sp/gc),
+                settle post-scenario consumption, and fit the transport with upgrades. The
+                transport's on-table push/combat rules are shown as reference text.
+              </p>
+            </details>
+          </div>
+        </details>
+
+        <details class="ref-panel hr-group" id="hr-group-core">
+          <summary>Core rule tweaks<span class="hr-count"></span></summary>
+          <div class="hr-row">
+            <input id="hr_edition2_soldier_costs" name="edition2_soldier_costs" type="checkbox" {% if hr.edition2_soldier_costs %}checked{% endif %} />
+            <details class="hr-note" id="hrnote-edition2_soldier_costs">
+              <summary>Adjust soldiers to edition 2</summary>
+              <p class="hr-note-body">
+                Assassin, Demon Hunter, Monk and Mystic Warrior read as costed closer to 1st edition
+                than the rest of the 2e tables. On by default, this bumps their hiring cost (Assassin
+                100gc, Demon Hunter/Monk/Mystic Warrior 125gc). Applies to future hires only.
+              </p>
+            </details>
+          </div>
+          <div class="hr-row">
+            <input id="free_dagger_enabled" name="free_dagger_enabled" type="checkbox" {% if hr.free_dagger_enabled %}checked{% endif %} />
+            <details class="hr-note" id="hrnote-free_dagger_enabled">
+              <summary>Every ordinary soldier gets a free backup dagger</summary>
+              <p class="hr-note-body">
+                A single dagger costs no item slot. Skips anyone already carrying a hand weapon and a
+                dagger, or two daggers; upgrades a lone dagger to two, and two hand weapons still gets
+                one added.
+              </p>
+            </details>
+          </div>
+          <div class="hr-row">
+            <input id="hr_black_market_enabled" name="black_market_enabled" type="checkbox" {% if hr.black_market_enabled %}checked{% endif %} />
+            <details class="hr-note" id="hrnote-black_market_enabled">
+              <summary>Black Market Contacts</summary>
+              <p class="hr-note-body">
+                Instead of open buying, roll 4x on the Treasure Table after a game and buy only from
+                what comes up — adds a Black Market sub-card to the Treasury, Vault and Workshop card
+                below to record rolls and look up results.
+              </p>
+            </details>
+          </div>
+        </details>
 
         <details class="ref-panel" id="additional-weapons-panel">
           <summary>Additional Weapons</summary>
@@ -299,84 +415,60 @@
           </div>
         </details>
 
-        <details class="ref-panel" id="high-level-wizards-panel">
-          <summary>High-Level Wizards (Blood Legacy)</summary>
-          <p class="muted" style="font-size:0.85rem">
-            Needs Blood Legacy switched on above. The book treats each of these as its own optional
-            rule to agree on separately, so each has its own toggle here rather than one bundled switch.
-          </p>
-          <div class="actions" style="margin-bottom:0.5rem">
-            <button class="btn small secondary" type="button" data-toggle-hlw="on">Enable all</button>
-            <button class="btn small secondary" type="button" data-toggle-hlw="off">Disable all</button>
-          </div>
-          <div id="hlw-toggles">
-            <label class="checkbox-row" style="margin-top:0.4rem">
-              <input name="hlw_specialist_allowance" type="checkbox" {% if hr.hlw_specialist_allowance %}checked{% endif %} />
-              Increased Specialist Soldier Allowance
-            </label>
-            <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0.6rem">
-              +1 specialist slot per full 20 wizard levels (5 at level 20, up to 8 at level 80+).
-            </p>
-            <label class="checkbox-row">
-              <input name="hlw_item_slots" type="checkbox" {% if hr.hlw_item_slots %}checked{% endif %} />
-              Increased Item Slots
-            </label>
-            <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0.6rem">
-              Wizard and apprentice each gain +1 item slot at level 30, +1 more at level 70 (max +2).
-            </p>
-            <label class="checkbox-row">
-              <input name="hlw_max_health" type="checkbox" {% if hr.hlw_max_health %}checked{% endif %} />
-              Increased Maximum Health
-            </label>
-            <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0.6rem">
-              Wizard's maximum potential Health Stat rises +1 per full 10 levels (max +10, so 30 at level
-              100+). Stacks on top of any Health cap from another wizard state the same way.
-            </p>
-            <label class="checkbox-row">
-              <input name="hlw_casting_min" type="checkbox" {% if hr.hlw_casting_min %}checked{% endif %} />
-              Lower Casting Number Minimum
-            </label>
-            <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0.6rem">
-              A level 100+ wizard may improve a Casting Number down to 4 instead of the normal floor of 5.
-            </p>
-            <label class="checkbox-row">
-              <input name="hlw_alt_xp" type="checkbox" {% if hr.hlw_alt_xp %}checked{% endif %} />
-              Alternate Experience Point Expenditure
-            </label>
-            <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0">
-              Adds a "Spend XP" option on the Wizard card for trading banked XP for gold or a one-off bonus
-              instead of a level — no level requirement of its own, unlike the other four.
-            </p>
-          </div>
-          <script>
-            // Tick/untick every High-Level Wizards toggle at once, then save
-            // immediately — same pattern as the source books' Enable/Disable all.
-            document.querySelectorAll('[data-toggle-hlw]').forEach(function (btn) {
-              btn.addEventListener('click', function () {
-                var on = btn.dataset.toggleHlw === 'on';
-                var boxes = document.querySelectorAll('#hlw-toggles input[type="checkbox"]');
-                boxes.forEach(function (box) { box.checked = on; });
-                if (boxes.length) boxes[0].dispatchEvent(new Event('change', { bubbles: true }));
+        <script>
+          // Tick/untick every source book at once, then save immediately —
+          // same as ticking each checkbox by hand on this autosaving form.
+          document.querySelectorAll("[data-toggle-sources]").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+              var on = btn.dataset.toggleSources === "on";
+              var boxes = document.querySelectorAll('#source-books input[type="checkbox"]');
+              boxes.forEach(function (box) { box.checked = on; });
+              if (boxes.length) boxes[0].dispatchEvent(new Event("change", { bubbles: true }));
+            });
+          });
+          // Tick/untick every High-Level Wizards toggle at once, then save
+          // immediately — same pattern as the source books' Enable/Disable all.
+          document.querySelectorAll('[data-toggle-hlw]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+              var on = btn.dataset.toggleHlw === 'on';
+              var boxes = document.querySelectorAll('#hlw-toggles input[type="checkbox"]');
+              boxes.forEach(function (box) { box.checked = on; });
+              if (boxes.length) boxes[0].dispatchEvent(new Event('change', { bubbles: true }));
+            });
+          });
+          // Switching Blood Legacy on defaults all five High-Level Wizards
+          // toggles on too, so turning on the book actually turns on its
+          // headline chapter instead of leaving five more boxes to tick by
+          // hand. Attached directly to the checkbox (not via document
+          // delegation) so it runs before the autosave listener submits the
+          // form. Only fires on and, not off — turning Blood Legacy back off
+          // doesn't fight the player over toggles they set by hand.
+          var bloodLegacyBox = document.querySelector('input[name="source_enabled_blood-legacy"]');
+          if (bloodLegacyBox) {
+            bloodLegacyBox.addEventListener('change', function () {
+              if (!bloodLegacyBox.checked) return;
+              document.querySelectorAll('#hlw-toggles input[type="checkbox"]').forEach(function (box) {
+                box.checked = true;
               });
             });
-            // Switching Blood Legacy on defaults all five High-Level Wizards
-            // toggles on too, so turning on the book actually turns on its
-            // headline chapter instead of leaving five more boxes to tick by
-            // hand. Attached directly to the checkbox (not via document
-            // delegation) so it runs before the autosave listener submits the
-            // form. Only fires on and, not off — turning Blood Legacy back off
-            // doesn't fight the player over toggles they set by hand.
-            var bloodLegacyBox = document.querySelector('input[name="source_enabled_blood-legacy"]');
-            if (bloodLegacyBox) {
-              bloodLegacyBox.addEventListener('change', function () {
-                if (!bloodLegacyBox.checked) return;
-                document.querySelectorAll('#hlw-toggles input[type="checkbox"]').forEach(function (box) {
-                  box.checked = true;
-                });
-              });
+          }
+          // Each collapsed group shows how many of its toggles are on, so the
+          // summary line carries the state the closed panel hides. Nested
+          // panels (High-Level Wizards) count under themselves, not their parent.
+          document.querySelectorAll('#general-rules-panel .hr-group').forEach(function (group) {
+            var badge = group.querySelector('.hr-count');
+            var boxes = [].filter.call(
+              group.querySelectorAll('input[type="checkbox"]'),
+              function (box) { return box.closest('.ref-panel') === group; }
+            );
+            function paint() {
+              var on = boxes.filter(function (box) { return box.checked; }).length;
+              badge.textContent = on + ' of ' + boxes.length + ' on';
             }
-          </script>
-        </details>
+            boxes.forEach(function (box) { box.addEventListener('change', paint); });
+            paint();
+          });
+        </script>
       </details>
 
       <details class="ref-panel" id="roster-caps-panel">
@@ -1142,8 +1234,7 @@
     <details class="ref-panel" id="level-up-wizard-panel">
       <summary>Level up wizard {% if pending_levels %}({{ pending_levels }} ready){% endif %}</summary>
       <p class="muted">
-        XP is tracked on the wizard. When you have enough XP ({{ 100 }} per level), spend level-ups here.
-        The apprentice auto-levels: level = wizard÷2, stats = wizard with apprentice offsets, same spells.
+        {{ xp_per_level }} XP per level (100 base, 120 Vampire, 150 Lich, 200 Fire Giant).
         Enter a negative number to remove XP; if that drops below the level you're at, the most
         recent level-up(s) are automatically reversed.
       </p>
@@ -1695,37 +1786,78 @@
       <div class="limit">Treasury: <span class="gold">{{ wb.gold }} gc</span></div>
     </div>
 
-    {% if giant_blooded_enabled %}
-      <details class="ref-panel" id="giant-blooded-panel">
-        <summary>Giant-Blooded (Blood Legacy)</summary>
-        <p class="muted" style="font-size:0.85rem">
-          Declared at hire, per the book: +{{ GIANT_BLOODED_COST }}gc, -1 Move, -2 Will,
-          +2 Health, and the Giant-Blooded trait (+1 melee damage, +4 to TN-based Fight
-          rolls, includes Large). Animals, demons, constructs and undead aren't eligible.
-          Only one soldier in the warband may have it.
-        </p>
-        {% if giant_blooded_soldier %}
-          <p>
-            <strong>{{ giant_blooded_soldier.name }}</strong> is Giant-Blooded.
+    {% if giant_blooded_enabled or thrall_available %}
+      <details class="ref-panel" id="hiring-options-panel">
+        <summary>Hiring options</summary>
+        {% if giant_blooded_enabled %}
+          <h3>Giant-Blooded (Blood Legacy)</h3>
+          <p class="muted" style="font-size:0.85rem">
+            Declared at hire, per the book: +{{ GIANT_BLOODED_COST }}gc, -1 Move, -2 Will,
+            +2 Health, and the Giant-Blooded trait (+1 melee damage, +4 to TN-based Fight
+            rolls, includes Large). Animals, demons, constructs and undead aren't eligible.
+            Only one soldier in the warband may have it.
           </p>
-          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" onsubmit="return confirm('Remove Giant-Blooded from {{ giant_blooded_soldier.name }}? The stat changes will be reversed (the {{ GIANT_BLOODED_COST }}gc fee is not refunded).');">
-            <input type="hidden" name="action" value="remove_soldier_giant_blooded" />
-            <input type="hidden" name="soldier_id" value="{{ giant_blooded_soldier.id }}" />
-            <button class="btn secondary small" type="submit">Remove Giant-Blooded</button>
-          </form>
-        {% elif giant_blooded_pending %}
-          <p>Next eligible soldier hired will be Giant-Blooded.</p>
-          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
-            <input type="hidden" name="action" value="set_giant_blooded_pending" />
-            <input type="hidden" name="fitted" value="0" />
-            <button class="btn secondary small" type="submit">Cancel</button>
-          </form>
-        {% else %}
-          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
-            <input type="hidden" name="action" value="set_giant_blooded_pending" />
-            <input type="hidden" name="fitted" value="1" />
-            <button class="btn secondary small" type="submit">Declare next hire Giant-Blooded</button>
-          </form>
+          {% if giant_blooded_soldier %}
+            <p>
+              <strong>{{ giant_blooded_soldier.name }}</strong> is Giant-Blooded.
+            </p>
+            <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" onsubmit="return confirm('Remove Giant-Blooded from {{ giant_blooded_soldier.name }}? The stat changes will be reversed (the {{ GIANT_BLOODED_COST }}gc fee is not refunded).');">
+              <input type="hidden" name="action" value="remove_soldier_giant_blooded" />
+              <input type="hidden" name="soldier_id" value="{{ giant_blooded_soldier.id }}" />
+              <button class="btn secondary small" type="submit">Remove Giant-Blooded</button>
+            </form>
+          {% elif giant_blooded_pending %}
+            <p>Next eligible soldier hired will be Giant-Blooded.</p>
+            <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
+              <input type="hidden" name="action" value="set_giant_blooded_pending" />
+              <input type="hidden" name="fitted" value="0" />
+              <button class="btn secondary small" type="submit">Cancel</button>
+            </form>
+          {% else %}
+            <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
+              <input type="hidden" name="action" value="set_giant_blooded_pending" />
+              <input type="hidden" name="fitted" value="1" />
+              <button class="btn secondary small" type="submit">Declare next hire Giant-Blooded</button>
+            </form>
+          {% endif %}
+        {% endif %}
+        {% if thrall_available %}
+          <h3>Thralldom (Blood Legacy)</h3>
+          <p class="muted" style="font-size:0.85rem">
+            Cast Thralldom (Out of Game (A)) at the table between scenarios first. Once it
+            succeeds, the next soldier hired here — any type, no roster-cap exception — joins
+            free and permanently at -1 Will. If a Thrall is ever reduced to 0 Health in a game,
+            roll a die at the table: 1-10 it's lost (remove it from the roster), 11+ it recovers
+            and stays on. Thralldom may be cast again for another Thrall.
+          </p>
+          {% if thrall_soldiers %}
+            <ul class="list-plain">
+              {% for th in thrall_soldiers %}
+                <li>
+                  <strong>{{ th.name }}</strong> is a Thrall.
+                  <form class="inline-form" method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" onsubmit="return confirm('Remove Thrall from {{ th.name }}? The Will penalty will be reversed.');">
+                    <input type="hidden" name="action" value="remove_soldier_thrall" />
+                    <input type="hidden" name="soldier_id" value="{{ th.id }}" />
+                    <button class="btn secondary small" type="submit">Remove Thrall</button>
+                  </form>
+                </li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+          {% if thrall_pending %}
+            <p>Next soldier hired will be a free Thrall.</p>
+            <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
+              <input type="hidden" name="action" value="set_thrall_pending" />
+              <input type="hidden" name="fitted" value="0" />
+              <button class="btn secondary small" type="submit">Cancel</button>
+            </form>
+          {% else %}
+            <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
+              <input type="hidden" name="action" value="set_thrall_pending" />
+              <input type="hidden" name="fitted" value="1" />
+              <button class="btn secondary small" type="submit">Declare next hire a Thrall</button>
+            </form>
+          {% endif %}
         {% endif %}
       </details>
     {% endif %}
@@ -1817,6 +1949,7 @@
                     {% if s.revenant %}<span class="badge" title="Reanimated with the Revenant spell">revenant</span>{% endif %}
                     {% if s.mutations %}<span class="badge" title="{{ s.mutations|length }} Grave Mutation{{ 's' if s.mutations|length != 1 }}">mutated</span>{% endif %}
                     {% if s.giant_blooded %}<span class="badge" title="Blood Legacy's Giant-Blooded: -1 Move, -2 Will, +2 Health, Giant-Blooded trait">giant-blooded</span>{% endif %}
+                    {% if s.thrall %}<span class="badge" title="Blood Legacy's Thralldom: hired free at -1 Will">thrall</span>{% endif %}
                     {% if s.knightly_order_info %}<span class="badge" title="{{ s.knightly_order_info.ability }}">{{ s.knightly_order_info.name }}</span>{% endif %}
                     {% set s_mounted = horse_rider and horse_rider.kind == 'soldier' and horse_rider.soldier_id == s.id %}
                     {% if s_mounted %}<span class="badge" title="Riding the warband's horse: Move +{{ hmd.move }}, Fight +{{ hmd.fight }}, Armour {{ hmd.armour }}">mounted</span>{% endif %}
@@ -2393,10 +2526,46 @@
         <p class="empty">No vault items yet. Add via post-game loot.</p>
       {% endif %}
     </div>
+    {% if black_market_enabled %}
+      <details class="ref-panel" id="black-market-panel" style="margin-top:1rem">
+        <summary>Black Market{% if black_market.rolls_used %} ({{ black_market.rolls_used }}/{{ black_market_rolls_max }} rolls used){% endif %}</summary>
+        <p class="muted" style="font-size:0.85rem">
+          Core Rules Optional Rule: instead of open buying, roll {{ black_market_rolls_max }}x on
+          the Treasure Table after a game and buy only from what comes up. Either roll the d20 at
+          the table and report it below, or let the app roll it for you — it's an out-of-game
+          table, not a contested roll. Recording it looks up the result and banks any flat gc it
+          lists; a "d20 ×" result needs its own extra roll at the table first. One roll may be
+          resolved against an enabled supplement's own table instead of Core Rules.
+        </p>
+        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="form-row inline">
+          <div>
+            <label for="black_market_table">Table</label>
+            <select id="black_market_table" name="table">
+              {% for book, title in black_market_tables %}
+                <option value="{{ title }}">{{ title }}{% if book != "Core Rules" %} ({{ book }}){% endif %}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <label for="black_market_d20">d20 result (blank to auto-roll)</label>
+            <input id="black_market_d20" name="d20" type="number" min="1" max="20" step="1" />
+          </div>
+          <div>
+            <label>&nbsp;</label>
+            <button class="btn secondary" type="submit" name="action" value="black_market_roll" {% if black_market.rolls_used >= black_market_rolls_max %}disabled{% endif %}>Record roll</button>
+            <button class="btn secondary" type="submit" name="action" value="black_market_roll" onclick="document.getElementById('black_market_d20').value=''" {% if black_market.rolls_used >= black_market_rolls_max %}disabled{% endif %}>Auto-roll</button>
+          </div>
+        </form>
+        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:0.5rem" onsubmit="return confirm('Start a new scenario? This resets the roll counter back to 0.');">
+          <input type="hidden" name="action" value="black_market_reset" />
+          <button class="btn secondary small" type="submit">Start new scenario (reset rolls)</button>
+        </form>
+      </details>
+    {% endif %}
     {% set purchasable_items = full_standard_items|selectattr('cost', 'defined')|rejectattr('compatible_bases')|rejectattr('name', 'equalto', SPELL_COMPONENT_BAG_NAME)|list %}
     {% if purchasable_items %}
-      <div style="margin-top:1rem">
-        <h3>Workshop — Firearms</h3>
+      <details class="ref-panel" id="firearms-panel" style="margin-top:1rem">
+        <summary>Workshop — Firearms</summary>
         <p class="muted" style="font-size:0.85rem">
           Black Powder Firearms (Spellcaster Magazine) are the only items on the Arms &amp; Armour list
           with a real gold cost — everything else there is free starting gear. Buying one here adds
@@ -2429,7 +2598,7 @@
             </tbody>
           </table>
         </div>
-      </div>
+      </details>
     {% endif %}
     {% if owned_firearms %}
       <details class="ref-panel" id="firearm-upgrade-panel" style="margin-top:1rem">
