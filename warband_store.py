@@ -123,6 +123,7 @@ from game_content import (
     construct_modifications,
     equipment_bonuses,
     grave_mutations_by_number,
+    load_loot_tables,
     load_monster_hunting,
     load_potion_choices,
     magic_items_for_sources,
@@ -449,6 +450,15 @@ def default_homerules() -> dict:
         # edition than the rest of the 2e tables. On by default; see
         # expansions.EDITION_2_SOLDIER_COSTS.
         "edition2_soldier_costs": True,
+        # Core Rules Optional Rule: Black Market Contacts (p.13) — replaces
+        # open buying after a game with 4 rolls on the Treasure Table (one
+        # may be swapped for an enabled supplement's own table), resolving
+        # each before buying from it. Off by default, an opt-in variant not a
+        # baseline rule, same as Ragged Warbands/Wildwoods Supplies. Needs no
+        # source book — it's Core Rules. See _black_market_gate() and
+        # black_market_roll() below; the actual dice are rolled at the table,
+        # this only looks up the row and tracks the 4-roll cap per scenario.
+        "black_market_enabled": False,
         # Spellcaster Magazine's troop stat lines read as unbalanced to some
         # groups; this lets a warband keep the book's spells/items/bestiary
         # switched on while dropping just its hireable soldiers. On by
@@ -1382,6 +1392,9 @@ def _normalize_warband(wb: dict) -> dict:
         wiz["spells"] = []
     wb["vault_items"] = _normalize_vault_items(wb.get("vault_items"))
     wb.setdefault("giant_blooded_pending", False)
+    wb.setdefault("thrall_pending", False)
+    bm = wb.setdefault("black_market", {"rolls_used": 0})
+    bm["rolls_used"] = _as_int(bm.get("rolls_used"), 0)
     mh = wb.setdefault("monster_hunting", {"kills": [], "prizes": [], "bags_bought": 0})
     mh.setdefault("kills", [])
     mh.setdefault("prizes", [])
@@ -2070,6 +2083,9 @@ def add_soldier(
                 "hire an eligible type."
             )
         cost += GIANT_BLOODED_COST
+    thrall_now = bool(wb.get("thrall_pending")) and not _thrall_gate(wb)
+    if thrall_now:
+        cost = 0
     if wb.get("gold", 0) < cost:
         return False, f"Not enough gold (need {cost} gc, have {wb.get('gold', 0)} gc)."
 
@@ -2090,11 +2106,22 @@ def add_soldier(
         soldier["giant_blooded_backup"] = backup
         wb["giant_blooded_pending"] = False
         giant_blooded_suffix = f", Giant-Blooded ({', '.join(parts)})"
+    thrall_suffix = ""
+    if thrall_now:
+        before = int(soldier.get("will", info.get("will", 0)))
+        after = before - 1
+        soldier["will"] = after
+        soldier["thrall"] = True
+        soldier["thrall_backup"] = {"will": before}
+        wb["thrall_pending"] = False
+        thrall_suffix = f", Thrall (Will {before} -> {after})"
     wb["gold"] = int(wb.get("gold", 0)) - cost
     wb.setdefault("soldiers", []).append(soldier)
-    wb.setdefault("history", []).append(
-        {"when": _now(), "text": f"Hired {soldier['name']} ({info['name']}{order_suffix}{illusion_suffix}{giant_blooded_suffix}) for {cost} gc."}
+    hire_text = (
+        f"Hired {soldier['name']} ({info['name']}{order_suffix}{illusion_suffix}"
+        f"{giant_blooded_suffix}{thrall_suffix}) for {cost} gc."
     )
+    wb.setdefault("history", []).append({"when": _now(), "text": hire_text})
     return True, f"Hired {soldier['name']} ({info['name']}) for {cost} gc. Treasury: {wb['gold']} gc."
 
 
@@ -2110,6 +2137,8 @@ def remove_soldier(wb: dict, soldier_id: str, refund: bool = False) -> tuple[boo
             cost = expansions.soldier_cost(wb, info, type_key, include_discount=False)
             if s.get("giant_blooded"):
                 cost += GIANT_BLOODED_COST
+            if s.get("thrall"):
+                cost = 0  # hired free — nothing to refund
             name = s.get("name", "Soldier")
             if refund and cost:
                 wb["gold"] = int(wb.get("gold", 0)) + cost
@@ -2569,6 +2598,153 @@ def remove_soldier_giant_blooded(wb: dict, soldier_id: str) -> tuple[bool, str]:
     text = f"{soldier.get('name', 'Soldier')} is no longer Giant-Blooded."
     add_history(wb, text)
     return True, text
+
+
+def _thrall_gate(wb: dict) -> str | None:
+    if not expansions.is_vampire(wb):
+        return "Thralldom needs a Vampire wizard."
+    if "Thralldom" not in known_spell_names(wb):
+        return "Your Vampire doesn't know the Thralldom spell."
+    return None
+
+
+def set_thrall_pending(wb: dict, pending: bool) -> tuple[bool, str]:
+    """Blood Legacy's Thralldom (an Out of Game (A) spell, cast between
+    scenarios): rather than simulate the Casting Roll, this assumes it was
+    already made successfully at the table and offers the book's effect as a
+    toggle on the *next* hire, the same "declared at hire" idiom as
+    set_giant_blooded_pending — add_soldier() consumes and clears it. Unlike
+    Giant-Blooded, any soldier type is eligible and there's no per-warband
+    limit (Thralldom may be cast again)."""
+    err = _thrall_gate(wb)
+    if err:
+        return False, err
+    wb["thrall_pending"] = bool(pending)
+    if pending:
+        return True, "The next soldier hired will be free and enslaved (-1 Will)."
+    return True, "Cancelled — the next hire will be an ordinary paid soldier."
+
+
+def remove_soldier_thrall(wb: dict, soldier_id: str) -> tuple[bool, str]:
+    """Undo a misclick, same idiom as remove_soldier_giant_blooded — reverses
+    the -1 Will penalty via the recorded backup. The book offers no in-fiction
+    way to free a thrall; this is purely a correction tool."""
+    err = _thrall_gate(wb)
+    if err:
+        return False, err
+    soldier = next((s for s in wb.get("soldiers") or [] if s.get("id") == soldier_id), None)
+    if soldier is None:
+        return False, "Soldier not found."
+    if not soldier.get("thrall"):
+        return False, "That soldier isn't a Thrall."
+    backup = soldier.pop("thrall_backup", {}) or {}
+    for stat, value in backup.items():
+        soldier[stat] = value
+    soldier["thrall"] = False
+    text = f"{soldier.get('name', 'Soldier')} is no longer a Thrall."
+    add_history(wb, text)
+    return True, text
+
+
+BLACK_MARKET_ROLLS_PER_SCENARIO = 4
+# Only matches a *flat* leading gc amount ("20gc, Potions (3)"), never a
+# dice-formula one ("d20 × 10gc") — those need a second roll at the table,
+# which this app doesn't simulate, so they're left for the player to add
+# manually via Treasury once rolled.
+_FLAT_GOLD_RE = re.compile(r"^(\d+)gc\b")
+
+
+def _black_market_gate(wb: dict) -> str | None:
+    hr = wb.get("homerules") or {}
+    if not hr.get("black_market_enabled"):
+        return (
+            "Black Market Contacts needs its own homerule switched on under "
+            "Additional Rules and Homerules first."
+        )
+    return None
+
+
+def black_market_tables(wb: dict) -> list[tuple[str, str]]:
+    """(book, table title) pairs the Treasure Table roll may be resolved
+    against: Core Rules always, plus each enabled source book's own
+    table(s) — the book's "may swap one roll for a supplement's own table"
+    clause, offered per-roll rather than tracked as a strict 3-plus-1 split."""
+    sources = enabled_sources(wb)
+    tables = load_loot_tables()
+    out: list[tuple[str, str]] = []
+    for book, entries in tables.items():
+        if book not in sources:
+            continue
+        for entry in entries:
+            out.append((book, entry["title"]))
+    return out
+
+
+def black_market_roll(wb: dict, table_title: str, d20: int | None = None) -> tuple[bool, str]:
+    """Records one Black Market roll: looks up the row for `d20` on the named
+    table and, if it's a flat gc amount, credits it immediately. Leave `d20`
+    as None to have the app roll it for you (this is an out-of-game table,
+    not a contested table-play roll, so there's nothing to referee); pass a
+    physical die result instead if you'd rather report what you actually
+    rolled. `table_title` must be one of black_market_tables(wb) — titles are
+    unique across books in data/loot_tables.json, and restricting to that
+    list also keeps a disabled supplement's table off-limits."""
+    err = _black_market_gate(wb)
+    if err:
+        return False, err
+    if d20 is None:
+        d20 = random.randint(1, 20)
+    else:
+        try:
+            d20 = int(d20)
+        except (TypeError, ValueError):
+            return False, "Enter the d20 you rolled (1-20), or leave it blank to auto-roll."
+        if not 1 <= d20 <= 20:
+            return False, "d20 result must be between 1 and 20."
+    bm = wb.setdefault("black_market", {"rolls_used": 0})
+    used = int(bm.get("rolls_used", 0))
+    if used >= BLACK_MARKET_ROLLS_PER_SCENARIO:
+        return False, (
+            f"All {BLACK_MARKET_ROLLS_PER_SCENARIO} Black Market rolls for this scenario are "
+            "used — start a new scenario to reset."
+        )
+    allowed_books = {book for book, title in black_market_tables(wb) if title == table_title}
+    if not allowed_books:
+        return False, "Unknown or disabled table."
+    book = next(iter(allowed_books))
+    table = next(
+        (e for e in load_loot_tables().get(book, []) if e["title"] == table_title),
+        None,
+    )
+    if table is None:
+        return False, "Unknown table."
+    row = next((r for r in table["rows"] if r["name"] == str(d20)), None)
+    if row is None:
+        return False, f"No row {d20} on {table_title}."
+    gold_match = _FLAT_GOLD_RE.match(row["text"])
+    gold = int(gold_match.group(1)) if gold_match else 0
+    if gold:
+        wb["gold"] = int(wb.get("gold", 0)) + gold
+    bm["rolls_used"] = used + 1
+    text = (
+        f"Black Market roll {bm['rolls_used']}/{BLACK_MARKET_ROLLS_PER_SCENARIO} "
+        f"(d20={d20} on {table_title}): {row['text']}."
+    )
+    if gold:
+        text += f" +{gold}gc added."
+    add_history(wb, text)
+    return True, text
+
+
+def black_market_reset(wb: dict) -> tuple[bool, str]:
+    """Starts a new scenario's Black Market rolls — the 4-roll cap is per
+    game, not per warband lifetime."""
+    err = _black_market_gate(wb)
+    if err:
+        return False, err
+    bm = wb.setdefault("black_market", {"rolls_used": 0})
+    bm["rolls_used"] = 0
+    return True, "Black Market rolls reset for a new scenario."
 
 
 def _ragged_warbands_gate(wb: dict) -> str | None:
@@ -3191,6 +3367,7 @@ def update_homerules(wb: dict, form: "ImmutableMultiDict") -> tuple[bool, str]:
             ),
             "wildwoods_supplies_enabled": form.get("wildwoods_supplies_enabled") == "on",
             "edition2_soldier_costs": form.get("edition2_soldier_costs") == "on",
+            "black_market_enabled": form.get("black_market_enabled") == "on",
             "spellcaster_magazine_soldiers": form.get("spellcaster_magazine_soldiers") == "on",
             "spellcaster_magazine_legendary_soldiers": (
                 form.get("spellcaster_magazine_legendary_soldiers") == "on"

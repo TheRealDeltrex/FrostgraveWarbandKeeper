@@ -136,6 +136,7 @@ from game_content import (
 from idle_watchdog import note_closing, note_heartbeat
 from warband_store import (
     ALT_XP_CONVERSIONS,
+    BLACK_MARKET_ROLLS_PER_SCENARIO,
     InvalidUpload,
     add_apprentice_mutation,
     add_apprentice_permanent_injury,
@@ -169,6 +170,9 @@ from warband_store import (
     apprentice_takes_over,
     base_summary,
     become_vampire,
+    black_market_reset,
+    black_market_roll,
+    black_market_tables,
     break_wizard_pact,
     buy_base_resource,
     buy_cargo_transport,
@@ -228,6 +232,7 @@ from warband_store import (
     remove_soldier_giant_blooded,
     remove_soldier_mutation,
     remove_soldier_permanent_injury,
+    remove_soldier_thrall,
     remove_vault_item,
     remove_wizard_mutation,
     remove_wizard_permanent_injury,
@@ -253,6 +258,7 @@ from warband_store import (
     set_giant_blooded_pending,
     set_permanent_injury_prosthetic,
     set_soldier_status,
+    set_thrall_pending,
     set_wizard_state,
     soldier_count,
     soldier_from_book_enabled,
@@ -1033,6 +1039,14 @@ def warband_view(warband_id: str) -> str:
         (s for s in all_soldiers if s.get("giant_blooded")), None
     )
     giant_blooded_pending = bool(wb.get("giant_blooded_pending"))
+    # Blood Legacy's Thralldom (an Out of Game (A) spell): same "declared at
+    # hire" toggle idiom as Giant-Blooded above, gated on actually being a
+    # Vampire who knows the spell rather than a homerule switch — see
+    # warband_store._thrall_gate(). Unlike Giant-Blooded, any number of
+    # thralls may be hired, so this tracks the full list, not just one.
+    thrall_available = expansions.is_vampire(wb) and "Thralldom" in known_spell_names(wb)
+    thrall_soldiers = [s for s in all_soldiers if s.get("thrall")]
+    thrall_pending = bool(wb.get("thrall_pending"))
     # Legendary Soldiers (Spellcaster Magazine, Issue 4): only worth showing the
     # limit bar / hire-cap messaging when that book AND its own Legendary
     # Soldiers sub-toggle are on — see expansions.max_legendary_soldiers()
@@ -1127,6 +1141,10 @@ def warband_view(warband_id: str) -> str:
         (wb.get("homerules") or {}).get("wildwoods_supplies_enabled")
     )
     wildwoods = wildwoods_summary(wb)
+    # Core Rules Optional Rule: Black Market Contacts — see
+    # warband_store.black_market_roll()/black_market_reset().
+    black_market_enabled = bool((wb.get("homerules") or {}).get("black_market_enabled"))
+    black_market = wb.get("black_market") or {"rolls_used": 0}
     return render_template(
         "warband_view.html",
         wb=wb,
@@ -1144,6 +1162,9 @@ def warband_view(warband_id: str) -> str:
         legendary_type_keys_held=legendary_type_keys_held,
         giant_blooded_soldier=giant_blooded_soldier,
         giant_blooded_pending=giant_blooded_pending,
+        thrall_available=thrall_available,
+        thrall_soldiers=thrall_soldiers,
+        thrall_pending=thrall_pending,
         ragged_warbands_enabled=ragged_warbands_enabled,
         ragged_warbands_have=ragged_warbands_have,
         ragged_warbands_rules=ragged_warbands_rules,
@@ -1174,9 +1195,14 @@ def warband_view(warband_id: str) -> str:
         component_bags_bought=component_bags_bought,
         wildwoods_enabled=wildwoods_enabled,
         wildwoods=wildwoods,
+        black_market_enabled=black_market_enabled,
+        black_market=black_market,
+        black_market_tables=black_market_tables(wb) if black_market_enabled else [],
+        black_market_rolls_max=BLACK_MARKET_ROLLS_PER_SCENARIO,
         schools=SCHOOLS,
         learnable=learnable,
         pending_levels=limits["pending_levels"],
+        xp_per_level=limits["xp_per_level"],
         relations=SCHOOL_RELATIONS.get(wschool, {}),
         base=base_summary(wb),
         base_locations=BASE_LOCATIONS,
@@ -2093,6 +2119,33 @@ def _act_set_giant_blooded_pending(wb: dict) -> tuple[bool, str]:
 @register_action("remove_soldier_giant_blooded")
 def _act_remove_soldier_giant_blooded(wb: dict) -> tuple[bool, str]:
     return remove_soldier_giant_blooded(wb, request.form.get("soldier_id") or "")
+
+
+@register_action("set_thrall_pending")
+def _act_set_thrall_pending(wb: dict) -> tuple[bool, str]:
+    return set_thrall_pending(wb, _fitted_from_form())
+
+
+@register_action("remove_soldier_thrall")
+def _act_remove_soldier_thrall(wb: dict) -> tuple[bool, str]:
+    return remove_soldier_thrall(wb, request.form.get("soldier_id") or "")
+
+
+@register_action("black_market_roll")
+def _act_black_market_roll(wb: dict) -> tuple[bool, str]:
+    raw = (request.form.get("d20") or "").strip()
+    if not raw:
+        return black_market_roll(wb, request.form.get("table") or "Treasure Table")
+    try:
+        d20 = int(raw)
+    except ValueError:
+        return False, "Enter the d20 you rolled (1-20), or leave it blank to auto-roll."
+    return black_market_roll(wb, request.form.get("table") or "Treasure Table", d20)
+
+
+@register_action("black_market_reset")
+def _act_black_market_reset(wb: dict) -> tuple[bool, str]:
+    return black_market_reset(wb)
 
 
 @register_action("roll_random_recruits")

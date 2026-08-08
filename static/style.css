@@ -378,6 +378,51 @@ textarea:focus {
   width: auto;
 }
 
+/* Homerule toggle rows in the General Rules panel. The checkbox sits outside
+   the <details> — a control inside a <summary> fights the disclosure toggle —
+   so the label line itself opens the explainer. */
+.hr-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin: 0.35rem 0;
+}
+
+.hr-row > input[type="checkbox"] {
+  width: auto;
+  flex: none;
+  margin-top: 0.25rem;
+}
+
+.hr-row.hr-child {
+  margin-left: 1.8rem;
+}
+
+.hr-note {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.hr-note > summary {
+  cursor: pointer;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.hr-note-body {
+  margin: 0.3rem 0 0.1rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.hr-count {
+  float: right;
+  font-weight: 400;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
 /* Male/female side-by-side toggle for the wizard/apprentice creation-time
    portrait pick — see empty_wizard()/empty_apprentice()'s gender field. */
 .gender-toggle {
