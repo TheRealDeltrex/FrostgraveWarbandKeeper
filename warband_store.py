@@ -1395,6 +1395,8 @@ def _normalize_warband(wb: dict) -> dict:
     wb.setdefault("thrall_pending", False)
     bm = wb.setdefault("black_market", {"rolls_used": 0})
     bm["rolls_used"] = _as_int(bm.get("rolls_used"), 0)
+    if not isinstance(bm.get("offers"), list):
+        bm["offers"] = []
     mh = wb.setdefault("monster_hunting", {"kills": [], "prizes": [], "bags_bought": 0})
     mh.setdefault("kills", [])
     mh.setdefault("prizes", [])
@@ -2652,6 +2654,19 @@ BLACK_MARKET_ROLLS_PER_SCENARIO = 4
 # which this app doesn't simulate, so they're left for the player to add
 # manually via Treasury once rolled.
 _FLAT_GOLD_RE = re.compile(r"^(\d+)gc\b")
+# A concrete named item with its own price ("Amulet of Resistance — 300gc") —
+# most supplement Treasure Tables roll straight into these rather than the
+# abstract "Magic Item" categories Core Rules uses. The separator character is
+# whatever non-word glyph sits between name and price (an em dash in the
+# source PDFs, sometimes mangled in extraction) — matched loosely rather than
+# pinned to one literal character.
+_NAMED_ITEM_RE = re.compile(r"^(?P<name>.+?)\s*\W\s*(?P<cost>\d+)gc$")
+_ROLL_ON_RE = re.compile(r"roll on the (?P<table>.+?) Table", re.I)
+_POTION_RE = re.compile(r"^(?:(?P<n1>\d+)\s+)?Potions?(?:\s*\((?P<n2>\d+)\))?$", re.I)
+_SCROLL_RE = re.compile(r"^(?:(?P<n1>\d+)\s+)?Scrolls?(?:\s*\((?P<n2>\d+)\))?$", re.I)
+_GRIMOIRE_RE = re.compile(r"^Grimoire$", re.I)
+_MAGIC_WEAPON_RE = re.compile(r"(?:^|\s)Magic Weapon/Armour$", re.I)
+_MAGIC_ITEM_RE = re.compile(r"(?:^|\s)Magic Item$", re.I)
 
 
 def _black_market_gate(wb: dict) -> str | None:
@@ -2678,6 +2693,89 @@ def black_market_tables(wb: dict) -> list[tuple[str, str]]:
         for entry in entries:
             out.append((book, entry["title"]))
     return out
+
+
+def _loot_row_range(row_name: str) -> tuple[int, int]:
+    """Row names are either a single number ("11") or a d20 sub-range
+    ("18-20") — the separator is sometimes a mangled non-ASCII dash in the
+    extracted JSON, so this reads off the digit groups instead of the glyph
+    between them."""
+    nums = re.findall(r"\d+", row_name)
+    if len(nums) >= 2:
+        return int(nums[0]), int(nums[1])
+    if nums:
+        return int(nums[0]), int(nums[0])
+    return 0, 0
+
+
+def _lookup_loot_row(book: str, table_title: str, d20: int) -> dict | None:
+    table = next((e for e in load_loot_tables().get(book, []) if e["title"] == table_title), None)
+    if table is None:
+        return None
+    for row in table["rows"]:
+        lo, hi = _loot_row_range(row["name"])
+        if lo <= d20 <= hi:
+            return row
+    return None
+
+
+def _resolve_black_market_items(wb: dict, book: str, row_text: str, _depth: int = 0) -> list[str]:
+    """Turns one Treasure Table row into the concrete item name(s) it's
+    offering — "resolves the sub-tables to see exactly what's on offer",
+    per the Black Market Contacts rule (roll {book}'s sub-table die is
+    handled here, not left to the player). Concrete named items ("Amulet of
+    Resistance — 300gc") pass through as-is; abstract categories (Potions,
+    Scrolls, Grimoire, Magic Item/Weapon-Armour) get a concrete pick from the
+    same pools other random-item rolls in this app draw from. Flat gc with no
+    item component resolves to nothing here — see black_market_roll() for the
+    gold side. `_depth` guards against an unexpected table->table->table
+    cycle in the data; real chains in data/loot_tables.json are one level
+    deep (e.g. Forgotten Pacts' Magic Ammunition Table)."""
+    if _depth > 2:
+        return []
+    text = row_text.strip()
+    low = text.lower()
+    if "not for sale" in low:
+        return []
+    m = _NAMED_ITEM_RE.match(text)
+    if m:
+        return [m.group("name").strip()]
+    m = _ROLL_ON_RE.search(text)
+    if m:
+        sub_title = f"{m.group('table').strip()} Table"
+        row = _lookup_loot_row(book, sub_title, random.randint(1, 20))
+        if row is None:
+            return []
+        if low.startswith("grimoire"):
+            return [f"Grimoire of {row['text'].strip()}"]
+        return _resolve_black_market_items(wb, book, row["text"], _depth + 1)
+    sources = enabled_sources(wb)
+    items: list[str] = []
+    for part in text.split(","):
+        part = part.strip()
+        if not part:
+            continue
+        mp = _POTION_RE.match(part)
+        if mp:
+            n = int(mp.group("n1") or mp.group("n2") or 1)
+            choices = load_potion_choices()
+            items.extend(random.choice(choices) if choices else "Potion" for _ in range(n))
+            continue
+        mp = _SCROLL_RE.match(part)
+        if mp:
+            n = int(mp.group("n1") or mp.group("n2") or 1)
+            names = sorted({s["name"] for s in all_spells_flat() if s["source"] in sources})
+            items.extend((f"Scroll of {random.choice(names)}" if names else "Scroll") for _ in range(n))
+            continue
+        if _GRIMOIRE_RE.match(part):
+            names = sorted({s["name"] for s in all_spells_flat() if s["source"] in sources})
+            items.append(f"Grimoire of {random.choice(names)}" if names else "Grimoire")
+            continue
+        if _MAGIC_WEAPON_RE.search(part) or _MAGIC_ITEM_RE.search(part):
+            pool = magic_items_for_sources(sources)
+            items.append(random.choice(pool)["name"] if pool else "Magic item")
+            continue
+    return items
 
 
 def black_market_roll(wb: dict, table_title: str, d20: int | None = None) -> tuple[bool, str]:
@@ -2725,6 +2823,17 @@ def black_market_roll(wb: dict, table_title: str, d20: int | None = None) -> tup
     gold = int(gold_match.group(1)) if gold_match else 0
     if gold:
         wb["gold"] = int(wb.get("gold", 0)) + gold
+    item_names = _resolve_black_market_items(wb, book, row["text"])
+    offer = {
+        "id": uuid.uuid4().hex[:8],
+        "table": table_title,
+        "d20": d20,
+        "roll_text": row["text"],
+        # Not "items" — Jinja resolves dict.items to the builtin method on a
+        # plain dict, same trap group_magic_items() avoids with its "rows" key.
+        "entries": [{"id": uuid.uuid4().hex[:8], "name": name, "bought": False} for name in item_names],
+    }
+    bm.setdefault("offers", []).append(offer)
     bm["rolls_used"] = used + 1
     text = (
         f"Black Market roll {bm['rolls_used']}/{BLACK_MARKET_ROLLS_PER_SCENARIO} "
@@ -2732,18 +2841,46 @@ def black_market_roll(wb: dict, table_title: str, d20: int | None = None) -> tup
     )
     if gold:
         text += f" +{gold}gc added."
+    if item_names:
+        text += f" On offer: {', '.join(item_names)}."
+    add_history(wb, text)
+    return True, text
+
+
+def black_market_buy_item(wb: dict, offer_id: str, item_id: str) -> tuple[bool, str]:
+    """Moves one item from a recorded Black Market roll into the vault —
+    "a player may only buy from their own results", so this only ever reads
+    from offers this warband already rolled, never a free-text add."""
+    err = _black_market_gate(wb)
+    if err:
+        return False, err
+    bm = wb.get("black_market") or {}
+    offer = next((o for o in bm.get("offers", []) if o["id"] == offer_id), None)
+    if offer is None:
+        return False, "Unknown Black Market offer."
+    item = next((it for it in offer.get("entries", []) if it["id"] == item_id), None)
+    if item is None:
+        return False, "Unknown Black Market item."
+    if item.get("bought"):
+        return False, f"{item['name']} was already bought."
+    item["bought"] = True
+    add_vault_item(wb, item["name"], source="black_market")
+    text = f"Bought {item['name']} from the Black Market."
     add_history(wb, text)
     return True, text
 
 
 def black_market_reset(wb: dict) -> tuple[bool, str]:
     """Starts a new scenario's Black Market rolls — the 4-roll cap is per
-    game, not per warband lifetime."""
+    game, not per warband lifetime. Clears unbought offers along with it:
+    "a player may only buy from their own results" (this scenario's), so a
+    roll left unbought when the counter resets isn't for sale any more."""
     err = _black_market_gate(wb)
     if err:
         return False, err
     bm = wb.setdefault("black_market", {"rolls_used": 0})
     bm["rolls_used"] = 0
+    bm["offers"] = []
     return True, "Black Market rolls reset for a new scenario."
 
 

@@ -2556,10 +2556,41 @@
             <button class="btn secondary" type="submit" name="action" value="black_market_roll" onclick="document.getElementById('black_market_d20').value=''" {% if black_market.rolls_used >= black_market_rolls_max %}disabled{% endif %}>Auto-roll</button>
           </div>
         </form>
-        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:0.5rem" onsubmit="return confirm('Start a new scenario? This resets the roll counter back to 0.');">
+        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:0.5rem" onsubmit="return confirm('Start a new scenario? This resets the roll counter back to 0 and clears any unbought offers.');">
           <input type="hidden" name="action" value="black_market_reset" />
           <button class="btn secondary small" type="submit">Start new scenario (reset rolls)</button>
         </form>
+        {% if black_market.offers %}
+          <div style="margin-top:0.75rem">
+            <h4 style="margin:0 0 0.35rem">On offer this scenario</h4>
+            <ul class="list-plain">
+              {% for offer in black_market.offers %}
+                <li style="margin-bottom:0.35rem">
+                  <span class="muted">d20={{ offer.d20 }} on {{ offer.table }}: {{ offer.roll_text }}</span>
+                  {% if offer.entries %}
+                    <ul class="list-plain" style="margin-top:0.15rem">
+                      {% for it in offer.entries %}
+                        <li>
+                          {% if it.bought %}
+                            <span>{{ it.name }}</span> <span class="muted">— bought</span>
+                          {% else %}
+                            <span>{{ it.name }}</span>
+                            <form class="inline-form" method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
+                              <input type="hidden" name="action" value="black_market_buy_item" />
+                              <input type="hidden" name="offer_id" value="{{ offer.id }}" />
+                              <input type="hidden" name="item_id" value="{{ it.id }}" />
+                              <button class="btn secondary small" type="submit">Buy → Vault</button>
+                            </form>
+                          {% endif %}
+                        </li>
+                      {% endfor %}
+                    </ul>
+                  {% endif %}
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
       </details>
     {% endif %}
     {% set purchasable_items = full_standard_items|selectattr('cost', 'defined')|rejectattr('compatible_bases')|rejectattr('name', 'equalto', SPELL_COMPONENT_BAG_NAME)|list %}

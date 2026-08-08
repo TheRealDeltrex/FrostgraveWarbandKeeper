@@ -170,6 +170,7 @@ from warband_store import (
     apprentice_takes_over,
     base_summary,
     become_vampire,
+    black_market_buy_item,
     black_market_reset,
     black_market_roll,
     black_market_tables,
@@ -1144,7 +1145,7 @@ def warband_view(warband_id: str) -> str:
     # Core Rules Optional Rule: Black Market Contacts — see
     # warband_store.black_market_roll()/black_market_reset().
     black_market_enabled = bool((wb.get("homerules") or {}).get("black_market_enabled"))
-    black_market = wb.get("black_market") or {"rolls_used": 0}
+    black_market = wb.get("black_market") or {"rolls_used": 0, "offers": []}
     return render_template(
         "warband_view.html",
         wb=wb,
@@ -2146,6 +2147,13 @@ def _act_black_market_roll(wb: dict) -> tuple[bool, str]:
 @register_action("black_market_reset")
 def _act_black_market_reset(wb: dict) -> tuple[bool, str]:
     return black_market_reset(wb)
+
+
+@register_action("black_market_buy_item")
+def _act_black_market_buy_item(wb: dict) -> tuple[bool, str]:
+    return black_market_buy_item(
+        wb, request.form.get("offer_id") or "", request.form.get("item_id") or ""
+    )
 
 
 @register_action("roll_random_recruits")
