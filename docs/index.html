@@ -7,22 +7,57 @@
 <meta name="description" content="A warband tracker for Frostgrave 2nd Edition. Play free in your browser (nothing stored — export to save), or download for Windows and Linux. No login, no cloud." />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9D%84%EF%B8%8F%3C/text%3E%3C/svg%3E" />
 <style>
+/*__FONT_FACE__*/
+
+  /* Same deep polar night tokens the app itself ships (static/style.css), so the
+     download page and the thing it advertises read as one product. */
   :root {
-    --bg: #0b1220;
-    --bg-deep: #070c14;
-    --surface: #121c2e;
-    --surface-2: #1a2740;
-    --border: #2a3d5c;
-    --text: #e8eef8;
-    --muted: #8fa3c1;
-    --ice: #7ec8e8;
-    --ice-dim: #4a9fbf;
-    --accent: #5eb8e0;
-    --accent-hover: #8ad0f0;
-    --gold: #e0b84e;
+    --bg-deep: #03070d;
+    --bg: #060c15;
+    --surface: #0b1523;
+    --surface-2: #122031;
+    --surface-3: #1a2c40;
+    --border: #1e3149;
+    --border-soft: #152538;
+    --border-lit: #2e4d6d;
+    --text: #eaf3fb;
+    --text-dim: #b6c9de;
+    --muted: #7d94ae;
+    --faint: #56697f;
+    --ice: #9fdcf5;
+    --ice-dim: #62a8c9;
+    --accent: #58c4ec;
+    --accent-hover: #9ce0ff;
+    --accent-ink: #04121c;
+    --gold: #e8c56a;
+    --accent-rgb: 88 196 236;
+    --frost-rgb: 174 226 255;
+    --void-rgb: 2 6 12;
+    --gold-rgb: 232 197 106;
+
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 14px;
+    --radius-pill: 999px;
+
+    --shadow-1: 0 1px 2px rgb(var(--void-rgb) / 0.5);
+    --shadow-2: 0 8px 24px -8px rgb(var(--void-rgb) / 0.7);
+    --shadow-3: 0 18px 48px -16px rgb(var(--void-rgb) / 0.8);
+    --rim: inset 0 1px 0 rgb(var(--frost-rgb) / 0.07);
+    --rim-lit: inset 0 1px 0 rgb(var(--frost-rgb) / 0.16);
+    --bevel: inset 0 1px 0 rgb(var(--frost-rgb) / 0.24), inset 0 -1px 0 rgb(var(--void-rgb) / 0.55);
+    --ring: 0 0 0 3px rgb(var(--accent-rgb) / 0.28);
+
+    --dur-1: 90ms;
+    --dur-2: 150ms;
+    --ease-out: cubic-bezier(0.2, 0.8, 0.3, 1);
+
     --font: "Segoe UI", system-ui, -apple-system, sans-serif;
+    --font-display: "FWK Display", Georgia, serif;
   }
+
   * { box-sizing: border-box; }
+
   body {
     margin: 0;
     min-height: 100vh;
@@ -30,179 +65,262 @@
     color: var(--text);
     line-height: 1.55;
     background:
-      radial-gradient(900px 500px at 0% -10%, rgba(80, 140, 190, 0.18), transparent 55%),
-      radial-gradient(700px 400px at 100% 0%, rgba(40, 80, 120, 0.22), transparent 50%),
+      radial-gradient(1100px 620px at 0% -12%, rgb(var(--frost-rgb) / 0.07), transparent 58%),
+      radial-gradient(820px 480px at 100% -4%, rgb(var(--accent-rgb) / 0.08), transparent 52%),
       linear-gradient(180deg, var(--bg) 0%, var(--bg-deep) 100%);
+    background-attachment: fixed;
+    -webkit-font-smoothing: antialiased;
   }
-  .wrap { max-width: 880px; margin: 0 auto; padding: 3rem 1.25rem 4rem; }
-  .hero { text-align: center; margin-bottom: 2.75rem; }
-  .hero h1 {
-    font-size: 2.3rem;
-    margin: 0 0 0.6rem;
-    color: var(--ice);
-    letter-spacing: 0.01em;
-  }
-  .hero p { color: var(--muted); font-size: 1.05rem; max-width: 46rem; margin: 0 auto; }
-  .hero .disclaimer { font-size: 0.85rem; margin-top: 0.6rem; }
 
-  .cards {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.25rem;
-    margin-bottom: 2.5rem;
+  :focus-visible { outline: 2px solid var(--accent-hover); outline-offset: 3px; border-radius: var(--radius-sm); }
+
+  .wrap { max-width: 940px; margin: 0 auto; padding: 3.5rem 1.25rem 4rem; }
+
+  /* Hero */
+  .hero { text-align: center; margin-bottom: 3rem; }
+  .hero .mark { font-size: 2.6rem; line-height: 1; display: block; margin-bottom: 0.6rem; }
+  .hero h1 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(2rem, 5vw, 2.8rem);
+    line-height: 1.15;
+    margin: 0 0 0.7rem;
+    color: var(--ice);
+    letter-spacing: -0.01em;
+    text-wrap: balance;
   }
-  @media (max-width: 700px) {
-    .cards { grid-template-columns: 1fr; }
+  .hero p { color: var(--text-dim); font-size: 1.05rem; max-width: 44rem; margin: 0 auto; text-wrap: pretty; }
+  .hero .disclaimer { font-size: 0.85rem; margin-top: 0.8rem; color: var(--faint); }
+
+  /* A single hairline of frost under the hero. */
+  .rule {
+    height: 1px; border: 0; margin: 2.5rem auto 0; max-width: 30rem;
+    background: linear-gradient(90deg, transparent, rgb(var(--frost-rgb) / 0.28), transparent);
   }
-  .card {
-    background: linear-gradient(145deg, var(--surface) 0%, #0e1a2c 100%);
+
+  /* Shared surfaces */
+  .section {
+    background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 1.6rem 1.5rem;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    border-radius: var(--radius-lg);
+    padding: 1.6rem 1.7rem;
+    margin-bottom: 1.25rem;
+    box-shadow: var(--shadow-2), var(--rim);
   }
-  .card h2 {
+  .section > h2 {
+    margin: 0 0 0.5rem;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.2rem;
+    color: var(--ice-dim);
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    flex-wrap: wrap;
+  }
+  .section p.lead { color: var(--muted); font-size: 0.92rem; margin: 0 0 1.15rem; max-width: 62ch; }
+  .section p.lead strong { color: var(--text); }
+
+  /* The online build is the frictionless path, so it gets the lit edge. */
+  .section.featured {
+    border-color: var(--border-lit);
+    background: linear-gradient(145deg, var(--surface-2) 0%, var(--bg) 100%);
+    box-shadow: var(--shadow-3), var(--rim-lit);
+  }
+  .section.featured > h2 { color: var(--ice); }
+
+  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem; }
+  @media (max-width: 700px) { .cards { grid-template-columns: 1fr; } }
+
+  .card {
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(145deg, var(--surface) 0%, var(--bg) 100%);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.6rem 1.5rem;
+    box-shadow: var(--shadow-2), var(--rim);
+  }
+  .card > h2 {
     margin: 0 0 0.35rem;
-    font-size: 1.25rem;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.2rem;
     color: var(--text);
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-  }
-  .version-badge {
-    font-size: 0.72rem;
-    font-weight: 600;
-    color: var(--muted);
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    padding: 0.1rem 0.55rem;
-    letter-spacing: 0.02em;
+    gap: 0.55rem;
+    flex-wrap: wrap;
   }
   .card p.sub { color: var(--muted); font-size: 0.88rem; margin: 0 0 1.1rem; }
+  .card .btn { margin-top: auto; }
+
+  .version-badge {
+    font-family: var(--font);
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--ice);
+    background: rgb(var(--accent-rgb) / 0.12);
+    border: 1px solid rgb(var(--accent-rgb) / 0.45);
+    border-radius: var(--radius-pill);
+    padding: 0.1rem 0.6rem;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Same raised treatment as the app's buttons: gradient body, lit top edge,
+     shaded bottom, and a real press. */
   .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     width: 100%;
     padding: 0.75rem 1rem;
-    border-radius: 9px;
-    background: var(--accent);
-    color: #061018;
+    border-radius: var(--radius-md);
+    background: linear-gradient(180deg, var(--accent) 0%, var(--ice-dim) 100%);
+    color: var(--accent-ink);
     font-weight: 700;
     font-size: 1rem;
     text-decoration: none;
     border: 1px solid transparent;
+    box-shadow: var(--bevel), var(--shadow-1);
+    transition:
+      background var(--dur-1) var(--ease-out),
+      box-shadow var(--dur-1) var(--ease-out),
+      transform var(--dur-1) var(--ease-out);
   }
-  .btn:hover { background: var(--accent-hover); }
-  .steps {
-    margin: 1.1rem 0 0;
-    padding-left: 1.2rem;
-    font-size: 0.85rem;
-    color: var(--muted);
+  .btn:hover {
+    background: linear-gradient(180deg, var(--accent-hover) 0%, var(--accent) 100%);
+    box-shadow: var(--bevel), var(--shadow-2);
   }
-  .steps li { margin-bottom: 0.3rem; }
-  .steps code {
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 0.05rem 0.35rem;
-    font-size: 0.82rem;
+  .btn:active { transform: translateY(1px); box-shadow: inset 0 2px 4px rgb(var(--void-rgb) / 0.55); }
+
+  .btn.secondary {
+    background: linear-gradient(180deg, var(--surface-3) 0%, var(--surface-2) 100%);
+    border-color: var(--border);
+    color: var(--text-dim);
+    font-weight: 600;
+  }
+  .btn.secondary:hover {
+    background: linear-gradient(180deg, var(--border-lit) 0%, var(--surface-3) 100%);
+    border-color: var(--border-lit);
     color: var(--text);
   }
+  .btn.wide { width: auto; padding-left: 2.2rem; padding-right: 2.2rem; }
 
-  .section {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 1.5rem 1.6rem;
-    margin-bottom: 1.25rem;
+  .steps { margin: 1.1rem 0 0; padding-left: 1.2rem; font-size: 0.85rem; color: var(--muted); }
+  .steps li { margin-bottom: 0.35rem; }
+  code {
+    background: var(--bg-deep);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-sm);
+    padding: 0.08rem 0.4rem;
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    box-shadow: inset 0 1px 2px rgb(var(--void-rgb) / 0.4);
   }
-  .section h2 { margin-top: 0; font-size: 1.1rem; color: var(--ice-dim); }
-  .section ul { margin: 0.4rem 0 0; padding-left: 1.2rem; color: var(--muted); font-size: 0.92rem; }
-  .section ul li { margin-bottom: 0.35rem; }
-  .section ul li strong { color: var(--text); }
 
-  footer {
-    text-align: center;
-    margin-top: 2.5rem;
+  .note {
+    margin: 1rem 0 0;
+    padding: 0.6rem 0.8rem;
+    font-size: 0.82rem;
     color: var(--muted);
-    font-size: 0.85rem;
+    background: var(--bg-deep);
+    border: 1px solid var(--border-soft);
+    border-left: 3px solid rgb(var(--gold-rgb) / 0.55);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--rim);
   }
-  footer a { color: var(--accent); text-decoration: none; }
+
+  .features { margin: 0.4rem 0 0; padding-left: 1.2rem; color: var(--muted); font-size: 0.92rem; }
+  .features li { margin-bottom: 0.45rem; }
+  .features li strong { color: var(--text); font-weight: 600; }
+
+  footer { text-align: center; margin-top: 2.75rem; color: var(--faint); font-size: 0.85rem; }
+  footer a { color: var(--accent); text-decoration: none; transition: color var(--dur-2) var(--ease-out); }
   footer a:hover { color: var(--accent-hover); text-decoration: underline; }
-  footer .links { margin-bottom: 0.5rem; }
-  footer .links span { margin: 0 0.5rem; opacity: 0.5; }
+  footer .links { margin-bottom: 0.6rem; }
+  footer .links span { margin: 0 0.5rem; color: var(--border-lit); }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+    .btn:active { transform: none; }
+  }
 </style>
 </head>
 <body>
   <div class="wrap">
     <section class="hero">
-      <h1>❄️ Frostgrave Warband Keeper</h1>
+      <span class="mark" aria-hidden="true">❄️</span>
+      <h1>Frostgrave Warband Keeper</h1>
       <p>
         A local warband tracker for <strong>Frostgrave (2nd Edition)</strong>. No login, no
         server, no cloud — download it and everything runs on your own PC with your warbands
-        saved as plain files, or play entirely in your browser below.
+        saved as plain files, or play entirely in your browser.
       </p>
       <p class="disclaimer">Not affiliated with Osprey Games / Joseph A. McCullough.</p>
+      <hr class="rule" />
     </section>
 
-    <div class="section" style="border-color: var(--accent); background: linear-gradient(145deg, var(--surface-2) 0%, #101d31 100%);">
-      <h2 style="color: var(--ice); display:flex; align-items:center; gap:0.5rem">
+    <div class="section featured">
+      <h2>
         ▶ Play online — no download
         <span class="version-badge" data-version-badge="online">vDEV</span>
       </h2>
-      <p style="color:var(--muted);font-size:0.92rem;margin:0 0 1rem">
-        Run the full app right in your browser. It works exactly like the desktop version — including
-        custom pictures — and your warbands are saved in this browser, so closing the tab or
-        refreshing is safe. That storage is per-browser though (this device, this browser only), so
-        <strong style="color:var(--text)">use “Export warband” for a portable backup</strong> or to
-        move a warband to another browser or device. Custom pictures don't come back on import, so
-        re-upload them if you reload a warband there. (First load fetches a runtime, so give it a
-        few seconds.)
+      <p class="lead">
+        Run the full app right in your browser. It works exactly like the desktop version —
+        including custom pictures — and your warbands are saved in this browser, so closing the
+        tab or refreshing is safe. That storage is per-browser though (this device, this browser
+        only), so <strong>use “Export warband” for a portable backup</strong> or to move a
+        warband to another browser or device. Custom pictures don't come back on import, so
+        re-upload them if you reload a warband there. First load fetches a runtime, so give it a
+        few seconds.
       </p>
-      <a class="btn" style="width:auto;padding-left:2rem;padding-right:2rem" href="app/">Launch the online app</a>
+      <a class="btn wide" href="app/">Launch the online app</a>
     </div>
 
     <div class="cards">
       <div class="card">
         <h2>🪟 Windows <span class="version-badge" data-version-badge="windows">vDEV</span></h2>
         <p class="sub">No Python install needed.</p>
-        <a class="btn" href="https://github.com/TheRealDeltrex/FrostgraveWarbandKeeper/releases/latest/download/FrostgraveWarbandKeeper-win64.zip">
-          Download for Windows
-        </a>
-        <ol class="steps">
+        <ol class="steps" style="margin-top:0">
           <li>Unzip it anywhere (e.g. your Desktop or Documents).</li>
           <li>Run <code>FrostgraveWarbandKeeper.exe</code> inside the unzipped folder.</li>
           <li>It opens in your browser automatically. A tray icon lets you quit it later.</li>
         </ol>
-        <p class="sub" style="margin-top:0.9rem">
-          The exe is signed ("Deltrex"), but with a self-signed certificate rather than a paid/
-          trusted one, so SmartScreen may still warn the first time — click "More info" → "Run
-          anyway".
+        <p class="note">
+          The exe is signed (“Deltrex”), but with a self-signed certificate rather than a paid
+          one, so SmartScreen may still warn the first time — click “More info” → “Run anyway”.
         </p>
+        <a class="btn" style="margin-top:1.2rem" href="https://github.com/TheRealDeltrex/FrostgraveWarbandKeeper/releases/latest/download/FrostgraveWarbandKeeper-win64.zip">
+          Download for Windows
+        </a>
       </div>
 
       <div class="card">
         <h2>🐧 Linux <span class="version-badge" data-version-badge="linux">vDEV</span></h2>
         <p class="sub">No Python install needed.</p>
-        <a class="btn" href="https://github.com/TheRealDeltrex/FrostgraveWarbandKeeper/releases/latest/download/FrostgraveWarbandKeeper-linux-x64.tar.gz">
-          Download for Linux
-        </a>
-        <ol class="steps">
+        <ol class="steps" style="margin-top:0">
           <li>Extract it: <code>tar -xzf FrostgraveWarbandKeeper-linux-x64.tar.gz</code></li>
           <li>Make it executable: <code>chmod +x FrostgraveWarbandKeeper</code></li>
           <li>Run it: <code>./FrostgraveWarbandKeeper</code> — opens in your browser automatically.</li>
         </ol>
-        <p class="sub" style="margin-top:0.9rem">
+        <p class="note">
           Or from a file manager: right-click → Properties → allow executing, then double-click.
         </p>
+        <a class="btn" style="margin-top:1.2rem" href="https://github.com/TheRealDeltrex/FrostgraveWarbandKeeper/releases/latest/download/FrostgraveWarbandKeeper-linux-x64.tar.gz">
+          Download for Linux
+        </a>
       </div>
     </div>
 
     <div class="section">
       <h2>See it in action</h2>
-      <p style="color:var(--muted);font-size:0.92rem;margin:0 0 1rem">
+      <p class="lead">
         Static, click-around previews — no install needed. Nothing on these pages saves; they're
         read-only snapshots of the real app's screens with sample data.
       </p>
@@ -210,19 +328,19 @@
         <div class="card">
           <h2>📜 Warband view</h2>
           <p class="sub">Wizard, spells, soldiers, captain, treasury &amp; vault, home base.</p>
-          <a class="btn" href="preview-warband.html">Preview a warband</a>
+          <a class="btn secondary" href="preview-warband.html">Preview a warband</a>
         </div>
         <div class="card">
           <h2>📖 Frostgrave Lexicon</h2>
           <p class="sub">Spells, arms &amp; armour, soldiers, bestiary, loot &amp; encounter tables.</p>
-          <a class="btn" href="preview-reference.html">Preview the Lexicon</a>
+          <a class="btn secondary" href="preview-reference.html">Preview the Lexicon</a>
         </div>
       </div>
     </div>
 
     <div class="section">
       <h2>What it does</h2>
-      <ul>
+      <ul class="features">
         <li><strong>Create a warband</strong>: wizard, spells with casting numbers (own/aligned/neutral/opposed), and an optional apprentice.</li>
         <li><strong>Autosave</strong>: most fields save the instant you change them, keeping your scroll position and open cards intact — no Save button to remember.</li>
         <li><strong>Wizard states</strong>: Lich, Beastcrafter, and Demonic Pacts, plus grave mutations for wizard, apprentice, captain, and soldiers.</li>

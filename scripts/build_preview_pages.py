@@ -212,6 +212,42 @@ def sanitize(html: str, *, other_preview: str, page_label: str) -> str:
     return html
 
 
+FONT_FACE_RE = re.compile(r"@font-face\s*\{[^}]*\}", re.S)
+# Idempotent marker pair, same idiom as the version badges: the committed
+# docs/index.html carries the placeholder, and every build refills it.
+LANDING_FONT_RE = re.compile(
+    r"(/\*__FONT_FACE__\*/)(?:.*?)(/\*__END_FONT_FACE__\*/)?(?=\n\n)", re.S
+)
+
+
+def sync_landing_page_font() -> bool:
+    """Mirrors the @font-face block from static/style.css into docs/index.html.
+
+    The landing page is standalone — it has its own <style> and never loads
+    style.css — so it needs its own copy of the display face to match the app
+    it advertises. Copying it at build time rather than committing a second
+    25 KB base64 literal keeps one source of truth; hand-maintained duplicates
+    under docs/ are exactly the drift this repo has been bitten by before.
+    Regenerate the original with scripts/build_display_font.py.
+    """
+    css = (REPO_ROOT / "static" / "style.css").read_text(encoding="utf-8")
+    match = FONT_FACE_RE.search(css)
+    if not match:
+        print("warning: no @font-face in static/style.css; leaving the landing page as-is",
+              file=sys.stderr)
+        return False
+
+    landing = REPO_ROOT / "docs" / "index.html"
+    html = landing.read_text(encoding="utf-8")
+    block = f"/*__FONT_FACE__*/\n{match.group(0)}\n/*__END_FONT_FACE__*/"
+    new_html, n = LANDING_FONT_RE.subn(lambda _: block, html, count=1)
+    if n == 0:
+        print(f"warning: no /*__FONT_FACE__*/ marker in {landing}", file=sys.stderr)
+        return False
+    landing.write_text(new_html, encoding="utf-8")
+    return True
+
+
 def main():
     warband_id = build_sample_warband()
     warband_html = client.get(f"/warband/{warband_id}").get_data(as_text=True)
@@ -241,11 +277,16 @@ def main():
         for name in sorted(used_portraits):
             shutil.copyfile(REPO_ROOT / "static" / "portraits" / name, portraits_out / name)
 
+    font_synced = sync_landing_page_font()
+
     print(f"Sample warband id: {warband_id}")
     for f in ["preview-warband.html", "preview-reference.html", "static/style.css", "static/item_slots.js"]:
         p = docs / f
         print(f"  wrote {p} ({p.stat().st_size} bytes)")
     print(f"  wrote {len(used_portraits)} default portraits to {portraits_out}")
+    if font_synced:
+        p = docs / "index.html"
+        print(f"  synced @font-face into {p} ({p.stat().st_size} bytes)")
 
 
 if __name__ == "__main__":
