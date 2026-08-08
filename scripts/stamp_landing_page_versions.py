@@ -72,19 +72,24 @@ def stamp(html: str, key: str, value: str) -> str:
 
 
 def main() -> None:
+    # Online comes from this checkout's pyproject.toml and needs no network, so
+    # it is stamped even when the API call fails. Returning early on a hiccup
+    # used to leave all three reading "vDEV" — the placeholder is what ships in
+    # the committed file, so an unstamped badge is a visibly wrong version
+    # rather than a merely stale one.
+    values = {"online": online_version()}
     try:
         releases = _fetch_releases()
     except OSError as err:
-        # Network/API hiccup shouldn't fail the whole Pages deploy over a
-        # cosmetic badge — leave whatever's already in the file.
-        print(f"warning: couldn't fetch releases ({err}); leaving badges as-is", file=sys.stderr)
-        return
+        print(
+            f"warning: couldn't fetch releases ({err}); "
+            "stamping online only, leaving windows/linux as-is",
+            file=sys.stderr,
+        )
+    else:
+        values["windows"] = latest_version_with_asset(WIN_ASSET, releases)
+        values["linux"] = latest_version_with_asset(LINUX_ASSET, releases)
 
-    values = {
-        "online": online_version(),
-        "windows": latest_version_with_asset(WIN_ASSET, releases),
-        "linux": latest_version_with_asset(LINUX_ASSET, releases),
-    }
     html = SHELL.read_text(encoding="utf-8")
     for key, value in values.items():
         html = stamp(html, key, value)
