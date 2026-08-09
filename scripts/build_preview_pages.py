@@ -15,7 +15,7 @@ Usage (from the repo root, on devversion, with the venv active):
     python scripts/build_preview_pages.py
 
 Writes docs/preview-warband.html, docs/preview-reference.html, docs/static/style.css,
-docs/static/item_slots.js — all relative to the repo root. The demo warband itself is
+docs/static/item_slots.js, docs/static/logo.webp — all relative to the repo root. The demo warband itself is
 built in a throwaway OS temp directory (via FWK_DATA_DIR), never touching data/warbands/.
 """
 
@@ -266,6 +266,10 @@ def main():
     )
     shutil.copyfile(REPO_ROOT / "static" / "style.css", docs / "static" / "style.css")
     shutil.copyfile(REPO_ROOT / "static" / "item_slots.js", docs / "static" / "item_slots.js")
+    # The landing page's hero art and favicon. The app itself carries the same
+    # emblem as a data URI inside style.css (see scripts/build_logo_asset.py);
+    # docs/index.html is a plain page on Pages, so it can just link the file.
+    shutil.copyfile(REPO_ROOT / "static" / "logo.webp", docs / "static" / "logo.webp")
 
     # Only the default portraits these pages reference — shipping all 36 would put
     # a couple of MB on the Pages site for pictures nothing links to.
@@ -280,7 +284,13 @@ def main():
     font_synced = sync_landing_page_font()
 
     print(f"Sample warband id: {warband_id}")
-    for f in ["preview-warband.html", "preview-reference.html", "static/style.css", "static/item_slots.js"]:
+    for f in [
+        "preview-warband.html",
+        "preview-reference.html",
+        "static/style.css",
+        "static/item_slots.js",
+        "static/logo.webp",
+    ]:
         p = docs / f
         print(f"  wrote {p} ({p.stat().st_size} bytes)")
     print(f"  wrote {len(used_portraits)} default portraits to {portraits_out}")

@@ -1,17 +1,20 @@
 {% extends "base.html" %}
 {% block title %}Warbands · Frostgrave{% endblock %}
 {% block content %}
-  <section class="hero">
-    <h1>Frostgrave warbands</h1>
-    <p>
-      Create a wizard (name, school, picture, spells), auto-level an apprentice,
-      recruit soldiers within cost and unit limits, record gold and items after games,
-      level up your wizard, and export a PDF roster.
-    </p>
-    <div class="section-actions">
-      <a class="btn" href="{{ url_for('warband_new') }}">New warband</a>
-      <a class="btn secondary" href="{{ url_for('warband_import') }}">Import warband</a>
-      <a class="btn secondary" href="{{ url_for('reference') }}">Frostgrave Lexicon</a>
+  <section class="hero home-hero">
+    <div class="home-hero-logo" role="img" aria-label="Frostgrave Warband Keeper"></div>
+    <div class="home-hero-text">
+      <h1>Frostgrave warbands</h1>
+      <p>
+        Create a wizard (name, school, picture, spells), auto-level an apprentice,
+        recruit soldiers within cost and unit limits, record gold and items after games,
+        level up your wizard, and export a PDF roster.
+      </p>
+      <div class="section-actions">
+        <a class="btn" href="{{ url_for('warband_new') }}">New warband</a>
+        <a class="btn secondary" href="{{ url_for('warband_import') }}">Import warband</a>
+        <a class="btn secondary" href="{{ url_for('reference') }}">Frostgrave Lexicon</a>
+      </div>
     </div>
   </section>
 
