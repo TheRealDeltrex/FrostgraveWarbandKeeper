@@ -5,7 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Frostgrave Warband Keeper — download</title>
 <meta name="description" content="A warband tracker for Frostgrave 2nd Edition. Play free in your browser (nothing stored — export to save), or download for Windows and Linux. No login, no cloud." />
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9D%84%EF%B8%8F%3C/text%3E%3C/svg%3E" />
+<link rel="icon" href="static/logo.webp" />
+<meta property="og:title" content="Frostgrave Warband Keeper" />
+<meta property="og:description" content="A warband tracker for Frostgrave 2nd Edition. Play free in your browser, or download for Windows and Linux. No login, no cloud." />
+<meta property="og:image" content="https://therealdeltrex.github.io/FrostgraveWarbandKeeper/static/logo.webp" />
+<meta name="twitter:card" content="summary_large_image" />
 <style>
 /*__FONT_FACE__*/
 
@@ -78,7 +82,12 @@
 
   /* Hero */
   .hero { text-align: center; margin-bottom: 3rem; }
-  .hero .mark { font-size: 2.6rem; line-height: 1; display: block; margin-bottom: 0.6rem; }
+  .hero .mark {
+    display: block;
+    width: clamp(11rem, 30vw, 16rem);
+    height: auto;
+    margin: 0 auto 1rem;
+  }
   .hero h1 {
     font-family: var(--font-display);
     font-weight: 600;
@@ -255,7 +264,8 @@
 <body>
   <div class="wrap">
     <section class="hero">
-      <span class="mark" aria-hidden="true">❄️</span>
+      <img class="mark" src="static/logo.webp" width="512" height="512"
+           alt="Frostgrave Warband Keeper" />
       <h1>Frostgrave Warband Keeper</h1>
       <p>
         A local warband tracker for <strong>Frostgrave (2nd Edition)</strong>. No login, no
