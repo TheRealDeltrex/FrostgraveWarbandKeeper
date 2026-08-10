@@ -187,6 +187,8 @@ from warband_store import (
     claim_free_underworld_favor,
     claim_monster_prize,
     consume_wilderness_supplies,
+    consume_wilderness_supplies_half,
+    consume_wilderness_supplies_none,
     create_warband,
     delete_warband,
     discard_component,
@@ -238,6 +240,7 @@ from warband_store import (
     remove_wizard_mutation,
     remove_wizard_permanent_injury,
     remove_wizard_prosthetic_upgrade,
+    rename_warband,
     reorder_soldiers,
     reorder_spells,
     resolve_portrait_path,
@@ -257,6 +260,7 @@ from warband_store import (
     set_animal_feature,
     set_base_location,
     set_giant_blooded_pending,
+    set_member_status,
     set_permanent_injury_prosthetic,
     set_soldier_status,
     set_thrall_pending,
@@ -269,6 +273,7 @@ from warband_store import (
     update_homerules,
     upgrade_firearm,
     use_component,
+    use_supply_points,
     warband_dir,
     warband_limits,
     wildwoods_summary,
@@ -1392,6 +1397,21 @@ def _act_soldier_status(wb: dict) -> tuple[bool, str]:
     )
 
 
+@register_action("wizard_status")
+def _act_wizard_status(wb: dict) -> tuple[bool, str]:
+    return set_member_status(wb, "wizard", request.form.get("status") or "active")
+
+
+@register_action("apprentice_status")
+def _act_apprentice_status(wb: dict) -> tuple[bool, str]:
+    return set_member_status(wb, "apprentice", request.form.get("status") or "active")
+
+
+@register_action("captain_status")
+def _act_captain_status(wb: dict) -> tuple[bool, str]:
+    return set_member_status(wb, "captain", request.form.get("status") or "active")
+
+
 @register_action("soldier_edit")
 def _act_soldier_edit(wb: dict) -> tuple[bool, str]:
     sid = request.form.get("soldier_id") or ""
@@ -1522,9 +1542,28 @@ def _act_sell_supply_points(wb: dict) -> tuple[bool, str]:
     return sell_supply_points(wb, amount)
 
 
+@register_action("use_supply_points")
+def _act_use_supply_points(wb: dict) -> tuple[bool, str]:
+    try:
+        amount = int(request.form.get("amount") or 0)
+    except ValueError:
+        return False, "Invalid amount."
+    return use_supply_points(wb, amount)
+
+
 @register_action("consume_wilderness_supplies")
 def _act_consume_wilderness_supplies(wb: dict) -> tuple[bool, str]:
     return consume_wilderness_supplies(wb)
+
+
+@register_action("consume_wilderness_supplies_half")
+def _act_consume_wilderness_supplies_half(wb: dict) -> tuple[bool, str]:
+    return consume_wilderness_supplies_half(wb)
+
+
+@register_action("consume_wilderness_supplies_none")
+def _act_consume_wilderness_supplies_none(wb: dict) -> tuple[bool, str]:
+    return consume_wilderness_supplies_none(wb)
 
 
 @register_action("buy_cargo_transport")
@@ -2205,6 +2244,15 @@ def warband_delete(warband_id: str) -> Response:
     name = wb.get("name", warband_id)
     delete_warband(warband_id)
     flash(f"Deleted warband “{name}”.", "success")
+    return redirect(url_for("home"))
+
+
+@app.route("/warband/<warband_id>/rename", methods=["POST"])
+def warband_rename(warband_id: str) -> Response:
+    _require_warband(warband_id)
+    new_name = request.form.get("new_name") or ""
+    ok, msg = rename_warband(warband_id, new_name)
+    flash(msg, "success" if ok else "error")
     return redirect(url_for("home"))
 
 

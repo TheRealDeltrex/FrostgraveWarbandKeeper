@@ -95,6 +95,7 @@ from frostgrave_data import (
     UNDERWORLD_LOAN_MIN,
     UNDERWORLD_PAYOFF_COST,
     VAMPIRE_MIN_MAX_SOLDIERS,
+    WILDERNESS_HALF_RATIONS_PER_MEMBER,
     WILDERNESS_SUPPLY_CONSUMPTION_PER_MEMBER,
     WIZARD_BASE,
     WIZARD_ITEM_SLOTS,
@@ -602,7 +603,7 @@ def captain_effective_stats(cap: dict) -> dict:
     bonus = equipment_bonuses(cap.get("item_slots") or [])
     stats["armour"] = int(stats.get("armour", 0)) + bonus["armour"]
     stats["move"] = int(stats.get("move", 0)) + bonus["move"]
-    return stats
+    return expansions.apply_hunger_penalty(stats, cap.get("status"))
 
 
 def wizard_effective_stats(wb: dict) -> dict:
@@ -613,7 +614,7 @@ def wizard_effective_stats(wb: dict) -> dict:
     stats = dict((wb.get("wizard") or {}).get("stats") or {})
     for stat, amount in expansions.wizard_state_stat_bonus(wb).items():
         stats[stat] = int(stats.get(stat, 0)) + amount
-    return stats
+    return expansions.apply_hunger_penalty(stats, (wb.get("wizard") or {}).get("status"))
 
 
 def sync_apprentice(wb: dict) -> None:
@@ -639,6 +640,7 @@ def sync_apprentice(wb: dict) -> None:
         for stat, offset in (m.get("stat_offsets") or {}).items():
             if stat in ap_stats:
                 ap_stats[stat] += offset
+    ap_stats = expansions.apply_hunger_penalty(ap_stats, ap.get("status"))
     for stat in ap_stats:
         ap_stats[stat] = max(1, ap_stats[stat]) if stat == "health" else max(0, ap_stats[stat])
     ap["stats"] = ap_stats
@@ -1592,6 +1594,22 @@ def _copy_portrait_file(rel: str | None, old_id: str, new_id: str) -> str | None
     return f"{new_id}/{dest.name}"
 
 
+def rename_warband(warband_id: str, new_name: str) -> tuple[bool, str]:
+    """Change a warband's display name. The id and save file are unaffected."""
+    wb = load_warband(warband_id)
+    if not wb:
+        return False, "Warband not found."
+    new_name = new_name.strip()
+    if not new_name:
+        return False, "Name cannot be empty."
+    old_name = wb.get("name", warband_id)
+    wb["name"] = new_name
+    wb["updated"] = _now()
+    add_history(wb, f"Renamed from “{old_name}” to “{new_name}”.")
+    save_warband(wb)
+    return True, f"Renamed to “{new_name}”."
+
+
 def duplicate_warband(source_id: str, new_name: str | None = None) -> tuple[Warband | None, str]:
     """Deep-copy a warband (data + portraits) under a new id and name."""
     src = load_warband(source_id)
@@ -1924,6 +1942,7 @@ def enrich_soldier(wb: dict, s: dict) -> dict:
     bonus = equipment_bonuses(s.get("item_slots") or [])
     out["armour"] = int(out.get("armour", 0)) + bonus["armour"]
     out["move"] = int(out.get("move", 0)) + bonus["move"]
+    out = expansions.apply_hunger_penalty(out, s.get("status"))
     return out
 
 
@@ -2172,16 +2191,48 @@ def dismiss_all_temporary_members(wb: dict) -> tuple[bool, str]:
     return True, text
 
 
-def set_soldier_status(wb: dict, soldier_id: str, status: str) -> tuple[bool, str]:
-    if status not in ("active", "injured", "dead"):
+STATUS_CHOICES = ("active", "injured", "dead", "hungry", "very_hungry")
+
+
+def _status_target(wb: dict, kind: str, soldier_id: str | None = None):
+    """Resolves 'wizard' | 'apprentice' | 'captain' | 'soldier' (+ soldier_id)
+    to (entity, label) for set_member_status(), or (None, error_message) if
+    the target doesn't exist. Mirrors _mutation_target()'s kind dispatch."""
+    if kind == "wizard":
+        wiz = wb.setdefault("wizard", {})
+        return wiz, (wiz.get("name") or "Your wizard")
+    if kind == "apprentice":
+        ap = wb.get("apprentice")
+        if not ap:
+            return None, "No apprentice hired."
+        return ap, (ap.get("name") or "Your apprentice")
+    if kind == "captain":
+        cap = wb.get("captain")
+        if not cap:
+            return None, "No captain hired."
+        return cap, (cap.get("name") or "Your captain")
+    if kind == "soldier":
+        for s in wb.get("soldiers") or []:
+            if s.get("id") == soldier_id:
+                return s, s.get("name", "Soldier")
+        return None, "Soldier not found."
+    raise ValueError(f"Unknown status target kind: {kind!r}")
+
+
+def set_member_status(wb: dict, kind: str, status: str, soldier_id: str | None = None) -> tuple[bool, str]:
+    if status not in STATUS_CHOICES:
         return False, "Invalid status."
-    for s in wb.get("soldiers") or []:
-        if s.get("id") == soldier_id:
-            s["status"] = status
-            text = f"{s.get('name', 'Soldier')} marked {status}."
-            wb.setdefault("history", []).append({"when": _now(), "text": text})
-            return True, text
-    return False, "Soldier not found."
+    entity, label = _status_target(wb, kind, soldier_id)
+    if entity is None:
+        return False, label  # label holds the not-found message in this branch
+    entity["status"] = status
+    text = f"{label} marked {status.replace('_', ' ')}."
+    add_history(wb, text)
+    return True, text
+
+
+def set_soldier_status(wb: dict, soldier_id: str, status: str) -> tuple[bool, str]:
+    return set_member_status(wb, "soldier", status, soldier_id)
 
 
 def raise_revenant(wb: dict, soldier_id: str) -> tuple[bool, str]:
@@ -5057,39 +5108,122 @@ def sell_supply_points(wb: dict, amount: int) -> tuple[bool, str]:
     return True, text
 
 
-def _wildwoods_supply_eating_members(wb: dict) -> int:
-    """Warband members who consume Supply Points post-scenario: wizard +
-    apprentice + every active soldier except those with Wilderness Survival
-    (see WILDWOODS_SUPPLY_EXEMPT_TYPE_KEYS)."""
-    eating_soldiers = sum(
-        1 for s in active_soldiers(wb) if s.get("type_key") not in WILDWOODS_SUPPLY_EXEMPT_TYPE_KEYS
+def _wildwoods_eating_entities(wb: dict) -> list[dict]:
+    """Every entity that eats Supply Points post-scenario: wizard, apprentice
+    (if hired), captain (if hired), and every active soldier — except any of
+    them with Wilderness Survival (see WILDWOODS_SUPPLY_EXEMPT_TYPE_KEYS)."""
+    entities = [wb.setdefault("wizard", {})]
+    if wb.get("apprentice"):
+        entities.append(wb["apprentice"])
+    cap = wb.get("captain")
+    if cap and cap.get("type_key") not in WILDWOODS_SUPPLY_EXEMPT_TYPE_KEYS:
+        entities.append(cap)
+    entities.extend(
+        s for s in active_soldiers(wb) if s.get("type_key") not in WILDWOODS_SUPPLY_EXEMPT_TYPE_KEYS
     )
-    return 1 + (1 if wb.get("apprentice") else 0) + eating_soldiers
+    return entities
+
+
+def _wildwoods_supply_eating_members(wb: dict) -> int:
+    """Warband members who consume Supply Points post-scenario — see
+    _wildwoods_eating_entities()."""
+    return len(_wildwoods_eating_entities(wb))
+
+
+def _consume_supplies_at_rate(wb: dict, rate: int, members: int) -> tuple[int, int]:
+    """Deducts rate sp per eating member from supply_points, capped at what's
+    available. Returns (consumed, shortfall)."""
+    needed = members * rate
+    current = int(wb.get("supply_points", 0))
+    consumed = min(current, needed)
+    wb["supply_points"] = current - consumed
+    return consumed, needed - consumed
 
 
 def consume_wilderness_supplies(wb: dict) -> tuple[bool, str]:
     """Post-scenario upkeep: each warband member eats
-    WILDERNESS_SUPPLY_CONSUMPTION_PER_MEMBER sp. Applying the resulting
-    "hungry"/"very hungry" penalties to individual figures is left to the
-    player (same as this app's other reminder-only per-game upkeep rules) —
-    this just settles the sp math and reports the shortfall, if any."""
+    WILDERNESS_SUPPLY_CONSUMPTION_PER_MEMBER sp. Deciding *which* individual
+    figures go short on a shortfall is left to the player (same as this
+    app's other reminder-only per-game upkeep rules) — mark them Hungry/Very
+    Hungry via each figure's status control afterward; the Health/Will
+    penalty is then applied automatically wherever their stats are shown."""
     err = _wildwoods_supplies_gate(wb)
     if err:
         return False, err
     members = _wildwoods_supply_eating_members(wb)
-    needed = members * WILDERNESS_SUPPLY_CONSUMPTION_PER_MEMBER
-    current = int(wb.get("supply_points", 0))
-    consumed = min(current, needed)
-    wb["supply_points"] = current - consumed
-    shortfall = needed - consumed
+    consumed, shortfall = _consume_supplies_at_rate(wb, WILDERNESS_SUPPLY_CONSUMPTION_PER_MEMBER, members)
     if shortfall <= 0:
         text = f"Consumed {consumed}sp feeding {members} member(s). Everyone is fed."
     else:
         text = (
             f"Consumed {consumed}sp feeding {members} member(s), {shortfall}sp short. "
-            "Choose who goes hungry (-2 Health/-1 Will next game) or very hungry "
-            "(-5 Health/-2 Will next game) and record it on their notes."
+            "Mark who goes hungry (-2 Health/-1 Will next game) or very hungry "
+            "(-5 Health/-2 Will next game) via their status control."
         )
+    add_history(wb, text)
+    return True, text
+
+
+def consume_wilderness_supplies_half(wb: dict) -> tuple[bool, str]:
+    """Post-scenario upkeep at half rations: each member eats
+    WILDERNESS_HALF_RATIONS_PER_MEMBER sp (half the full ration) instead, and
+    every eating figure is marked "hungry" (-2 Health/-1 Will next game) —
+    per the book, 1sp consumed is "hungry," and a deliberate half-rations
+    feed always hits exactly that, shortfall or not."""
+    err = _wildwoods_supplies_gate(wb)
+    if err:
+        return False, err
+    entities = _wildwoods_eating_entities(wb)
+    consumed, shortfall = _consume_supplies_at_rate(wb, WILDERNESS_HALF_RATIONS_PER_MEMBER, len(entities))
+    for e in entities:
+        e["status"] = "hungry"
+    if shortfall <= 0:
+        text = (
+            f"Consumed {consumed}sp on half rations feeding {len(entities)} member(s) — "
+            "everyone marked hungry (-2 Health/-1 Will next game)."
+        )
+    else:
+        text = (
+            f"Consumed {consumed}sp on half rations feeding {len(entities)} member(s), "
+            f"{shortfall}sp short — everyone marked hungry (-2 Health/-1 Will next game)."
+        )
+    add_history(wb, text)
+    return True, text
+
+
+def consume_wilderness_supplies_none(wb: dict) -> tuple[bool, str]:
+    """Skips rations entirely: no sp is spent, and every eating figure is
+    marked "very hungry" (-5 Health/-2 Will next game) — 0sp consumed per the
+    book's Supply Point table."""
+    err = _wildwoods_supplies_gate(wb)
+    if err:
+        return False, err
+    entities = _wildwoods_eating_entities(wb)
+    for e in entities:
+        e["status"] = "very_hungry"
+    text = (
+        f"Skipped rations for {len(entities)} member(s) — "
+        "everyone marked very hungry (-5 Health/-2 Will next game)."
+    )
+    add_history(wb, text)
+    return True, text
+
+
+def use_supply_points(wb: dict, amount: int) -> tuple[bool, str]:
+    """Manually spends sp with no gold involved — e.g. an Out of Game
+    spell's 1sp cost — same shape as buy_supply_points()/sell_supply_points()
+    but without the gc conversion."""
+    err = _wildwoods_supplies_gate(wb)
+    if err:
+        return False, err
+    amount = int(amount)
+    if amount <= 0:
+        return False, "Enter a positive amount of sp to consume."
+    current = int(wb.get("supply_points", 0))
+    if amount > current:
+        return False, f"Only have {current}sp."
+    wb["supply_points"] = current - amount
+    text = f"Consumed {amount}sp."
     add_history(wb, text)
     return True, text
 

@@ -2993,9 +2993,18 @@ SUPPLY_POINT_BUY_RATE = 1  # gc per sp bought
 SUPPLY_POINT_SELL_RATE = 2  # sp sold per gc received
 SUPPLY_CARRY_CAPACITY_BASE = 50  # sp a warband can carry unaided, no transport
 WILDERNESS_SUPPLY_CONSUMPTION_PER_MEMBER = 2  # sp each warband member eats post-scenario
+WILDERNESS_HALF_RATIONS_PER_MEMBER = 1  # sp each warband member eats on half rations
 OUT_OF_GAME_SPELL_SP_COST = 1  # sp per Out of Game casting (reference only; not auto-charged)
 CARGO_TRANSPORT_COST = 100
 CARGO_TRANSPORT_BASE_CAPACITY = 100  # sp capacity of a bare transport
+
+# 1sp consumed (half rations) = "hungry"; 0sp consumed = "very hungry" (The
+# Wildwoods, Ch.1) — folded into effective Health/Will wherever a member's
+# stats are computed, see expansions.apply_hunger_penalty().
+HUNGER_STAT_PENALTY = {
+    "hungry": {"health": -2, "will": -1},
+    "very_hungry": {"health": -5, "will": -2},
+}
 
 # Cargo Transport upgrades: each type may only be bought once. "capacity" adds
 # to the transport's sp capacity; other effects are reference text only (the
