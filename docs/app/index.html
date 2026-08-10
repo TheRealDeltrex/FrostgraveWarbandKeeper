@@ -714,7 +714,22 @@
           // imports it lazily on the first PDF export, so this only needs to run
           // before that, but doing it here at boot keeps the ordering simple.
           await pyodide.loadPackage("Pillow");
-          await micropip.install("fpdf2");
+          // Pinned, deliberately: fpdf2 2.8.8 does `from urllib.request import
+          // HTTPSHandler` at import time, and Pyodide's stdlib only defines that
+          // name when the separate `ssl` package is loaded — so the import blows
+          // up here and nowhere else. Worse, it fails *silently at boot*: the
+          // install below succeeds, and pdf_export.py only imports fpdf lazily on
+          // the first export, so the catch below never fires and the user just
+          // gets an error page when they click "PDF roster". Before unpinning,
+          // check that `import fpdf` actually works in Pyodide with the newer
+          // version (loading the `ssl` package first is the alternative fix, at
+          // the cost of another wasm download on every cold boot).
+          await micropip.install("fpdf2==2.8.7");
+          // Import it here rather than leaving it to pdf_export.py's lazy import:
+          // installing cleanly is not the same as importing cleanly (see above),
+          // and this is the only place a failure can still be reported as the
+          // toast below instead of as an error page mid-export.
+          pyodide.runPython("import fpdf");
         } catch (pdfErr) {
           // Non-fatal: the app still runs; PDF export may error or omit portraits.
           // Surfaced as a toast too (D12) — a silent console.warn means the only
