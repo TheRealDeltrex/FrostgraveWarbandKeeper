@@ -7,6 +7,8 @@
 {% block content %}
   {% set wiz = wb.wizard %}
   {% set ap = wb.apprentice %}
+  {# Hungry/Very hungry only make sense once Supply Points are in play. #}
+  {% set status_options = ['active', 'injured', 'dead'] + (['hungry', 'very_hungry'] if wildwoods_enabled else []) %}
   {% if not limits.specialists_ok %}
     <div class="card flash warn">
       Too many specialists hired ({{ limits.specialists }} / {{ limits.max_specialists }}). The app
@@ -891,6 +893,15 @@
               <div class="stat-pill"><span class="label">Will</span><span class="value">{{ format_stat(wizard_display_stats.will) }}</span></div>
               <div class="stat-pill"><span class="label">Health</span><span class="value">{{ wizard_display_stats.health }}</span></div>
             </div>
+            <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
+              <input type="hidden" name="action" value="wizard_status" />
+              <label for="wizard_status" class="muted" style="font-size:0.85rem">Status</label>
+              <select id="wizard_status" name="status" data-autosubmit>
+                {% for st in status_options %}
+                  <option value="{{ st }}" {% if wiz.status == st %}selected{% endif %}>{{ st|replace('_', ' ') }}</option>
+                {% endfor %}
+              </select>
+            </form>
             <details class="ref-panel" id="wizard-equipment-notes-panel">
               <summary>Equipment &amp; notes</summary>
               <h3>Wizard items ({{ wizard_item_slots }} slots)</h3>
@@ -954,6 +965,15 @@
                 <div class="stat-pill"><span class="label">Will</span><span class="value">{{ format_stat(ap.stats.will) }}</span></div>
                 <div class="stat-pill"><span class="label">Health</span><span class="value">{{ ap.stats.health }}</span></div>
               </div>
+              <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
+                <input type="hidden" name="action" value="apprentice_status" />
+                <label for="apprentice_status" class="muted" style="font-size:0.85rem">Status</label>
+                <select id="apprentice_status" name="status" data-autosubmit>
+                  {% for st in status_options %}
+                    <option value="{{ st }}" {% if ap.status == st %}selected{% endif %}>{{ st|replace('_', ' ') }}</option>
+                  {% endfor %}
+                </select>
+              </form>
               <details class="ref-panel" id="apprentice-equipment-notes-panel">
                 <summary>Equipment &amp; notes</summary>
                 <h3>Apprentice items ({{ apprentice_item_slots }} slots)</h3>
@@ -1579,9 +1599,18 @@
                 <div class="stat-pill"><span class="label">Fight</span><span class="value">{{ format_stat(cap.stats.fight) }}{% if cap_mounted %} <span class="muted">({{ format_stat(cap.stats.fight - hmd.fight) }})</span>{% endif %}</span></div>
                 <div class="stat-pill"><span class="label">Shoot</span><span class="value">{{ format_stat(cap.stats.shoot) }}</span></div>
                 <div class="stat-pill"><span class="label">Armour</span><span class="value">{{ cap_eff.armour }}{% if cap_mounted %} <span class="muted">({{ cap_eff.armour - hmd.armour }})</span>{% endif %}</span></div>
-                <div class="stat-pill"><span class="label">Will</span><span class="value">{{ format_stat(cap.stats.will) }}</span></div>
-                <div class="stat-pill"><span class="label">Health</span><span class="value">{{ cap.stats.health }}</span></div>
+                <div class="stat-pill"><span class="label">Will</span><span class="value">{{ format_stat(cap_eff.will) }}</span></div>
+                <div class="stat-pill"><span class="label">Health</span><span class="value">{{ cap_eff.health }}</span></div>
               </div>
+              <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
+                <input type="hidden" name="action" value="captain_status" />
+                <label for="captain_status" class="muted" style="font-size:0.85rem">Status</label>
+                <select id="captain_status" name="status" data-autosubmit>
+                  {% for st in status_options %}
+                    <option value="{{ st }}" {% if cap.status == st %}selected{% endif %}>{{ st|replace('_', ' ') }}</option>
+                  {% endfor %}
+                </select>
+              </form>
               <p class="muted" style="font-size:0.8rem">Move and Armour include bonuses from equipped Shield/Light Armour/Heavy Armour.</p>
               <p class="muted" style="font-size:0.85rem">
                 {{ 'Promoted from the ranks' if cap.origin == 'promoted' else 'Hired' }} · Level {{ cap.level }}/{{ hr.captain_max_level }} · XP {{ cap.xp }}
@@ -1985,8 +2014,8 @@
                       <input type="hidden" name="action" value="soldier_status" />
                       <input type="hidden" name="soldier_id" value="{{ s.id }}" />
                       <select name="status" data-autosubmit>
-                        {% for st in ['active', 'injured', 'dead'] %}
-                          <option value="{{ st }}" {% if s.status == st %}selected{% endif %}>{{ st }}</option>
+                        {% for st in status_options %}
+                          <option value="{{ st }}" {% if s.status == st %}selected{% endif %}>{{ st|replace('_', ' ') }}</option>
                         {% endfor %}
                       </select>
                     </form>
@@ -2751,7 +2780,7 @@
     {% endif %}
     {% if horses_enabled and has_stable %}
       <details class="ref-panel" id="horse-panel" style="margin-top:1rem">
-        <summary>Workshop — Horse (Spellcaster Magazine, Issue 1){% if wb.horse.owned %} — owned{% endif %}</summary>
+        <summary>Workshop — Horse{% if wb.horse.owned %} — owned{% endif %}</summary>
         {% if not wb.horse.owned %}
           <p class="muted" style="font-size:0.85rem">
             Riderless: Move {{ hrs.move }}, Fight {{ format_stat(hrs.fight) }},
@@ -2984,9 +3013,28 @@
             <button class="btn small" type="submit">Sell</button>
           </div>
         </form>
+        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="form-row inline" style="margin-top:0.4rem">
+          <input type="hidden" name="action" value="use_supply_points" />
+          <div>
+            <label for="sp_use_amount">Consume sp</label>
+            <input id="sp_use_amount" name="amount" type="number" min="1" value="1" />
+          </div>
+          <div>
+            <label>&nbsp;</label>
+            <button class="btn small" type="submit" title="Spend sp directly, e.g. an Out of Game spell's 1sp cost">Consume</button>
+          </div>
+        </form>
         <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:0.6rem">
           <input type="hidden" name="action" value="consume_wilderness_supplies" />
           <button class="btn small" type="submit">Settle post-scenario consumption</button>
+        </form>
+        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:0.4rem">
+          <input type="hidden" name="action" value="consume_wilderness_supplies_half" />
+          <button class="btn secondary small" type="submit" title="1sp/member instead of 2 — marks everyone hungry">Half rations</button>
+        </form>
+        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:0.4rem">
+          <input type="hidden" name="action" value="consume_wilderness_supplies_none" />
+          <button class="btn danger small" type="submit" title="No sp spent — marks everyone very hungry">No ration</button>
         </form>
       </div>
       <div>

@@ -153,6 +153,17 @@ def _health_line(max_health: object) -> str:
     return _t(f"**Health:** {max_health}")
 
 
+def _status_note(status: str | None) -> str:
+    """'  -  Hungry' / '  -  Very Hungry' next to a name, mirroring how the
+    web roster's status control reads; empty for active/injured/dead/unset,
+    whose bookkeeping stays reminder-only rather than printed."""
+    if status == "hungry":
+        return "  -  Hungry"
+    if status == "very_hungry":
+        return "  -  Very Hungry"
+    return ""
+
+
 def _mutation_lines(mutations: list[dict] | None) -> list[str] | None:
     """One bold-name line per recorded mutation, same layout as a captain's
     tricks (see the "Tricks:" block below) — precise enough to resolve at
@@ -421,6 +432,7 @@ def build_warband_pdf(wb: dict) -> bytes:
         _t(
             f"{wiz.get('name', 'Wizard')}  -  {school}  -  "
             f"Level {wiz.get('level', 0)}  -  XP {wiz.get('xp', 0)}{state_note}"
+            f"{_status_note(wiz.get('status'))}"
         ),
         new_x="LMARGIN",
         new_y="NEXT",
@@ -491,7 +503,7 @@ def build_warband_pdf(wb: dict) -> bytes:
         pdf.cell(
             0,
             6,
-            _t(f"{ap.get('name', 'Apprentice')}  -  {school}"),
+            _t(f"{ap.get('name', 'Apprentice')}  -  {school}{_status_note(ap.get('status'))}"),
             new_x="LMARGIN",
             new_y="NEXT",
         )
@@ -607,7 +619,10 @@ def build_warband_pdf(wb: dict) -> bytes:
         pdf.cell(
             0,
             6,
-            _t(f"{cap.get('name', 'Captain')}  -  Level {cap.get('level', 0)}  -  XP {cap.get('xp', 0)}"),
+            _t(
+                f"{cap.get('name', 'Captain')}  -  Level {cap.get('level', 0)}  -  "
+                f"XP {cap.get('xp', 0)}{_status_note(cap.get('status'))}"
+            ),
             new_x="LMARGIN",
             new_y="NEXT",
         )
@@ -618,10 +633,9 @@ def build_warband_pdf(wb: dict) -> bytes:
             pdf.cell(0, 4, _t(_horse_companion_line(wb)), new_x="LMARGIN", new_y="NEXT")
         pdf.set_x(left)
         pdf.set_font("Helvetica", "", 10)
-        cstats = cap.get("stats") or {}
         cstats_eff = captain_effective_stats(cap)
         pdf.cell(
-            0, 5, _health_line(cstats.get("health", 14)), new_x="LMARGIN", new_y="NEXT", markdown=True
+            0, 5, _health_line(cstats_eff.get("health", 14)), new_x="LMARGIN", new_y="NEXT", markdown=True
         )
         pdf.set_x(left)
         pdf.cell(
@@ -701,7 +715,8 @@ def build_warband_pdf(wb: dict) -> bytes:
                 0,
                 5,
                 _t(
-                    f"{s.get('name', '?')}  -  {s.get('type_name', s.get('type_key', '?'))}{level_suffix}"
+                    f"{s.get('name', '?')}  -  {s.get('type_name', s.get('type_key', '?'))}"
+                    f"{level_suffix}{_status_note(s.get('status'))}"
                 ),
                 new_x="LMARGIN",
                 new_y="NEXT",

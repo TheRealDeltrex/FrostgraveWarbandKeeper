@@ -31,6 +31,7 @@ from frostgrave_data import (
     FIRE_GIANT_XP_PER_LEVEL,
     HORSE_MOUNT_STAT_DELTA,
     HORSE_UPGRADE_BY_ID,
+    HUNGER_STAT_PENALTY,
     LEGENDARY_SOLDIER_BASE_MAX,
     LEGENDARY_SOLDIER_LEVEL_STEP,
     LEGENDARY_SOLDIER_MAX_CAP,
@@ -1012,6 +1013,20 @@ def brew_potion_component_bonus(wb: dict) -> tuple[int, int]:
 
 def cargo_transport_owned(wb: dict) -> bool:
     return bool((wb.get("cargo_transport") or {}).get("owned"))
+
+
+def apply_hunger_penalty(stats: dict, status: str | None) -> dict:
+    """Folds a "hungry"/"very hungry" Supply Point penalty (The Wildwoods,
+    Ch.1) into a stat dict: -2 Health/-1 Will for 1sp consumed ("hungry"),
+    -5 Health/-2 Will for 0sp consumed ("very hungry"). Health floors at 1;
+    Will is left free to go negative (format_stat prints the sign)."""
+    penalty = HUNGER_STAT_PENALTY.get(status or "")
+    if not penalty:
+        return stats
+    out = dict(stats)
+    out["health"] = max(1, int(out.get("health", 0)) + penalty["health"])
+    out["will"] = int(out.get("will", 0)) + penalty["will"]
+    return out
 
 
 def supply_carry_capacity(wb: dict) -> int:

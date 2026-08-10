@@ -62,6 +62,15 @@
               </div>
             </a>
             <div class="warband-actions">
+              <form
+                method="post"
+                action="{{ url_for('warband_rename', warband_id=w.id) }}"
+                data-current-name="{{ w.name }}"
+                onsubmit="var n = prompt('Rename warband:', this.dataset.currentName); if (n === null || !n.trim()) return false; this.new_name.value = n; return true;"
+              >
+                <input type="hidden" name="new_name" value="" />
+                <button class="btn secondary small" type="submit" title="Rename warband">Rename</button>
+              </form>
               <form method="post" action="{{ url_for('warband_duplicate', warband_id=w.id) }}">
                 <button class="btn secondary small" type="submit" title="Duplicate warband">Duplicate</button>
               </form>
