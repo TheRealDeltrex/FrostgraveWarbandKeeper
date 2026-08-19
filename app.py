@@ -387,6 +387,7 @@ app.jinja_env.globals.update(
     HORSE_UPGRADES=HORSE_UPGRADES,
     horse_riderless_stats=expansions.horse_riderless_stats,
     horse_mount_delta=expansions.horse_mount_delta,
+    kennel_bonus_available=expansions.kennel_bonus_available,
     SUPPLY_POINT_BUY_RATE=SUPPLY_POINT_BUY_RATE,
     SUPPLY_POINT_SELL_RATE=SUPPLY_POINT_SELL_RATE,
     WILDERNESS_SUPPLY_CONSUMPTION_PER_MEMBER=WILDERNESS_SUPPLY_CONSUMPTION_PER_MEMBER,

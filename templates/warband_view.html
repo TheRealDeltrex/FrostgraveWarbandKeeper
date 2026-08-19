@@ -2363,7 +2363,7 @@
           <tbody>
             {% for c in hireable %}
               {% set can_afford = wb.gold >= c.cost %}
-              {% set within_soldiers = limits.soldiers < limits.max_soldiers %}
+              {% set within_soldiers = limits.soldiers < limits.max_soldiers or kennel_bonus_available(wb, c.key) %}
               {% set within_specialists = c.category != 'specialist' or limits.specialists < limits.max_specialists %}
               {% set companion_blocked = c.requires_spell == 'Animal Companion' and has_animal_companion %}
               {% set is_legendary = c.key in LEGENDARY_SOLDIER_TYPE_KEYS %}
@@ -2468,7 +2468,7 @@
             <tbody>
               {% for c in summoned_catalog %}
               {% set can_afford = wb.gold >= c.cost %}
-              {% set within_soldiers = limits.soldiers < limits.max_soldiers %}
+              {% set within_soldiers = limits.soldiers < limits.max_soldiers or kennel_bonus_available(wb, c.key) %}
               {% set within_specialists = c.category != 'specialist' or limits.specialists < limits.max_specialists %}
               {% set companion_blocked = c.requires_spell == 'Animal Companion' and has_animal_companion %}
               {% set is_legendary = c.key in LEGENDARY_SOLDIER_TYPE_KEYS %}
@@ -2762,6 +2762,8 @@
                         </li>
                       {% endfor %}
                     </ul>
+                  {% else %}
+                    <span class="muted">— No item</span>
                   {% endif %}
                 </li>
               {% endfor %}

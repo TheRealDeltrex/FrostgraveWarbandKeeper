@@ -630,12 +630,6 @@ BASE_RESOURCES: dict[str, dict] = {
         "source": "The Frostgrave Folio",
         "effects": "+1 Casting Rolls for all Miraculous Cure and Restore Life spells.",
     },
-    "weapons_rack": {
-        "name": "Weapons Rack",
-        "cost": 50,
-        "source": "The Frostgrave Folio",
-        "effects": "Non-magic weapons are bought or replaced for free.",
-    },
     # --- Fireheart ---
     "mirror_of_preening": {
         "name": "Mirror of Preening",
@@ -2660,6 +2654,17 @@ LEGENDARY_SOLDIER_MAX_CAP = 8  # hard ceiling, reached at level 70+
 # Pistol/Musket/Blunderbuss items themselves (standard items are
 # deliberately never source-gated).
 FIREARM_SOLDIER_TYPE_KEYS = frozenset({"musketeer", "coachman", "duellist"})
+
+# The Kennel base resource (2e core, p.106-107): may bring one war hound or
+# Animal Companion wolf above the normal soldier limit. Fireheart's Construct
+# Hound (bought or Animate Construct-summoned) explicitly stands in for a war
+# hound too — see its "notes" above — so it fills the same kennel slot.
+KENNEL_ELIGIBLE_TYPE_KEYS = frozenset({
+    "war_hound",
+    "companion_wolf",
+    "construct_hound",
+    "construct_hound_summoned",
+})
 
 # Extra source books whose soldiers / creatures / rules can be toggled on per
 # warband from the "Additional Rules and Homerules" tab. Core Rules content is

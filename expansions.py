@@ -32,6 +32,7 @@ from frostgrave_data import (
     HORSE_MOUNT_STAT_DELTA,
     HORSE_UPGRADE_BY_ID,
     HUNGER_STAT_PENALTY,
+    KENNEL_ELIGIBLE_TYPE_KEYS,
     LEGENDARY_SOLDIER_BASE_MAX,
     LEGENDARY_SOLDIER_LEVEL_STEP,
     LEGENDARY_SOLDIER_MAX_CAP,
@@ -501,6 +502,30 @@ def max_soldiers(wb: dict) -> int:
     base = int(base_raw) if base_raw is not None else MAX_SOLDIERS
     extra = sum(1 for p in pact_tiers(wb) if p.get("boon") == BOON_EXTRA_SOLDIER)
     return base + extra
+
+
+def kennel_bonus_available(wb: dict, type_key: str) -> bool:
+    """Whether hiring `type_key` right now would use the Kennel base
+    resource's one extra roster slot (2e core, p.106-107: "may bring one war
+    hound or wolf above normal soldier limit"; Fireheart's Construct Hound
+    stands in for a war hound too — see KENNEL_ELIGIBLE_TYPE_KEYS).
+
+    Unlike max_soldiers()'s other bonuses, this can't just be folded into a
+    flat +1 there — the extra slot is only for a hound, not any soldier, so
+    it has to be checked per hire attempt: the Kennel is owned, `type_key`
+    is eligible, and no other eligible soldier already occupies the slot (a
+    second hound past that needs genuine free roster space like anyone
+    else). Checked both in add_soldier()'s cap enforcement and in the hire
+    catalog's per-row "can I hire this" display, so the button and the
+    backend never disagree."""
+    if type_key not in KENNEL_ELIGIBLE_TYPE_KEYS:
+        return False
+    if "kennel" not in ((wb.get("base") or {}).get("resources") or []):
+        return False
+    return not any(
+        s.get("status") != "dead" and s.get("type_key") in KENNEL_ELIGIBLE_TYPE_KEYS
+        for s in wb.get("soldiers") or []
+    )
 
 
 def wizard_stat_caps(wb: dict) -> dict:

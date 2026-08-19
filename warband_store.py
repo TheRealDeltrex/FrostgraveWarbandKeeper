@@ -2133,6 +2133,8 @@ def add_soldier(
             return False, f"You may only have {TEMPORARY_MEMBER_LIMIT} temporary members (raised zombies/summoned demons combined) on the table at once."
     if not info.get("temporary"):
         cap = expansions.max_soldiers(wb)
+        if expansions.kennel_bonus_available(wb, type_key):
+            cap += 1
         if soldier_count(wb) >= cap:
             return False, f"Soldier limit reached ({cap})."
         spec_cap = expansions.max_specialists(wb)
@@ -2753,11 +2755,6 @@ def remove_soldier_thrall(wb: dict, soldier_id: str) -> tuple[bool, str]:
 
 
 BLACK_MARKET_ROLLS_PER_SCENARIO = 4
-# Only matches a *flat* leading gc amount ("20gc, Potions (3)"), never a
-# dice-formula one ("d20 × 10gc") — those need a second roll at the table,
-# which this app doesn't simulate, so they're left for the player to add
-# manually via Treasury once rolled.
-_FLAT_GOLD_RE = re.compile(r"^(\d+)gc\b")
 # A concrete named item with its own price ("Amulet of Resistance — 300gc") —
 # most supplement Treasure Tables roll straight into these rather than the
 # abstract "Magic Item" categories Core Rules uses. The separator character is
@@ -2884,7 +2881,8 @@ def _resolve_black_market_items(wb: dict, book: str, row_text: str, _depth: int 
 
 def black_market_roll(wb: dict, table_title: str, d20: int | None = None) -> tuple[bool, str]:
     """Records one Black Market roll: looks up the row for `d20` on the named
-    table and, if it's a flat gc amount, credits it immediately. Leave `d20`
+    table and resolves it to concrete item(s), if any — a flat gc amount is
+    discarded per the Black Market Contacts rule, not banked. Leave `d20`
     as None to have the app roll it for you (this is an out-of-game table,
     not a contested table-play roll, so there's nothing to referee); pass a
     physical die result instead if you'd rather report what you actually
@@ -2923,10 +2921,9 @@ def black_market_roll(wb: dict, table_title: str, d20: int | None = None) -> tup
     row = next((r for r in table["rows"] if r["name"] == str(d20)), None)
     if row is None:
         return False, f"No row {d20} on {table_title}."
-    gold_match = _FLAT_GOLD_RE.match(row["text"])
-    gold = int(gold_match.group(1)) if gold_match else 0
-    if gold:
-        wb["gold"] = int(wb.get("gold", 0)) + gold
+    # Black Market Contacts: gc rolled here is discarded, not banked — the
+    # rule is "roll on the table below instead" of the normal Treasure roll,
+    # and a flat-gc result on this table means nothing was actually found.
     item_names = _resolve_black_market_items(wb, book, row["text"])
     offer = {
         "id": uuid.uuid4().hex[:8],
@@ -2943,10 +2940,10 @@ def black_market_roll(wb: dict, table_title: str, d20: int | None = None) -> tup
         f"Black Market roll {bm['rolls_used']}/{BLACK_MARKET_ROLLS_PER_SCENARIO} "
         f"(d20={d20} on {table_title}): {row['text']}."
     )
-    if gold:
-        text += f" +{gold}gc added."
     if item_names:
         text += f" On offer: {', '.join(item_names)}."
+    else:
+        text += " No item."
     add_history(wb, text)
     return True, text
 
