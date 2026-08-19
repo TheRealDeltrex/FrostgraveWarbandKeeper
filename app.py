@@ -170,6 +170,7 @@ from warband_store import (
     apply_monster_hunting_results,
     apply_portrait,
     apply_soldier_level_up,
+    apprentice_effective_stats,
     apprentice_takes_over,
     base_summary,
     become_vampire,
@@ -411,6 +412,7 @@ app.jinja_env.globals.update(
     level_from_xp=level_from_xp,
     unused_xp=unused_xp,
     captain_effective_stats=captain_effective_stats,
+    apprentice_effective_stats=apprentice_effective_stats,
     soldier_item_slots=expansions.soldier_item_slots,
     IS_FROZEN=paths.is_frozen(),
     BROWSER_MODE=BROWSER_MODE,
@@ -1019,21 +1021,42 @@ def warband_view(warband_id: str) -> str:
     # wizard's state forbids. Filtering here rather than in the template keeps
     # empty source groups from rendering a heading with nothing under it.
     wb_spells = known_spell_names(wb)
+    # The Red King's Ragged Warbands & Random Recruits: computed here (rather
+    # than with the rest of its own UI block below) because it also relaxes
+    # two things in the hireable filter just below — see the loop.
+    ragged_warbands_enabled = "The Red King" in wb_sources and bool(
+        (wb.get("homerules") or {}).get("ragged_warbands_enabled")
+    )
+    disable_app_mechanics = bool((wb.get("homerules") or {}).get("disable_app_mechanics_enabled"))
     # Temporary members skip the known-spell check: hiring one is bookkeeping
     # for a spell the player already cast for real, not a request the app
     # needs to gate (see add_soldier()'s matching exemption).
-    hireable = [
-        {**c, "cost": expansions.soldier_cost(wb, c, c["key"])}
-        for c in soldier_list_for_ui()
-        if c["source"] in wb_sources
-        and soldier_from_book_enabled(wb, c["source"], c["key"])
-        and (c.get("temporary") or not c.get("requires_spell") or c["requires_spell"] in wb_spells)
-        and expansions.soldier_state_block(wb, c["key"]) is None
-    ]
+    hireable = []
+    for c in soldier_list_for_ui():
+        if not disable_app_mechanics:
+            if c["source"] not in wb_sources or not soldier_from_book_enabled(wb, c["source"], c["key"]):
+                continue
+            if not (c.get("temporary") or not c.get("requires_spell") or c["requires_spell"] in wb_spells):
+                continue
+            # Random Recruit Table III's two purely-random results (no vault
+            # item, no spell — see expansions.RANDOM_ONLY_SOLDIER_TYPE_KEYS)
+            # only belong in the catalog once Ragged Warbands is what could
+            # actually produce them.
+            if c["key"] in expansions.RANDOM_ONLY_SOLDIER_TYPE_KEYS and not ragged_warbands_enabled:
+                continue
+            if expansions.soldier_state_block(wb, c["key"], ignore_vault_item=ragged_warbands_enabled):
+                continue
+        hireable.append({**c, "cost": expansions.soldier_cost(wb, c, c["key"])})
     # The temporary-member catalog (Raise Zombie, Summon Demon) gets its own
     # "Hire temporary member" panel instead of living in the main hire table.
     temporary_catalog = [c for c in hireable if c.get("temporary")]
     hireable = [c for c in hireable if not c.get("temporary")]
+    # Spell-summoned permanent members (Animal Companion, Animate Construct,
+    # ...) get their own "Summoned creatures" panel too, between Hire soldier
+    # and Hire temporary member — they're gated by a known spell rather than
+    # a source book, so mixing them into the source-book catalog read oddly.
+    summoned_catalog = [c for c in hireable if c.get("requires_spell")]
+    hireable = [c for c in hireable if not c.get("requires_spell")]
     # Total temporary members on the table right now — one shared cap across
     # zombies and demons (no per-type sub-limit), disables every "Hire"
     # button in that panel once reached, mirroring Animal Companion's block.
@@ -1072,10 +1095,9 @@ def warband_view(warband_id: str) -> str:
     # The Red King's Ragged Warbands & Random Recruits: a single "Fill
     # roster" control (see roll_random_recruits), same idiom as Giant-Blooded
     # above — a warband-level toggle gates one shared control rather than a
-    # button repeated anywhere per-soldier.
-    ragged_warbands_enabled = "The Red King" in wb_sources and bool(
-        (wb.get("homerules") or {}).get("ragged_warbands_enabled")
-    )
+    # button repeated anywhere per-soldier. (ragged_warbands_enabled itself
+    # is computed earlier, alongside the hireable-catalog filter it also
+    # feeds into.)
     ragged_warbands_have = 1 + (1 if wb.get("apprentice") else 0) + soldier_count(wb)
     ragged_warbands_rules = next(
         (
@@ -1164,7 +1186,8 @@ def warband_view(warband_id: str) -> str:
         temporary_member_count=temporary_member_count,
         temporary_member_limit=TEMPORARY_MEMBER_LIMIT,
         limits=limits,
-        catalog_groups=group_soldiers_by_source(hireable),
+        hireable=hireable,
+        summoned_catalog=summoned_catalog,
         temporary_catalog=temporary_catalog,
         known_spell_names=wb_spells,
         has_animal_companion=has_animal_companion(wb),
@@ -1424,10 +1447,16 @@ def _act_soldier_edit(wb: dict) -> tuple[bool, str]:
     for s in wb.get("soldiers") or []:
         if s.get("id") == sid:
             s["name"] = (request.form.get("soldier_name") or s.get("name", "")).strip()
-            s["notes"] = request.form.get("notes") or ""
+            # The Equipment (gear) and Edit/picture sections now submit as separate
+            # forms sharing this one action (see roster table), so a field entirely
+            # absent from request.form means "not part of this submission" and must
+            # leave the existing value alone, not blank it.
+            if "notes" in request.form:
+                s["notes"] = request.form.get("notes") or ""
             slot_n = expansions.soldier_item_slots(wb, s.get("type_key", ""))
-            slots = [(request.form.get(f"soldier_{sid}_slot_{i}") or "").strip() for i in range(slot_n)]
-            s["item_slots"] = normalize_item_slots(slots, slot_n)
+            if any(f"soldier_{sid}_slot_{i}" in request.form for i in range(slot_n)):
+                slots = [(request.form.get(f"soldier_{sid}_slot_{i}") or "").strip() for i in range(slot_n)]
+                s["item_slots"] = normalize_item_slots(slots, slot_n)
             if request.form.get("soldier_portrait_remove") == "on":
                 remove_portrait(s, wb["id"], f"soldier_{sid}")
             f = request.files.get("soldier_portrait")

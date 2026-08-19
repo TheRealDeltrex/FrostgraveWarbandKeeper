@@ -87,6 +87,94 @@
       ]
     }
   ],
+  "Thaw of the Lich Lord": [
+    {
+      "title": "Lich Lord Treasure Table",
+      "blurb": "After playing a Thaw of the Lich Lord scenario, a player that has acquired treasure may exchange one roll on the regular treasure table for a roll on this table. Players may only make one roll on this table after each game, unless otherwise stated by a specific scenario.",
+      "rows": [
+        {
+          "name": "1",
+          "text": "Wraithbottle — 200gc"
+        },
+        {
+          "name": "2",
+          "text": "Magic Spectacles — 250gc"
+        },
+        {
+          "name": "3",
+          "text": "Sword of Undead Slaying — 300gc"
+        },
+        {
+          "name": "4",
+          "text": "Horn of Hellfire — 400gc"
+        },
+        {
+          "name": "5",
+          "text": "Vampire Blade — 300gc"
+        },
+        {
+          "name": "6",
+          "text": "Quiver of the Soul Seeker — 300gc"
+        },
+        {
+          "name": "7",
+          "text": "Boots of Leaping — 250gc"
+        },
+        {
+          "name": "8",
+          "text": "Eyes of Amoto — 300gc"
+        },
+        {
+          "name": "9",
+          "text": "Ring of Life — 400gc"
+        },
+        {
+          "name": "10",
+          "text": "Unbreakable Orb — 300gc"
+        },
+        {
+          "name": "11",
+          "text": "Ivory Scroll"
+        },
+        {
+          "name": "12",
+          "text": "Scarf of Obscurance — 350gc"
+        },
+        {
+          "name": "13",
+          "text": "Vial of Starlight (10) — 600gc"
+        },
+        {
+          "name": "14",
+          "text": "Crystal Rose — 400gc"
+        },
+        {
+          "name": "15",
+          "text": "Club of Battering — 300gc"
+        },
+        {
+          "name": "16",
+          "text": "Book of Bones — 500gc"
+        },
+        {
+          "name": "17",
+          "text": "Book of the Rangifer — 300gc"
+        },
+        {
+          "name": "18",
+          "text": "Grimoire of the Revenant"
+        },
+        {
+          "name": "19",
+          "text": "Grimoire of the Homunculus"
+        },
+        {
+          "name": "20",
+          "text": "Grimoire of Lichdom"
+        }
+      ]
+    }
+  ],
   "Forgotten Pacts": [
     {
       "title": "Forgotten Pacts Treasure Table",

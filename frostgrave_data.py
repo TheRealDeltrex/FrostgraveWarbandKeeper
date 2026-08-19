@@ -2542,9 +2542,13 @@ SOLDIERS: dict[str, dict] = {
     # Added for Ragged Warbands & Random Recruits (The Red King, Chapter Two),
     # whose Random Recruit Table III can produce any of these four. Each is
     # sourced to the book that actually grants the hire (only Foulhorn is
-    # genuinely a Red King addition), modeled on "rangifer": a plain soldier
-    # entry whose hiring prerequisite (a magic item, here) is documented but
-    # not enforced by the app.
+    # genuinely a Red King addition). Werewolf/Snow Troll/Foulhorn each have a
+    # magic-item hiring prerequisite, enforced the same way as Rangifer troops
+    # — see expansions.VAULT_ITEM_SOLDIERS. Vampire and Minor Demon (below)
+    # have no such item and are purely a Random Recruit Table III result —
+    # see expansions.RANDOM_ONLY_SOLDIER_TYPE_KEYS, which the "Hire soldier"
+    # panel uses to hide them from the catalog by default (a display
+    # preference, not a hire block: nothing stops hiring them directly).
     "werewolf": {
         "name": "Werewolf",
         "cost": 200,

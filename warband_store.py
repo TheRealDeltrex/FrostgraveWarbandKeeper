@@ -380,6 +380,14 @@ def default_homerules() -> dict:
         # single dagger costs no item slot under the core rules. Gear-text
         # only — never touches item_slots. See expansions.free_dagger_gear().
         "free_dagger_enabled": True,
+        # Off by default: an escape hatch, not a rule — floods the "Hire
+        # soldier" panel with every catalog entry regardless of source book,
+        # known spells, wizard state, or vault items, and lets add_soldier()
+        # hire any of them. For working around an app oversight (a soldier
+        # wrongly gated) or a house rule this app doesn't model. Roster/
+        # specialist/legendary caps and gold cost still apply — this only
+        # bypasses which *types* are eligible, not warband size or economy.
+        "disable_app_mechanics_enabled": False,
         "soldier_max_levels": SOLDIER_MAX_LEVELS,
         "soldier_stat_caps": deepcopy(SOLDIER_STAT_CAPS),
         "promote_captain_cost": PROMOTE_CAPTAIN_COST,
@@ -596,14 +604,19 @@ def empty_captain(name: str = "", homerules: dict | None = None, origin: str = "
     }
 
 
-def captain_effective_stats(cap: dict) -> dict:
+def captain_effective_stats(wb: dict, cap: dict) -> dict:
     """Base captain stats plus Armour/Move bonuses from equipped Shield/Armour items.
     Computed fresh from item_slots every time rather than stored — Armour and Move
     aren't level-up stats, so there's no persisted value that could drift out of
-    sync with whatever the captain currently has equipped."""
+    sync with whatever the captain currently has equipped. If the captain is
+    currently riding the warband's horse, Armour is floored at
+    expansions.MOUNTED_ARMOUR_FLOOR after the item bonus is added, so equipping
+    (or removing) Armour after mounting can't dodge or double-dip the floor."""
     stats = dict(cap.get("stats") or {})
     bonus = equipment_bonuses(cap.get("item_slots") or [])
     stats["armour"] = int(stats.get("armour", 0)) + bonus["armour"]
+    if expansions.is_horse_rider(wb, "captain"):
+        stats["armour"] = max(expansions.MOUNTED_ARMOUR_FLOOR, stats["armour"])
     stats["move"] = int(stats.get("move", 0)) + bonus["move"]
     return expansions.apply_hunger_penalty(stats, cap.get("status"))
 
@@ -612,10 +625,14 @@ def wizard_effective_stats(wb: dict) -> dict:
     """The wizard's stats as they play, with any wizard-state bonus folded in
     (e.g. Beastcrafter III's Fast/Scales animal feature). Lives here rather than
     in app.py (G6) so pdf_export.py can use the same numbers the web UI shows,
-    instead of reading raw stats and printing a wrong roster."""
+    instead of reading raw stats and printing a wrong roster. See
+    captain_effective_stats() for why the Mounted Armour floor is applied here
+    rather than baked into the stored stat at mount_horse() time."""
     stats = dict((wb.get("wizard") or {}).get("stats") or {})
     for stat, amount in expansions.wizard_state_stat_bonus(wb).items():
         stats[stat] = int(stats.get(stat, 0)) + amount
+    if expansions.is_horse_rider(wb, "wizard"):
+        stats["armour"] = max(expansions.MOUNTED_ARMOUR_FLOOR, int(stats.get("armour", 0)))
     return expansions.apply_hunger_penalty(stats, (wb.get("wizard") or {}).get("status"))
 
 
@@ -651,6 +668,21 @@ def sync_apprentice(wb: dict) -> None:
     ap["item_slots"] = normalize_item_slots(
         ap.get("item_slots", ap.get("items")), expansions.apprentice_item_slots(wb)
     )
+
+
+def apprentice_effective_stats(wb: dict) -> dict:
+    """The apprentice's stored stats, with the Mounted Armour floor applied if
+    currently riding the warband's horse. Computed fresh rather than baked
+    into the stored stat at mount time — sync_apprentice() fully rebuilds
+    ap['stats'] from the wizard elsewhere, so a value written once at mount
+    time can't be relied on to still reflect the mount penalty later; reading
+    it dynamically here (same idiom as captain_effective_stats()) means the
+    floor is always correct regardless of when it's checked."""
+    ap = wb.get("apprentice") or {}
+    stats = dict(ap.get("stats") or {})
+    if expansions.is_horse_rider(wb, "apprentice"):
+        stats["armour"] = max(expansions.MOUNTED_ARMOUR_FLOOR, int(stats.get("armour", 0)))
+    return stats
 
 
 def spells_from_keys(keys: list[str], wizard_school: str) -> list[dict]:
@@ -1944,6 +1976,8 @@ def enrich_soldier(wb: dict, s: dict) -> dict:
     # it can't drift from whatever the soldier currently has equipped.
     bonus = equipment_bonuses(s.get("item_slots") or [])
     out["armour"] = int(out.get("armour", 0)) + bonus["armour"]
+    if expansions.is_horse_rider(wb, "soldier", s.get("id")):
+        out["armour"] = max(expansions.MOUNTED_ARMOUR_FLOOR, out["armour"])
     out["move"] = int(out.get("move", 0)) + bonus["move"]
     out = expansions.apply_hunger_penalty(out, s.get("status"))
     return out
@@ -2034,11 +2068,23 @@ def add_soldier(
     info = get_soldier(type_key)
     if not info:
         return False, "Unknown soldier type."
+    # The "disable app mechanics" homerule escape hatch (default_homerules()):
+    # skips every check below that gates which soldier *types* are eligible
+    # (source book, wizard state, vault items, known spells) — for an app
+    # oversight wrongly blocking a legal hire, or a house rule this app
+    # doesn't model. Roster/specialist/legendary caps and gold cost, further
+    # down, are never skipped.
+    disable_mechanics = bool((wb.get("homerules") or {}).get("disable_app_mechanics_enabled"))
     src = info.get("source", "Core Rules")
-    if src not in enabled_sources(wb):
-        return False, f"{info['name']} is from {src}; enable that source under Additional Rules and Homerules first."
-    if not soldier_from_book_enabled(wb, src, type_key):
-        return False, f"{info['name']}'s soldiers are switched off for {src} under Additional Rules and Homerules (its spells/items/bestiary can stay on)."
+    if not disable_mechanics and src not in enabled_sources(wb):
+        return False, (
+            f"{info['name']} is from {src}; enable that source under Additional Rules and Homerules first."
+        )
+    if not disable_mechanics and not soldier_from_book_enabled(wb, src, type_key):
+        return False, (
+            f"{info['name']}'s soldiers are switched off for {src} under Additional Rules "
+            "and Homerules (its spells/items/bestiary can stay on)."
+        )
     illusion_source = (illusion_source or "").strip()
     illusion_info = None
     if type_key == "illusionary_soldier":
@@ -2055,17 +2101,21 @@ def add_soldier(
             return False, "Knightly Orders need Spellcaster Magazine and its own toggle switched on under Additional Rules and Homerules."
         if order not in KNIGHTLY_ORDER_IDS:
             return False, "Unknown Knightly Order."
-    blocked = expansions.soldier_state_block(wb, type_key)
-    if blocked:
-        return False, blocked
+    if not disable_mechanics:
+        blocked = expansions.soldier_state_block(wb, type_key)
+        if blocked:
+            return False, blocked
     req_spell = info.get("requires_spell")
     # Temporary members (Raise Zombie, Summon Demon) are bookkeeping for what's
     # already happened at the table — the player cast the spell for real, dice
     # and all, so the app doesn't re-gate the add on the wizard's known-spell
     # list the way it does for the permanent summons below.
-    if req_spell and not info.get("temporary"):
+    if req_spell and not info.get("temporary") and not disable_mechanics:
         if req_spell not in known_spell_names(wb):
-            return False, f"{info['name']} can only be summoned with the {req_spell} spell — your wizard doesn't know it."
+            return False, (
+                f"{info['name']} can only be summoned with the {req_spell} spell — "
+                "your wizard doesn't know it."
+            )
         if req_spell == "Animal Companion" and has_animal_companion(wb):
             limit = animal_companion_limit(wb)
             if limit == 1:
@@ -3523,6 +3573,7 @@ def update_homerules(wb: dict, form: "ImmutableMultiDict") -> tuple[bool, str]:
                 form.get("soldier_permanent_injuries_enabled") == "on"
             ),
             "free_dagger_enabled": form.get("free_dagger_enabled") == "on",
+            "disable_app_mechanics_enabled": form.get("disable_app_mechanics_enabled") == "on",
             "soldier_max_levels": int(form.get("soldier_max_levels") or hr["soldier_max_levels"]),
             "soldier_stat_caps": _parse_stat_caps(form, "soldier", hr["soldier_stat_caps"]),
             "promote_captain_cost": int(

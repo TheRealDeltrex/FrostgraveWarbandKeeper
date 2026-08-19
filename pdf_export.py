@@ -34,6 +34,7 @@ from frostgrave_data import (
 )
 from game_content import item_slot_cost
 from warband_store import (
+    apprentice_effective_stats,
     base_summary,
     captain_effective_stats,
     enrich_soldier,
@@ -120,22 +121,19 @@ def _stat_line(stats: dict, include_health: bool = False, unmounted: dict | None
 
 
 def _horse_rider_match(wb: dict, kind: str, soldier_id: str | None = None) -> bool:
+    return expansions.is_horse_rider(wb, kind, soldier_id)
+
+
+def _unmounted_overlay(wb: dict) -> dict | None:
+    """This figure's Move/Fight/Armour before it climbed on the warband's
+    horse, straight from the mount's stored backup — not derived by
+    subtracting the Mounted Modifier from the current effective stat, because
+    Armour is floored at expansions.MOUNTED_ARMOUR_FLOOR while mounted (see
+    captain_effective_stats() et al.), which would make that subtraction
+    silently wrong whenever the floor is doing anything. None if no one is
+    currently mounted."""
     rider = (wb.get("horse") or {}).get("rider")
-    if not rider or rider.get("kind") != kind:
-        return False
-    return rider.get("soldier_id") == soldier_id if kind == "soldier" else True
-
-
-def _unmounted_overlay(wb: dict, current: dict) -> dict:
-    """current minus the warband horse's Mounted Modifiers (including any
-    Advanced Horsemanship upgrade's effect on them) — the figure's own stats
-    before it climbed on, for _stat_line's bracket display."""
-    delta = expansions.horse_mount_delta(wb)
-    return {
-        "move": int(current.get("move", 0)) - delta["move"],
-        "fight": int(current.get("fight", 0)) - delta["fight"],
-        "armour": int(current.get("armour", 0)) - delta["armour"],
-    }
+    return rider.get("backup") if rider else None
 
 
 def _horse_companion_line(wb: dict) -> str:
@@ -455,7 +453,7 @@ def build_warband_pdf(wb: dict) -> bytes:
     pdf.cell(
         0,
         5,
-        _stat_line(wstats, unmounted=_unmounted_overlay(wb, wstats) if wiz_mounted else None),
+        _stat_line(wstats, unmounted=_unmounted_overlay(wb) if wiz_mounted else None),
         new_x="LMARGIN",
         new_y="NEXT",
         markdown=True,
@@ -503,7 +501,7 @@ def build_warband_pdf(wb: dict) -> bytes:
         left = pdf.l_margin + wiz_size + portrait_gap
         pdf.set_xy(left, y0)
         pdf.set_font("Helvetica", "B", 12)
-        astats = ap.get("stats") or {}
+        astats = apprentice_effective_stats(wb)
         pdf.cell(
             0,
             6,
@@ -530,7 +528,7 @@ def build_warband_pdf(wb: dict) -> bytes:
         pdf.cell(
             0,
             5,
-            _stat_line(astats, unmounted=_unmounted_overlay(wb, astats) if ap_mounted else None),
+            _stat_line(astats, unmounted=_unmounted_overlay(wb) if ap_mounted else None),
             new_x="LMARGIN",
             new_y="NEXT",
             markdown=True,
@@ -638,7 +636,7 @@ def build_warband_pdf(wb: dict) -> bytes:
             pdf.cell(0, 4, _t(_horse_companion_line(wb)), new_x="LMARGIN", new_y="NEXT")
         pdf.set_x(left)
         pdf.set_font("Helvetica", "", 10)
-        cstats_eff = captain_effective_stats(cap)
+        cstats_eff = captain_effective_stats(wb, cap)
         pdf.cell(
             0, 5, _health_line(cstats_eff.get("health", 14)), new_x="LMARGIN", new_y="NEXT", markdown=True
         )
@@ -646,7 +644,7 @@ def build_warband_pdf(wb: dict) -> bytes:
         pdf.cell(
             0,
             5,
-            _stat_line(cstats_eff, unmounted=_unmounted_overlay(wb, cstats_eff) if cap_mounted else None),
+            _stat_line(cstats_eff, unmounted=_unmounted_overlay(wb) if cap_mounted else None),
             new_x="LMARGIN",
             new_y="NEXT",
             markdown=True,
@@ -784,7 +782,7 @@ def build_warband_pdf(wb: dict) -> bytes:
                 new_y="NEXT",
                 markdown=True,
             )
-            s_unmounted = _unmounted_overlay(wb, stats) if s_mounted else None
+            s_unmounted = _unmounted_overlay(wb) if s_mounted else None
             pdf.set_x(left)
             pdf.multi_cell(
                 0,
