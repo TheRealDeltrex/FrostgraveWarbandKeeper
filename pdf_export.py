@@ -27,7 +27,10 @@ from frostgrave_data import (
     PROSTHETIC_LIMB_NAME_BY_INJURY_ID,
     PROSTHETIC_UPGRADE_BY_ID,
     SOLDIER_COMPANION_BY_TYPE_KEY,
+    animal_companion_type_keys,
+    construct_type_keys,
     format_stat,
+    unused_xp,
 )
 from game_content import item_slot_cost
 from warband_store import (
@@ -426,12 +429,13 @@ def build_warband_pdf(wb: dict) -> bytes:
         elif state_kind == expansions.STATE_PACT:
             held = len(expansions.pact_tiers(wb))
             state_note += f" ({held} pact{'' if held == 1 else 's'})"
+    wiz_unused_xp = unused_xp(wiz.get("xp", 0), wiz.get("level", 0), expansions.xp_per_level(wb))
     pdf.cell(
         0,
         6,
         _t(
             f"{wiz.get('name', 'Wizard')}  -  {school}  -  "
-            f"Level {wiz.get('level', 0)}  -  XP {wiz.get('xp', 0)}{state_note}"
+            f"Level {wiz.get('level', 0)}  -  XP {wiz_unused_xp}{state_note}"
             f"{_status_note(wiz.get('status'))}"
         ),
         new_x="LMARGIN",
@@ -616,12 +620,13 @@ def build_warband_pdf(wb: dict) -> bytes:
         left = pdf.l_margin + wiz_size + portrait_gap
         pdf.set_xy(left, y0)
         pdf.set_font("Helvetica", "B", 12)
+        cap_unused_xp = unused_xp(cap.get("xp", 0), cap.get("level", 0))
         pdf.cell(
             0,
             6,
             _t(
                 f"{cap.get('name', 'Captain')}  -  Level {cap.get('level', 0)}  -  "
-                f"XP {cap.get('xp', 0)}{_status_note(cap.get('status'))}"
+                f"XP {cap_unused_xp}{_status_note(cap.get('status'))}"
             ),
             new_x="LMARGIN",
             new_y="NEXT",
@@ -709,8 +714,18 @@ def build_warband_pdf(wb: dict) -> bytes:
             pdf.set_xy(left, y0)
             pdf.set_font("Helvetica", "B", 10)
             level_suffix = ""
-            if homerules.get("soldier_leveling_enabled") and s.get("level", 0) > 0:
-                level_suffix = f"  ·  Level {s['level']}"
+            s_type_key = s.get("type_key")
+            s_allow_animal = homerules.get("soldier_leveling_animal_companions")
+            s_allow_construct = homerules.get("soldier_leveling_constructs")
+            s_can_level = (
+                homerules.get("soldier_leveling_enabled")
+                and not s.get("temporary")
+                and (s_type_key not in animal_companion_type_keys() or s_allow_animal)
+                and (s_type_key not in construct_type_keys() or s_allow_construct)
+            )
+            if s_can_level:
+                s_unused_xp = unused_xp(s.get("xp", 0), s.get("level", 0))
+                level_suffix = f"  ·  Level {s.get('level', 0)}  -  XP {s_unused_xp}"
             pdf.cell(
                 0,
                 5,

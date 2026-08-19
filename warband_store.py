@@ -27,6 +27,7 @@ from frostgrave_data import (
     BASE_LOCATIONS,
     BASE_RESOURCES,
     CAPTAIN_BASE,
+    CAPTAIN_BONUS_STATS,
     CAPTAIN_HIRING_COST,
     CAPTAIN_ITEM_SLOTS,
     CAPTAIN_MAX_LEVEL,
@@ -118,6 +119,7 @@ from frostgrave_data import (
     range_table_lookup,
     school_relation,
     spell_id,
+    unused_xp,
     xp_to_next_level,
 )
 from game_content import (
@@ -1914,6 +1916,7 @@ def warband_limits(wb: dict) -> dict:
         "level": level,
         "xp_per_level": per_level,
         "xp_to_next": xp_to_next_level(xp, level, per_level),
+        "unused_xp": unused_xp(xp, level, per_level),
         "pending_levels": max(0, level_from_xp(xp, per_level, expansions.max_wizard_level(wb)) - level),
     }
 
@@ -3676,7 +3679,7 @@ def hire_captain(
     wb["gold"] = int(wb["gold"]) - cost
     cap = empty_captain(name or "Captain", hr)
     cap["known_tricks"] = list(tricks or [])
-    if hr.get("captain_bonus_choice_enabled") and extra_stat in LEVELUP_STATS:
+    if hr.get("captain_bonus_choice_enabled") and extra_stat in CAPTAIN_BONUS_STATS:
         limits = hr.get("captain_stat_absolute_limits") or CAPTAIN_STAT_ABSOLUTE_LIMITS
         current = int(cap["stats"].get(extra_stat, 0))
         limit = limits.get(extra_stat)
@@ -4023,7 +4026,7 @@ def promote_soldier_to_captain(
     for stat in LEVELUP_STATS:
         stats[stat] = _apply_stat_absolute_limit(stats.get(stat, 0), int(bonus.get(stat, 0)), limits.get(stat))
     applied_extra_stat = None
-    if hr.get("promote_captain_bonus_choice_enabled") and extra_stat in LEVELUP_STATS:
+    if hr.get("promote_captain_bonus_choice_enabled") and extra_stat in CAPTAIN_BONUS_STATS:
         current = stats.get(extra_stat, 0)
         limit = limits.get(extra_stat)
         if limit is None or current < limit:

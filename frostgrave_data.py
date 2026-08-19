@@ -66,6 +66,21 @@ def bonus_choice_amount(stat: str) -> int:
 # Soldier all share this set — matches the stat subset in LEVEL_UP_OPTIONS).
 LEVELUP_STATS = ["fight", "shoot", "will", "health"]
 
+# Stats offered for the captain's one-time hire/promotion "+1 to a stat of
+# your choice" bonus — a superset of LEVELUP_STATS (which governs the
+# separate, repeatable flat-XP level-up spend) that also allows Move.
+CAPTAIN_BONUS_STATS = LEVELUP_STATS + ["move"]
+
+# Flavor-only "class" implied by which stat the captain's one-time starting
+# bonus was spent on. Display only — no rules text/description anywhere.
+CAPTAIN_CLASS_BY_BONUS_STAT = {
+    "fight": "Fighter",
+    "shoot": "Shooter",
+    "move": "Runner",
+    "health": "Survivor",
+    "will": "Strong-willed",
+}
+
 # Per-stat level-up cap shape used by both Captain and Soldier Leveling:
 # {"limit": int, "unlimited": bool} — limit is ignored when unlimited is True;
 # limit 0 (and not unlimited) means that stat can never be leveled.
@@ -3228,3 +3243,10 @@ def level_from_xp(xp: int, per_level: int = XP_PER_LEVEL, max_level: int = MAX_W
 
 def xp_to_next_level(xp: int, level: int, per_level: int = XP_PER_LEVEL) -> int:
     return max(0, xp_for_level(level + 1, per_level) - int(xp))
+
+
+def unused_xp(xp: int, level: int, per_level: int = XP_PER_LEVEL) -> int:
+    """XP already earned but not yet converted into a spent level-up — total
+    XP minus what the current (spent) level already accounts for. Distinct
+    from xp_to_next_level(), which measures the gap to the *next* level."""
+    return max(0, int(xp) - xp_for_level(int(level), per_level))

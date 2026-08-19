@@ -35,6 +35,8 @@ from frostgrave_data import (
     APPRENTICE_COST,
     BASE_LOCATIONS,
     BASE_RESOURCES,
+    CAPTAIN_BONUS_STATS,
+    CAPTAIN_CLASS_BY_BONUS_STAT,
     CAPTAIN_ITEM_SLOTS,
     CAPTAIN_MIND_CONTROL_LABELS,
     CAPTAIN_MIND_CONTROL_OPTIONS,
@@ -108,6 +110,7 @@ from frostgrave_data import (
     level_from_xp,
     soldier_list_for_ui,
     spells_for_wizard_ui,
+    unused_xp,
 )
 from game_content import (
     construct_modifications,
@@ -403,7 +406,10 @@ app.jinja_env.globals.update(
     SPELL_COMPONENT_BAG_COST=SPELL_COMPONENT_BAG_COST,
     SPELL_COMPONENT_BAG_LIMIT=SPELL_COMPONENT_BAG_LIMIT,
     LEVELUP_STATS=LEVELUP_STATS,
+    CAPTAIN_BONUS_STATS=CAPTAIN_BONUS_STATS,
+    CAPTAIN_CLASS_BY_BONUS_STAT=CAPTAIN_CLASS_BY_BONUS_STAT,
     level_from_xp=level_from_xp,
+    unused_xp=unused_xp,
     captain_effective_stats=captain_effective_stats,
     soldier_item_slots=expansions.soldier_item_slots,
     IS_FROZEN=paths.is_frozen(),
