@@ -359,10 +359,27 @@ VAULT_ITEM_SOLDIERS = {
     "rangifer_hurler": "Book of the Rangifer",
     "rangifer_packdeer": "Book of the Rangifer",
     "rangifer_war_leader": "Book of the Rangifer",
+    # The Red King's Random Recruit Table III bestiary hires (see
+    # frostgrave_data.SOLDIERS' "werewolf" comment) — each names its own
+    # magic-item prerequisite in its own flavor text.
+    "werewolf": "Book of the Werewolf",
+    "snow_troll": "Troll Shackles",
+    "foulhorn": "Book of the Foulhorn",
 }
 
 # Never hireable on its own — see the VAULT_ITEM_SOLDIERS comment above.
 NEVER_HIREABLE_SOLDIERS = {"rangifer_boar"}
+
+# The remaining two Random Recruit Table III bestiary hires (see
+# frostgrave_data.SOLDIERS' "werewolf" comment) have no magic-item
+# prerequisite at all — a genuine random-encounter/campaign result, not
+# something a wizard can go acquire. Unlike VAULT_ITEM_SOLDIERS above, this
+# is NOT a hire gate (soldier_state_block() doesn't consult it — nothing
+# stops hiring them directly). app.py's "Hire soldier" panel uses this set
+# to keep them out of the catalog unless Ragged Warbands (the homerule that
+# actually puts Random Recruit Table results in play) is switched on, or the
+# "disable app mechanics" escape hatch is.
+RANDOM_ONLY_SOLDIER_TYPE_KEYS = {"vampire", "minor_demon"}
 
 # Reanimating a dead soldier (Thaw of the Lich Lord). Keeps their stats; Will
 # becomes +0. Unlimited revenants per warband.
@@ -715,10 +732,16 @@ def wizard_state_stat_bonus(wb: dict) -> dict:
 # --- Gating -----------------------------------------------------------------
 
 
-def soldier_state_block(wb: dict, type_key: str) -> str | None:
+def soldier_state_block(wb: dict, type_key: str, ignore_vault_item: bool = False) -> str | None:
     """Why this soldier type is unavailable beyond its source book — the wizard's
     state forbids it, or it needs a pact boon or a treasure in the vault.
-    None means nothing here blocks it."""
+    None means nothing here blocks it.
+
+    `ignore_vault_item` skips the vault-item check only — for Ragged Warbands
+    (The Red King): a Random Recruit Table roll can legitimately produce any
+    of these regardless of whether the matching item happens to be owned, so
+    the "Hire soldier" panel passes True for the vault-item-gated entries
+    once that homerule is on. Every other reason here still applies."""
     if type_key in LICH_BLOCKED_SOLDIERS and is_lich(wb):
         return "A Rangifer will not serve an undead wizard — your wizard is a Lich."
     if type_key in LICH_BLOCKED_SOLDIERS and is_vampire(wb):
@@ -734,7 +757,7 @@ def soldier_state_block(wb: dict, type_key: str) -> str | None:
         boon = PACT_BOON_BY_ID[need_boon]["name"]
         return f"Requires the {boon} pact boon."
     need_item = VAULT_ITEM_SOLDIERS.get(type_key)
-    if need_item and not has_vault_item(wb, need_item):
+    if need_item and not ignore_vault_item and not has_vault_item(wb, need_item):
         return f"Requires a {need_item} in the vault."
     return None
 
@@ -883,6 +906,28 @@ def horse_mount_delta(wb: dict) -> dict:
         for stat, amount in upgrade["mount_delta"].items():
             delta[stat] = delta.get(stat, 0) + amount
     return delta
+
+
+# A mounted model's Armour can never end up below this, no matter how harsh
+# the horse's Mounted Modifier (or an Advanced Horsemanship upgrade) makes it
+# — Frostgrave's floor for a model on horseback. Enforced at effective-stat
+# computation time (wizard_effective_stats(), apprentice_effective_stats(),
+# captain_effective_stats(), enrich_soldier() in warband_store.py) rather than
+# baked into the stored base stat once at mount_horse() time, so it can't be
+# dodged by equipping (or unequipping) an Armour item afterward: those
+# functions add the item's Armour bonus on top of the stored base fresh on
+# every read, so flooring the base alone would let a later-equipped bonus
+# stack on top of an artificially-raised floor instead of the true value.
+MOUNTED_ARMOUR_FLOOR = 10
+
+
+def is_horse_rider(wb: dict, kind: str, soldier_id: str | None = None) -> bool:
+    """Whether `kind` (+ soldier_id for a soldier) is currently riding the
+    warband's horse."""
+    rider = (wb.get("horse") or {}).get("rider")
+    if not rider or rider.get("kind") != kind:
+        return False
+    return rider.get("soldier_id") == soldier_id if kind == "soldier" else True
 
 
 def equipped_item_holders(wb: dict) -> dict[str, list[str]]:

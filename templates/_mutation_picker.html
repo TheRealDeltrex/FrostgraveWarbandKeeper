@@ -58,3 +58,19 @@
     </details>
   {% endif %}
 {% endmacro %}
+
+{# A "mutated" badge that's itself a <details> summary — clicking it shows the
+   mutation list inline, right where the badge is, instead of navigating to
+   the full Mutations panel elsewhere on the card. #}
+{% macro mutated_badge(mutations) %}
+  {% if mutations %}
+    <details style="display:inline-block;vertical-align:middle">
+      <summary class="badge" title="{{ mutations|length }} Grave Mutation{{ 's' if mutations|length != 1 }} — click for details">mutated</summary>
+      <ul class="list-plain" style="font-size:0.8rem;margin:0.3rem 0 0;max-width:26rem">
+        {% for m in mutations %}
+          <li><strong>{{ m.number }}. {{ m.name }}</strong> — {{ m.text }}</li>
+        {% endfor %}
+      </ul>
+    </details>
+  {% endif %}
+{% endmacro %}

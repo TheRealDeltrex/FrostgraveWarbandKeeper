@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% from "_loot_picker.html" import loot_picker_row with context %}
-{% from "_mutation_picker.html" import mutation_picker with context %}
+{% from "_mutation_picker.html" import mutation_picker, mutated_badge with context %}
 {% from "_construct_modification_picker.html" import construct_modification_picker with context %}
 {% from "_permanent_injury_picker.html" import permanent_injury_picker with context %}
 {% block title %}{{ wb.name }} · Frostgrave{% endblock %}
@@ -382,6 +382,18 @@
                 Instead of open buying, roll 4x on the Treasure Table after a game and buy only from
                 what comes up — adds a Black Market sub-card to the Treasury, Vault and Workshop card
                 below to record rolls and look up results.
+              </p>
+            </details>
+          </div>
+          <div class="hr-row">
+            <input id="disable_app_mechanics_enabled" name="disable_app_mechanics_enabled" type="checkbox" {% if hr.disable_app_mechanics_enabled %}checked{% endif %} />
+            <details class="hr-note" id="hrnote-disable_app_mechanics_enabled">
+              <summary>Disable app mechanics and show all soldiers</summary>
+              <p class="hr-note-body">
+                Not a rule — an escape hatch. Hire soldier lists and allows hiring every catalog entry,
+                regardless of source book, known spells, wizard state, or vault items. For working
+                around an app oversight, or a house rule this app doesn't model. Roster/specialist/
+                legendary limits and gold cost still apply.
               </p>
             </details>
           </div>
@@ -883,13 +895,14 @@
             {% endif %}
             {% set wiz_mounted = horse_rider and horse_rider.kind == 'wizard' %}
             {% if wiz_mounted %}<span class="badge" title="Riding the warband's horse: Move +{{ hmd.move }}, Fight +{{ hmd.fight }}, Armour {{ hmd.armour }}">mounted</span>{% endif %}
+            {{ mutated_badge(wiz.mutations) }}
             <div class="stat-row">
               {# wizard_display_stats, not wiz.stats: a Beastcrafter III's Animal
                  Feature (Fast / Scales) is folded in, marked with a * below. #}
               <div class="stat-pill"><span class="label">Move</span><span class="value">{{ wizard_display_stats.move }}{% if wizard_state_bonus.move %}*{% endif %}{% if wiz_mounted %} <span class="muted">({{ wizard_display_stats.move - hmd.move }})</span>{% endif %}</span></div>
               <div class="stat-pill"><span class="label">Fight</span><span class="value">{{ format_stat(wizard_display_stats.fight) }}{% if wiz_mounted %} <span class="muted">({{ format_stat(wizard_display_stats.fight - hmd.fight) }})</span>{% endif %}</span></div>
               <div class="stat-pill"><span class="label">Shoot</span><span class="value">{{ format_stat(wizard_display_stats.shoot) }}</span></div>
-              <div class="stat-pill"><span class="label">Armour</span><span class="value">{{ wizard_display_stats.armour }}{% if wizard_state_bonus.armour %}*{% endif %}{% if wiz_mounted %} <span class="muted">({{ wizard_display_stats.armour - hmd.armour }})</span>{% endif %}</span></div>
+              <div class="stat-pill"><span class="label">Armour</span><span class="value">{{ wizard_display_stats.armour }}{% if wizard_state_bonus.armour %}*{% endif %}{% if wiz_mounted %} <span class="muted">({{ horse_rider.backup.armour }})</span>{% endif %}</span></div>
               <div class="stat-pill"><span class="label">Will</span><span class="value">{{ format_stat(wizard_display_stats.will) }}</span></div>
               <div class="stat-pill"><span class="label">Health</span><span class="value">{{ wizard_display_stats.health }}</span></div>
             </div>
@@ -957,13 +970,15 @@
               <p class="muted">Stats synced from wizard (starting H12 when wizard is H14)</p>
               {% set ap_mounted = horse_rider and horse_rider.kind == 'apprentice' %}
               {% if ap_mounted %}<span class="badge" title="Riding the warband's horse: Move +{{ hmd.move }}, Fight +{{ hmd.fight }}, Armour {{ hmd.armour }}">mounted</span>{% endif %}
+              {{ mutated_badge(ap.mutations) }}
+              {% set ap_eff = apprentice_effective_stats(wb) %}
               <div class="stat-row">
-                <div class="stat-pill"><span class="label">Move</span><span class="value">{{ ap.stats.move }}{% if ap_mounted %} <span class="muted">({{ horse_rider.backup.move }})</span>{% endif %}</span></div>
-                <div class="stat-pill"><span class="label">Fight</span><span class="value">{{ format_stat(ap.stats.fight) }}{% if ap_mounted %} <span class="muted">({{ format_stat(horse_rider.backup.fight) }})</span>{% endif %}</span></div>
-                <div class="stat-pill"><span class="label">Shoot</span><span class="value">{{ format_stat(ap.stats.shoot) }}</span></div>
-                <div class="stat-pill"><span class="label">Armour</span><span class="value">{{ ap.stats.armour }}{% if ap_mounted %} <span class="muted">({{ horse_rider.backup.armour }})</span>{% endif %}</span></div>
-                <div class="stat-pill"><span class="label">Will</span><span class="value">{{ format_stat(ap.stats.will) }}</span></div>
-                <div class="stat-pill"><span class="label">Health</span><span class="value">{{ ap.stats.health }}</span></div>
+                <div class="stat-pill"><span class="label">Move</span><span class="value">{{ ap_eff.move }}{% if ap_mounted %} <span class="muted">({{ horse_rider.backup.move }})</span>{% endif %}</span></div>
+                <div class="stat-pill"><span class="label">Fight</span><span class="value">{{ format_stat(ap_eff.fight) }}{% if ap_mounted %} <span class="muted">({{ format_stat(horse_rider.backup.fight) }})</span>{% endif %}</span></div>
+                <div class="stat-pill"><span class="label">Shoot</span><span class="value">{{ format_stat(ap_eff.shoot) }}</span></div>
+                <div class="stat-pill"><span class="label">Armour</span><span class="value">{{ ap_eff.armour }}{% if ap_mounted %} <span class="muted">({{ horse_rider.backup.armour }})</span>{% endif %}</span></div>
+                <div class="stat-pill"><span class="label">Will</span><span class="value">{{ format_stat(ap_eff.will) }}</span></div>
+                <div class="stat-pill"><span class="label">Health</span><span class="value">{{ ap_eff.health }}</span></div>
               </div>
               <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
                 <input type="hidden" name="action" value="apprentice_status" />
@@ -1558,7 +1573,7 @@
       {% if cap %}
         {% set cap_slots_n = hr.promote_captain_item_slots if cap.origin == 'promoted' else hr.captain_item_slots %}
         {% set cap_dismiss_cost = hr.promote_captain_cost if cap.origin == 'promoted' else hr.captain_hiring_cost %}
-        {% set cap_eff = captain_effective_stats(cap) %}
+        {% set cap_eff = captain_effective_stats(wb, cap) %}
         {% set cap_class = CAPTAIN_CLASS_BY_BONUS_STAT.get(cap.bonus_extra_stat) %}
         {% set cap_unused_xp = unused_xp(cap.xp, cap.level) %}
         <details class="ref-panel" id="captain-panel" open>
@@ -1571,11 +1586,13 @@
             {% else %}
               <span class="portrait-placeholder portrait-md-ph" aria-hidden="true">?</span>
             {% endif %}
-            {% if legendary_soldiers_enabled %}
-              <div style="text-align:center;margin-top:0.3rem">
+            <div style="text-align:center;margin-top:0.3rem">
+              {% if legendary_soldiers_enabled %}
                 <span class="badge legendary" title="Spellcaster Magazine, Issue 4: the Captain is a Legendary Soldier, subject to the Legendary Soldier limit instead of the Specialist limit.">legendary</span>
-              </div>
-            {% endif %}
+              {% else %}
+                <span class="badge specialist" title="Counts against the warband's specialist limit.">specialist</span>
+              {% endif %}
+            </div>
           </div>
           <div class="char-body">
             <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" enctype="multipart/form-data" data-autosave>
@@ -1598,11 +1615,12 @@
               {% endif %}
               {% set cap_mounted = horse_rider and horse_rider.kind == 'captain' %}
               {% if cap_mounted %}<span class="badge" title="Riding the warband's horse: Move +{{ hmd.move }}, Fight +{{ hmd.fight }}, Armour {{ hmd.armour }}">mounted</span>{% endif %}
+              {{ mutated_badge(cap.mutations) }}
               <div class="stat-row">
                 <div class="stat-pill"><span class="label">Move</span><span class="value">{{ cap_eff.move }}{% if cap_mounted %} <span class="muted">({{ cap_eff.move - hmd.move }})</span>{% endif %}</span></div>
                 <div class="stat-pill"><span class="label">Fight</span><span class="value">{{ format_stat(cap.stats.fight) }}{% if cap_mounted %} <span class="muted">({{ format_stat(cap.stats.fight - hmd.fight) }})</span>{% endif %}</span></div>
                 <div class="stat-pill"><span class="label">Shoot</span><span class="value">{{ format_stat(cap.stats.shoot) }}</span></div>
-                <div class="stat-pill"><span class="label">Armour</span><span class="value">{{ cap_eff.armour }}{% if cap_mounted %} <span class="muted">({{ cap_eff.armour - hmd.armour }})</span>{% endif %}</span></div>
+                <div class="stat-pill"><span class="label">Armour</span><span class="value">{{ cap_eff.armour }}{% if cap_mounted %} <span class="muted">({{ horse_rider.backup.armour }})</span>{% endif %}</span></div>
                 <div class="stat-pill"><span class="label">Will</span><span class="value">{{ format_stat(cap_eff.will) }}</span></div>
                 <div class="stat-pill"><span class="label">Health</span><span class="value">{{ cap_eff.health }}</span></div>
               </div>
@@ -1960,7 +1978,7 @@
           </thead>
           <tbody id="soldier-order-body">
             {% for s in soldiers %}
-              <tr class="status-{{ s.status }}" data-soldier-id="{{ s.id }}">
+              <tr class="status-{{ s.status }} catalog-row" data-soldier-id="{{ s.id }}">
                 <td class="muted">{{ loop.index }}</td>
                 <td>
                   <input type="radio" name="soldier-select" aria-label="Select {{ s.name }} to reorder" />
@@ -2024,9 +2042,17 @@
                 <td>
                   {{ s.type_name }}
                   <div>
-                    <span class="badge {{ s.category }}">{{ s.category }}</span>
+                    {% if s.category == 'temporary' %}
+                      <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="display:inline" onsubmit="return confirm('Dismiss {{ s.name }}?');">
+                        <input type="hidden" name="action" value="remove_soldier" />
+                        <input type="hidden" name="soldier_id" value="{{ s.id }}" />
+                        <button type="submit" class="badge temporary" title="Click to dismiss this temporary member">temporary</button>
+                      </form>
+                    {% else %}
+                      <span class="badge {{ s.category }}">{{ s.category }}</span>
+                    {% endif %}
                     {% if s.revenant %}<span class="badge" title="Reanimated with the Revenant spell">revenant</span>{% endif %}
-                    {% if s.mutations %}<span class="badge" title="{{ s.mutations|length }} Grave Mutation{{ 's' if s.mutations|length != 1 }}">mutated</span>{% endif %}
+                    {{ mutated_badge(s.mutations) }}
                     {% if s.giant_blooded %}<span class="badge" title="Blood Legacy's Giant-Blooded: -1 Move, -2 Will, +2 Health, Giant-Blooded trait">giant-blooded</span>{% endif %}
                     {% if s.thrall %}<span class="badge" title="Blood Legacy's Thralldom: hired free at -1 Will">thrall</span>{% endif %}
                     {% if s.knightly_order_info %}<span class="badge" title="{{ s.knightly_order_info.ability }}">{{ s.knightly_order_info.name }}</span>{% endif %}
@@ -2044,19 +2070,31 @@
                 <td class="gold">{{ s.cost }}</td>
                 <td class="actions-cell">
                   {% if s.description %}
-                    <details class="actions-cell-persistent">
-                      <summary class="muted" style="cursor:pointer;font-size:0.85rem">Info</summary>
-                      <p class="muted" style="font-size:0.85rem;margin:0.4rem 0 0;max-width:32rem">{{ s.description }}</p>
+                    <details class="actions-cell-persistent info-toggle-details">
+                      <summary class="info-toggle">Info</summary>
                     </details>
                   {% endif %}
                   {% set carried = (s.item_slots or []) | select | list %}
-                  {% if (s.gear and s.gear != '—') or carried %}
+                  {% set soldier_slot_n = soldier_item_slots(wb, s.type_key) %}
+                  {% if (s.gear and s.gear != '—') or carried or soldier_slot_n %}
                     <details class="actions-cell-persistent">
                       <summary class="muted" style="cursor:pointer;font-size:0.85rem">Equipment</summary>
                       <p class="muted" style="font-size:0.85rem;margin:0.4rem 0 0;max-width:32rem">
                         {% if s.gear and s.gear != '—' %}{{ s.gear }}{% else %}No starting gear.{% endif %}
                         {% if carried %}<br />Carrying: {{ carried|join(', ') }}{% endif %}
                       </p>
+                      {% if soldier_slot_n %}
+                        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" data-autosave>
+                          <input type="hidden" name="action" value="soldier_edit" />
+                          <input type="hidden" name="soldier_id" value="{{ s.id }}" />
+                          <h4 style="margin:0.6rem 0 0.3rem;font-size:0.85rem">Gear ({{ soldier_slot_n }} slot{{ 's' if soldier_slot_n != 1 else '' }})</h4>
+                          {% set prefix = 'soldier_' ~ s.id %}
+                          {% set n = soldier_slot_n %}
+                          {% set slots = s.item_slots if s.item_slots is defined else [] %}
+                          {% set standard_items = soldier_capable_items %}
+                          {% include '_item_slots.html' %}
+                        </form>
+                      {% endif %}
                     </details>
                   {% endif %}
                   <div class="stack-sm">
@@ -2106,21 +2144,6 @@
                           <input name="notes" type="text" value="{{ s.notes }}" placeholder="Notes" />
                         </div>
                       </details>
-                      {% set soldier_slot_n = soldier_item_slots(wb, s.type_key) %}
-                      {% if soldier_slot_n %}
-                        <details>
-                          <summary class="muted" style="cursor:pointer;font-size:0.85rem">Gear ({{ soldier_slot_n }} slot{{ 's' if soldier_slot_n != 1 else '' }})</summary>
-                          <div style="margin-top:0.4rem">
-                            {% set prefix = 'soldier_' ~ s.id %}
-                            {% set n = soldier_slot_n %}
-                            {% set slots = s.item_slots if s.item_slots is defined else [] %}
-                            {% set standard_items = soldier_capable_items %}
-                            {% include '_item_slots.html' %}
-                          </div>
-                        </details>
-                      {% else %}
-                        <p class="muted" style="font-size:0.8rem;margin:0.4rem 0 0">No item slots ({{ s.type_name }}).</p>
-                      {% endif %}
                     </form>
                     {{ mutation_picker('add_soldier_mutation', s.mutations, soldier_id=s.id) }}
                     {% if hr.soldier_permanent_injuries_enabled or s.permanent_injuries %}
@@ -2198,6 +2221,9 @@
                   </div>
                 </td>
               </tr>
+              {% if s.description %}
+                <tr class="info-desc-row"><td colspan="14">{{ s.description }}</td></tr>
+              {% endif %}
               {% set companion = SOLDIER_COMPANION_BY_TYPE_KEY.get(s.type_key) %}
               {% if companion %}
                 {% set companion_src = portrait_src((s.get('companion') or {}).get('portrait'), 'companion', companion.portrait_key) %}
@@ -2322,13 +2348,6 @@
 
     <details class="ref-panel" id="hire-soldier-panel">
       <summary>Hire soldier</summary>
-      <p class="muted" style="font-size:0.85rem">
-        Default name is the type plus a number (e.g. “Archer 1”). Rename and add a picture afterward via Edit / picture.
-        Soldiers from the supplements only appear here once their source book is switched on under
-        <a href="#homerules">Additional Rules and Homerules</a>. Spell-summoned members (constructs from
-        <em>Animate Construct</em>, animals from <em>Animal Companion</em>) appear for free only when your
-        wizard knows that spell.
-      </p>
       <div class="filter-bar">
         <input type="search" id="hire-filter" placeholder="Filter soldiers…" aria-label="Filter hire catalog" />
       </div>
@@ -2336,15 +2355,13 @@
         <table>
           <thead>
             <tr>
-              <th>Type</th><th>Cat</th><th>Source</th><th>Cost</th>
+              <th></th><th>Type</th><th>Cat / Source</th><th>Cost</th>
               <th>Move</th><th>Fight</th><th>Shoot</th><th>Armour</th><th>Will</th><th>Health</th><th>Gear</th>
               <th></th><th></th>
             </tr>
           </thead>
           <tbody>
-            {% for group in catalog_groups %}
-              <tr class="group-row"><th colspan="13">{{ group.label }}</th></tr>
-              {% for c in group.soldiers %}
+            {% for c in hireable %}
               {% set can_afford = wb.gold >= c.cost %}
               {% set within_soldiers = limits.soldiers < limits.max_soldiers %}
               {% set within_specialists = c.category != 'specialist' or limits.specialists < limits.max_specialists %}
@@ -2367,11 +2384,126 @@
               {% elif companion_blocked %}
                 {% set ns.hire_reason = "You may only have one Animal Companion at a time — hire an apprentice to field a second (one per spellcaster)." if animal_companion_limit == 1 else "You may only have " ~ animal_companion_limit ~ " Animal Companions at a time (one per spellcaster)." %}
               {% endif %}
+              {% set c_src = portrait_src(None, 'soldier', c.key) %}
               <tr class="catalog-row" {% if not can_hire %}style="opacity:0.5"{% endif %}>
+                <td>
+                  {% if c_src %}
+                    <img class="portrait-sm" src="{{ c_src }}" alt="" />
+                  {% else %}
+                    <span class="portrait-placeholder" aria-hidden="true">?</span>
+                  {% endif %}
+                </td>
                 <td><strong>{{ c.name }}</strong></td>
-                <td><span class="badge {{ c.category }}">{{ c.category }}</span></td>
-                <td class="muted">{% if c.requires_spell %}<span class="badge">via {{ c.requires_spell }}</span>{% elif c.source != 'Core Rules' %}<span class="badge">{{ c.source }}</span>{% else %}—{% endif %}</td>
-                <td class="gold">{% if c.cost_label %}{{ c.cost_label }}{% elif c.cost == 0 %}{{ 'Spell' if c.requires_spell else 'Free' }}{% else %}{{ c.cost }}{% endif %}</td>
+                <td class="muted">
+                  <span class="badge {{ c.category }}">{{ c.category }}</span><br />
+                  {% if c.source != 'Core Rules' %}<span class="badge">{{ c.source }}</span>{% else %}<span class="badge">Core</span>{% endif %}
+                </td>
+                <td class="gold">{% if c.cost_label %}{{ c.cost_label }}{% elif c.cost == 0 %}Free{% else %}{{ c.cost }}{% endif %}</td>
+                <td>{{ c.move }}</td>
+                <td>{{ format_stat(c.fight) }}</td>
+                <td>{{ format_stat(c.shoot) }}</td>
+                <td>{{ c.armour }}</td>
+                <td>{{ format_stat(c.will) }}</td>
+                <td>{{ c.health }}</td>
+                <td class="muted">{{ c.gear }}</td>
+                <td>
+                  {% if c.description %}
+                    <details class="info-toggle-details">
+                      <summary class="info-toggle">Info</summary>
+                    </details>
+                  {% endif %}
+                </td>
+                <td>
+                  <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
+                    <input type="hidden" name="action" value="hire_soldier" />
+                    <input type="hidden" name="type_key" value="{{ c.key }}" />
+                    {% if hr.knightly_orders_enabled and c.key in KNIGHTLY_ORDER_ELIGIBLE %}
+                      <select name="knightly_order" style="margin-bottom:0.3rem">
+                        <option value="">No order</option>
+                        {% for o in KNIGHTLY_ORDERS %}
+                          <option value="{{ o.id }}">{{ o.name }}</option>
+                        {% endfor %}
+                      </select>
+                    {% endif %}
+                    <button class="btn small" type="submit" {% if not can_hire %}disabled{% endif %}{% if ns.hire_reason %} title="{{ ns.hire_reason }}"{% endif %}>Hire</button>
+                    {% if ns.hire_reason %}<div class="muted" style="font-size:0.78rem;margin-top:0.2rem">{{ ns.hire_reason }}</div>{% endif %}
+                  </form>
+                </td>
+              </tr>
+              {% if c.description %}
+                <tr class="info-desc-row"><td colspan="13">{{ c.description }}</td></tr>
+              {% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </details>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        if (window.fgInitFilter) {
+          window.fgInitFilter(
+            document.getElementById("hire-filter"),
+            document.getElementById("hire-soldier-panel"),
+            { itemSelector: "tr.catalog-row" }
+          );
+        }
+      });
+    </script>
+
+    <details class="ref-panel" id="summoned-creatures-panel">
+      <summary>Summoned creatures</summary>
+      <div class="filter-bar">
+        <input type="search" id="summoned-filter" placeholder="Filter summoned creatures…" aria-label="Filter summoned creatures catalog" />
+      </div>
+      {% if summoned_catalog %}
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th></th><th>Type</th><th>Cat / Source</th><th>Cost</th>
+                <th>Move</th><th>Fight</th><th>Shoot</th><th>Armour</th><th>Will</th><th>Health</th><th>Gear</th>
+                <th></th><th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for c in summoned_catalog %}
+              {% set can_afford = wb.gold >= c.cost %}
+              {% set within_soldiers = limits.soldiers < limits.max_soldiers %}
+              {% set within_specialists = c.category != 'specialist' or limits.specialists < limits.max_specialists %}
+              {% set companion_blocked = c.requires_spell == 'Animal Companion' and has_animal_companion %}
+              {% set is_legendary = c.key in LEGENDARY_SOLDIER_TYPE_KEYS %}
+              {% set legendary_duplicate = is_legendary and c.key in legendary_type_keys_held %}
+              {% set legendary_capped = is_legendary and not legendary_duplicate and limits.legendary_soldiers >= limits.max_legendary_soldiers %}
+              {% set can_hire = can_afford and within_soldiers and within_specialists and not companion_blocked and not legendary_duplicate and not legendary_capped %}
+              {% set ns = namespace(hire_reason='') %}
+              {% if not can_afford %}
+                {% set ns.hire_reason = "Needs " ~ c.cost ~ " gc (have " ~ wb.gold ~ ")." %}
+              {% elif not within_soldiers %}
+                {% set ns.hire_reason = "Soldier limit reached (" ~ limits.max_soldiers ~ ")." %}
+              {% elif not within_specialists %}
+                {% set ns.hire_reason = "Specialist limit reached (" ~ limits.max_specialists ~ ")." %}
+              {% elif legendary_duplicate %}
+                {% set ns.hire_reason = "Only one " ~ c.name ~ " may be on the roster at a time." %}
+              {% elif legendary_capped %}
+                {% set ns.hire_reason = "Legendary Soldier limit reached (" ~ limits.max_legendary_soldiers ~ " at wizard level " ~ limits.level ~ ") — level up to hire more." %}
+              {% elif companion_blocked %}
+                {% set ns.hire_reason = "You may only have one Animal Companion at a time — hire an apprentice to field a second (one per spellcaster)." if animal_companion_limit == 1 else "You may only have " ~ animal_companion_limit ~ " Animal Companions at a time (one per spellcaster)." %}
+              {% endif %}
+              {% set c_src = portrait_src(None, 'soldier', c.key) %}
+              <tr class="catalog-row" {% if not can_hire %}style="opacity:0.5"{% endif %}>
+                <td>
+                  {% if c_src %}
+                    <img class="portrait-sm" src="{{ c_src }}" alt="" />
+                  {% else %}
+                    <span class="portrait-placeholder" aria-hidden="true">?</span>
+                  {% endif %}
+                </td>
+                <td><strong>{{ c.name }}</strong></td>
+                <td class="muted">
+                  <span class="badge {{ c.category }}">{{ c.category }}</span><br />
+                  <span class="badge">via {{ c.requires_spell }}</span>
+                </td>
+                <td class="gold">{% if c.cost_label %}{{ c.cost_label }}{% else %}Spell{% endif %}</td>
                 <td>{{ c.move }}</td>
                 <td>{{ format_stat(c.fight) }}</td>
                 <td>{{ format_stat(c.shoot) }}</td>
@@ -2407,17 +2539,19 @@
                 <tr class="info-desc-row"><td colspan="13">{{ c.description }}</td></tr>
               {% endif %}
               {% endfor %}
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="empty">No spell-summoned members available yet — your wizard doesn't know a summoning spell.</p>
+      {% endif %}
     </details>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         if (window.fgInitFilter) {
           window.fgInitFilter(
-            document.getElementById("hire-filter"),
-            document.getElementById("hire-soldier-panel"),
+            document.getElementById("summoned-filter"),
+            document.getElementById("summoned-creatures-panel"),
             { itemSelector: "tr.catalog-row" }
           );
         }
@@ -2438,7 +2572,7 @@
           <table>
             <thead>
               <tr>
-                <th>Type</th><th>Via spell</th>
+                <th></th><th>Type</th><th>Via spell</th>
                 <th>Move</th><th>Fight</th><th>Shoot</th><th>Armour</th><th>Will</th><th>Health</th>
                 <th></th><th></th>
               </tr>
@@ -2446,7 +2580,15 @@
             <tbody>
               {% set temp_at_cap = temporary_member_count >= temporary_member_limit %}
               {% for c in temporary_catalog %}
+                {% set c_src = portrait_src(None, 'soldier', c.key) %}
                 <tr class="catalog-row" {% if temp_at_cap %}style="opacity:0.5"{% endif %}>
+                  <td>
+                    {% if c_src %}
+                      <img class="portrait-sm" src="{{ c_src }}" alt="" />
+                    {% else %}
+                      <span class="portrait-placeholder" aria-hidden="true">?</span>
+                    {% endif %}
+                  </td>
                   <td><strong>{{ c.name }}</strong></td>
                   <td class="muted"><span class="badge">via {{ c.requires_spell }}</span></td>
                   <td>{{ c.move }}</td>
@@ -2479,7 +2621,7 @@
                   </td>
                 </tr>
                 {% if c.description %}
-                  <tr class="info-desc-row"><td colspan="10">{{ c.description }}</td></tr>
+                  <tr class="info-desc-row"><td colspan="11">{{ c.description }}</td></tr>
                 {% endif %}
               {% endfor %}
             </tbody>
