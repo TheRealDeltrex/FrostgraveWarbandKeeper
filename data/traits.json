@@ -271,7 +271,7 @@
   },
   {
     "name": "Poison",
-    "text": "Attacks from this creature are venomous and deal poison damage.",
+    "text": "Attacks from this creature are venomous and deal poison damage. A figure that is poisoned, or takes at least one point of damage from a creature with this trait, is reduced to a single action per activation instead of the normal two, until cured by any healing that restores Health, by a spell or item that specifically cures poison, or by the end of the scenario. Multiple poisonings don't stack.",
     "source": "Core Rules"
   },
   {

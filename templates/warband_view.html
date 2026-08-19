@@ -831,7 +831,7 @@
     <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" enctype="multipart/form-data" data-autosave>
       <input type="hidden" name="action" value="details" />
       <details class="ref-panel" id="wizard-panel" open>
-        <summary>Wizard — {{ wiz.name }} · {{ wiz.school }}</summary>
+        <summary>Wizard — {{ wiz.name }} · {{ wiz.school }} · Level {{ wiz.level }} · {{ wiz.xp }} XP total · {{ limits.unused_xp }} XP unused</summary>
         {% if wiz.school == "Fire Giant" %}
           <p class="muted" style="font-size:0.85rem">
             Blood Legacy's Fire Giant Wizard: Large, Strong, Elemental Resistance (2). No armour/
@@ -1559,6 +1559,10 @@
         {% set cap_slots_n = hr.promote_captain_item_slots if cap.origin == 'promoted' else hr.captain_item_slots %}
         {% set cap_dismiss_cost = hr.promote_captain_cost if cap.origin == 'promoted' else hr.captain_hiring_cost %}
         {% set cap_eff = captain_effective_stats(cap) %}
+        {% set cap_class = CAPTAIN_CLASS_BY_BONUS_STAT.get(cap.bonus_extra_stat) %}
+        {% set cap_unused_xp = unused_xp(cap.xp, cap.level) %}
+        <details class="ref-panel" id="captain-panel" open>
+        <summary>Captain — {{ cap.name }}{% if cap_class %} · {{ cap_class }}{% endif %} · Level {{ cap.level }} · {{ cap.xp }} XP total · {{ cap_unused_xp }} XP unused</summary>
         <div class="char-block">
           <div style="display:flex;flex-direction:column;align-items:center">
             {% set cap_src = portrait_src(cap.portrait, 'captain', cap.type_key) %}
@@ -1613,7 +1617,7 @@
               </form>
               <p class="muted" style="font-size:0.8rem">Move and Armour include bonuses from equipped Shield/Light Armour/Heavy Armour.</p>
               <p class="muted" style="font-size:0.85rem">
-                {{ 'Promoted from the ranks' if cap.origin == 'promoted' else 'Hired' }} · Level {{ cap.level }}/{{ hr.captain_max_level }} · XP {{ cap.xp }}
+                {{ 'Promoted from the ranks' if cap.origin == 'promoted' else 'Hired' }}
                 {% if cap.bonus_extra_stat %}
                   · Starting bonus: +{{ bonus_choice_amount(cap.bonus_extra_stat) }} {{ cap.bonus_extra_stat|capitalize }}
                 {% endif %}
@@ -1735,6 +1739,7 @@
           </label>
           <button class="btn danger small" type="submit" onclick="return confirm('Dismiss captain?');">Dismiss captain</button>
         </form>
+        </details>
       {% elif not hr.enabled_sources.get('The Frostgrave Folio') %}
         <p class="muted" style="font-size:0.85rem">
           The Captain is from The Frostgrave Folio — enable that source under Additional Rules and Homerules first.
@@ -1753,7 +1758,7 @@
                 <div>
                   <label for="captain_extra_stat">Starting bonus</label>
                   <select id="captain_extra_stat" name="captain_extra_stat">
-                    {% for stat in LEVELUP_STATS %}
+                    {% for stat in CAPTAIN_BONUS_STATS %}
                       {% set base_val = (hr.captain_base_stats or {}).get(stat, 0) %}
                       {% set limit = (hr.captain_stat_absolute_limits or {}).get(stat) %}
                       <option value="{{ stat }}" {% if limit is not none and base_val >= limit %}disabled{% endif %}>
@@ -1969,7 +1974,52 @@
                   {% endif %}
                 </td>
                 <td>
-                  <strong>{{ s.name }}</strong>{% if hr.soldier_leveling_enabled and s.level %} <span class="muted">(Lv {{ s.level }})</span>{% endif %}
+                  <strong>{{ s.name }}</strong>
+                  {% set s_can_level = hr.soldier_leveling_enabled
+                      and not s.temporary
+                      and (s.type_key not in ANIMAL_COMPANION_TYPE_KEYS or hr.soldier_leveling_animal_companions)
+                      and (s.type_key not in CONSTRUCT_TYPE_KEYS or hr.soldier_leveling_constructs) %}
+                  {% if s_can_level %}
+                    {% set s_pending = level_from_xp(s.xp) - s.level %}
+                    <details>
+                      <summary class="muted" style="cursor:pointer;font-size:0.85rem">Level {{ s.level }}{% if s_pending > 0 %} ({{ s_pending }} ready){% endif %}</summary>
+                      <div class="stack-sm" style="margin-top:0.4rem">
+                        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
+                          <input type="hidden" name="action" value="soldier_add_xp" />
+                          <input type="hidden" name="soldier_id" value="{{ s.id }}" />
+                          <input name="amount" type="text" inputmode="numeric" pattern="[+-]?[0-9]+" value="20" style="width:5rem" title="Negative removes XP (reverses a level-up if it drops below the current level)" />
+                          <button class="btn secondary small" type="submit">Add/remove XP</button>
+                        </form>
+                        <p class="muted" style="font-size:0.8rem;margin:0">XP {{ s.xp }} · Level {{ s.level }}/{{ hr.soldier_max_levels }}</p>
+                        {% if s_pending > 0 %}
+                          {% for stat in LEVELUP_STATS %}
+                            {% set scapcfg = hr.soldier_stat_caps[stat] %}
+                            {% set sused = s.levelup_counts[stat] %}
+                            <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
+                              <input type="hidden" name="action" value="soldier_level_up" />
+                              <input type="hidden" name="soldier_id" value="{{ s.id }}" />
+                              <input type="hidden" name="choice" value="{{ stat }}" />
+                              <button class="btn secondary small" type="submit" {% if not scapcfg.unlimited and sused >= scapcfg.limit %}disabled{% endif %}>
+                                +1 {{ stat|capitalize }} ({% if scapcfg.unlimited %}{{ sused }}, unlimited{% else %}{{ sused }}/{{ scapcfg.limit }} used{% endif %})
+                              </button>
+                            </form>
+                          {% endfor %}
+                        {% endif %}
+                        {% if s.level_history %}
+                          <ul class="list-plain" style="font-size:0.8rem">
+                            {% for h in s.level_history|reverse %}
+                              <li>Level {{ h.level }}: {{ h.detail }}{% if loop.first %} <span class="muted">(latest)</span>{% endif %}</li>
+                            {% endfor %}
+                          </ul>
+                          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
+                            <input type="hidden" name="action" value="reverse_soldier_level_up" />
+                            <input type="hidden" name="soldier_id" value="{{ s.id }}" />
+                            <button class="btn danger small" type="submit" onclick="return confirm('Reverse the latest level-up for {{ s.name }}?');">Reverse last level-up</button>
+                          </form>
+                        {% endif %}
+                      </div>
+                    </details>
+                  {% endif %}
                 </td>
                 <td>
                   {{ s.type_name }}
@@ -2086,50 +2136,6 @@
                         <button class="btn secondary small" type="submit" title="Animal Companion casting roll was a critical success — normal pick, so a one-time +1 Health instead of the White Gorilla.">Summoned with crit</button>
                       </form>
                     {% endif %}
-                    {% set s_can_level = hr.soldier_leveling_enabled
-                        and (s.type_key not in ANIMAL_COMPANION_TYPE_KEYS or hr.soldier_leveling_animal_companions)
-                        and (s.type_key not in CONSTRUCT_TYPE_KEYS or hr.soldier_leveling_constructs) %}
-                    {% if s_can_level %}
-                      {% set s_pending = level_from_xp(s.xp) - s.level %}
-                      <details>
-                        <summary class="muted" style="cursor:pointer;font-size:0.85rem">Level up {% if s_pending > 0 %}({{ s_pending }} ready){% endif %}</summary>
-                        <div class="stack-sm" style="margin-top:0.4rem">
-                          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
-                            <input type="hidden" name="action" value="soldier_add_xp" />
-                            <input type="hidden" name="soldier_id" value="{{ s.id }}" />
-                            <input name="amount" type="text" inputmode="numeric" pattern="[+-]?[0-9]+" value="20" style="width:5rem" title="Negative removes XP (reverses a level-up if it drops below the current level)" />
-                            <button class="btn secondary small" type="submit">Add/remove XP</button>
-                          </form>
-                          <p class="muted" style="font-size:0.8rem;margin:0">XP {{ s.xp }} · Level {{ s.level }}/{{ hr.soldier_max_levels }}</p>
-                          {% if s_pending > 0 %}
-                            {% for stat in LEVELUP_STATS %}
-                              {% set scapcfg = hr.soldier_stat_caps[stat] %}
-                              {% set sused = s.levelup_counts[stat] %}
-                              <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
-                                <input type="hidden" name="action" value="soldier_level_up" />
-                                <input type="hidden" name="soldier_id" value="{{ s.id }}" />
-                                <input type="hidden" name="choice" value="{{ stat }}" />
-                                <button class="btn secondary small" type="submit" {% if not scapcfg.unlimited and sused >= scapcfg.limit %}disabled{% endif %}>
-                                  +1 {{ stat|capitalize }} ({% if scapcfg.unlimited %}{{ sused }}, unlimited{% else %}{{ sused }}/{{ scapcfg.limit }} used{% endif %})
-                                </button>
-                              </form>
-                            {% endfor %}
-                          {% endif %}
-                          {% if s.level_history %}
-                            <ul class="list-plain" style="font-size:0.8rem">
-                              {% for h in s.level_history|reverse %}
-                                <li>Level {{ h.level }}: {{ h.detail }}{% if loop.first %} <span class="muted">(latest)</span>{% endif %}</li>
-                              {% endfor %}
-                            </ul>
-                            <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
-                              <input type="hidden" name="action" value="reverse_soldier_level_up" />
-                              <input type="hidden" name="soldier_id" value="{{ s.id }}" />
-                              <button class="btn danger small" type="submit" onclick="return confirm('Reverse the latest level-up for {{ s.name }}?');">Reverse last level-up</button>
-                            </form>
-                          {% endif %}
-                        </div>
-                      </details>
-                    {% endif %}
                     {% if hr.captain_mode in ('promote', 'both') and not cap and s.status == 'active' and not s.temporary and not s.requires_spell and s.type_key != 'construct_hound' and (not hr.promote_captain_specialist_only or s.category == 'specialist') %}
                       <details>
                         <summary class="muted" style="cursor:pointer;font-size:0.85rem">Promote to Captain</summary>
@@ -2147,7 +2153,7 @@
                             <label style="font-size:0.8rem">
                               Starting bonus
                               <select name="extra_stat">
-                                {% for stat in LEVELUP_STATS %}
+                                {% for stat in CAPTAIN_BONUS_STATS %}
                                   {% set base_val = s.get(stat, 0) %}
                                   {% set fixed = hr.promote_captain_bonus.get(stat, 0) %}
                                   {% set limit = (hr.captain_stat_absolute_limits or {}).get(stat) %}
