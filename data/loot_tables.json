@@ -2,7 +2,7 @@
   "Core Rules": [
     {
       "title": "Treasure Table",
-      "blurb": "One roll per treasure token your warband got off the table. Recovering the central treasure lets you re-roll your first result, but you must accept the second roll. \"Magic Weapon/Armour\", \"Magic Item\" and \"Grimoire\" results are then looked up in Magic items & treasure above.",
+      "blurb": "One roll per treasure token your warband got off the table. Recovering the central treasure lets you re-roll your first result, but you must accept the second roll. \"Magic Weapon/Armour\" and \"Magic Item\" results are then rolled on the two tables below (full descriptions are in Magic items & treasure above); a Grimoire's (or Scroll's) spell comes from the Random Spell Table below, and each Potion from the Lesser/Greater Potion Table below.",
       "rows": [
         {
           "name": "1",
@@ -83,6 +83,392 @@
         {
           "name": "20",
           "text": "120gc, Grimoire"
+        }
+      ]
+    },
+    {
+      "title": "Magic Weapon and Armour Table",
+      "blurb": "Rolled once per \"Magic Weapon/Armour\" result on the Treasure Table. Also lists the purchase price for buying a specific one outright.",
+      "rows": [
+        {
+          "name": "1",
+          "text": "Hand Weapon, +1 damage modifier — 300gc"
+        },
+        {
+          "name": "2",
+          "text": "Hand Weapon, +1 Fight — 500gc"
+        },
+        {
+          "name": "3",
+          "text": "Hand Weapon, +2 Will — 300gc"
+        },
+        {
+          "name": "4",
+          "text": "Two-Handed Weapon, +1 damage modifier — 300gc"
+        },
+        {
+          "name": "5",
+          "text": "Two-Handed Weapon, +1 Fight — 500gc"
+        },
+        {
+          "name": "6",
+          "text": "Two-Handed Weapon, +2 Will — 300gc"
+        },
+        {
+          "name": "7",
+          "text": "Bow, +1 damage modifier — 300gc"
+        },
+        {
+          "name": "8",
+          "text": "Bow, +1 Shoot — 600gc"
+        },
+        {
+          "name": "9",
+          "text": "Crossbow, +1 damage modifier — 300gc"
+        },
+        {
+          "name": "10",
+          "text": "Crossbow, +1 Shoot — 600gc"
+        },
+        {
+          "name": "11",
+          "text": "Dagger, +1 Fight — 400gc"
+        },
+        {
+          "name": "12",
+          "text": "Dagger, +1 damage modifier — 400gc"
+        },
+        {
+          "name": "13",
+          "text": "Dagger, +2 damage modifier — 500gc"
+        },
+        {
+          "name": "14",
+          "text": "Light Armour, +1 Armour — 600gc"
+        },
+        {
+          "name": "15",
+          "text": "Heavy Armour, Elemental Absorption — 800gc"
+        },
+        {
+          "name": "16",
+          "text": "Ring of Protection, +1 Armour — 600gc"
+        },
+        {
+          "name": "17",
+          "text": "Cloak of Protection, +1 Armour — 600gc"
+        },
+        {
+          "name": "18",
+          "text": "Cloak of Night, Elemental Absorption — 500gc"
+        },
+        {
+          "name": "19",
+          "text": "Staff, +1 Fight — 300gc"
+        },
+        {
+          "name": "20",
+          "text": "Shield, +1 Armour — 700gc"
+        }
+      ]
+    },
+    {
+      "title": "Magic Item Table",
+      "blurb": "Rolled once per \"Magic Item\" result on the Treasure Table — everything magic that isn't a potion, scroll, grimoire, weapon or armour. Also lists the purchase price for buying a specific one outright.",
+      "rows": [
+        {
+          "name": "1",
+          "text": "Staff of Power (1) — 300gc"
+        },
+        {
+          "name": "2",
+          "text": "Staff of Power (2) — 400gc"
+        },
+        {
+          "name": "3",
+          "text": "Ring of Transference — 400gc"
+        },
+        {
+          "name": "4",
+          "text": "Ring of Power (1) — 200gc"
+        },
+        {
+          "name": "5",
+          "text": "Orb of Power (6) — 500gc"
+        },
+        {
+          "name": "6",
+          "text": "Staff of Casting — 500gc"
+        },
+        {
+          "name": "7",
+          "text": "Boots of Speed — 300gc"
+        },
+        {
+          "name": "8",
+          "text": "Ring of Slow Fall — 200gc"
+        },
+        {
+          "name": "9",
+          "text": "Ring of Will — 300gc"
+        },
+        {
+          "name": "10",
+          "text": "Ring of Teleportation — 400gc"
+        },
+        {
+          "name": "11",
+          "text": "Gloves of Strength — 300gc"
+        },
+        {
+          "name": "12",
+          "text": "Robes of Arrow Turning — 500gc"
+        },
+        {
+          "name": "13",
+          "text": "Amulet of Resistance — 300gc"
+        },
+        {
+          "name": "14",
+          "text": "Construct Hammer — 300gc"
+        },
+        {
+          "name": "15",
+          "text": "Gloves of Casting — 500gc"
+        },
+        {
+          "name": "16",
+          "text": "Wand of Light — 400gc"
+        },
+        {
+          "name": "17",
+          "text": "Horn of Destruction — 300gc"
+        },
+        {
+          "name": "18",
+          "text": "Fate Stone — 500gc"
+        },
+        {
+          "name": "19",
+          "text": "Wand of Power (1) — 300gc"
+        },
+        {
+          "name": "20",
+          "text": "Staff of Power (3) — 1,200gc"
+        }
+      ]
+    },
+    {
+      "title": "Lesser Potion Table",
+      "blurb": "Roll once per Potion a Treasure Table result grants. A roll of 19–20 means roll on the Greater Potion Table below instead.",
+      "rows": [
+        {
+          "name": "1",
+          "text": "Potion of Healing — 75gc"
+        },
+        {
+          "name": "2",
+          "text": "Potion of Strength — 100gc"
+        },
+        {
+          "name": "3",
+          "text": "Potion of Toughness — 50gc"
+        },
+        {
+          "name": "4",
+          "text": "Elixir of Speed — 50gc"
+        },
+        {
+          "name": "5",
+          "text": "Potion of Invisibility — 100gc"
+        },
+        {
+          "name": "6",
+          "text": "Explosive Cocktail — 100gc"
+        },
+        {
+          "name": "7",
+          "text": "Potion of Teleportation — 500gc"
+        },
+        {
+          "name": "8",
+          "text": "Potion of Elemental Absorption — 200gc"
+        },
+        {
+          "name": "9",
+          "text": "Cordial of Clearsight — 200gc"
+        },
+        {
+          "name": "10",
+          "text": "Poison — 100gc"
+        },
+        {
+          "name": "11",
+          "text": "Philtre of Fury — 300gc"
+        },
+        {
+          "name": "12",
+          "text": "Potion of Iron Mind — 50gc"
+        },
+        {
+          "name": "13",
+          "text": "Bottle of Burrowing — 200gc"
+        },
+        {
+          "name": "14",
+          "text": "Philtre of Fairy Dust — 50gc"
+        },
+        {
+          "name": "15",
+          "text": "Construct Oil — 100gc"
+        },
+        {
+          "name": "16",
+          "text": "Potion of Fire Breath — 200gc"
+        },
+        {
+          "name": "17",
+          "text": "Potion of Preservation — 500gc"
+        },
+        {
+          "name": "18",
+          "text": "Elixir of the Chameleon — 400gc"
+        },
+        {
+          "name": "19–20",
+          "text": "Roll on the Greater Potion Table"
+        }
+      ]
+    },
+    {
+      "title": "Greater Potion Table",
+      "blurb": "Rolled instead of a Lesser Potion Table result of 19–20. None of these can be bought outright — sale price and Brew Potion (Out of Game) ingredient cost shown instead.",
+      "rows": [
+        {
+          "name": "1–2",
+          "text": "Cordial of Empowerment — 500gc (sells 200gc, ingredients 200gc)"
+        },
+        {
+          "name": "3–4",
+          "text": "Shrinking Potion — 500gc (sells 200gc, ingredients 200gc)"
+        },
+        {
+          "name": "5–6",
+          "text": "Potion of Restoration — 2,000gc (sells 300gc, ingredients 750gc)"
+        },
+        {
+          "name": "7–8",
+          "text": "Bottle of Dreams and Nightmares — 2,000gc (sells 300gc, ingredients 500gc)"
+        },
+        {
+          "name": "9–10",
+          "text": "Shatterstar Draught — 1,500gc (sells 200gc, ingredients 600gc)"
+        },
+        {
+          "name": "11–12",
+          "text": "Bottle of Darkness — 1,500gc (sells 300gc, ingredients 600gc)"
+        },
+        {
+          "name": "13–14",
+          "text": "Ethereal Vacuum — 2,000gc (sells 200gc, ingredients 800gc)"
+        },
+        {
+          "name": "15–16",
+          "text": "Potion of Invulnerability — cannot be purchased (sells 400gc, ingredients 2,000gc)"
+        },
+        {
+          "name": "17–18",
+          "text": "Bottle of Null — cannot be purchased (sells 200gc, ingredients 1,000gc)"
+        },
+        {
+          "name": "19–20",
+          "text": "Elixir of Life — cannot be purchased (sells 1,000gc, ingredients 3,000gc)"
+        }
+      ]
+    },
+    {
+      "title": "Random Spell Table",
+      "blurb": "Determines the spell in a found Grimoire or Scroll. Roll two d20s: the first picks which column below (grouped in fives), the second picks the row.",
+      "rows": [
+        {
+          "name": "1",
+          "text": "1–5: Animate Skull  ·  6–10: Bones of the Earth  ·  11–15: Strike Dead  ·  16–20: Control Undead"
+        },
+        {
+          "name": "2",
+          "text": "1–5: Curse  ·  6–10: Poison Dart  ·  11–15: Animal Companion  ·  16–20: Familiar"
+        },
+        {
+          "name": "3",
+          "text": "1–5: Fleet Feet  ·  6–10: Slow  ·  11–15: Crumble  ·  16–20: Fast Act"
+        },
+        {
+          "name": "4",
+          "text": "1–5: Leap  ·  6–10: Imp  ·  11–15: Plane Walk  ·  16–20: Control Demon"
+        },
+        {
+          "name": "5",
+          "text": "1–5: Wall  ·  6–10: Call Storm  ·  11–15: Scatter Shot  ·  16–20: Destructive Sphere"
+        },
+        {
+          "name": "6",
+          "text": "1–5: Push  ·  6–10: Draining Word  ·  11–15: Explosive Rune  ·  16–20: Write Scroll"
+        },
+        {
+          "name": "7",
+          "text": "1–5: Teleport  ·  6–10: Invisibility  ·  11–15: Beauty  ·  16–20: Transpose"
+        },
+        {
+          "name": "8",
+          "text": "1–5: Strength  ·  6–10: Telekinesis  ·  11–15: Enchant Armour  ·  16–20: Control Construct"
+        },
+        {
+          "name": "9",
+          "text": "1–5: Awareness  ·  6–10: True Sight  ·  11–15: Mind Lock  ·  16–20: Mind Control"
+        },
+        {
+          "name": "10",
+          "text": "1–5: Shield  ·  6–10: Banish  ·  11–15: Blinding Light  ·  16–20: Miraculous Cure"
+        },
+        {
+          "name": "11",
+          "text": "1–5: Bone Dart  ·  6–10: Spell Eater  ·  11–15: Steal Health  ·  16–20: Raise Zombie"
+        },
+        {
+          "name": "12",
+          "text": "1–5: Mud  ·  6–10: Fog  ·  11–15: Control Animal  ·  16–20: Brew Potion"
+        },
+        {
+          "name": "13",
+          "text": "1–5: Decay  ·  6–10: Time Store  ·  11–15: Petrify  ·  16–20: Time Walk"
+        },
+        {
+          "name": "14",
+          "text": "1–5: Plague of Insects  ·  6–10: Planar Tear  ·  11–15: Possess  ·  16–20: Summon Demon"
+        },
+        {
+          "name": "15",
+          "text": "1–5: Elemental Bolt  ·  6–10: Elemental Ball  ·  11–15: Elemental Hammer  ·  16–20: Elemental Shield"
+        },
+        {
+          "name": "16",
+          "text": "1–5: Furious Quill  ·  6–10: Absorb Knowledge  ·  11–15: Power Word  ·  16–20: Bridge"
+        },
+        {
+          "name": "17",
+          "text": "1–5: Blink  ·  6–10: Fool's Gold  ·  11–15: Glow  ·  16–20: Illusionary Soldier"
+        },
+        {
+          "name": "18",
+          "text": "1–5: Enchant Weapon  ·  6–10: Grenade  ·  11–15: Embed Enchantment  ·  16–20: Animate Construct"
+        },
+        {
+          "name": "19",
+          "text": "1–5: Combat Awareness  ·  6–10: Wizard Eye  ·  11–15: Suggestion  ·  16–20: Reveal Secret"
+        },
+        {
+          "name": "20",
+          "text": "1–5: Circle of Protection  ·  6–10: Heal  ·  11–15: Dispel  ·  16–20: Destroy Undead"
         }
       ]
     }
