@@ -379,13 +379,13 @@ def default_homerules() -> dict:
         # already covers that. A group that wants soldiers to be able to
         # re-equip from the full standard-item catalog ticks this on.
         "soldier_normal_gear_enabled": False,
-        # General house rule, on by default and not tied to any specific
+        # General house rule, off by default and not tied to any specific
         # source book: every ordinary human soldier hire (the same "not an
         # animal, construct, demon, or non-human troop type" filter as
         # Giant-Blooded eligibility) gets a free backup dagger, since a
         # single dagger costs no item slot under the core rules. Gear-text
         # only — never touches item_slots. See expansions.free_dagger_gear().
-        "free_dagger_enabled": True,
+        "free_dagger_enabled": False,
         # Off by default: an escape hatch, not a rule — floods the "Hire
         # soldier" panel with every catalog entry regardless of source book,
         # known spells, wizard state, or vault items, and lets add_soldier()
@@ -502,14 +502,14 @@ def default_homerules() -> dict:
         "knightly_orders_enabled": True,
         # Additional Weapons sub-card: independent on/off switches for three
         # standard weapons that are otherwise deliberately not source-gated
-        # (see game_content.load_standard_items()) — a group that doesn't
-        # want the Javelineer's/Monk's issued weapon or Ghost Archipelago's
-        # Throwing Knife showing up in the item-slot picker turns it off
-        # here instead. On by default, same as the rest of this card. See
-        # app.py's _filtered_standard_items().
-        "javelin_enabled": True,
-        "throwing_knife_enabled": True,
-        "bladed_staff_enabled": True,
+        # (see game_content.load_standard_items()) — a group that wants the
+        # Javelineer's/Monk's issued weapon or Ghost Archipelago's Throwing
+        # Knife showing up in the item-slot picker turns it on here. Off by
+        # default, unlike the rest of this card. See app.py's
+        # _filtered_standard_items().
+        "javelin_enabled": False,
+        "throwing_knife_enabled": False,
+        "bladed_staff_enabled": False,
         # Bladed Staff's slot cost isn't specified consistently between
         # printings — on by default at 2 slots (the more common reading);
         # untick for the 1-slot reading instead.
@@ -4878,11 +4878,10 @@ def sell_fin_dalka_grimoire(wb: dict) -> tuple[bool, str]:
     wiz = wb.setdefault("wizard", {})
     fd = wiz.setdefault("fin_dalka", {"attempts": {}})
     price = _fin_dalka_sell_price(fd)
-    name = FIN_DALKA_ITEM_NAME.lower()
     wb["vault_items"] = [
         it
         for it in wb.get("vault_items") or []
-        if ((it.get("name") if isinstance(it, dict) else str(it)) or "").strip().lower() != name
+        if not expansions.is_fin_dalka_name(it.get("name") if isinstance(it, dict) else str(it))
     ]
     wb["gold"] = int(wb.get("gold", 0)) + price
     text = f"Sold the Grimoire of Fin Dalka for {price} gc."
