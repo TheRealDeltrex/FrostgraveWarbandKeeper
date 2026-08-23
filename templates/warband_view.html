@@ -353,6 +353,17 @@
         <details class="ref-panel hr-group" id="hr-group-core">
           <summary>Core rule tweaks<span class="hr-count"></span></summary>
           <div class="hr-row">
+            <input id="hr_black_market_enabled" name="black_market_enabled" type="checkbox" {% if hr.black_market_enabled %}checked{% endif %} />
+            <details class="hr-note" id="hrnote-black_market_enabled">
+              <summary>Black Market Contacts</summary>
+              <p class="hr-note-body">
+                Instead of open buying, roll 4x on the Treasure Table after a game and buy only from
+                what comes up — adds a Black Market sub-card to the Treasury, Vault and Workshop card
+                below to record rolls and look up results.
+              </p>
+            </details>
+          </div>
+          <div class="hr-row">
             <input id="hr_edition2_soldier_costs" name="edition2_soldier_costs" type="checkbox" {% if hr.edition2_soldier_costs %}checked{% endif %} />
             <details class="hr-note" id="hrnote-edition2_soldier_costs">
               <summary>Adjust soldiers to edition 2</summary>
@@ -371,17 +382,6 @@
                 A single dagger costs no item slot. Skips anyone already carrying a hand weapon and a
                 dagger, or two daggers; upgrades a lone dagger to two, and two hand weapons still gets
                 one added.
-              </p>
-            </details>
-          </div>
-          <div class="hr-row">
-            <input id="hr_black_market_enabled" name="black_market_enabled" type="checkbox" {% if hr.black_market_enabled %}checked{% endif %} />
-            <details class="hr-note" id="hrnote-black_market_enabled">
-              <summary>Black Market Contacts</summary>
-              <p class="hr-note-body">
-                Instead of open buying, roll 4x on the Treasure Table after a game and buy only from
-                what comes up — adds a Black Market sub-card to the Treasury, Vault and Workshop card
-                below to record rolls and look up results.
               </p>
             </details>
           </div>
@@ -1672,6 +1672,7 @@
                 {% set prefix = 'captain' %}
                 {% set n = cap_slots_n %}
                 {% set standard_items = soldier_capable_items %}
+                {% set vault_names = vault_names|reject('equalto', SPELL_COMPONENT_BAG_NAME)|list %}
                 {% include '_item_slots.html' %}
                 <div class="form-row">
                   <label for="captain_notes">Notes</label>
@@ -2097,6 +2098,7 @@
                           {% set slots = s.item_slots if s.item_slots is defined else [] %}
                           {% set standard_items = soldier_capable_items %}
                           {% set hide_normal_gear = not hr.soldier_normal_gear_enabled %}
+                          {% set vault_names = vault_names|reject('equalto', SPELL_COMPONENT_BAG_NAME)|list %}
                           {% set vault_names = vault_names|reject('firearm_item')|list if hide_normal_gear else vault_names %}
                           {% include '_item_slots.html' %}
                         </form>

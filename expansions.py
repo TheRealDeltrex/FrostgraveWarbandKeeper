@@ -888,14 +888,27 @@ def pact_break_penalty(wb: dict) -> dict:
 # --- Vault-gated items (bought firearms, found artefacts) -------------------
 
 
+def is_fin_dalka_name(raw: str) -> bool:
+    """Whether a vault item's stored name refers to The Grimoire of Fin
+    Dalka. Not a plain equality check: the "pick from a rulebook" loot
+    picker (_loot_picker.html / warband_view.html's composeRow()) appends
+    " (<book>)" to whatever item it fills in — e.g. "The Grimoire of Fin
+    Dalka (Blood Legacy)" — same as any other magic item, since that's the
+    natural way the help text tells a player to add it. A bare equality
+    check against FIN_DALKA_ITEM_NAME would silently never match anything
+    added that way, so also accept the name with that suffix attached."""
+    name = (raw or "").strip().lower()
+    base = FIN_DALKA_ITEM_NAME.lower()
+    return name == base or name.startswith(base + " (")
+
+
 def fin_dalka_owned(wb: dict) -> bool:
     """Whether the warband currently holds The Grimoire of Fin Dalka —
     found/bought like any other magic item via the Treasury, Vault and
     Workshop card's vault-item route, so ownership is just "is it in the
     vault" rather than a separate manually-toggled flag."""
-    name = FIN_DALKA_ITEM_NAME.lower()
     return any(
-        ((it.get("name") if isinstance(it, dict) else str(it)) or "").strip().lower() == name
+        is_fin_dalka_name(it.get("name") if isinstance(it, dict) else str(it))
         for it in wb.get("vault_items") or []
     )
 

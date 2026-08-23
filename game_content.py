@@ -177,16 +177,14 @@ def group_magic_items(items: list[dict]) -> list[dict]:
     The list is keyed "rows", not "items": in Jinja `group.items` resolves to
     dict.items, the method, so a template would silently get something unusable.
     """
-    from frostgrave_data import SOURCE_BOOKS
+    from frostgrave_data import source_book_order
 
-    order = {book: i + 1 for i, book in enumerate(SOURCE_BOOKS)}
-    order["Core Rules"] = 0
     groups: dict[str, list[dict]] = {}
     for it in items:
         groups.setdefault(it.get("source", ""), []).append(it)
     return [
         {"source": src, "rows": sorted(rows, key=lambda r: r["name"].lower())}
-        for src, rows in sorted(groups.items(), key=lambda kv: order.get(kv[0], len(order) + 1))
+        for src, rows in sorted(groups.items(), key=lambda kv: source_book_order(kv[0]))
     ]
 
 

@@ -109,6 +109,7 @@ from frostgrave_data import (
     illusion_source_choices,
     level_from_xp,
     soldier_list_for_ui,
+    source_book_order,
     spells_for_wizard_ui,
     unused_xp,
 )
@@ -565,6 +566,16 @@ def home() -> str:
     )
 
 
+def _sorted_by_source_book(d: dict) -> dict:
+    """A {book: ...} dict (expansion rules / loot tables / random encounters),
+    reordered Core Rules-first-then-release-order for display — the
+    extractor scripts that generate these JSON files don't promise any
+    particular top-level key order, so this is the single place that fixes
+    it rather than hand-ordering the JSON (which a re-run would silently
+    revert, per CLAUDE.md's extract_*.py note)."""
+    return dict(sorted(d.items(), key=lambda kv: source_book_order(kv[0])))
+
+
 @app.route("/reference")
 def reference() -> str:
     descs = load_spell_descriptions()
@@ -600,15 +611,25 @@ def reference() -> str:
         quick_reference=load_quick_reference(),
         core_rules=load_core_rules(),
         base_locations=BASE_LOCATIONS,
-        base_resources=BASE_RESOURCES,
+        # BASE_RESOURCES is grouped by book in the dict literal, but not in
+        # release order (Fireheart/Spellcaster Magazine sit before Thaw of
+        # the Lich Lord/The Maze of Malcor there) — reorder for display only,
+        # same as _sorted_by_source_book above, without touching the dict
+        # other code reads.
+        base_resources=dict(
+            sorted(
+                BASE_RESOURCES.items(),
+                key=lambda kv: source_book_order(kv[1].get("source", "Core Rules")),
+            )
+        ),
         spell_names=load_spell_names(),
         # The Lexicon is a browsable reference, so unlike the warband page none
         # of this is filtered by source toggles — same as the bestiary already is.
         magic_item_groups=group_magic_items(load_magic_items()),
         magic_item_count=len(load_magic_items()),
-        expansion_rules=load_expansion_rules(),
-        random_encounters=load_random_encounters(),
-        loot_tables=load_loot_tables(),
+        expansion_rules=_sorted_by_source_book(load_expansion_rules()),
+        random_encounters=_sorted_by_source_book(load_random_encounters()),
+        loot_tables=_sorted_by_source_book(load_loot_tables()),
         ghost=load_ghost_archipelago(),
     )
 
@@ -1250,12 +1271,17 @@ def warband_view(warband_id: str) -> str:
         # Supplement resources (Crow Roost, Gondola Repair Shop) only appear once
         # their book is on. Anything already owned stays listed regardless, so a
         # book switched off later never hides something the warband paid for.
-        base_resources={
-            key: info
-            for key, info in BASE_RESOURCES.items()
-            if info.get("source", "Core Rules") in wb_sources
-            or key in ((wb.get("base") or {}).get("resources") or [])
-        },
+        base_resources=dict(
+            sorted(
+                (
+                    (key, info)
+                    for key, info in BASE_RESOURCES.items()
+                    if info.get("source", "Core Rules") in wb_sources
+                    or key in ((wb.get("base") or {}).get("resources") or [])
+                ),
+                key=lambda kv: source_book_order(kv[1].get("source", "Core Rules")),
+            )
+        ),
         # no armour for wizard/apprentice UI
         standard_items=_filtered_standard_items(load_spellcaster_items(), hr),
         # unfiltered aside from the Additional Weapons toggles: page-wide item-suggestions datalist
@@ -1314,7 +1340,7 @@ def warband_view(warband_id: str) -> str:
         # learnable-spell list — a book that's off shouldn't leak its content
         # into the page even inside a picker; "Other / write-in" is the escape
         # hatch for anything else actually found at the table.
-        loot_picker_books=sorted(wb_sources, key=lambda b: (b != "Core Rules", b)),
+        loot_picker_books=sorted(wb_sources, key=source_book_order),
         loot_picker_data={
             "items_by_book": {
                 book: sorted(

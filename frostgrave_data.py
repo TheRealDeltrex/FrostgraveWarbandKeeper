@@ -2671,21 +2671,29 @@ KENNEL_ELIGIBLE_TYPE_KEYS = frozenset({
 
 # Extra source books whose soldiers / creatures / rules can be toggled on per
 # warband from the "Additional Rules and Homerules" tab. Core Rules content is
-# always available and is not part of this list. Order = release order.
+# always available and is not part of this list.
+#
+# Order = real-world publication date (Thaw of the Lich Lord Nov 2015 through
+# The Wildwoods Jun 2023) — several of these predate the 2e core rules
+# (Aug 2020) themselves, since Frostgrave started as 1st edition and these
+# were folded into 2e later. Anywhere Core Rules is listed alongside these
+# (e.g. the loot picker's book dropdown — see source_book_order() below) it
+# still goes first regardless, since it's the baseline everything else is
+# read against, not because it's chronologically first.
 SOURCE_BOOKS = [
     "Thaw of the Lich Lord",
     "Into the Breeding Pits",
     "Forgotten Pacts",
+    "The Frostgrave Folio",
+    "Spellcaster Magazine",
     "The Maze of Malcor",
     "The Wizards' Conclave",
     "The Perilous Dark",
-    "The Frostgrave Folio",
-    "Grave Mutations",
     "The Red King",
     "Blood Legacy",
     "Fireheart",
+    "Grave Mutations",
     "The Wildwoods",
-    "Spellcaster Magazine",
 ]
 
 
@@ -2699,6 +2707,7 @@ def source_slug(name: str) -> str:
 # [{"name": ..., "slug": ...}] convenience for templates/forms.
 SOURCE_BOOK_OPTIONS = [{"name": b, "slug": source_slug(b)} for b in SOURCE_BOOKS]
 SOURCE_BOOK_BY_SLUG = {source_slug(b): b for b in SOURCE_BOOKS}
+
 
 
 def soldier_list_for_ui() -> list[dict]:
@@ -2778,8 +2787,11 @@ TEMPORARY_ORDER = [
 ]
 
 
-def _source_rank(source: str) -> int:
-    """Core Rules first, then the supplement books in release order."""
+def source_book_order(source: str) -> int:
+    """Sort key for any listing that mixes "Core Rules" in with the
+    supplement books: Core Rules always sorts first, then the rest fall in
+    real-world publication order (SOURCE_BOOKS above) regardless of Core
+    Rules' own 2e publication date. An unrecognized name sorts last."""
     if source == "Core Rules":
         return 0
     return SOURCE_BOOKS.index(source) + 1 if source in SOURCE_BOOKS else len(SOURCE_BOOKS) + 1
@@ -2811,7 +2823,7 @@ def _ui_sort_key(r: dict) -> tuple:
         rank = SUMMONED_ORDER.index(r["key"]) if r["key"] in SUMMONED_ORDER else len(SUMMONED_ORDER)
         return (0, 1, rank, 0, r["name"])
     return (
-        _source_rank(r["source"]),
+        source_book_order(r["source"]),
         0,
         1 if r["category"] != "standard" else 0,
         r["cost"],

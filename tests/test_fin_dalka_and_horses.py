@@ -20,6 +20,26 @@ def test_fin_dalka_owned_reflects_vault_contents(fresh_warband):
     assert expansions.fin_dalka_owned(wb)
 
 
+def test_fin_dalka_owned_with_book_suffix_from_loot_picker(fresh_warband):
+    """The "pick from a rulebook" loot picker (warband_view.html's
+    composeRow()) appends " (<book>)" to whatever item it fills into the
+    Vault's Add item field, same as any other magic item — the natural way
+    the help text tells a player to add this one. Ownership must still be
+    recognized, not just the bare-name case add_vault_item() uses above."""
+    wb = fresh_warband
+    warband_store.add_vault_item(wb, f"{FIN_DALKA_ITEM_NAME} (Blood Legacy)")
+    assert expansions.fin_dalka_owned(wb)
+
+
+def test_sell_fin_dalka_grimoire_removes_book_suffixed_vault_entry(fresh_warband):
+    wb = fresh_warband
+    wb["homerules"]["enabled_sources"]["Blood Legacy"] = True
+    warband_store.add_vault_item(wb, f"{FIN_DALKA_ITEM_NAME} (Blood Legacy)")
+    ok, msg = warband_store.sell_fin_dalka_grimoire(wb)
+    assert ok, msg
+    assert not expansions.fin_dalka_owned(wb)
+
+
 def test_fin_dalka_decipher_requires_blood_legacy(fresh_warband):
     wb = fresh_warband
     wb["homerules"]["enabled_sources"]["Blood Legacy"] = False
