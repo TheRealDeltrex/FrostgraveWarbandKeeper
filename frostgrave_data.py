@@ -2658,12 +2658,15 @@ FIREARM_SOLDIER_TYPE_KEYS = frozenset({"musketeer", "coachman", "duellist"})
 # The Kennel base resource (2e core, p.106-107): may bring one war hound or
 # Animal Companion wolf above the normal soldier limit. Fireheart's Construct
 # Hound (bought or Animate Construct-summoned) explicitly stands in for a war
-# hound too — see its "notes" above — so it fills the same kennel slot.
+# hound too — see its "notes" above — so it fills the same kennel slot. The
+# Dire Hound (Spellcaster Magazine Legendary Soldier) is also a hound and
+# fills it too.
 KENNEL_ELIGIBLE_TYPE_KEYS = frozenset({
     "war_hound",
     "companion_wolf",
     "construct_hound",
     "construct_hound_summoned",
+    "dire_hound",
 })
 
 # Extra source books whose soldiers / creatures / rules can be toggled on per

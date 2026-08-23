@@ -442,6 +442,11 @@ app.jinja_env.globals.update(
     PACT_MAX_TIERS=expansions.PACT_MAX_TIERS,
 )
 
+# Lets templates filter a vault-item-name list with `|reject('firearm_item')`
+# (see the soldier gear block in warband_view.html) without exposing
+# expansions.parse_firearm_name itself as a callable global.
+app.jinja_env.tests["firearm_item"] = lambda name: expansions.parse_firearm_name(name) is not None
+
 
 # --- Local-only request guards ---------------------------------------------
 #
