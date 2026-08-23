@@ -1,6 +1,10 @@
 {#
   Item slot editor with short primary list + secondary detail for Potion/Scroll/Grimoire.
-  Expects: prefix, n, slots, standard_items, vault_names (optional), gated_items (optional)
+  Expects: prefix, n, slots, standard_items, vault_names (optional), gated_items (optional),
+  hide_normal_gear (optional) — when true, the Weapon/Missile/Armour/Gear categories are
+  dropped from the primary list, leaving only Consumable (Potion/Scroll/Grimoire) plus
+  vault loot. Used for the soldier gear block when the "soldiers can use their item slot
+  for normal gear" homerule is off — see soldier_normal_gear_enabled in warband_store.py.
 
   The potion list, spell list, and item-suggestions datalist are the same on
   every block on the page (wizard/apprentice/captain/soldier), so they are
@@ -16,7 +20,7 @@
 #}
 {% set vault_names = vault_names or [] %}
 {% set gated_items = gated_items or {} %}
-{% set cat_order = ['Weapon', 'Missile', 'Armour', 'Gear', 'Consumable'] %}
+{% set cat_order = ['Consumable'] if hide_normal_gear else ['Weapon', 'Missile', 'Armour', 'Gear', 'Consumable'] %}
 
 <div class="item-slots" data-prefix="{{ prefix }}" data-count="{{ n }}">
   {% for i in range(n) %}

@@ -656,6 +656,10 @@
           <input id="soldier_permanent_injuries_enabled" name="soldier_permanent_injuries_enabled" type="checkbox" {% if hr.soldier_permanent_injuries_enabled %}checked{% endif %} />
           <label for="soldier_permanent_injuries_enabled" style="margin:0">Ordinary soldiers can take permanent injuries (Permanent Injury Table, page 77 — normally only the wizard/apprentice/captain's Survival Roll uses it)</label>
         </div>
+        <div class="checkbox-row">
+          <input id="soldier_normal_gear_enabled" name="soldier_normal_gear_enabled" type="checkbox" {% if hr.soldier_normal_gear_enabled %}checked{% endif %} />
+          <label for="soldier_normal_gear_enabled" style="margin:0">Soldiers can use their item slot for normal gear</label>
+        </div>
         <div class="form-row">
           <label for="soldier_max_levels">Max levels gained (per soldier)</label>
           <input id="soldier_max_levels" name="soldier_max_levels" type="number" min="0" value="{{ hr.soldier_max_levels }}" />
@@ -2092,6 +2096,8 @@
                           {% set n = soldier_slot_n %}
                           {% set slots = s.item_slots if s.item_slots is defined else [] %}
                           {% set standard_items = soldier_capable_items %}
+                          {% set hide_normal_gear = not hr.soldier_normal_gear_enabled %}
+                          {% set vault_names = vault_names|reject('firearm_item')|list if hide_normal_gear else vault_names %}
                           {% include '_item_slots.html' %}
                         </form>
                       {% endif %}

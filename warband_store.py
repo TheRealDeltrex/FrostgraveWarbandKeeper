@@ -373,6 +373,12 @@ def default_homerules() -> dict:
         # soldiers to shrug off a Survival Roll with a lasting injury instead
         # ticks this on.
         "soldier_permanent_injuries_enabled": False,
+        # Off by default: ordinary soldiers' item slot is meant for potions
+        # and found artefacts/loot, not the mundane Weapon/Missile/Armour/
+        # Gear catalog — a soldier's fixed starting kit (its "gear" field)
+        # already covers that. A group that wants soldiers to be able to
+        # re-equip from the full standard-item catalog ticks this on.
+        "soldier_normal_gear_enabled": False,
         # General house rule, on by default and not tied to any specific
         # source book: every ordinary human soldier hire (the same "not an
         # animal, construct, demon, or non-human troop type" filter as
@@ -3569,6 +3575,7 @@ def update_homerules(wb: dict, form: "ImmutableMultiDict") -> tuple[bool, str]:
             "soldier_permanent_injuries_enabled": (
                 form.get("soldier_permanent_injuries_enabled") == "on"
             ),
+            "soldier_normal_gear_enabled": form.get("soldier_normal_gear_enabled") == "on",
             "free_dagger_enabled": form.get("free_dagger_enabled") == "on",
             "disable_app_mechanics_enabled": form.get("disable_app_mechanics_enabled") == "on",
             "soldier_max_levels": int(form.get("soldier_max_levels") or hr["soldier_max_levels"]),
