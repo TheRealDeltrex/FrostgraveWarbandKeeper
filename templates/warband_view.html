@@ -1980,9 +1980,16 @@
               </th>
             </tr>
           </thead>
-          <tbody id="soldier-order-body">
-            {% for s in soldiers %}
-              <tr class="status-{{ s.status }} catalog-row" data-soldier-id="{{ s.id }}">
+          {% for s in soldiers %}
+            {# One <tbody> per soldier, not one shared <tbody> for the whole
+               roster — a soldier can render extra sibling <tr>s below its
+               main row (info-desc-row, companion-row), and the reorder
+               controls below need to move a soldier's whole row group
+               together as one atomic unit via insertBefore/nextElementSibling
+               on these <tbody>s, not fight over individual <tr>s that don't
+               all carry data-soldier-id. #}
+            <tbody data-soldier-id="{{ s.id }}">
+              <tr class="status-{{ s.status }} catalog-row">
                 <td class="muted">{{ loop.index }}</td>
                 <td>
                   <input type="radio" name="soldier-select" aria-label="Select {{ s.name }} to reorder" />
@@ -2272,8 +2279,8 @@
                   </td>
                 </tr>
               {% endif %}
-            {% endfor %}
-          </tbody>
+            </tbody>
+          {% endfor %}
         </table>
       </div>
       <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" id="soldier-reorder-form" style="margin-top:0.75rem">
@@ -2288,35 +2295,45 @@
       </form>
       <script>
         (function () {
-          const body = document.getElementById('soldier-order-body');
-          if (!body) return;
+          // Each soldier is a whole <tbody data-soldier-id> group, not a bare
+          // <tr> — a soldier can carry extra sibling rows below its main one
+          // (info-desc-row, companion-row) that don't themselves carry
+          // data-soldier-id, and grouping into a real content group means
+          // insertBefore()/previousElementSibling below moves a soldier's
+          // full row set atomically instead of only its first <tr>. Also
+          // guards against picking up <thead> as a "previous sibling".
+          const table = document.getElementById('roster-table');
+          if (!table) return;
           const input = document.getElementById('view-soldier-order');
           const status = document.getElementById('soldier-order-status');
           const selKey = 'selsoldier:' + location.pathname;
-          function rows() { return [...body.querySelectorAll('tr')]; }
-          function radios() { return [...body.querySelectorAll('input[name="soldier-select"]')]; }
-          function selectedRow() {
-            const radio = body.querySelector('input[name="soldier-select"]:checked');
-            return radio ? radio.closest('tr') : null;
+          function groups() { return [...table.querySelectorAll('tbody[data-soldier-id]')]; }
+          function radios() { return [...table.querySelectorAll('tbody[data-soldier-id] input[name="soldier-select"]')]; }
+          function selectedGroup() {
+            const radio = table.querySelector('tbody[data-soldier-id] input[name="soldier-select"]:checked');
+            return radio ? radio.closest('tbody[data-soldier-id]') : null;
           }
           function refreshHighlight() {
-            rows().forEach((r) => { r.style.outline = ''; });
-            const sel = selectedRow();
+            groups().forEach((g) => { g.style.outline = ''; });
+            const sel = selectedGroup();
             if (sel) {
               sel.style.outline = '2px solid var(--accent)';
               try { sessionStorage.setItem(selKey, sel.dataset.soldierId); } catch (err) { /* ignore */ }
             }
           }
           function sync() {
-            rows().forEach((r, i) => { r.cells[0].textContent = i + 1; });
-            input.value = rows().map(r => r.dataset.soldierId).join('|');
+            groups().forEach((g, i) => {
+              const numCell = g.querySelector('tr.catalog-row')?.cells[0];
+              if (numCell) numCell.textContent = i + 1;
+            });
+            input.value = groups().map(g => g.dataset.soldierId).join('|');
             if (status) status.textContent = 'Saving order…';
             window.fgDebounceSubmit(input.form, 800);
           }
           radios().forEach((radio) => radio.addEventListener('change', refreshHighlight));
-          rows().forEach(r => r.addEventListener('click', (e) => {
+          groups().forEach(g => g.addEventListener('click', (e) => {
             if (e.target.closest('form') || e.target.closest('select') || e.target.closest('button') || e.target.closest('input') || e.target.closest('details')) return;
-            const radio = r.querySelector('input[name="soldier-select"]');
+            const radio = g.querySelector('input[name="soldier-select"]');
             if (radio) {
               radio.checked = true;
               refreshHighlight();
@@ -2328,7 +2345,7 @@
           try {
             const savedId = sessionStorage.getItem(selKey);
             if (savedId) {
-              const match = rows().find(r => r.dataset.soldierId === savedId);
+              const match = groups().find(g => g.dataset.soldierId === savedId);
               const radio = match ? match.querySelector('input[name="soldier-select"]') : null;
               if (radio) {
                 radio.checked = true;
@@ -2337,15 +2354,17 @@
             }
           } catch (err) { /* ignore */ }
           document.getElementById('soldier-up').onclick = () => {
-            const sel = selectedRow();
-            if (!sel || !sel.previousElementSibling) return;
-            body.insertBefore(sel, sel.previousElementSibling);
+            const sel = selectedGroup();
+            const prev = sel ? sel.previousElementSibling : null;
+            if (!sel || !prev || !prev.dataset.soldierId) return;
+            table.insertBefore(sel, prev);
             sync();
           };
           document.getElementById('soldier-down').onclick = () => {
-            const sel = selectedRow();
-            if (!sel || !sel.nextElementSibling) return;
-            body.insertBefore(sel.nextElementSibling, sel);
+            const sel = selectedGroup();
+            const next = sel ? sel.nextElementSibling : null;
+            if (!sel || !next || !next.dataset.soldierId) return;
+            table.insertBefore(next, sel);
             sync();
           };
         })();
