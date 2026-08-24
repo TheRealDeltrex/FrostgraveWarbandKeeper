@@ -453,11 +453,12 @@ def has_vault_item(wb: dict, needle: str) -> bool:
 def xp_per_level(wb: dict) -> int:
     """XP one wizard level costs. A Lich levels more slowly; a Fire Giant
     levels more slowly still (Blood Legacy: 200xp, vs. a Lich's 150xp); a
-    Vampire's 120xp sits between the two. The book also caps a Fire Giant at
-    400xp and a Vampire at 300xp spent per game — a per-game (not per-
-    warband-lifetime) limit this app has no bookkeeping for anywhere else
-    (same as the niggling injury/prosthetic upkeep fees), so it's left as a
-    house rule to track at the table rather than enforced here."""
+    Vampire's 120xp sits between the two. The book also raises a Fire Giant's
+    per-game XP cap to 400 (a Vampire's stays at the ordinary 300) — a
+    per-game (not per-warband-lifetime) limit this app has no bookkeeping for
+    anywhere else (same as the niggling injury/prosthetic upkeep fees), so
+    it's left as a house rule to track at the table rather than enforced
+    here."""
     if is_fire_giant(wb):
         return FIRE_GIANT_XP_PER_LEVEL
     if is_vampire(wb):
@@ -602,6 +603,64 @@ def wizard_stat_caps(wb: dict) -> dict:
         base = caps.get("health", WIZARD_STAT_LIMITS_DEFAULT["health"])
         caps["health"] = base + min(10, wizard_level(wb) // 10)
     return caps
+
+
+# Reference-only text for the Lexicon's Wizard states panels (templates/
+# reference.html) — same LICH_NOTES treatment: facts this app has no other
+# tracking infrastructure for (per-game bookkeeping, item restrictions,
+# GM-only subsystems), listed so a player can look them up without the book.
+
+# "As a Vampire" — rules that apply regardless of how the wizard got there
+# (built as one from creation, or transformed mid-campaign).
+VAMPIRE_NOTES = [
+    "Never has a Rangifer in the warband.",
+    "Animal Companion yields an undead version of the animal.",
+    "May never benefit from Heal or Miraculous Cure, and may not drink Healing Potions.",
+    "Regains lost Health equal to the damage inflicted (up to its starting Health) whenever it "
+    "damages a giant in hand-to-hand combat.",
+]
+
+# "Creating a Vampire" (Blood Legacy p.9-11) — the wizard's own school from
+# the start, as a full PC/NPC build (is_vampire()).
+VAMPIRE_CREATION_NOTES = [
+    "No apprentice — may nominate one warband member before each game to act as an "
+    "apprentice for the purposes of activating figures during the Apprentice Phase.",
+    "9-soldier roster instead of the usual 8 (still 4 specialists).",
+    "Same item slots as an ordinary wizard, but never armour or shields.",
+    "Unnatural Health: no automatic healing between games. Pay 5gc per Health point "
+    "regained, or consume a permanent (non-undead/construct/demon) warband member's blood "
+    "instead — that soldier is removed from the roster, replaceable from the next game on.",
+    "Sun Damage: 1 point of damage every activation spent in direct sunlight, unless under cover.",
+]
+
+# "Becoming a Vampire" (Blood Legacy p.13) — an ordinary wizard transformed
+# mid-campaign, tracked as the STATE_VAMPIRE wizard state (become_vampire()/
+# revert_vampire()).
+VAMPIRE_TRANSFORM_NOTES = [
+    "Loses any known Thaumaturge spells; every other known spell's Casting Number goes up by 1.",
+    "Will drops to +5 if it was higher.",
+    "Recalculate the wizard's level afterward: -1 for each spell whose Casting Number went "
+    "up, -1 for each spell lost, -1 for each improvement lost with it, -1 for each point of "
+    "Will lost.",
+    "Loses their apprentice, gaining a 9th soldier slot instead (still capped at 4 specialists).",
+]
+
+# "Creating a Fire Giant Wizard" (Blood Legacy p.19-21) — the wizard's own
+# school from the start; there's no mid-campaign transformation into one.
+FIRE_GIANT_NOTES = [
+    "No apprentice.",
+    "Same item slots as an ordinary wizard, but never armour or shields.",
+    "Can use grimoires normally, except Chronomancer or Write Scroll grimoires — those can be "
+    "sold but never learned from.",
+    "Can never use scrolls, only sell them.",
+    "A found magic weapon is giant-usable only on a roll of 16+ — otherwise it can be given "
+    "away, sold, or vaulted.",
+    "Potions are human-sized; two doses of the same potion can be combined into one "
+    "giant-sized dose (one item slot). Other magic items resize themselves to fit automatically.",
+    "Still subject to the Maximum Armour rule.",
+    "Empowering a spell or a Will Roll costs 2 Health per +1, instead of the usual 1-for-1 "
+    "(Elemental Resistance).",
+]
 
 
 # --- Blood Legacy: High-Level Wizards ---------------------------------------

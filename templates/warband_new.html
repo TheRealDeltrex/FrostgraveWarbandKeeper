@@ -66,7 +66,7 @@
         Fire Giant Wizard playable (Blood Legacy)
       </label>
       <p class="muted" style="font-size:0.82rem;margin:0.2rem 0 0">
-        Needs Blood Legacy above. A giant-scale wizard build (M6 F6 S0 A14 W8 H22, no armour/
+        Needs Blood Legacy above. A giant-scale wizard build (M6 F4 S0 A14 W4 H22, no armour/
         shields, no apprentice, Health cap 30, 200xp/level) rather than an ordinary human wizard.
       </p>
       {# Blood Legacy frames the Vampire Wizard as a GM/NPC villain build "or PC
@@ -152,7 +152,7 @@
               // option list (e.g. the Pentangle schools) stays in sync with
               // whatever sources/toggles are enabled here — not just the counts
               // and relations text below it.
-              ["school-field", "neutral-needed-num", "creation-dynamic"].forEach(function (id) {
+              ["school-field", "neutral-needed-num", "wizard-notes", "creation-dynamic"].forEach(function (id) {
                 var fresh = doc.getElementById(id);
                 var current = document.getElementById(id);
                 if (!fresh || !current) return;
@@ -236,8 +236,15 @@
           <p class="muted" style="font-size:0.78rem;margin:0.35rem 0 0">Only used if you don't upload your own picture. Fixed once the warband is created.</p>
         </div>
       </div>
+      {# Wrapped so fgNewReload() can swap this whole block (stats note +
+         apprentice section) when the school dropdown changes — both depend
+         on school, and both live outside #creation-dynamic. Without this,
+         switching to Fire Giant/Vampire left the apprentice checkbox visible
+         and checkable client-side until the next full page load, so the
+         "no apprentice" rejection only ever surfaced after a failed submit. #}
+      <div id="wizard-notes">
       {% if school == "Fire Giant" %}
-        <p class="muted">Starting wizard stats: Move 6 · Fight 6 · Shoot 0 · Armour 14 · Will 8 · Health 22 (no armour/shield item slots)</p>
+        <p class="muted">Starting wizard stats: Move 6 · Fight 4 · Shoot 0 · Armour 14 · Will 4 · Health 22 (no armour/shield item slots)</p>
       {% elif school == "Vampire" %}
         <p class="muted">Starting wizard stats: Move 6 · Fight +2 · Shoot +0 · Armour 10 · Will +4 · Health 14 (same as an ordinary wizard; Will capped at 5, Health cap 22)</p>
       {% else %}
@@ -280,6 +287,7 @@
           </div>
         </div>
       {% endif %}
+      </div>
     </details>
 
     <div id="creation-dynamic">

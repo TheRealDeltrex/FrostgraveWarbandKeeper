@@ -851,21 +851,20 @@
         {% if wiz.school == "Fire Giant" %}
           <p class="muted" style="font-size:0.85rem">
             Blood Legacy's Fire Giant Wizard: Large, Strong, Elemental Resistance (2). No armour/
-            shield item slots, no apprentice. Health cap 30; 200xp per level (book caps spending
-            at 400xp/game). Can't learn Chronomancer spells or Write Scroll. A found magic weapon
-            is giant-usable only on a roll of 16+; potions/items are human-sized unless resized
-            at the table.
+            shield item slots, no apprentice. Health cap 30; 200xp per level, and may earn up to
+            400 XP per game (instead of the normal 300). Can't learn Chronomancer spells or Write
+            Scroll. A found magic weapon is giant-usable only on a roll of 16+; potions/items are
+            human-sized unless resized at the table.
           </p>
         {% elif wiz.school == "Vampire" %}
           <p class="muted" style="font-size:0.85rem">
             Blood Legacy's Vampire Wizard: Undead, Immune to Control Undead, Magic Attacks, Mind
             Lock, Thaumaturgic Vulnerability, True Sight, Partial Immunity to Normal Damage. No
             apprentice (a 9-soldier roster instead — 4 specialist, unchanged). Will capped at 5,
-            Health cap 22; 120xp per level (book caps spending at 300xp/game). Thaumaturge spells
-            are never learnable, nor is Transcendence. Never fields a Rangifer. Sun Damage, the
-            Unnatural Health economy (post-game healing costs 5gc/Health or a warband member's
-            blood instead of the ordinary rules), and regaining Health from damaging giants are
-            house rules to apply at the table.
+            Health cap 22; 120xp per level. Thaumaturge spells are never learnable, nor is
+            Transcendence. Never fields a Rangifer. Sun Damage and the Unnatural Health economy
+            (post-game healing costs 5gc/Health or a warband member's blood instead of the
+            ordinary rules) are house rules to apply at the table.
           </p>
         {% endif %}
         <div class="char-block">
@@ -3069,49 +3068,42 @@
             Riderless: Move {{ hrs.move }}, Fight {{ format_stat(hrs.fight) }},
             Armour {{ hrs.armour }}, Will {{ format_stat(hrs.will) }},
             Health {{ hrs.health }}.
-            {% if wb.horse.rider %}
-              Currently ridden
-              {% if wb.horse.rider.kind == 'wizard' %}by {{ wiz.name or 'the wizard' }}
-              {% elif wb.horse.rider.kind == 'apprentice' %}by {{ (wb.apprentice or {}).name or 'the apprentice' }}
-              {% elif wb.horse.rider.kind == 'captain' %}by {{ (wb.captain or {}).name or 'the captain' }}
-              {% else %}by a soldier
-              {% endif %}.
-            {% else %}
-              No one is mounted.
-            {% endif %}
           </p>
-          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="form-row inline">
-            <input type="hidden" name="action" value="mount_horse" />
-            <div>
-              <label for="horse_rider_kind">Mount</label>
-              <select id="horse_rider_kind" name="rider_kind" onchange="document.getElementById('horse_rider_soldier').style.display = (this.value === 'soldier') ? '' : 'none'">
-                <option value="wizard">Wizard</option>
-                {% if wb.apprentice %}<option value="apprentice">Apprentice</option>{% endif %}
-                {% if wb.captain %}<option value="captain">Captain</option>{% endif %}
-                {% if horse_rider_choices %}<option value="soldier">Soldier…</option>{% endif %}
-              </select>
-            </div>
-            <div id="horse_rider_soldier" style="display:none">
-              <label for="horse_rider_soldier_id">Which soldier</label>
-              <select id="horse_rider_soldier_id" name="soldier_id">
-                {% for s in horse_rider_choices %}<option value="{{ s.id }}">{{ s.name }}</option>{% endfor %}
-              </select>
-            </div>
-            <div>
-              <label>&nbsp;</label>
-              <button class="btn secondary small" type="submit">Mount</button>
-            </div>
-          </form>
-          {% if wb.horse.rider %}
-            <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:0.4rem">
-              <input type="hidden" name="action" value="dismount_horse" />
-              <button class="btn small" type="submit">Dismount</button>
+          <div style="display:flex;flex-wrap:wrap;gap:0.75rem;align-items:flex-end">
+            <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="form-row inline" style="margin:0">
+              <input type="hidden" name="action" value="mount_horse" />
+              <div>
+                <label for="horse_rider_kind">Mount</label>
+                <select id="horse_rider_kind" name="rider_kind" onchange="document.getElementById('horse_rider_soldier').style.display = (this.value === 'soldier') ? '' : 'none'">
+                  <option value="wizard">Wizard</option>
+                  {% if wb.apprentice %}<option value="apprentice">Apprentice</option>{% endif %}
+                  {% if wb.captain %}<option value="captain">Captain</option>{% endif %}
+                  {% if horse_rider_choices %}<option value="soldier">Soldier…</option>{% endif %}
+                </select>
+              </div>
+              <div id="horse_rider_soldier" style="display:none">
+                <label for="horse_rider_soldier_id">Which soldier</label>
+                <select id="horse_rider_soldier_id" name="soldier_id">
+                  {% for s in horse_rider_choices %}<option value="{{ s.id }}">{{ s.name }}</option>{% endfor %}
+                </select>
+              </div>
+              <div>
+                <label>&nbsp;</label>
+                <button class="btn secondary small" type="submit">Mount</button>
+              </div>
             </form>
-          {% endif %}
-          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:0.4rem" onsubmit="return confirm('Release the warband horse?');">
-            <input type="hidden" name="action" value="sell_horse" />
-            <button class="btn danger small" type="submit">Release horse</button>
-          </form>
+            <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
+              <input type="hidden" name="action" value="dismount_horse" />
+              <button class="btn small" type="submit" {% if not wb.horse.rider %}disabled{% endif %}>Dismount</button>
+            </form>
+            <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" onsubmit="return confirm('Release the warband horse?');">
+              <input type="hidden" name="action" value="sell_horse" />
+              <button class="btn danger small" type="submit">Release horse</button>
+            </form>
+          </div>
+          <p style="font-size:var(--fs-xl);font-weight:400;margin:0.6rem 0 0">
+            {{ horse_rider_line or "No one is mounted." }}
+          </p>
           <h3 style="margin-top:1rem">Advanced Horsemanship</h3>
           <p class="muted" style="font-size:0.85rem">
             One-off, stacking upgrades. Aggressive/Loyal/Barding change the stats above;

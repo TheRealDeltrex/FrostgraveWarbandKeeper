@@ -496,8 +496,13 @@
 
     <h3>Wizard states</h3>
     <p class="muted" style="font-size:0.85rem">
-      Three mutually exclusive states a wizard may take on, each from its own supplement.
-      Taking one clears any other; the app tracks all of the mechanical effects below.
+      Mutually exclusive states a wizard may take on, each from its own supplement. Taking one
+      clears any other; the app tracks all of the mechanical effects below. Vampire is the one
+      exception with two doors in — a wizard can be built as one from creation instead of
+      transforming into it mid-campaign, see below. Fire Giant is included here too even though
+      it isn't technically a wizard state — Blood Legacy treats it the same way, as an
+      alternative to an ordinary human wizard picked at creation, not something layered on top
+      of one.
     </p>
 
     <details class="ref-panel">
@@ -567,6 +572,58 @@
       <p style="margin:0.6rem 0 0.2rem"><strong>Boons:</strong></p>
       <ul style="margin:0.2rem 0">
         {% for b in PACT_BOONS %}<li><strong>{{ b.name }}</strong> — {{ b.effect }}</li>{% endfor %}
+      </ul>
+    </details>
+
+    <details class="ref-panel">
+      <summary>{{ STATE_LABELS[STATE_VAMPIRE] }} ({{ STATE_SOURCE[STATE_VAMPIRE] }})</summary>
+      <p class="muted" style="font-size:0.85rem">
+        Blood Legacy gives two ways into this: pick Vampire as the wizard's own school at
+        creation (a full PC/NPC vampire build), or transform an ordinary wizard mid-campaign via
+        "Becoming a Vampire" (usually an accident, per the book). Either way ends at the same
+        wizard state, with the same creature traits — Undead, Immune to Control Undead, Magic
+        Attacks, Mind Lock, Thaumaturgic Vulnerability, True Sight, Partial Immunity to Normal
+        Damage — and the same rules below.
+      </p>
+      <p style="margin:0.6rem 0 0.2rem"><strong>As a Vampire:</strong></p>
+      <ul style="margin:0.2rem 0">
+        <li>{{ VAMPIRE_XP_PER_LEVEL }} XP per level instead of the usual {{ XP_PER_LEVEL }}.</li>
+        <li>Will is capped at +{{ VAMPIRE_WILL_CAP }}, Health at {{ VAMPIRE_HEALTH_CAP }}.</li>
+        <li>Thaumaturge is Vampire's antithetical school — never learnable.</li>
+        <li>Can never learn or cast Transcendence.</li>
+        <li>The Rangifer refuses to join a warband with a Vampire in it.</li>
+        {% for note in VAMPIRE_NOTES %}<li>{{ note }}</li>{% endfor %}
+      </ul>
+      <p style="margin:0.6rem 0 0.2rem"><strong>Creating a Vampire from scratch (own school):</strong></p>
+      <ul style="margin:0.2rem 0">
+        <li>{{ VAMPIRE_MIN_MAX_SOLDIERS }}-soldier roster instead of the usual {{ MAX_SOLDIERS }} (still {{ MAX_SPECIALISTS }} specialists).</li>
+        {% for note in VAMPIRE_CREATION_NOTES %}<li>{{ note }}</li>{% endfor %}
+      </ul>
+      <p style="margin:0.6rem 0 0.2rem"><strong>Becoming a Vampire mid-campaign (tracked as a wizard state):</strong></p>
+      <ul style="margin:0.2rem 0">
+        {% for note in VAMPIRE_TRANSFORM_NOTES %}<li>{{ note }}</li>{% endfor %}
+      </ul>
+    </details>
+
+    <details class="ref-panel">
+      <summary>Fire Giant Wizard ({{ STATE_SOURCE[STATE_VAMPIRE] }})</summary>
+      <p class="muted" style="font-size:0.85rem">
+        Not a wizard state (see above) — picked as the wizard's own school at creation, like any
+        other. Blood Legacy frames it as a giant-scale alternative to an ordinary human wizard,
+        meant for very hard/large encounters rather than balanced campaign play. Creature traits:
+        Large, Strong, Elemental Resistance (2).
+      </p>
+      <p style="margin:0.6rem 0 0.2rem"><strong>As a Fire Giant Wizard:</strong></p>
+      <ul style="margin:0.2rem 0">
+        <li>
+          Starting stats: Move {{ FIRE_GIANT_WIZARD_BASE.move }} · Fight +{{ FIRE_GIANT_WIZARD_BASE.fight }} ·
+          Shoot +{{ FIRE_GIANT_WIZARD_BASE.shoot }} · Armour {{ FIRE_GIANT_WIZARD_BASE.armour }} ·
+          Will +{{ FIRE_GIANT_WIZARD_BASE.will }} · Health {{ FIRE_GIANT_WIZARD_BASE.health }}.
+        </li>
+        <li>{{ FIRE_GIANT_XP_PER_LEVEL }} XP per level instead of the usual {{ XP_PER_LEVEL }}.</li>
+        <li>Health stat maximum is {{ FIRE_GIANT_HEALTH_CAP }}.</li>
+        <li>Chronomancer is Fire Giant's antithetical school — never learnable, and Write Scroll can never be learned or cast either.</li>
+        {% for note in FIRE_GIANT_NOTES %}<li>{{ note }}</li>{% endfor %}
       </ul>
     </details>
   </details>
