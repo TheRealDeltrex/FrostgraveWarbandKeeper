@@ -481,13 +481,6 @@ def build_warband_pdf(wb: dict) -> bytes:
         for line in wiz_inj_lines:
             pdf.set_x(left)
             pdf.multi_cell(0, 4.5, line, new_x="LMARGIN", new_y="NEXT", markdown=True)
-    wiz_comp_lines = _component_lines(wiz.get("components"))
-    if wiz_comp_lines:
-        pdf.set_x(left)
-        pdf.multi_cell(0, 4.5, _t("**Components:**"), new_x="LMARGIN", new_y="NEXT", markdown=True)
-        for line in wiz_comp_lines:
-            pdf.set_x(left)
-            pdf.multi_cell(0, 4.5, line, new_x="LMARGIN", new_y="NEXT", markdown=True)
     pdf.set_y(max(pdf.get_y(), y0 + wiz_size + 2))
     pdf.ln(2)
 
@@ -556,13 +549,6 @@ def build_warband_pdf(wb: dict) -> bytes:
             for line in ap_inj_lines:
                 pdf.set_x(left)
                 pdf.multi_cell(0, 4.5, line, new_x="LMARGIN", new_y="NEXT", markdown=True)
-        ap_comp_lines = _component_lines(ap.get("components"))
-        if ap_comp_lines:
-            pdf.set_x(left)
-            pdf.multi_cell(0, 4.5, _t("**Components:**"), new_x="LMARGIN", new_y="NEXT", markdown=True)
-            for line in ap_comp_lines:
-                pdf.set_x(left)
-                pdf.multi_cell(0, 4.5, line, new_x="LMARGIN", new_y="NEXT", markdown=True)
         pdf.set_y(max(pdf.get_y(), y0 + wiz_size + 2))
         pdf.ln(2)
 
@@ -604,6 +590,31 @@ def build_warband_pdf(wb: dict) -> bytes:
                 pdf.cell(w, 5.5, _t(val[:42]), border=1)
             pdf.ln()
     pdf.ln(3)
+
+    # --- Component Bag (Spellcaster Magazine, Issue 5: Monster Hunting) ---
+    # Held components get one shared field at the bottom of the front page
+    # instead of duplicated under the wizard's/apprentice's own block above —
+    # it's bag inventory, not a per-figure stat, so it reads better grouped.
+    wiz_comp_lines = _component_lines(wiz.get("components"))
+    ap_comp_lines = _component_lines(ap.get("components")) if ap else None
+    if wiz_comp_lines or ap_comp_lines:
+        _next_section("Component Bag")
+        pdf.set_font("Helvetica", "", 9)
+        if wiz_comp_lines:
+            pdf.set_x(pdf.l_margin)
+            wiz_comp_label = _t(f"**{wiz.get('name') or 'Wizard'}:**")
+            pdf.multi_cell(0, 4.5, wiz_comp_label, new_x="LMARGIN", new_y="NEXT", markdown=True)
+            for line in wiz_comp_lines:
+                pdf.set_x(pdf.l_margin)
+                pdf.multi_cell(0, 4.5, line, new_x="LMARGIN", new_y="NEXT", markdown=True)
+        if ap_comp_lines:
+            pdf.set_x(pdf.l_margin)
+            ap_comp_label = _t(f"**{ap.get('name') or 'Apprentice'}:**")
+            pdf.multi_cell(0, 4.5, ap_comp_label, new_x="LMARGIN", new_y="NEXT", markdown=True)
+            for line in ap_comp_lines:
+                pdf.set_x(pdf.l_margin)
+                pdf.multi_cell(0, 4.5, line, new_x="LMARGIN", new_y="NEXT", markdown=True)
+        pdf.ln(3)
 
     # Captain (if any) shares a fresh page with the Soldiers roster, above them.
     if cap:
@@ -804,7 +815,7 @@ def build_warband_pdf(wb: dict) -> bytes:
                 new_y="NEXT",
                 markdown=True,
             )
-            s_slot_n = expansions.soldier_item_slots(wb, s.get("type_key", ""))
+            s_slot_n = expansions.soldier_item_slots(wb, s.get("type_key", ""), s.get("item_slots"))
             if s_slot_n:
                 _write_item_block(pdf, left, s.get("item_slots") or [], s_slot_n, False, "Carried")
             s_mut_lines = _mutation_lines(s.get("mutations"))

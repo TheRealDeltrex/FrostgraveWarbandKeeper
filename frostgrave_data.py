@@ -2207,10 +2207,9 @@ SOLDIERS: dict[str, dict] = {
         "gear": "—",
         "notes": (
             "Part of a rangifer \"hide\" (Issue 3). Animal; cannot carry items or treasure. "
-            "Not directly hireable — the Book of the Rangifer only lets a wizard field the "
-            "other rangifer troop types."
+            "Only hireable by a Rangifer Shaman."
         ),
-        "description": 'A tamed boar from rangifer culture (Spellcaster Magazine, Issue 3), part of a hired "hide" of up to 5 rangifer troops. Animal: cannot carry items or treasure. Not directly hireable in this app — the Book of the Rangifer only fields the other rangifer troop types.',
+        "description": 'A tamed boar from rangifer culture (Spellcaster Magazine, Issue 3), part of a hired "hide" of up to 5 rangifer troops. Animal: cannot carry items or treasure. Only hireable by a Rangifer Shaman.',
     },
     "rangifer_ambusher": {
         "name": "Rangifer Ambusher",
@@ -2399,15 +2398,15 @@ SOLDIERS: dict[str, dict] = {
         "armour": 11,
         "will": 4,
         "health": 12,
-        "gear": "Hand weapon, bow, leather armour, up to 3 magic arrows (free)",
+        "gear": "Hand weapon, bow, leather armour, space for up to 3 magic arrows without needing an item slot",
         "item_slots": 2,
         "notes": (
             "Legendary Soldier (Issue 4). All shooting attacks count as magic. May "
             "\"steady aim\" (an action, can replace the move) for -1 Fight on the target's "
-            "defence if it shoots the same activation. 2 item slots plus up to 3 free magic "
-            "arrows."
+            "defence if it shoots the same activation. The archer has space for up to 3 "
+            "magic arrows without needing one of its 2 item slots."
         ),
-        "description": 'An archer whose every shot is magical ("Legendary Soldier", Spellcaster Magazine Issue 4). All shooting attacks count as magic. May "steady aim" — an action that can replace its move — to impose -1 Fight on the target\'s defence if it also shoots that activation.',
+        "description": 'An archer whose every shot is magical ("Legendary Soldier", Spellcaster Magazine Issue 4). All shooting attacks count as magic. May "steady aim" — an action that can replace its move — to impose -1 Fight on the target\'s defence if it also shoots that activation. The archer has space for up to 3 magic arrows without needing one of its 2 item slots.',
     },
     "graverobber": {
         "name": "Graverobber",

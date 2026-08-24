@@ -24,6 +24,9 @@ def test_every_row_has_the_expected_shape():
 def test_every_source_is_a_known_source_book():
     valid = set(SOURCE_BOOKS) | {"Core Rules"}
     for row in load_monster_hunting():
+        if row["monster"] == "Other Creature":
+            assert row["source"] == "Other origin"
+            continue
         assert row["source"] in valid, row["monster"]
 
 
