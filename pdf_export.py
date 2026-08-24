@@ -27,6 +27,7 @@ from frostgrave_data import (
     PROSTHETIC_LIMB_NAME_BY_INJURY_ID,
     PROSTHETIC_UPGRADE_BY_ID,
     SOLDIER_COMPANION_BY_TYPE_KEY,
+    SOURCE_BOOKS,
     animal_companion_type_keys,
     construct_type_keys,
     format_stat,
@@ -302,6 +303,20 @@ def _spell_cn_pair(sp: dict) -> str:
     return f"{wiz_cn}/{wiz_cn + APPRENTICE_CAST_PENALTY}"
 
 
+def _strip_source_suffix(name: str) -> str:
+    """Drop a trailing " (Book Name)" tag off an item name for display, the
+    provenance the loot picker appends when an item is picked from a rulebook
+    (composeRow() in warband_view.html) — useful in the app but redundant
+    weight on the printed roster. Only strips when the parenthesized text is
+    an exact, known source book, so a real item name with its own parens
+    (e.g. "Pistol (Double-barrelled)") is left alone."""
+    for book in SOURCE_BOOKS:
+        suffix = f" ({book})"
+        if name.endswith(suffix):
+            return name[: -len(suffix)]
+    return name
+
+
 def _format_slots(slots: list[str], n: int, has_dagger: bool = False) -> str:
     """Format item slots (bold slot numbers, render with markdown=True); empty
     slots as EMPTY_SLOT; 2-slot items as e.g. **2+3:** Two-Handed Weapon."""
@@ -317,14 +332,15 @@ def _format_slots(slots: list[str], n: int, has_dagger: bool = False) -> str:
             i += 1
             continue
         cost = item_slot_cost(val)
+        disp = _strip_source_suffix(val)
         if cost >= 2 and i + 1 < n:
             nxt = (normalized[i + 1] or "").strip()
             # Second slot empty, same name, or a continuation marker
             if not nxt or nxt.lower() == val.lower() or nxt in ("—", "-", "(2h)", "(2H)"):
-                parts.append(f"**{i + 1}+{i + 2}:** {val}")
+                parts.append(f"**{i + 1}+{i + 2}:** {disp}")
                 i += 2
                 continue
-        parts.append(f"**{i + 1}:** {val}")
+        parts.append(f"**{i + 1}:** {disp}")
         i += 1
     return "  ".join(parts)
 
