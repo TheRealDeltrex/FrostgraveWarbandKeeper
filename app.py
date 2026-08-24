@@ -416,6 +416,8 @@ app.jinja_env.globals.update(
     captain_effective_stats=captain_effective_stats,
     apprentice_effective_stats=apprentice_effective_stats,
     soldier_item_slots=expansions.soldier_item_slots,
+    ELEMENTAL_ARCHER_TYPE_KEY=expansions.ELEMENTAL_ARCHER_TYPE_KEY,
+    ELEMENTAL_ARCHER_BASE_ITEM_SLOTS=expansions.ELEMENTAL_ARCHER_BASE_ITEM_SLOTS,
     IS_FROZEN=paths.is_frozen(),
     BROWSER_MODE=BROWSER_MODE,
     # Wizard states (Lich / Beastcrafter / Demonic Pact).
@@ -447,6 +449,9 @@ app.jinja_env.globals.update(
 # (see the soldier gear block in warband_view.html) without exposing
 # expansions.parse_firearm_name itself as a callable global.
 app.jinja_env.tests["firearm_item"] = lambda name: expansions.parse_firearm_name(name) is not None
+# Same idiom, for the Elemental Archer's arrow-only bonus slots — see
+# arrow_only_from in _item_slots.html.
+app.jinja_env.tests["magic_arrow_item"] = expansions.is_magic_arrow_item
 
 
 # --- Local-only request guards ---------------------------------------------
@@ -1060,6 +1065,7 @@ def warband_view(warband_id: str) -> str:
     # needs to gate (see add_soldier()'s matching exemption).
     hireable = []
     for c in soldier_list_for_ui():
+        state_block = None
         if not disable_app_mechanics:
             if c["source"] not in wb_sources or not soldier_from_book_enabled(wb, c["source"], c["key"]):
                 continue
@@ -1067,13 +1073,24 @@ def warband_view(warband_id: str) -> str:
                 continue
             # Random Recruit Table III's two purely-random results (no vault
             # item, no spell — see expansions.RANDOM_ONLY_SOLDIER_TYPE_KEYS)
-            # only belong in the catalog once Ragged Warbands is what could
-            # actually produce them.
+            # only clear once Ragged Warbands is what could actually produce
+            # them; until then they still surface (disabled) in the special-
+            # condition panel below rather than vanishing outright.
             if c["key"] in expansions.RANDOM_ONLY_SOLDIER_TYPE_KEYS and not ragged_warbands_enabled:
+                state_block = (
+                    "A Random Recruit Table III result — switch on Ragged Warbands & "
+                    "Random Recruits under Additional Rules and Homerules to hire it."
+                )
+            else:
+                state_block = expansions.soldier_state_block(
+                    wb, c["key"], ignore_vault_item=ragged_warbands_enabled
+                )
+            # SPECIALLY_GATED_SOLDIERS still show up (in their own panel,
+            # below) so the block reason is visible even when the gate isn't
+            # met — everything else stays fully hidden until it clears.
+            if state_block and c["key"] not in expansions.SPECIALLY_GATED_SOLDIERS:
                 continue
-            if expansions.soldier_state_block(wb, c["key"], ignore_vault_item=ragged_warbands_enabled):
-                continue
-        hireable.append({**c, "cost": expansions.soldier_cost(wb, c, c["key"])})
+        hireable.append({**c, "cost": expansions.soldier_cost(wb, c, c["key"]), "state_block": state_block})
     # The temporary-member catalog (Raise Zombie, Summon Demon) gets its own
     # "Hire temporary member" panel instead of living in the main hire table.
     temporary_catalog = [c for c in hireable if c.get("temporary")]
@@ -1084,6 +1101,22 @@ def warband_view(warband_id: str) -> str:
     # a source book, so mixing them into the source-book catalog read oddly.
     summoned_catalog = [c for c in hireable if c.get("requires_spell")]
     hireable = [c for c in hireable if not c.get("requires_spell")]
+    # Soldiers gated behind a vault item, a pact boon, a Beastcrafter tier or
+    # the wizard's undead state get their own "Hired by special condition"
+    # panel too, rather than sitting in the main hire table only once already
+    # hireable — see expansions.SPECIALLY_GATED_SOLDIERS. Sorted by its own
+    # fixed order (SPECIAL_HIREABLE_ORDER) rather than the main catalog's
+    # book/cost/name order, so every rangifer type lands together at the
+    # bottom regardless of source book.
+    special_hireable = [c for c in hireable if c["key"] in expansions.SPECIALLY_GATED_SOLDIERS]
+    special_hireable.sort(
+        key=lambda c: (
+            expansions.SPECIAL_HIREABLE_ORDER.index(c["key"])
+            if c["key"] in expansions.SPECIAL_HIREABLE_ORDER
+            else len(expansions.SPECIAL_HIREABLE_ORDER)
+        )
+    )
+    hireable = [c for c in hireable if c["key"] not in expansions.SPECIALLY_GATED_SOLDIERS]
     # Total temporary members on the table right now — one shared cap across
     # zombies and demons (no per-type sub-limit), disables every "Hire"
     # button in that panel once reached, mirroring Animal Companion's block.
@@ -1214,6 +1247,7 @@ def warband_view(warband_id: str) -> str:
         temporary_member_limit=TEMPORARY_MEMBER_LIMIT,
         limits=limits,
         hireable=hireable,
+        special_hireable=special_hireable,
         summoned_catalog=summoned_catalog,
         temporary_catalog=temporary_catalog,
         known_spell_names=wb_spells,
@@ -1485,7 +1519,7 @@ def _act_soldier_edit(wb: dict) -> tuple[bool, str]:
             # leave the existing value alone, not blank it.
             if "notes" in request.form:
                 s["notes"] = request.form.get("notes") or ""
-            slot_n = expansions.soldier_item_slots(wb, s.get("type_key", ""))
+            slot_n = expansions.soldier_item_slots(wb, s.get("type_key", ""), s.get("item_slots"))
             if any(f"soldier_{sid}_slot_{i}" in request.form for i in range(slot_n)):
                 slots = [(request.form.get(f"soldier_{sid}_slot_{i}") or "").strip() for i in range(slot_n)]
                 s["item_slots"] = normalize_item_slots(slots, slot_n)

@@ -2080,7 +2080,7 @@
                     </details>
                   {% endif %}
                   {% set carried = (s.item_slots or []) | select | list %}
-                  {% set soldier_slot_n = soldier_item_slots(wb, s.type_key) %}
+                  {% set soldier_slot_n = soldier_item_slots(wb, s.type_key, s.item_slots) %}
                   {% if (s.gear and s.gear != '—') or carried or soldier_slot_n %}
                     <details class="actions-cell-persistent">
                       <summary class="muted" style="cursor:pointer;font-size:0.85rem">Equipment</summary>
@@ -2100,6 +2100,7 @@
                           {% set hide_normal_gear = not hr.soldier_normal_gear_enabled %}
                           {% set vault_names = vault_names|reject('equalto', SPELL_COMPONENT_BAG_NAME)|list %}
                           {% set vault_names = vault_names|reject('firearm_item')|list if hide_normal_gear else vault_names %}
+                          {% set arrow_only_from = ELEMENTAL_ARCHER_BASE_ITEM_SLOTS if s.type_key == ELEMENTAL_ARCHER_TYPE_KEY else none %}
                           {% include '_item_slots.html' %}
                         </form>
                       {% endif %}
@@ -2639,6 +2640,118 @@
         <p class="empty">Your wizard doesn't know Raise Zombie or Summon Demon yet.</p>
       {% endif %}
     </details>
+
+    <details class="ref-panel" id="special-hireable-panel">
+      <summary>Hired by special condition</summary>
+      <p class="muted" style="font-size:0.85rem">
+        Soldiers gated behind a vault item, a pact boon, a Beastcrafter tier, the wizard's
+        undead state, or being a Random Recruit Table III result, rather than just gold and a
+        source book — listed here whether or not the gate is currently met.
+      </p>
+      {% if special_hireable %}
+        <div class="filter-bar">
+          <input type="search" id="special-hire-filter" placeholder="Filter soldiers…" aria-label="Filter special hire catalog" />
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th></th><th>Type</th><th>Cat / Source</th><th>Cost</th>
+                <th>Move</th><th>Fight</th><th>Shoot</th><th>Armour</th><th>Will</th><th>Health</th><th>Gear</th>
+                <th></th><th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for c in special_hireable %}
+                {% set can_afford = wb.gold >= c.cost %}
+                {% set within_soldiers = limits.soldiers < limits.max_soldiers or kennel_bonus_available(wb, c.key) %}
+                {% set within_specialists = c.category != 'specialist' or limits.specialists < limits.max_specialists %}
+                {% set is_legendary = c.key in LEGENDARY_SOLDIER_TYPE_KEYS %}
+                {% set legendary_duplicate = is_legendary and c.key in legendary_type_keys_held %}
+                {% set legendary_capped = is_legendary and not legendary_duplicate and limits.legendary_soldiers >= limits.max_legendary_soldiers %}
+                {% set can_hire = can_afford and within_soldiers and within_specialists and not legendary_duplicate and not legendary_capped and not c.state_block %}
+                {% set ns = namespace(hire_reason='') %}
+                {% if c.state_block %}
+                  {% set ns.hire_reason = c.state_block %}
+                {% elif not can_afford %}
+                  {% set ns.hire_reason = "Needs " ~ c.cost ~ " gc (have " ~ wb.gold ~ ")." %}
+                {% elif not within_soldiers %}
+                  {% set ns.hire_reason = "Soldier limit reached (" ~ limits.max_soldiers ~ ")." %}
+                {% elif not within_specialists %}
+                  {% set ns.hire_reason = "Specialist limit reached (" ~ limits.max_specialists ~ ")." %}
+                {% elif legendary_duplicate %}
+                  {% set ns.hire_reason = "Only one " ~ c.name ~ " may be on the roster at a time." %}
+                {% elif legendary_capped %}
+                  {% set ns.hire_reason = "Legendary Soldier limit reached (" ~ limits.max_legendary_soldiers ~ " at wizard level " ~ limits.level ~ ") — level up to hire more." %}
+                {% endif %}
+                {% set c_src = portrait_src(None, 'soldier', c.key) %}
+                <tr class="catalog-row" {% if not can_hire %}style="opacity:0.5"{% endif %}>
+                  <td>
+                    {% if c_src %}
+                      <img class="portrait-sm" src="{{ c_src }}" alt="" />
+                    {% else %}
+                      <span class="portrait-placeholder" aria-hidden="true">?</span>
+                    {% endif %}
+                  </td>
+                  <td><strong>{{ c.name }}</strong></td>
+                  <td class="muted">
+                    <span class="badge {{ c.category }}">{{ c.category }}</span><br />
+                    {% if c.source != 'Core Rules' %}<span class="badge">{{ c.source }}</span>{% else %}<span class="badge">Core</span>{% endif %}
+                  </td>
+                  <td class="gold">{% if c.cost_label %}{{ c.cost_label }}{% elif c.cost == 0 %}Free{% else %}{{ c.cost }}{% endif %}</td>
+                  <td>{{ c.move }}</td>
+                  <td>{{ format_stat(c.fight) }}</td>
+                  <td>{{ format_stat(c.shoot) }}</td>
+                  <td>{{ c.armour }}</td>
+                  <td>{{ format_stat(c.will) }}</td>
+                  <td>{{ c.health }}</td>
+                  <td class="muted">{{ c.gear }}</td>
+                  <td>
+                    {% if c.description %}
+                      <details class="info-toggle-details">
+                        <summary class="info-toggle">Info</summary>
+                      </details>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
+                      <input type="hidden" name="action" value="hire_soldier" />
+                      <input type="hidden" name="type_key" value="{{ c.key }}" />
+                      {% if hr.knightly_orders_enabled and c.key in KNIGHTLY_ORDER_ELIGIBLE %}
+                        <select name="knightly_order" style="margin-bottom:0.3rem">
+                          <option value="">No order</option>
+                          {% for o in KNIGHTLY_ORDERS %}
+                            <option value="{{ o.id }}">{{ o.name }}</option>
+                          {% endfor %}
+                        </select>
+                      {% endif %}
+                      <button class="btn small" type="submit" {% if not can_hire %}disabled{% endif %}{% if ns.hire_reason %} title="{{ ns.hire_reason }}"{% endif %}>Hire</button>
+                      {% if ns.hire_reason %}<div class="muted" style="font-size:0.78rem;margin-top:0.2rem">{{ ns.hire_reason }}</div>{% endif %}
+                    </form>
+                  </td>
+                </tr>
+                {% if c.description %}
+                  <tr class="info-desc-row"><td colspan="13">{{ c.description }}</td></tr>
+                {% endif %}
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="empty">No source books that add these are switched on yet.</p>
+      {% endif %}
+    </details>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        if (window.fgInitFilter) {
+          window.fgInitFilter(
+            document.getElementById("special-hire-filter"),
+            document.getElementById("special-hireable-panel"),
+            { itemSelector: "tr.catalog-row" }
+          );
+        }
+      });
+    </script>
   </details>
 
   {# ---- Treasury, Vault and Workshop ---- #}

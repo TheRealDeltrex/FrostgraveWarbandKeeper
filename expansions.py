@@ -349,10 +349,11 @@ PACT_BOON_SOLDIERS = {"chilopendra": BOON_EXTRA_SOLDIER}
 #
 # The rangifer troop types (Spellcaster Magazine, Issue 3) are only fieldable
 # via the Book of the Rangifer (Thaw of the Lich Lord). The Rangifer Boar is
-# excluded here — it's part of a hide's own composition, not something the
-# book lets a wizard field directly — and is blocked outright below instead.
+# excluded here — it only comes with a Rangifer Shaman's own hide, not the
+# Book of the Rangifer — and is blocked outright below instead.
 VAULT_ITEM_SOLDIERS = {
     "collegium_porter": "Porter Control Rod",
+    "rangifer": "Book of the Rangifer",
     "rangifer_ambusher": "Book of the Rangifer",
     "rangifer_charger": "Book of the Rangifer",
     "rangifer_herdsman": "Book of the Rangifer",
@@ -368,7 +369,8 @@ VAULT_ITEM_SOLDIERS = {
     "foulhorn": "Book of the Foulhorn",
 }
 
-# Never hireable on its own — see the VAULT_ITEM_SOLDIERS comment above.
+# Never hireable on its own — only a Rangifer Shaman's hide brings one, see
+# the VAULT_ITEM_SOLDIERS comment above.
 NEVER_HIREABLE_SOLDIERS = {"rangifer_boar"}
 
 # The remaining two Random Recruit Table III bestiary hires (see
@@ -376,11 +378,56 @@ NEVER_HIREABLE_SOLDIERS = {"rangifer_boar"}
 # prerequisite at all — a genuine random-encounter/campaign result, not
 # something a wizard can go acquire. Unlike VAULT_ITEM_SOLDIERS above, this
 # is NOT a hire gate (soldier_state_block() doesn't consult it — nothing
-# stops hiring them directly). app.py's "Hire soldier" panel uses this set
-# to keep them out of the catalog unless Ragged Warbands (the homerule that
-# actually puts Random Recruit Table results in play) is switched on, or the
-# "disable app mechanics" escape hatch is.
+# stops hiring them directly). app.py's "Hired by special condition" panel
+# uses this set to keep them disabled there unless Ragged Warbands (the
+# homerule that actually puts Random Recruit Table results in play) is
+# switched on, or the "disable app mechanics" escape hatch is.
 RANDOM_ONLY_SOLDIER_TYPE_KEYS = {"vampire", "minor_demon"}
+
+# Soldier types kept out of the ordinary "Hire soldier" table because
+# something beyond gold/cap gates them: a vault item (VAULT_ITEM_SOLDIERS), a
+# pact boon (PACT_BOON_SOLDIERS), a Beastcrafter tier (BEASTCRAFTER_COMPANIONS),
+# the wizard's undead state (LICH_BLOCKED_SOLDIERS), not being directly
+# hireable at all (NEVER_HIREABLE_SOLDIERS), or only being a genuine
+# random-encounter result (RANDOM_ONLY_SOLDIER_TYPE_KEYS). app.py's "Hired by
+# special condition" panel lists these instead, whether or not the gate is
+# currently satisfied — the Rangifer Boar included, alongside the other
+# rangifer troop types, even though it never becomes hireable.
+SPECIALLY_GATED_SOLDIERS = (
+    set(VAULT_ITEM_SOLDIERS)
+    | set(PACT_BOON_SOLDIERS)
+    | set(BEASTCRAFTER_COMPANIONS)
+    | LICH_BLOCKED_SOLDIERS
+    | NEVER_HIREABLE_SOLDIERS
+    | RANDOM_ONLY_SOLDIER_TYPE_KEYS
+)
+
+# Display order for the "Hired by special condition" panel: the non-rangifer
+# item gates (alphabetical) — Foulhorn included, since Book of the Foulhorn is
+# a vault-item gate like the rest — then the pact gate, then the two Random
+# Recruit Table III results (alphabetical), then every rangifer type together
+# at the bottom regardless of which of the gates above applies to it, sorted
+# by cost then name, with the never-hireable Rangifer Boar forced last rather
+# than sorted by its (irrelevantly low) cost. Anything not listed here falls
+# back to catalog order.
+SPECIAL_HIREABLE_ORDER = [
+    "collegium_porter",
+    "foulhorn",
+    "snow_troll",
+    "werewolf",
+    "chilopendra",
+    "minor_demon",
+    "vampire",
+    "rangifer",
+    "rangifer_ambusher",
+    "rangifer_herdsman",
+    "rangifer_packdeer",
+    "rangifer_charger",
+    "rangifer_hurler",
+    "rangifer_hewer",
+    "rangifer_war_leader",
+    "rangifer_boar",
+]
 
 # Reanimating a dead soldier (Thaw of the Lich Lord). Keeps their stats; Will
 # becomes +0. Unlimited revenants per warband.
@@ -651,14 +698,60 @@ def apprentice_item_slots(wb: dict) -> int:
     return APPRENTICE_ITEM_SLOTS + _hlw_item_slot_bonus(wb)
 
 
-def soldier_item_slots(wb: dict, type_key: str) -> int:
+# Spellcaster Magazine Issue 4's Elemental Archer: 2 ordinary item slots plus
+# room for up to 3 magic arrows that don't cost one of those. Modeled as
+# bonus slots appended after the ordinary 2 — grown one at a time as arrows
+# are actually carried (see _elemental_archer_arrow_slot_bonus) rather than
+# all three shown up front — that the item-slot picker restricts to arrow
+# items only, see the arrow_only_from param on _item_slots.html.
+ELEMENTAL_ARCHER_TYPE_KEY = "elemental_archer"
+ELEMENTAL_ARCHER_BASE_ITEM_SLOTS = 2
+ELEMENTAL_ARCHER_MAX_ARROW_SLOTS = 3
+
+
+def is_magic_arrow_item(name: str) -> bool:
+    """Whether a hand-typed item name is one of the Elemental Archer's
+    free-carry magic arrows. Matched the same loose way as every other
+    item-slot name in this app (no separate "is this an arrow" catalog
+    flag exists): any name containing "arrow" — "Arrow of Piercing",
+    "Wraith Arrow", etc."""
+    return "arrow" in (name or "").lower()
+
+
+def _elemental_archer_arrow_slot_bonus(current_items: list[str] | None) -> int:
+    """How many bonus arrow-only slots the Elemental Archer currently needs,
+    beyond the ordinary 2: enough to hold every magic arrow already in any of
+    its slots, plus one spare to carry the next one — capped at 3. If the 2
+    ordinary slots are both already full of other gear (leaving nowhere at
+    all to type a first arrow), one bonus slot opens even with zero arrows
+    carried yet, so there's somewhere to put it."""
+    items = list(current_items or [])
+    base = items[:ELEMENTAL_ARCHER_BASE_ITEM_SLOTS]
+    base += [""] * (ELEMENTAL_ARCHER_BASE_ITEM_SLOTS - len(base))
+    arrows = sum(1 for name in items if is_magic_arrow_item(name))
+    if arrows == 0:
+        base_has_room = any(not (name or "").strip() for name in base)
+        return 0 if base_has_room else 1
+    if arrows >= ELEMENTAL_ARCHER_MAX_ARROW_SLOTS:
+        return ELEMENTAL_ARCHER_MAX_ARROW_SLOTS
+    return arrows + 1
+
+
+def soldier_item_slots(wb: dict, type_key: str, current_items: list[str] | None = None) -> int:
     """A soldier's item slot count (2e core: 1). Zero for anything the book
     says "has no item slots" — animals, constructs, and temporary
     spell-summoned members (undead/demon/illusion) all carry that text
     verbatim in their own catalog description. An explicit "item_slots" key
     on the catalog entry (e.g. a Red King creature with no item slots of its
-    own) always wins; otherwise it's derived from the entry's own flags."""
+    own) always wins; otherwise it's derived from the entry's own flags.
+
+    `current_items` (the soldier's present item_slots contents, if known) only
+    matters for the Elemental Archer, whose slot count depends on how many
+    magic arrows it's currently carrying — see
+    _elemental_archer_arrow_slot_bonus. Every other soldier type ignores it."""
     info = get_soldier(type_key) or {}
+    if type_key == ELEMENTAL_ARCHER_TYPE_KEY:
+        return ELEMENTAL_ARCHER_BASE_ITEM_SLOTS + _elemental_archer_arrow_slot_bonus(current_items)
     if "item_slots" in info:
         return int(info["item_slots"])
     if type_key in animal_companion_type_keys() or type_key in construct_type_keys():
@@ -772,7 +865,7 @@ def soldier_state_block(wb: dict, type_key: str, ignore_vault_item: bool = False
     if type_key in LICH_BLOCKED_SOLDIERS and is_vampire(wb):
         return "A Rangifer will not serve an undead wizard — your wizard is a Vampire."
     if type_key in NEVER_HIREABLE_SOLDIERS:
-        return "The Rangifer Boar isn't hireable on its own — it only comes as part of a hide."
+        return "Only hireable by a Rangifer Shaman."
     need_tier = BEASTCRAFTER_COMPANIONS.get(type_key)
     if need_tier and beastcrafter_tier(wb) < need_tier:
         name = BEASTCRAFTER_TIER_BY_N[need_tier]["name"]

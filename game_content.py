@@ -95,7 +95,7 @@ def load_bestiary() -> list[dict]:
 OTHER_CREATURE_ROW = {
     "monster": "Other Creature",
     "rules": "",
-    "source": "Spellcaster Magazine",
+    "source": "Other origin",
     "xp": 5,
     "bestiary_name": None,
     "prize": {"name": None, "kind": "none", "target": None, "gold": 0, "known": True},

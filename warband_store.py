@@ -285,8 +285,11 @@ def empty_base() -> dict:
     }
 
 
-def normalize_item_slots(raw: Iterable[str], n: int) -> list[str]:
-    """Convert legacy item formats into a fixed-length list of slot strings."""
+def _coerce_item_slot_strings(raw) -> list[str]:
+    """Convert legacy item formats (a list of {"name": ...} dicts, a
+    newline-separated string) into a plain list of slot-name strings, with no
+    length applied yet — see normalize_item_slots(), which pads/trims this to
+    a fixed length."""
     slots: list[str] = []
     if isinstance(raw, list):
         for entry in raw:
@@ -296,6 +299,12 @@ def normalize_item_slots(raw: Iterable[str], n: int) -> list[str]:
                 slots.append(str(entry or "").strip())
     elif isinstance(raw, str):
         slots = [line.strip() for line in raw.splitlines() if line.strip()]
+    return slots
+
+
+def normalize_item_slots(raw: Iterable[str], n: int) -> list[str]:
+    """Convert legacy item formats into a fixed-length list of slot strings."""
+    slots = _coerce_item_slot_strings(raw)
     # pad / trim
     if len(slots) < n:
         slots.extend([""] * (n - len(slots)))
@@ -1554,8 +1563,9 @@ def _normalize_warband(wb: dict) -> dict:
     # here rather than as a MIGRATIONS entry since the target slot count is
     # per-type-key (expansions.soldier_item_slots), not a fixed constant.
     for s in wb.get("soldiers") or []:
-        n = expansions.soldier_item_slots(wb, s.get("type_key", ""))
-        s["item_slots"] = normalize_item_slots(s.get("item_slots") or s.get("items"), n)
+        current = _coerce_item_slot_strings(s.get("item_slots") or s.get("items"))
+        n = expansions.soldier_item_slots(wb, s.get("type_key", ""), current)
+        s["item_slots"] = normalize_item_slots(current, n)
         s.pop("items", None)
 
     return wb
@@ -4346,7 +4356,7 @@ def record_game_loot(
     for item_name in items:
         item_name = item_name.strip()
         if item_name:
-            add_vault_item(wb, item_name, notes="Found in game", source="game")
+            add_vault_item(wb, item_name, source="manual")
             parts.append(item_name)
     if xp:
         # Routed through _apply_xp_delta (G3) rather than a bare assignment, so a
