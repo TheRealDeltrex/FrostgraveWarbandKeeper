@@ -2078,6 +2078,28 @@ def _build_soldier_record(
     return soldier, order_suffix, illusion_suffix
 
 
+def hire_cost_preview(wb: dict, info: dict, type_key: str) -> int:
+    """What add_soldier() would actually charge for `type_key` right now,
+    given any "next hire is ..." declaration pending (Giant-Blooded, Thrall —
+    see set_giant_blooded_pending()/set_thrall_pending()). Factored out of
+    add_soldier()'s own cost calculation so the hire catalog's displayed cost
+    and afford/can-hire check (app.py) never drift from what a hire actually
+    costs — before this existed, the catalog showed (and gated hiring on) the
+    ordinary price even with Thrall pending, so an otherwise-unaffordable
+    soldier looked and acted unhireable despite Thralldom making it free.
+
+    Mirrors add_soldier()'s eligibility checks only far enough to know
+    whether the surcharge/override applies — an actual ineligible-type hire
+    attempt still gets its own rejection message from add_soldier() itself."""
+    cost = expansions.soldier_cost(wb, info, type_key)
+    if bool(wb.get("giant_blooded_pending")) and not _giant_blooded_homerule_gate(wb):
+        if type_key in giant_blooded_eligible_type_keys():
+            cost += GIANT_BLOODED_COST
+    if bool(wb.get("thrall_pending")) and not _thrall_gate(wb):
+        cost = 0
+    return cost
+
+
 def add_soldier(
     wb: dict, type_key: str, name: str = "", order: str = "", illusion_source: str = ""
 ) -> tuple[bool, str]:
@@ -2165,19 +2187,15 @@ def add_soldier(
                     f"Legendary Soldier limit reached ({leg_cap} at wizard level "
                     f"{expansions.wizard_level(wb)}) — level up to hire more."
                 )
-    cost = expansions.soldier_cost(wb, info, type_key)
     giant_blooded_now = bool(wb.get("giant_blooded_pending")) and not _giant_blooded_homerule_gate(wb)
-    if giant_blooded_now:
-        if type_key not in giant_blooded_eligible_type_keys():
-            return False, (
-                f"{info['name']} can't be Giant-Blooded (only ordinary human soldiers are "
-                "eligible) — turn off the \"next hire is Giant-Blooded\" toggle first, or "
-                "hire an eligible type."
-            )
-        cost += GIANT_BLOODED_COST
+    if giant_blooded_now and type_key not in giant_blooded_eligible_type_keys():
+        return False, (
+            f"{info['name']} can't be Giant-Blooded (only ordinary human soldiers are "
+            "eligible) — turn off the \"next hire is Giant-Blooded\" toggle first, or "
+            "hire an eligible type."
+        )
     thrall_now = bool(wb.get("thrall_pending")) and not _thrall_gate(wb)
-    if thrall_now:
-        cost = 0
+    cost = hire_cost_preview(wb, info, type_key)
     if wb.get("gold", 0) < cost:
         return False, f"Not enough gold (need {cost} gc, have {wb.get('gold', 0)} gc)."
 

@@ -724,17 +724,15 @@ WIZARD_BASE = {
 
 # Blood Legacy's Fire Giant Wizard (Chapter Three) — a giant-scale wizard
 # build the book itself frames as being for "very hard/large encounters, not
-# balanced campaign play". M6 F+4 S+0 A14 W+4 H22 relative to the ordinary
-# Starting Wizard line above, i.e. Fight 6 / Armour 14 (natural, no
-# armour/shield item slots) / Will 8 / Health 22. See
-# expansions.is_fire_giant()/warband_store.playable_schools() for how a
-# warband actually opts into this as the wizard's own school.
+# balanced campaign play". M6 F+4 S+0 A14 W+4 H22, verbatim from the book's
+# stat table. See expansions.is_fire_giant()/warband_store.playable_schools()
+# for how a warband actually opts into this as the wizard's own school.
 FIRE_GIANT_WIZARD_BASE = {
     "move": 6,
-    "fight": 6,
+    "fight": 4,
     "shoot": 0,
     "armour": 14,
-    "will": 8,
+    "will": 4,
     "health": 22,
 }
 FIRE_GIANT_XP_PER_LEVEL = 200

@@ -51,6 +51,9 @@ from frostgrave_data import (
     FIN_DALKA_BASE_SELL,
     FIN_DALKA_DECIPHER_COST,
     FIN_DALKA_SELL_PER_SPELL,
+    FIRE_GIANT_HEALTH_CAP,
+    FIRE_GIANT_WIZARD_BASE,
+    FIRE_GIANT_XP_PER_LEVEL,
     GIANT_BLOODED_COST,
     HORSE_COST,
     HORSE_UPGRADES,
@@ -95,6 +98,10 @@ from frostgrave_data import (
     UNDERWORLD_LOAN_MAX,
     UNDERWORLD_LOAN_MIN,
     UNDERWORLD_PAYOFF_COST,
+    VAMPIRE_HEALTH_CAP,
+    VAMPIRE_MIN_MAX_SOLDIERS,
+    VAMPIRE_WILL_CAP,
+    VAMPIRE_XP_PER_LEVEL,
     WILDERNESS_SUPPLY_CONSUMPTION_PER_MEMBER,
     XP_PER_LEVEL,
     all_spells_flat,
@@ -209,6 +216,7 @@ from warband_store import (
     has_animal_companion,
     hire_apprentice,
     hire_captain,
+    hire_cost_preview,
     import_warband_json,
     known_spell_ids,
     known_spell_names,
@@ -443,6 +451,21 @@ app.jinja_env.globals.update(
     PACT_BOON_BY_ID=expansions.PACT_BOON_BY_ID,
     PACT_TIER_LEVELS=expansions.PACT_TIER_LEVELS,
     PACT_MAX_TIERS=expansions.PACT_MAX_TIERS,
+    # Vampire / Fire Giant (Blood Legacy) — see expansions.py's Vampire/Fire
+    # Giant reference-note constants, and is_vampire()/is_fire_giant()'s
+    # "school marker, not a wizard state" note for why Fire Giant isn't a
+    # STATE_* entry despite living in this same globals group.
+    VAMPIRE_XP_PER_LEVEL=VAMPIRE_XP_PER_LEVEL,
+    VAMPIRE_HEALTH_CAP=VAMPIRE_HEALTH_CAP,
+    VAMPIRE_WILL_CAP=VAMPIRE_WILL_CAP,
+    VAMPIRE_MIN_MAX_SOLDIERS=VAMPIRE_MIN_MAX_SOLDIERS,
+    VAMPIRE_NOTES=expansions.VAMPIRE_NOTES,
+    VAMPIRE_CREATION_NOTES=expansions.VAMPIRE_CREATION_NOTES,
+    VAMPIRE_TRANSFORM_NOTES=expansions.VAMPIRE_TRANSFORM_NOTES,
+    FIRE_GIANT_WIZARD_BASE=FIRE_GIANT_WIZARD_BASE,
+    FIRE_GIANT_XP_PER_LEVEL=FIRE_GIANT_XP_PER_LEVEL,
+    FIRE_GIANT_HEALTH_CAP=FIRE_GIANT_HEALTH_CAP,
+    FIRE_GIANT_NOTES=expansions.FIRE_GIANT_NOTES,
 )
 
 # Lets templates filter a vault-item-name list with `|reject('firearm_item')`
@@ -1090,7 +1113,7 @@ def warband_view(warband_id: str) -> str:
             # met — everything else stays fully hidden until it clears.
             if state_block and c["key"] not in expansions.SPECIALLY_GATED_SOLDIERS:
                 continue
-        hireable.append({**c, "cost": expansions.soldier_cost(wb, c, c["key"]), "state_block": state_block})
+        hireable.append({**c, "cost": hire_cost_preview(wb, c, c["key"]), "state_block": state_block})
     # The temporary-member catalog (Raise Zombie, Summon Demon) gets its own
     # "Hire temporary member" panel instead of living in the main hire table.
     temporary_catalog = [c for c in hireable if c.get("temporary")]
@@ -1193,6 +1216,27 @@ def warband_view(warband_id: str) -> str:
         for s in all_soldiers
         if s.get("status") != "dead" and s.get("type_key") in horse_rider_eligible_keys
     ]
+    # "Name - class" summary line for the horse panel, e.g. "Thug1 - Thug" —
+    # computed here rather than in the template since a soldier rider needs
+    # the catalog's display name (SOLDIERS[type_key]["name"]), not the
+    # instance's own possibly-renamed one.
+    horse_rider_line = None
+    _horse_rider = (wb.get("horse") or {}).get("rider")
+    if _horse_rider:
+        _rider_kind = _horse_rider.get("kind")
+        if _rider_kind == "wizard":
+            horse_rider_line = f"{(wb.get('wizard') or {}).get('name') or 'Wizard'} - Wizard"
+        elif _rider_kind == "apprentice":
+            horse_rider_line = f"{(wb.get('apprentice') or {}).get('name') or 'Apprentice'} - Apprentice"
+        elif _rider_kind == "captain":
+            horse_rider_line = f"{(wb.get('captain') or {}).get('name') or 'Captain'} - Captain"
+        elif _rider_kind == "soldier":
+            _rider_soldier = next(
+                (s for s in all_soldiers if s.get("id") == _horse_rider.get("soldier_id")), None
+            )
+            if _rider_soldier:
+                _rider_class = SOLDIERS.get(_rider_soldier.get("type_key"), {}).get("name", "Soldier")
+                horse_rider_line = f"{_rider_soldier.get('name') or 'Soldier'} - {_rider_class}"
     # Spellcaster Magazine's Underworld Favours: a debt economy tracked on
     # wb.wizard.underworld_favors (Markers held); the loan amounts and debt
     # call table are the same data the Lexicon shows, not a re-transcription.
@@ -1273,6 +1317,7 @@ def warband_view(warband_id: str) -> str:
         horses_enabled=horses_enabled,
         has_stable=has_stable,
         horse_rider_choices=horse_rider_choices,
+        horse_rider_line=horse_rider_line,
         monster_hunting_enabled=monster_hunting_enabled,
         monster_hunting_table=monster_hunting_table,
         monster_hunting_kills=monster_hunting.get("kills") or [],
