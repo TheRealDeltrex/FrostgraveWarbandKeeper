@@ -328,11 +328,12 @@
               <p class="hr-note-body">
                 Adds a "Fill roster" control to the Soldiers card below, rolling random recruits up
                 to 10 members and bypassing the usual gold/roster caps, per the book's endgame
-                campaign mode. The surrounding restrictions (no spending gold, no hiring/dismissing
-                outside this roll, no Vault storage, a soldier lost on a 1-8 survival roll) are shown
-                there as reminder text. The Random Recruit Status Table can inflict a permanent
-                injury on any recruited soldier — turn on "Ordinary soldiers can take permanent
-                injuries" below too if your group wants that to actually apply.
+                campaign mode — plus a "hire for free" picker and a dice-roll entry for adding a
+                recruit you already rolled at the table by hand. The surrounding restrictions (no
+                spending gold, no hiring/dismissing outside this roll, no Vault storage, a soldier
+                lost on a 1-8 survival roll) are shown there as reminder text. Forces "Ordinary
+                soldiers can take permanent injuries" on below, since the Random Recruit Status
+                Table and the book's own Survival Roll can both inflict one on a soldier.
               </p>
             </details>
           </div>
@@ -653,8 +654,14 @@
           <label for="soldier_leveling_constructs" style="margin:0">Constructs can level</label>
         </div>
         <div class="checkbox-row">
-          <input id="soldier_permanent_injuries_enabled" name="soldier_permanent_injuries_enabled" type="checkbox" {% if hr.soldier_permanent_injuries_enabled %}checked{% endif %} />
-          <label for="soldier_permanent_injuries_enabled" style="margin:0">Ordinary soldiers can take permanent injuries (Permanent Injury Table, page 77 — normally only the wizard/apprentice/captain's Survival Roll uses it)</label>
+          <input id="soldier_permanent_injuries_enabled" name="soldier_permanent_injuries_enabled" type="checkbox"
+                 {% if hr.soldier_permanent_injuries_enabled or hr.ragged_warbands_enabled %}checked{% endif %}
+                 {% if hr.ragged_warbands_enabled %}disabled{% endif %} />
+          <label for="soldier_permanent_injuries_enabled" style="margin:0">
+            Ordinary soldiers can take permanent injuries (Permanent Injury Table, page 77 — normally
+            only the wizard/apprentice/captain's Survival Roll uses it){% if hr.ragged_warbands_enabled %} —
+            <span class="muted">forced on while Ragged Warbands &amp; Random Recruits is enabled</span>{% endif %}
+          </label>
         </div>
         <div class="checkbox-row">
           <input id="soldier_normal_gear_enabled" name="soldier_normal_gear_enabled" type="checkbox" {% if hr.soldier_normal_gear_enabled %}checked{% endif %} />
@@ -1553,13 +1560,15 @@
             }
           } catch (err) { /* ignore */ }
           document.getElementById('spell-up').onclick = () => {
-            if (!selected || !selected.previousElementSibling) return;
-            body.insertBefore(selected, selected.previousElementSibling);
+            const prev = selected ? selected.previousElementSibling : null;
+            if (!selected || !prev || !prev.classList.contains('spell-row')) return;
+            body.insertBefore(selected, prev);
             sync();
           };
           document.getElementById('spell-down').onclick = () => {
-            if (!selected || !selected.nextElementSibling) return;
-            body.insertBefore(selected.nextElementSibling, selected);
+            const next = selected ? selected.nextElementSibling : null;
+            if (!selected || !next || !next.classList.contains('spell-row')) return;
+            body.insertBefore(next, selected);
             sync();
           };
         })();
@@ -1950,6 +1959,57 @@
         {% else %}
           <p class="empty">Roster is already at 10 members.</p>
         {% endif %}
+
+        <p class="muted" style="font-size:0.82rem;margin-top:1rem">
+          Rolled at the table instead? Add that result directly — both controls below are free and
+          skip the roster/specialist caps the same way "Fill roster to 10" does.
+        </p>
+        <div class="grid-2" style="margin-top:0.4rem">
+          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
+            <input type="hidden" name="action" value="hire_ragged_warbands_soldier" />
+            <div class="form-row">
+              <label for="rw-free-hire-type">Add a specific recruit for free</label>
+              <select id="rw-free-hire-type" name="type_key">
+                {% set rw_src = '' %}
+                {% for c in ragged_warbands_all_soldiers %}
+                  {% if c.source != rw_src %}
+                    {% if not loop.first %}</optgroup>{% endif %}
+                    <optgroup label="{{ c.source }}">
+                    {% set rw_src = c.source %}
+                  {% endif %}
+                  <option value="{{ c.key }}">{{ c.name }}</option>
+                  {% if loop.last %}</optgroup>{% endif %}
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-row">
+              <label for="rw-free-hire-name">Name (optional)</label>
+              <input id="rw-free-hire-name" name="soldier_name" type="text" placeholder="Leave blank for a default name" />
+            </div>
+            <button class="btn secondary small" type="submit">Add for free</button>
+          </form>
+          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
+            <input type="hidden" name="action" value="add_dice_recruit" />
+            <div class="form-row">
+              <label for="rw-dice-table-i">Table I roll (1–20)</label>
+              <input id="rw-dice-table-i" name="table_i_roll" type="number" min="1" max="20" required />
+            </div>
+            <div class="form-row">
+              <label for="rw-dice-table-roll">Table II/III roll (1–20)</label>
+              <input id="rw-dice-table-roll" name="table_roll" type="number" min="1" max="20" required />
+            </div>
+            <div class="form-row">
+              <label for="rw-dice-name">Name (optional)</label>
+              <input id="rw-dice-name" name="soldier_name" type="text" placeholder="Leave blank for a default name" />
+            </div>
+            <p class="muted" style="font-size:0.78rem;margin:0 0 0.4rem">
+              1–14 on Table I is Table II, 15–20 is Table III — enter whichever you actually rolled
+              next. A result that needs a re-roll (the Captain's slot, or a soldier from a book
+              that's switched off) is reported back instead of applied; re-roll it at the table.
+            </p>
+            <button class="btn secondary small" type="submit">Add from dice roll</button>
+          </form>
+        </div>
       </details>
     {% endif %}
 

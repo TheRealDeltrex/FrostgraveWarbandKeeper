@@ -157,6 +157,7 @@ from warband_store import (
     add_captain_prosthetic_upgrade,
     add_captain_xp,
     add_construct_modification,
+    add_dice_recruit,
     add_history,
     add_pact_tier,
     add_soldier,
@@ -217,6 +218,7 @@ from warband_store import (
     hire_apprentice,
     hire_captain,
     hire_cost_preview,
+    hire_ragged_warbands_soldier,
     import_warband_json,
     known_spell_ids,
     known_spell_names,
@@ -1190,6 +1192,28 @@ def warband_view(warband_id: str) -> str:
         ),
         None,
     )
+    # "Hire for free" dropdown: every non-temporary, non-spell-summoned
+    # soldier type from an enabled source book, regardless of the normal
+    # hireable-catalog gates (wizard state, vault items, roster/specialist
+    # caps) — hire_ragged_warbands_soldier()/add_dice_recruit() re-check the
+    # ones that still apply (source book, wizard-state bans other than the
+    # vault-item one) themselves, so a pick that's still illegal comes back
+    # as a flashed error rather than needing to be filtered out here twice.
+    # Spell-summoned types are left out because neither Random Recruit Table
+    # includes any — a player rolling at the table can never land on one.
+    ragged_warbands_all_soldiers = []
+    if ragged_warbands_enabled:
+        ragged_warbands_all_soldiers = sorted(
+            (
+                c
+                for c in soldier_list_for_ui()
+                if not c.get("temporary")
+                and not c.get("requires_spell")
+                and c["source"] in wb_sources
+                and soldier_from_book_enabled(wb, c["source"], c["key"])
+            ),
+            key=lambda c: (source_book_order(c["source"]), c["name"]),
+        )
     # Blood Legacy's Grimoire of Fin Dalka: per-spell decipher state lives on
     # wb.wizard.fin_dalka, merged here with the 8 Fire Giant spells so the
     # template doesn't have to cross-reference SPELLS itself.
@@ -1308,6 +1332,7 @@ def warband_view(warband_id: str) -> str:
         ragged_warbands_enabled=ragged_warbands_enabled,
         ragged_warbands_have=ragged_warbands_have,
         ragged_warbands_rules=ragged_warbands_rules,
+        ragged_warbands_all_soldiers=ragged_warbands_all_soldiers,
         fin_dalka_enabled=fin_dalka_enabled,
         fin_dalka_owned=fin_dalka_owned,
         fin_dalka_spells=fin_dalka_spells,
@@ -2344,6 +2369,27 @@ def _act_black_market_buy_item(wb: dict) -> tuple[bool, str]:
 @register_action("roll_random_recruits")
 def _act_roll_random_recruits(wb: dict) -> tuple[bool, str]:
     return roll_random_recruits(wb, with_status=request.form.get("with_status") == "on")
+
+
+@register_action("hire_ragged_warbands_soldier")
+def _act_hire_ragged_warbands_soldier(wb: dict) -> tuple[bool, str]:
+    return hire_ragged_warbands_soldier(
+        wb,
+        request.form.get("type_key") or "",
+        (request.form.get("soldier_name") or "").strip(),
+    )
+
+
+@register_action("add_dice_recruit")
+def _act_add_dice_recruit(wb: dict) -> tuple[bool, str]:
+    try:
+        table_i_roll = int(request.form.get("table_i_roll") or 0)
+        table_roll = int(request.form.get("table_roll") or 0)
+    except ValueError:
+        return False, "Rolls must be whole numbers between 1 and 20."
+    return add_dice_recruit(
+        wb, table_i_roll, table_roll, (request.form.get("soldier_name") or "").strip()
+    )
 
 
 def _update_details(wb: dict) -> None:

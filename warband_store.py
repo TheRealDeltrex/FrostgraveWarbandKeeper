@@ -977,46 +977,8 @@ def create_warband(
         gold -= APPRENTICE_COST
         apprentice = empty_apprentice(apprentice_name or "Apprentice", apprentice_gender)
 
-    # Validate soldiers before committing
-    hired: list[dict] = []
-    specs = 0
-    soldier_cap = homerules["max_soldiers"]
-    spec_cap = homerules["max_specialists"]
-    if soldiers:
-        if len(soldiers) > soldier_cap:
-            return None, f"Max {soldier_cap} soldiers."
-        for entry in soldiers:
-            type_key = entry.get("type_key") or ""
-            info = get_soldier(type_key)
-            if not info:
-                return None, f"Unknown soldier type: {type_key}"
-            src = info.get("source", "Core Rules")
-            if src not in picked_sources:
-                return None, f"{info['name']} is from {src}; switch that source book on to hire it."
-            if info["category"] == "specialist":
-                specs += 1
-                if specs > spec_cap:
-                    return None, f"Max {spec_cap} specialists."
-            # Same cost rule every other hiring path uses (add_soldier,
-            # enrich_soldier, warband_limits) rather than the raw catalog
-            # figure — the Edition 2 correction, Beastcrafter surcharge and
-            # base-resource discount all apply here too.
-            cost = expansions.soldier_cost({"homerules": homerules}, info, type_key)
-            if gold < cost:
-                return None, f"Not enough gold for {info['name']} (need {cost} gc)."
-            gold -= cost
-            hired.append(
-                {
-                    "id": uuid.uuid4().hex[:10],
-                    "type_key": type_key,
-                    "name": (entry.get("name") or info["name"]).strip(),
-                    "status": "active",
-                    "items": [],
-                    "notes": "",
-                    "portrait": None,
-                    **_new_soldier_leveling_fields(info),
-                }
-            )
+    if soldiers and len(soldiers) > homerules["max_soldiers"]:
+        return None, f"Max {homerules['max_soldiers']} soldiers."
 
     wb = {
         "id": new_warband_id(warband_name),
@@ -1030,7 +992,7 @@ def create_warband(
         "apprentice": apprentice,
         "captain": None,
         "homerules": homerules,
-        "soldiers": hired,
+        "soldiers": [],
         "vault_items": [],
         "base": empty_base(),
         "history": [],
@@ -1040,7 +1002,25 @@ def create_warband(
         wb["wizard"]["xp"] = int(wizard_starting_xp)
     if apprentice:
         sync_apprentice(wb)
-    parts = [f"Warband founded with {gold} gc remaining"]
+
+    # Soldiers requested at creation are hired through add_soldier() itself
+    # rather than a hand-rolled subset of its checks — that hand-rolled
+    # version used to skip soldier_from_book_enabled() (Legendary Soldiers/
+    # firearms' own extra homerule toggles), expansions.soldier_state_block()
+    # (wizard-state/vault-item/pact gates), and requires_spell/legendary-cap
+    # checks that every other hire is subject to, and its manually-built
+    # soldier dict was missing item_slots entirely. Failing partway through
+    # just discards this in-memory wb (it's never saved until this function
+    # returns it), so add_soldier()'s own no-partial-apply contract doesn't
+    # need re-implementing here.
+    if soldiers:
+        for entry in soldiers:
+            ok, msg = add_soldier(wb, entry.get("type_key") or "", entry.get("name") or "")
+            if not ok:
+                return None, msg
+
+    hired = wb["soldiers"]
+    parts = [f"Warband founded with {wb['gold']} gc remaining"]
     if with_apprentice:
         parts.append("apprentice hired")
     if hired:
@@ -2140,7 +2120,14 @@ def add_soldier(
         if order not in KNIGHTLY_ORDER_IDS:
             return False, "Unknown Knightly Order."
     if not disable_mechanics:
-        blocked = expansions.soldier_state_block(wb, type_key)
+        # Mirrors the same relaxation the "Hired by special condition" panel's
+        # display already applies under Ragged Warbands (app.py) — without it,
+        # a vault-item-gated soldier the hire catalog shows as enabled (because
+        # a Random Recruit roll could legitimately produce it regardless of
+        # ownership) would still get rejected here on an actual hire click.
+        blocked = expansions.soldier_state_block(
+            wb, type_key, ignore_vault_item=not _ragged_warbands_gate(wb)
+        )
         if blocked:
             return False, blocked
     req_spell = info.get("requires_spell")
@@ -2187,6 +2174,16 @@ def add_soldier(
                     f"Legendary Soldier limit reached ({leg_cap} at wizard level "
                     f"{expansions.wizard_level(wb)}) — level up to hire more."
                 )
+    # A "next hire is ..." declaration (Giant-Blooded, Thrall) that's still
+    # set but whose homerule/gate no longer passes (the group switched it off
+    # after arming it, or — for Thrall — the wizard is no longer a Vampire
+    # who knows Thralldom) is discarded here rather than left pending: any
+    # hire made while the gate is down clears it, so it can't silently
+    # reactivate on a later, unrelated hire once the gate passes again.
+    if wb.get("giant_blooded_pending") and _giant_blooded_homerule_gate(wb):
+        wb["giant_blooded_pending"] = False
+    if wb.get("thrall_pending") and _thrall_gate(wb):
+        wb["thrall_pending"] = False
     giant_blooded_now = bool(wb.get("giant_blooded_pending")) and not _giant_blooded_homerule_gate(wb)
     if giant_blooded_now and type_key not in giant_blooded_eligible_type_keys():
         return False, (
@@ -2492,7 +2489,19 @@ def _mutation_target(wb: dict, kind: str, soldier_id: str | None = None):
         for s in wb.get("soldiers") or []:
             if s.get("id") == soldier_id:
                 cat = get_soldier(s.get("type_key", "")) or {}
-                return s, (lambda k: s.get(k, cat.get(k, 0))), (lambda k, v: s.__setitem__(k, v)), s.get("name", "Soldier")
+                # Unlike wizard/apprentice/captain's stats dicts (always seeded
+                # from a base stat block of real ints), a soldier's own stat
+                # fields are never normalized on load/import — _as_int() here
+                # matches the other three branches' implicit int-ness so a
+                # malformed imported value (string/None) can't reach arithmetic
+                # in a caller like mount_horse() and raise instead of failing
+                # cleanly.
+                return (
+                    s,
+                    (lambda k: _as_int(s.get(k, cat.get(k, 0)), 0)),
+                    (lambda k, v: s.__setitem__(k, v)),
+                    s.get("name", "Soldier"),
+                )
         return None, None, None, "Soldier not found."
     raise ValueError(f"Unknown mutation target kind: {kind!r}")
 
@@ -3051,7 +3060,11 @@ def _roll_recruit_type_key(wb: dict) -> str | None:
         src = info.get("source", "Core Rules")
         if src not in sources or not soldier_from_book_enabled(wb, src, type_key):
             continue
-        if expansions.soldier_state_block(wb, type_key):
+        # A Random Recruit Table roll can legitimately produce a vault-item-
+        # gated soldier regardless of whether the matching item is actually
+        # owned (the book's own text — see roll_random_recruits()'s
+        # docstring) — every other soldier_state_block() reason still applies.
+        if expansions.soldier_state_block(wb, type_key, ignore_vault_item=True):
             continue
         return type_key
     return None
@@ -3146,6 +3159,87 @@ def roll_random_recruits(wb: dict, with_status: bool = True) -> tuple[bool, str]
         )
     add_history(wb, f"Rolled {len(hired)} Random Recruit(s): {'; '.join(hired)}.")
     return True, f"Rolled {len(hired)} Random Recruit(s): {'; '.join(hired)}."
+
+
+def _resolve_and_add_ragged_soldier(
+    wb: dict, type_key: str, name: str = ""
+) -> tuple[dict | None, str]:
+    """Shared by hire_ragged_warbands_soldier() and add_dice_recruit(): the
+    add half of a Ragged Warbands recruit once `type_key` is known — same
+    relaxations roll_random_recruits() applies for any Random Recruit Table
+    result (free, ignores the vault-item gate), but not its roster-cap
+    bypass or bounded reroll loop, since both of those callers are handling
+    one specific, already-decided result rather than filling the roster.
+    Callers must run _ragged_warbands_gate() first.
+
+    Returns (soldier, info_name) on success, or (None, error_message)."""
+    info = get_soldier(type_key)
+    if not info:
+        return None, "Unknown soldier type."
+    src = info.get("source", "Core Rules")
+    if src not in enabled_sources(wb) or not soldier_from_book_enabled(wb, src, type_key):
+        return None, f"{info['name']} is from {src}; switch that source book on to add it."
+    blocked = expansions.soldier_state_block(wb, type_key, ignore_vault_item=True)
+    if blocked:
+        return None, blocked
+    soldier, _order_suffix, _illusion_suffix = _build_soldier_record(wb, type_key, info, name)
+    wb.setdefault("soldiers", []).append(soldier)
+    return soldier, info["name"]
+
+
+def hire_ragged_warbands_soldier(wb: dict, type_key: str, name: str = "") -> tuple[bool, str]:
+    """The Red King's "add a recruit for free" control: puts a specific
+    soldier type straight on the roster at no cost, for a Random Recruit
+    Table result already worked out at the table by hand (or any soldier the
+    player wants to add outright under the book's "completely random
+    warbands" mode) without going through gold, the roster cap, or the
+    specialist cap. See _resolve_and_add_ragged_soldier()."""
+    err = _ragged_warbands_gate(wb)
+    if err:
+        return False, err
+    soldier, msg_or_name = _resolve_and_add_ragged_soldier(wb, type_key, name)
+    if soldier is None:
+        return False, msg_or_name
+    text = f"Added {soldier['name']} ({msg_or_name}) for free (Ragged Warbands)."
+    add_history(wb, text)
+    return True, text
+
+
+def add_dice_recruit(
+    wb: dict, table_i_roll: int, table_roll: int, name: str = ""
+) -> tuple[bool, str]:
+    """Resolves a Random Recruit Table result rolled with real dice at the
+    table (a Table I roll picks Table II or III, then a second roll on that
+    table names the recruit — see RANDOM_RECRUIT_TABLE_I/II/III) and adds the
+    matching soldier for free, so a player who already has physical dice
+    results doesn't have to re-roll them in-app via roll_random_recruits().
+
+    Never auto-rerolls a result the book itself says to reroll (the Captain's
+    slot, a soldier from a source book that's switched off, or a wizard-
+    state/vault-item block) — that's the player's own dice and their call to
+    make, so it's reported back as an error instead of silently discarded."""
+    err = _ragged_warbands_gate(wb)
+    if err:
+        return False, err
+    if not (1 <= table_i_roll <= 20) or not (1 <= table_roll <= 20):
+        return False, "Both rolls must be between 1 and 20."
+    table_name = range_table_lookup(RANDOM_RECRUIT_TABLE_I, table_i_roll)
+    table = RANDOM_RECRUIT_TABLE_II if table_name == "II" else RANDOM_RECRUIT_TABLE_III
+    type_key = range_table_lookup(table, table_roll)
+    prefix = f"Table I roll {table_i_roll} → Table {table_name} roll {table_roll}"
+    if type_key is None:
+        return False, f"{prefix} is the Captain's slot — re-roll it at the table."
+    soldier, msg_or_name = _resolve_and_add_ragged_soldier(wb, type_key, name)
+    if soldier is None:
+        info = get_soldier(type_key)
+        label = info["name"] if info else type_key
+        return False, (
+            f"{prefix} would be {label}, but that's blocked: {msg_or_name} "
+            "Re-roll per the book's own rule."
+        )
+    text = f"Added {soldier['name']} ({msg_or_name}) via {prefix} (Ragged Warbands, free)."
+    add_history(wb, text)
+    return True, text
 
 
 def add_permanent_injury(
@@ -3553,6 +3647,20 @@ def _validate_tricks(tricks: list[str] | None, required: int) -> tuple[bool, str
 def update_homerules(wb: dict, form: "ImmutableMultiDict") -> tuple[bool, str]:
     """Parse and apply the per-warband homerule settings form."""
     hr = wb.setdefault("homerules", default_homerules())
+    # Read ahead of the dict literal below: Ragged Warbands' own campaign
+    # rules require soldiers to be able to take permanent injuries (the
+    # Random Recruit Status Table's "injury" result, and the wizard/
+    # apprentice/captain-only Survival Roll extending to soldiers too), so
+    # switching Ragged Warbands on forces that homerule on too — unlike the
+    # reverted earlier attempt at this, it's the settings form's own
+    # `disabled` attribute on that checkbox (see warband_view.html) doing
+    # the forcing, not a value this function fights the player over: while
+    # Ragged Warbands stays on the checkbox can't be unchecked at all, and
+    # turning Ragged Warbands back off in the same save naturally lets
+    # permanent injuries default back off too (a disabled control is never
+    # part of the submitted form), rather than a checked box the player
+    # never actually chose silently outliving the rule that forced it.
+    ragged_warbands_enabled = form.get("ragged_warbands_enabled") == "on"
     try:
         new_hr = {
             "max_soldiers": max(1, int(form.get("max_soldiers") or hr.get("max_soldiers", MAX_SOLDIERS))),
@@ -3595,13 +3703,12 @@ def update_homerules(wb: dict, form: "ImmutableMultiDict") -> tuple[bool, str]:
             "soldier_leveling_enabled": form.get("soldier_leveling_enabled") == "on",
             "soldier_leveling_animal_companions": form.get("soldier_leveling_animal_companions") == "on",
             "soldier_leveling_constructs": form.get("soldier_leveling_constructs") == "on",
-            # Its own checkbox, nothing else. Ragged Warbands used to force this
-            # on, which made the checkbox silently revert on every save; the
-            # Random Recruit Status Table doesn't need it anyway — it goes
-            # through add_permanent_injury() directly, and the homerule gate
-            # lives only in the add_soldier_permanent_injury() wrapper.
+            # Forced on whenever Ragged Warbands is — see the comment above
+            # this function for why, and how this avoids the earlier
+            # reverted attempt's "checkbox silently reverts on every save"
+            # problem.
             "soldier_permanent_injuries_enabled": (
-                form.get("soldier_permanent_injuries_enabled") == "on"
+                form.get("soldier_permanent_injuries_enabled") == "on" or ragged_warbands_enabled
             ),
             "soldier_normal_gear_enabled": form.get("soldier_normal_gear_enabled") == "on",
             "free_dagger_enabled": form.get("free_dagger_enabled") == "on",
@@ -3634,7 +3741,7 @@ def update_homerules(wb: dict, form: "ImmutableMultiDict") -> tuple[bool, str]:
             "fire_giant_wizard_playable": form.get("fire_giant_wizard_playable") == "on",
             "vampire_wizard_playable": form.get("vampire_wizard_playable") == "on",
             "giant_blooded_enabled": form.get("giant_blooded_enabled") == "on",
-            "ragged_warbands_enabled": form.get("ragged_warbands_enabled") == "on",
+            "ragged_warbands_enabled": ragged_warbands_enabled,
             "monster_hunting_enabled": form.get("monster_hunting_enabled") == "on",
             "monster_hunting_edition1_loot_gold": (
                 form.get("monster_hunting_edition1_loot_gold") == "on"
@@ -3882,8 +3989,17 @@ def _spend_stat_level_up(
     label: str,
 ) -> tuple[bool, str]:
     """Shared flat-XP level-up spend logic for Captain and Soldier (identical mechanics;
-    the Wizard keeps its own bespoke apply_level_up because of spell choices)."""
-    ok, msg = _pending_level_check(entity, overall_max, label)
+    the Wizard keeps its own bespoke apply_level_up because of spell choices).
+
+    Passes `overall_max` through as `_pending_level_check`'s `xp_level_cap` too —
+    Captain/Soldier have no separate XP-earned ceiling the way the Wizard does
+    (Blood Legacy's High-Level Wizards), so their own max-level homerule IS the
+    ceiling XP alone can earn. Without this, a `captain_max_level`/
+    `soldier_max_levels` raised above the MAX_WIZARD_LEVEL default was silently
+    capped there anyway, since that default was `_pending_level_check`'s
+    unraised `xp_level_cap`."""
+    xp_cap = overall_max if overall_max is not None else MAX_WIZARD_LEVEL
+    ok, msg = _pending_level_check(entity, overall_max, label, xp_level_cap=xp_cap)
     if not ok:
         return False, msg
     level = int(entity.get("level", 0))
@@ -3950,7 +4066,8 @@ def apply_captain_trick(wb: dict, trick_id: str) -> tuple[bool, str]:
     if trick_id not in CAPTAIN_TRICK_IDS:
         return False, "Invalid trick."
     hr = wb.setdefault("homerules", default_homerules())
-    ok, msg = _pending_level_check(cap, int(hr.get("captain_max_level", CAPTAIN_MAX_LEVEL)), "Captain")
+    captain_max = int(hr.get("captain_max_level", CAPTAIN_MAX_LEVEL))
+    ok, msg = _pending_level_check(cap, captain_max, "Captain", xp_level_cap=captain_max)
     if not ok:
         return False, msg
     known = cap.setdefault("known_tricks", [])
@@ -4000,7 +4117,10 @@ def add_captain_xp(wb: dict, amount: int) -> tuple[bool, str]:
         return False, "No captain hired."
     hr = wb.setdefault("homerules", default_homerules())
     overall_max = int(hr.get("captain_max_level", CAPTAIN_MAX_LEVEL))
-    ok, msg = _apply_xp_delta(cap, amount, lambda: reverse_last_captain_level_up(wb), overall_max, "Captain")
+    ok, msg = _apply_xp_delta(
+        cap, amount, lambda: reverse_last_captain_level_up(wb), overall_max, "Captain",
+        xp_level_cap=overall_max,
+    )
     if ok:
         add_history(wb, msg)
     return ok, msg
@@ -4237,6 +4357,7 @@ def add_soldier_xp(wb: dict, soldier_id: str, amount: int) -> tuple[bool, str]:
                 lambda: reverse_last_soldier_level_up(wb, soldier_id),
                 overall_max,
                 s.get("name", "Soldier"),
+                xp_level_cap=overall_max,
             )
             if ok:
                 add_history(wb, msg)
