@@ -1565,8 +1565,8 @@ SOLDIERS: dict[str, dict] = {
         "will": 1,
         "health": 12,
         "gear": "Two daggers, light armour",
-        "notes": "Once per game, may treat the first initiative roll of 2 as a 1 for the purpose of springing a trap.",
-        "description": "Someone who has survived the city's traps often enough to read the warning signs. Once per game, treats the first initiative roll of 2 as a 1 for the purpose of springing a trap, giving the party one extra chance to avoid it.",
+        "notes": "Once per game, may treat the first initiative roll of 2 as a 1 for the purpose of springing a trap, letting that player pick which figure on the board is the target — enemies included.",
+        "description": "Not just skilled at identifying and disarming traps, but also at setting booby traps to catch unwary enemies. Once per game, treats the first initiative roll of 2 as a 1 for the purpose of springing a trap — the player who springs one chooses the target, so this is an extra chance to catch an enemy figure in a trap, not to dodge one.",
     },
     "tunnel_fighter": {
         "name": "Tunnel Fighter",
