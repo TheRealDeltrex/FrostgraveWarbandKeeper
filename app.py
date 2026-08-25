@@ -1142,6 +1142,11 @@ def warband_view(warband_id: str) -> str:
         )
     )
     hireable = [c for c in hireable if c["key"] not in expansions.SPECIALLY_GATED_SOLDIERS]
+    # Main hire table order: by cost, standard before specialist within a cost,
+    # then alphabetically — not by source book. The book still shows via the
+    # Cat / Source badge, it just no longer drives ordering here; other pages
+    # (the full soldier reference) still group by book via _ui_sort_key.
+    hireable.sort(key=lambda c: (c["cost"], c["category"] != "standard", c["name"]))
     # Total temporary members on the table right now — one shared cap across
     # zombies and demons (no per-type sub-limit), disables every "Hire"
     # button in that panel once reached, mirroring Animal Companion's block.
