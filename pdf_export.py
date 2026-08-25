@@ -589,7 +589,7 @@ def build_warband_pdf(wb: dict) -> bytes:
         pdf.ln(1)
         pdf.set_font("Helvetica", "B", 9)
         pdf.set_fill_color(220, 232, 242)
-        col_w = [58, 36, 32, 52]
+        col_w = [50, 36, 32, 60]
         headers = ["Spell", "School", "Difficulty", "Type"]
         for w, h in zip(col_w, headers):
             pdf.cell(w, 6, _t(h), border=1, fill=True)
