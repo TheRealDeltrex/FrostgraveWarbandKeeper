@@ -849,6 +849,12 @@
   </details>
 
   {# ---- Wizard & apprentice details ---- #}
+  {# Targets of the wizard/apprentice status selects' form="" attribute below
+     — kept as their own real (non-nested) forms, submitting just their own
+     action, rather than a <form> physically nested inside the big details
+     form further down, which HTML forbids and browsers silently mishandle. #}
+  <form id="wizard-status-form" method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" hidden></form>
+  {% if ap %}<form id="apprentice-status-form" method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" hidden></form>{% endif %}
   <details class="card" id="wizard-apprentice-card" open>
     <summary><span class="card-title">Wizard &amp; apprentice</span></summary>
     <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" enctype="multipart/form-data" data-autosave>
@@ -916,15 +922,25 @@
               <div class="stat-pill"><span class="label">Will</span><span class="value">{{ format_stat(wizard_display_stats.will) }}</span></div>
               <div class="stat-pill"><span class="label">Health</span><span class="value">{{ wizard_display_stats.health }}</span></div>
             </div>
-            <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
-              <input type="hidden" name="action" value="wizard_status" />
+            {# Not a nested <form> — this card is already inside the big
+               data-autosave "details" form, and HTML forbids nesting forms:
+               a browser silently drops a nested <form> tag, and its stray
+               closing tag pops the OUTER form off the parser's stack early,
+               orphaning everything typed after it (no enclosing form at
+               all — see the apprentice/captain equipment bug this caused,
+               fixed alongside this). The status control instead points at
+               the standalone #wizard-status-form declared above via the
+               form="" attribute, which keeps it out of the outer form
+               without moving it out of this markup position. #}
+            <div class="inline-form">
+              <input type="hidden" name="action" value="wizard_status" form="wizard-status-form" />
               <label for="wizard_status" class="muted" style="font-size:0.85rem">Status</label>
-              <select id="wizard_status" name="status" data-autosubmit>
+              <select id="wizard_status" name="status" form="wizard-status-form" data-autosubmit>
                 {% for st in status_options %}
                   <option value="{{ st }}" {% if wiz.status == st %}selected{% endif %}>{{ st|replace('_', ' ') }}</option>
                 {% endfor %}
               </select>
-            </form>
+            </div>
             <details class="ref-panel" id="wizard-equipment-notes-panel">
               <summary>Equipment &amp; notes</summary>
               <h3>Wizard items ({{ wizard_item_slots }} slots)</h3>
@@ -990,15 +1006,22 @@
                 <div class="stat-pill"><span class="label">Will</span><span class="value">{{ format_stat(ap_eff.will) }}</span></div>
                 <div class="stat-pill"><span class="label">Health</span><span class="value">{{ ap_eff.health }}</span></div>
               </div>
-              <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
-                <input type="hidden" name="action" value="apprentice_status" />
+              {# See the wizard status control above: form="" instead of a
+                 nested <form>, for the same reason. This is the one that was
+                 actually silently discarding every apprentice edit — once
+                 this pointer form goes out of scope, the parser drops back
+                 out to the whole card's own ancestor, so the equipment panel
+                 below (item slots, dagger, notes) never belonged to any
+                 form at all. #}
+              <div class="inline-form">
+                <input type="hidden" name="action" value="apprentice_status" form="apprentice-status-form" />
                 <label for="apprentice_status" class="muted" style="font-size:0.85rem">Status</label>
-                <select id="apprentice_status" name="status" data-autosubmit>
+                <select id="apprentice_status" name="status" form="apprentice-status-form" data-autosubmit>
                   {% for st in status_options %}
                     <option value="{{ st }}" {% if ap.status == st %}selected{% endif %}>{{ st|replace('_', ' ') }}</option>
                   {% endfor %}
                 </select>
-              </form>
+              </div>
               <details class="ref-panel" id="apprentice-equipment-notes-panel">
                 <summary>Equipment &amp; notes</summary>
                 <h3>Apprentice items ({{ apprentice_item_slots }} slots)</h3>
@@ -1580,6 +1603,12 @@
 
   {% if hr.captain_mode != 'off' or cap %}
     {# ---- Captain ---- #}
+    {% if cap %}
+      {# Target of the captain status select's form="" attribute below — see
+         the wizard/apprentice status forms above for why this can't be a
+         <form> nested inside the big captain_edit details form further down. #}
+      <form id="captain-status-form" method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" hidden></form>
+    {% endif %}
     <details class="card" id="captain">
       <summary><span class="card-title">Captain</span></summary>
       {% if cap %}
@@ -1636,15 +1665,20 @@
                 <div class="stat-pill"><span class="label">Will</span><span class="value">{{ format_stat(cap_eff.will) }}</span></div>
                 <div class="stat-pill"><span class="label">Health</span><span class="value">{{ cap_eff.health }}</span></div>
               </div>
-              <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
-                <input type="hidden" name="action" value="captain_status" />
+              {# See the wizard/apprentice status controls: form="" instead
+                 of a nested <form>, since this card is itself already inside
+                 the big data-autosave "captain_edit" form and a nested
+                 <form> silently truncates it, orphaning the equipment panel
+                 that follows below (item slots, dagger, notes). #}
+              <div class="inline-form">
+                <input type="hidden" name="action" value="captain_status" form="captain-status-form" />
                 <label for="captain_status" class="muted" style="font-size:0.85rem">Status</label>
-                <select id="captain_status" name="status" data-autosubmit>
+                <select id="captain_status" name="status" form="captain-status-form" data-autosubmit>
                   {% for st in status_options %}
                     <option value="{{ st }}" {% if cap.status == st %}selected{% endif %}>{{ st|replace('_', ' ') }}</option>
                   {% endfor %}
                 </select>
-              </form>
+              </div>
               <p class="muted" style="font-size:0.8rem">Move and Armour include bonuses from equipped Shield/Light Armour/Heavy Armour.</p>
               <p class="muted" style="font-size:0.85rem">
                 {{ 'Promoted from the ranks' if cap.origin == 'promoted' else 'Hired' }}
@@ -2063,7 +2097,9 @@
                   {% endif %}
                 </td>
                 <td>
-                  <strong>{{ s.name }}</strong>
+                  <strong class="soldier-name-edit" tabindex="0" role="button" title="Click to rename"
+                    onclick="var d=document.getElementById('soldier-edit-{{ s.id }}'); if(d){ d.open=true; var i=d.querySelector('input[name=soldier_name]'); if(i){ i.focus(); i.select(); } }"
+                    onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">{{ s.name }}</strong>
                   {% set s_can_level = hr.soldier_leveling_enabled
                       and not s.temporary
                       and (s.type_key not in ANIMAL_COMPANION_TYPE_KEYS or hr.soldier_leveling_animal_companions)
@@ -2208,7 +2244,7 @@
                     <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" enctype="multipart/form-data" data-autosave>
                       <input type="hidden" name="action" value="soldier_edit" />
                       <input type="hidden" name="soldier_id" value="{{ s.id }}" />
-                      <details>
+                      <details id="soldier-edit-{{ s.id }}">
                         <summary class="muted" style="cursor:pointer;font-size:0.85rem">Edit / picture</summary>
                         <div class="stack-sm" style="margin-top:0.4rem">
                           <input name="soldier_name" type="text" value="{{ s.name }}" />

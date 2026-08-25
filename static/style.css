@@ -357,6 +357,15 @@ a:hover {
   color: var(--muted);
 }
 
+.soldier-name-edit {
+  cursor: pointer;
+  border-bottom: 1px dotted var(--muted);
+}
+.soldier-name-edit:hover,
+.soldier-name-edit:focus {
+  border-bottom-style: solid;
+}
+
 .stat-row {
   display: flex;
   flex-wrap: wrap;

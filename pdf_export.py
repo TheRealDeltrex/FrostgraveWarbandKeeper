@@ -23,6 +23,7 @@ except ImportError:  # pragma: no cover - only hit if Pillow genuinely isn't ins
 from frostgrave_data import (
     CAPTAIN_ITEM_SLOTS,
     CAPTAIN_TRICK_BY_ID,
+    KNIGHTLY_ORDER_BY_ID,
     PROMOTE_CAPTAIN_ITEM_SLOTS,
     PROSTHETIC_LIMB_NAME_BY_INJURY_ID,
     PROSTHETIC_UPGRADE_BY_ID,
@@ -831,6 +832,17 @@ def build_warband_pdf(wb: dict) -> bytes:
                 new_y="NEXT",
                 markdown=True,
             )
+            s_order = KNIGHTLY_ORDER_BY_ID.get(s.get("knightly_order"))
+            if s_order:
+                pdf.set_x(left)
+                pdf.multi_cell(
+                    0,
+                    4.5,
+                    _t(f"**{s_order['name']}:** {s_order['ability']}"),
+                    new_x="LMARGIN",
+                    new_y="NEXT",
+                    markdown=True,
+                )
             s_slot_n = expansions.soldier_item_slots(wb, s.get("type_key", ""), s.get("item_slots"))
             if s_slot_n:
                 _write_item_block(pdf, left, s.get("item_slots") or [], s_slot_n, False, "Carried")
