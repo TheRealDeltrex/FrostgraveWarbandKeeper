@@ -137,3 +137,87 @@ def test_random_recruit_tables_only_reference_real_soldiers_or_reroll():
         assert lo <= hi
         if type_key is not None:
             assert type_key in SOLDIERS, type_key
+
+
+# --- Manual additions: "hire for free" and dice-roll entry -------------------
+
+
+def test_hire_ragged_warbands_soldier_is_free_and_bypasses_caps(fresh_warband):
+    wb = fresh_warband
+    wb["gold"] = 0
+    wb["homerules"]["max_specialists"] = 0
+    wb["homerules"]["ragged_warbands_enabled"] = True
+    ok, msg = warband_store.hire_ragged_warbands_soldier(wb, "archer", "Robin")
+    assert ok, msg
+    assert wb["gold"] == 0
+    assert wb["soldiers"][0]["name"] == "Robin"
+    assert wb["soldiers"][0]["type_key"] == "archer"
+
+
+def test_hire_ragged_warbands_soldier_ignores_vault_item_gate(fresh_warband):
+    wb = fresh_warband
+    wb["homerules"]["ragged_warbands_enabled"] = True
+    assert "Book of the Werewolf" not in [
+        it if isinstance(it, str) else it.get("name") for it in wb.get("vault_items") or []
+    ]
+    ok, msg = warband_store.hire_ragged_warbands_soldier(wb, "werewolf")
+    assert ok, msg
+    assert wb["soldiers"][0]["type_key"] == "werewolf"
+
+
+def test_hire_ragged_warbands_soldier_requires_the_homerule(fresh_warband):
+    wb = fresh_warband
+    ok, msg = warband_store.hire_ragged_warbands_soldier(wb, "archer")
+    assert not ok
+    assert "homerule" in msg.lower()
+
+
+def test_add_dice_recruit_resolves_table_ii_result(fresh_warband):
+    wb = fresh_warband
+    wb["homerules"]["ragged_warbands_enabled"] = True
+    # Table I roll 1 -> Table II; Table II roll 1-2 -> thug.
+    ok, msg = warband_store.add_dice_recruit(wb, table_i_roll=1, table_roll=1, name="Dave")
+    assert ok, msg
+    assert wb["soldiers"][0]["type_key"] == "thug"
+    assert wb["soldiers"][0]["name"] == "Dave"
+    assert wb["gold"] == 400  # unchanged — free
+
+
+def test_add_dice_recruit_resolves_table_iii_result(fresh_warband):
+    wb = fresh_warband
+    wb["homerules"]["ragged_warbands_enabled"] = True
+    # Table I roll 20 -> Table III; Table III roll 1 -> assassin.
+    ok, msg = warband_store.add_dice_recruit(wb, table_i_roll=20, table_roll=1)
+    assert ok, msg
+    assert wb["soldiers"][0]["type_key"] == "assassin"
+
+
+def test_add_dice_recruit_reports_captain_slot_instead_of_adding(fresh_warband):
+    wb = fresh_warband
+    wb["homerules"]["ragged_warbands_enabled"] = True
+    # Table I roll 20 -> Table III; Table III roll 3 -> Captain slot (reroll).
+    ok, msg = warband_store.add_dice_recruit(wb, table_i_roll=20, table_roll=3)
+    assert not ok
+    assert "captain" in msg.lower()
+    assert wb["soldiers"] == []
+
+
+def test_add_dice_recruit_reports_disabled_source_instead_of_adding(fresh_warband):
+    wb = fresh_warband
+    wb["homerules"]["ragged_warbands_enabled"] = True
+    wb["homerules"]["enabled_sources"]["The Perilous Dark"] = False
+    # Table I roll 15 -> Table III; Table III roll 15 -> Werewolf (The Perilous Dark).
+    ok, msg = warband_store.add_dice_recruit(wb, table_i_roll=15, table_roll=15)
+    assert not ok
+    assert "source" in msg.lower() or "book" in msg.lower()
+    assert wb["soldiers"] == []
+
+
+def test_add_dice_recruit_rejects_out_of_range_rolls(fresh_warband):
+    wb = fresh_warband
+    wb["homerules"]["ragged_warbands_enabled"] = True
+    ok, msg = warband_store.add_dice_recruit(wb, table_i_roll=0, table_roll=1)
+    assert not ok
+    ok, msg = warband_store.add_dice_recruit(wb, table_i_roll=1, table_roll=21)
+    assert not ok
+    assert wb["soldiers"] == []

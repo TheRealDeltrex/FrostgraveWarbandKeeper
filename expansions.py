@@ -547,7 +547,13 @@ def max_soldiers(wb: dict) -> int:
     Soldier boon."""
     hr = wb.get("homerules") or {}
     base_raw = hr.get("max_soldiers")
-    base = int(base_raw) if base_raw is not None else MAX_SOLDIERS
+    # max(1, ...) matches the clamp every writer of this homerule already
+    # applies (create_warband(), the settings form) — but a warband loaded
+    # from an untrusted/hand-edited .warbands file only has this value
+    # type-coerced by _coerce_numeric_homerules(), never range-checked, so an
+    # imported 0/negative value must still be floored here or the roster cap
+    # goes negative and every hire silently rejects with a nonsense message.
+    base = max(1, int(base_raw)) if base_raw is not None else MAX_SOLDIERS
     extra = sum(1 for p in pact_tiers(wb) if p.get("boon") == BOON_EXTRA_SOLDIER)
     return base + extra
 
@@ -720,7 +726,10 @@ def max_specialists(wb: dict) -> int:
     this at 3, regardless of the above — see _has_legendary_soldier()."""
     hr = wb.get("homerules") or {}
     base_raw = hr.get("max_specialists")
-    base = int(base_raw) if base_raw is not None else MAX_SPECIALISTS
+    # max(0, ...) matches create_warband()'s/the settings form's own clamp —
+    # see max_soldiers()'s comment on why an untrusted-import value still
+    # needs range-checking here, not just type-checking.
+    base = max(0, int(base_raw)) if base_raw is not None else MAX_SPECIALISTS
     extra = min(4, wizard_level(wb) // 20) if _hlw_active(wb, "hlw_specialist_allowance") else 0
     cap = base + extra
     if _has_legendary_soldier(wb):
@@ -859,7 +868,10 @@ def casting_number_minimum(wb: dict) -> int:
     Blood Legacy's Lower Casting Number Minimum drops it 1 further for a
     level 100+ wizard, on top of whatever floor is set here."""
     hr = wb.get("homerules") or {}
-    base = int(hr.get("wizard_min_casting_number", WIZARD_MIN_CASTING_NUMBER_DEFAULT))
+    # max(1, ...): same untrusted-import range-checking gap as max_soldiers()/
+    # max_specialists() — a Casting Number floor of 0 or negative has no
+    # in-game meaning.
+    base = max(1, int(hr.get("wizard_min_casting_number", WIZARD_MIN_CASTING_NUMBER_DEFAULT)))
     if _hlw_active(wb, "hlw_casting_min") and wizard_level(wb) >= 100:
         return max(1, base - 1)
     return base
