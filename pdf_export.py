@@ -194,6 +194,50 @@ def _mutation_lines(mutations: list[dict] | None) -> list[str] | None:
     return lines
 
 
+def _restricted_item_notes(names: list[str]) -> list[dict]:
+    """Every equipped item name that matches a named magic item (Lexicon
+    magic_items.json, via expansions.item_restriction()) gets its rules text
+    printed here, the same idea as a captain's Tricks block, so the player has
+    it at the table without reopening the Lexicon — not just the ones with a
+    restriction. A hand-curated `note` (extra text beyond what the numeric
+    bonus fields already convey, e.g. Betrayer's Blade's support-reduction
+    clause) takes priority when present; otherwise the plain Lexicon `effect`
+    text is used. Mundane gear (not in magic_items.json at all) has no
+    item_restriction() entry and is skipped."""
+    out = []
+    seen = set()
+    for raw in names or []:
+        name = (raw or "").strip()
+        key = name.lower()
+        if not name or key in seen:
+            continue
+        r = expansions.item_restriction(name)
+        text = (r.get("note") or r.get("effect")) if r else None
+        if not text:
+            continue
+        seen.add(key)
+        out.append({"name": name, "note": text})
+    return out
+
+
+def _write_restricted_item_notes(pdf: FPDF, left: float, names: list[str]) -> None:
+    notes = _restricted_item_notes(names)
+    if not notes:
+        return
+    pdf.set_x(left)
+    pdf.multi_cell(0, 4.5, _t("**Item notes:**"), new_x="LMARGIN", new_y="NEXT", markdown=True)
+    for note in notes:
+        pdf.set_x(left)
+        pdf.multi_cell(
+            0,
+            4.5,
+            _t(f"**{note['name']}** - {note['note']}"),
+            new_x="LMARGIN",
+            new_y="NEXT",
+            markdown=True,
+        )
+
+
 def _component_lines(components: list[dict] | None) -> list[str] | None:
     """One line per held Monster Hunting component (Spellcaster Magazine,
     Issue 5) — name plus what it's a +1 to, same layout as _mutation_lines.
@@ -484,6 +528,7 @@ def build_warband_pdf(wb: dict) -> bytes:
         bool(wiz.get("has_dagger")),
         "Equipment",
     )
+    _write_restricted_item_notes(pdf, left, slots)
     wiz_mut_lines = _mutation_lines(wiz.get("mutations"))
     if wiz_mut_lines:
         pdf.set_x(left)
@@ -552,6 +597,7 @@ def build_warband_pdf(wb: dict) -> bytes:
             bool(ap.get("has_dagger")),
             "Equipment",
         )
+        _write_restricted_item_notes(pdf, left, ap_slots)
         ap_mut_lines = _mutation_lines(ap.get("mutations"))
         if ap_mut_lines:
             pdf.set_x(left)
@@ -681,6 +727,7 @@ def build_warband_pdf(wb: dict) -> bytes:
         _write_item_block(
             pdf, left, cap_slots, cap_slots_n, bool(cap.get("has_dagger")), "Equipment"
         )
+        _write_restricted_item_notes(pdf, left, cap_slots)
         tricks = [
             CAPTAIN_TRICK_BY_ID[tid]
             for tid in cap.get("known_tricks") or []
@@ -844,8 +891,19 @@ def build_warband_pdf(wb: dict) -> bytes:
                     markdown=True,
                 )
             s_slot_n = expansions.soldier_item_slots(wb, s.get("type_key", ""), s.get("item_slots"))
-            if s_slot_n:
-                _write_item_block(pdf, left, s.get("item_slots") or [], s_slot_n, False, "Carried")
+            s_slots = s.get("item_slots") or []
+            # Creatures (animal companions/constructs) only have a slot at all
+            # under the creature_item_slot_enabled homerule, and printing an
+            # empty "Carried — 1: -" line for one with nothing equipped is
+            # noise the user explicitly doesn't want on the roster — every
+            # other soldier type keeps printing all N slots, empty or not.
+            is_creature = s.get("type_key", "") in (
+                expansions.animal_companion_type_keys() | expansions.construct_type_keys()
+            )
+            has_any_item = any((x or "").strip() for x in s_slots)
+            if s_slot_n and (not is_creature or has_any_item):
+                _write_item_block(pdf, left, s_slots, s_slot_n, False, "Carried")
+                _write_restricted_item_notes(pdf, left, s_slots)
             s_mut_lines = _mutation_lines(s.get("mutations"))
             if s_mut_lines:
                 pdf.set_x(left)

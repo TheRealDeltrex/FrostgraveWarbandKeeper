@@ -357,13 +357,21 @@ a:hover {
   color: var(--muted);
 }
 
-.soldier-name-edit {
-  cursor: pointer;
+.soldier-name-inline {
+  font: inherit;
+  font-weight: 700;
+  color: var(--text);
+  background: transparent;
+  border: none;
   border-bottom: 1px dotted var(--muted);
+  padding: 0 0.1em;
+  min-width: 3ch;
 }
-.soldier-name-edit:hover,
-.soldier-name-edit:focus {
+.soldier-name-inline:hover,
+.soldier-name-inline:focus {
   border-bottom-style: solid;
+  border-bottom-color: var(--accent);
+  outline: none;
 }
 
 .stat-row {
@@ -1120,6 +1128,28 @@ code {
   height: 88px;
   border-radius: var(--radius);
   font-size: 1.5rem;
+}
+
+/* The portrait itself is the <summary> of a <details> — see
+   _portrait_picker.html — so clicking it reveals the Choose/Revert controls
+   right underneath, in place, instead of a separate far-away file input. */
+.portrait-picker {
+  display: inline-block;
+}
+.portrait-picker-summary {
+  cursor: pointer;
+  list-style: none;
+  display: inline-block;
+  border-radius: var(--radius-md);
+  transition: box-shadow var(--dur-1) var(--ease-out);
+}
+.portrait-picker-summary::-webkit-details-marker {
+  display: none;
+}
+.portrait-picker-summary:hover,
+.portrait-picker-summary:focus-visible {
+  box-shadow: 0 0 0 2px var(--accent);
+  outline: none;
 }
 
 .hero-with-portrait {

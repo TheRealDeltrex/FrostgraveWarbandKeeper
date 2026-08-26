@@ -388,6 +388,14 @@ def default_homerules() -> dict:
         # already covers that. A group that wants soldiers to be able to
         # re-equip from the full standard-item catalog ticks this on.
         "soldier_normal_gear_enabled": False,
+        # Off by default: the core rules give animal companions and constructs
+        # no item slot at all. A group that wants to equip a companion-specific
+        # artefact (Bear Armour, Iron Collar, Mind Lock Collar, ...) ticks this
+        # on to grant every such creature exactly one slot — still restricted in
+        # the dropdown to gear that creature can actually use (free text stays
+        # unrestricted, same as every other slot). See
+        # expansions.soldier_item_slots().
+        "creature_item_slot_enabled": False,
         # General house rule, off by default and not tied to any specific
         # source book: every ordinary human soldier hire (the same "not an
         # animal, construct, demon, or non-human troop type" filter as
@@ -633,6 +641,9 @@ def captain_effective_stats(wb: dict, cap: dict) -> dict:
     if expansions.is_horse_rider(wb, "captain"):
         stats["armour"] = max(expansions.MOUNTED_ARMOUR_FLOOR, stats["armour"])
     stats["move"] = int(stats.get("move", 0)) + bonus["move"]
+    stats["fight"] = int(stats.get("fight", 0)) + bonus["fight"]
+    stats["shoot"] = int(stats.get("shoot", 0)) + bonus["shoot"]
+    stats["will"] = int(stats.get("will", 0)) + bonus["will"]
     return expansions.apply_hunger_penalty(stats, cap.get("status"))
 
 
@@ -1975,6 +1986,9 @@ def enrich_soldier(wb: dict, s: dict) -> dict:
     if expansions.is_horse_rider(wb, "soldier", s.get("id")):
         out["armour"] = max(expansions.MOUNTED_ARMOUR_FLOOR, out["armour"])
     out["move"] = int(out.get("move", 0)) + bonus["move"]
+    out["fight"] = int(out.get("fight", 0)) + bonus["fight"]
+    out["shoot"] = int(out.get("shoot", 0)) + bonus["shoot"]
+    out["will"] = int(out.get("will", 0)) + bonus["will"]
     out = expansions.apply_hunger_penalty(out, s.get("status"))
     return out
 
@@ -3711,6 +3725,7 @@ def update_homerules(wb: dict, form: "ImmutableMultiDict") -> tuple[bool, str]:
                 form.get("soldier_permanent_injuries_enabled") == "on" or ragged_warbands_enabled
             ),
             "soldier_normal_gear_enabled": form.get("soldier_normal_gear_enabled") == "on",
+            "creature_item_slot_enabled": form.get("creature_item_slot_enabled") == "on",
             "free_dagger_enabled": form.get("free_dagger_enabled") == "on",
             "disable_app_mechanics_enabled": form.get("disable_app_mechanics_enabled") == "on",
             "soldier_max_levels": int(form.get("soldier_max_levels") or hr["soldier_max_levels"]),

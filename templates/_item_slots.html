@@ -5,11 +5,17 @@
   dropped from the primary list, leaving only Consumable (Potion/Scroll/Grimoire) plus
   vault loot. Used for the soldier gear block when the "soldiers can use their item slot
   for normal gear" homerule is off — see soldier_normal_gear_enabled in warband_store.py.
-  arrow_only_from (optional) — the slot index (0-based) from which rows are restricted to
-  magic-arrow vault items only: no Weapon/Missile/Armour/Gear/Consumable categories, and the
-  Vault group filtered to |select('magic_arrow_item'). Used for the Elemental Archer's bonus
-  slots — see expansions.ELEMENTAL_ARCHER_BASE_ITEM_SLOTS. A soft guide only: the text input
-  stays free text, same as every other slot, nothing stops typing something else in.
+  restricted_from (optional) — the slot index (0-based) from which rows drop the
+  Weapon/Missile/Armour/Gear/Consumable categories entirely. If restricted_vault_test is also
+  given, the Vault group for those rows is further filtered to |select(restricted_vault_test)
+  — used for the Elemental Archer's bonus arrow slots (restricted_vault_test='magic_arrow_item',
+  see expansions.ELEMENTAL_ARCHER_BASE_ITEM_SLOTS), where the base slots in the same block still
+  need the unfiltered list. A companion/Crow Master's conditional bonus slot instead pre-filters
+  vault_names itself before the include (its restriction test needs the figure's type_key, which
+  isn't in scope here) and passes restricted_from=0 with no restricted_vault_test — see
+  soldier_item_slots() and the companion-row/soldier-row wiring in warband_view.html. A soft
+  guide only either way: the text input stays free text, same as every other slot, nothing stops
+  typing something else in.
 
   The potion list, spell list, and item-suggestions datalist are the same on
   every block on the page (wizard/apprentice/captain/soldier), so they are
@@ -26,14 +32,15 @@
 {% set vault_names = vault_names or [] %}
 {% set gated_items = gated_items or {} %}
 {% set cat_order = ['Consumable'] if hide_normal_gear else ['Weapon', 'Missile', 'Armour', 'Gear', 'Consumable'] %}
-{% set arrow_only_from = arrow_only_from if arrow_only_from is defined else none %}
+{% set restricted_from = restricted_from if restricted_from is defined else none %}
+{% set restricted_vault_test = restricted_vault_test if restricted_vault_test is defined else none %}
 
 <div class="item-slots" data-prefix="{{ prefix }}" data-count="{{ n }}">
   {% for i in range(n) %}
     {% set cur = slots[i] if slots|length > i else '' %}
-    {% set is_arrow_only = arrow_only_from is not none and i >= arrow_only_from %}
+    {% set is_restricted = restricted_from is not none and i >= restricted_from %}
     <div class="form-row item-slot-row" data-index="{{ i }}">
-      <label>Slot {{ i + 1 }}{% if is_arrow_only %} (magic arrows only){% endif %}</label>
+      <label>Slot {{ i + 1 }}{% if is_restricted %} ({{ 'magic arrows only' if restricted_vault_test == 'magic_arrow_item' else 'restricted' }}){% endif %}</label>
       <div class="item-slot-controls">
         <select
           class="item-slot-pick"
@@ -41,7 +48,7 @@
           aria-label="Item type for slot {{ i + 1 }}"
         >
           <option value="">— empty / custom —</option>
-          {% if not is_arrow_only %}
+          {% if not is_restricted %}
             {% for cat in cat_order %}
               {% set group = standard_items|selectattr('category', 'equalto', cat)|rejectattr('cost', 'defined')|list %}
               {% if group %}
@@ -63,7 +70,7 @@
               {% endif %}
             {% endfor %}
           {% endif %}
-          {% set vault_row_names = vault_names|select('magic_arrow_item')|list if is_arrow_only else vault_names %}
+          {% set vault_row_names = vault_names|select(restricted_vault_test)|list if (is_restricted and restricted_vault_test) else vault_names %}
           {% if vault_row_names %}
             <optgroup label="Vault / recorded loot">
               {% for name in vault_row_names %}
@@ -101,7 +108,7 @@
           name="{{ prefix }}_slot_{{ i }}"
           type="text"
           value="{{ cur }}"
-          placeholder="{{ 'magic arrow' if is_arrow_only else '___ or custom item' }}"
+          placeholder="{{ 'magic arrow' if (is_restricted and restricted_vault_test == 'magic_arrow_item') else '___ or custom item' }}"
           data-index="{{ i }}"
           list="fg-item-suggestions"
         />

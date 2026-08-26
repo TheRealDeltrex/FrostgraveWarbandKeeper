@@ -475,8 +475,19 @@ app.jinja_env.globals.update(
 # expansions.parse_firearm_name itself as a callable global.
 app.jinja_env.tests["firearm_item"] = lambda name: expansions.parse_firearm_name(name) is not None
 # Same idiom, for the Elemental Archer's arrow-only bonus slots — see
-# arrow_only_from in _item_slots.html.
+# restricted_from in _item_slots.html.
 app.jinja_env.tests["magic_arrow_item"] = expansions.is_magic_arrow_item
+# Prunes a figure's Vault picker to items it's actually eligible for (see
+# item_eligible_for_role in _item_slots.html's call sites) — role is a soldier
+# type_key or 'wizard'/'apprentice'/'captain'.
+app.jinja_env.tests["item_eligible_for_role"] = expansions.item_eligible_for_role
+# Narrower test: true only if the item is specifically restricted to type_key
+# (not merely eligible) — drives a conditional bonus slot's dropdown (Bear,
+# Crow Master, ...) via restricted_vault_test in _item_slots.html.
+app.jinja_env.tests["item_restricted_for"] = expansions.item_restricted_for_type_key
+# True for a type_key whose item slots are entirely conditional (Crow Master,
+# or a creature under creature_item_slot_enabled) — see is_conditional_slot_type.
+app.jinja_env.tests["conditional_slot_type"] = expansions.is_conditional_slot_type
 
 
 # --- Local-only request guards ---------------------------------------------

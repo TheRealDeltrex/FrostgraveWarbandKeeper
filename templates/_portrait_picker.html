@@ -1,0 +1,54 @@
+{#
+  Click-the-portrait picture control: the portrait itself is the <summary> of
+  a <details>, so clicking it reveals "Choose picture" (a styled <label>
+  wrapping a hidden file input — no JS needed to open the file dialog) and,
+  when a custom picture is already set, "Revert to default".
+
+  Expects (all required unless noted):
+  portrait_id — stable id for the <details>. base.html restores open/closed
+    state per-<details> across page reloads (see CLAUDE.md); a real id is
+    what it keys on.
+  portrait_field — form field name prefix. Emits "<portrait_field>_portrait"
+    (the file input) and "<portrait_field>_portrait_remove" (the revert
+    button's submitted value) — must match whatever the action handler reads
+    (warband_store/app.py's apply_portrait()/remove_portrait() call sites).
+  portrait_src_value — the current picture's src, or falsy to show the "?"
+    placeholder instead.
+  portrait_size_class — "portrait-md" or "portrait-sm", matching the figure's
+    usual size elsewhere on the page.
+  portrait_alt (optional) — <img> alt text, default "".
+  portrait_placeholder_extra_class (optional) — extra class on the "?"
+    placeholder span (e.g. "portrait-md-ph"), default none.
+  portrait_has_current — whether a non-default picture is set; the "Revert to
+    default" button is omitted entirely when false, same as the old standalone
+    checkbox it replaces.
+
+  This partial emits no <form> of its own — the caller must already be inside
+  one (either an existing per-figure form, wizard/apprentice/captain share one
+  big `action=details`/`action=captain_edit` form already, or a small
+  dedicated one for a soldier/companion). Nesting a second <form> here would
+  be silently dropped by the browser, same trap noted elsewhere in this file
+  for the equipment/notes panels.
+#}
+{% set portrait_alt = portrait_alt if portrait_alt is defined else '' %}
+{% set portrait_placeholder_extra_class = portrait_placeholder_extra_class if portrait_placeholder_extra_class is defined else '' %}
+<details class="portrait-picker" id="{{ portrait_id }}">
+  <summary class="portrait-picker-summary" title="Click to change picture">
+    {% if portrait_src_value %}
+      <img class="{{ portrait_size_class }}" src="{{ portrait_src_value }}" alt="{{ portrait_alt }}" />
+    {% else %}
+      <span class="portrait-placeholder {{ portrait_placeholder_extra_class }}" aria-hidden="true">?</span>
+    {% endif %}
+  </summary>
+  <div class="stack-sm" style="margin-top:0.4rem">
+    <label class="btn secondary small" style="cursor:pointer">
+      Choose picture
+      <input name="{{ portrait_field }}_portrait" type="file" accept="image/*" hidden />
+    </label>
+    {% if portrait_has_current %}
+      <button type="submit" name="{{ portrait_field }}_portrait_remove" value="on" class="btn secondary small">
+        Revert to default
+      </button>
+    {% endif %}
+  </div>
+</details>
