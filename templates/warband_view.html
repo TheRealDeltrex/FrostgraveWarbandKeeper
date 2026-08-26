@@ -2119,7 +2119,7 @@
                       type="text"
                       name="soldier_name"
                       value="{{ s.name }}"
-                      size="{{ [s.name|length + 2, 8]|max }}"
+                      size="{{ [s.name|length + 2, 12]|max }}"
                       aria-label="Soldier name"
                     />
                   </form>
@@ -2136,7 +2136,7 @@
                           <input type="hidden" name="action" value="soldier_add_xp" />
                           <input type="hidden" name="soldier_id" value="{{ s.id }}" />
                           <input name="amount" type="text" inputmode="numeric" pattern="[+-]?[0-9]+" value="20" style="width:5rem" title="Negative removes XP (reverses a level-up if it drops below the current level)" />
-                          <button class="btn secondary small" type="submit">Add/remove XP</button>
+                          <button class="btn secondary small" type="submit">Add XP</button>
                         </form>
                         <p class="muted" style="font-size:0.8rem;margin:0">XP {{ s.xp }} · Level {{ s.level }}/{{ hr.soldier_max_levels }}</p>
                         {% if s_pending > 0 %}

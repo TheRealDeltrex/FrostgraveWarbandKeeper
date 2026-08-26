@@ -989,10 +989,15 @@ def build_warband_pdf(wb: dict) -> bytes:
     pdf.set_x(pdf.l_margin)
     pdf.cell(0, 5, _t("Items:"), new_x="LMARGIN", new_y="NEXT")
     if vault:
+        holders = expansions.equipped_item_holders(wb)
         pdf.set_font("Helvetica", "", 9)
         for it in vault:
             pdf.set_x(pdf.l_margin)
-            line = f"* {it.get('name', '')}"
+            name = it.get("name", "")
+            line = f"* {_strip_source_suffix(name)}"
+            carriers = holders.get(name.strip().lower())
+            if carriers:
+                line += f" - carried by {', '.join(carriers)}"
             if it.get("notes"):
                 line += f" - {it.get('notes')}"
             pdf.multi_cell(0, 5, _t(line), new_x="LMARGIN", new_y="NEXT")
