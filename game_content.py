@@ -7,6 +7,7 @@ import logging
 from functools import lru_cache
 
 import paths
+from frostgrave_data import animal_companion_type_keys
 
 DATA = paths.bundle_dir() / "data"
 logger = logging.getLogger(__name__)
@@ -169,6 +170,218 @@ def load_magic_items() -> list[dict]:
 def magic_items_for_sources(sources) -> list[dict]:
     """Treasure from the books this warband has switched on."""
     return [it for it in load_magic_items() if it.get("source") in sources]
+
+
+# Sentinel role in a restricted_to list meaning "any Animal Companion type_key",
+# rather than enumerating every companion_* key by hand (which would silently
+# miss a newly added companion type).
+ANY_ANIMAL_COMPANION = "__animal_companion__"
+
+# Hand-curated restriction/bonus data for named magic items (data/magic_items.json
+# itself is regenerated wholesale from the reference PDFs by
+# scripts/extract_expansion_content.py — see its docstring and CLAUDE.md's note on
+# extract_*.py scripts — so anything added directly to that JSON would be silently
+# wiped on the next extraction run. This table is hand-maintained here instead and
+# merged with the Lexicon's `effect` text at lookup time via item_restriction().
+#
+# restricted_to: soldier type_keys, ANY_ANIMAL_COMPANION, or the role strings
+# "wizard"/"apprentice"/"captain" for non-soldier figures. Absent entirely means
+# unrestricted (matches magic_items.json's default behavior).
+# armour_bonus/move_bonus/move_penalty/fight_bonus/shoot_bonus/will_bonus: flat,
+# unconditional stat bonuses only — see equipment_bonuses() below. Situational or
+# non-numeric effects are never encoded here; only restriction + (optionally) a
+# flat bonus.
+# note: only set when the item's rules text says something beyond what the
+# restriction + numeric bonuses already convey (see pdf_export._restricted_item_notes).
+MAGIC_ITEM_RESTRICTIONS: dict[str, dict] = {
+    "Bear Armour": {
+        "restricted_to": ["companion_bear"],
+        "armour_bonus": 2,
+        "move_penalty": 1,
+    },
+    "Iron Collar": {
+        "restricted_to": ["companion_wolf", "war_hound"],
+        "armour_bonus": 2,
+        "fight_bonus": 2,
+        "will_bonus": 1,
+    },
+    "Sickle of the Crowmaster": {
+        "restricted_to": ["crow_master"],
+        "fight_bonus": 1,
+    },
+    "Bracers of True Flight": {
+        "restricted_to": ["javelineer"],
+        "fight_bonus": 1,
+        "shoot_bonus": 1,
+        "move_bonus": 1,
+    },
+    "Karmic Belt": {
+        "restricted_to": ["mystic_warrior"],
+        "move_bonus": 1,
+    },
+    "Backpack of Hefty Haulage": {
+        "restricted_to": ["pack_mule"],
+        "armour_bonus": 2,
+        "fight_bonus": 1,
+        "move_bonus": 1,
+    },
+    "Bearclaw Pendant": {
+        "restricted_to": ["tracker"],
+        "note": "+2 Fight/+2 Shoot vs animals — situational, apply at the table.",
+    },
+    "Bladed Staff of Fire": {
+        "restricted_to": ["monk"],
+        "note": "+2 extra damage on the bladed staff.",
+    },
+    "Thunderstrike Javelin": {
+        "restricted_to": ["javelineer"],
+        "note": "Once/game +3 Shoot or +3 Fight javelin attack.",
+    },
+    "Mind Lock Collar": {
+        "restricted_to": [ANY_ANIMAL_COMPANION],
+        "note": "Grants the Mind Lock creature trait; blocks other items.",
+    },
+    "Mantle of the Bear (or Leopard)": {
+        "restricted_to": ["companion_bear", "companion_snow_leopard"],
+        "note": "The matching Animal Companion counts as a standard soldier instead of a specialist.",
+    },
+    "The Betrayer's Blade": {
+        "restricted_to": ["wizard"],
+        "fight_bonus": 2,
+        "note": (
+            "In multi-figure combats where the wielder is attacker or declared "
+            "target, supporting figures grant only +1 each instead of +2."
+        ),
+    },
+    "The Blade of Barael": {
+        "restricted_to": ["wizard", "apprentice"],
+        "fight_bonus": 1,
+        "note": (
+            "No dagger or shield alongside it; +2 damage. The bearer can never be "
+            "targeted by an attack or spell from beyond 12\" (friendly or enemy), "
+            "and is immune to Glow (though Cordial of Clearsight still works "
+            "normally against them). A natural 20 in melee lets the bearer "
+            "immediately take another action (needn't be a move)."
+        ),
+    },
+    "Ring of Foresight": {
+        "restricted_to": ["wizard", "apprentice"],
+        "note": "Once/scenario, +8 to an Initiative Roll (comparison only, not trigger effects).",
+    },
+    "Spitfire Wand": {
+        "restricted_to": ["wizard", "apprentice"],
+        "note": '+1 elemental shooting attack at 16"; also grants Elemental Resistance (1).',
+    },
+    "Construct Key": {
+        "restricted_to": ["wizard", "apprentice"],
+        "note": '+4 to Control Construct within 4".',
+    },
+    "Dreadstone of the Fallen Mind": {
+        "restricted_to": ["wizard", "apprentice"],
+        "note": (
+            "Opposed Will Rolls vs. a target — win and the target can't approach "
+            "the bearer for the rest of the game."
+        ),
+    },
+    "Ice Staff": {
+        "restricted_to": ["wizard", "apprentice"],
+        "note": (
+            'Action creates a 3"-diameter ice circle that punishes movement '
+            "in/out with a Move Roll or 2 damage."
+        ),
+    },
+    "Wand of Fireballs": {
+        "restricted_to": ["wizard", "apprentice"],
+        "note": "Casts Elemental Bolt (CV5) ignoring giant elemental resistance. Useless after 5 uses.",
+    },
+    "Script of the Golem": {
+        "restricted_to": ["wizard"],
+        "note": "Every successful Animate Construct produces a construct with +2 Health.",
+    },
+    "Black Pipe": {
+        "restricted_to": ["wizard", "apprentice"],
+        "note": "-1 Will, +1 Fight vs shooting while smoking.",
+    },
+    "Ring of Command": {
+        "restricted_to": ["wizard", "apprentice"],
+        "note": 'Once/game, activate an extra soldier within 12" alongside your own activation.',
+    },
+    "Beartooth Talisman": {
+        "restricted_to": ["wizard", "apprentice"],
+        "note": "+2 to Control Animal, controls 2 animals at once.",
+    },
+    "Demonic Talisman": {
+        "restricted_to": ["wizard", "apprentice"],
+        "note": "+2 to Control Demon, controls 2 demons at once.",
+    },
+    "Talisman of Undead": {
+        "restricted_to": ["wizard", "apprentice"],
+        "note": "+2 to Control Undead, controls 2 undead at once.",
+    },
+    "Tiger Eye Ring": {
+        "restricted_to": ["wizard"],
+        "note": (
+            'Extends line of sight 2" past any visible point, moving the '
+            "Wizard Eye further; risk of 3 damage on a failed Will Roll each use."
+        ),
+    },
+}
+_MAGIC_ITEM_RESTRICTIONS_BY_LOWER = {k.lower(): v for k, v in MAGIC_ITEM_RESTRICTIONS.items()}
+
+
+@lru_cache(maxsize=1)
+def _magic_items_by_lower_name() -> dict[str, dict]:
+    return {(it.get("name") or "").strip().lower(): it for it in load_magic_items()}
+
+
+def item_restriction(name: str) -> dict | None:
+    """This item's data for anything a caller might need at equip time: its
+    hand-curated restriction/bonus entry (MAGIC_ITEM_RESTRICTIONS), if any, merged
+    with its `effect` text from the Lexicon (magic_items.json). Returns a dict for
+    *any* named magic item — even one with no restriction or bonus of its own — so
+    pdf_export.py can print every equipped magic item's rules text, not just the
+    restricted ones; callers that only care about restrictions (item_eligible_for_role,
+    item_restricted_for_type_key) already treat a missing `restricted_to` key as
+    unrestricted, so this doesn't change their behavior. None only for a name that
+    matches no magic item at all (mundane gear, a typo, free text)."""
+    key = (name or "").strip().lower()
+    base = _MAGIC_ITEM_RESTRICTIONS_BY_LOWER.get(key)
+    lexicon_entry = _magic_items_by_lower_name().get(key)
+    if base is None and lexicon_entry is None:
+        return None
+    out = dict(base) if base else {}
+    if lexicon_entry is not None:
+        out["effect"] = lexicon_entry.get("effect", "")
+    return out
+
+
+def item_role_matches(role: str, restricted_to: list[str]) -> bool:
+    """Whether `role` (a soldier type_key, or 'wizard'/'apprentice'/'captain')
+    satisfies a restriction's restricted_to list, expanding the
+    ANY_ANIMAL_COMPANION sentinel against the live set of companion type_keys."""
+    if role in restricted_to:
+        return True
+    return ANY_ANIMAL_COMPANION in restricted_to and role in animal_companion_type_keys()
+
+
+def item_eligible_for_role(name: str, role: str) -> bool:
+    """True if this item (free-typed or vault name) carries no restriction, or
+    `role` satisfies its restricted_to list. Used to prune the Vault picker's
+    options to what a given figure can actually use — see _item_slots.html."""
+    r = item_restriction(name)
+    if not r or "restricted_to" not in r:
+        return True
+    return item_role_matches(role, r["restricted_to"])
+
+
+def item_restricted_for_type_key(name: str, type_key: str) -> bool:
+    """True only if this item is specifically restricted to type_key (narrower
+    than item_eligible_for_role: an unrestricted item returns False here). Used to
+    both detect "does the warband own gear for this creature/class" (see
+    expansions._has_restricted_vault_item_for) and to filter the dropdown for a
+    conditional bonus slot to just that gear."""
+    r = item_restriction(name)
+    return bool(r and item_role_matches(type_key, r.get("restricted_to") or []))
 
 
 def group_magic_items(items: list[dict]) -> list[dict]:
@@ -383,19 +596,32 @@ def enrich_spells_with_descriptions(spells: list[dict]) -> list[dict]:
 
 
 def equipment_bonuses(slots: list) -> dict:
-    """Sum the Armour/Move bonuses granted by known Armour-category items (Shield,
-    Light Armour, Heavy Armour) sitting in these item slots. Matches by exact
+    """Sum the Armour/Move/Fight/Shoot/Will bonuses granted by known items sitting
+    in these item slots: standard Armour-category items (Shield, Light Armour,
+    Heavy Armour) plus any restricted magic item carrying a flat bonus in
+    MAGIC_ITEM_RESTRICTIONS (Bear Armour, Iron Collar, etc.). Matches by exact
     catalog name (case-insensitive), same idiom as item_slot_cost() below."""
-    bonus = {"armour": 0, "move": 0}
+    bonus = {"armour": 0, "move": 0, "fight": 0, "shoot": 0, "will": 0}
     for raw in slots or []:
         name = (raw or "").strip().lower()
         if not name:
             continue
+        matched = False
         for it in load_standard_items():
             if it["name"].lower() == name:
                 bonus["armour"] += int(it.get("armour_bonus", 0))
-                bonus["move"] -= int(it.get("move_penalty", 0))
+                bonus["move"] += int(it.get("move_bonus", 0)) - int(it.get("move_penalty", 0))
+                matched = True
                 break
+        if matched:
+            continue
+        it = _MAGIC_ITEM_RESTRICTIONS_BY_LOWER.get(name)
+        if it:
+            bonus["armour"] += int(it.get("armour_bonus", 0))
+            bonus["move"] += int(it.get("move_bonus", 0)) - int(it.get("move_penalty", 0))
+            bonus["fight"] += int(it.get("fight_bonus", 0))
+            bonus["shoot"] += int(it.get("shoot_bonus", 0))
+            bonus["will"] += int(it.get("will_bonus", 0))
     return bonus
 
 

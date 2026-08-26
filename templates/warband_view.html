@@ -398,6 +398,17 @@
               </p>
             </details>
           </div>
+          <div class="hr-row">
+            <input id="creature_item_slot_enabled" name="creature_item_slot_enabled" type="checkbox" {% if hr.creature_item_slot_enabled %}checked{% endif %} />
+            <details class="hr-note" id="hrnote-creature_item_slot_enabled">
+              <summary>Creatures get one item slot</summary>
+              <p class="hr-note-body">
+                Animal companions and constructs normally have no item slot at all. This grants each
+                one exactly one, still restricted to gear that creature can actually use (e.g. Bear
+                Armour on a Bear) — the picker just won't offer anything else there.
+              </p>
+            </details>
+          </div>
         </details>
 
         <details class="ref-panel" id="additional-weapons-panel">
@@ -881,9 +892,15 @@
           </p>
         {% endif %}
         <div class="char-block">
-          {% if wiz_src %}
-            <img class="portrait-md" src="{{ wiz_src }}" alt="" />
-          {% endif %}
+          {% with %}
+            {% set portrait_id = 'wizard-portrait-picker' %}
+            {% set portrait_field = 'wizard' %}
+            {% set portrait_src_value = wiz_src %}
+            {% set portrait_size_class = 'portrait-md' %}
+            {% set portrait_alt = wiz.name %}
+            {% set portrait_has_current = wiz.portrait %}
+            {% include '_portrait_picker.html' %}
+          {% endwith %}
           <div class="char-body">
             <div class="grid-2">
               <div class="form-row">
@@ -898,17 +915,7 @@
                 <label>School</label>
                 <input type="text" value="{{ wiz.school }}" disabled />
               </div>
-              <div class="form-row">
-                <label for="wizard_portrait">Change picture</label>
-                <input id="wizard_portrait" name="wizard_portrait" type="file" accept="image/*" />
-              </div>
             </div>
-            {% if wiz.portrait %}
-              <div class="checkbox-row">
-                <input id="wizard_portrait_remove" name="wizard_portrait_remove" type="checkbox" />
-                <label for="wizard_portrait_remove" style="margin:0">Remove picture (revert to default)</label>
-              </div>
-            {% endif %}
             {% set wiz_mounted = horse_rider and horse_rider.kind == 'wizard' %}
             {% if wiz_mounted %}<span class="badge" title="Riding the warband's horse: Move +{{ hmd.move }}, Fight +{{ hmd.fight }}, Armour {{ hmd.armour }}">mounted</span>{% endif %}
             {{ mutated_badge(wiz.mutations) }}
@@ -953,10 +960,13 @@
                 <input id="wizard_dagger" name="wizard_dagger" type="checkbox" {% if wiz.has_dagger %}checked{% endif %} />
                 <label for="wizard_dagger" style="margin:0">Carries a dagger (free slot)</label>
               </div>
-              {% set slots = wiz.item_slots if wiz.item_slots is defined else [] %}
-              {% set prefix = 'wizard' %}
-              {% set n = wizard_item_slots %}
-              {% include '_item_slots.html' %}
+              {% with %}
+                {% set slots = wiz.item_slots if wiz.item_slots is defined else [] %}
+                {% set prefix = 'wizard' %}
+                {% set n = wizard_item_slots %}
+                {% set vault_names = vault_names|select('item_eligible_for_role', 'wizard')|list %}
+                {% include '_item_slots.html' %}
+              {% endwith %}
               <div class="form-row">
                 <label for="wizard_notes">Wizard notes</label>
                 <textarea id="wizard_notes" name="wizard_notes">{{ wiz.notes }}</textarea>
@@ -971,28 +981,23 @@
           <summary>Apprentice — {{ ap.name }} · {{ wiz.school }}</summary>
           <div class="char-block">
             {% set ap_src = portrait_src(ap.portrait, 'apprentice', None, ap.gender) %}
-            {% if ap_src %}
-              <img class="portrait-md" src="{{ ap_src }}" alt="" />
-            {% else %}
-              <span class="portrait-placeholder portrait-md-ph" aria-hidden="true">?</span>
-            {% endif %}
+            {% with %}
+              {% set portrait_id = 'apprentice-portrait-picker' %}
+              {% set portrait_field = 'apprentice' %}
+              {% set portrait_src_value = ap_src %}
+              {% set portrait_size_class = 'portrait-md' %}
+              {% set portrait_placeholder_extra_class = 'portrait-md-ph' %}
+              {% set portrait_alt = ap.name %}
+              {% set portrait_has_current = ap.portrait %}
+              {% include '_portrait_picker.html' %}
+            {% endwith %}
             <div class="char-body">
               <div class="grid-2">
                 <div class="form-row">
                   <label for="apprentice_name">Name</label>
                   <input id="apprentice_name" name="apprentice_name" type="text" value="{{ ap.name }}" />
                 </div>
-                <div class="form-row">
-                  <label for="apprentice_portrait">Change picture</label>
-                  <input id="apprentice_portrait" name="apprentice_portrait" type="file" accept="image/*" />
-                </div>
               </div>
-              {% if ap.portrait %}
-                <div class="checkbox-row">
-                  <input id="apprentice_portrait_remove" name="apprentice_portrait_remove" type="checkbox" />
-                  <label for="apprentice_portrait_remove" style="margin:0">Remove picture (revert to default)</label>
-                </div>
-              {% endif %}
               <p class="muted">Stats synced from wizard (starting H12 when wizard is H14)</p>
               {% set ap_mounted = horse_rider and horse_rider.kind == 'apprentice' %}
               {% if ap_mounted %}<span class="badge" title="Riding the warband's horse: Move +{{ hmd.move }}, Fight +{{ hmd.fight }}, Armour {{ hmd.armour }}">mounted</span>{% endif %}
@@ -1029,10 +1034,13 @@
                   <input id="apprentice_dagger" name="apprentice_dagger" type="checkbox" {% if ap.has_dagger %}checked{% endif %} />
                   <label for="apprentice_dagger" style="margin:0">Carries a dagger (free slot)</label>
                 </div>
-                {% set slots = ap.item_slots if ap.item_slots is defined else [] %}
-                {% set prefix = 'apprentice' %}
-                {% set n = apprentice_item_slots %}
-                {% include '_item_slots.html' %}
+                {% with %}
+                  {% set slots = ap.item_slots if ap.item_slots is defined else [] %}
+                  {% set prefix = 'apprentice' %}
+                  {% set n = apprentice_item_slots %}
+                  {% set vault_names = vault_names|select('item_eligible_for_role', 'apprentice')|list %}
+                  {% include '_item_slots.html' %}
+                {% endwith %}
                 <div class="form-row">
                   <label for="apprentice_notes">Notes</label>
                   <textarea id="apprentice_notes" name="apprentice_notes">{{ ap.notes }}</textarea>
@@ -1620,40 +1628,35 @@
         <details class="ref-panel" id="captain-panel" open>
         <summary>Captain — {{ cap.name }}{% if cap_class %} · {{ cap_class }}{% endif %} · Level {{ cap.level }} · {{ cap.xp }} XP total · {{ cap_unused_xp }} XP unused</summary>
         <div class="char-block">
-          <div style="display:flex;flex-direction:column;align-items:center">
-            {% set cap_src = portrait_src(cap.portrait, 'captain', cap.type_key) %}
-            {% if cap_src %}
-              <img class="portrait-md" src="{{ cap_src }}" alt="" />
-            {% else %}
-              <span class="portrait-placeholder portrait-md-ph" aria-hidden="true">?</span>
-            {% endif %}
-            <div style="text-align:center;margin-top:0.3rem">
-              {% if legendary_soldiers_enabled %}
-                <span class="badge legendary" title="Spellcaster Magazine, Issue 4: the Captain is a Legendary Soldier, subject to the Legendary Soldier limit instead of the Specialist limit.">legendary</span>
-              {% else %}
-                <span class="badge specialist" title="Counts against the warband's specialist limit.">specialist</span>
-              {% endif %}
+          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" enctype="multipart/form-data" data-autosave>
+            <input type="hidden" name="action" value="captain_edit" />
+            <div style="display:flex;flex-direction:column;align-items:center">
+              {% set cap_src = portrait_src(cap.portrait, 'captain', cap.type_key) %}
+              {% with %}
+                {% set portrait_id = 'captain-portrait-picker' %}
+                {% set portrait_field = 'captain' %}
+                {% set portrait_src_value = cap_src %}
+                {% set portrait_size_class = 'portrait-md' %}
+                {% set portrait_placeholder_extra_class = 'portrait-md-ph' %}
+                {% set portrait_alt = cap.name %}
+                {% set portrait_has_current = cap.portrait %}
+                {% include '_portrait_picker.html' %}
+              {% endwith %}
+              <div style="text-align:center;margin-top:0.3rem">
+                {% if legendary_soldiers_enabled %}
+                  <span class="badge legendary" title="Spellcaster Magazine, Issue 4: the Captain is a Legendary Soldier, subject to the Legendary Soldier limit instead of the Specialist limit.">legendary</span>
+                {% else %}
+                  <span class="badge specialist" title="Counts against the warband's specialist limit.">specialist</span>
+                {% endif %}
+              </div>
             </div>
-          </div>
-          <div class="char-body">
-            <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" enctype="multipart/form-data" data-autosave>
-              <input type="hidden" name="action" value="captain_edit" />
+            <div class="char-body">
               <div class="grid-2">
                 <div class="form-row">
                   <label for="captain_name">Name</label>
                   <input id="captain_name" name="captain_name" type="text" value="{{ cap.name }}" />
                 </div>
-                <div class="form-row">
-                  <label for="captain_portrait">Change picture</label>
-                  <input id="captain_portrait" name="captain_portrait" type="file" accept="image/*" />
-                </div>
               </div>
-              {% if cap.portrait %}
-                <div class="checkbox-row">
-                  <input id="captain_portrait_remove" name="captain_portrait_remove" type="checkbox" />
-                  <label for="captain_portrait_remove" style="margin:0">Remove picture (revert to default)</label>
-                </div>
-              {% endif %}
               {% set cap_mounted = horse_rider and horse_rider.kind == 'captain' %}
               {% if cap_mounted %}<span class="badge" title="Riding the warband's horse: Move +{{ hmd.move }}, Fight +{{ hmd.fight }}, Armour {{ hmd.armour }}">mounted</span>{% endif %}
               {{ mutated_badge(cap.mutations) }}
@@ -1710,19 +1713,22 @@
                   <input id="captain_dagger" name="captain_dagger" type="checkbox" {% if cap.has_dagger %}checked{% endif %} />
                   <label for="captain_dagger" style="margin:0">Carries a dagger (free slot)</label>
                 </div>
-                {% set slots = cap.item_slots if cap.item_slots is defined else [] %}
-                {% set prefix = 'captain' %}
-                {% set n = cap_slots_n %}
-                {% set standard_items = soldier_capable_items %}
-                {% set vault_names = vault_names|reject('equalto', SPELL_COMPONENT_BAG_NAME)|list %}
-                {% include '_item_slots.html' %}
+                {% with %}
+                  {% set slots = cap.item_slots if cap.item_slots is defined else [] %}
+                  {% set prefix = 'captain' %}
+                  {% set n = cap_slots_n %}
+                  {% set standard_items = soldier_capable_items %}
+                  {% set vault_names = vault_names|reject('equalto', SPELL_COMPONENT_BAG_NAME)|list %}
+                  {% set vault_names = vault_names|select('item_eligible_for_role', 'captain')|list %}
+                  {% include '_item_slots.html' %}
+                {% endwith %}
                 <div class="form-row">
                   <label for="captain_notes">Notes</label>
                   <textarea id="captain_notes" name="captain_notes">{{ cap.notes }}</textarea>
                 </div>
               </details>
-            </form>
-          </div>
+            </div>
+          </form>
         </div>
 
         <details class="ref-panel" id="captain-mutations-panel">
@@ -2090,16 +2096,33 @@
                 </td>
                 <td>
                   {% set s_src = portrait_src(s.portrait, 'soldier', s.type_key) %}
-                  {% if s_src %}
-                    <img class="portrait-sm" src="{{ s_src }}" alt="" />
-                  {% else %}
-                    <span class="portrait-placeholder" aria-hidden="true">?</span>
-                  {% endif %}
+                  <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" enctype="multipart/form-data" data-autosave>
+                    <input type="hidden" name="action" value="soldier_edit" />
+                    <input type="hidden" name="soldier_id" value="{{ s.id }}" />
+                    {% with %}
+                      {% set portrait_id = 'soldier-portrait-picker-' ~ s.id %}
+                      {% set portrait_field = 'soldier' %}
+                      {% set portrait_src_value = s_src %}
+                      {% set portrait_size_class = 'portrait-sm' %}
+                      {% set portrait_alt = s.name %}
+                      {% set portrait_has_current = s.portrait %}
+                      {% include '_portrait_picker.html' %}
+                    {% endwith %}
+                  </form>
                 </td>
                 <td>
-                  <strong class="soldier-name-edit" tabindex="0" role="button" title="Click to rename"
-                    onclick="var d=document.getElementById('soldier-edit-{{ s.id }}'); if(d){ d.open=true; var i=d.querySelector('input[name=soldier_name]'); if(i){ i.focus(); i.select(); } }"
-                    onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">{{ s.name }}</strong>
+                  <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" data-autosave style="display:inline-block">
+                    <input type="hidden" name="action" value="soldier_edit" />
+                    <input type="hidden" name="soldier_id" value="{{ s.id }}" />
+                    <input
+                      class="soldier-name-inline"
+                      type="text"
+                      name="soldier_name"
+                      value="{{ s.name }}"
+                      size="{{ [s.name|length + 2, 8]|max }}"
+                      aria-label="Soldier name"
+                    />
+                  </form>
                   {% set s_can_level = hr.soldier_leveling_enabled
                       and not s.temporary
                       and (s.type_key not in ANIMAL_COMPANION_TYPE_KEYS or hr.soldier_leveling_animal_companions)
@@ -2195,15 +2218,21 @@
                           <input type="hidden" name="action" value="soldier_edit" />
                           <input type="hidden" name="soldier_id" value="{{ s.id }}" />
                           <h4 style="margin:0.6rem 0 0.3rem;font-size:0.85rem">Gear ({{ soldier_slot_n }} slot{{ 's' if soldier_slot_n != 1 else '' }})</h4>
-                          {% set prefix = 'soldier_' ~ s.id %}
-                          {% set n = soldier_slot_n %}
-                          {% set slots = s.item_slots if s.item_slots is defined else [] %}
-                          {% set standard_items = soldier_capable_items %}
-                          {% set hide_normal_gear = not hr.soldier_normal_gear_enabled %}
-                          {% set vault_names = vault_names|reject('equalto', SPELL_COMPONENT_BAG_NAME)|list %}
-                          {% set vault_names = vault_names|reject('firearm_item')|list if hide_normal_gear else vault_names %}
-                          {% set arrow_only_from = ELEMENTAL_ARCHER_BASE_ITEM_SLOTS if s.type_key == ELEMENTAL_ARCHER_TYPE_KEY else none %}
-                          {% include '_item_slots.html' %}
+                          {% with %}
+                            {% set prefix = 'soldier_' ~ s.id %}
+                            {% set n = soldier_slot_n %}
+                            {% set slots = s.item_slots if s.item_slots is defined else [] %}
+                            {% set is_conditional_creature = s.type_key is conditional_slot_type %}
+                            {% set standard_items = [] if is_conditional_creature else soldier_capable_items %}
+                            {% set hide_normal_gear = not hr.soldier_normal_gear_enabled %}
+                            {% set vault_names = vault_names|reject('equalto', SPELL_COMPONENT_BAG_NAME)|list %}
+                            {% set vault_names = vault_names|reject('firearm_item')|list if hide_normal_gear else vault_names %}
+                            {% set vault_names = vault_names|select('item_eligible_for_role', s.type_key)|list %}
+                            {% set vault_names = vault_names|select('item_restricted_for', s.type_key)|list if is_conditional_creature else vault_names %}
+                            {% set restricted_from = 0 if is_conditional_creature else (ELEMENTAL_ARCHER_BASE_ITEM_SLOTS if s.type_key == ELEMENTAL_ARCHER_TYPE_KEY else none) %}
+                            {% set restricted_vault_test = 'magic_arrow_item' if s.type_key == ELEMENTAL_ARCHER_TYPE_KEY else none %}
+                            {% include '_item_slots.html' %}
+                          {% endwith %}
                         </form>
                       {% endif %}
                     </details>
@@ -2245,13 +2274,8 @@
                       <input type="hidden" name="action" value="soldier_edit" />
                       <input type="hidden" name="soldier_id" value="{{ s.id }}" />
                       <details id="soldier-edit-{{ s.id }}">
-                        <summary class="muted" style="cursor:pointer;font-size:0.85rem">Edit / picture</summary>
+                        <summary class="muted" style="cursor:pointer;font-size:0.85rem">Notes</summary>
                         <div class="stack-sm" style="margin-top:0.4rem">
-                          <input name="soldier_name" type="text" value="{{ s.name }}" />
-                          <input name="soldier_portrait" type="file" accept="image/*" />
-                          {% if s.portrait %}
-                            <label class="muted" style="font-size:0.8rem"><input name="soldier_portrait_remove" type="checkbox" /> Remove picture (revert to default)</label>
-                          {% endif %}
                           <input name="notes" type="text" value="{{ s.notes }}" placeholder="Notes" />
                         </div>
                       </details>
@@ -2342,11 +2366,19 @@
                   <td></td>
                   <td></td>
                   <td style="padding-left:1.25rem">
-                    {% if companion_src %}
-                      <img class="portrait-sm" src="{{ companion_src }}" alt="" />
-                    {% else %}
-                      <span class="portrait-placeholder" aria-hidden="true">?</span>
-                    {% endif %}
+                    <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" enctype="multipart/form-data" data-autosave>
+                      <input type="hidden" name="action" value="soldier_edit" />
+                      <input type="hidden" name="soldier_id" value="{{ s.id }}" />
+                      {% with %}
+                        {% set portrait_id = 'soldier-companion-portrait-picker-' ~ s.id %}
+                        {% set portrait_field = 'soldier_companion' %}
+                        {% set portrait_src_value = companion_src %}
+                        {% set portrait_size_class = 'portrait-sm' %}
+                        {% set portrait_alt = companion.name %}
+                        {% set portrait_has_current = (s.get('companion') or {}).get('portrait') %}
+                        {% include '_portrait_picker.html' %}
+                      {% endwith %}
+                    </form>
                   </td>
                   <td style="padding-left:1.25rem">↳ <strong>{{ companion.name }}</strong> <span class="muted">({{ s.name }}'s companion)</span></td>
                   <td><span class="badge">animal</span></td>
@@ -2358,21 +2390,7 @@
                   <td>{{ format_stat(companion.stats.will) }}</td>
                   <td>{{ companion.stats.health }}</td>
                   <td></td>
-                  <td>
-                    <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" enctype="multipart/form-data" data-autosave>
-                      <input type="hidden" name="action" value="soldier_edit" />
-                      <input type="hidden" name="soldier_id" value="{{ s.id }}" />
-                      <details>
-                        <summary class="muted" style="cursor:pointer;font-size:0.85rem">Picture</summary>
-                        <div class="stack-sm" style="margin-top:0.4rem">
-                          <input name="soldier_companion_portrait" type="file" accept="image/*" />
-                          {% if (s.get('companion') or {}).get('portrait') %}
-                            <label class="muted" style="font-size:0.8rem"><input name="soldier_companion_portrait_remove" type="checkbox" /> Remove picture (revert to default)</label>
-                          {% endif %}
-                        </div>
-                      </details>
-                    </form>
-                  </td>
+                  <td></td>
                 </tr>
               {% endif %}
             </tbody>

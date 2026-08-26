@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import re
 
+import game_content
 from frostgrave_data import (
     APPRENTICE_ITEM_SLOTS,
     CARGO_TRANSPORT_BASE_CAPACITY,
@@ -805,25 +806,97 @@ def _elemental_archer_arrow_slot_bonus(current_items: list[str] | None) -> int:
     return arrows + 1
 
 
+def item_eligible_for_role(name: str, role: str) -> bool:
+    """True if this item (free-typed or vault name) carries no restriction, or
+    `role` (a soldier type_key, or 'wizard'/'apprentice'/'captain') satisfies its
+    restriction. Thin wrapper over game_content.item_eligible_for_role() so
+    templates/app.py only need to import expansions."""
+    return game_content.item_eligible_for_role(name, role)
+
+
+def item_restricted_for_type_key(name: str, type_key: str) -> bool:
+    """True only if this item is specifically restricted to type_key — narrower
+    than item_eligible_for_role(), which also allows unrestricted items through.
+    Used to detect "does the warband own gear for this creature/class" and to
+    filter a conditional bonus slot's dropdown to just that gear."""
+    return game_content.item_restricted_for_type_key(name, type_key)
+
+
+def item_restriction(name: str) -> dict | None:
+    """The restriction/bonus/effect-text entry for this item, if any — see
+    game_content.item_restriction()."""
+    return game_content.item_restriction(name)
+
+
+def _has_restricted_vault_item_for(wb: dict, type_key: str) -> bool:
+    """Whether any vault_items entry is restricted specifically to type_key —
+    used to spawn the Crow Master's one conditional item slot only once the
+    warband actually owns the Sickle of the Crowmaster, mirroring how the
+    Elemental Archer's bonus arrow slots only grow once arrows are actually
+    carried."""
+    for it in wb.get("vault_items") or []:
+        name = (it.get("name") if isinstance(it, dict) else str(it)) or ""
+        if item_restricted_for_type_key(name, type_key):
+            return True
+    return False
+
+
+def _conditional_bonus_slot(wb: dict, type_key: str, current_items: list[str] | None) -> int:
+    """One slot once the warband owns (or the soldier already carries) gear
+    restricted specifically to type_key; zero otherwise. Used for the Crow
+    Master, whose Sickle of the Crowmaster "bypasses the no-items rule" as a
+    real printed exception, not a homerule."""
+    if any((i or "").strip() for i in (current_items or [])):
+        return 1
+    return 1 if _has_restricted_vault_item_for(wb, type_key) else 0
+
+
+def is_conditional_slot_type(type_key: str) -> bool:
+    """True for every type_key whose item slots come from the "zero base slots,
+    conditionally unlocked" branch of soldier_item_slots() below — the Crow
+    Master, and animal companions/constructs under the creature_item_slot_enabled
+    homerule. Used by warband_view.html to fully restrict that slot's dropdown to
+    gear restricted to that exact type_key, rather than the ordinary catalog.
+    False for the Elemental Archer, which has real base slots of its own — only
+    its *bonus* slots are restricted, handled separately via restricted_from."""
+    return (
+        type_key == "crow_master"
+        or type_key in animal_companion_type_keys()
+        or type_key in construct_type_keys()
+    )
+
+
 def soldier_item_slots(wb: dict, type_key: str, current_items: list[str] | None = None) -> int:
     """A soldier's item slot count (2e core: 1). Zero for anything the book
     says "has no item slots" — animals, constructs, and temporary
     spell-summoned members (undead/demon/illusion) all carry that text
-    verbatim in their own catalog description. An explicit "item_slots" key
-    on the catalog entry (e.g. a Red King creature with no item slots of its
-    own) always wins; otherwise it's derived from the entry's own flags.
+    verbatim in their own catalog description — unless the "Creatures get one
+    item slot" homerule is on, which flatly grants animal companions and
+    constructs one slot regardless of what's owned (see
+    default_homerules()'s creature_item_slot_enabled). The Crow Master is a
+    separate, non-homerule case: its catalog entry hardcodes 0 slots, but the
+    Sickle of the Crowmaster "bypasses the no-items rule" as a real printed
+    exception, so it gets one slot only once the warband owns (or it already
+    carries) that specific item — see _conditional_bonus_slot(). An explicit
+    "item_slots" key on the catalog entry (e.g. a Red King creature with no
+    item slots of its own) always wins over every other case below it;
+    otherwise it's derived from the entry's own flags.
 
-    `current_items` (the soldier's present item_slots contents, if known) only
-    matters for the Elemental Archer, whose slot count depends on how many
-    magic arrows it's currently carrying — see
-    _elemental_archer_arrow_slot_bonus. Every other soldier type ignores it."""
+    `current_items` (the soldier's present item_slots contents, if known)
+    matters for the Elemental Archer (how many magic arrows it's currently
+    carrying — see _elemental_archer_arrow_slot_bonus) and the Crow Master
+    (whether it's already carrying its conditional item). Every other soldier
+    type ignores it."""
     info = get_soldier(type_key) or {}
     if type_key == ELEMENTAL_ARCHER_TYPE_KEY:
         return ELEMENTAL_ARCHER_BASE_ITEM_SLOTS + _elemental_archer_arrow_slot_bonus(current_items)
+    if type_key == "crow_master":
+        return _conditional_bonus_slot(wb, type_key, current_items)
     if "item_slots" in info:
         return int(info["item_slots"])
     if type_key in animal_companion_type_keys() or type_key in construct_type_keys():
-        return 0
+        hr = wb.get("homerules") or {}
+        return 1 if hr.get("creature_item_slot_enabled") else 0
     if info.get("temporary"):
         return 0
     return SOLDIER_ITEM_SLOTS
