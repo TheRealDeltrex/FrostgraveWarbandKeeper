@@ -509,10 +509,12 @@ def default_homerules() -> dict:
         "spellcaster_magazine_legendary_soldiers": True,
         # Black Powder Firearms (Issue 1): the Musketeer/Coachman/Duellist
         # only appear once BOTH this and spellcaster_magazine_soldiers above
-        # are on. Doesn't gate the standalone Pistol/Musket/Blunderbuss items
-        # — those are separately purchase-gated (buy_standard_item(), needs
-        # Spellcaster Magazine switched on) regardless of this toggle. On by
-        # default.
+        # are on. Also gates the standalone Pistol/Musket/Blunderbuss items —
+        # buy_standard_item(), upgrade_firearm() and app.py's
+        # _filtered_standard_items() each check this flag on top of Spellcaster
+        # Magazine being switched on, so turning it off hides the Workshop's
+        # Firearms panel rather than leaving it visible but non-functional.
+        # On by default.
         "firearms_rules_enabled": True,
         # Knightly Orders (Spellcaster Magazine, Issue 1). Needs Spellcaster
         # Magazine switched on in enabled_sources too.
@@ -1276,7 +1278,7 @@ MIGRATIONS: list[tuple[int, Callable[[dict], None]]] = [
 
 
 def _run_migrations(wb: dict) -> None:
-    version = int(wb.get("schema_version", 0))
+    version = _as_int(wb.get("schema_version"), 0)
     ran = [target for target, _ in MIGRATIONS if version < target]
     for target_version, migration in MIGRATIONS:
         if version < target_version:
@@ -1313,31 +1315,45 @@ def _as_int(value: object, fallback: int) -> int:
         return fallback
 
 
+def _as_list(value: object) -> list:
+    """The value if it's a list, otherwise a fresh empty one. setdefault() is
+    not enough for the roster's list fields: a key that is present but
+    explicitly null survives it untouched, and every template that renders one
+    calls |length or iterates it — so a hand-edited "mutations": null imports
+    cleanly and then 500s warband_view forever."""
+    return value if isinstance(value, list) else []
+
+
 def _coerce_numeric_homerules(hr: dict) -> None:
-    """Force every homerule that defaults to a number back to a number, one
-    level of nesting deep (captain_base_stats, wizard_stat_limits, the
-    {limit, unlimited} cap grids). Driven off default_homerules() rather than a
-    hand-kept list, so a numeric homerule added later is covered automatically.
+    """Force every homerule that defaults to a number back to a number, however
+    deep it sits (captain_base_stats, wizard_stat_limits, wizard_level_cap, and
+    the per-stat {limit, unlimited} cap grids, which nest two levels). Driven
+    off default_homerules() rather than a hand-kept list, so a numeric homerule
+    added later is covered automatically, at any depth.
 
     Without this a single bad value bricks a warband permanently: nothing
     validates an imported file's homerules, and expansions.max_soldiers() calls
     int() on one during warband_limits(), which warband_view calls unguarded —
     so the import succeeds and every later view of that warband is a 500, with
     the delete button living on the page that crashes."""
-    for key, default in default_homerules().items():
-        if isinstance(default, bool):  # bool is an int subclass — check first
-            continue
-        if isinstance(default, int):
-            hr[key] = _as_int(hr.get(key), default)
-        elif isinstance(default, dict):
-            stored = hr.get(key)
-            if not isinstance(stored, dict):
-                hr[key] = deepcopy(default)
+    def coerce_into(stored: dict, defaults: dict) -> None:
+        for key, default in defaults.items():
+            if isinstance(default, bool):  # bool is an int subclass — check first
                 continue
-            for sub_key, sub_default in default.items():
-                if isinstance(sub_default, bool) or not isinstance(sub_default, int):
-                    continue
-                stored[sub_key] = _as_int(stored.get(sub_key), sub_default)
+            if isinstance(default, int):
+                stored[key] = _as_int(stored.get(key), default)
+            elif isinstance(default, dict):
+                # A missing or wrong-typed sub-dict is replaced wholesale, not
+                # skipped: soldier_stat_caps/captain_stat_caps nest a second
+                # level ({fight: {limit, unlimited}}) that warband_view reads
+                # with attribute access, so an absent stat key is a 500 on
+                # every later view rather than a merely odd cap.
+                if not isinstance(stored.get(key), dict):
+                    stored[key] = deepcopy(default)
+                else:
+                    coerce_into(stored[key], default)
+
+    coerce_into(hr, default_homerules())
 
 
 def _safe_portrait_ref(rel: object) -> str | None:
@@ -1407,8 +1423,9 @@ def _normalize_warband(wb: dict) -> dict:
     wiz["stats"].setdefault("health", 14)
     wiz.pop("health_current", None)
     wiz.setdefault("has_dagger", True)
-    wiz.setdefault("mutations", [])
-    wiz.setdefault("permanent_injuries", [])
+    wiz["mutations"] = _as_list(wiz.get("mutations"))
+    wiz["permanent_injuries"] = _as_list(wiz.get("permanent_injuries"))
+    wiz["level_history"] = _as_list(wiz.get("level_history"))
     _resync_permanent_injury_text(wiz)
     wiz.setdefault("portrait_source_name", None)
     if wiz.get("gender") != "female":
@@ -1420,7 +1437,7 @@ def _normalize_warband(wb: dict) -> dict:
     # Monster Hunting (Issue 5): spell/potion components the wizard is
     # carrying — see expansions.component_capacity() for the holding limit
     # (driven by Spell Component Bag entries in item_slots, not a field here).
-    wiz.setdefault("components", [])
+    wiz["components"] = _as_list(wiz.get("components"))
     # Wizard state (Lich / Beastcrafter / pact). Backfilled per-key so a warband
     # saved before this existed loads as an ordinary wizard.
     state = wiz.setdefault("state", expansions.default_wizard_state())
@@ -1430,8 +1447,19 @@ def _normalize_warband(wb: dict) -> dict:
         state.setdefault(key, value)
     if state.get("kind") not in expansions.WIZARD_STATES:
         state["kind"] = expansions.STATE_NONE
-    if not isinstance(wiz.get("spells"), list):
-        wiz["spells"] = []
+    # Non-dict entries are dropped, not kept: recompute_spell_cns() calls .get()
+    # on every one, so a bare spell-id string from a hand-edit or another tool
+    # would otherwise brick the warband on load. Its numbers go straight into
+    # arithmetic and its school into a dict lookup (frostgrave_data.
+    # school_relation), so both are coerced here as well.
+    wiz["spells"] = [sp for sp in _as_list(wiz.get("spells")) if isinstance(sp, dict)]
+    for sp in wiz["spells"]:
+        for key, fallback in (("base_cn", 10), ("cn", 10), ("cn_improve", 0), ("cn_penalty", 0)):
+            if key in sp:
+                sp[key] = _as_int(sp[key], fallback)
+        for key in ("id", "name", "school", "type", "relation"):
+            if key in sp and not isinstance(sp[key], str):
+                sp[key] = ""
     wb["vault_items"] = _normalize_vault_items(wb.get("vault_items"))
     wb.setdefault("giant_blooded_pending", False)
     wb.setdefault("thrall_pending", False)
@@ -1454,28 +1482,31 @@ def _normalize_warband(wb: dict) -> dict:
     if not isinstance(wb.get("base"), dict):
         wb["base"] = empty_base()
     else:
-        wb["base"].setdefault("location", "none")
-        wb["base"].setdefault("resources", [])
-        wb["base"].setdefault("notes", "")
-        if wb["base"]["location"] not in BASE_LOCATIONS:
-            wb["base"]["location"] = "none"
-        wb["base"]["resources"] = [
-            r for r in wb["base"]["resources"] if r in BASE_RESOURCES
+        # location is looked up in BASE_LOCATIONS and resources is iterated, so
+        # an unhashable or non-iterable value raises out of _normalize_warband
+        # itself — which load_warband() doesn't catch, unlike the import route.
+        # notes reaches .strip() in pdf_export.build_warband_pdf().
+        base = wb["base"]
+        if not isinstance(base.get("location"), str) or base["location"] not in BASE_LOCATIONS:
+            base["location"] = "none"
+        base["resources"] = [
+            r for r in _as_list(base.get("resources")) if isinstance(r, str) and r in BASE_RESOURCES
         ]
+        base["notes"] = base["notes"] if isinstance(base.get("notes"), str) else ""
     if not isinstance(wb.get("apprentice"), dict):
         wb["apprentice"] = None
     if wb.get("apprentice"):
         ap = wb["apprentice"]
         ap["portrait"] = _safe_portrait_ref(ap.get("portrait"))
         ap.setdefault("has_dagger", True)
-        ap.setdefault("mutations", [])
-        ap.setdefault("permanent_injuries", [])
+        ap["mutations"] = _as_list(ap.get("mutations"))
+        ap["permanent_injuries"] = _as_list(ap.get("permanent_injuries"))
         _resync_permanent_injury_text(ap)
         ap.setdefault("portrait_source_name", None)
         ap.pop("health_current", None)
         if ap.get("gender") != "female":
             ap["gender"] = "male"
-        ap.setdefault("components", [])
+        ap["components"] = _as_list(ap.get("components"))
     if not isinstance(wb.get("homerules"), dict):
         wb["homerules"] = default_homerules()
     hr = wb["homerules"]
@@ -1497,14 +1528,14 @@ def _normalize_warband(wb: dict) -> dict:
         cap["level"] = _as_int(cap.get("level"), 0)
         cap.setdefault("bonus_extra_stat", None)
         cap.setdefault("xp", 0)
-        cap.setdefault("level_history", [])
+        cap["level_history"] = _as_list(cap.get("level_history"))
         cap.setdefault("has_dagger", True)
         cap.setdefault("notes", "")
         cap.setdefault("portrait", None)
         cap.setdefault("origin", "hired")
-        cap.setdefault("known_tricks", [])
-        cap.setdefault("mutations", [])
-        cap.setdefault("permanent_injuries", [])
+        cap["known_tricks"] = _as_list(cap.get("known_tricks"))
+        cap["mutations"] = _as_list(cap.get("mutations"))
+        cap["permanent_injuries"] = _as_list(cap.get("permanent_injuries"))
         _resync_permanent_injury_text(cap)
         cap.setdefault("portrait_source_name", None)
         cap.setdefault("level", 0)
@@ -1520,22 +1551,41 @@ def _normalize_warband(wb: dict) -> dict:
         s["xp"] = _as_int(s.get("xp"), 0)
         s["level"] = _as_int(s.get("level"), 0)
         s.setdefault("id", uuid.uuid4().hex[:10])
+        s["name"] = s["name"] if isinstance(s.get("name"), str) else ""
+        # Both are dict-lookup keys downstream (get_soldier(), and
+        # KNIGHTLY_ORDER_BY_ID in enrich_soldier/pdf_export), so a list or dict
+        # here is an unhashable-type crash rather than a miss.
+        s["type_key"] = s["type_key"] if isinstance(s.get("type_key"), str) else ""
+        if not isinstance(s.get("knightly_order"), str):
+            s["knightly_order"] = None
         s.setdefault("portrait_source_name", None)
-        s.setdefault("mutations", [])
-        s.setdefault("modifications", [])
-        s.setdefault("permanent_injuries", [])
+        s["mutations"] = _as_list(s.get("mutations"))
+        s["modifications"] = _as_list(s.get("modifications"))
+        s["permanent_injuries"] = _as_list(s.get("permanent_injuries"))
         _resync_permanent_injury_text(s)
         s.pop("health_current", None)
-        if any(s.get(k) is None for k in ("fight", "shoot", "will", "health")):
-            info = get_soldier(s.get("type_key", "")) or {}
-            for k in ("fight", "shoot", "will", "health"):
-                s.setdefault(k, info.get(k))
-        s.setdefault("xp", 0)
-        s.setdefault("level", 0)
+        # Coerced, not merely backfilled: enrich_soldier() feeds these straight
+        # into int() arithmetic. The catalog entry is the fallback, but a
+        # type_key this build doesn't know (a renamed one, or a file written by
+        # a build carrying more supplements) leaves it empty — so a second
+        # fallback is needed, or the old setdefault(k, info.get(k)) writes None
+        # back and every later view of that warband is a 500.
+        info = get_soldier(s.get("type_key", "")) or {}
+        for k in ("fight", "shoot", "will", "health"):
+            s[k] = _as_int(s.get(k), _as_int(info.get(k), 0))
+        # Move and Armour are catalog-only — a hired soldier never stores them,
+        # so enrich_soldier()'s {**catalog, **soldier} merge supplies them and a
+        # later data fix to a soldier type still reaches existing warbands.
+        # Only repair one that's already stored (and wrong-typed); never add it.
+        for k in ("move", "armour"):
+            if k in s:
+                s[k] = _as_int(s[k], _as_int(info.get(k), 0))
         counts = s.setdefault("levelup_counts", {stat: 0 for stat in LEVELUP_STATS})
+        if not isinstance(counts, dict):
+            counts = s["levelup_counts"] = {stat: 0 for stat in LEVELUP_STATS}
         for stat in LEVELUP_STATS:
-            counts.setdefault(stat, 0)
-        s.setdefault("level_history", [])
+            counts[stat] = _as_int(counts.get(stat), 0)
+        s["level_history"] = _as_list(s.get("level_history"))
 
     _run_migrations(wb)
 

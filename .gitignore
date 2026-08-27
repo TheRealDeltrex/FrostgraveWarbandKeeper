@@ -13,6 +13,10 @@ data/portraits/*
 .DS_Store
 build/
 dist/
+# The packaged release archive is built beside dist/ and attached to the
+# GitHub release, never committed — it is ~46 MB and would live in history
+# forever after a single `git add -A`.
+FrostgraveWarbandKeeper-*.zip
 .codesign/
 
 # Local AI-agent operating manual (CLAUDE.md) and its pointer for other tools.

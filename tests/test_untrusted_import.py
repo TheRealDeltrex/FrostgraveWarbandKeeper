@@ -147,6 +147,121 @@ def test_non_dict_soldiers_are_discarded(fresh_warband):
     assert imported["soldiers"][0]["id"]
 
 
+def test_two_level_stat_cap_grids_are_backfilled(fresh_warband):
+    """captain_stat_caps/soldier_stat_caps nest {stat: {limit, unlimited}}, one
+    level deeper than every other numeric homerule. Coercion used to skip any
+    sub-value that wasn't itself an int, so a grid missing a stat imported fine
+    and then 500'd warband_view, which reads hr.<grid>[stat].limit."""
+    hostile = json.loads(ws.export_warband_json(fresh_warband))
+    del hostile["homerules"]["captain_stat_caps"]["health"]
+    hostile["homerules"]["soldier_stat_caps"]["fight"] = "unlimited"
+    hostile["id"] = "bad-cap-grid"
+    imported = ws.import_warband_json(json.dumps(hostile))
+    defaults = ws.default_homerules()
+    for grid in ("captain_stat_caps", "soldier_stat_caps"):
+        for stat in defaults[grid]:
+            assert isinstance(imported["homerules"][grid][stat], dict), (grid, stat)
+            assert isinstance(imported["homerules"][grid][stat]["limit"], int), (grid, stat)
+    # a wrong-typed sub-grid is replaced wholesale with the default, not patched
+    assert (
+        imported["homerules"]["soldier_stat_caps"]["fight"]
+        == defaults["soldier_stat_caps"]["fight"]
+    )
+
+
+def test_soldier_of_an_unknown_type_key_still_gets_numeric_stats(fresh_warband):
+    """The stat backfill falls back to get_soldier(type_key), which is empty for
+    a type this build doesn't know — a renamed key, or a file written by a build
+    carrying more supplements. It used to write that None straight back, and
+    enrich_soldier() then called int() on it."""
+    imported = _round_trip(
+        fresh_warband, soldiers=[{"id": "x1", "type_key": "no_such_soldier", "name": "Ghost"}]
+    )
+    s = imported["soldiers"][0]
+    for stat in ("fight", "shoot", "will", "health"):
+        assert isinstance(s[stat], int), stat
+    ws.enrich_soldier(imported, s)  # must not raise
+
+
+def test_soldier_move_and_armour_stay_catalog_driven(fresh_warband):
+    """Move/Armour are deliberately not stored per soldier, so a later data fix
+    to a soldier type reaches existing warbands. Normalization must not start
+    writing them onto the instance dict."""
+    imported = _round_trip(fresh_warband, soldiers=[{"id": "x1", "type_key": "thug"}])
+    assert "move" not in imported["soldiers"][0]
+    assert "armour" not in imported["soldiers"][0]
+    enriched = ws.enrich_soldier(imported, imported["soldiers"][0])
+    assert enriched["move"] == ws.get_soldier("thug")["move"]
+    assert enriched["armour"] == ws.get_soldier("thug")["armour"]
+
+
+@pytest.mark.parametrize("field", ["mutations", "permanent_injuries", "level_history"])
+def test_explicitly_null_list_fields_become_lists(fresh_warband, field):
+    """setdefault() leaves a present-but-null key alone, and every template that
+    renders one takes its |length."""
+    hostile = json.loads(ws.export_warband_json(fresh_warband))
+    hostile["wizard"][field] = None
+    hostile["soldiers"] = [{"id": "x1", "type_key": "thug", field: None}]
+    hostile["id"] = "null-lists"
+    imported = ws.import_warband_json(json.dumps(hostile))
+    assert imported["wizard"][field] == []
+    assert imported["soldiers"][0][field] == []
+
+
+def test_non_dict_spells_are_dropped_and_scalars_coerced(fresh_warband):
+    """recompute_spell_cns() calls .get() on every spell and feeds base_cn into
+    arithmetic and school into a dict lookup."""
+    hostile = json.loads(ws.export_warband_json(fresh_warband))
+    hostile["wizard"]["spells"][0]["base_cn"] = "twelve"
+    hostile["wizard"]["spells"][1]["school"] = []
+    hostile["wizard"]["spells"].append("elementalist::wall")
+    hostile["id"] = "bad-spells"
+    imported = ws.import_warband_json(json.dumps(hostile))
+    assert all(isinstance(sp, dict) for sp in imported["wizard"]["spells"])
+    assert all(isinstance(sp["base_cn"], int) for sp in imported["wizard"]["spells"])
+    assert all(isinstance(sp["school"], str) for sp in imported["wizard"]["spells"])
+
+
+def test_unhashable_lookup_keys_are_coerced(fresh_warband):
+    """type_key, knightly_order and base.location are all used as dict keys
+    downstream (get_soldier, KNIGHTLY_ORDER_BY_ID, BASE_LOCATIONS). A list or
+    dict there is an unhashable-type TypeError, not a lookup miss — raised out
+    of _normalize_warband itself, which load_warband() does not catch."""
+    hostile = json.loads(ws.export_warband_json(fresh_warband))
+    hostile["base"]["location"] = []
+    hostile["soldiers"] = [{"id": "x1", "type_key": {}, "knightly_order": []}]
+    hostile["id"] = "unhashable-keys"
+    imported = ws.import_warband_json(json.dumps(hostile))
+    assert imported["base"]["location"] == "none"
+    assert imported["soldiers"][0]["type_key"] == ""
+    assert imported["soldiers"][0]["knightly_order"] is None
+
+
+@pytest.mark.parametrize("bad_resources", [None, 5, True, "stable"])
+def test_non_list_base_resources_becomes_a_list(fresh_warband, bad_resources):
+    """The resources filter iterates it directly."""
+    hostile = json.loads(ws.export_warband_json(fresh_warband))
+    hostile["base"]["resources"] = bad_resources
+    hostile["id"] = "bad-resources"
+    imported = ws.import_warband_json(json.dumps(hostile))
+    assert imported["base"]["resources"] == []
+
+
+@pytest.mark.parametrize("bad_notes", [42, True, None, []])
+def test_non_string_base_notes_becomes_a_string(fresh_warband, bad_notes):
+    """pdf_export.build_warband_pdf() calls .strip() on it."""
+    imported = _round_trip(fresh_warband, base={"location": "none", "notes": bad_notes})
+    assert imported["base"]["notes"] == ""
+
+
+@pytest.mark.parametrize("bad_version", ["abc", None, [], {}, ""])
+def test_non_numeric_schema_version_falls_back(fresh_warband, bad_version):
+    """_run_migrations() int()s it before any migration runs, so this fails
+    ahead of every other guard in _normalize_warband."""
+    imported = _round_trip(fresh_warband, schema_version=bad_version)
+    assert imported["schema_version"] == ws.SCHEMA_VERSION
+
+
 # --- Filename sanitisation --------------------------------------------------
 
 

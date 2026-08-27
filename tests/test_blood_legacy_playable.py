@@ -247,7 +247,10 @@ def test_ordinary_wizard_is_not_vampire(fresh_warband):
     assert expansions.spell_state_block(
         fresh_warband, {"name": "Heal", "school": "Thaumaturge"}
     ) is None
-    assert expansions.soldier_state_block(fresh_warband, "rangifer") is None
+    # ignore_vault_item: this asserts the *undead* block doesn't apply, and a
+    # plain call has returned the separate Book of the Rangifer vault-item
+    # block ever since rangifer troops were gated behind it.
+    assert expansions.soldier_state_block(fresh_warband, "rangifer", ignore_vault_item=True) is None
 
 
 # --- The Grimoire of Fin Dalka ------------------------------------------------

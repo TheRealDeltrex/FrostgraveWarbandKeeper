@@ -860,12 +860,14 @@
   </details>
 
   {# ---- Wizard & apprentice details ---- #}
-  {# Targets of the wizard/apprentice status selects' form="" attribute below
-     — kept as their own real (non-nested) forms, submitting just their own
-     action, rather than a <form> physically nested inside the big details
-     form further down, which HTML forbids and browsers silently mishandle. #}
+  {# Targets of the wizard/apprentice status selects' and the dismiss-apprentice
+     button's form="" attribute below — kept as their own real (non-nested)
+     forms, submitting just their own action, rather than a <form> physically
+     nested inside the big details form further down, which HTML forbids and
+     browsers silently mishandle. #}
   <form id="wizard-status-form" method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" hidden></form>
   {% if ap %}<form id="apprentice-status-form" method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" hidden></form>{% endif %}
+  {% if ap %}<form id="dismiss-apprentice-form" method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" hidden></form>{% endif %}
   <details class="card" id="wizard-apprentice-card" open>
     <summary><span class="card-title">Wizard &amp; apprentice</span></summary>
     <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" enctype="multipart/form-data" data-autosave>
@@ -1048,13 +1050,18 @@
               </details>
             </div>
           </div>
-          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="actions" style="margin-top:0.75rem">
-            <input type="hidden" name="action" value="dismiss_apprentice" />
+          {# Not a nested <form> — see the wizard status control above for why.
+             Nested here, the browser dropped the <form> tag and hung these
+             controls on the enclosing data-autosave form instead, so its
+             action=details won the request.form.get("action") lookup and the
+             button saved details rather than dismissing anyone. #}
+          <div class="actions" style="margin-top:0.75rem">
+            <input type="hidden" name="action" value="dismiss_apprentice" form="dismiss-apprentice-form" />
             <label class="checkbox-row" style="margin:0">
-              <input type="checkbox" name="refund" /> Refund {{ APPRENTICE_COST }} gc
+              <input type="checkbox" name="refund" form="dismiss-apprentice-form" /> Refund {{ APPRENTICE_COST }} gc
             </label>
-            <button class="btn danger small" type="submit" onclick="return confirm('Dismiss apprentice?');">Dismiss apprentice</button>
-          </form>
+            <button class="btn danger small" type="submit" form="dismiss-apprentice-form" onclick="return confirm('Dismiss apprentice?');">Dismiss apprentice</button>
+          </div>
         </details>
       {% endif %}
 
