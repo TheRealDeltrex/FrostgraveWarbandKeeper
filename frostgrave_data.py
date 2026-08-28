@@ -843,10 +843,11 @@ SCHOOL_NEUTRAL = {k: v["neutral"] for k, v in SCHOOL_RELATIONS.items()}
 SCHOOL_OPPOSED = {k: v["opposed"] for k, v in SCHOOL_RELATIONS.items()}
 
 
-def school_relation(wizard_school: str, spell_school: str) -> str:
+def school_relation(wizard_school: str, spell_school: str, symmetric: bool = True) -> str:
     """own/aligned/neutral/opposed of spell_school as wizard_school sees it.
 
-    Symmetric (H1): Vampire, Fire Giant, Rangifer, and the five Pentangle
+    Symmetric (H1, the `symmetric` flag, a per-warband homerule defaulting on
+    — see warband_store.school_symmetry()): Vampire, Fire Giant, Rangifer, and the five Pentangle
     schools only declare relations FROM their own perspective (toward the ten
     core schools) — the core schools' own rows were never updated to name them
     back. Frostgrave's alignment wheel is symmetric and no supplement
@@ -858,6 +859,10 @@ def school_relation(wizard_school: str, spell_school: str) -> str:
     counts exactly one pick per name in a school's own "aligned" list, and
     mutating that list would silently change how many starting spells a
     wizard has to pick.
+
+    With `symmetric` off the fallback is skipped: a school only relates to
+    what its own row names, so a core wizard reads every supplement school as
+    neutral even where that school names the core one aligned or opposed.
     """
     if wizard_school == spell_school:
         return "own"
@@ -869,7 +874,7 @@ def school_relation(wizard_school: str, spell_school: str) -> str:
             return "opposed"
         if spell_school in rel["neutral"]:
             return "neutral"
-    rev = SCHOOL_RELATIONS.get(spell_school)
+    rev = SCHOOL_RELATIONS.get(spell_school) if symmetric else None
     if rev:
         if wizard_school in rev["aligned"]:
             return "aligned"
@@ -878,8 +883,8 @@ def school_relation(wizard_school: str, spell_school: str) -> str:
     return "neutral"
 
 
-def cn_penalty(wizard_school: str, spell_school: str) -> int:
-    rel = school_relation(wizard_school, spell_school)
+def cn_penalty(wizard_school: str, spell_school: str, symmetric: bool = True) -> int:
+    rel = school_relation(wizard_school, spell_school, symmetric)
     return {
         "own": CN_OWN,
         "aligned": CN_ALIGNED,
@@ -3234,12 +3239,12 @@ def find_spell(spell_key: str) -> dict | None:
     return None
 
 
-def spells_for_wizard_ui(wizard_school: str) -> list[dict]:
+def spells_for_wizard_ui(wizard_school: str, symmetric: bool = True) -> list[dict]:
     """All spells with relation + effective CN for a wizard school."""
     out = []
     for sp in all_spells_flat():
-        rel = school_relation(wizard_school, sp["school"])
-        pen = cn_penalty(wizard_school, sp["school"])
+        rel = school_relation(wizard_school, sp["school"], symmetric)
+        pen = cn_penalty(wizard_school, sp["school"], symmetric)
         out.append(
             {
                 **sp,

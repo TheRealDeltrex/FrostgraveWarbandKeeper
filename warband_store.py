@@ -352,7 +352,12 @@ def empty_apprentice(name: str = "", gender: str = "male") -> dict:
 
 
 def default_homerules() -> dict:
-    """Optional house rules, off by default. See frostgrave_data.CAPTAIN_* etc. for context."""
+    """Optional house rules. See frostgrave_data.CAPTAIN_* etc. for context.
+
+    Default-value rule: anything taken from a rulebook defaults **on** (a group opts
+    the printed rule out), anything devised for this app defaults **off** (a group
+    opts the house rule in). Exceptions are deliberate and noted at the flag.
+    """
     return {
         # Roster caps, settable at creation for a group that wants a bigger
         # (or smaller) warband than the 2e default — see expansions.max_soldiers/
@@ -360,16 +365,21 @@ def default_homerules() -> dict:
         # Increased Specialist Soldier Allowance) on top of these.
         "max_soldiers": MAX_SOLDIERS,
         "max_specialists": MAX_SPECIALISTS,
+        # "hire" by default because that is the Folio's own rule; "promote" and "both"
+        # reach the maintainer-devised promotion path, which stays opt-in.
         "captain_mode": CAPTAIN_MODE_DEFAULT,  # "off" | "hire" | "promote" | "both"
         "captain_hiring_cost": CAPTAIN_HIRING_COST,
         "captain_item_slots": CAPTAIN_ITEM_SLOTS,
         "captain_base_stats": deepcopy(CAPTAIN_BASE),
+        # The hired captain's player-chosen +1 to one stat. On by default: it is the
+        # rulebook's own hiring rule, not a house addition.
         "captain_bonus_choice_enabled": True,
         "captain_stat_caps": deepcopy(CAPTAIN_STAT_CAPS),
         "captain_stat_absolute_limits": deepcopy(CAPTAIN_STAT_ABSOLUTE_LIMITS),
         "captain_max_level": CAPTAIN_MAX_LEVEL,
         "captain_mind_control": CAPTAIN_MIND_CONTROL_DEFAULT,
         "captain_starting_tricks": CAPTAIN_STARTING_TRICKS,
+        # Maintainer-devised, so off by default (see the note at the top of this dict).
         "soldier_leveling_enabled": False,
         # Whether summoned animal companions / constructs may level up when
         # Soldier Leveling is on. Off by default — a group opts summons in
@@ -415,6 +425,10 @@ def default_homerules() -> dict:
         "soldier_stat_caps": deepcopy(SOLDIER_STAT_CAPS),
         "promote_captain_cost": PROMOTE_CAPTAIN_COST,
         "promote_captain_bonus": deepcopy(PROMOTE_CAPTAIN_BONUS),
+        # On by default despite promotion itself being maintainer-devised: once a group
+        # has opted into promoting captains, the promoted one should match a hired one,
+        # and captain_bonus_choice_enabled above is on. Nothing here is reachable until
+        # captain_mode allows promotion.
         "promote_captain_bonus_choice_enabled": True,
         "promote_captain_item_slots": PROMOTE_CAPTAIN_ITEM_SLOTS,
         "promote_captain_tricks": PROMOTE_CAPTAIN_TRICKS,
@@ -484,6 +498,13 @@ def default_homerules() -> dict:
         # edition than the rest of the 2e tables. On by default; see
         # expansions.EDITION_2_SOLDIER_COSTS.
         "edition2_soldier_costs": True,
+        # Whether school relations read both ways. On by default: the ten core
+        # schools' relations are symmetric, and the supplement schools declare
+        # theirs one-directionally only because the core rows were never
+        # updated to name them back. Off makes a school relate solely to what
+        # its own row names — see frostgrave_data.school_relation(). Flipping
+        # it recalculates every known spell's Casting Number.
+        "school_relations_symmetric": True,
         # Core Rules Optional Rule: Black Market Contacts (p.13) — replaces
         # open buying after a game with 4 rolls on the Treasure Table (one
         # may be swapped for an enabled supplement's own table), resolving
@@ -571,6 +592,14 @@ def playable_schools(wb: dict | None = None) -> list[str]:
     if hr.get("vampire_wizard_playable") and es.get("Blood Legacy"):
         schools.append("Vampire")
     return schools
+
+
+def school_symmetry(wb: dict) -> bool:
+    """Whether this warband's world reads school relations both ways. Pass into
+    frostgrave_data.school_relation()/cn_penalty() — never read the homerule at
+    the call site."""
+    hr = wb.get("homerules") or {}
+    return hr.get("school_relations_symmetric", True) is not False
 
 
 def enabled_sources(wb: dict) -> set[str]:
@@ -713,7 +742,9 @@ def apprentice_effective_stats(wb: dict) -> dict:
     return stats
 
 
-def spells_from_keys(keys: list[str], wizard_school: str) -> list[dict]:
+def spells_from_keys(
+    keys: list[str], wizard_school: str, symmetric: bool = True
+) -> list[dict]:
     """Build spell list with base CN and effective CN for this wizard."""
     spells = []
     for key in keys:
@@ -721,7 +752,7 @@ def spells_from_keys(keys: list[str], wizard_school: str) -> list[dict]:
         if not sp:
             continue
         base = int(sp["cn"])
-        pen = cn_penalty(wizard_school, sp["school"])
+        pen = cn_penalty(wizard_school, sp["school"], symmetric)
         spells.append(
             {
                 "id": sp["id"],
@@ -731,7 +762,7 @@ def spells_from_keys(keys: list[str], wizard_school: str) -> list[dict]:
                 "cn_penalty": pen,
                 "cn": base + pen,  # effective casting number for this wizard
                 "type": sp["type"],
-                "relation": school_relation(wizard_school, sp["school"]),
+                "relation": school_relation(wizard_school, sp["school"], symmetric),
             }
         )
     return spells
@@ -741,14 +772,15 @@ def recompute_spell_cns(wb: dict) -> None:
     """Refresh effective CN if school changed or spells improved."""
     wiz = wb.get("wizard") or {}
     school = wiz.get("school") or "Elementalist"
+    symmetric = school_symmetry(wb)
     for s in wiz.get("spells") or []:
         base = int(s.get("base_cn", s.get("cn", 10)))
         # If spell was improved, base_cn is original, cn may be lower than base+penalty
         # Store improvements as cn_bonus (negative reduction)
-        pen = cn_penalty(school, s.get("school", school))
+        pen = cn_penalty(school, s.get("school", school), symmetric)
         improve = int(s.get("cn_improve", 0))  # number of -1 improvements
         s["cn_penalty"] = pen
-        s["relation"] = school_relation(school, s.get("school", school))
+        s["relation"] = school_relation(school, s.get("school", school), symmetric)
         s["base_cn"] = base
         s["cn"] = max(expansions.casting_number_minimum(wb), base + pen - improve)
 
@@ -1010,7 +1042,9 @@ def create_warband(
         "base": empty_base(),
         "history": [],
     }
-    wb["wizard"]["spells"] = spells_from_keys(spell_keys, school)
+    wb["wizard"]["spells"] = spells_from_keys(
+        spell_keys, school, homerules.get("school_relations_symmetric", True)
+    )
     if wizard_starting_xp:
         wb["wizard"]["xp"] = int(wizard_starting_xp)
     if apprentice:
@@ -1074,6 +1108,13 @@ def list_unreadable_warbands() -> list[dict]:
 
 
 def list_warbands() -> list[dict]:
+    """Home-page rows, read straight from raw JSON with no normalization.
+
+    Deliberate: a file corrupted in place raises out of _normalize_warband()
+    (which load_warband() doesn't catch), so normalizing here would take the
+    whole list down with one bad warband — including the delete button that is
+    the only way to get rid of it. Bad files surface via
+    list_unreadable_warbands() instead. Keep this path normalization-free."""
     items = []
     for path in sorted(
         warband_dir().glob("*.warbands"), key=lambda p: p.stat().st_mtime, reverse=True
@@ -1513,6 +1554,10 @@ def _normalize_warband(wb: dict) -> dict:
     for k, v in default_homerules().items():
         hr.setdefault(k, v)
     _coerce_numeric_homerules(hr)
+    # Not covered by _coerce_numeric_homerules (bools are skipped there), and a
+    # key present but explicitly null would read as symmetry switched off.
+    if not isinstance(hr.get("school_relations_symmetric"), bool):
+        hr["school_relations_symmetric"] = True
     if not isinstance(hr.get("enabled_sources"), dict):
         hr["enabled_sources"] = {}
     es = hr["enabled_sources"]
@@ -3813,6 +3858,7 @@ def update_homerules(wb: dict, form: "ImmutableMultiDict") -> tuple[bool, str]:
             ),
             "wildwoods_supplies_enabled": form.get("wildwoods_supplies_enabled") == "on",
             "edition2_soldier_costs": form.get("edition2_soldier_costs") == "on",
+            "school_relations_symmetric": form.get("school_relations_symmetric") == "on",
             "black_market_enabled": form.get("black_market_enabled") == "on",
             "spellcaster_magazine_soldiers": form.get("spellcaster_magazine_soldiers") == "on",
             "spellcaster_magazine_legendary_soldiers": (
@@ -3878,7 +3924,13 @@ def update_homerules(wb: dict, form: "ImmutableMultiDict") -> tuple[bool, str]:
     # Merge onto defaults + existing values so any homerule key not (yet) handled
     # by the literal above — e.g. one added after this warband was created —
     # survives the save instead of being silently dropped.
+    symmetry_changed = school_symmetry(wb) != new_hr["school_relations_symmetric"]
     wb["homerules"] = {**default_homerules(), **hr, **new_hr}
+    # World-level rule: every wizard in it uses the same relation table, so a
+    # flip recalculates the known spells' Casting Numbers rather than leaving
+    # the old ones standing (the apprentice derives hers from the wizard's).
+    if symmetry_changed:
+        recompute_spell_cns(wb)
     if wb.get("captain"):
         cap = wb["captain"]
         n = (
@@ -4648,7 +4700,8 @@ def apply_level_up(
         if sp["id"] in known_ids:
             return False, "Spell already known."
         wschool = wiz.get("school") or "Elementalist"
-        pen = cn_penalty(wschool, sp["school"])
+        symmetric = school_symmetry(wb)
+        pen = cn_penalty(wschool, sp["school"], symmetric)
         eff = int(sp["cn"]) + pen
         wiz.setdefault("spells", []).append(
             {
@@ -4660,7 +4713,7 @@ def apply_level_up(
                 "cn_improve": 0,
                 "cn": eff,
                 "type": sp["type"],
-                "relation": school_relation(wschool, sp["school"]),
+                "relation": school_relation(wschool, sp["school"], symmetric),
             }
         )
         detail = f"Learned {sp['name']} (effective CN {eff})"
@@ -5145,7 +5198,8 @@ def fin_dalka_decipher(wb: dict, target_spell_id: str, outcome: str) -> tuple[bo
         )
     else:
         wschool = wiz.get("school") or "Elementalist"
-        pen = cn_penalty(wschool, sp["school"])
+        symmetric = school_symmetry(wb)
+        pen = cn_penalty(wschool, sp["school"], symmetric)
         eff = int(sp["cn"]) + pen
         wiz.setdefault("spells", []).append(
             {
@@ -5157,7 +5211,7 @@ def fin_dalka_decipher(wb: dict, target_spell_id: str, outcome: str) -> tuple[bo
                 "cn_improve": 0,
                 "cn": eff,
                 "type": sp["type"],
-                "relation": school_relation(wschool, sp["school"]),
+                "relation": school_relation(wschool, sp["school"], symmetric),
             }
         )
         rec["learned"] = True

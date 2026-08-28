@@ -376,6 +376,19 @@
             </details>
           </div>
           <div class="hr-row">
+            <input id="hr_school_relations_symmetric" name="school_relations_symmetric" type="checkbox" {% if hr.school_relations_symmetric %}checked{% endif %} />
+            <details class="hr-note" id="hrnote-school_relations_symmetric">
+              <summary>School relations read both ways</summary>
+              <p class="hr-note-body">
+                The supplement schools (the five Pentangle schools, Vampire, Fire Giant) name their
+                relations to the core ten, but the core schools' own tables never name them back. On
+                by default, this mirrors each such relation so both wizards see the same one. Off,
+                each school relates only to what its own table names, and the rest count as neutral.
+                Saving recalculates the wizard's Casting Numbers either way.
+              </p>
+            </details>
+          </div>
+          <div class="hr-row">
             <input id="free_dagger_enabled" name="free_dagger_enabled" type="checkbox" {% if hr.free_dagger_enabled %}checked{% endif %} />
             <details class="hr-note" id="hrnote-free_dagger_enabled">
               <summary>Every ordinary soldier gets a free backup dagger</summary>
@@ -962,6 +975,12 @@
                 <input id="wizard_dagger" name="wizard_dagger" type="checkbox" {% if wiz.has_dagger %}checked{% endif %} />
                 <label for="wizard_dagger" style="margin:0">Carries a dagger (free slot)</label>
               </div>
+              {# The {% with %} is load-bearing, not decoration: in this Jinja version a
+                 {% set %} inside an {% if %} does NOT reset the way a {% for %} body does —
+                 the narrowed vault_names below would carry on into the apprentice block,
+                 then the captain's, then every soldier row, compounding until it is wrong
+                 or empty everywhere after here. Every per-figure override of a shared
+                 context variable needs the same wrapper. #}
               {% with %}
                 {% set slots = wiz.item_slots if wiz.item_slots is defined else [] %}
                 {% set prefix = 'wizard' %}

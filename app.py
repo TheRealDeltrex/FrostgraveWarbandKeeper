@@ -267,6 +267,7 @@ from warband_store import (
     roll_random_recruits,
     roll_underworld_debt_call,
     save_warband,
+    school_symmetry,
     sell_cargo_transport,
     sell_fin_dalka_grimoire,
     sell_or_release_horse,
@@ -935,6 +936,19 @@ def _render_new(
 # are dropped and Bladed Staff gets a shallow copy when its slot cost differs
 # from the catalog default.
 def _filtered_standard_items(items: list[dict], hr: dict) -> list[dict]:
+    """Drop catalog entries this warband's homerules switch off.
+
+    Two rules any new gated item has to follow, neither visible from the call
+    sites: a source book and a feature homerule are **separate gates that both
+    apply** — filtering on enabled_sources() alone lets a switched-off toggle
+    through — and the gate has to be repeated in every place the item can be
+    acquired (buy, upgrade *and* hire), not just the one being edited.
+
+    Never mutate `items` or the dicts inside it: callers pass the @lru_cache'd
+    loaders straight in, so an in-place edit here corrupts the catalog for the
+    rest of the process. Vary an entry by copying it, as the Bladed Staff
+    branch does.
+    """
     out = []
     for it in items:
         name = it["name"]
@@ -951,6 +965,7 @@ def _filtered_standard_items(items: list[dict], hr: dict) -> list[dict]:
                 continue
             slot_cost = 2 if hr.get("bladed_staff_two_slots", True) else 1
             if slot_cost != it.get("slot_cost", 1):
+                # Copy, never it["slot_cost"] = ... — see the no-mutate rule above.
                 it = {**it, "slot_cost": slot_cost}
         out.append(it)
     return out
@@ -1008,8 +1023,9 @@ def warband_view(warband_id: str) -> str:
     # wizard's state allows them. Spells already known are excluded here but are
     # never hidden from the wizard's own list, even if their book is later
     # switched off — that would read as the app deleting a learned spell.
+    symmetric = school_symmetry(wb)
     learnable = [
-        {**s, "effective_cn": s["cn"] + cn_penalty(wschool, s["school"])}
+        {**s, "effective_cn": s["cn"] + cn_penalty(wschool, s["school"], symmetric)}
         for s in all_spells_flat()
         if s["id"] not in known and expansions.spell_available(wb, s, wb_sources)
     ]
