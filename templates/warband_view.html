@@ -1653,9 +1653,9 @@
         {% set cap_unused_xp = unused_xp(cap.xp, cap.level) %}
         <details class="ref-panel" id="captain-panel" open>
         <summary>Captain — {{ cap.name }}{% if cap_class %} · {{ cap_class }}{% endif %} · Level {{ cap.level }} · {{ cap.xp }} XP total · {{ cap_unused_xp }} XP unused</summary>
-        <div class="char-block">
-          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" enctype="multipart/form-data" data-autosave>
-            <input type="hidden" name="action" value="captain_edit" />
+        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" enctype="multipart/form-data" data-autosave>
+          <input type="hidden" name="action" value="captain_edit" />
+          <div class="char-block">
             <div style="display:flex;flex-direction:column;align-items:center">
               {% set cap_src = portrait_src(cap.portrait, 'captain', cap.type_key) %}
               {% with %}
@@ -1754,8 +1754,8 @@
                 </div>
               </details>
             </div>
-          </form>
-        </div>
+          </div>
+        </form>
 
         <details class="ref-panel" id="captain-mutations-panel">
           <summary>Mutations &amp; Permanent Injuries</summary>
