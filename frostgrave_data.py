@@ -1257,6 +1257,19 @@ RANGIFER_XP_PER_LEVEL = 100
 # (which leave Fight/Shoot uncapped), a Shaman's replaces all four.
 RANGIFER_STAT_CAPS = {"fight": 5, "shoot": 5, "will": 8, "health": 18}
 RANGIFER_STARTING_SPELL_COUNT = 4
+# "a maximum of five figures (six, if you count the shaman)" — the shaman's
+# "hide" is their entire warband roster, not just a starting purchase; see
+# expansions.max_soldiers().
+RANGIFER_MAX_SOLDIERS = 5
+# "he must pay the cost listed below +80gc" — an ordinary wizard hiring one
+# of these rangifer troop types (via the Book of the Rangifer) pays this on
+# top of the Issue 3 table cost; a Rangifer Shaman fielding their own kind
+# pays the table cost directly. The catalog "cost" fields for these type_keys
+# already have the +80 baked in (they're what an ordinary wizard pays), so
+# expansions.soldier_cost() subtracts it back out for a Shaman. Doesn't apply
+# to the Rangifer Boar (never hireable by an ordinary wizard) or the plain
+# "rangifer" (Thaw of the Lich Lord, not part of this Issue 3 table).
+RANGIFER_HIRE_SURCHARGE = 80
 
 RANGIFER_SHAMAN_NOTES = [
     "Casts only from the Rangifer Spell List — never learns another school's spells.",
@@ -1265,9 +1278,10 @@ RANGIFER_SHAMAN_NOTES = [
     "armed with antlers/flint/wood), Antlers (never unarmed), Flint Weapons (destroyed on "
     "any natural 1 rolled in combat).",
     "Starts with a wooden staff or flint hand weapon at no cost (free item slot).",
-    "May spend 200gc at creation on a \"hide\" of up to 5 rangifer troop types, including "
-    "the Rangifer Boar — this app doesn't automate the flat 200gc bulk price; hire them "
-    "individually afterward at their listed cost instead.",
+    "Fields only their own kind — no thugs, mercenaries, or other soldier types.",
+    "Roster capped at 5 rangifer (the shaman's \"hide\"), not the usual soldier limit.",
+    "Pays the table cost for their own rangifer troop types, not the +80gc surcharge an "
+    "ordinary wizard pays via the Book of the Rangifer.",
 ]
 
 LEVEL_UP_OPTIONS = [
@@ -2275,7 +2289,7 @@ SOLDIERS: dict[str, dict] = {
     "demonic_prison": {
         "name": "Demonic Prison",
         "cost": 0,
-        "category": "standard",
+        "category": "specialist",
         "source": "Fireheart",
         "requires_spell": "Animate Construct",
         "move": 4,
@@ -2419,7 +2433,7 @@ SOLDIERS: dict[str, dict] = {
             "Part of a rangifer \"hide\" (Issue 3). Hate Undead, Antlers, Flint Weapons "
             "(destroyed on any natural 1 rolled in combat). All Trap Expert abilities "
             "(Into the Breeding Pits). Requires the Book of the Rangifer (Thaw of the Lich "
-            "Lord) in the vault."
+            "Lord)."
         ),
         "description": 'A rangifer scout skilled with traps (Spellcaster Magazine, Issue 3), part of a hired "hide" of up to 5 rangifer troops. Cultural traits shared by all rangifer: Hate Undead (+1 Fight vs. undead, magic attacks, only while armed with antlers/flint/wood), Antlers (never unarmed; -1 Fight if antlers are the only weapon), Flint Weapons (destroyed on any natural 1 rolled in combat). Also has all of a Trap Expert\'s abilities (Into the Breeding Pits).',
     },
@@ -2438,7 +2452,7 @@ SOLDIERS: dict[str, dict] = {
         "notes": (
             "Part of a rangifer \"hide\" (Issue 3). Hate Undead, Antlers (no Fight penalty "
             "when armed only with antlers), Flint Weapons. Requires the Book of the "
-            "Rangifer (Thaw of the Lich Lord) in the vault."
+            "Rangifer (Thaw of the Lich Lord)."
         ),
         "description": 'A rangifer shock-fighter (Spellcaster Magazine, Issue 3), part of a hired "hide" of up to 5 rangifer troops. Hate Undead, Antlers (suffers no Fight penalty when armed only with its antlers, unlike other rangifer), Flint Weapons.',
     },
@@ -2456,7 +2470,7 @@ SOLDIERS: dict[str, dict] = {
         "gear": "Flint hand weapon",
         "notes": (
             "Part of a rangifer \"hide\" (Issue 3). Hate Undead, Antlers, Flint Weapons. "
-            "Requires the Book of the Rangifer (Thaw of the Lich Lord) in the vault."
+            "Requires the Book of the Rangifer (Thaw of the Lich Lord)."
         ),
         "description": 'A rangifer herder-warrior (Spellcaster Magazine, Issue 3), part of a hired "hide" of up to 5 rangifer troops. Hate Undead, Antlers, Flint Weapons.',
     },
@@ -2474,7 +2488,7 @@ SOLDIERS: dict[str, dict] = {
         "gear": "Flint two-handed weapon",
         "notes": (
             "Part of a rangifer \"hide\" (Issue 3). Hate Undead, Antlers, Flint Weapons. "
-            "Requires the Book of the Rangifer (Thaw of the Lich Lord) in the vault."
+            "Requires the Book of the Rangifer (Thaw of the Lich Lord)."
         ),
         "description": 'A rangifer heavy fighter (Spellcaster Magazine, Issue 3), part of a hired "hide" of up to 5 rangifer troops. Hate Undead, Antlers, Flint Weapons.',
     },
@@ -2493,7 +2507,7 @@ SOLDIERS: dict[str, dict] = {
         "notes": (
             "Part of a rangifer \"hide\" (Issue 3). Hate Undead, Antlers, Flint Weapons. "
             "Throwing spear: once/game, a 12\" shooting attack with no damage modifier. "
-            "Requires the Book of the Rangifer (Thaw of the Lich Lord) in the vault."
+            "Requires the Book of the Rangifer (Thaw of the Lich Lord)."
         ),
         "description": 'A rangifer skirmisher (Spellcaster Magazine, Issue 3), part of a hired "hide" of up to 5 rangifer troops. Hate Undead, Antlers, Flint Weapons. Once per game may throw its flint spear as a 12" shooting attack with no damage modifier.',
     },
@@ -2513,7 +2527,7 @@ SOLDIERS: dict[str, dict] = {
         "notes": (
             "Part of a rangifer \"hide\" (Issue 3). Hate Undead, Antlers, Flint Weapons. 3 "
             "item slots; all Pack Mule abilities (Thaw of the Lich Lord). Requires the "
-            "Book of the Rangifer (Thaw of the Lich Lord) in the vault."
+            "Book of the Rangifer (Thaw of the Lich Lord)."
         ),
         "description": 'A burden-bearing rangifer (Spellcaster Magazine, Issue 3), part of a hired "hide" of up to 5 rangifer troops. Hate Undead, Antlers, Flint Weapons. Carries 3 item slots and has all of a Pack Mule\'s abilities (Thaw of the Lich Lord).',
     },
@@ -2534,7 +2548,7 @@ SOLDIERS: dict[str, dict] = {
             "flint hand weapon, no shield/armour, Move never above 7. Uses the Captain rules "
             "(The Frostgrave Folio) in place of the warband's own Captain — the actual "
             "Captain-replacement mechanic is deferred; hires here as a stat-block soldier. "
-            "Requires the Book of the Rangifer (Thaw of the Lich Lord) in the vault."
+            "Requires the Book of the Rangifer (Thaw of the Lich Lord)."
         ),
         "description": 'The chieftain of a rangifer "hide" (Spellcaster Magazine, Issue 3), who leads using the Captain rules (The Frostgrave Folio) in place of a warband\'s own Captain — never carries a shield or armour, and Move never rises above 7 regardless of bonuses. The actual Captain-replacement mechanic (fielding a War-Leader instead of hiring/promoting a Captain) is a deferred feature; for now this hires as an ordinary specialist stat-block.',
     },

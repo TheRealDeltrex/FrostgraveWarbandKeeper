@@ -76,6 +76,7 @@ from frostgrave_data import (
     RANDOM_RECRUIT_TABLE_I,
     RANDOM_RECRUIT_TABLE_II,
     RANDOM_RECRUIT_TABLE_III,
+    RANGIFER_MAX_SOLDIERS,
     RANGIFER_STARTING_SPELL_COUNT,
     RANGIFER_WIZARD_BASE,
     SCHOOL_RELATIONS,
@@ -88,6 +89,7 @@ from frostgrave_data import (
     SPELL_COMPONENT_BAG_COST,
     SPELL_COMPONENT_BAG_LIMIT,
     SPELL_COMPONENT_BAG_NAME,
+    SPELLS,
     STANDARD_CONSTRUCT_TYPE_KEYS,
     STARTING_GOLD,
     STARTING_SPELL_COUNT,
@@ -120,6 +122,7 @@ from frostgrave_data import (
     permanent_injury_by_roll,
     range_table_lookup,
     school_relation,
+    source_book_order,
     spell_id,
     unused_xp,
     xp_to_next_level,
@@ -284,6 +287,12 @@ def empty_base() -> dict:
         "location": "laboratory",  # key in BASE_LOCATIONS — still changeable any time
         "resources": [],  # list of BASE_RESOURCES keys
         "notes": "",
+        # Whether the Brewery's +1 Will is applied (see set_brewery_will()).
+        # Every key _normalize_warband() coerces on an existing base has to
+        # exist here too, or a warband created without one gains the key only
+        # on its *second* load — which tests/test_migrations.py catches as a
+        # non-idempotent load.
+        "brewery_will": False,
     }
 
 
@@ -519,6 +528,13 @@ def default_homerules() -> dict:
         # expansions.max_legendary_soldiers()). On by default, same as the
         # book's other soldiers.
         "spellcaster_magazine_legendary_soldiers": True,
+        # The Dire Hound (Spellcaster Magazine Legendary Soldier) is both a
+        # beast and a Legendary, and no book settles which side wins. On, it
+        # counts as a hound: it fills the Kennel's extra slot and is exempt
+        # from the Beastcrafter surcharge like a war hound. Off, it is an
+        # ordinary Legendary Soldier on both counts. One flag for both, so
+        # they can never disagree — see expansions.dire_hound_is_hound().
+        "dire_hound_counts_as_hound": True,
         # Black Powder Firearms (Issue 1): the Musketeer/Coachman/Duellist
         # only appear once BOTH this and spellcaster_magazine_soldiers above
         # are on. Also gates the standalone Pistol/Musket/Blunderbuss items —
@@ -1027,11 +1043,15 @@ def create_warband(
         # "9 soldiers (4 specialist)" — a floor, not a suggestion; never
         # lowers a bigger cap the group asked for of their own.
         homerules["max_soldiers"] = max(homerules["max_soldiers"], VAMPIRE_MIN_MAX_SOLDIERS)
-    if school == "Rangifer" and with_apprentice:
-        return None, (
-            "A Rangifer Shaman has no apprentice (Spellcaster Magazine) — rangifer "
-            "children are invited to a gathering instead."
-        )
+    if school == "Rangifer":
+        if with_apprentice:
+            return None, (
+                "A Rangifer Shaman has no apprentice (Spellcaster Magazine) — rangifer "
+                "children are invited to a gathering instead."
+            )
+        # "a maximum of five figures" — a ceiling, unlike the Vampire's 9-soldier
+        # floor above; never raises a smaller cap the group asked for.
+        homerules["max_soldiers"] = min(homerules["max_soldiers"], RANGIFER_MAX_SOLDIERS)
 
     gold = STARTING_GOLD if starting_gold is None else int(starting_gold)
     apprentice = None
@@ -1040,6 +1060,9 @@ def create_warband(
             return None, f"Not enough gold for apprentice ({APPRENTICE_COST} gc)."
         gold -= APPRENTICE_COST
         apprentice = empty_apprentice(apprentice_name or "Apprentice", apprentice_gender)
+        # A brand-new wizard is level 0, where expansions.apprentice_cost()
+        # returns exactly APPRENTICE_COST — recorded so the refund matches.
+        apprentice["cost_paid"] = APPRENTICE_COST
 
     if soldiers and len(soldiers) > homerules["max_soldiers"]:
         return None, f"Max {homerules['max_soldiers']} soldiers."
@@ -1156,9 +1179,7 @@ def list_warbands() -> list[dict]:
                 "updated": data.get("updated", ""),
                 "portrait": (data.get("wizard") or {}).get("portrait"),
                 "gender": (data.get("wizard") or {}).get("gender"),
-                "state": "vampire" if expansions.is_vampire(data) else (
-                    "lich" if expansions.state_kind(data) == expansions.STATE_LICH else None
-                ),
+                "state": expansions.wizard_portrait_state(data),
             }
         )
     return items
@@ -1431,9 +1452,13 @@ def _safe_portrait_ref(rel: object) -> str | None:
 
 
 def _normalize_vault_items(items: object) -> list[dict]:
-    """Vault entries as {id, name, notes, source} dicts with string values.
-    A nameless entry is dropped rather than kept as None — the warband page
-    calls .strip() on every vault name."""
+    """Vault entries as {id, name, notes, source} dicts with string values,
+    plus an optional catalog_key. A nameless entry is dropped rather than kept
+    as None — the warband page calls .strip() on every vault name.
+
+    This rebuilds each entry rather than patching it, so **any new vault field
+    has to be copied through here** or it is silently lost on the next save.
+    """
     if not isinstance(items, list):
         return []
     out = []
@@ -1445,12 +1470,19 @@ def _normalize_vault_items(items: object) -> list[dict]:
         if not isinstance(name, str) or not name.strip():
             continue
         src = it if isinstance(it, dict) else {}
-        out.append({
+        entry = {
             "id": str(src.get("id") or uuid.uuid4().hex[:8]),
             "name": name.strip(),
             "notes": str(src.get("notes") or ""),
             "source": str(src.get("source") or "vault"),
-        })
+        }
+        # Which Shop row this was bought as, so a "Grimoire: Bone Dart" still
+        # prices as a grimoire. Only kept when it's a string — it's used as a
+        # dict key in shop_prices().
+        key = src.get("catalog_key")
+        if isinstance(key, str) and key.strip():
+            entry["catalog_key"] = key.strip()
+        out.append(entry)
     return out
 
 
@@ -1476,6 +1508,8 @@ def _normalize_warband(wb: dict) -> dict:
     wiz["xp"] = _as_int(wiz.get("xp"), 0)
     wiz["level"] = _as_int(wiz.get("level"), 0)
     wiz["portrait"] = _safe_portrait_ref(wiz.get("portrait"))
+    if not isinstance(wiz.get("school"), str):
+        wiz["school"] = "Elementalist"
     if not isinstance(wiz.get("stats"), dict):
         wiz["stats"] = deepcopy(WIZARD_BASE)
     for stat, value in WIZARD_BASE.items():
@@ -1483,7 +1517,12 @@ def _normalize_warband(wb: dict) -> dict:
     wiz["stats"].setdefault("health", 14)
     wiz.pop("health_current", None)
     wiz.setdefault("has_dagger", True)
-    wiz["mutations"] = _as_list(wiz.get("mutations"))
+    wiz["mutations"] = [x for x in _as_list(wiz.get("mutations")) if isinstance(x, dict)]
+    # Iterated by the template and used as a dict key in expansions.REPUTATIONS,
+    # so both the list and its members are type-enforced here.
+    wiz["reputations"] = [
+        r for r in _as_list(wiz.get("reputations")) if isinstance(r, str) and r
+    ]
     wiz["permanent_injuries"] = _as_list(wiz.get("permanent_injuries"))
     wiz["level_history"] = _as_list(wiz.get("level_history"))
     _resync_permanent_injury_text(wiz)
@@ -1491,13 +1530,18 @@ def _normalize_warband(wb: dict) -> dict:
     if wiz.get("gender") != "female":
         wiz["gender"] = "male"
     fd = wiz.setdefault("fin_dalka", {"attempts": {}})
-    fd.setdefault("attempts", {})
+    if not isinstance(fd, dict):
+        fd = wiz["fin_dalka"] = {"attempts": {}}
+    if not isinstance(fd.get("attempts"), dict):
+        fd["attempts"] = {}
     uf = wiz.setdefault("underworld_favors", {"markers": 0})
-    uf.setdefault("markers", 0)
+    if not isinstance(uf, dict):
+        uf = wiz["underworld_favors"] = {"markers": 0}
+    uf["markers"] = _as_int(uf.get("markers"), 0)
     # Monster Hunting (Issue 5): spell/potion components the wizard is
     # carrying — see expansions.component_capacity() for the holding limit
     # (driven by Spell Component Bag entries in item_slots, not a field here).
-    wiz["components"] = _as_list(wiz.get("components"))
+    wiz["components"] = [x for x in _as_list(wiz.get("components")) if isinstance(x, dict)]
     # Wizard state (Lich / Beastcrafter / pact). Backfilled per-key so a warband
     # saved before this existed loads as an ordinary wizard.
     state = wiz.setdefault("state", expansions.default_wizard_state())
@@ -1507,6 +1551,8 @@ def _normalize_warband(wb: dict) -> dict:
         state.setdefault(key, value)
     if state.get("kind") not in expansions.WIZARD_STATES:
         state["kind"] = expansions.STATE_NONE
+    if state.get("feature") is not None and not isinstance(state.get("feature"), str):
+        state["feature"] = None
     # Non-dict entries are dropped, not kept: recompute_spell_cns() calls .get()
     # on every one, so a bare spell-id string from a hand-edit or another tool
     # would otherwise brick the warband on load. Its numbers go straight into
@@ -1527,18 +1573,34 @@ def _normalize_warband(wb: dict) -> dict:
     bm["rolls_used"] = _as_int(bm.get("rolls_used"), 0)
     if not isinstance(bm.get("offers"), list):
         bm["offers"] = []
+    for offer in bm["offers"]:
+        if not isinstance(offer, dict):
+            continue
+        for entry in offer.get("entries") or []:
+            if isinstance(entry, dict):
+                # Reaches arithmetic in black_market_buy_item().
+                entry["price"] = max(0, _as_int(entry.get("price"), 0))
     mh = wb.setdefault("monster_hunting", {"kills": [], "prizes": [], "bags_bought": 0})
-    mh.setdefault("kills", [])
-    mh.setdefault("prizes", [])
-    mh.setdefault("bags_bought", 0)
+    if not isinstance(mh, dict):
+        mh = wb["monster_hunting"] = {"kills": [], "prizes": [], "bags_bought": 0}
+    mh["kills"] = [k for k in _as_list(mh.get("kills")) if isinstance(k, dict)]
+    mh["prizes"] = [p for p in _as_list(mh.get("prizes")) if isinstance(p, dict)]
+    mh["bags_bought"] = _as_int(mh.get("bags_bought"), 0)
     horse = wb.setdefault("horse", {"owned": False, "rider": None})
+    if not isinstance(horse, dict):
+        horse = wb["horse"] = {"owned": False, "rider": None}
     horse.setdefault("owned", False)
-    horse.setdefault("rider", None)
-    horse.setdefault("upgrades", [])
-    wb.setdefault("supply_points", 0)
+    if not isinstance(horse.get("rider"), dict):
+        horse["rider"] = None
+    horse["upgrades"] = [u for u in _as_list(horse.get("upgrades")) if isinstance(u, str)]
+    wb["supply_points"] = _as_int(wb.get("supply_points"), 0)
     transport = wb.setdefault("cargo_transport", {"owned": False, "upgrades": []})
+    if not isinstance(transport, dict):
+        transport = wb["cargo_transport"] = {"owned": False, "upgrades": []}
     transport.setdefault("owned", False)
-    transport["upgrades"] = [k for k in transport.get("upgrades") or [] if k in CARGO_TRANSPORT_UPGRADES]
+    transport["upgrades"] = [
+        k for k in _as_list(transport.get("upgrades")) if k in CARGO_TRANSPORT_UPGRADES
+    ]
     if not isinstance(wb.get("base"), dict):
         wb["base"] = empty_base()
     else:
@@ -1547,6 +1609,7 @@ def _normalize_warband(wb: dict) -> dict:
         # itself — which load_warband() doesn't catch, unlike the import route.
         # notes reaches .strip() in pdf_export.build_warband_pdf().
         base = wb["base"]
+        base["brewery_will"] = base.get("brewery_will") is True
         if not isinstance(base.get("location"), str) or base["location"] not in BASE_LOCATIONS:
             base["location"] = "none"
         base["resources"] = [
@@ -1559,14 +1622,19 @@ def _normalize_warband(wb: dict) -> dict:
         ap = wb["apprentice"]
         ap["portrait"] = _safe_portrait_ref(ap.get("portrait"))
         ap.setdefault("has_dagger", True)
-        ap["mutations"] = _as_list(ap.get("mutations"))
+        ap["mutations"] = [x for x in _as_list(ap.get("mutations")) if isinstance(x, dict)]
         ap["permanent_injuries"] = _as_list(ap.get("permanent_injuries"))
         _resync_permanent_injury_text(ap)
         ap.setdefault("portrait_source_name", None)
         ap.pop("health_current", None)
         if ap.get("gender") != "female":
             ap["gender"] = "male"
-        ap["components"] = _as_list(ap.get("components"))
+        ap["components"] = [x for x in _as_list(ap.get("components")) if isinstance(x, dict)]
+        # Reaches arithmetic (the dismissal refund), so _as_int, not setdefault:
+        # a file carrying an explicit null or a string here would otherwise
+        # crash or refund nonsense. Absent means an apprentice hired before the
+        # price scaled — see apprentice_cost_paid().
+        ap["cost_paid"] = max(0, _as_int(ap.get("cost_paid"), APPRENTICE_COST))
     if not isinstance(wb.get("homerules"), dict):
         wb["homerules"] = default_homerules()
     hr = wb["homerules"]
@@ -1577,6 +1645,8 @@ def _normalize_warband(wb: dict) -> dict:
     # key present but explicitly null would read as symmetry switched off.
     if not isinstance(hr.get("school_relations_symmetric"), bool):
         hr["school_relations_symmetric"] = True
+    if not isinstance(hr.get("dire_hound_counts_as_hound"), bool):
+        hr["dire_hound_counts_as_hound"] = True
     if not isinstance(hr.get("enabled_sources"), dict):
         hr["enabled_sources"] = {}
     es = hr["enabled_sources"]
@@ -1586,6 +1656,8 @@ def _normalize_warband(wb: dict) -> dict:
         wb["captain"] = None
     if wb.get("captain"):
         cap = wb["captain"]
+        if not isinstance(cap.get("stats"), dict):
+            cap["stats"] = deepcopy(CAPTAIN_BASE)
         cap.pop("bonus_choice", None)  # removed: fixed +3F/+2S hire bonus no longer exists
         cap["portrait"] = _safe_portrait_ref(cap.get("portrait"))
         cap["xp"] = _as_int(cap.get("xp"), 0)
@@ -1598,7 +1670,7 @@ def _normalize_warband(wb: dict) -> dict:
         cap.setdefault("portrait", None)
         cap.setdefault("origin", "hired")
         cap["known_tricks"] = _as_list(cap.get("known_tricks"))
-        cap["mutations"] = _as_list(cap.get("mutations"))
+        cap["mutations"] = [x for x in _as_list(cap.get("mutations")) if isinstance(x, dict)]
         cap["permanent_injuries"] = _as_list(cap.get("permanent_injuries"))
         _resync_permanent_injury_text(cap)
         cap.setdefault("portrait_source_name", None)
@@ -1622,9 +1694,18 @@ def _normalize_warband(wb: dict) -> dict:
         s["type_key"] = s["type_key"] if isinstance(s.get("type_key"), str) else ""
         if not isinstance(s.get("knightly_order"), str):
             s["knightly_order"] = None
+        if not isinstance(s.get("status"), str):
+            s["status"] = "active"
+        # Decides whether this soldier occupies a roster slot
+        # (active_permanent_soldiers()), so a truthy non-bool from a
+        # hand-edited file must not read as "off-roster by accident".
+        s["underworld_muscle"] = s.get("underworld_muscle") is True
+        # The Inn's stay-at-base soldier. Same reasoning as underworld_muscle:
+        # a truthy non-bool from a hand-edited file must not read as True.
+        s["at_inn"] = s.get("at_inn") is True
         s.setdefault("portrait_source_name", None)
-        s["mutations"] = _as_list(s.get("mutations"))
-        s["modifications"] = _as_list(s.get("modifications"))
+        s["mutations"] = [x for x in _as_list(s.get("mutations")) if isinstance(x, dict)]
+        s["modifications"] = [x for x in _as_list(s.get("modifications")) if isinstance(x, dict)]
         s["permanent_injuries"] = _as_list(s.get("permanent_injuries"))
         _resync_permanent_injury_text(s)
         s.pop("health_current", None)
@@ -1685,7 +1766,13 @@ def load_warband(warband_id: str) -> Warband | None:
     except (OSError, json.JSONDecodeError) as exc:
         logger.warning("Warband file %s could not be read: %s", path, exc)
         return None
-    return _normalize_warband(wb)
+    wb = _normalize_warband(wb)
+    # A hand-edited file can carry a non-string id. The view survives it, but
+    # warband_path() then raises out of the next save_warband() and every
+    # mutation 500s. The filename is the authority for a file found by it.
+    if not isinstance(wb.get("id"), str) or not wb["id"].strip():
+        wb["id"] = _sanitize_filename(warband_id)
+    return wb
 
 
 def save_warband(wb: Warband) -> None:
@@ -1835,7 +1922,11 @@ def import_warband_json(raw: str) -> Warband:
     data = json.loads(raw)
     if not isinstance(data, dict) or "wizard" not in data:
         raise ValueError("Invalid warband file")
-    old_id = data.get("id") or new_warband_id(data.get("name", "imported"))
+    raw_id = data.get("id")
+    if isinstance(raw_id, str) and raw_id.strip():
+        old_id = _sanitize_filename(raw_id)
+    else:
+        old_id = new_warband_id(data.get("name", "imported"))
     if warband_path(old_id).is_file():
         data["id"] = new_warband_id(data.get("name", "imported"))
     else:
@@ -1898,7 +1989,7 @@ def save_portrait(warband_id: str, role: str, file_storage: "FileStorage | None"
             except OSError:
                 pass
     file_storage.save(dest)
-    return f"{warband_id}/{dest.name}"
+    return f"{_sanitize_filename(warband_id)}/{dest.name}"
 
 
 def apply_portrait(entity: dict, warband_id: str, role: str, file_storage: "FileStorage | None") -> None:
@@ -1993,6 +2084,9 @@ def active_permanent_soldiers(wb: dict) -> list[dict]:
     return [
         s for s in active_soldiers(wb)
         if not SOLDIERS.get(s.get("type_key", ""), {}).get("temporary")
+        # Underworld hired muscle is permanent but explicitly off-roster
+        # (Spellcaster Issue 3) — see hire_underworld_muscle().
+        and not s.get("underworld_muscle")
     ]
 
 
@@ -2033,7 +2127,7 @@ def warband_limits(wb: dict) -> dict:
     spent = 0
     # Approximate gold spent on current roster from costs (not perfect for refunds)
     if wb.get("apprentice"):
-        spent += APPRENTICE_COST
+        spent += apprentice_cost_paid(wb)
     if wb.get("captain"):
         spent += int((wb.get("homerules") or {}).get("captain_hiring_cost", CAPTAIN_HIRING_COST))
     for s in soldiers:
@@ -2102,7 +2196,7 @@ def enrich_soldier(wb: dict, s: dict) -> dict:
     out["move"] = int(out.get("move", 0)) + bonus["move"]
     out["fight"] = int(out.get("fight", 0)) + bonus["fight"]
     out["shoot"] = int(out.get("shoot", 0)) + bonus["shoot"]
-    out["will"] = int(out.get("will", 0)) + bonus["will"]
+    out["will"] = int(out.get("will", 0)) + bonus["will"] + expansions.brewery_will_bonus(wb)
     out = expansions.apply_hunger_penalty(out, s.get("status"))
     return out
 
@@ -2209,8 +2303,18 @@ def hire_cost_preview(wb: dict, info: dict, type_key: str) -> int:
 
 
 def add_soldier(
-    wb: dict, type_key: str, name: str = "", order: str = "", illusion_source: str = ""
+    wb: dict,
+    type_key: str,
+    name: str = "",
+    order: str = "",
+    illusion_source: str = "",
+    off_roster: bool = False,
 ) -> tuple[bool, str]:
+    """off_roster=True hires without a gold cost or a roster/specialist cap
+    check — Spellcaster Issue 3's hired muscle, which is paid for in Underworld
+    Markers and "does not count against the warband's usual size limit". Only
+    hire_underworld_muscle() passes it; every ordinary hire still pays and
+    still counts."""
     info = get_soldier(type_key)
     if not info:
         return False, "Unknown soldier type."
@@ -2265,10 +2369,7 @@ def add_soldier(
     # list the way it does for the permanent summons below.
     if req_spell and not info.get("temporary") and not disable_mechanics:
         if req_spell not in known_spell_names(wb):
-            return False, (
-                f"{info['name']} can only be summoned with the {req_spell} spell — "
-                "your wizard doesn't know it."
-            )
+            return False, f"{info['name']} can only be summoned with the {req_spell} spell."
         if req_spell == "Animal Companion" and has_animal_companion(wb):
             limit = animal_companion_limit(wb)
             if limit == 1:
@@ -2284,7 +2385,7 @@ def add_soldier(
         )
         if temp_count >= TEMPORARY_MEMBER_LIMIT:
             return False, f"You may only have {TEMPORARY_MEMBER_LIMIT} temporary members (raised zombies/summoned demons combined) on the table at once."
-    if not info.get("temporary"):
+    if not info.get("temporary") and not off_roster:
         cap = expansions.max_soldiers(wb)
         if expansions.kennel_bonus_available(wb, type_key):
             cap += 1
@@ -2320,7 +2421,7 @@ def add_soldier(
             "hire an eligible type."
         )
     thrall_now = bool(wb.get("thrall_pending")) and not _thrall_gate(wb)
-    cost = hire_cost_preview(wb, info, type_key)
+    cost = 0 if off_roster else hire_cost_preview(wb, info, type_key)
     if wb.get("gold", 0) < cost:
         return False, f"Not enough gold (need {cost} gc, have {wb.get('gold', 0)} gc)."
 
@@ -2925,6 +3026,463 @@ def remove_soldier_thrall(wb: dict, soldier_id: str) -> tuple[bool, str]:
     return True, text
 
 
+# --- Alchemical Workshop (Spellcaster Magazine, Issue 7 p.13) --------------
+#
+# "Once after each game, if the wizard has 2 potions, he may attempt to mix
+# them. Both potions are consumed in this process. The wizard should roll 2
+# dice. If both dice roll odd numbers, the mixture is useless. If both numbers
+# are even, then the wizard should take the lower of the two numbers and
+# compare it to the Greater Potion Table. If the results of both die rolls are
+# the same, but less than '20', then the two potions have an explosive
+# reaction. The Alchemical workshop is destroyed, and the wizard starts the
+# next game at -2 Health. If one die rolls even and the other odd, the potions
+# refuse to mix and there is no result. Both potions are recovered."
+#
+# The clauses overlap and the book doesn't order them: 4 and 4 is both "both
+# even" and "the same". Read in print order the explosion could never fire
+# (every double is either two odds or two evens), which can't be the intent —
+# so doubles are tested first, with the book's own "but less than 20" carve-out
+# making a double 20 the jackpot rather than a disaster. The -2 Health is
+# recorded in the history rather than applied: it lasts for one game, and the
+# app tracks no games.
+ALCHEMICAL_WORKSHOP_KEY = "alchemical_workshop"
+ALCHEMICAL_WORKSHOP_BOOK = "Spellcaster Magazine"
+
+
+def _alchemical_workshop_gate(wb: dict) -> str | None:
+    if ALCHEMICAL_WORKSHOP_BOOK not in enabled_sources(wb):
+        return f"The Alchemical Workshop comes from {ALCHEMICAL_WORKSHOP_BOOK}; switch that book on first."
+    if ALCHEMICAL_WORKSHOP_KEY not in ((wb.get("base") or {}).get("resources") or []):
+        return "Your base has no Alchemical Workshop."
+    return None
+
+
+# First words that mark a vault entry as a potion when the name isn't one the
+# app knows. data/potions.json only carries the Core Rules potions, so a
+# supplement one found at the table ("Potion of Persistence", Perilous Dark)
+# would otherwise be unmixable. This is a *display* filter, not a rules gate —
+# a false positive only offers a bad choice the player won't make, whereas a
+# false negative hides a potion they legitimately hold.
+POTION_NAME_PREFIXES = ("potion", "elixir", "philtre", "cordial", "draught", "bottle")
+
+
+def is_vault_potion(item: dict) -> bool:
+    """Whether a vault entry looks like a potion, for the mixing dropdowns."""
+    known = {n.lower() for n in game_content.load_potion_choices()}
+    key = item.get("catalog_key")
+    if isinstance(key, str) and key.lower() in known:
+        return True
+    name = (item.get("name") or "").strip()
+    # The loot picker tags composed names with their book ("Potion of Healing
+    # (Core Rules)"), so compare the bare name too.
+    bare = name.split(" (")[0].strip().lower()
+    if bare in known or name.lower() in known:
+        return True
+    return bare.split(" ")[0] in POTION_NAME_PREFIXES if bare else False
+
+
+def vault_potions(wb: dict) -> list[dict]:
+    return [it for it in (wb.get("vault_items") or []) if is_vault_potion(it)]
+
+
+def _greater_potion_for_die(die: int) -> str | None:
+    for row in game_content.load_common_items():
+        if row.get("tier") == "greater" and row["die_low"] <= die <= row["die_high"]:
+            return row["name"]
+    return None
+
+
+def mix_potions(
+    wb: dict,
+    item_a: str,
+    item_b: str,
+    die_a: int | None = None,
+    die_b: int | None = None,
+) -> tuple[bool, str]:
+    """Mix two vault potions in the Alchemical Workshop. Dice are optional —
+    pass what you rolled at the table, or leave them out and the app rolls."""
+    err = _alchemical_workshop_gate(wb)
+    if err:
+        return False, err
+    if not item_a or not item_b or item_a == item_b:
+        return False, "Pick two different potions from the vault."
+    items = wb.get("vault_items") or []
+    picked = []
+    for item_id in (item_a, item_b):
+        found = next((i for i in items if i.get("id") == item_id), None)
+        if found is None:
+            return False, "Potion not found in the vault."
+        picked.append(found)
+    for label, value in (("first", die_a), ("second", die_b)):
+        if value is not None and not (1 <= int(value) <= 20):
+            return False, f"The {label} die must be between 1 and 20."
+    a = int(die_a) if die_a is not None else random.randint(1, 20)
+    b = int(die_b) if die_b is not None else random.randint(1, 20)
+    names = f"{picked[0]['name']} + {picked[1]['name']}"
+    rolled = f"rolled {a} and {b}"
+
+    if a == b and a < 20:
+        for item in picked:
+            items.remove(item)
+        resources = wb.setdefault("base", empty_base()).setdefault("resources", [])
+        if ALCHEMICAL_WORKSHOP_KEY in resources:
+            resources.remove(ALCHEMICAL_WORKSHOP_KEY)
+        text = (
+            f"Alchemical Workshop: {names} reacted explosively ({rolled}). The workshop is "
+            "destroyed, and the wizard starts the next game at -2 Health."
+        )
+    elif a % 2 == 0 and b % 2 == 0:
+        for item in picked:
+            items.remove(item)
+        result = _greater_potion_for_die(min(a, b))
+        if result is None:
+            return False, "No Greater Potion for that roll."
+        add_vault_item(wb, result, source="alchemical_workshop")
+        wb["vault_items"][-1]["catalog_key"] = result
+        text = f"Alchemical Workshop: {names} produced {result} ({rolled}, lower die {min(a, b)})."
+    elif a % 2 == 1 and b % 2 == 1:
+        for item in picked:
+            items.remove(item)
+        text = f"Alchemical Workshop: {names} made a useless mixture ({rolled}). Both potions lost."
+    else:
+        text = f"Alchemical Workshop: {names} refused to mix ({rolled}). Both potions recovered."
+    add_history(wb, text)
+    return True, text
+
+
+# --- Out of Game item creation (Core Rules p.81) ---------------------------
+#
+# Write Scroll (Sigilist, CN 12, Out of Game A) and Brew Potion (Witch, CN 12,
+# Out of Game B) are the two Out of Game spells that produce a vault item, so
+# they are the two the app can bookkeep. Everything else Out of Game stays
+# table play. The roll is offered, never required — a player who rolled at the
+# table passes their own die, or skips this entirely and adds the item by hand.
+WRITE_SCROLL_SPELL = "Write Scroll"
+BREW_POTION_SPELL = "Brew Potion"
+# "The wizard should then roll to cast Brew Potion with a -4 to the Casting
+# Roll" — Greater Potions only, and a wizard only (not the apprentice).
+BREW_GREATER_PENALTY = 4
+
+
+def _caster_dict(wb: dict, caster: str) -> dict | None:
+    return wb.get("wizard") if caster == "wizard" else wb.get("apprentice")
+
+
+def _known_spell(figure: dict, name: str) -> dict | None:
+    for sp in figure.get("spells") or []:
+        if (sp.get("name") or "").strip().lower() == name.lower():
+            return sp
+    return None
+
+
+def out_of_game_cast_info(wb: dict, spell_name: str) -> dict:
+    """What the UI needs to offer one Out of Game casting: who can cast it, its
+    CN, and the base bonus that applies — shown whether or not the app rolls,
+    since most players roll their own dice."""
+    bonus, sources = expansions.base_casting_bonus(wb, spell_name)
+    casters = []
+    for kind in ("wizard", "apprentice"):
+        figure = _caster_dict(wb, kind)
+        if not figure:
+            continue
+        sp = _known_spell(figure, spell_name)
+        if sp:
+            casters.append({"kind": kind, "name": figure.get("name") or kind, "cn": int(sp.get("cn", 12))})
+    return {"spell": spell_name, "bonus": bonus, "bonus_from": sources, "casters": casters}
+
+
+def _resolve_out_of_game_roll(
+    wb: dict, caster: str, spell_name: str, die: int | None, penalty: int = 0
+) -> tuple[bool, str, bool]:
+    """(ok, message, succeeded). ok is False only for a bad request."""
+    figure = _caster_dict(wb, caster)
+    if not figure:
+        return False, "No such caster in this warband.", False
+    sp = _known_spell(figure, spell_name)
+    if sp is None:
+        return False, f"{figure.get('name') or caster} doesn't know {spell_name}.", False
+    if die is not None and not (1 <= int(die) <= 20):
+        return False, "The casting roll must be between 1 and 20.", False
+    bonus, sources = expansions.base_casting_bonus(wb, spell_name)
+    roll = int(die) if die is not None else random.randint(1, 20)
+    cn = int(sp.get("cn", 12))
+    total = roll + bonus - penalty
+    detail = f"rolled {roll}"
+    if bonus:
+        detail += f" +{bonus} ({', '.join(sources)})"
+    if penalty:
+        detail += f" −{penalty}"
+    detail += f" = {total} vs CN {cn}"
+    return True, detail, total >= cn
+
+
+def cast_write_scroll(wb: dict, caster: str, spell: str, die: int | None = None) -> tuple[bool, str]:
+    """Write Scroll (Core Rules p.135): creates one scroll of a spell the
+    caster knows, or one they own the grimoire for. The grimoire side is not
+    checked — vault names are free text — so any spell is offered and the
+    player is the authority on whether they hold the book."""
+    spell = (spell or "").strip()
+    if not spell:
+        return False, "Pick the spell to write."
+    ok, detail, success = _resolve_out_of_game_roll(wb, caster, WRITE_SCROLL_SPELL, die)
+    if not ok:
+        return False, detail
+    if not success:
+        text = f"Write Scroll failed ({detail})."
+    else:
+        add_vault_item(wb, f"Scroll: {spell}", source="write_scroll")
+        wb["vault_items"][-1]["catalog_key"] = "Scroll"
+        text = f"Wrote a Scroll: {spell} ({detail})."
+    add_history(wb, text)
+    return True, text
+
+
+def cast_brew_potion(wb: dict, caster: str, potion: str, die: int | None = None) -> tuple[bool, str]:
+    """Brew Potion (Core Rules p.114). A Lesser Potion of the caster's choice
+    is simply created on a successful casting. A Greater Potion is a wizard
+    only, costs its ingredient price whether or not the roll succeeds, and is
+    rolled at -4."""
+    potion = (potion or "").strip()
+    row = game_content.common_item_index().get(potion)
+    if row is None or row.get("category") != "Potion":
+        return False, "Pick a potion from the Lesser or Greater Potion Table."
+    greater = row.get("tier") == "greater"
+    penalty = BREW_GREATER_PENALTY if greater else 0
+    if greater and caster != "wizard":
+        return False, "Only a wizard may brew a Greater Potion."
+    ingredients = int(row.get("ingredients") or 0) if greater else 0
+    if ingredients and int(wb.get("gold", 0)) < ingredients:
+        return False, f"Need {ingredients} gc of ingredients for {potion}."
+    ok, detail, success = _resolve_out_of_game_roll(wb, caster, BREW_POTION_SPELL, die, penalty)
+    if not ok:
+        return False, detail
+    if ingredients:
+        # "If unsuccessful, the potion is not created and the money spent on
+        # ingredients is lost" — paid up front either way.
+        wb["gold"] = int(wb.get("gold", 0)) - ingredients
+    if not success:
+        text = f"Brew Potion failed ({detail})."
+        if ingredients:
+            text += f" {ingredients} gc of ingredients lost."
+    else:
+        add_vault_item(wb, potion, source="brew_potion")
+        wb["vault_items"][-1]["catalog_key"] = potion
+        text = f"Brewed {potion} ({detail})."
+        if ingredients:
+            text += f" Ingredients cost {ingredients} gc."
+    add_history(wb, text)
+    return True, text
+
+
+# --- Shop (Core Rules p.104, "Buying and Selling") ------------------------
+#
+# The book's default: grimoires, scrolls, potions, magic weapons/armour and
+# magic items may be bought and sold freely at their tables' listed prices.
+# Black Market Contacts is the *optional replacement* for this, not an
+# addition — "consider using this optional rule to limit and randomise the
+# treasure that is available for purchase" — so the Shop card shows one or the
+# other, switched by black_market_enabled.
+#
+# Two supplement items are stocked despite supplement pricing being deferred
+# (todo.md), because both are one entry plus a variant dropdown and their
+# prices are printed plainly in their own books.
+SHOP_VARIANT_ITEMS = {
+    # The Perilous Dark p.78 Treasure Table prints a purchase price but no
+    # sale column, so a bane weapon can be bought and never sold back.
+    "Bane Weapon": {
+        "source": "The Perilous Dark",
+        "purchase": 500,
+        "sale": None,
+        "variants": expansions.BANE_WEAPON_VARIANT_NAMES,
+    },
+    # Fireheart p.70. The app-only "(All)" convenience entry is deliberately
+    # not stocked — it is not a sub-table result, so it isn't for sale; it
+    # stays available through the vault's item picker.
+    "Book of the Construct": {
+        "source": "Fireheart",
+        "purchase": 300,
+        "sale": 150,
+        "variants": expansions.CONSTRUCT_BOOK_VARIANT_NAMES,
+    },
+}
+
+
+def shop_prices(name: str) -> dict | None:
+    """The catalog row for `name`, or None if the app doesn't price it."""
+    return game_content.common_item_index().get(name)
+
+
+def shop_catalog(wb: dict) -> list[dict]:
+    """What the Shop stocks, grouped for the template.
+
+    Grimoires and scrolls carry a spell dropdown; the two variant items carry
+    their own. Entries the book prints a dash for (Elixir of Life, Bottle of
+    Null, Potion of Invulnerability) stay listed but with `purchase` None, so
+    they show as sell-only rather than vanishing — a wizard can still brew or
+    find them, and needs somewhere to sell them."""
+    spells = shop_spell_choices(wb)
+    groups: dict[str, list[dict]] = {}
+    for item in game_content.load_common_items():
+        row = {**item, "choices": spells if item.get("variant") == "spell" else None}
+        groups.setdefault(item["category"], []).append(row)
+    sources = enabled_sources(wb)
+    for name, info in SHOP_VARIANT_ITEMS.items():
+        if info["source"] not in sources:
+            continue
+        groups.setdefault("Magic Item", []).append(
+            {
+                "name": name,
+                "category": "Magic Item",
+                "source": info["source"],
+                "purchase": info["purchase"],
+                "sale": info["sale"],
+                "choices": [{"value": v, "label": v} for v in info["variants"]],
+            }
+        )
+    # Potions read Lesser then Greater rather than in table order, and each
+    # tier is labelled, so which half of the shelf you are looking at is
+    # visible without counting rows.
+    if "Potion" in groups:
+        tiers = {"lesser": "Lesser Potions", "greater": "Greater Potions"}
+        groups["Potion"] = [
+            {**row, "subgroup": tiers.get(row.get("tier"), "Potions")}
+            for tier in ("lesser", "greater")
+            for row in groups["Potion"]
+            if row.get("tier") == tier
+        ]
+    # Magic items get a collapsible shelf per source book — one shelf today
+    # (Core Rules, plus Fireheart's Book of the Construct and the Perilous
+    # Dark's Bane Weapon when those books are on), and the shape the supplement
+    # price extraction in todo.md will fill out.
+    if "Magic Item" in groups:
+        groups["Magic Item"] = sorted(
+            ({**row, "subgroup": row.get("source", "Core Rules")} for row in groups["Magic Item"]),
+            key=lambda r: (source_book_order(r["subgroup"]), r["name"].lower()),
+        )
+    order = ["Grimoire", "Scroll", "Potion", "Magic Weapon or Armour", "Magic Item"]
+    return [
+        {
+            "category": c,
+            "rows": groups[c],
+            # Preserves the order built above; the template renders one
+            # collapsible block per subgroup when there is more than a bare one.
+            "subgroups": list(dict.fromkeys(r["subgroup"] for r in groups[c] if r.get("subgroup"))),
+        }
+        for c in order
+        if c in groups
+    ]
+
+
+def shop_spell_choices(wb: dict) -> list[dict]:
+    """Grimoire/scroll dropdown entries, labelled "School: Spell" and ordered by
+    school then spell.
+
+    The school is part of the label *and* of the stored value because two
+    schools can print a spell of the same name — the collision that already
+    bites data/spell_descriptions.json (see CLAUDE.md). Scoped to the warband's
+    enabled books, like every other spell list on the page.
+    """
+    sources = enabled_sources(wb)
+    rows = [sp for sp in all_spells_flat() if sp.get("source", "Core Rules") in sources]
+    # SPELLS is keyed in the app's canonical school order — the ten core
+    # schools, then the supplement ones — which is what every other school
+    # listing uses. Sorting the names alphabetically instead would file
+    # Astromancer above Elementalist.
+    school_order = {school: i for i, school in enumerate(SPELLS)}
+    rows.sort(key=lambda sp: (school_order.get(sp["school"], len(school_order)), sp["name"].lower()))
+    labels = [f"{sp['school']}: {sp['name']}" for sp in rows]
+    return [{"value": label, "label": label} for label in labels]
+
+
+def shop_buy(wb: dict, name: str, choice: str = "") -> tuple[bool, str]:
+    """Buy one catalog item into the vault, paying its purchase price."""
+    if (wb.get("homerules") or {}).get("black_market_enabled"):
+        return False, "Black Market Contacts replaces the shop — buy from your own rolls below."
+    variant = SHOP_VARIANT_ITEMS.get(name)
+    row = shop_prices(name)
+    if variant is None and row is None:
+        return False, "The shop doesn't stock that."
+    price = (variant or row).get("purchase")
+    if price is None:
+        return False, f"{name} can never be bought — only found or brewed."
+    if int(wb.get("gold", 0)) < int(price):
+        return False, f"Need {price} gc for {name}."
+    # Grimoire/Scroll take a spell, the variant items take a sub-table result;
+    # everything else ignores `choice`. The stored name is what a player reads
+    # in the vault, so it carries the choice rather than hiding it in notes.
+    choice = (choice or "").strip()
+    if variant is not None:
+        if choice not in variant["variants"]:
+            return False, f"Pick which {name} you're buying."
+        stored = choice
+    elif row.get("variant") == "spell":
+        if not choice:
+            return False, f"Pick the spell for the {name.lower()}."
+        if choice not in {c["value"] for c in shop_spell_choices(wb)}:
+            return False, "That spell isn't available from your enabled books."
+        # The dropdown value is "School: Spell"; stored the other way round so
+        # the vault reads as the thing rather than as the shelf it came off
+        # ("Grimoire: Animal Companion (Witch)"). The school is kept because
+        # two schools can print a spell of the same name.
+        school, _, spell = choice.partition(": ")
+        stored = f"{name}: {spell} ({school})"
+    else:
+        stored = name
+    wb["gold"] = int(wb.get("gold", 0)) - int(price)
+    add_vault_item(wb, stored, source="shop")
+    # The exact catalog row that was paid for, so selling it back prices
+    # precisely even when the stored name carries a spell or variant.
+    (wb["vault_items"][-1])["catalog_key"] = name
+    text = f"Bought {stored} for {price} gc."
+    add_history(wb, text)
+    return True, text
+
+
+def shop_sale_price(wb: dict, item: dict) -> int | None:
+    """The suggested sale price for a vault entry, or None if unknown.
+
+    Prefers the catalog key recorded when the item was bought here, since the
+    stored name may carry a spell or variant ("Grimoire: Bone Dart"). Falls
+    back to an exact name match, which is all a found or hand-typed item has.
+    """
+    key = item.get("catalog_key")
+    row = shop_prices(key) if isinstance(key, str) and key else None
+    if row is None:
+        row = shop_prices(item.get("name", ""))
+    if row is None and isinstance(key, str):
+        variant = SHOP_VARIANT_ITEMS.get(key)
+        if variant:
+            return variant["sale"]
+    return row.get("sale") if row else None
+
+
+def shop_sell(wb: dict, item_id: str, price: str | int | None = None) -> tuple[bool, str]:
+    """Sell a vault item, banking `price` (the suggested one if omitted).
+
+    The price stays editable and any vault entry can be sold: names are free
+    text, so the app proposes a figure and the player is the authority on it.
+    A grimoire for a spell the wizard doesn't know is warned about in the UI,
+    per Core Rules p.104, and sold anyway if they confirm.
+    """
+    items = wb.get("vault_items") or []
+    item = next((i for i in items if i.get("id") == item_id), None)
+    if item is None:
+        return False, "Item not found."
+    if price in (None, ""):
+        amount = shop_sale_price(wb, item)
+        if amount is None:
+            return False, "No price known for that item — enter one to sell it."
+    else:
+        amount = _as_int(price, -1)
+        if amount < 0:
+            return False, "Enter a whole, non-negative sale price."
+    items.remove(item)
+    adjust_gold(wb, int(amount), f"sold {item.get('name', 'an item')}")
+    text = f"Sold {item.get('name', 'an item')} for {amount} gc."
+    add_history(wb, text)
+    return True, text
+
+
 BLACK_MARKET_ROLLS_PER_SCENARIO = 4
 # A concrete named item with its own price ("Amulet of Resistance — 300gc") —
 # most supplement Treasure Tables roll straight into these rather than the
@@ -3103,7 +3661,18 @@ def black_market_roll(wb: dict, table_title: str, d20: int | None = None) -> tup
         "roll_text": row["text"],
         # Not "items" — Jinja resolves dict.items to the builtin method on a
         # plain dict, same trap group_magic_items() avoids with its "rows" key.
-        "entries": [{"id": uuid.uuid4().hex[:8], "name": name, "bought": False} for name in item_names],
+        "entries": [
+            {
+                "id": uuid.uuid4().hex[:8],
+                "name": name,
+                "bought": False,
+                # Priced at roll time so the offer keeps the figure it was
+                # made at, rather than re-deriving it from a catalog that
+                # may have gained the item's price in the meantime.
+                "price": (shop_prices(name) or {}).get("purchase") or 0,
+            }
+            for name in item_names
+        ],
     }
     bm.setdefault("offers", []).append(offer)
     bm["rolls_used"] = used + 1
@@ -3135,9 +3704,23 @@ def black_market_buy_item(wb: dict, offer_id: str, item_id: str) -> tuple[bool, 
         return False, "Unknown Black Market item."
     if item.get("bought"):
         return False, f"{item['name']} was already bought."
+    # Core Rules p.104: black-market goods are bought at their listed purchase
+    # price, same as the open shop — the optional rule limits *what* is on
+    # offer, not what it costs. Items the app has no price for (most
+    # supplement treasure, until todo.md's price extraction lands) are free
+    # rather than unbuyable, so an unpriced roll is still usable.
+    price = max(0, _as_int(item.get("price"), 0))
+    if price and int(wb.get("gold", 0)) < price:
+        return False, f"Need {price} gc for {item['name']}."
     item["bought"] = True
+    if price:
+        wb["gold"] = int(wb.get("gold", 0)) - price
     add_vault_item(wb, item["name"], source="black_market")
-    text = f"Bought {item['name']} from the Black Market."
+    text = (
+        f"Bought {item['name']} from the Black Market for {price} gc."
+        if price
+        else f"Took {item['name']} from the Black Market (no price on record)."
+    )
     add_history(wb, text)
     return True, text
 
@@ -3670,23 +4253,45 @@ def hire_apprentice(wb: dict, name: str = "", gender: str = "male") -> tuple[boo
         return False, "A Fire Giant Wizard has no apprentice (Blood Legacy)."
     if wschool == "Vampire":
         return False, "A Vampire Wizard has no apprentice (Blood Legacy)."
-    if int(wb.get("gold", 0)) < APPRENTICE_COST:
-        return False, f"Need {APPRENTICE_COST} gc for an apprentice."
-    wb["gold"] = int(wb["gold"]) - APPRENTICE_COST
+    if wschool == "Rangifer":
+        return False, (
+            "A Rangifer Shaman has no apprentice (Spellcaster Magazine) — rangifer "
+            "children are invited to a gathering instead."
+        )
+    cost = expansions.apprentice_cost(wb)
+    if int(wb.get("gold", 0)) < cost:
+        return False, f"Need {cost} gc for an apprentice."
+    wb["gold"] = int(wb["gold"]) - cost
     wizard_name = (wb.get("wizard") or {}).get("name", "Wizard")
     wb["apprentice"] = empty_apprentice(name or f"{wizard_name}'s Apprentice", gender)
+    # What was actually paid, so the dismissal refund returns that and not the
+    # current formula price — otherwise hiring at level 0 for 100gc, levelling
+    # to 40 and dismissing would hand back 500gc, repeatably.
+    wb["apprentice"]["cost_paid"] = cost
     sync_apprentice(wb)
-    text = f"Hired apprentice for {APPRENTICE_COST} gc."
+    text = f"Hired apprentice for {cost} gc."
     wb.setdefault("history", []).append({"when": _now(), "text": text})
     return True, text
+
+
+def apprentice_cost_paid(wb: dict) -> int:
+    """What the current apprentice actually cost, for the dismissal refund.
+
+    Apprentices hired before the price scaled (Core Rules p.103) carry no
+    `cost_paid`, and every one of those was bought at the old flat price, so
+    APPRENTICE_COST is the right fallback rather than the current formula.
+    """
+    ap = wb.get("apprentice") or {}
+    return max(0, int(ap.get("cost_paid") or APPRENTICE_COST))
 
 
 def dismiss_apprentice(wb: dict, refund: bool = False) -> tuple[bool, str]:
     if not wb.get("apprentice"):
         return False, "No apprentice to dismiss."
     if refund:
-        wb["gold"] = int(wb.get("gold", 0)) + APPRENTICE_COST
-        text = f"Dismissed apprentice and refunded {APPRENTICE_COST} gc."
+        paid = apprentice_cost_paid(wb)
+        wb["gold"] = int(wb.get("gold", 0)) + paid
+        text = f"Dismissed apprentice and refunded {paid} gc."
     else:
         text = "Dismissed apprentice (no refund)."
     wb["apprentice"] = None
@@ -3694,7 +4299,37 @@ def dismiss_apprentice(wb: dict, refund: bool = False) -> tuple[bool, str]:
     return True, text
 
 
-def apprentice_takes_over(wb: dict) -> tuple[bool, str]:
+def set_wizard_reputation(wb: dict, key: str, held: bool) -> tuple[bool, str]:
+    """Grant or withdraw a campaign reputation.
+
+    Gated on the source book only when *granting* — a reputation already
+    earned survives the book being switched off, which is almost always a
+    misclick rather than a decision to give it back. Removing one never needs
+    the book on, or a reputation earned under a since-disabled book could
+    never be cleared.
+    """
+    info = expansions.REPUTATIONS.get(key)
+    if info is None:
+        return False, "Unknown reputation."
+    wiz = wb.setdefault("wizard", {})
+    held_now = expansions.wizard_reputations(wb)
+    if held:
+        if info["source"] not in enabled_sources(wb):
+            return False, f"{info['name']} comes from {info['source']}; switch that book on first."
+        if key in held_now:
+            return False, f"{info['name']} is already recorded."
+        wiz["reputations"] = [*held_now, key]
+        text = f"Gained the reputation {info['name']}. {info['effects']}"
+    else:
+        if key not in held_now:
+            return False, f"{info['name']} isn't recorded."
+        wiz["reputations"] = [r for r in held_now if r != key]
+        text = f"Lost the reputation {info['name']}."
+    add_history(wb, text)
+    return True, text
+
+
+def apprentice_takes_over(wb: dict, keep_reputations: bool = False) -> tuple[bool, str]:
     """Core rules (p.103, "New Wizards"): what happens when the wizard dies.
 
     The book: if the wizard was level 5 or below, discard the whole warband
@@ -3737,6 +4372,11 @@ def apprentice_takes_over(wb: dict) -> tuple[bool, str]:
         "portrait": ap.get("portrait"),
         "level_history": [],
         "state": expansions.default_wizard_state(),
+        # Whether a campaign reputation passes to the apprentice is a group
+        # call the books don't settle — is it the warband's standing or the
+        # dead wizard's? The promotion button asks, and defaults to losing it,
+        # consistent with everything else wizard-specific dying with them.
+        "reputations": deepcopy(expansions.wizard_reputations(wb)) if keep_reputations else [],
         "gender": ap.get("gender", "male"),
     }
     wb["wizard"] = new_wizard
@@ -3745,6 +4385,9 @@ def apprentice_takes_over(wb: dict) -> tuple[bool, str]:
         f"{old_wizard_name} died. {new_wizard['name']} takes over as the new wizard at level {new_level} "
         "(no spells known yet — the old wizard's spellbook and gear are lost)."
     )
+    if new_wizard["reputations"]:
+        kept = ", ".join(expansions.REPUTATIONS[r]["name"] for r in new_wizard["reputations"])
+        text += f" Kept: {kept}."
     add_history(wb, text)
     return True, text
 
@@ -3875,11 +4518,16 @@ def update_homerules(wb: dict, form: "ImmutableMultiDict") -> tuple[bool, str]:
             "wildwoods_supplies_enabled": form.get("wildwoods_supplies_enabled") == "on",
             "edition2_soldier_costs": form.get("edition2_soldier_costs") == "on",
             "school_relations_symmetric": form.get("school_relations_symmetric") == "on",
-            "black_market_enabled": form.get("black_market_enabled") == "on",
+            # Not a field on the homerules form any more — its checkbox moved to
+            # the top of the Shop card, which is what it actually switches. Read
+            # the stored value back rather than the absent field, or every save
+            # of this panel would quietly turn the Black Market off.
+            "black_market_enabled": bool(hr.get("black_market_enabled")),
             "spellcaster_magazine_soldiers": form.get("spellcaster_magazine_soldiers") == "on",
             "spellcaster_magazine_legendary_soldiers": (
                 form.get("spellcaster_magazine_legendary_soldiers") == "on"
             ),
+            "dire_hound_counts_as_hound": form.get("dire_hound_counts_as_hound") == "on",
             "firearms_rules_enabled": form.get("firearms_rules_enabled") == "on",
             "knightly_orders_enabled": form.get("knightly_orders_enabled") == "on",
             "javelin_enabled": form.get("javelin_enabled") == "on",
@@ -4683,7 +5331,9 @@ def apply_level_up(
     if choice not in allowed:
         # The only way to get here is a hand-crafted POST or a stale page: a Lich
         # may never raise Fight or Shoot.
-        return False, f"A {expansions.STATE_LABELS[expansions.state_kind(wb)]} cannot choose that."
+        label = expansions.STATE_LABELS[expansions.state_kind(wb)]
+        article = "An" if label[0] in "AEIOU" else "A"
+        return False, f"{article} {label} cannot choose that."
 
     if choice in ("fight", "shoot", "will", "health"):
         caps = expansions.wizard_stat_caps(wb)
@@ -5698,6 +6348,138 @@ def claim_free_underworld_favor(wb: dict) -> tuple[bool, str]:
     return True, text
 
 
+# Spellcaster Magazine Issue 3, Hired Muscle Table. Each entry is the roster
+# type the model is played as, plus its cost in Markers. Barber-Surgeon and
+# Burglar are the guild's names for an Apothecary and a Treasure Hunter (the
+# Burglar additionally climbs at full speed, a table-play detail).
+UNDERWORLD_MUSCLE = {
+    "thug": {"label": "Thug", "markers": 1},
+    "thief": {"label": "Thief", "markers": 1},
+    "trap_expert": {"label": "Trap Expert", "markers": 1},
+    "assassin": {"label": "Assassin", "markers": 2},
+    "apothecary": {"label": "Barber-Surgeon", "markers": 2},
+    "treasure_hunter": {"label": "Burglar", "markers": 2},
+}
+UNDERWORLD_MUSCLE_MAX = 2
+# "+1 modifiers (to a maximum of +3) may also be purchased at the cost of 1
+# Underworld Marker per modifier."
+UNDERWORLD_INTIMIDATION_MAX_MODIFIER = 3
+
+
+def underworld_muscle_count(wb: dict) -> int:
+    return sum(
+        1
+        for s in wb.get("soldiers") or []
+        if s.get("underworld_muscle") and s.get("status") != "dead"
+    )
+
+
+def _underworld_markers(wb: dict) -> dict:
+    return wb.setdefault("wizard", {}).setdefault("underworld_favors", {"markers": 0})
+
+
+def _take_underworld_markers(wb: dict, count: int) -> str | None:
+    """Add `count` Markers, or refuse if that would break the level cap."""
+    wiz = wb.setdefault("wizard", {})
+    uf = _underworld_markers(wb)
+    level = int(wiz.get("level", 0))
+    held = int(uf.get("markers", 0))
+    if held + count > level:
+        return (
+            f"That needs {count} Marker(s) and you hold {held}; a level {level} wizard may "
+            f"hold at most {level} — pay some off first."
+        )
+    uf["markers"] = held + count
+    return None
+
+
+def hire_underworld_muscle(wb: dict, type_key: str, name: str = "") -> tuple[bool, str]:
+    """Recruit hired muscle for Markers (Spellcaster Issue 3).
+
+    "Hired muscle does not count against the warband's usual size limit", so
+    the roster entry is flagged and active_permanent_soldiers() skips it — the
+    same shape as a temporary member, but permanent until dismissed or killed.
+    """
+    err = _underworld_favors_gate(wb)
+    if err:
+        return False, err
+    entry = UNDERWORLD_MUSCLE.get(type_key)
+    if entry is None:
+        return False, "Not on the Hired Muscle Table."
+    if underworld_muscle_count(wb) >= UNDERWORLD_MUSCLE_MAX:
+        return False, f"A warband may hold at most {UNDERWORLD_MUSCLE_MAX} hired muscle."
+    err = _take_underworld_markers(wb, entry["markers"])
+    if err:
+        return False, err
+    ok, msg = add_soldier(wb, type_key, name or entry["label"], off_roster=True)
+    if not ok:
+        # Roll the Markers back rather than charging for a hire that didn't
+        # happen (a source book switched off, an unknown type).
+        uf = _underworld_markers(wb)
+        uf["markers"] = int(uf.get("markers", 0)) - entry["markers"]
+        return False, msg
+    wb["soldiers"][-1]["underworld_muscle"] = True
+    held = int(_underworld_markers(wb).get("markers", 0))
+    text = (
+        f"Hired {entry['label']} as Underworld muscle for {entry['markers']} Marker(s) "
+        f"({held} held). Doesn't count against the warband size; if they die, take one more Marker."
+    )
+    add_history(wb, text)
+    return True, text
+
+
+def underworld_intimidation(
+    wb: dict,
+    modifier: int = 0,
+    own_roll: int | None = None,
+    target_will: int = 0,
+    target_roll: int | None = None,
+) -> tuple[bool, str]:
+    """Resolve an Intimidation Favour (Spellcaster Issue 3).
+
+    1 Marker to attempt, plus one per +1 modifier up to +3. Both players roll a
+    d20; the attacker adds their modifiers, the defender the target's Will.
+    A tie goes to the defender. On a failure "the wizard may remove half (round
+    up) of the Underworld Markers generated in this attempt", never dropping
+    below the one Marker the attempt always costs.
+    """
+    err = _underworld_favors_gate(wb)
+    if err:
+        return False, err
+    modifier = max(0, int(modifier or 0))
+    if modifier > UNDERWORLD_INTIMIDATION_MAX_MODIFIER:
+        return False, f"The modifier tops out at +{UNDERWORLD_INTIMIDATION_MAX_MODIFIER}."
+    for label, value in (("your", own_roll), ("the target's", target_roll)):
+        if value is not None and not (1 <= int(value) <= 20):
+            return False, f"{label.capitalize()} roll must be between 1 and 20."
+    taken = 1 + modifier
+    err = _take_underworld_markers(wb, taken)
+    if err:
+        return False, err
+    mine = int(own_roll) if own_roll is not None else random.randint(1, 20)
+    theirs = int(target_roll) if target_roll is not None else random.randint(1, 20)
+    attack = mine + modifier
+    defence = theirs + int(target_will or 0)
+    detail = f"{mine}+{modifier} = {attack} vs {theirs}+{target_will} = {defence}"
+    if attack > defence:
+        text = (
+            f"Intimidation succeeded ({detail}) for {taken} Marker(s) — the target misses the "
+            "next game, staying in their warband and unfireable until it's over."
+        )
+    else:
+        # Half, rounded up — but "a wizard always receives a minimum of one
+        # Underworld Maker", so a bare 1-Marker attempt returns nothing.
+        returned = min(-(-taken // 2), taken - 1)
+        uf = _underworld_markers(wb)
+        uf["markers"] = int(uf.get("markers", 0)) - returned
+        text = (
+            f"Intimidation failed ({detail}). {returned} of {taken} Marker(s) returned; "
+            f"{int(uf['markers'])} held."
+        )
+    add_history(wb, text)
+    return True, text
+
+
 def pay_off_underworld_marker(wb: dict) -> tuple[bool, str]:
     err = _underworld_favors_gate(wb)
     if err:
@@ -6254,6 +7036,147 @@ def sell_or_remove_base_resource(wb: dict, resource_key: str, refund: bool = Fal
         text = f"Removed {info['name']} (refunded {half} gc)."
     else:
         text = f"Removed base resource {info['name']}."
+    add_history(wb, text)
+    return True, text
+
+
+# Core Rules p.106, the post-game half of the Base Location Table. Only these
+# five do anything after a game. The Inn's extra soldier is a roster slot, the
+# Temple/Crypt/Tower casting bonuses are applied at the table (CNs are never
+# rewritten — see CLAUDE.md), and the Brewery's +1 Will is a roster effect
+# toggled on the Home base card. "flat" grants a fixed amount with nothing to
+# roll; "roll" resolves one d20.
+BASE_POST_GAME = {
+    "laboratory": {"kind": "flat", "summary": "+20 XP for the wizard."},
+    "brewery": {"kind": "flat", "summary": "+20 gc from the sale of excess stock."},
+    "temple": {"kind": "roll", "summary": "Roll a die: on 16+ gain a free potion of healing."},
+    "library": {
+        "kind": "roll",
+        "summary": "Roll a die: 15-18 a random scroll, 19-20 a random grimoire.",
+    },
+    "treasury": {
+        "kind": "roll",
+        "summary": (
+            "Roll a die to open a vault: 2-16 gains that many gc, 17-18 gains "
+            "that many +100, 19-20 finds a treasure (roll it as a secured treasure)."
+        ),
+    },
+}
+
+BASE_POST_GAME_LABORATORY_XP = 20
+BASE_POST_GAME_BREWERY_GOLD = 20
+
+
+def base_post_game_effect(wb: dict) -> dict | None:
+    """The current base location's post-game effect, or None. Feeds the
+    After-the-game card's Base block."""
+    loc_key = (wb.get("base") or {}).get("location", "none")
+    entry = BASE_POST_GAME.get(loc_key)
+    if not entry:
+        return None
+    return {"key": loc_key, "name": BASE_LOCATIONS[loc_key]["name"], **entry}
+
+
+def apply_base_post_game(wb: dict, die: int | None = None) -> tuple[bool, str]:
+    """Bank the base location's after-game result (Core Rules p.106).
+
+    Like roll_underworld_debt_call(), the app rolls by default and accepts a
+    `die` the player already threw at the table. Nothing here is once-per-game
+    enforced: the app tracks no games, so the button is simply pressed once
+    per game by the player.
+    """
+    effect = base_post_game_effect(wb)
+    if effect is None:
+        return False, "This base location grants nothing after a game."
+    if die is not None and not (1 <= int(die) <= 20):
+        return False, "The die roll must be between 1 and 20."
+    key = effect["key"]
+
+    if key == "laboratory":
+        wiz = wb.setdefault("wizard", {})
+        ok, msg = _apply_xp_delta(
+            wiz,
+            BASE_POST_GAME_LABORATORY_XP,
+            lambda: reverse_last_level_up(wb),
+            None,
+            "Wizard",
+            expansions.xp_per_level(wb),
+            expansions.max_wizard_level(wb),
+        )
+        text = f"Laboratory: +{BASE_POST_GAME_LABORATORY_XP} XP. {msg}" if ok else msg
+        add_history(wb, text)
+        return True, text
+
+    if key == "brewery":
+        adjust_gold(wb, BASE_POST_GAME_BREWERY_GOLD, "Brewery sales")
+        text = f"Brewery: +{BASE_POST_GAME_BREWERY_GOLD} gc from excess stock."
+        add_history(wb, text)
+        return True, text
+
+    roll = int(die) if die is not None else random.randint(1, 20)
+
+    if key == "temple":
+        if roll >= 16:
+            add_vault_item(wb, "Potion of Healing", source="base")
+            text = f"Temple (rolled {roll}): a free potion of healing."
+        else:
+            text = f"Temple (rolled {roll}): nothing this time."
+    elif key == "library":
+        if 15 <= roll <= 18:
+            add_vault_item(wb, "Scroll (random)", source="base")
+            text = f"Library (rolled {roll}): a random scroll."
+        elif roll >= 19:
+            add_vault_item(wb, "Grimoire (random)", source="base")
+            text = f"Library (rolled {roll}): a random grimoire."
+        else:
+            text = f"Library (rolled {roll}): nothing this time."
+    else:  # treasury
+        if roll >= 19:
+            add_vault_item(wb, "Treasure (roll as secured treasure)", source="base")
+            text = f"Treasury (rolled {roll}): a treasure — roll it as a secured treasure."
+        elif roll >= 17:
+            gained = roll + 100
+            adjust_gold(wb, gained, "Treasury vault")
+            text = f"Treasury (rolled {roll}): +{gained} gc."
+        elif roll >= 2:
+            adjust_gold(wb, roll, "Treasury vault")
+            text = f"Treasury (rolled {roll}): +{roll} gc."
+        else:
+            text = f"Treasury (rolled {roll}): the vault stays shut."
+    add_history(wb, text)
+    return True, text
+
+
+def set_inn_resident(wb: dict, soldier_id: str) -> tuple[bool, str]:
+    """Record which soldier stays at the Inn this game (Core Rules p.106).
+    An empty id clears it; the book lets the choice change between games."""
+    if not expansions.inn_extra_slot(wb):
+        return False, "Your base is not an Inn."
+    soldiers = wb.get("soldiers") or []
+    if soldier_id and not any(s.get("id") == soldier_id for s in soldiers):
+        return False, "No such soldier."
+    for s in soldiers:
+        s["at_inn"] = s.get("id") == soldier_id and bool(soldier_id)
+    if not soldier_id:
+        text = "Nobody is staying at the Inn."
+    else:
+        who = next(s for s in soldiers if s.get("id") == soldier_id)
+        text = f"{who.get('name') or 'A soldier'} stays at the Inn and misses the next game."
+    add_history(wb, text)
+    return True, text
+
+
+def set_brewery_will(wb: dict, on: bool) -> tuple[bool, str]:
+    """Toggle the Brewery's +1 Will for every soldier."""
+    base = wb.setdefault("base", empty_base())
+    if base.get("location") != "brewery":
+        return False, "Your base is not a Brewery."
+    base["brewery_will"] = bool(on)
+    text = (
+        "Brewery: soldiers get +1 Will."
+        if base["brewery_will"]
+        else "Brewery: the +1 Will is off."
+    )
     add_history(wb, text)
     return True, text
 

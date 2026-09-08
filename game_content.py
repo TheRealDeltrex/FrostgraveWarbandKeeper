@@ -167,6 +167,39 @@ def load_magic_items() -> list[dict]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+@lru_cache(maxsize=1)
+def load_common_items() -> list[dict]:
+    """Core Rules items with a printed buy/sell price that the Magic Item
+    Table (load_magic_items()) doesn't already cover: the Lesser and Greater
+    Potion tables, the Magic Weapon and Armour table, plus grimoires and
+    scrolls at their flat p.104 prices.
+
+    Fields: name, category, source, purchase, sale — `purchase` is None for
+    the three Greater Potions the book prints a dash for (they can be brewed
+    or found but never bought), and Greater Potions also carry `ingredients`
+    for Brew Potion. A `variant` of "spell" means the entry is one row plus a
+    spell dropdown rather than one row per spell.
+
+    Built by scripts/extract_common_items.py, which regenerates the file
+    wholesale — hand edits are lost, put corrections in the script."""
+    path = DATA / "common_items.json"
+    if not path.is_file():
+        return []
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+@lru_cache(maxsize=1)
+def common_item_index() -> dict[str, dict]:
+    """load_common_items() keyed by name, for pricing a vault entry.
+
+    A plain name key is safe *only* because every entry here is Core Rules,
+    where names are unique. Supplement prices (todo.md) must be keyed by
+    (source, name): two books print "Book of the Construct" and two print
+    "Construct Hammer", so a name-keyed price table would silently give one of
+    each pair the other's price."""
+    return {it["name"]: it for it in load_common_items()}
+
+
 def magic_items_for_sources(sources) -> list[dict]:
     """Treasure from the books this warband has switched on."""
     return [it for it in load_magic_items() if it.get("source") in sources]

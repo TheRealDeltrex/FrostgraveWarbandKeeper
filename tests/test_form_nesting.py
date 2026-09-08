@@ -21,6 +21,7 @@ from html.parser import HTMLParser
 import pytest
 
 import app as app_module
+import expansions
 import warband_store as ws
 from frostgrave_data import spell_id
 
@@ -114,10 +115,118 @@ def _vampire() -> dict:
     return wb
 
 
+def _lich() -> dict:
+    wb = _warband("nesting-lich")
+    ws.hire_apprentice(wb, "Appy")
+    ws.hire_captain(wb, "Capy")
+    ws.set_wizard_state(wb, "lich")
+    ws.add_soldier(wb, "thug", "Thug", "", "")
+    return wb
+
+
+def _every_soldier_type() -> dict:
+    """Every hireable type at once: each soldier row's own template branches
+    (companions, constructs, firearms, mounts, legendaries...) rendered on one
+    page. Caps are lifted so as many as the rules allow actually get hired."""
+    from frostgrave_data import SOLDIERS
+
+    wb = _warband("nesting-all")
+    ws.hire_apprentice(wb, "Appy")
+    ws.hire_captain(wb, "Capy")
+    wb["homerules"]["max_soldiers"] = wb["homerules"]["max_specialists"] = 500
+    wb["wizard"]["level"] = 20
+    for type_key in SOLDIERS:
+        illusion = "thug" if type_key == "illusionary_soldier" else ""
+        ws.add_soldier(wb, type_key, type_key, "", illusion)
+    assert len(wb["soldiers"]) > 60, "roster should hold most soldier types"
+    return wb
+
+
+def _mounted_horse() -> dict:
+    """Workshop horse panel, owned and ridden. Its Mount / Dismount / Release
+    buttons share one row and each points at its own standalone form via
+    form="", so the panel only renders its controls at all once a Stable is
+    built and a horse bought — the shape this list would otherwise never see."""
+    wb = _warband("nesting-horse")
+    ws.hire_apprentice(wb, "Appy")
+    ws.hire_captain(wb, "Capy")
+    ws.add_soldier(wb, "thug", "Thug", "", "")
+    wb.setdefault("base", {}).setdefault("resources", []).append("stable")
+    ok, msg = ws.buy_horse(wb)
+    assert ok, msg
+    ok, msg = ws.mount_horse(wb, "wizard")
+    assert ok, msg
+    return wb
+
+
+def _shop_open() -> dict:
+    """The Shop card with the open shop showing: buy rows with their variant
+    dropdowns and the sell-from-vault list, plus the Workshop's Write Scroll,
+    Brew Potion and Alchemical Workshop panels over in the Treasury card —
+    all of them small forms inside a card, which is exactly the shape this
+    test guards."""
+    wb = _warband("nesting-shop")
+    ws.hire_apprentice(wb, "Appy")
+    wb["homerules"]["black_market_enabled"] = False
+    wb["base"] = {"location": "brewery", "resources": ["scriptorium", "giant_cauldron", "alchemical_workshop"]}
+    ws.add_vault_item(wb, "Potion of Healing")
+    ws.add_vault_item(wb, "Poison")
+    for spell_name, school in (("Write Scroll", "Sigilist"), ("Brew Potion", "Witch")):
+        sp = ws.find_spell(spell_id(school, spell_name))
+        wb["wizard"]["spells"].append(
+            {"id": sp["id"], "name": sp["name"], "school": sp["school"], "base_cn": sp["cn"], "cn": sp["cn"]}
+        )
+    return wb
+
+
+def _shop_black_market() -> dict:
+    """The other half of the Shop card: Black Market on, with a rolled offer
+    whose Buy buttons are their own forms."""
+    wb = _warband("nesting-bm")
+    wb["homerules"]["black_market_enabled"] = True
+    for _ in range(3):
+        ws.black_market_roll(wb, "Treasure Table", 8)
+    return wb
+
+
+def _inn_and_underworld() -> dict:
+    """The Inn's stay-behind picker, the campaign-reputation panel, and the
+    Underworld Muscle / Intimidation forms — three cards' worth of new controls."""
+    wb = _warband("nesting-inn")
+    wb["base"] = {"location": "inn", "resources": []}
+    wb["wizard"]["level"] = 25
+    wb["homerules"]["underworld_favors_enabled"] = True
+    ws.add_soldier(wb, "thug", "Thug", "", "")
+    ws.hire_underworld_muscle(wb, "thief")
+    ws.set_wizard_reputation(wb, expansions.REPUTATION_DEATH_OF_THE_LICH_LORD, True)
+    ws.set_inn_resident(wb, wb["soldiers"][0]["id"])
+    return wb
+
+
 @pytest.mark.parametrize(
     "build",
-    [_with_apprentice_and_captain, _no_apprentice, _vampire],
-    ids=["apprentice+captain", "no-apprentice", "vampire"],
+    [
+        _with_apprentice_and_captain,
+        _no_apprentice,
+        _vampire,
+        _lich,
+        _every_soldier_type,
+        _mounted_horse,
+        _shop_open,
+        _shop_black_market,
+        _inn_and_underworld,
+    ],
+    ids=[
+        "apprentice+captain",
+        "no-apprentice",
+        "vampire",
+        "lich",
+        "every-soldier-type",
+        "mounted-horse",
+        "shop-open",
+        "shop-black-market",
+        "inn-and-underworld",
+    ],
 )
 def test_warband_page_has_no_nested_forms(build):
     wb = build()

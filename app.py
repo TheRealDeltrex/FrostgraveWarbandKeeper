@@ -134,6 +134,7 @@ from game_content import (
     enrich_spells_with_descriptions,
     group_magic_items,
     load_bestiary,
+    load_common_items,
     load_core_rules,
     load_expansion_rules,
     load_ghost_archipelago,
@@ -157,6 +158,9 @@ from idle_watchdog import note_closing, note_heartbeat
 from warband_store import (
     ALT_XP_CONVERSIONS,
     BLACK_MARKET_ROLLS_PER_SCENARIO,
+    BREW_GREATER_PENALTY,
+    UNDERWORLD_INTIMIDATION_MAX_MODIFIER,
+    UNDERWORLD_MUSCLE,
     InvalidUpload,
     add_apprentice_mutation,
     add_apprentice_permanent_injury,
@@ -182,14 +186,17 @@ from warband_store import (
     advance_beastcrafter,
     animal_companion_limit,
     apply_animal_companion_crit_bonus,
+    apply_base_post_game,
     apply_captain_level_up,
     apply_captain_trick,
     apply_level_up,
     apply_monster_hunting_results,
     apply_portrait,
     apply_soldier_level_up,
+    apprentice_cost_paid,
     apprentice_effective_stats,
     apprentice_takes_over,
+    base_post_game_effect,
     base_summary,
     become_vampire,
     black_market_buy_item,
@@ -206,12 +213,15 @@ from warband_store import (
     buy_standard_item,
     buy_supply_points,
     captain_effective_stats,
+    cast_brew_potion,
+    cast_write_scroll,
     claim_free_underworld_favor,
     claim_monster_prize,
     consume_wilderness_supplies,
     consume_wilderness_supplies_half,
     consume_wilderness_supplies_none,
     create_warband,
+    default_homerules,
     delete_warband,
     discard_component,
     dismiss_all_temporary_members,
@@ -228,14 +238,17 @@ from warband_store import (
     hire_captain,
     hire_cost_preview,
     hire_ragged_warbands_soldier,
+    hire_underworld_muscle,
     import_warband_json,
     known_spell_ids,
     known_spell_names,
     list_unreadable_warbands,
     list_warbands,
     load_warband,
+    mix_potions,
     mount_horse,
     normalize_item_slots,
+    out_of_game_cast_info,
     pay_off_underworld_marker,
     portrait_filesystem_path,
     portraits_root_dir,
@@ -284,21 +297,31 @@ from warband_store import (
     sell_supply_points,
     set_animal_feature,
     set_base_location,
+    set_brewery_will,
     set_giant_blooded_pending,
+    set_inn_resident,
     set_member_status,
     set_permanent_injury_prosthetic,
     set_soldier_status,
     set_thrall_pending,
+    set_wizard_reputation,
     set_wizard_state,
+    shop_buy,
+    shop_catalog,
+    shop_sale_price,
+    shop_sell,
     soldier_count,
     soldier_from_book_enabled,
     spend_alt_xp,
     take_underworld_loan,
+    underworld_intimidation,
+    underworld_muscle_count,
     unlock_fin_dalka_spell,
     update_homerules,
     upgrade_firearm,
     use_component,
     use_supply_points,
+    vault_potions,
     warband_dir,
     warband_limits,
     wildwoods_summary,
@@ -743,19 +766,20 @@ def warband_new() -> str | Response:
         apprentice_gender = "female" if request.form.get("apprentice_gender") == "female" else "male"
         sources = _posted_sources(request.form)
         try:
-            starting_gold = int(request.form.get("starting_gold") or STARTING_GOLD)
+            starting_gold = max(0, int(request.form.get("starting_gold") or STARTING_GOLD))
         except ValueError:
             starting_gold = STARTING_GOLD
         try:
-            wizard_starting_xp = int(request.form.get("wizard_starting_xp") or 0)
+            wizard_starting_xp = max(0, int(request.form.get("wizard_starting_xp") or 0))
         except ValueError:
             wizard_starting_xp = 0
         try:
-            max_soldiers = int(request.form.get("max_soldiers") or MAX_SOLDIERS)
+            max_soldiers = max(0, int(request.form.get("max_soldiers") or MAX_SOLDIERS))
         except ValueError:
             max_soldiers = MAX_SOLDIERS
         try:
-            max_specialists = int(request.form.get("max_specialists") or MAX_SPECIALISTS)
+            posted_specialists = int(request.form.get("max_specialists") or MAX_SPECIALISTS)
+            max_specialists = max(0, min(max_soldiers, posted_specialists))
         except ValueError:
             max_specialists = MAX_SPECIALISTS
 
@@ -1040,6 +1064,75 @@ def _wizard_level_up_blocked(wb: dict, options: list[dict], learnable: list[dict
     return blocked
 
 
+# A pseudo-book at the top of the loot picker's rulebook list. Not a source
+# book: it collects the Core Rules items a wizard routinely acquires —
+# grimoires, scrolls, potions and magic weapons/armour — which are otherwise
+# spread across four tables and, unlike the Magic Item Table's twenty, are not
+# in magic_items.json at all. Mundane weapons are excluded (they are free, so
+# nobody records buying one) and so is the Magic Item Table itself, which the
+# per-book lists already reach.
+COMMON_ITEMS_BOOK = "Common items"
+COMMON_ITEM_CATEGORIES = ("Grimoire", "Scroll", "Potion", "Magic Weapon or Armour")
+
+
+def _common_item_names() -> list[str]:
+    return sorted(
+        (
+            it["name"]
+            for it in load_common_items()
+            if it.get("category") in COMMON_ITEM_CATEGORIES
+        ),
+        key=str.lower,
+    )
+
+
+def _wizard_knows_vault_grimoire_spell(wb: dict, item: dict) -> bool:
+    """Whether the wizard already knows the spell in a vault grimoire.
+
+    Core Rules p.104: "no wizard may ever sell a grimoire containing a spell
+    they do not already know." The app warns and lets the player confirm
+    rather than blocking, so this only decides whether to warn. A grimoire
+    whose spell can't be read out of the name is treated as known — a warning
+    the player can't act on is worse than none.
+    """
+    name = (item.get("name") or "")
+    _, _, spell = name.partition(":")
+    spell = spell.strip().lower()
+    if not spell:
+        return True
+    known = {
+        (s.get("name") or "").strip().lower()
+        for s in ((wb.get("wizard") or {}).get("spells") or [])
+    }
+    return spell in known
+
+
+def _item_name_suggestions(books: set[str]) -> set[str]:
+    """Magic-item names offered on the Vault "Add item" field and the loot
+    picker for `books`. The field stays free text — this only saves typing.
+
+    Fireheart contributes the Book of the Construct's five named sub-table
+    results plus the app-only "(All)" convenience item (see
+    expansions.CONSTRUCT_BOOK_SUGGESTED_NAMES); they are not magic_items.json
+    entries of their own, since that file is regenerated wholesale and the
+    book's own text names only the one generic item. That generic name is
+    dropped here — see expansions.CONSTRUCT_BOOK_BASE_NAME for why offering it
+    only produces a construct that refuses to unlock."""
+    names = {it["name"] for it in magic_items_for_sources(books)}
+    names.discard(expansions.CONSTRUCT_BOOK_BASE_NAME)
+    if "Fireheart" in books:
+        names |= {*expansions.CONSTRUCT_BOOK_SUGGESTED_NAMES}
+    if "The Frostgrave Folio" in books:
+        names.add(expansions.CONSTRUCT_BOOK_FOLIO_NAME)
+    if "The Perilous Dark" in books:
+        # Same reasoning as the Book of the Construct above: the generic name
+        # names no particular weapon, and which creature a bane weapon doubles
+        # damage against is what makes it worth carrying.
+        names.discard(expansions.BANE_WEAPON_BASE_NAME)
+        names |= {*expansions.BANE_WEAPON_VARIANT_NAMES}
+    return names
+
+
 @app.route("/warband/<warband_id>")
 def warband_view(warband_id: str) -> str:
     wb = _require_warband(warband_id)
@@ -1118,11 +1211,13 @@ def warband_view(warband_id: str) -> str:
         }
         for key, owned in vault_owned_counts.items()
     }
-    # Owned firearms (base or already partway upgraded) that still have at
-    # least one compatible, not-yet-applied upgrade — drives the "Upgrade a
-    # firearm" table on the Treasury, Vault and Workshop card. See
-    # warband_store.upgrade_firearm(): commissioning one consumes the vault
-    # copy of `name` and adds the combined item back in its place.
+    # Owned firearms (base or already partway upgraded) and every upgrade
+    # compatible with them — drives the "Upgrade a firearm" table on the
+    # Treasury, Vault and Workshop card. See warband_store.upgrade_firearm():
+    # commissioning one consumes the vault copy of `name` and adds the combined
+    # item back in its place. Already-applied upgrades stay in the list flagged
+    # `installed` rather than disappearing, so the table always shows the full
+    # set of what a firearm can take and what it already has.
     upgrade_catalog = [
         it for it in _filtered_standard_items(load_standard_items(), hr) if it.get("compatible_bases")
     ]
@@ -1140,8 +1235,9 @@ def warband_view(warband_id: str) -> str:
         if applied:
             firearm_modded_counts[base] = firearm_modded_counts.get(base, 0) + owned
         options = [
-            u for u in upgrade_catalog
-            if base in u["compatible_bases"] and u["name"].removesuffix(" (Firearm Upgrade)") not in applied
+            {**u, "installed": u["name"].removesuffix(" (Firearm Upgrade)") in applied}
+            for u in upgrade_catalog
+            if base in u["compatible_bases"]
         ]
         if options:
             owned_firearms.append({"name": vault_display_names[key], "owned": owned, "options": options})
@@ -1166,14 +1262,17 @@ def warband_view(warband_id: str) -> str:
         if not disable_app_mechanics:
             if c["source"] not in wb_sources or not soldier_from_book_enabled(wb, c["source"], c["key"]):
                 continue
-            if not (c.get("temporary") or not c.get("requires_spell") or c["requires_spell"] in wb_spells):
-                continue
+            spell_known = (
+                c.get("temporary") or not c.get("requires_spell") or c["requires_spell"] in wb_spells
+            )
             # Random Recruit Table III's two purely-random results (no vault
             # item, no spell — see expansions.RANDOM_ONLY_SOLDIER_TYPE_KEYS)
             # only clear once Ragged Warbands is what could actually produce
             # them; until then they still surface (disabled) in the special-
             # condition panel below rather than vanishing outright.
-            if c["key"] in expansions.RANDOM_ONLY_SOLDIER_TYPE_KEYS and not ragged_warbands_enabled:
+            if not spell_known:
+                state_block = f"Requires the {c['requires_spell']} spell."
+            elif c["key"] in expansions.RANDOM_ONLY_SOLDIER_TYPE_KEYS and not ragged_warbands_enabled:
                 state_block = (
                     "A Random Recruit Table III result — switch on Ragged Warbands & "
                     "Random Recruits under Additional Rules and Homerules to hire it."
@@ -1182,10 +1281,12 @@ def warband_view(warband_id: str) -> str:
                 state_block = expansions.soldier_state_block(
                     wb, c["key"], ignore_vault_item=ragged_warbands_enabled
                 )
-            # SPECIALLY_GATED_SOLDIERS still show up (in their own panel,
-            # below) so the block reason is visible even when the gate isn't
-            # met — everything else stays fully hidden until it clears.
-            if state_block and c["key"] not in expansions.SPECIALLY_GATED_SOLDIERS:
+            # SPECIALLY_GATED_SOLDIERS and any spell-summoned member (requires_spell)
+            # still show up (in their own panel, below) so the block reason is
+            # visible even when the gate isn't met — everything else stays fully
+            # hidden until it clears.
+            always_listed = c["key"] in expansions.SPECIALLY_GATED_SOLDIERS or bool(c.get("requires_spell"))
+            if state_block and not always_listed:
                 continue
         hireable.append({**c, "cost": hire_cost_preview(wb, c, c["key"]), "state_block": state_block})
     # The temporary-member catalog (Raise Zombie, Summon Demon) gets its own
@@ -1447,7 +1548,40 @@ def warband_view(warband_id: str) -> str:
         pending_levels=limits["pending_levels"],
         xp_per_level=limits["xp_per_level"],
         relations=SCHOOL_RELATIONS.get(wschool, {}),
+        apprentice_cost=expansions.apprentice_cost(wb),
+        apprentice_cost_paid=apprentice_cost_paid(wb),
         base=base_summary(wb),
+        shop_catalog=shop_catalog(wb),
+        BREW_GREATER_PENALTY=BREW_GREATER_PENALTY,
+        underworld_muscle_table=UNDERWORLD_MUSCLE,
+        underworld_muscle_count=underworld_muscle_count(wb),
+        UNDERWORLD_MUSCLE_MAX=2,
+        UNDERWORLD_INTIMIDATION_MAX_MODIFIER=UNDERWORLD_INTIMIDATION_MAX_MODIFIER,
+        inn_extra_slot=expansions.inn_extra_slot(wb),
+        brewery_will_on=bool((wb.get("base") or {}).get("brewery_will")),
+        REPUTATIONS=expansions.REPUTATIONS,
+        reputations_grantable=[
+            key for key, rep in expansions.REPUTATIONS.items() if rep["source"] in wb_sources
+        ],
+        wizard_reputations=expansions.wizard_reputations(wb),
+        vault_potions=vault_potions(wb),
+        alchemical_workshop_ready=(
+            "Spellcaster Magazine" in enabled_sources(wb)
+            and "alchemical_workshop" in ((wb.get("base") or {}).get("resources") or [])
+        ),
+        write_scroll_info=out_of_game_cast_info(wb, "Write Scroll"),
+        brew_potion_info=out_of_game_cast_info(wb, "Brew Potion"),
+        lesser_potions=[
+            it["name"] for it in load_common_items()
+            if it.get("category") == "Potion" and it.get("tier") == "lesser"
+        ],
+        greater_potions=[
+            it["name"] for it in load_common_items()
+            if it.get("category") == "Potion" and it.get("tier") == "greater"
+        ],
+        wizard_knows_vault_grimoire_spell=lambda item: _wizard_knows_vault_grimoire_spell(wb, item),
+        shop_sale_price=lambda item: shop_sale_price(wb, item),
+        base_post_game=base_post_game_effect(wb),
         base_locations=BASE_LOCATIONS,
         # Supplement resources (Crow Roost, Gondola Repair Shop) only appear once
         # their book is on. Anything already owned stays listed regardless, so a
@@ -1490,6 +1624,7 @@ def warband_view(warband_id: str) -> str:
         enabled_source_names=wb_sources,
         wizard_state=expansions.wizard_state(wb),
         wizard_state_kind=expansions.state_kind(wb),
+        wizard_portrait_state=expansions.wizard_portrait_state(wb),
         # The Beastcrafter III Animal Feature (Fast / Scales) is a real stat
         # change, so the wizard card shows the boosted value. The stored stats
         # stay clean — the feature is reversible by picking another one.
@@ -1510,17 +1645,8 @@ def warband_view(warband_id: str) -> str:
         alt_xp_enabled=expansions.alt_xp_enabled(wb),
         alt_xp_conversions=ALT_XP_CONVERSIONS,
         # Treasure from the enabled books, offered as suggestions on the vault's
-        # "Add item" field. It stays a free-text box — this only saves typing.
-        # Fireheart also contributes the Book of the Construct's five named
-        # sub-table results plus the app-only "(All)" convenience item (see
-        # expansions.CONSTRUCT_BOOK_SUGGESTED_NAMES) — not a magic_items.json
-        # entry of their own, since that file is regenerated wholesale and the
-        # book's own text names only the one generic item.
-        magic_item_names=sorted(
-            {it["name"] for it in magic_items_for_sources(wb_sources)}
-            | ({*expansions.CONSTRUCT_BOOK_SUGGESTED_NAMES} if "Fireheart" in wb_sources else set()),
-            key=str.lower,
-        ),
+        # "Add item" field — see _item_name_suggestions().
+        magic_item_names=sorted(_item_name_suggestions(wb_sources), key=str.lower),
         knows_revenant=expansions.REVENANT_SPELL in wb_spells,
         # Rulebook -> item -> power level/spell cascading picker, shared by the
         # After the Game card and the Vault's Add item field. Scoped to this
@@ -1528,16 +1654,19 @@ def warband_view(warband_id: str) -> str:
         # learnable-spell list — a book that's off shouldn't leak its content
         # into the page even inside a picker; "Other / write-in" is the escape
         # hatch for anything else actually found at the table.
-        loot_picker_books=sorted(wb_sources, key=source_book_order),
+        loot_picker_books=[COMMON_ITEMS_BOOK, *sorted(wb_sources, key=source_book_order)],
         loot_picker_data={
             "items_by_book": {
-                book: sorted(
-                    {it["name"] for it in magic_items_for_sources({book})}
-                    | ({*expansions.CONSTRUCT_BOOK_SUGGESTED_NAMES} if book == "Fireheart" else set()),
-                    key=str.lower,
-                )
-                for book in wb_sources
+                COMMON_ITEMS_BOOK: _common_item_names(),
+                **{
+                    book: sorted(_item_name_suggestions({book}), key=str.lower)
+                    for book in wb_sources
+                },
             },
+            # The picker tags a composed name with the book it came from
+            # ("Fate Stone (Fireheart)"). "Common items" is not a book, so a
+            # "(Common items)" suffix would be noise in the vault.
+            "no_suffix_books": [COMMON_ITEMS_BOOK],
             "spell_names": sorted(
                 {s["name"] for s in all_spells_flat() if s["source"] in wb_sources}, key=str.lower
             ),
@@ -1710,7 +1839,7 @@ def _act_dismiss_apprentice(wb: dict) -> tuple[bool, str]:
 
 @register_action("apprentice_takes_over")
 def _act_apprentice_takes_over(wb: dict) -> tuple[bool, str]:
-    return apprentice_takes_over(wb)
+    return apprentice_takes_over(wb, request.form.get("keep_reputations") == "on")
 
 
 @register_action("update_homerules")
@@ -2118,13 +2247,21 @@ def _act_spend_alt_xp(wb: dict) -> tuple[bool, str]:
 @register_action("post_game")
 def _act_post_game(wb: dict) -> tuple[bool, str]:
     gold_raw = (request.form.get("loot_gold") or "").strip()
+    gold_lost_raw = (request.form.get("loot_gold_lost") or "").strip()
     xp_raw = (request.form.get("loot_xp") or "").strip()
     captain_xp_raw = (request.form.get("loot_captain_xp") or "").strip()
-    gold = _parse_signed_int(gold_raw) if gold_raw else 0
+    gained = _parse_signed_int(gold_raw) if gold_raw else 0
+    # "Gold lost" is entered as a positive number and subtracted, but both
+    # fields accept either sign so one of them alone can carry the whole
+    # figure — a player who only ever nets out uses "Gold gained" and puts a
+    # minus in front. The captain field is `disabled` in the template when
+    # there is no captain, so the browser omits it and this reads 0.
+    lost = _parse_signed_int(gold_lost_raw) if gold_lost_raw else 0
     xp = _parse_signed_int(xp_raw) if xp_raw else 0
     captain_xp = _parse_signed_int(captain_xp_raw) if captain_xp_raw else 0
-    if gold is None or xp is None or captain_xp is None:
+    if gained is None or lost is None or xp is None or captain_xp is None:
         return False, "Enter whole numbers for gold and XP."
+    gold = gained - lost
     notes = request.form.get("loot_notes") or ""
     items_raw = request.form.get("loot_items") or ""
     items = [line.strip() for line in items_raw.splitlines() if line.strip()]
@@ -2135,6 +2272,118 @@ def _act_post_game(wb: dict) -> tuple[bool, str]:
     items += [x.strip() for x in request.form.getlist("loot_structured_items") if x.strip()]
     summary = record_game_loot(wb, gold, items, xp, notes, captain_xp)
     return True, summary
+
+
+@register_action("apply_base_post_game")
+def _act_apply_base_post_game(wb: dict) -> tuple[bool, str]:
+    die_raw = (request.form.get("base_die") or "").strip()
+    die = _parse_signed_int(die_raw) if die_raw else None
+    if die_raw and die is None:
+        return False, "Enter a whole number for the die roll."
+    return apply_base_post_game(wb, die)
+
+
+def _optional_die(field: str) -> tuple[int | None, str | None]:
+    raw = (request.form.get(field) or "").strip()
+    if not raw:
+        return None, None
+    value = _parse_signed_int(raw)
+    if value is None:
+        return None, "Enter the die you rolled, or leave it blank to auto-roll."
+    return value, None
+
+
+@register_action("hire_underworld_muscle")
+def _act_hire_underworld_muscle(wb: dict) -> tuple[bool, str]:
+    return hire_underworld_muscle(
+        wb, request.form.get("type_key") or "", request.form.get("name") or ""
+    )
+
+
+@register_action("underworld_intimidation")
+def _act_underworld_intimidation(wb: dict) -> tuple[bool, str]:
+    own, err = _optional_die("own_roll")
+    if err:
+        return False, err
+    target, err = _optional_die("target_roll")
+    if err:
+        return False, err
+    modifier = _parse_signed_int((request.form.get("modifier") or "0").strip()) or 0
+    will = _parse_signed_int((request.form.get("target_will") or "0").strip()) or 0
+    return underworld_intimidation(wb, modifier, own, will, target)
+
+
+@register_action("set_inn_resident")
+def _act_set_inn_resident(wb: dict) -> tuple[bool, str]:
+    return set_inn_resident(wb, request.form.get("soldier_id") or "")
+
+
+@register_action("set_brewery_will")
+def _act_set_brewery_will(wb: dict) -> tuple[bool, str]:
+    return set_brewery_will(wb, request.form.get("brewery_will") == "on")
+
+
+@register_action("set_wizard_reputation")
+def _act_set_wizard_reputation(wb: dict) -> tuple[bool, str]:
+    return set_wizard_reputation(
+        wb, request.form.get("reputation") or "", request.form.get("held") == "on"
+    )
+
+
+@register_action("mix_potions")
+def _act_mix_potions(wb: dict) -> tuple[bool, str]:
+    die_a, err = _optional_die("die_a")
+    if err:
+        return False, err
+    die_b, err = _optional_die("die_b")
+    if err:
+        return False, err
+    return mix_potions(
+        wb,
+        request.form.get("item_a") or "",
+        request.form.get("item_b") or "",
+        die_a,
+        die_b,
+    )
+
+
+@register_action("write_scroll")
+def _act_write_scroll(wb: dict) -> tuple[bool, str]:
+    die, err = _optional_die("die")
+    if err:
+        return False, err
+    return cast_write_scroll(wb, request.form.get("caster") or "wizard", request.form.get("spell") or "", die)
+
+
+@register_action("brew_potion")
+def _act_brew_potion(wb: dict) -> tuple[bool, str]:
+    die, err = _optional_die("die")
+    if err:
+        return False, err
+    return cast_brew_potion(wb, request.form.get("caster") or "wizard", request.form.get("potion") or "", die)
+
+
+@register_action("shop_buy")
+def _act_shop_buy(wb: dict) -> tuple[bool, str]:
+    return shop_buy(wb, request.form.get("item_name") or "", request.form.get("choice") or "")
+
+
+@register_action("shop_sell")
+def _act_shop_sell(wb: dict) -> tuple[bool, str]:
+    return shop_sell(wb, request.form.get("item_id") or "", request.form.get("price"))
+
+
+@register_action("set_black_market")
+def _act_set_black_market(wb: dict) -> tuple[bool, str]:
+    """The Black Market toggle lives at the top of the Shop card rather than in
+    Additional Rules, because it selects which half of that card is in play."""
+    hr = wb.setdefault("homerules", default_homerules())
+    hr["black_market_enabled"] = request.form.get("black_market_enabled") == "on"
+    return True, (
+        "Black Market Contacts on — the open shop is closed."
+        if hr["black_market_enabled"]
+        else "Black Market Contacts off — the open shop is back."
+    )
 
 
 @register_action("remove_vault_item")

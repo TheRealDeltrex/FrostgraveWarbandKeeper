@@ -1,0 +1,593 @@
+[
+ {
+  "name": "Potion of Healing",
+  "category": "Potion",
+  "tier": "lesser",
+  "purchase": 75,
+  "sale": 50,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Potion of Strength",
+  "category": "Potion",
+  "tier": "lesser",
+  "purchase": 100,
+  "sale": 40,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Potion of Toughness",
+  "category": "Potion",
+  "tier": "lesser",
+  "purchase": 50,
+  "sale": 30,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Elixir of Speed",
+  "category": "Potion",
+  "tier": "lesser",
+  "purchase": 50,
+  "sale": 30,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Potion of Invisibility",
+  "category": "Potion",
+  "tier": "lesser",
+  "purchase": 100,
+  "sale": 50,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Explosive Cocktail",
+  "category": "Potion",
+  "tier": "lesser",
+  "purchase": 100,
+  "sale": 30,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Potion of Teleportation",
+  "category": "Potion",
+  "tier": "lesser",
+  "purchase": 500,
+  "sale": 100,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Potion of Elemental Absorption",
+  "category": "Potion",
+  "tier": "lesser",
+  "purchase": 200,
+  "sale": 80,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Cordial of Clearsight",
+  "category": "Potion",
+  "tier": "lesser",
+  "purchase": 200,
+  "sale": 80,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Poison",
+  "category": "Potion",
+  "tier": "lesser",
+  "purchase": 100,
+  "sale": 30,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Philtre of Fury",
+  "category": "Potion",
+  "tier": "lesser",
+  "purchase": 300,
+  "sale": 120,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Potion of Iron Mind",
+  "category": "Potion",
+  "tier": "lesser",
+  "purchase": 50,
+  "sale": 30,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Bottle of Burrowing",
+  "category": "Potion",
+  "tier": "lesser",
+  "purchase": 200,
+  "sale": 80,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Philtre of Fairy Dust",
+  "category": "Potion",
+  "tier": "lesser",
+  "purchase": 50,
+  "sale": 30,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Construct Oil",
+  "category": "Potion",
+  "tier": "lesser",
+  "purchase": 100,
+  "sale": 50,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Potion of Fire Breath",
+  "category": "Potion",
+  "tier": "lesser",
+  "purchase": 200,
+  "sale": 80,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Potion of Preservation",
+  "category": "Potion",
+  "tier": "lesser",
+  "purchase": 500,
+  "sale": 200,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Elixir of the Chameleon",
+  "category": "Potion",
+  "tier": "lesser",
+  "purchase": 400,
+  "sale": 140,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Cordial of Empowerment",
+  "category": "Potion",
+  "tier": "greater",
+  "die_low": 1,
+  "die_high": 2,
+  "purchase": 500,
+  "sale": 200,
+  "ingredients": 200,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Shrinking Potion",
+  "category": "Potion",
+  "tier": "greater",
+  "die_low": 3,
+  "die_high": 4,
+  "purchase": 500,
+  "sale": 200,
+  "ingredients": 200,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Potion of Restoration",
+  "category": "Potion",
+  "tier": "greater",
+  "die_low": 5,
+  "die_high": 6,
+  "purchase": 2000,
+  "sale": 300,
+  "ingredients": 750,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Bottle of Dreams and Nightmares",
+  "category": "Potion",
+  "tier": "greater",
+  "die_low": 7,
+  "die_high": 8,
+  "purchase": 2000,
+  "sale": 300,
+  "ingredients": 500,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Shatterstar Draught",
+  "category": "Potion",
+  "tier": "greater",
+  "die_low": 9,
+  "die_high": 10,
+  "purchase": 1500,
+  "sale": 200,
+  "ingredients": 600,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Bottle of Darkness",
+  "category": "Potion",
+  "tier": "greater",
+  "die_low": 11,
+  "die_high": 12,
+  "purchase": 1500,
+  "sale": 300,
+  "ingredients": 600,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Ethereal Vacuum",
+  "category": "Potion",
+  "tier": "greater",
+  "die_low": 13,
+  "die_high": 14,
+  "purchase": 2000,
+  "sale": 200,
+  "ingredients": 800,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Potion of Invulnerability",
+  "category": "Potion",
+  "tier": "greater",
+  "die_low": 15,
+  "die_high": 16,
+  "purchase": null,
+  "sale": 400,
+  "ingredients": 2000,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Bottle of Null",
+  "category": "Potion",
+  "tier": "greater",
+  "die_low": 17,
+  "die_high": 18,
+  "purchase": null,
+  "sale": 200,
+  "ingredients": 1000,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Elixir of Life",
+  "category": "Potion",
+  "tier": "greater",
+  "die_low": 19,
+  "die_high": 20,
+  "purchase": null,
+  "sale": 1000,
+  "ingredients": 3000,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Hand Weapon, +1 damage modifier",
+  "category": "Magic Weapon or Armour",
+  "base_item": "Hand Weapon",
+  "effect": "+1 damage modifier",
+  "purchase": 300,
+  "sale": 125,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Hand Weapon, +1 Fight",
+  "category": "Magic Weapon or Armour",
+  "base_item": "Hand Weapon",
+  "effect": "+1 Fight",
+  "purchase": 500,
+  "sale": 200,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Hand Weapon, +2 Will",
+  "category": "Magic Weapon or Armour",
+  "base_item": "Hand Weapon",
+  "effect": "+2 Will",
+  "purchase": 300,
+  "sale": 125,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Two-Handed Weapon, +1 damage modifier",
+  "category": "Magic Weapon or Armour",
+  "base_item": "Two-Handed Weapon",
+  "effect": "+1 damage modifier",
+  "purchase": 300,
+  "sale": 125,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Two-Handed Weapon, +1 Fight",
+  "category": "Magic Weapon or Armour",
+  "base_item": "Two-Handed Weapon",
+  "effect": "+1 Fight",
+  "purchase": 500,
+  "sale": 200,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Two-Handed Weapon, +2 Will",
+  "category": "Magic Weapon or Armour",
+  "base_item": "Two-Handed Weapon",
+  "effect": "+2 Will",
+  "purchase": 300,
+  "sale": 125,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Bow, +1 damage modifier",
+  "category": "Magic Weapon or Armour",
+  "base_item": "Bow",
+  "effect": "+1 damage modifier",
+  "purchase": 300,
+  "sale": 125,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Bow, +1 Shoot",
+  "category": "Magic Weapon or Armour",
+  "base_item": "Bow",
+  "effect": "+1 Shoot",
+  "purchase": 600,
+  "sale": 250,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Crossbow, +1 damage modifier",
+  "category": "Magic Weapon or Armour",
+  "base_item": "Crossbow",
+  "effect": "+1 damage modifier",
+  "purchase": 300,
+  "sale": 125,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Crossbow, +1 Shoot",
+  "category": "Magic Weapon or Armour",
+  "base_item": "Crossbow",
+  "effect": "+1 Shoot",
+  "purchase": 600,
+  "sale": 250,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Dagger, +1 Fight",
+  "category": "Magic Weapon or Armour",
+  "base_item": "Dagger",
+  "effect": "+1 Fight",
+  "purchase": 400,
+  "sale": 200,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Dagger, +1 damage modifier",
+  "category": "Magic Weapon or Armour",
+  "base_item": "Dagger",
+  "effect": "+1 damage modifier",
+  "purchase": 400,
+  "sale": 150,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Dagger, +2 damage modifier",
+  "category": "Magic Weapon or Armour",
+  "base_item": "Dagger",
+  "effect": "+2 damage modifier",
+  "purchase": 500,
+  "sale": 200,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Light Armour, +1 Armour",
+  "category": "Magic Weapon or Armour",
+  "base_item": "Light Armour",
+  "effect": "+1 Armour",
+  "purchase": 600,
+  "sale": 200,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Heavy Armour, Elemental Absorption",
+  "category": "Magic Weapon or Armour",
+  "base_item": "Heavy Armour",
+  "effect": "Elemental Absorption",
+  "purchase": 800,
+  "sale": 300,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Ring of Protection, +1 Armour",
+  "category": "Magic Weapon or Armour",
+  "base_item": "Ring of Protection",
+  "effect": "+1 Armour",
+  "purchase": 600,
+  "sale": 250,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Cloak of Protection, +1 Armour",
+  "category": "Magic Weapon or Armour",
+  "base_item": "Cloak of Protection",
+  "effect": "+1 Armour",
+  "purchase": 600,
+  "sale": 250,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Cloak of Night, Elemental Absorption",
+  "category": "Magic Weapon or Armour",
+  "base_item": "Cloak of Night",
+  "effect": "Elemental Absorption",
+  "purchase": 500,
+  "sale": 200,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Staff, +1 Fight",
+  "category": "Magic Weapon or Armour",
+  "base_item": "Staff",
+  "effect": "+1 Fight",
+  "purchase": 300,
+  "sale": 125,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Shield, +1 Armour",
+  "category": "Magic Weapon or Armour",
+  "base_item": "Shield",
+  "effect": "+1 Armour",
+  "purchase": 700,
+  "sale": 250,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Staff of Power (1)",
+  "category": "Magic Item",
+  "purchase": 300,
+  "sale": 150,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Staff of Power (2)",
+  "category": "Magic Item",
+  "purchase": 400,
+  "sale": 200,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Ring of Transference",
+  "category": "Magic Item",
+  "purchase": 400,
+  "sale": 150,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Ring of Power (1)",
+  "category": "Magic Item",
+  "purchase": 200,
+  "sale": 100,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Orb of Power (6)",
+  "category": "Magic Item",
+  "purchase": 500,
+  "sale": 200,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Staff of Casting",
+  "category": "Magic Item",
+  "purchase": 500,
+  "sale": 200,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Boots of Speed",
+  "category": "Magic Item",
+  "purchase": 300,
+  "sale": 130,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Ring of Slow Fall",
+  "category": "Magic Item",
+  "purchase": 200,
+  "sale": 100,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Ring of Will",
+  "category": "Magic Item",
+  "purchase": 300,
+  "sale": 150,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Ring of Teleportation",
+  "category": "Magic Item",
+  "purchase": 400,
+  "sale": 150,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Gloves of Strength",
+  "category": "Magic Item",
+  "purchase": 300,
+  "sale": 150,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Robes of Arrow Turning",
+  "category": "Magic Item",
+  "purchase": 500,
+  "sale": 250,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Amulet of Resistance",
+  "category": "Magic Item",
+  "purchase": 300,
+  "sale": 100,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Construct Hammer",
+  "category": "Magic Item",
+  "purchase": 300,
+  "sale": 100,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Gloves of Casting",
+  "category": "Magic Item",
+  "purchase": 500,
+  "sale": 200,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Wand of Light",
+  "category": "Magic Item",
+  "purchase": 400,
+  "sale": 200,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Horn of Destruction",
+  "category": "Magic Item",
+  "purchase": 300,
+  "sale": 100,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Fate Stone",
+  "category": "Magic Item",
+  "purchase": 500,
+  "sale": 200,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Wand of Power (1)",
+  "category": "Magic Item",
+  "purchase": 300,
+  "sale": 150,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Staff of Power (3)",
+  "category": "Magic Item",
+  "purchase": 1200,
+  "sale": 300,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Grimoire",
+  "category": "Grimoire",
+  "variant": "spell",
+  "purchase": 500,
+  "sale": 200,
+  "sale_requires_known_spell": true,
+  "source": "Core Rules"
+ },
+ {
+  "name": "Scroll",
+  "category": "Scroll",
+  "variant": "spell",
+  "purchase": 250,
+  "sale": 30,
+  "source": "Core Rules"
+ }
+]

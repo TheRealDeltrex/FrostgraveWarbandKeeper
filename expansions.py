@@ -23,6 +23,8 @@ import re
 import game_content
 from frostgrave_data import (
     APPRENTICE_ITEM_SLOTS,
+    BASE_LOCATIONS,
+    BASE_RESOURCES,
     CARGO_TRANSPORT_BASE_CAPACITY,
     CARGO_TRANSPORT_UPGRADES,
     COMPONENT_POUCH_CAPACITY,
@@ -44,6 +46,8 @@ from frostgrave_data import (
     MAX_WIZARD_LEVEL,
     MONSTER_HUNTER_TYPE_KEY,
     POTION_MASTER_TYPE_KEY,
+    RANGIFER_HIRE_SURCHARGE,
+    RANGIFER_MAX_SOLDIERS,
     RANGIFER_STAT_CAPS,
     RANGIFER_XP_PER_LEVEL,
     RIDERLESS_HORSE_STATS,
@@ -146,6 +150,22 @@ def is_rangifer_shaman(wb: dict) -> bool:
     base stat line (RANGIFER_WIZARD_BASE) and its own XP/stat-cap/spell-list
     rules. See warband_store.playable_schools()/empty_wizard()."""
     return (wb.get("wizard") or {}).get("school") == "Rangifer"
+
+
+def wizard_portrait_state(wb: dict) -> str | None:
+    """The `state` arg for default_portrait_name()/resolve_portrait_path() for
+    this wizard, or None for the plain art. A Fire Giant or Rangifer Shaman
+    can independently become a Lich (state.kind, separate from the school
+    marker); there's no combined portrait for that, so the school art wins."""
+    if is_vampire(wb):
+        return "vampire"
+    if is_fire_giant(wb):
+        return "fire_giant"
+    if is_rangifer_shaman(wb):
+        return "rangifer_shaman"
+    if is_lich(wb):
+        return "lich"
+    return None
 
 
 def beastcrafter_tier(wb: dict) -> int:
@@ -376,6 +396,12 @@ RANGIFER_TROOP_TYPE_KEYS = frozenset({
     "rangifer_boar",
 })
 
+# The Issue 3 troop types whose catalog cost has the +80gc ordinary-wizard
+# surcharge baked in (RANGIFER_HIRE_SURCHARGE) — everything above except the
+# Boar (never hireable by an ordinary wizard) and the plain "rangifer"
+# (Thaw of the Lich Lord, priced separately). See soldier_cost().
+RANGIFER_SURCHARGED_TYPE_KEYS = RANGIFER_TROOP_TYPE_KEYS - {"rangifer", "rangifer_boar"}
+
 VAULT_ITEM_SOLDIERS = {
     "collegium_porter": "Porter Control Rod",
     "rangifer": "Book of the Rangifer",
@@ -438,6 +464,40 @@ CONSTRUCT_BOOK_ALL_NAME = "Book of the Construct (All)"
 # rolled results plus the app-only "All" convenience item) — what app.py
 # offers on the Vault "Add item" field and the loot picker under Fireheart.
 CONSTRUCT_BOOK_SUGGESTED_NAMES = [*CONSTRUCT_BOOK_VARIANT_NAMES, CONSTRUCT_BOOK_ALL_NAME]
+
+# The bare catalog name is never offered as a suggestion. Fireheart's own item
+# carries it, but recording it satisfies no gate — has_vault_item() needs the
+# specific sub-table result (CONSTRUCT_BOOK_VARIANT_NAMES), so the generic name
+# is a dead end that reads as a construct that refuses to unlock. The Frostgrave
+# Folio prints the identical name for an unrelated item (Enchant Weapon on a
+# construct, not construct-building), and the pickers dedupe by name, so the two
+# would merge into one entry either way. Both are dropped and the Folio's is
+# offered under the disambiguated name below; /reference still shows each book's
+# own printed name from magic_items.json.
+# The Perilous Dark p.79: a bane weapon found or bought is resolved by two
+# rolls — its weapon type (1-14 hand weapon, 15-20 two-handed) and the creature
+# it was built to kill. It does double damage against that creature and counts
+# as an ordinary magic weapon against everything else, so *which* bane weapon a
+# figure carries is real, printable state: enumerated the same way
+# CONSTRUCT_BOOK_VARIANT_NAMES is, rather than left to the vault's free text.
+BANE_WEAPON_TYPES = ["Hand Weapon", "Two-Handed Weapon"]
+BANE_WEAPON_TARGETS = [
+    "Wraith",
+    "Vampire",
+    "Frost Giants",
+    "Giant Worms",
+    "Snow Trolls",
+    "Werewolves",
+]
+BANE_WEAPON_VARIANT_NAMES = [
+    f"Bane Weapon ({weapon}, {target})"
+    for weapon in BANE_WEAPON_TYPES
+    for target in BANE_WEAPON_TARGETS
+]
+BANE_WEAPON_BASE_NAME = "Bane Weapon"
+
+CONSTRUCT_BOOK_BASE_NAME = "Book of the Construct"
+CONSTRUCT_BOOK_FOLIO_NAME = "Book of the Construct (Folio)"
 
 # Never hireable on its own — only a Rangifer Shaman's hide brings one, see
 # the VAULT_ITEM_SOLDIERS comment above.
@@ -542,16 +602,157 @@ def xp_per_level(wb: dict) -> int:
     return LICH_XP_PER_LEVEL if is_lich(wb) else XP_PER_LEVEL
 
 
-def soldier_surcharge(wb: dict) -> int:
-    """Extra gold every soldier costs because of the wizard's state."""
+def dire_hound_is_hound(wb: dict) -> bool:
+    """Whether the Dire Hound counts as a hound (homerule, default on).
+
+    The Dire Hound (Spellcaster Magazine) is both a beast and a Legendary
+    Soldier, and no book settles which side wins. This one flag decides both
+    places it matters — kennel eligibility and the Beastcrafter surcharge
+    exemption — so the two can never disagree.
+    """
+    return bool((wb.get("homerules") or {}).get("dire_hound_counts_as_hound", True))
+
+
+def kennel_eligible_type_keys(wb: dict) -> frozenset[str]:
+    """KENNEL_ELIGIBLE_TYPE_KEYS, minus the Dire Hound when the homerule is off."""
+    if dire_hound_is_hound(wb):
+        return KENNEL_ELIGIBLE_TYPE_KEYS
+    return KENNEL_ELIGIBLE_TYPE_KEYS - {"dire_hound"}
+
+
+def soldier_surcharge(wb: dict, type_key: str = "") -> int:
+    """Extra gold a soldier costs because of the wizard's state.
+
+    Into the Breeding Pits (pp.29-30) exempts war hounds at all three tiers:
+    "All soldiers (except war hounds) cost an additional 2gc/10gc/20gc to
+    hire." The exemption is for *beasts*, so it is deliberately narrower than
+    KENNEL_ELIGIBLE_TYPE_KEYS — that set is a roster-slot concept, and
+    Fireheart p.29 says construct hounds "count as standard soldiers" and only
+    stand in for the kennel slot, so they stay surcharged (a Beastcrafter who
+    wants a cheap one summons it instead). The Dire Hound follows
+    dire_hound_is_hound().
+    """
+    if type_key == "war_hound":
+        return 0
+    if type_key == "dire_hound" and dire_hound_is_hound(wb):
+        return 0
     tier = beastcrafter_tier(wb)
     return BEASTCRAFTER_TIER_BY_N[tier]["surcharge"] if tier else 0
 
 
+# Base bonuses to Casting Rolls, per resource/location key. These are bonuses
+# to the *roll*, never reductions of the printed Casting Number — CNs are left
+# exactly as the books print them (see CLAUDE.md), so this table is consulted
+# only where the app itself rolls, and the figure is shown beside the result so
+# a player rolling their own dice can apply it by hand.
+#
+# Deliberately partial: it covers what the app rolls for. Conditional bonuses
+# are left out rather than applied wrongly — the Construct Repair Tools' +2
+# is only for repairing or reviving a construct, not every Animate Construct.
+BASE_CASTING_BONUSES: dict[str, tuple[int, frozenset[str]]] = {
+    # Core Rules p.106-107 base resources.
+    "giant_cauldron": (1, frozenset({"Brew Potion"})),
+    "scriptorium": (1, frozenset({"Write Scroll"})),
+    "enchanters_workshop": (1, frozenset({"Animate Construct", "Embed Enchantment"})),
+    "crystal_ball": (1, frozenset({"Reveal Secret"})),
+    "arcane_candle": (1, frozenset({"Control Demon"})),
+    "summoning_candle": (1, frozenset({"Summon Demon"})),
+    "homunculus_jar": (1, frozenset({"Homunculus"})),
+    "lectern": (1, frozenset({"Absorb Knowledge"})),
+    "sacrificial_altar": (1, frozenset({"Revenant"})),
+    "shrine": (1, frozenset({"Miraculous Cure", "Restore Life"})),
+    "breeding_cages": (1, frozenset({"Animal Manipulation"})),
+}
+
+# Core Rules p.106 base *locations* (one per warband, unlike resources).
+BASE_LOCATION_CASTING_BONUSES: dict[str, tuple[int, frozenset[str]]] = {
+    "temple": (3, frozenset({"Miraculous Cure"})),
+    "crypt": (2, frozenset({"Raise Zombie", "Animate Skull"})),
+    "tower": (2, frozenset({"Reveal Secret", "Awareness"})),
+}
+
+
+def base_casting_bonus(wb: dict, spell_name: str) -> tuple[int, list[str]]:
+    """(total bonus, the base features granting it) for casting `spell_name`.
+
+    Returned rather than folded into anything, so callers can both apply it to
+    a roll they make and print it next to the result.
+    """
+    base = wb.get("base") or {}
+    total = 0
+    from_what: list[str] = []
+    location = base.get("location", "none")
+    entry = BASE_LOCATION_CASTING_BONUSES.get(location)
+    if entry and spell_name in entry[1]:
+        total += entry[0]
+        from_what.append(f"{BASE_LOCATIONS[location]['name']} +{entry[0]}")
+    for key in base.get("resources") or []:
+        entry = BASE_CASTING_BONUSES.get(key)
+        if entry and spell_name in entry[1]:
+            total += entry[0]
+            from_what.append(f"{BASE_RESOURCES[key]['name']} +{entry[0]}")
+    return total, from_what
+
+
+# Wizard reputations: campaign rewards a warband earns and then keeps. Stored
+# on the wizard because that is where the book puts them ("add ... to the notes
+# on their Wizard Sheet"), and because base["resources"] is wiped wholesale by
+# set_base_location() on every base move.
+#
+# Deliberately exempt from the source-book gate: a reputation is *earned* by
+# playing the book, and switching that book off afterwards is a misclick, not a
+# retraction. See CLAUDE.md — acquisition is gated, possession persists.
+REPUTATION_DEATH_OF_THE_LICH_LORD = "death_of_the_lich_lord"
+REPUTATIONS = {
+    REPUTATION_DEATH_OF_THE_LICH_LORD: {
+        "name": "Death of the Lich Lord",
+        "source": "Thaw of the Lich Lord",
+        # p.34: "Wizards with 'Reputation - Death of the Lich Lord' pay 5gc
+        # less whenever they hire any soldier and 10gc less when recruiting a
+        # new apprentice."
+        "effects": "Soldiers cost 5gc less to hire; a new apprentice costs 10gc less.",
+        "soldier_discount": 5,
+        "apprentice_discount": 10,
+    },
+}
+
+
+def wizard_reputations(wb: dict) -> list[str]:
+    return [
+        r
+        for r in ((wb.get("wizard") or {}).get("reputations") or [])
+        if r in REPUTATIONS
+    ]
+
+
+def has_reputation(wb: dict, key: str) -> bool:
+    return key in wizard_reputations(wb)
+
+
+def reputation_discount(wb: dict, field: str) -> int:
+    return sum(REPUTATIONS[r].get(field, 0) for r in wizard_reputations(wb))
+
+
+def apprentice_cost(wb: dict) -> int:
+    """What hiring an apprentice costs this warband right now.
+
+    Core Rules p.103: "(wizard level - 6) x 10 + 160gc" — a level-0 wizard pays
+    100gc (which is why warband creation is unaffected by the switch from a
+    flat price), a level 40 wizard pays 500gc. Floored at 0 rather than at
+    APPRENTICE_COST: a discount is allowed to take it below the starting price,
+    and no wizard level makes the formula itself go negative.
+    """
+    level = int((wb.get("wizard") or {}).get("level", 0))
+    return max(0, (level - 6) * 10 + 160 - reputation_discount(wb, "apprentice_discount"))
+
+
 def soldier_discount(wb: dict) -> int:
-    """Gold off every soldier from base resources (Carrier Pigeons: −10gc)."""
+    """Gold off every soldier hired: Carrier Pigeons -10gc, plus any wizard
+    reputation's own discount. They stack — different sources, and
+    soldier_cost() floors the total at 0 anyway."""
     owned = ((wb.get("base") or {}).get("resources")) or []
-    return 10 if "carrier_pigeons" in owned else 0
+    base = 10 if "carrier_pigeons" in owned else 0
+    return base + reputation_discount(wb, "soldier_discount")
 
 
 # A homerule, on by default: several supplement soldiers (Into the Breeding
@@ -613,8 +814,10 @@ def soldier_cost(wb: dict, info: dict, type_key: str = "", include_discount: boo
         base = EDITION_2_SOLDIER_COSTS[type_key]
     if type_key == "demon_hunter":
         base += demon_hunter_surcharge(wb)
+    if type_key in RANGIFER_SURCHARGED_TYPE_KEYS and is_rangifer_shaman(wb):
+        base -= RANGIFER_HIRE_SURCHARGE
     discount = soldier_discount(wb) if include_discount else 0
-    return max(0, base + soldier_surcharge(wb) - discount)
+    return max(0, base + soldier_surcharge(wb, type_key) - discount)
 
 
 def max_soldiers(wb: dict) -> int:
@@ -630,8 +833,33 @@ def max_soldiers(wb: dict) -> int:
     # imported 0/negative value must still be floored here or the roster cap
     # goes negative and every hire silently rejects with a nonsense message.
     base = max(1, int(base_raw)) if base_raw is not None else MAX_SOLDIERS
+    if is_rangifer_shaman(wb):
+        base = min(base, RANGIFER_MAX_SOLDIERS)
     extra = sum(1 for p in pact_tiers(wb) if p.get("boon") == BOON_EXTRA_SOLDIER)
-    return base + extra
+    return base + extra + (1 if inn_extra_slot(wb) else 0)
+
+
+def inn_extra_slot(wb: dict) -> bool:
+    """The Inn's extra roster place (Core Rules p.106).
+
+    "The wizard may keep an extra soldier in their warband. This soldier can be
+    a specialist. However, this extra soldier cannot be used in a game and must
+    remain in the base." Unlike the Kennel's slot this isn't restricted by
+    soldier type, so it folds straight into max_soldiers(); which body actually
+    sits it out is recorded per-soldier (`at_inn`) and changeable between games,
+    as the book allows.
+    """
+    return (wb.get("base") or {}).get("location") == "inn"
+
+
+def brewery_will_bonus(wb: dict) -> int:
+    """The Brewery's +1 Will for every soldier (Core Rules p.106), applied only
+    while the Home base card's toggle is on — it lasts for a game, and the app
+    tracks no games, so whether the casks are open is the player's call."""
+    base = wb.get("base") or {}
+    if base.get("location") != "brewery":
+        return 0
+    return 1 if base.get("brewery_will") else 0
 
 
 def kennel_bonus_available(wb: dict, type_key: str) -> bool:
@@ -648,12 +876,13 @@ def kennel_bonus_available(wb: dict, type_key: str) -> bool:
     else). Checked both in add_soldier()'s cap enforcement and in the hire
     catalog's per-row "can I hire this" display, so the button and the
     backend never disagree."""
-    if type_key not in KENNEL_ELIGIBLE_TYPE_KEYS:
+    eligible = kennel_eligible_type_keys(wb)
+    if type_key not in eligible:
         return False
     if "kennel" not in ((wb.get("base") or {}).get("resources") or []):
         return False
     return not any(
-        s.get("status") != "dead" and s.get("type_key") in KENNEL_ELIGIBLE_TYPE_KEYS
+        s.get("status") != "dead" and s.get("type_key") in eligible
         for s in wb.get("soldiers") or []
     )
 
@@ -1082,10 +1311,10 @@ def soldier_state_block(wb: dict, type_key: str, ignore_vault_item: bool = False
     of these regardless of whether the matching item happens to be owned, so
     the "Hire soldier" panel passes True for the vault-item-gated entries
     once that homerule is on. Every other reason here still applies."""
-    if type_key in LICH_BLOCKED_SOLDIERS and is_lich(wb):
-        return "A Rangifer will not serve an undead wizard — your wizard is a Lich."
-    if type_key in LICH_BLOCKED_SOLDIERS and is_vampire(wb):
-        return "A Rangifer will not serve an undead wizard — your wizard is a Vampire."
+    if type_key in LICH_BLOCKED_SOLDIERS and (is_lich(wb) or is_vampire(wb)):
+        return "A Rangifer will not serve an undead wizard."
+    if is_rangifer_shaman(wb) and type_key not in RANGIFER_TROOP_TYPE_KEYS:
+        return "A Rangifer Shaman only fields their own kind (Spellcaster Magazine, Issue 3)."
     if type_key in NEVER_HIREABLE_SOLDIERS and not is_rangifer_shaman(wb):
         return "Only hireable by a Rangifer Shaman."
     need_tier = BEASTCRAFTER_COMPANIONS.get(type_key)
@@ -1115,7 +1344,9 @@ def soldier_state_block(wb: dict, type_key: str, ignore_vault_item: bool = False
             and has_vault_item(wb, CONSTRUCT_BOOK_ALL_NAME)
         )
     ):
-        return f"Requires a {need_item} in the vault."
+        # "the", not "a": every VAULT_ITEM_SOLDIERS entry is a uniquely named
+        # item, and one of them ("Troll Shackles") is plural.
+        return f"Requires the {need_item}."
     return None
 
 
