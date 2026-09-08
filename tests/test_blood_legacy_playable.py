@@ -111,10 +111,10 @@ def _fire_giant_spell_keys() -> list[str]:
     ]
 
 
-def test_fire_giant_school_rejected_without_homerule():
+def test_fire_giant_school_rejected_without_blood_legacy():
     wb, msg = warband_store.create_warband(
         warband_name="Giants", wizard_name="Grond", school="Fire Giant",
-        spell_keys=[], fire_giant_playable=False,
+        spell_keys=[], enabled_sources_map={"Blood Legacy": False},
     )
     assert wb is None
     assert "fire giant" in msg.lower()
@@ -123,7 +123,7 @@ def test_fire_giant_school_rejected_without_homerule():
 def test_fire_giant_wizard_stats_no_apprentice_and_health_cap():
     wb, msg = warband_store.create_warband(
         warband_name="Giants", wizard_name="Grond", school="Fire Giant",
-        spell_keys=_fire_giant_spell_keys(), fire_giant_playable=True,
+        spell_keys=_fire_giant_spell_keys(), enabled_sources_map={"Blood Legacy": True},
         with_apprentice=False,
     )
     assert wb, msg
@@ -141,7 +141,7 @@ def test_fire_giant_wizard_stats_no_apprentice_and_health_cap():
 def test_fire_giant_cannot_take_apprentice_at_creation():
     wb, msg = warband_store.create_warband(
         warband_name="Giants", wizard_name="Grond", school="Fire Giant",
-        spell_keys=_fire_giant_spell_keys(), fire_giant_playable=True,
+        spell_keys=_fire_giant_spell_keys(), enabled_sources_map={"Blood Legacy": True},
         with_apprentice=True,
     )
     assert wb is None
@@ -151,7 +151,7 @@ def test_fire_giant_cannot_take_apprentice_at_creation():
 def test_fire_giant_cannot_learn_chronomancer_or_write_scroll():
     wb, msg = warband_store.create_warband(
         warband_name="Giants", wizard_name="Grond", school="Fire Giant",
-        spell_keys=_fire_giant_spell_keys(), fire_giant_playable=True,
+        spell_keys=_fire_giant_spell_keys(), enabled_sources_map={"Blood Legacy": True},
     )
     assert wb, msg
     chrono = {"name": "Fast Act", "school": "Chronomancer", "source": "Core Rules"}
@@ -188,10 +188,10 @@ def _vampire_spell_keys() -> list[str]:
     ]
 
 
-def test_vampire_school_rejected_without_homerule():
+def test_vampire_school_rejected_without_blood_legacy():
     wb, msg = warband_store.create_warband(
         warband_name="Nightfall", wizard_name="Countess", school="Vampire",
-        spell_keys=[], vampire_playable=False,
+        spell_keys=[], enabled_sources_map={"Blood Legacy": False},
     )
     assert wb is None
     assert "vampire" in msg.lower()
@@ -200,7 +200,7 @@ def test_vampire_school_rejected_without_homerule():
 def test_vampire_wizard_stats_no_apprentice_bigger_roster_and_caps():
     wb, msg = warband_store.create_warband(
         warband_name="Nightfall", wizard_name="Countess", school="Vampire",
-        spell_keys=_vampire_spell_keys(), vampire_playable=True,
+        spell_keys=_vampire_spell_keys(), enabled_sources_map={"Blood Legacy": True},
         with_apprentice=False,
     )
     assert wb, msg
@@ -222,7 +222,7 @@ def test_vampire_wizard_stats_no_apprentice_bigger_roster_and_caps():
 def test_vampire_cannot_take_apprentice_at_creation():
     wb, msg = warband_store.create_warband(
         warband_name="Nightfall", wizard_name="Countess", school="Vampire",
-        spell_keys=_vampire_spell_keys(), vampire_playable=True,
+        spell_keys=_vampire_spell_keys(), enabled_sources_map={"Blood Legacy": True},
         with_apprentice=True,
     )
     assert wb is None
@@ -232,7 +232,7 @@ def test_vampire_cannot_take_apprentice_at_creation():
 def test_vampire_cannot_learn_thaumaturge_spells_or_field_a_rangifer():
     wb, msg = warband_store.create_warband(
         warband_name="Nightfall", wizard_name="Countess", school="Vampire",
-        spell_keys=_vampire_spell_keys(), vampire_playable=True,
+        spell_keys=_vampire_spell_keys(), enabled_sources_map={"Blood Legacy": True},
     )
     assert wb, msg
     thaum_spell = {"name": "Heal", "school": "Thaumaturge", "source": "Core Rules"}

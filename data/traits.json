@@ -335,6 +335,11 @@
     "text": "This creature cannot be seen beyond 12\" and gains +3 Fight against shooting attacks."
   },
   {
+    "name": "Smoke Release",
+    "source": "Fireheart",
+    "text": "Once per game, this creature may create a 3\" cloud (or a moving 1\"x3\"xup to 6\" line) that blocks line of sight. At the end of each turn, roll a die for the cloud/line: on a 16+ it dissipates."
+  },
+  {
     "name": "Spell Reflection",
     "source": "The Red King",
     "text": "Any time a spell is successfully cast upon this creature, roll a die: on a 16+ the spell is reflected back on the figure that originally cast the spell. This spellcaster should make any Will Rolls or Combat Rolls required as the target of the spell. This includes any spells that include the creature in their area of effect."
@@ -383,6 +388,11 @@
     "name": "Thaumaturgic Vulnerability",
     "source": "Blood Legacy",
     "text": "This creature suffers -1 Will against spells cast by a Thaumaturge."
+  },
+  {
+    "name": "Treasure Lifter",
+    "source": "Fireheart",
+    "text": "This creature may pick up a treasure token with no action cost."
   },
   {
     "name": "True Sight",
