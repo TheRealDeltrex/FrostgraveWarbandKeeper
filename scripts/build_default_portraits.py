@@ -49,6 +49,9 @@ ALIASES = {
     "female_wizard_vampire": "wizard_vampire_female",
     "wizard_s_apprentice": "apprentice",
     "female_wizard_s_apprentice": "apprentice_female",
+    "wizard_fire_giant": "wizard_fire_giant",
+    "female_wizard_fire_giant": "wizard_fire_giant_female",
+    "rangifer_shamen": "wizard_rangifer_shaman",
     "captain": "captain",
     "construct_small": "small_construct",
     "construct_medium": "medium_construct",
@@ -59,6 +62,12 @@ ALIASES = {
     "imp": "summoned_imp",
     "minor_demon": "summoned_minor_demon",
     "major_demon": "summoned_major_demon",
+    "guide_expert": "expert_guide",
+    "burden_construct": "construct_of_burden",
+    "candle_jack_shield_normal": "candle_jack",
+    "candle_jack_2h_normal": "candle_jack_two_handed",
+    "candle_jack_shield_large": "candle_jack_large",
+    "candle_jack_2h_large": "candle_jack_large_two_handed",
 }
 
 

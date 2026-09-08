@@ -270,3 +270,129 @@ def test_dot_ids_cannot_escape_the_portraits_root(hostile_id):
     """portrait_dir('..') used to resolve to the data-dir root, one level above
     portraits/ — delete_warband() would then unlink every loose file there."""
     assert ws.portrait_dir(hostile_id).resolve().parent == ws.portraits_root_dir().resolve()
+
+
+# --- Whole-file type fuzz -----------------------------------------------------
+#
+# Every field of a full warband (apprentice, captain, a spread of soldier
+# types), replaced in turn by each wrong-typed value, must either be refused
+# at import or produce a warband whose page and PDF still render. The
+# 2026-09-08 audit found 14 fields that imported fine and 500'd forever
+# (full_audit_2026-09-08.md, F6); this keeps the whole class closed rather
+# than one field at a time. ~250 paths × 10 values, each a view + PDF render:
+# about five minutes, by far the slowest test in the suite — run it when
+# touching _normalize_warband(), import, or the PDF, not as a routine check.
+
+_BAD_VALUES = [None, "str", 123, -7, [], {}, ["x"], {"a": 1}, True, 1.5]
+
+
+def _full_export() -> dict:
+    from frostgrave_data import spell_id
+
+    school = "Elementalist"
+    spells = [
+        spell_id(school, "Wall"),
+        spell_id(school, "Elemental Bolt"),
+        spell_id(school, "Elemental Shield"),
+        spell_id("Chronomancer", "Fast Act"),
+        spell_id("Enchanter", "Enchant Weapon"),
+        spell_id("Summoner", "Leap"),
+        spell_id("Necromancer", "Bone Dart"),
+        spell_id("Thaumaturge", "Heal"),
+    ]
+    wb, msg = ws.create_warband("fuzz", "W", school, spells, True, "A")
+    assert wb is not None, msg
+    hr = wb["homerules"]
+    for key, value in ws.default_homerules().items():
+        if isinstance(value, bool):
+            hr[key] = True
+    for book in hr["enabled_sources"]:
+        hr["enabled_sources"][book] = True
+    hr["max_soldiers"] = hr["max_specialists"] = 50
+    wb["gold"] = 90000
+    ws.hire_captain(wb, "Cap")
+    for type_key in ("thug", "war_hound", "man_at_arms", "musketeer", "apprentice_construct"):
+        ws.add_soldier(wb, type_key, type_key, "", "")
+    # Save and reload so the export carries every key _normalize_warband()
+    # backfills (fin_dalka, horse, supply_points, monster_hunting...) — a
+    # fresh create_warband() dict lacks them and the walk would never visit them.
+    ws.save_warband(wb)
+    return json.loads(ws.export_warband_json(ws.load_warband(wb["id"])))
+
+
+def _field_paths(obj, prefix=(), depth=0):
+    if depth > 3:
+        return
+    if isinstance(obj, dict):
+        for key, value in obj.items():
+            if prefix == () and key == "id":
+                continue
+            yield prefix + (key,)
+            yield from _field_paths(value, prefix + (key,), depth + 1)
+    elif isinstance(obj, list) and obj:
+        yield prefix + (0,)
+        yield from _field_paths(obj[0], prefix + (0,), depth + 1)
+
+
+_FUZZ_BASE = None
+
+
+def _fuzz_base() -> dict:
+    global _FUZZ_BASE
+    if _FUZZ_BASE is None:
+        _FUZZ_BASE = _full_export()
+    return _FUZZ_BASE
+
+
+@pytest.mark.parametrize("bad", _BAD_VALUES, ids=repr)
+def test_every_field_with_a_wrong_type_still_renders(bad):
+    import copy
+
+    import app as app_module
+
+    app_module.app.config["TESTING"] = True
+    client = app_module.app.test_client()
+    base = _fuzz_base()
+    failures = []
+    for path in _field_paths(base):
+        data = copy.deepcopy(base)
+        target = data
+        for key in path[:-1]:
+            target = target[key]
+        target[path[-1]] = bad
+        data["id"] = None
+        try:
+            wb = ws.import_warband_json(json.dumps(data))
+        except Exception:
+            continue  # refused at import: fine
+        ws.save_warband(wb)
+        label = ".".join(map(str, path))
+        for suffix in ("", "/pdf"):
+            try:
+                resp = client.get(f"/warband/{wb['id']}{suffix}")
+                if resp.status_code != 200:
+                    failures.append(f"{label}{suffix or '/view'} -> HTTP {resp.status_code}")
+            except Exception as exc:  # noqa: BLE001 - any raise is the failure
+                failures.append(f"{label}{suffix or '/view'} -> {type(exc).__name__}: {exc}")
+        ws.delete_warband(wb["id"])
+    assert not failures, "imported fine, then crashed:\n  " + "\n  ".join(failures)
+
+
+@pytest.mark.parametrize("bad_id", [123, None, [], {}, 1.5, True], ids=repr)
+def test_hand_edited_non_string_id_is_repaired_from_the_filename(fresh_warband, bad_id):
+    """The import path forces a fresh id, but a hand-edited file keeps whatever
+    `id` it carries. A non-string one renders fine and then raises
+    `TypeError: expected string or bytes-like object` out of `warband_path()`
+    on the next `save_warband()` — so every mutation 500s, not just one view."""
+    ws.save_warband(fresh_warband)
+    file_id = fresh_warband["id"]
+    path = ws.warband_path(file_id)
+    data = json.loads(path.read_text(encoding="utf-8"))
+    data["id"] = bad_id
+    path.write_text(json.dumps(data), encoding="utf-8")
+
+    loaded = ws.load_warband(file_id)
+    assert loaded is not None
+    assert loaded["id"] == file_id
+    ws.save_warband(loaded)  # used to raise
+    assert ws.warband_path(loaded["id"]) == path

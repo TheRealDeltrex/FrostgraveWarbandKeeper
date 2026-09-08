@@ -1201,6 +1201,57 @@ code {
   min-width: 0;
 }
 
+/* Standing note at the top of the Shop card. Gold rather than red: the shop
+   isn't doing anything wrong, it just can't know a table's house rules. */
+.shop-warning {
+  color: var(--warn);
+  font-size: 0.85rem;
+  margin: 0 0 0.7rem;
+}
+
+/* Sell-from-vault confirmation dialog. One shared <dialog> for the whole
+   list — a price field per row is what made that section taller than the
+   shop above it. */
+.fg-dialog {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border-lit);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.1rem;
+  max-width: 28rem;
+}
+
+.fg-dialog::backdrop {
+  background: rgba(3, 7, 13, 0.7);
+}
+
+.fg-dialog .warn-text {
+  color: var(--error);
+  margin: 0 0 0.5rem;
+}
+
+.fg-dialog p {
+  margin: 0 0 0.6rem;
+}
+
+.fg-dialog-actions {
+  display: flex;
+  /* Opposite corners, not merely adjacent: Sell sits bottom-left and Abort
+     bottom-right, so neither a slipped mouse nor a thumb on a tablet can
+     land on the wrong one. */
+  justify-content: space-between;
+  gap: 2rem;
+  margin-top: 0.9rem;
+}
+
+/* Badge strip under a wizard/apprentice/captain portrait. Every badge for
+   that figure belongs here — mounted, mutated, legendary/specialist, wizard
+   reputations — rather than scattered through the card body. */
+.figure-badges {
+  text-align: center;
+  margin-top: 0.3rem;
+}
+
 /* Spell picker */
 .spell-school {
   border: 1px solid var(--border-soft);

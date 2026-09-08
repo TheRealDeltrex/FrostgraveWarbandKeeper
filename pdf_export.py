@@ -466,12 +466,9 @@ def build_warband_pdf(wb: dict) -> bytes:
     y0 = pdf.get_y()
     school = wiz.get("school", "")
     # Lich / Beastcrafter / pact-holder, if any — it changes how the wizard levels
-    # and what they may field, so it belongs on the printed sheet. Vampire and
-    # Lich are also the two states with their own default portrait art.
+    # and what they may field, so it belongs on the printed sheet.
     state_kind = expansions.state_kind(wb)
-    portrait_state = "vampire" if school == "Vampire" else (
-        "lich" if state_kind == expansions.STATE_LICH else None
-    )
+    portrait_state = expansions.wizard_portrait_state(wb)
     _draw_portrait(
         pdf, wiz.get("portrait"), pdf.l_margin, y0, wiz_size, "wizard",
         gender=wiz.get("gender"), state=portrait_state,
