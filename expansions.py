@@ -44,6 +44,8 @@ from frostgrave_data import (
     MAX_WIZARD_LEVEL,
     MONSTER_HUNTER_TYPE_KEY,
     POTION_MASTER_TYPE_KEY,
+    RANGIFER_STAT_CAPS,
+    RANGIFER_XP_PER_LEVEL,
     RIDERLESS_HORSE_STATS,
     SOLDIER_ITEM_SLOTS,
     SPELL_COMPONENT_BAG_CAPACITY,
@@ -136,6 +138,14 @@ def is_vampire(wb: dict) -> bool:
     stat line (WIZARD_BASE), unlike Fire Giant, so only its caps/leveling/
     spell restrictions differ."""
     return (wb.get("wizard") or {}).get("school") == "Vampire"
+
+
+def is_rangifer_shaman(wb: dict) -> bool:
+    """Spellcaster Magazine's Rangifer Shaman — same "school marker, not a
+    wizard state" reasoning as is_fire_giant()/is_vampire(); it uses its own
+    base stat line (RANGIFER_WIZARD_BASE) and its own XP/stat-cap/spell-list
+    rules. See warband_store.playable_schools()/empty_wizard()."""
+    return (wb.get("wizard") or {}).get("school") == "Rangifer"
 
 
 def beastcrafter_tier(wb: dict) -> int:
@@ -351,7 +361,21 @@ PACT_BOON_SOLDIERS = {"chilopendra": BOON_EXTRA_SOLDIER}
 # The rangifer troop types (Spellcaster Magazine, Issue 3) are only fieldable
 # via the Book of the Rangifer (Thaw of the Lich Lord). The Rangifer Boar is
 # excluded here — it only comes with a Rangifer Shaman's own hide, not the
-# Book of the Rangifer — and is blocked outright below instead.
+# Book of the Rangifer — and is blocked outright below instead. A Rangifer
+# Shaman needs neither gate for their own kind — see is_rangifer_shaman()'s
+# carve-outs in soldier_state_block() below.
+RANGIFER_TROOP_TYPE_KEYS = frozenset({
+    "rangifer",
+    "rangifer_ambusher",
+    "rangifer_charger",
+    "rangifer_herdsman",
+    "rangifer_hewer",
+    "rangifer_hurler",
+    "rangifer_packdeer",
+    "rangifer_war_leader",
+    "rangifer_boar",
+})
+
 VAULT_ITEM_SOLDIERS = {
     "collegium_porter": "Porter Control Rod",
     "rangifer": "Book of the Rangifer",
@@ -368,7 +392,52 @@ VAULT_ITEM_SOLDIERS = {
     "werewolf": "Book of the Werewolf",
     "snow_troll": "Troll Shackles",
     "foulhorn": "Book of the Foulhorn",
+    # Fireheart's Book of the Construct (p.71-72): the item found/bought is
+    # generically named, but names one specific construct type via its own
+    # sub-table roll — "there are actually numerous different Books of the
+    # Construct, each giving instructions on how to build and animate a
+    # specific type of construct." A vault item is hand-typed free text (see
+    # has_vault_item's substring match above), so CONSTRUCT_BOOK_VARIANT_NAMES
+    # below gives each roll result its own suggested name (e.g. "Book of the
+    # Construct (Blade-Dog)") — a player records which one they actually
+    # rolled, and only that result's construct type(s) unlock. also
+    # requires_spell="Animate Construct" (frostgrave_data.SOLDIERS), so
+    # add_soldier needs both gates satisfied.
+    "blade_dog": "Book of the Construct (Blade-Dog)",
+    "glass_man": "Book of the Construct (Glass Man)",
+    "glass_man_large": "Book of the Construct (Glass Man)",
+    "candle_jack": "Book of the Construct (Candle-Jack)",
+    "candle_jack_two_handed": "Book of the Construct (Candle-Jack)",
+    "candle_jack_large": "Book of the Construct (Candle-Jack)",
+    "candle_jack_large_two_handed": "Book of the Construct (Candle-Jack)",
+    "demonic_prison": "Book of the Construct (Demonic Prison)",
+    "construct_of_burden": "Book of the Construct (Construct of Burden)",
 }
+
+# The five sub-table results a "Book of the Construct" can roll (Fireheart
+# p.72's Book of the Construct Table), offered as vault "Add item" / loot
+# picker suggestions alongside the plain catalog name — see the
+# VAULT_ITEM_SOLDIERS comment above for why a specific name is required rather
+# than the bare "Book of the Construct".
+CONSTRUCT_BOOK_VARIANT_NAMES = [
+    "Book of the Construct (Blade-Dog)",
+    "Book of the Construct (Glass Man)",
+    "Book of the Construct (Candle-Jack)",
+    "Book of the Construct (Demonic Prison)",
+    "Book of the Construct (Construct of Burden)",
+]
+
+# Not a real sub-table result — an app-only convenience item that satisfies
+# every specific Book of the Construct gate at once (see soldier_state_block's
+# vault-item check above). Covers scenarios/campaigns that call for a
+# construct type the sub-table roll didn't happen to produce, and is handy for
+# testing every type without rolling five separate books.
+CONSTRUCT_BOOK_ALL_NAME = "Book of the Construct (All)"
+
+# All six Book of the Construct vault-item suggestions together (the five
+# rolled results plus the app-only "All" convenience item) — what app.py
+# offers on the Vault "Add item" field and the loot picker under Fireheart.
+CONSTRUCT_BOOK_SUGGESTED_NAMES = [*CONSTRUCT_BOOK_VARIANT_NAMES, CONSTRUCT_BOOK_ALL_NAME]
 
 # Never hireable on its own — only a Rangifer Shaman's hide brings one, see
 # the VAULT_ITEM_SOLDIERS comment above.
@@ -454,7 +523,11 @@ def has_vault_item(wb: dict, needle: str) -> bool:
 def xp_per_level(wb: dict) -> int:
     """XP one wizard level costs. A Lich levels more slowly; a Fire Giant
     levels more slowly still (Blood Legacy: 200xp, vs. a Lich's 150xp); a
-    Vampire's 120xp sits between the two. The book also raises a Fire Giant's
+    Vampire's 120xp sits between the two. A Rangifer Shaman levels fastest of
+    all, at 100xp (Spellcaster Magazine, Issue 3) — the same rate as an
+    ordinary wizard's XP_PER_LEVEL, but kept as its own constant since the two
+    are set by unrelated books and shouldn't drift together by accident. The
+    book also raises a Fire Giant's
     per-game XP cap to 400 (a Vampire's stays at the ordinary 300) — a
     per-game (not per-warband-lifetime) limit this app has no bookkeeping for
     anywhere else (same as the niggling injury/prosthetic upkeep fees), so
@@ -464,6 +537,8 @@ def xp_per_level(wb: dict) -> int:
         return FIRE_GIANT_XP_PER_LEVEL
     if is_vampire(wb):
         return VAMPIRE_XP_PER_LEVEL
+    if is_rangifer_shaman(wb):
+        return RANGIFER_XP_PER_LEVEL
     return LICH_XP_PER_LEVEL if is_lich(wb) else XP_PER_LEVEL
 
 
@@ -587,11 +662,14 @@ def wizard_stat_caps(wb: dict) -> dict:
     """Hard ceilings on the wizard's stats, {stat: max}. For an ordinary
     wizard these come from the Wizard stat limits homerule (2e core defaults:
     Fight/Shoot 5, Will 8, Health 20); a Lich instead uses its own fixed caps
-    (Will 10, Health 25). Blood Legacy's Increased Maximum Health stacks its
+    (Will 10, Health 25), and a Rangifer Shaman its own (Fight 5, Shoot 5,
+    Will 8, Health 18). Blood Legacy's Increased Maximum Health stacks its
     level-based bonus on top of whichever health cap applies either way."""
     hr = wb.get("homerules") or {}
     if is_lich(wb):
         caps = dict(LICH_STAT_CAPS)
+    elif is_rangifer_shaman(wb):
+        caps = dict(RANGIFER_STAT_CAPS)
     else:
         caps = dict(hr.get("wizard_stat_limits") or WIZARD_STAT_LIMITS_DEFAULT)
     if is_fire_giant(wb):
@@ -1008,7 +1086,7 @@ def soldier_state_block(wb: dict, type_key: str, ignore_vault_item: bool = False
         return "A Rangifer will not serve an undead wizard — your wizard is a Lich."
     if type_key in LICH_BLOCKED_SOLDIERS and is_vampire(wb):
         return "A Rangifer will not serve an undead wizard — your wizard is a Vampire."
-    if type_key in NEVER_HIREABLE_SOLDIERS:
+    if type_key in NEVER_HIREABLE_SOLDIERS and not is_rangifer_shaman(wb):
         return "Only hireable by a Rangifer Shaman."
     need_tier = BEASTCRAFTER_COMPANIONS.get(type_key)
     if need_tier and beastcrafter_tier(wb) < need_tier:
@@ -1018,8 +1096,25 @@ def soldier_state_block(wb: dict, type_key: str, ignore_vault_item: bool = False
     if need_boon and not any(p.get("boon") == need_boon for p in pact_tiers(wb)):
         boon = PACT_BOON_BY_ID[need_boon]["name"]
         return f"Requires the {boon} pact boon."
+    # A Rangifer Shaman fields their own kind directly — neither the Book of
+    # the Rangifer nor (for the Boar) any item is needed.
+    if type_key in RANGIFER_TROOP_TYPE_KEYS and is_rangifer_shaman(wb):
+        return None
     need_item = VAULT_ITEM_SOLDIERS.get(type_key)
-    if need_item and not ignore_vault_item and not has_vault_item(wb, need_item):
+    if (
+        need_item
+        and not ignore_vault_item
+        and not has_vault_item(wb, need_item)
+        # "Book of the Construct (All)" is an app-only convenience item (not in
+        # the book) that satisfies any of the five specific rolls at once — for
+        # a scenario that calls for a construct type the sub-table roll didn't
+        # happen to produce, or for quickly testing every type without rolling
+        # five separate books. See CONSTRUCT_BOOK_ALL_NAME.
+        and not (
+            need_item.startswith("Book of the Construct")
+            and has_vault_item(wb, CONSTRUCT_BOOK_ALL_NAME)
+        )
+    ):
         return f"Requires a {need_item} in the vault."
     return None
 
@@ -1033,6 +1128,8 @@ def spell_state_block(wb: dict, spell: dict) -> str | None:
         return "A Fire Giant Wizard cannot learn Chronomancer spells or Write Scroll (Blood Legacy)."
     if is_vampire(wb) and spell.get("school") == "Thaumaturge":
         return "A Vampire Wizard cannot learn Thaumaturge spells — Thaumaturge is antithetical (Blood Legacy)."
+    if is_rangifer_shaman(wb) and spell.get("school") != "Rangifer":
+        return "A Rangifer Shaman only learns spells from the Rangifer Spell List (Spellcaster Magazine)."
     need_tier = BEASTCRAFTER_SPELLS.get(name)
     if need_tier and beastcrafter_tier(wb) < need_tier:
         return f"Requires {BEASTCRAFTER_TIER_BY_N[need_tier]['name']}."

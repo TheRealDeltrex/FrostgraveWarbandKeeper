@@ -626,6 +626,29 @@
         {% for note in FIRE_GIANT_NOTES %}<li>{{ note }}</li>{% endfor %}
       </ul>
     </details>
+
+    <details class="ref-panel">
+      <summary>Rangifer Shaman (Spellcaster Magazine, Issue 3)</summary>
+      <p class="muted" style="font-size:0.85rem">
+        Not a wizard state, and not really a wizard either — "rangifer shamans are not wizards in
+        the conventional sense". Picked as the wizard's own school at creation, like Fire Giant
+        above, using the same rules for magic as a wizard but restricted entirely to the Rangifer
+        Spell List.
+      </p>
+      <p style="margin:0.6rem 0 0.2rem"><strong>As a Rangifer Shaman:</strong></p>
+      <ul style="margin:0.2rem 0">
+        <li>
+          Starting stats: Move {{ RANGIFER_WIZARD_BASE.move }} · Fight +{{ RANGIFER_WIZARD_BASE.fight }} ·
+          Shoot +{{ RANGIFER_WIZARD_BASE.shoot }} · Armour {{ RANGIFER_WIZARD_BASE.armour }} ·
+          Will +{{ RANGIFER_WIZARD_BASE.will }} · Health {{ RANGIFER_WIZARD_BASE.health }}.
+        </li>
+        <li>{{ RANGIFER_XP_PER_LEVEL }} XP per level instead of the usual {{ XP_PER_LEVEL }}; picks
+          {{ RANGIFER_STARTING_SPELL_COUNT }} starting spells, all from the Rangifer Spell List.</li>
+        <li>Stat caps: Fight +{{ RANGIFER_STAT_CAPS.fight }}, Shoot +{{ RANGIFER_STAT_CAPS.shoot }},
+          Will +{{ RANGIFER_STAT_CAPS.will }}, Health {{ RANGIFER_STAT_CAPS.health }}.</li>
+        {% for note in RANGIFER_SHAMAN_NOTES %}<li>{{ note }}</li>{% endfor %}
+      </ul>
+    </details>
   </details>
 
   {% if ghost and ghost.sections %}

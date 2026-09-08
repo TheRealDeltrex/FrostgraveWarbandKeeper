@@ -47,6 +47,7 @@ from frostgrave_data import (
     CARGO_TRANSPORT_BASE_CAPACITY,
     CARGO_TRANSPORT_COST,
     COMPONENT_POUCH_CAPACITY,
+    CREATION_SOURCE_BOOK_OPTIONS,
     EDITION1_LOOT_GOLD_VALUE,
     FIN_DALKA_BASE_SELL,
     FIN_DALKA_DECIPHER_COST,
@@ -71,9 +72,15 @@ from frostgrave_data import (
     PENTANGLE_SCHOOLS,
     PERMANENT_INJURIES,
     PERMANENT_INJURY_BY_ID,
+    PRE_MODIFIED_CONSTRUCT_TYPE_KEYS,
     PROMOTE_CAPTAIN_ITEM_SLOTS,
     PROSTHETIC_UPGRADE_BY_ID,
     PROSTHETIC_UPGRADES,
+    RANGIFER_SHAMAN_NOTES,
+    RANGIFER_STARTING_SPELL_COUNT,
+    RANGIFER_STAT_CAPS,
+    RANGIFER_WIZARD_BASE,
+    RANGIFER_XP_PER_LEVEL,
     SCHOOL_ALIGNED,
     SCHOOL_NEUTRAL,
     SCHOOL_OPPOSED,
@@ -84,6 +91,7 @@ from frostgrave_data import (
     SOURCE_BOOK_BY_SLUG,
     SOURCE_BOOK_OPTIONS,
     SOURCE_BOOKS,
+    SOURCE_BOOKS_WITHOUT_CREATION_IMPACT,
     SPELL_COMPONENT_BAG_CAPACITY,
     SPELL_COMPONENT_BAG_COST,
     SPELL_COMPONENT_BAG_LIMIT,
@@ -117,6 +125,7 @@ from frostgrave_data import (
     level_from_xp,
     soldier_list_for_ui,
     source_book_order,
+    spell_id,
     spells_for_wizard_ui,
     unused_xp,
 )
@@ -394,6 +403,8 @@ app.jinja_env.globals.update(
     ANIMAL_COMPANION_TYPE_KEYS=animal_companion_type_keys(),
     CONSTRUCT_TYPE_KEYS=construct_type_keys(),
     STANDARD_CONSTRUCT_TYPE_KEYS=STANDARD_CONSTRUCT_TYPE_KEYS,
+    PRE_MODIFIED_CONSTRUCT_TYPE_KEYS=PRE_MODIFIED_CONSTRUCT_TYPE_KEYS,
+    SOLDIERS=SOLDIERS,
     GIANT_BLOODED_COST=GIANT_BLOODED_COST,
     HORSE_COST=HORSE_COST,
     HORSE_UPGRADES=HORSE_UPGRADES,
@@ -469,6 +480,13 @@ app.jinja_env.globals.update(
     FIRE_GIANT_XP_PER_LEVEL=FIRE_GIANT_XP_PER_LEVEL,
     FIRE_GIANT_HEALTH_CAP=FIRE_GIANT_HEALTH_CAP,
     FIRE_GIANT_NOTES=expansions.FIRE_GIANT_NOTES,
+    # Rangifer Shaman (Spellcaster Magazine) — same "school marker, not a
+    # wizard state" reasoning as Fire Giant/Vampire above.
+    RANGIFER_WIZARD_BASE=RANGIFER_WIZARD_BASE,
+    RANGIFER_XP_PER_LEVEL=RANGIFER_XP_PER_LEVEL,
+    RANGIFER_STAT_CAPS=RANGIFER_STAT_CAPS,
+    RANGIFER_STARTING_SPELL_COUNT=RANGIFER_STARTING_SPELL_COUNT,
+    RANGIFER_SHAMAN_NOTES=RANGIFER_SHAMAN_NOTES,
 )
 
 # Lets templates filter a vault-item-name list with `|reject('firearm_item')`
@@ -710,10 +728,8 @@ def warband_new() -> str | Response:
         name = (request.form.get("warband_name") or "").strip()
         wizard = (request.form.get("wizard_name") or "").strip()
         school = request.form.get("school") or SCHOOLS[0]
-        pentangle = request.form.get("pentangle_schools_playable") == "on"
-        fire_giant = request.form.get("fire_giant_wizard_playable") == "on"
-        vampire = request.form.get("vampire_wizard_playable") == "on"
-        if school not in _new_schools(_posted_sources(request.form), pentangle, fire_giant, vampire):
+        standard_wizards_only = request.form.get("standard_wizards_only") == "on"
+        if school not in _new_schools(_posted_sources(request.form), standard_wizards_only):
             school = SCHOOLS[0]
         # Order preserved from hidden field if present
         order_raw = (request.form.get("spell_order") or "").strip()
@@ -746,7 +762,7 @@ def warband_new() -> str | Response:
         if not name or not wizard:
             flash("Warband name and wizard name are required.", "error")
             return _render_new(school=school, selected=spell_keys, sources=sources,
-                               pentangle=pentangle, fire_giant=fire_giant, vampire=vampire,
+                               standard_wizards_only=standard_wizards_only,
                                warband_name=name, wizard_name=wizard,
                                with_apprentice=with_apprentice, apprentice_name=apprentice_name,
                                starting_gold=starting_gold, wizard_starting_xp=wizard_starting_xp,
@@ -763,9 +779,6 @@ def warband_new() -> str | Response:
             with_apprentice,
             apprentice_name,
             enabled_sources_map=sources,
-            pentangle_playable=pentangle,
-            fire_giant_playable=fire_giant,
-            vampire_playable=vampire,
             starting_gold=starting_gold,
             wizard_starting_xp=wizard_starting_xp,
             max_soldiers=max_soldiers,
@@ -776,7 +789,7 @@ def warband_new() -> str | Response:
         if not wb:
             flash(msg, "error")
             return _render_new(school=school, selected=spell_keys, sources=sources,
-                               pentangle=pentangle, fire_giant=fire_giant, vampire=vampire,
+                               standard_wizards_only=standard_wizards_only,
                                warband_name=name, wizard_name=wizard,
                                with_apprentice=with_apprentice, apprentice_name=apprentice_name,
                                starting_gold=starting_gold, wizard_starting_xp=wizard_starting_xp,
@@ -801,18 +814,13 @@ def warband_new() -> str | Response:
     # (fgNewReload always sets sources_touched), so switching school doesn't
     # silently untick the books already chosen. On a genuine first visit (no
     # query string at all) there's nothing to preserve, so every source book
-    # defaults to on — Pentangle stays off either way; the book's own scroll-
-    # only default needs an explicit opt-in.
+    # defaults to on; "Standard Wizards only" defaults off either way.
     if request.args.get("sources_touched"):
         sources = _posted_sources(request.args)
-        pentangle = request.args.get("pentangle_schools_playable") == "on"
-        fire_giant = request.args.get("fire_giant_wizard_playable") == "on"
-        vampire = request.args.get("vampire_wizard_playable") == "on"
+        standard_wizards_only = request.args.get("standard_wizards_only") == "on"
     else:
         sources = {book: True for book in SOURCE_BOOKS}
-        pentangle = False
-        fire_giant = False
-        vampire = False
+        standard_wizards_only = False
 
     if request.args.get("randomize"):
         # "Random wizard" button (core rules only): generates a random, legal
@@ -829,30 +837,42 @@ def warband_new() -> str | Response:
         )
         return _render_new(
             school=rand_school, selected=rand_keys, sources=sources,
-            pentangle=pentangle, fire_giant=fire_giant, vampire=vampire,
+            standard_wizards_only=standard_wizards_only,
             with_apprentice=True, random_identity=rand_names,
         )
-    return _render_new(school=school, sources=sources, pentangle=pentangle,
-                        fire_giant=fire_giant, vampire=vampire)
+    return _render_new(school=school, sources=sources,
+                        standard_wizards_only=standard_wizards_only)
 
 
-def _new_schools(sources: dict, pentangle: bool, fire_giant: bool = False, vampire: bool = False) -> list[str]:
-    """Schools offered on the creation page for these toggles."""
+def _new_schools(sources: dict, standard_only: bool = False) -> list[str]:
+    """Schools offered on the creation page. "Standard Wizards only" restricts
+    this to the ten core schools; otherwise every extra school unlocks as soon
+    as its own source book is on — no separate opt-in any more."""
     schools = list(SCHOOLS)
-    if pentangle and sources.get("The Maze of Malcor"):
+    if standard_only:
+        return schools
+    if sources.get("The Maze of Malcor"):
         schools += list(PENTANGLE_SCHOOLS)
-    if fire_giant and sources.get("Blood Legacy"):
-        schools.append("Fire Giant")
-    if vampire and sources.get("Blood Legacy"):
-        schools.append("Vampire")
+    if sources.get("Blood Legacy"):
+        schools += ["Fire Giant", "Vampire"]
+    if sources.get("Spellcaster Magazine"):
+        schools.append("Rangifer")
     return schools
 
 
 def _posted_sources(form) -> dict:
     """{book name: bool} from the source_enabled_<slug> checkboxes, in whichever
-    form or query string they arrived."""
+    form or query string they arrived. Books with no creation-page toggle (see
+    SOURCE_BOOKS_WITHOUT_CREATION_IMPACT) never post a checkbox at all, so they
+    default on here — same as before they had no toggle to begin with; a
+    player who wants one off can still do so afterwards under the warband's
+    own Additional Rules and Homerules tab."""
     return {
-        book: form.get(f"source_enabled_{slug}") == "on"
+        book: (
+            True
+            if book in SOURCE_BOOKS_WITHOUT_CREATION_IMPACT
+            else form.get(f"source_enabled_{slug}") == "on"
+        )
         for slug, book in SOURCE_BOOK_BY_SLUG.items()
     }
 
@@ -861,9 +881,7 @@ def _render_new(
     school: str = "Elementalist",
     selected: list | None = None,
     sources: dict | None = None,
-    pentangle: bool = False,
-    fire_giant: bool = False,
-    vampire: bool = False,
+    standard_wizards_only: bool = False,
     warband_name: str = "",
     wizard_name: str = "",
     with_apprentice: bool = False,
@@ -877,21 +895,48 @@ def _render_new(
     apprentice_gender: str = "male",
 ):
     sources = sources or {}
-    schools = _new_schools(sources, pentangle, fire_giant, vampire)
+    schools = _new_schools(sources, standard_wizards_only)
     school = school if school in schools else SCHOOLS[0]
-    rel = SCHOOL_RELATIONS[school]
-    # A Pentangle school has two aligned schools where a core school has three,
-    # so the leftover neutral picks differ. Derived the same way
-    # validate_starting_spells derives it, so the counter can't drift from the
-    # rule it is counting towards.
-    neutral_needed = (
-        STARTING_SPELL_COUNT - OWN_SCHOOL_SPELLS - len(rel["aligned"]) * ALIGNED_SCHOOL_SPELLS
-    )
     picked = {"Core Rules"} | {book for book, on in sources.items() if on}
-    # Starting spells come only from books the player has switched on here. The
-    # spell-only schools (Beastcrafter) never appear: they aren't in any wizard's
-    # own/aligned/neutral set, which the picker is already built from.
-    spells_ui = [sp for sp in spells_for_wizard_ui(school) if sp["source"] in picked]
+    if school == "Rangifer":
+        # A Shaman's own creation rule (Spellcaster Magazine, Issue 3, p.10) is
+        # unrelated to SCHOOL_RELATIONS["Rangifer"] (which describes an
+        # *ordinary* wizard learning Rangifer spells as a neutral pick — see
+        # validate_starting_spells/_validate_rangifer_starting_spells): 4
+        # spells, all Rangifer, no aligned/neutral cross-school picks at all.
+        # An empty aligned/neutral/opposed here also keeps
+        # spells_for_wizard_ui() (which would otherwise treat every other
+        # school as "neutral" to Rangifer) out of the picture entirely.
+        rel = {"aligned": [], "neutral": [], "opposed": []}
+        spell_count_needed = RANGIFER_STARTING_SPELL_COUNT
+        own_school_spells_needed = RANGIFER_STARTING_SPELL_COUNT
+        neutral_needed = 0
+        spells_ui = [
+            {
+                **sp,
+                "school": "Rangifer",
+                "id": spell_id("Rangifer", sp["name"]),
+                "relation": "own",
+                "cn_penalty": 0,
+                "effective_cn": sp["cn"],
+            }
+            for sp in SPELLS["Rangifer"] if sp["source"] in picked
+        ]
+    else:
+        rel = SCHOOL_RELATIONS[school]
+        # A Pentangle school has two aligned schools where a core school has three,
+        # so the leftover neutral picks differ. Derived the same way
+        # validate_starting_spells derives it, so the counter can't drift from the
+        # rule it is counting towards.
+        neutral_needed = (
+            STARTING_SPELL_COUNT - OWN_SCHOOL_SPELLS - len(rel["aligned"]) * ALIGNED_SCHOOL_SPELLS
+        )
+        spell_count_needed = STARTING_SPELL_COUNT
+        own_school_spells_needed = OWN_SCHOOL_SPELLS
+        # Starting spells come only from books the player has switched on here. The
+        # spell-only schools (Beastcrafter) never appear: they aren't in any wizard's
+        # own/aligned/neutral set, which the picker is already built from.
+        spells_ui = [sp for sp in spells_for_wizard_ui(school) if sp["source"] in picked]
     spells_ui = enrich_spells_with_descriptions(spells_ui)
     return render_template(
         "warband_new.html",
@@ -904,13 +949,13 @@ def _render_new(
         neutral=SCHOOL_NEUTRAL,
         relations=rel,
         selected=selected or [],
-        source_books=SOURCE_BOOK_OPTIONS,
+        source_books=CREATION_SOURCE_BOOK_OPTIONS,
         enabled_sources_map=sources,
-        pentangle_playable=pentangle,
-        fire_giant_playable=fire_giant,
-        vampire_playable=vampire,
+        standard_wizards_only=standard_wizards_only,
         PENTANGLE_SCHOOLS=PENTANGLE_SCHOOLS,
         neutral_needed=neutral_needed,
+        spell_count_needed=spell_count_needed,
+        own_school_spells_needed=own_school_spells_needed,
         warband_name=warband_name,
         wizard_name=wizard_name,
         with_apprentice=with_apprentice,
@@ -1466,8 +1511,15 @@ def warband_view(warband_id: str) -> str:
         alt_xp_conversions=ALT_XP_CONVERSIONS,
         # Treasure from the enabled books, offered as suggestions on the vault's
         # "Add item" field. It stays a free-text box — this only saves typing.
+        # Fireheart also contributes the Book of the Construct's five named
+        # sub-table results plus the app-only "(All)" convenience item (see
+        # expansions.CONSTRUCT_BOOK_SUGGESTED_NAMES) — not a magic_items.json
+        # entry of their own, since that file is regenerated wholesale and the
+        # book's own text names only the one generic item.
         magic_item_names=sorted(
-            {it["name"] for it in magic_items_for_sources(wb_sources)}, key=str.lower
+            {it["name"] for it in magic_items_for_sources(wb_sources)}
+            | ({*expansions.CONSTRUCT_BOOK_SUGGESTED_NAMES} if "Fireheart" in wb_sources else set()),
+            key=str.lower,
         ),
         knows_revenant=expansions.REVENANT_SPELL in wb_spells,
         # Rulebook -> item -> power level/spell cascading picker, shared by the
@@ -1480,7 +1532,9 @@ def warband_view(warband_id: str) -> str:
         loot_picker_data={
             "items_by_book": {
                 book: sorted(
-                    {it["name"] for it in magic_items_for_sources({book})}, key=str.lower
+                    {it["name"] for it in magic_items_for_sources({book})}
+                    | ({*expansions.CONSTRUCT_BOOK_SUGGESTED_NAMES} if book == "Fireheart" else set()),
+                    key=str.lower,
                 )
                 for book in wb_sources
             },

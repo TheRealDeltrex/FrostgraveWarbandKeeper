@@ -1,11 +1,38 @@
 {# Fireheart Construct Modification picker: a flat named-entry dropdown (no
    d100 roll like Grave Mutations — a modification is picked, not rolled),
    plus a stat picker for the -1 penalty most entries impose. Soldier-only:
-   only standard small/medium/large constructs may take one, and only one. #}
-{% macro construct_modification_picker(soldier_id, modifications) %}
+   only standard small/medium/large constructs may take one, and only one.
+   Lives in the Workshop card (Treasury, Vault and Workshop), not the
+   soldier's own row — soldier_name labels which construct this block is for. #}
+{# Roster-row badge: "modified" (real Construct Modification, click for its
+   effect) or "pre-modified" (Construct Hound/Familiar/every Book of the
+   Construct type — click for the baked-in traits from its own catalog notes,
+   see PRE_MODIFIED_CONSTRUCT_TYPE_KEYS). Mirrors mutated_badge's shape. #}
+{% macro construct_modification_badge(s) %}
+  {% if s.modifications %}
+    <details style="display:inline-block;vertical-align:middle">
+      <summary class="badge" title="Construct Modification — click for details">modified</summary>
+      <ul class="list-plain" style="font-size:0.8rem;margin:0.3rem 0 0;max-width:26rem">
+        {% for m in s.modifications %}
+          <li><strong>{{ m.name }}</strong> — {{ m.short }}</li>
+        {% endfor %}
+      </ul>
+    </details>
+  {% elif s.type_key in PRE_MODIFIED_CONSTRUCT_TYPE_KEYS %}
+    {# The catalog's own "notes" (traits) — never s.notes, which is this
+       soldier's separate free-text Notes field and shares that key name
+       once enrich_soldier() merges catalog and instance together. #}
+    <details style="display:inline-block;vertical-align:middle">
+      <summary class="badge" title="Comes pre-modified (Fireheart) — click for its traits">pre-modified</summary>
+      <p class="muted" style="font-size:0.8rem;margin:0.3rem 0 0;max-width:26rem">{{ SOLDIERS.get(s.type_key, {}).get('notes', '') }}</p>
+    </details>
+  {% endif %}
+{% endmacro %}
+
+{% macro construct_modification_picker(soldier_id, modifications, soldier_name='') %}
   {% if modifications or fireheart_enabled %}
     <details class="ref-panel">
-      <summary>Construct Modification ({{ modifications|length }})</summary>
+      <summary>{{ soldier_name ~ ' — ' if soldier_name }}Construct Modification ({{ modifications|length }})</summary>
       {% if modifications %}
         <ul class="list-plain">
           {% for m in modifications %}
@@ -31,20 +58,19 @@
             <div class="stat-row">
               <div class="form-row">
                 <label>Modification</label>
-                <select name="modification_name" required>
+                <select name="modification_name" id="construct-mod-name-{{ soldier_id }}" required>
                   <option value="">— pick —</option>
                   {% for entry in construct_modification_data %}
-                    <option value="{{ entry.name }}">{{ entry.name }}{% if entry.no_penalty %} (no penalty){% endif %}</option>
+                    <option value="{{ entry.name }}" data-no-penalty="{{ 'true' if entry.no_penalty else 'false' }}">{{ entry.name }}{% if entry.no_penalty %} (no penalty){% endif %}</option>
                   {% endfor %}
                 </select>
               </div>
               <div class="form-row">
                 <label>Penalty stat</label>
-                <select name="modification_stat">
+                <select name="modification_stat" id="construct-mod-stat-{{ soldier_id }}">
                   <option value="">— if a penalty applies —</option>
                   <option value="move">Move</option>
                   <option value="fight">Fight</option>
-                  <option value="shoot">Shoot</option>
                   <option value="armour">Armour</option>
                   <option value="will">Will</option>
                   <option value="health">Health</option>
@@ -55,6 +81,21 @@
               <button class="btn secondary small" type="submit">Add modification</button>
             </div>
           </form>
+          <script>
+            (function () {
+              var nameSel = document.getElementById("construct-mod-name-{{ soldier_id }}");
+              var statSel = document.getElementById("construct-mod-stat-{{ soldier_id }}");
+              if (!nameSel || !statSel) return;
+              function sync() {
+                var opt = nameSel.options[nameSel.selectedIndex];
+                var noPenalty = !!opt && opt.dataset.noPenalty === "true";
+                statSel.disabled = noPenalty;
+                if (noPenalty) statSel.value = "";
+              }
+              nameSel.addEventListener("change", sync);
+              sync();
+            })();
+          </script>
         {% else %}
           <p class="muted" style="font-size:0.8rem">Enable Fireheart under Additional Rules and Homerules to add one.</p>
         {% endif %}

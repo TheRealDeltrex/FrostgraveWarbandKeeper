@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% from "_loot_picker.html" import loot_picker_row with context %}
 {% from "_mutation_picker.html" import mutation_picker, mutated_badge with context %}
-{% from "_construct_modification_picker.html" import construct_modification_picker with context %}
+{% from "_construct_modification_picker.html" import construct_modification_picker, construct_modification_badge with context %}
 {% from "_permanent_injury_picker.html" import permanent_injury_picker with context %}
 {% block title %}{{ wb.name }} · Frostgrave{% endblock %}
 {% block content %}
@@ -129,28 +129,6 @@
           <p class="muted" style="font-size:0.85rem">
             Needs Blood Legacy switched on in Source books.
           </p>
-          <div class="hr-row">
-            <input id="hr_fire_giant_wizard_playable" name="fire_giant_wizard_playable" type="checkbox" {% if hr.fire_giant_wizard_playable %}checked{% endif %} />
-            <details class="hr-note" id="hrnote-fire_giant_wizard_playable">
-              <summary>Fire Giant Wizard playable</summary>
-              <p class="hr-note-body">
-                The book frames the Fire Giant Wizard as a build for very hard/large encounters
-                rather than balanced campaign play — this opts it in as a choosable wizard school.
-                Only affects newly created warbands — a wizard's own school is fixed once chosen.
-              </p>
-            </details>
-          </div>
-          <div class="hr-row">
-            <input id="hr_vampire_wizard_playable" name="vampire_wizard_playable" type="checkbox" {% if hr.vampire_wizard_playable %}checked{% endif %} />
-            <details class="hr-note" id="hrnote-vampire_wizard_playable">
-              <summary>Vampire Wizard playable</summary>
-              <p class="hr-note-body">
-                The book frames the Vampire Wizard as a GM/NPC villain build "or PC by group
-                agreement" — this opts it in as a choosable wizard school. Only affects newly
-                created warbands — a wizard's own school is fixed once chosen.
-              </p>
-            </details>
-          </div>
           <div class="hr-row">
             <input id="hr_giant_blooded_enabled" name="giant_blooded_enabled" type="checkbox" {% if hr.giant_blooded_enabled %}checked{% endif %} />
             <details class="hr-note" id="hrnote-giant_blooded_enabled">
@@ -310,17 +288,6 @@
 
         <details class="ref-panel hr-group" id="hr-group-supplements">
           <summary>Other supplements<span class="hr-count"></span></summary>
-          <div class="hr-row">
-            <input id="hr_pentangle_schools_playable" name="pentangle_schools_playable" type="checkbox" {% if hr.pentangle_schools_playable %}checked{% endif %} />
-            <details class="hr-note" id="hrnote-pentangle_schools_playable">
-              <summary>Pentangle schools playable (The Maze of Malcor)</summary>
-              <p class="hr-note-body">
-                Its five lost schools are scroll-only by the book; this is the optional rule for
-                running them as real schools. Only affects newly created warbands — a wizard's own
-                school is fixed once chosen.
-              </p>
-            </details>
-          </div>
           <div class="hr-row">
             <input id="hr_ragged_warbands_enabled" name="ragged_warbands_enabled" type="checkbox" {% if hr.ragged_warbands_enabled %}checked{% endif %} />
             <details class="hr-note" id="hrnote-ragged_warbands_enabled">
@@ -969,11 +936,15 @@
               <p class="muted" style="font-size:0.85rem">
                 Pick a standard item or vault loot, or type a custom name.
                 Two-handed weapons use two consecutive slots (shown on PDF as e.g. <code>2+3: Two-Handed Weapon</code>).
-                Dagger free slot: use the toggle.
+                {% if wiz.school == "Rangifer" %}Free starting weapon: use the toggle.{% else %}Dagger free slot: use the toggle.{% endif %}
               </p>
               <div class="checkbox-row">
                 <input id="wizard_dagger" name="wizard_dagger" type="checkbox" {% if wiz.has_dagger %}checked{% endif %} />
-                <label for="wizard_dagger" style="margin:0">Carries a dagger (free slot)</label>
+                {% if wiz.school == "Rangifer" %}
+                  <label for="wizard_dagger" style="margin:0">Carries a wooden staff or flint hand weapon (free slot)</label>
+                {% else %}
+                  <label for="wizard_dagger" style="margin:0">Carries a dagger (free slot)</label>
+                {% endif %}
               </div>
               {# The {% with %} is load-bearing, not decoration: in this Jinja version a
                  {% set %} inside an {% if %} does NOT reset the way a {% for %} body does —
@@ -2209,6 +2180,7 @@
                     {% endif %}
                     {% if s.revenant %}<span class="badge" title="Reanimated with the Revenant spell">revenant</span>{% endif %}
                     {{ mutated_badge(s.mutations) }}
+                    {{ construct_modification_badge(s) }}
                     {% if s.giant_blooded %}<span class="badge" title="Blood Legacy's Giant-Blooded: -1 Move, -2 Will, +2 Health, Giant-Blooded trait">giant-blooded</span>{% endif %}
                     {% if s.thrall %}<span class="badge" title="Blood Legacy's Thralldom: hired free at -1 Will">thrall</span>{% endif %}
                     {% if s.knightly_order_info %}<span class="badge" title="{{ s.knightly_order_info.ability }}">{{ s.knightly_order_info.name }}</span>{% endif %}
@@ -2309,9 +2281,6 @@
                     {{ mutation_picker('add_soldier_mutation', s.mutations, soldier_id=s.id) }}
                     {% if hr.soldier_permanent_injuries_enabled or s.permanent_injuries %}
                       {{ permanent_injury_picker('add_soldier_permanent_injury', s.permanent_injuries, soldier_id=s.id) }}
-                    {% endif %}
-                    {% if s.type_key in STANDARD_CONSTRUCT_TYPE_KEYS %}
-                      {{ construct_modification_picker(s.id, s.modifications) }}
                     {% endif %}
                     {% if s.type_key in ANIMAL_COMPANION_TYPE_KEYS and s.type_key != 'companion_white_gorilla' and not s.crit_health_bonus %}
                       <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
@@ -3051,6 +3020,136 @@
         {% endif %}
       </details>
     {% endif %}
+    {% set constructs = soldiers|selectattr('type_key', 'in', STANDARD_CONSTRUCT_TYPE_KEYS)|selectattr('status', 'ne', 'dead')|list %}
+    {% if constructs %}
+      <details class="ref-panel" id="construct-modification-panel" style="margin-top:1rem">
+        <summary>Workshop — Construct Modification</summary>
+        <p class="muted" style="font-size:0.85rem">
+          Fireheart's Construct Modification table — small/medium/large constructs only, one
+          modification per construct.
+        </p>
+        {% if constructs|length > 1 %}
+          <div class="form-row">
+            <label for="construct-modification-select">Construct</label>
+            <select id="construct-modification-select">
+              {% for s in constructs %}
+                <option value="construct-modification-block-{{ loop.index0 }}">{{ s.name }} ({{ s.modifications|length }} modification{{ 's' if s.modifications|length != 1 }})</option>
+              {% endfor %}
+            </select>
+          </div>
+        {% endif %}
+        {% for s in constructs %}
+          <div class="construct-modification-block" id="construct-modification-block-{{ loop.index0 }}" {% if not loop.first %}hidden{% endif %} style="margin-top:0.5rem">
+            {{ construct_modification_picker(s.id, s.modifications, s.name) }}
+          </div>
+        {% endfor %}
+        {% if constructs|length > 1 %}
+          <script>
+            (function () {
+              var sel = document.getElementById("construct-modification-select");
+              if (!sel) return;
+              sel.addEventListener("change", function () {
+                document.querySelectorAll(".construct-modification-block").forEach(function (b) {
+                  b.hidden = b.id !== sel.value;
+                });
+              });
+            })();
+          </script>
+        {% endif %}
+      </details>
+    {% endif %}
+    {% if horses_enabled and has_stable %}
+      <details class="ref-panel" id="horse-panel" style="margin-top:1rem">
+        <summary>Workshop — Horse{% if wb.horse.owned %} — owned{% endif %}</summary>
+        {% if not wb.horse.owned %}
+          <p class="muted" style="font-size:0.85rem">
+            Riderless: Move {{ hrs.move }}, Fight {{ format_stat(hrs.fight) }},
+            Armour {{ hrs.armour }}, Will {{ format_stat(hrs.will) }},
+            Health {{ hrs.health }}. Mounted, it instead grants the rider
+            Move +{{ hmd.move }}, Fight +{{ hmd.fight }},
+            Armour {{ hmd.armour }}.
+          </p>
+          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
+            <input type="hidden" name="action" value="buy_horse" />
+            <button class="btn secondary small" type="submit" {% if wb.gold < HORSE_COST %}disabled{% endif %}>Buy a horse ({{ HORSE_COST }}gc)</button>
+          </form>
+        {% else %}
+          <p class="muted" style="font-size:0.85rem">
+            Riderless: Move {{ hrs.move }}, Fight {{ format_stat(hrs.fight) }},
+            Armour {{ hrs.armour }}, Will {{ format_stat(hrs.will) }},
+            Health {{ hrs.health }}.
+          </p>
+          <div style="display:flex;flex-wrap:wrap;gap:0.75rem;align-items:flex-end">
+            <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="form-row inline" style="margin:0">
+              <input type="hidden" name="action" value="mount_horse" />
+              <div>
+                <label for="horse_rider_kind">Mount</label>
+                <select id="horse_rider_kind" name="rider_kind" onchange="document.getElementById('horse_rider_soldier').style.display = (this.value === 'soldier') ? '' : 'none'">
+                  <option value="wizard">Wizard</option>
+                  {% if wb.apprentice %}<option value="apprentice">Apprentice</option>{% endif %}
+                  {% if wb.captain %}<option value="captain">Captain</option>{% endif %}
+                  {% if horse_rider_choices %}<option value="soldier">Soldier…</option>{% endif %}
+                </select>
+              </div>
+              <div id="horse_rider_soldier" style="display:none">
+                <label for="horse_rider_soldier_id">Which soldier</label>
+                <select id="horse_rider_soldier_id" name="soldier_id">
+                  {% for s in horse_rider_choices %}<option value="{{ s.id }}">{{ s.name }}</option>{% endfor %}
+                </select>
+              </div>
+              <div>
+                <label>&nbsp;</label>
+                <button class="btn secondary small" type="submit">Mount</button>
+              </div>
+            </form>
+            <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
+              <input type="hidden" name="action" value="dismount_horse" />
+              <button class="btn small" type="submit" {% if not wb.horse.rider %}disabled{% endif %}>Dismount</button>
+            </form>
+            <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" onsubmit="return confirm('Release the warband horse?');">
+              <input type="hidden" name="action" value="sell_horse" />
+              <button class="btn danger small" type="submit">Release horse</button>
+            </form>
+          </div>
+          <p style="font-size:var(--fs-xl);font-weight:400;margin:0.6rem 0 0">
+            {{ horse_rider_line or "No one is mounted." }}
+          </p>
+          <h3 style="margin-top:1rem">Advanced Horsemanship</h3>
+          <p class="muted" style="font-size:0.85rem">
+            One-off, stacking upgrades. Aggressive/Loyal/Barding change the stats above;
+            the rest grant a trait or table-roll adjustment this app doesn't simulate.
+          </p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Upgrade</th><th>Cost</th><th></th></tr></thead>
+              <tbody>
+                {% for u in HORSE_UPGRADES %}
+                  {% set owned_upgrade = u.id in (wb.horse.upgrades or []) %}
+                  <tr>
+                    <td>
+                      <strong>{{ u.name }}</strong>
+                      <div class="muted" style="font-size:0.8rem">{{ u.summary }}</div>
+                    </td>
+                    <td>{{ u.cost }}gc</td>
+                    <td>
+                      {% if owned_upgrade %}
+                        <span class="badge">owned</span>
+                      {% else %}
+                        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
+                          <input type="hidden" name="action" value="buy_horse_upgrade" />
+                          <input type="hidden" name="upgrade_id" value="{{ u.id }}" />
+                          <button class="btn secondary small" type="submit" {% if wb.gold < u.cost %}disabled{% endif %}>Buy</button>
+                        </form>
+                      {% endif %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% endif %}
+      </details>
+    {% endif %}
     {% set purchasable_items = full_standard_items|selectattr('cost', 'defined')|rejectattr('compatible_bases')|rejectattr('name', 'equalto', SPELL_COMPONENT_BAG_NAME)|list %}
     {% if purchasable_items %}
       <details class="ref-panel" id="firearms-panel" style="margin-top:1rem">
@@ -3205,98 +3304,6 @@
             Sell grimoire ({{ [FIN_DALKA_BASE_SELL - FIN_DALKA_SELL_PER_SPELL * (fin_dalka_spells | selectattr('learned') | list | length), 0] | max }}gc)
           </button>
         </form>
-      </details>
-    {% endif %}
-    {% if horses_enabled and has_stable %}
-      <details class="ref-panel" id="horse-panel" style="margin-top:1rem">
-        <summary>Workshop — Horse{% if wb.horse.owned %} — owned{% endif %}</summary>
-        {% if not wb.horse.owned %}
-          <p class="muted" style="font-size:0.85rem">
-            Riderless: Move {{ hrs.move }}, Fight {{ format_stat(hrs.fight) }},
-            Armour {{ hrs.armour }}, Will {{ format_stat(hrs.will) }},
-            Health {{ hrs.health }}. Mounted, it instead grants the rider
-            Move +{{ hmd.move }}, Fight +{{ hmd.fight }},
-            Armour {{ hmd.armour }}.
-          </p>
-          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
-            <input type="hidden" name="action" value="buy_horse" />
-            <button class="btn secondary small" type="submit" {% if wb.gold < HORSE_COST %}disabled{% endif %}>Buy a horse ({{ HORSE_COST }}gc)</button>
-          </form>
-        {% else %}
-          <p class="muted" style="font-size:0.85rem">
-            Riderless: Move {{ hrs.move }}, Fight {{ format_stat(hrs.fight) }},
-            Armour {{ hrs.armour }}, Will {{ format_stat(hrs.will) }},
-            Health {{ hrs.health }}.
-          </p>
-          <div style="display:flex;flex-wrap:wrap;gap:0.75rem;align-items:flex-end">
-            <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="form-row inline" style="margin:0">
-              <input type="hidden" name="action" value="mount_horse" />
-              <div>
-                <label for="horse_rider_kind">Mount</label>
-                <select id="horse_rider_kind" name="rider_kind" onchange="document.getElementById('horse_rider_soldier').style.display = (this.value === 'soldier') ? '' : 'none'">
-                  <option value="wizard">Wizard</option>
-                  {% if wb.apprentice %}<option value="apprentice">Apprentice</option>{% endif %}
-                  {% if wb.captain %}<option value="captain">Captain</option>{% endif %}
-                  {% if horse_rider_choices %}<option value="soldier">Soldier…</option>{% endif %}
-                </select>
-              </div>
-              <div id="horse_rider_soldier" style="display:none">
-                <label for="horse_rider_soldier_id">Which soldier</label>
-                <select id="horse_rider_soldier_id" name="soldier_id">
-                  {% for s in horse_rider_choices %}<option value="{{ s.id }}">{{ s.name }}</option>{% endfor %}
-                </select>
-              </div>
-              <div>
-                <label>&nbsp;</label>
-                <button class="btn secondary small" type="submit">Mount</button>
-              </div>
-            </form>
-            <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
-              <input type="hidden" name="action" value="dismount_horse" />
-              <button class="btn small" type="submit" {% if not wb.horse.rider %}disabled{% endif %}>Dismount</button>
-            </form>
-            <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" onsubmit="return confirm('Release the warband horse?');">
-              <input type="hidden" name="action" value="sell_horse" />
-              <button class="btn danger small" type="submit">Release horse</button>
-            </form>
-          </div>
-          <p style="font-size:var(--fs-xl);font-weight:400;margin:0.6rem 0 0">
-            {{ horse_rider_line or "No one is mounted." }}
-          </p>
-          <h3 style="margin-top:1rem">Advanced Horsemanship</h3>
-          <p class="muted" style="font-size:0.85rem">
-            One-off, stacking upgrades. Aggressive/Loyal/Barding change the stats above;
-            the rest grant a trait or table-roll adjustment this app doesn't simulate.
-          </p>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>Upgrade</th><th>Cost</th><th></th></tr></thead>
-              <tbody>
-                {% for u in HORSE_UPGRADES %}
-                  {% set owned_upgrade = u.id in (wb.horse.upgrades or []) %}
-                  <tr>
-                    <td>
-                      <strong>{{ u.name }}</strong>
-                      <div class="muted" style="font-size:0.8rem">{{ u.summary }}</div>
-                    </td>
-                    <td>{{ u.cost }}gc</td>
-                    <td>
-                      {% if owned_upgrade %}
-                        <span class="badge">owned</span>
-                      {% else %}
-                        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
-                          <input type="hidden" name="action" value="buy_horse_upgrade" />
-                          <input type="hidden" name="upgrade_id" value="{{ u.id }}" />
-                          <button class="btn secondary small" type="submit" {% if wb.gold < u.cost %}disabled{% endif %}>Buy</button>
-                        </form>
-                      {% endif %}
-                    </td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-        {% endif %}
       </details>
     {% endif %}
     <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:1rem">

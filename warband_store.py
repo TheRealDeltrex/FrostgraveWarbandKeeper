@@ -76,6 +76,8 @@ from frostgrave_data import (
     RANDOM_RECRUIT_TABLE_I,
     RANDOM_RECRUIT_TABLE_II,
     RANDOM_RECRUIT_TABLE_III,
+    RANGIFER_STARTING_SPELL_COUNT,
+    RANGIFER_WIZARD_BASE,
     SCHOOL_RELATIONS,
     SCHOOLS,
     SOLDIER_MAX_LEVELS,
@@ -312,7 +314,13 @@ def normalize_item_slots(raw: Iterable[str], n: int) -> list[str]:
 
 
 def empty_wizard(name: str = "", school: str = "Elementalist", gender: str = "male") -> dict:
-    stats = deepcopy(FIRE_GIANT_WIZARD_BASE if school == "Fire Giant" else WIZARD_BASE)
+    if school == "Fire Giant":
+        base = FIRE_GIANT_WIZARD_BASE
+    elif school == "Rangifer":
+        base = RANGIFER_WIZARD_BASE
+    else:
+        base = WIZARD_BASE
+    stats = deepcopy(base)
     return {
         "name": name,
         "school": school,
@@ -440,23 +448,6 @@ def default_homerules() -> dict:
         # supplements). On by default — most groups play with everything
         # available rather than opting in book by book.
         "enabled_sources": {book: True for book in SOURCE_BOOKS},
-        # The Maze of Malcor says the Pentangle schools are scroll-only, then
-        # gives rules for playing them properly "if a group agrees". On by
-        # default, same as every other General Rules toggle; needs The Maze
-        # of Malcor switched on to have any effect.
-        "pentangle_schools_playable": True,
-        # Blood Legacy's Fire Giant Wizard (Chapter Three) — the book frames
-        # it as a build for very hard/large encounters rather than balanced
-        # campaign play, but is opt-in the same way as the rest of this card.
-        # On by default; needs Blood Legacy switched on to have any effect.
-        # Only affects newly created warbands — see playable_schools()/
-        # create_warband().
-        "fire_giant_wizard_playable": True,
-        # Blood Legacy's Vampire Wizard (Chapter Three) — the book frames it
-        # as a GM/NPC villain build "or PC by group agreement". On by
-        # default; needs Blood Legacy switched on to have any effect. Only
-        # affects newly created warbands.
-        "vampire_wizard_playable": True,
         # Blood Legacy's Giant-Blooded soldier modification (Chapter Three):
         # one soldier per warband may take it (+50gc, -1 Move, -2 Will,
         # +2 Health, Giant-Blooded trait). On by default; needs Blood Legacy
@@ -579,18 +570,20 @@ def default_homerules() -> dict:
 
 def playable_schools(wb: dict | None = None) -> list[str]:
     """Schools a wizard may actually be. The five Pentangle schools join the ten
-    core ones only when The Maze of Malcor is on and the group has agreed to the
-    homerule that makes them playable; Fire Giant and Vampire join the same way,
-    each gated on Blood Legacy and its own "playable" homerule."""
+    core ones once The Maze of Malcor is on; Fire Giant and Vampire once Blood
+    Legacy is on; Rangifer once Spellcaster Magazine is on. No separate
+    "playable" homerule any more — a group that wants only the ten standard
+    schools uses the "Standard Wizards only" toggle on the creation page
+    instead (app.py's _new_schools()), which never touches this list."""
     hr = (wb or {}).get("homerules") or {}
     es = hr.get("enabled_sources") or {}
     schools = list(SCHOOLS)
-    if hr.get("pentangle_schools_playable") and es.get("The Maze of Malcor"):
+    if es.get("The Maze of Malcor"):
         schools += list(PENTANGLE_SCHOOLS)
-    if hr.get("fire_giant_wizard_playable") and es.get("Blood Legacy"):
-        schools.append("Fire Giant")
-    if hr.get("vampire_wizard_playable") and es.get("Blood Legacy"):
-        schools.append("Vampire")
+    if es.get("Blood Legacy"):
+        schools += ["Fire Giant", "Vampire"]
+    if es.get("Spellcaster Magazine"):
+        schools.append("Rangifer")
     return schools
 
 
@@ -785,6 +778,29 @@ def recompute_spell_cns(wb: dict) -> None:
         s["cn"] = max(expansions.casting_number_minimum(wb), base + pen - improve)
 
 
+def _validate_rangifer_starting_spells(
+    spell_keys: list[str], sources: set[str] | None
+) -> tuple[bool, str]:
+    """Rangifer Shaman starting spells (Spellcaster Magazine, Issue 3, p.10):
+    exactly 4, all from the Rangifer Spell List, no own/aligned/neutral split."""
+    if len(spell_keys) != RANGIFER_STARTING_SPELL_COUNT:
+        return False, f"Pick exactly {RANGIFER_STARTING_SPELL_COUNT} spells (got {len(spell_keys)})."
+    if len(set(spell_keys)) != len(spell_keys):
+        return False, "Duplicate spells selected."
+    allowed_sources = sources or {"Core Rules"}
+    for key in spell_keys:
+        sp = find_spell(key)
+        if not sp:
+            return False, f"Unknown spell: {key}"
+        if sp["school"] != "Rangifer":
+            return False, "A Rangifer Shaman may only pick spells from the Rangifer Spell List."
+        if sp["source"] not in allowed_sources:
+            return False, (
+                f"{sp['name']} is from {sp['source']}; switch that source book on to take it."
+            )
+    return True, "OK"
+
+
 def validate_starting_spells(
     school: str, spell_keys: list[str], sources: set[str] | None = None
 ) -> tuple[bool, str]:
@@ -794,7 +810,15 @@ def validate_starting_spells(
     supplement spells from a book that is off cannot be taken. Defaults to Core
     Rules only. Spell-only schools (Beastcrafter) are excluded automatically by the
     own/aligned/neutral check further down.
+
+    Rangifer is a completely different rule (Spellcaster Magazine, Issue 3): 4
+    spells, all from the Rangifer Spell List, no aligned/neutral cross-school
+    picks at all — SCHOOL_RELATIONS["Rangifer"] (neutral: every other school)
+    describes an *ordinary* wizard learning Rangifer spells as a neutral pick,
+    not the Shaman's own rule, so it's deliberately not reused below.
     """
+    if school == "Rangifer":
+        return _validate_rangifer_starting_spells(spell_keys, sources)
     if len(spell_keys) != STARTING_SPELL_COUNT:
         return False, f"Pick exactly {STARTING_SPELL_COUNT} spells (got {len(spell_keys)})."
     if len(set(spell_keys)) != len(spell_keys):
@@ -924,9 +948,6 @@ def create_warband(
     apprentice_name: str = "",
     soldiers: list[dict] | None = None,
     enabled_sources_map: dict | None = None,
-    pentangle_playable: bool = False,
-    fire_giant_playable: bool = False,
-    vampire_playable: bool = False,
     starting_gold: int | None = None,
     wizard_starting_xp: int = 0,
     max_soldiers: int | None = None,
@@ -938,12 +959,10 @@ def create_warband(
     soldiers: optional list of {type_key, name} hired at creation (costs deducted).
     enabled_sources_map: {book name: bool} source books to switch on for the new
         warband, so supplement spells and soldiers can be picked at creation.
-    pentangle_playable: allow one of the five Pentangle schools as the wizard's
-        own school (needs The Maze of Malcor switched on).
-    fire_giant_playable: allow Fire Giant as the wizard's own school (needs
-        Blood Legacy switched on) — Blood Legacy's Fire Giant Wizard build.
-    vampire_playable: allow Vampire as the wizard's own school (needs Blood
-        Legacy switched on) — Blood Legacy's Vampire Wizard build.
+        Also decides which extra schools (Pentangle, Fire Giant, Vampire,
+        Rangifer) `school` may legally be — see playable_schools(). The
+        creation page's own "Standard Wizards only" toggle narrows what it
+        *offers*, but doesn't change what this function accepts.
     starting_gold: house-ruled starting gold; defaults to STARTING_GOLD (400).
     wizard_starting_xp: house-ruled starting XP for the wizard; defaults to 0.
     max_soldiers: house-ruled roster cap; defaults to MAX_SOLDIERS (8).
@@ -970,24 +989,19 @@ def create_warband(
                 "hlw_casting_min", "hlw_alt_xp",
             ):
                 homerules[key] = True
-    homerules["pentangle_schools_playable"] = bool(pentangle_playable)
-    homerules["fire_giant_wizard_playable"] = bool(fire_giant_playable)
-    homerules["vampire_wizard_playable"] = bool(vampire_playable)
     if school not in playable_schools({"homerules": homerules}):
         if school in PENTANGLE_SCHOOLS:
-            return None, (
-                f"{school} is a Pentangle school — switch on The Maze of Malcor and the "
-                "'Pentangle schools playable' homerule to use it."
-            )
+            return None, f"{school} is a Pentangle school — switch on The Maze of Malcor to use it."
         if school == "Fire Giant":
             return None, (
-                "Fire Giant is Blood Legacy's Fire Giant Wizard build — switch on Blood Legacy "
-                "and the 'Fire Giant Wizard playable' homerule to use it."
+                "Fire Giant is Blood Legacy's Fire Giant Wizard build — switch on Blood Legacy to use it."
             )
         if school == "Vampire":
+            return None, "Vampire is Blood Legacy's Vampire Wizard build — switch on Blood Legacy to use it."
+        if school == "Rangifer":
             return None, (
-                "Vampire is Blood Legacy's Vampire Wizard build — switch on Blood Legacy "
-                "and the 'Vampire Wizard playable' homerule to use it."
+                "Rangifer is Spellcaster Magazine's Rangifer Shaman — switch on "
+                "Spellcaster Magazine to use it."
             )
         return None, "Invalid school."
     picked_sources = {"Core Rules"} | {
@@ -1013,6 +1027,11 @@ def create_warband(
         # "9 soldiers (4 specialist)" — a floor, not a suggestion; never
         # lowers a bigger cap the group asked for of their own.
         homerules["max_soldiers"] = max(homerules["max_soldiers"], VAMPIRE_MIN_MAX_SOLDIERS)
+    if school == "Rangifer" and with_apprentice:
+        return None, (
+            "A Rangifer Shaman has no apprentice (Spellcaster Magazine) — rangifer "
+            "children are invited to a gathering instead."
+        )
 
     gold = STARTING_GOLD if starting_gold is None else int(starting_gold)
     apprentice = None
@@ -2752,7 +2771,7 @@ def add_construct_modification(
 
     penalty_suffix = ""
     if not row["no_penalty"]:
-        if stat not in ("move", "fight", "shoot", "armour", "will", "health"):
+        if stat not in ("move", "fight", "armour", "will", "health"):
             # Undo the auto effect applied above before bailing out — this
             # function must be all-or-nothing from the caller's perspective.
             for s, v in backup.items():
@@ -3847,9 +3866,6 @@ def update_homerules(wb: dict, form: "ImmutableMultiDict") -> tuple[bool, str]:
                 book: form.get(f"source_enabled_{slug}") == "on"
                 for slug, book in SOURCE_BOOK_BY_SLUG.items()
             },
-            "pentangle_schools_playable": form.get("pentangle_schools_playable") == "on",
-            "fire_giant_wizard_playable": form.get("fire_giant_wizard_playable") == "on",
-            "vampire_wizard_playable": form.get("vampire_wizard_playable") == "on",
             "giant_blooded_enabled": form.get("giant_blooded_enabled") == "on",
             "ragged_warbands_enabled": ragged_warbands_enabled,
             "monster_hunting_enabled": form.get("monster_hunting_enabled") == "on",

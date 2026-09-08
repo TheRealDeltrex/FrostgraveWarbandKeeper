@@ -1082,8 +1082,9 @@ del _school, _extra
 # Five schools taught at the Collegium and lost with it. The book is explicit
 # that they "can never be learned, and a wizard will never find a grimoire
 # containing them" — they exist only on scrolls. It then includes rules for
-# running them as full schools if a group agrees, which the
-# "pentangle_schools_playable" homerule switches on.
+# running them as full schools if a group agrees; the creation page offers
+# them automatically once The Maze of Malcor is on (see
+# warband_store.playable_schools()), unless "Standard Wizards only" is ticked.
 #
 # Casting numbers and ranges are extracted from the Lost Spells chapter of the
 # book itself (scripts/extract_pentangle_spells.py), not guessed.
@@ -1232,10 +1233,42 @@ del RANGIFER_SPELLS
 
 # Schools that carry spells but that no *ordinary* wizard may choose as their
 # own school at creation — they're reachable only through a wizard state
-# (Beastcrafter), a homerule (Pentangle's "Pentangle schools playable",
+# (Beastcrafter) or a homerule (Pentangle's "Pentangle schools playable",
 # Vampire's "Vampire Wizard playable", Fire Giant's "Fire Giant Wizard
-# playable"), or (Rangifer) not at all yet.
+# playable", Rangifer's "Rangifer Shaman playable").
 EXTRA_SPELL_SCHOOLS = ["Beastcrafter", "Vampire", "Fire Giant", "Rangifer"] + PENTANGLE_SCHOOLS
+
+# Rangifer Shaman (Spellcaster Magazine, Issue 3, p.9-11) — "not wizards in
+# the conventional sense": their own stat line, XP table and spell-list
+# restriction, playable the same "school marker, not a wizard state" way as
+# Fire Giant/Vampire (see expansions.is_rangifer_shaman()/
+# warband_store.playable_schools()). No apprentice ("shamans do not have
+# apprentices as such").
+RANGIFER_WIZARD_BASE = {
+    "move": 7,
+    "fight": 2,
+    "shoot": 0,
+    "armour": 12,
+    "will": 3,
+    "health": 12,
+}
+RANGIFER_XP_PER_LEVEL = 100
+# "Fight (+5), Shoot (+5), Will (+8), Health (18)" — unlike a Lich's caps
+# (which leave Fight/Shoot uncapped), a Shaman's replaces all four.
+RANGIFER_STAT_CAPS = {"fight": 5, "shoot": 5, "will": 8, "health": 18}
+RANGIFER_STARTING_SPELL_COUNT = 4
+
+RANGIFER_SHAMAN_NOTES = [
+    "Casts only from the Rangifer Spell List — never learns another school's spells.",
+    "Has no apprentice; a hide member is never promoted to replace one.",
+    "Cultural traits (all rangifer): Hate Undead (+1 Fight vs. undead/magic attacks while "
+    "armed with antlers/flint/wood), Antlers (never unarmed), Flint Weapons (destroyed on "
+    "any natural 1 rolled in combat).",
+    "Starts with a wooden staff or flint hand weapon at no cost (free item slot).",
+    "May spend 200gc at creation on a \"hide\" of up to 5 rangifer troop types, including "
+    "the Rangifer Boar — this app doesn't automate the flat 200gc bulk price; hire them "
+    "individually afterward at their listed cost instead.",
+]
 
 LEVEL_UP_OPTIONS = [
     {"id": "fight", "label": "+1 Fight", "stat": "fight"},
@@ -2115,6 +2148,162 @@ SOLDIERS: dict[str, dict] = {
         "notes": "Construct, Cannot Carry Treasure. Already modified; cannot be modified further. May fill a kennel's wolf/warhound slot. Animated by the Animate Construct spell instead of purchased.",
         "description": 'A construct built to resemble and serve as a war hound (Fireheart), animated directly with the Animate Construct spell rather than bought outright. Construct: immune to poison, never counts as wounded. Cannot Carry Treasure. Comes pre-modified and cannot take any further Construct Modification. May be taken in place of a wolf or warhound wherever a kennel-type resource allows one.',
     },
+    # The Book of the Construct (Fireheart, p.71-72): a magic item rolled on a
+    # sub-table for one specific construct type, letting its owner cast Animate
+    # Construct to build that type instead of a plain small/medium/large one.
+    # Vault items are recorded as free text, so expansions.VAULT_ITEM_SOLDIERS
+    # gates each type below on its own specific "Book of the Construct (...)"
+    # name (expansions.CONSTRUCT_BOOK_VARIANT_NAMES) rather than the bare
+    # catalog name, matching the book's own sub-roll. All are pre-modified per
+    # the book and so excluded from STANDARD_CONSTRUCT_TYPE_KEYS.
+    "blade_dog": {
+        "name": "Blade-Dog",
+        "cost": 0,
+        "category": "specialist",
+        "source": "Fireheart",
+        "requires_spell": "Animate Construct",
+        "move": 7,
+        "fight": 3,
+        "shoot": 0,
+        "armour": 12,
+        "will": 0,
+        "health": 14,
+        "gear": "—",
+        "notes": "Construct, Construct Spikes (Horns), Cannot Pick Up Treasure, Sharp Teeth (+1 melee damage). Already modified; cannot be modified further. Counts as a specialist. Animated via a Book of the Construct (Blade-Dog).",
+        "description": 'A dog-shaped construct built with the Construct Spikes modification already applied (Fireheart, Book of the Construct (Blade-Dog)). Construct: immune to poison, never counts as wounded. Cannot Pick Up Treasure. Sharp Teeth: +1 damage in melee. Comes pre-modified and cannot take any further Construct Modification. Counts as a specialist.',
+    },
+    "glass_man": {
+        "name": "Glass Man",
+        "cost": 0,
+        "category": "standard",
+        "source": "Fireheart",
+        "requires_spell": "Animate Construct",
+        "move": 5,
+        "fight": 3,
+        "shoot": 0,
+        "armour": 12,
+        "will": 0,
+        "health": 10,
+        "gear": "—",
+        "notes": "Construct, Distracting (+1 Fight vs. shooting; -1 to Casting Rolls within 3\"), Sharp Teeth (+1 melee damage). Already modified; cannot be modified further. Animated via a Book of the Construct (Glass Man). Standard size — see Glass Man (Large) for the specialist version.",
+        "description": 'A construct of animated glass, built to a standard size (Fireheart, Book of the Construct (Glass Man)). Construct: immune to poison, never counts as wounded. Distracting: +1 Fight against shooting attacks (itself and anyone within 2"); -1 to Casting Rolls for any spell cast within 3" of it. Sharp Teeth: +1 damage in melee. Comes pre-modified and cannot take any further Construct Modification.',
+    },
+    "glass_man_large": {
+        "name": "Glass Man (Large)",
+        "cost": 0,
+        "category": "specialist",
+        "source": "Fireheart",
+        "requires_spell": "Animate Construct",
+        "move": 4,
+        "fight": 4,
+        "shoot": 0,
+        "armour": 13,
+        "will": 0,
+        "health": 12,
+        "gear": "Construct Hammer",
+        "notes": "Construct, Distracting (+1 Fight vs. shooting; -1 to Casting Rolls within 3\"). Already modified; cannot be modified further. Counts as a specialist. Animated via a Book of the Construct (Glass Man).",
+        "description": 'A construct of animated glass, built to a large size (Fireheart, Book of the Construct (Glass Man)). Construct: immune to poison, never counts as wounded. Distracting: +1 Fight against shooting attacks (itself and anyone within 2"); -1 to Casting Rolls for any spell cast within 3" of it. Carries a Construct Hammer. Comes pre-modified and cannot take any further Construct Modification. Counts as a specialist.',
+    },
+    "candle_jack": {
+        "name": "Candle-Jack",
+        "cost": 0,
+        "category": "standard",
+        "source": "Fireheart",
+        "requires_spell": "Animate Construct",
+        "move": 5,
+        "fight": 3,
+        "shoot": 0,
+        "armour": 13,
+        "will": 0,
+        "health": 10,
+        "gear": "Hand weapon, shield",
+        "item_slots": 0,
+        "notes": "Construct, Magic Attack, Organic Construction (affected by Heal/Steal Health as if not a construct). No item slots, never unarmed. Already modified; cannot be modified further. Standard size, hand weapon & shield — see Candle-Jack (Two-Handed) for the same size with a two-handed weapon instead, or Candle-Jack (Large) for the specialist version. Animated via a Book of the Construct (Candle-Jack).",
+        "description": 'A wax-bodied construct, built to a standard size and equipped with a hand weapon and shield (Fireheart, Book of the Construct (Candle-Jack)). Construct: immune to poison, never counts as wounded. Magic Attack: all its attacks count as magic. Organic Construction: affected by Heal and Steal Health as though it were not a construct. Has no item slots and is never considered unarmed. Comes pre-modified and cannot take any further Construct Modification.',
+    },
+    "candle_jack_two_handed": {
+        "name": "Candle-Jack (Two-Handed)",
+        "cost": 0,
+        "category": "standard",
+        "source": "Fireheart",
+        "requires_spell": "Animate Construct",
+        "move": 5,
+        "fight": 3,
+        "shoot": 0,
+        "armour": 12,
+        "will": 0,
+        "health": 10,
+        "gear": "Two-handed weapon",
+        "item_slots": 0,
+        "notes": "Construct, Magic Attack, Organic Construction (affected by Heal/Steal Health as if not a construct). No item slots, never unarmed. Already modified; cannot be modified further. Standard size, two-handed weapon instead of hand weapon & shield (Armour 12 instead of 13) — see Candle-Jack for the shield version. Animated via a Book of the Construct (Candle-Jack).",
+        "description": 'A wax-bodied construct, built to a standard size and equipped with a two-handed weapon instead of a hand weapon and shield (Fireheart, Book of the Construct (Candle-Jack)). Construct: immune to poison, never counts as wounded. Magic Attack: all its attacks count as magic. Organic Construction: affected by Heal and Steal Health as though it were not a construct. Has no item slots and is never considered unarmed. Comes pre-modified and cannot take any further Construct Modification.',
+    },
+    "candle_jack_large": {
+        "name": "Candle-Jack (Large)",
+        "cost": 0,
+        "category": "specialist",
+        "source": "Fireheart",
+        "requires_spell": "Animate Construct",
+        "move": 4,
+        "fight": 4,
+        "shoot": 0,
+        "armour": 14,
+        "will": 0,
+        "health": 12,
+        "gear": "Hand weapon, shield",
+        "item_slots": 0,
+        "notes": "Construct, Magic Attack, Organic Construction (affected by Heal/Steal Health as if not a construct). No item slots, never unarmed. Already modified; cannot be modified further. Counts as a specialist. Large size, hand weapon & shield — see Candle-Jack (Large, Two-Handed) for the two-handed version. Animated via a Book of the Construct (Candle-Jack).",
+        "description": 'A wax-bodied construct, built to a large size and equipped with a hand weapon and shield (Fireheart, Book of the Construct (Candle-Jack)). Construct: immune to poison, never counts as wounded. Magic Attack: all its attacks count as magic. Organic Construction: affected by Heal and Steal Health as though it were not a construct. Has no item slots and is never considered unarmed. Comes pre-modified and cannot take any further Construct Modification. Counts as a specialist.',
+    },
+    "candle_jack_large_two_handed": {
+        "name": "Candle-Jack (Large, Two-Handed)",
+        "cost": 0,
+        "category": "specialist",
+        "source": "Fireheart",
+        "requires_spell": "Animate Construct",
+        "move": 4,
+        "fight": 4,
+        "shoot": 0,
+        "armour": 13,
+        "will": 0,
+        "health": 12,
+        "gear": "Two-handed weapon",
+        "item_slots": 0,
+        "notes": "Construct, Magic Attack, Organic Construction (affected by Heal/Steal Health as if not a construct). No item slots, never unarmed. Already modified; cannot be modified further. Counts as a specialist. Large size, two-handed weapon instead of hand weapon & shield (Armour 13 instead of 14). Animated via a Book of the Construct (Candle-Jack).",
+        "description": 'A wax-bodied construct, built to a large size and equipped with a two-handed weapon instead of a hand weapon and shield (Fireheart, Book of the Construct (Candle-Jack)). Construct: immune to poison, never counts as wounded. Magic Attack: all its attacks count as magic. Organic Construction: affected by Heal and Steal Health as though it were not a construct. Has no item slots and is never considered unarmed. Comes pre-modified and cannot take any further Construct Modification. Counts as a specialist.',
+    },
+    "demonic_prison": {
+        "name": "Demonic Prison",
+        "cost": 0,
+        "category": "standard",
+        "source": "Fireheart",
+        "requires_spell": "Animate Construct",
+        "move": 4,
+        "fight": 4,
+        "shoot": 0,
+        "armour": 13,
+        "will": 0,
+        "health": 14,
+        "gear": "—",
+        "notes": "Construct, Demon Portal. Starts empty — cast Imp or Summon Demon on it to fill it with an Imp (always an Imp, regardless of which spell; doesn't count against the caster's demon-control limit). While possessed: Fight +6, Armour 14, Will -2. Already modified; cannot be modified further. Animated via a Book of the Construct (Demonic Prison).",
+        "description": 'A construct shell built to house a demon (Fireheart, Book of the Construct (Demonic Prison)). Construct: immune to poison, never counts as wounded. Demon Portal: starts empty; casting Imp or Summon Demon on it fills it with an Imp regardless of the spell used, and doesn\'t count against the caster\'s demon-control limit. While possessed it fights as Fight +6, Armour 14, Will -2 instead of the stats above. Comes pre-modified and cannot take any further Construct Modification.',
+    },
+    "construct_of_burden": {
+        "name": "Construct of Burden",
+        "cost": 0,
+        "category": "standard",
+        "source": "Fireheart",
+        "requires_spell": "Animate Construct",
+        "move": 6,
+        "fight": 2,
+        "shoot": 0,
+        "armour": 12,
+        "will": 0,
+        "health": 12,
+        "gear": "—",
+        "notes": "Construct, Treasure Lifter (picks up treasure with no action cost), Smoke Release (once/game: a 3\" cloud or moving line blocks line of sight; 16+ each turn-end dissipates it). Already modified; cannot be modified further. Animated via a Book of the Construct (Construct of Burden).",
+        "description": 'A construct built purely for hauling (Fireheart, Book of the Construct (Construct of Burden)). Construct: immune to poison, never counts as wounded. Treasure Lifter: may pick up a treasure token with no action cost. Smoke Release: once per game, creates a 3" cloud (or a moving 1"x3"xup to 6" line) that blocks line of sight, dissipating on a 16+ rolled at the end of each turn. Comes pre-modified and cannot take any further Construct Modification.',
+    },
     "scrounger": {
         "name": "Scrounger",
         "cost": 60,
@@ -2710,6 +2899,27 @@ def source_slug(name: str) -> str:
 SOURCE_BOOK_OPTIONS = [{"name": b, "slug": source_slug(b)} for b in SOURCE_BOOKS]
 SOURCE_BOOK_BY_SLUG = {source_slug(b): b for b in SOURCE_BOOKS}
 
+# Books with nothing that affects the creation page: no starting-spell entries
+# (SPELLS carries no "source" tagged with them) and no school they unlock (only
+# The Maze of Malcor/Blood Legacy/Spellcaster Magazine gate a school — see
+# app._new_schools()). Everything they add (mercenaries, Fireheart constructs,
+# Grave Mutations, Ragged Warbands, Wildwoods supplies, ...) only ever comes up
+# after the warband exists, on its own "Additional Rules and Homerules" tab —
+# so the creation page skips a toggle for them and simply leaves them on by
+# default, same as before a toggle would have.
+SOURCE_BOOKS_WITHOUT_CREATION_IMPACT = [
+    "The Frostgrave Folio",
+    "The Wizards' Conclave",
+    "The Perilous Dark",
+    "The Red King",
+    "Fireheart",
+    "Grave Mutations",
+    "The Wildwoods",
+]
+CREATION_SOURCE_BOOK_OPTIONS = [
+    opt for opt in SOURCE_BOOK_OPTIONS if opt["name"] not in SOURCE_BOOKS_WITHOUT_CREATION_IMPACT
+]
+
 
 
 def soldier_list_for_ui() -> list[dict]:
@@ -2775,6 +2985,15 @@ SUMMONED_ORDER = [
     "large_construct",
     "construct_familiar",
     "construct_hound_summoned",
+    "blade_dog",
+    "glass_man",
+    "glass_man_large",
+    "candle_jack",
+    "candle_jack_two_handed",
+    "candle_jack_large",
+    "candle_jack_large_two_handed",
+    "demonic_prison",
+    "construct_of_burden",
     "demonic_servant",
 ]
 
@@ -2844,11 +3063,19 @@ def construct_type_keys() -> set[str]:
 
 
 # Fireheart's Construct Modification rule only applies to the "standard"
-# small/medium/large constructs — the Construct Familiar and both Construct
-# Hound entries come pre-modified and can never take another modification
-# (see their "notes" above), even though the familiar is also animated by
-# Animate Construct.
+# small/medium/large constructs — the Construct Familiar, both Construct
+# Hound entries, and every Book of the Construct type (blade_dog, glass_man*,
+# candle_jack*, demonic_prison, construct_of_burden) come pre-modified and can
+# never take another modification (see their "notes" above), even though all
+# of them are also animated by Animate Construct.
 STANDARD_CONSTRUCT_TYPE_KEYS = {"small_construct", "medium_construct", "large_construct"}
+
+# Every construct that comes pre-modified per the comment above (bought or
+# summoned) — every Animate-Construct type minus the three standard ones, plus
+# construct_hound (bought outright, no requires_spell of its own). Used to
+# show a "pre-modified" badge in the roster instead of a real Construct
+# Modification pick.
+PRE_MODIFIED_CONSTRUCT_TYPE_KEYS = (construct_type_keys() | {"construct_hound"}) - STANDARD_CONSTRUCT_TYPE_KEYS
 
 
 # Blood Legacy's Giant-Blooded modification (Chapter Three) is written for

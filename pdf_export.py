@@ -24,6 +24,7 @@ from frostgrave_data import (
     CAPTAIN_ITEM_SLOTS,
     CAPTAIN_TRICK_BY_ID,
     KNIGHTLY_ORDER_BY_ID,
+    PRE_MODIFIED_CONSTRUCT_TYPE_KEYS,
     PROMOTE_CAPTAIN_ITEM_SLOTS,
     PROSTHETIC_LIMB_NAME_BY_INJURY_ID,
     PROSTHETIC_UPGRADE_BY_ID,
@@ -32,6 +33,7 @@ from frostgrave_data import (
     animal_companion_type_keys,
     construct_type_keys,
     format_stat,
+    get_soldier,
     unused_xp,
 )
 from game_content import item_slot_cost
@@ -918,6 +920,17 @@ def build_warband_pdf(wb: dict) -> bytes:
                 for line in s_mod_lines:
                     pdf.set_x(left)
                     pdf.multi_cell(0, 4.5, line, new_x="LMARGIN", new_y="NEXT", markdown=True)
+            elif s.get("type_key", "") in PRE_MODIFIED_CONSTRUCT_TYPE_KEYS:
+                # The catalog's own "notes" (traits) — never s.get("notes"),
+                # which is the soldier's separate free-text Notes field and
+                # shares that key name once merged by enrich_soldier().
+                cat_notes = (get_soldier(s.get("type_key", "")) or {}).get("notes", "")
+                if cat_notes.strip():
+                    pdf.set_x(left)
+                    pdf.multi_cell(
+                        0, 4.5, _t(f"**Pre-modified (Fireheart):** {cat_notes}"),
+                        new_x="LMARGIN", new_y="NEXT", markdown=True,
+                    )
             s_inj_lines = _mutation_lines(s.get("permanent_injuries"))
             if s_inj_lines:
                 pdf.set_x(left)
