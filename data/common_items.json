@@ -5,7 +5,8 @@
   "tier": "lesser",
   "purchase": 75,
   "sale": 50,
-  "source": "Core Rules"
+  "source": "Core Rules",
+  "effect": "This potion restores up to 5 lost points of Health. It may not take a figure above its normal starting Health."
  },
  {
   "name": "Potion of Strength",
@@ -13,7 +14,8 @@
   "tier": "lesser",
   "purchase": 100,
   "sale": 40,
-  "source": "Core Rules"
+  "source": "Core Rules",
+  "effect": "A figure that drinks this potion receives +1 Fight for the rest of the game."
  },
  {
   "name": "Potion of Toughness",
@@ -21,7 +23,8 @@
   "tier": "lesser",
   "purchase": 50,
   "sale": 30,
-  "source": "Core Rules"
+  "source": "Core Rules",
+  "effect": "The figure that drinks this potion receives +1 Armour for the rest of the game."
  },
  {
   "name": "Elixir of Speed",
@@ -29,7 +32,8 @@
   "tier": "lesser",
   "purchase": 50,
   "sale": 30,
-  "source": "Core Rules"
+  "source": "Core Rules",
+  "effect": "The figure who drinks this potion receives +2 Move for the rest of the game. This may not take a figure’s Move above 9."
  },
  {
   "name": "Potion of Invisibility",
@@ -37,7 +41,8 @@
   "tier": "lesser",
   "purchase": 100,
   "sale": 50,
-  "source": "Core Rules"
+  "source": "Core Rules",
+  "effect": "A figure that drinks this potion is treated as though an Invisibility spell was cast upon it."
  },
  {
   "name": "Explosive Cocktail",
@@ -45,7 +50,8 @@
   "tier": "lesser",
   "purchase": 100,
   "sale": 30,
-  "source": "Core Rules"
+  "source": "Core Rules",
+  "effect": "Throwing this cocktail follows all the rules of casting the Grenade spell, except that it can be used by a non-spellcaster, no Casting Roll is necessary, and the target point must be within 8”. Use of this potion cannot replace a move action."
  },
  {
   "name": "Potion of Teleportation",
@@ -53,7 +59,8 @@
   "tier": "lesser",
   "purchase": 500,
   "sale": 100,
-  "source": "Core Rules"
+  "source": "Core Rules",
+  "effect": "A figure that drinks this potion is treated as though it had just cast the Teleport spell. 93"
  },
  {
   "name": "Potion of Elemental Absorption",
@@ -61,7 +68,8 @@
   "tier": "lesser",
   "purchase": 200,
   "sale": 80,
-  "source": "Core Rules"
+  "source": "Core Rules",
+  "effect": "A figure that drinks this potion ignores the next 5 points of elemental damage it takes."
  },
  {
   "name": "Cordial of Clearsight",
@@ -69,7 +77,8 @@
   "tier": "lesser",
   "purchase": 200,
   "sale": 80,
-  "source": "Core Rules"
+  "source": "Core Rules",
+  "effect": "A figure that drinks this potion ignores the effects of Beauty and Invisibility spells for the rest of the game. Furthermore, if this figure moves into combat with an Illusionary Soldier, the Illusionary Soldier is immediately removed from the table."
  },
  {
   "name": "Poison",
@@ -77,7 +86,8 @@
   "tier": "lesser",
   "purchase": 100,
   "sale": 30,
-  "source": "Core Rules"
+  "source": "Core Rules",
+  "effect": "This sticky poison may be used to coat any weapon except a staff, bow, or crossbow. It can be used on one arrow or crossbow bolt. The next time this weapon causes damage, the figure that takes the damage is poisoned (assuming that figure is not immune to poison). The weapon loses the ability to poison after the first attack with it that causes damage. This potion is not magic and not affected by anything that cancels magic."
  },
  {
   "name": "Philtre of Fury",
@@ -85,7 +95,8 @@
   "tier": "lesser",
   "purchase": 300,
   "sale": 120,
-  "source": "Core Rules"
+  "source": "Core Rules",
+  "effect": "The figure gains +1 Fight and receives an additional +1 damage modifier on any successful hand-to-hand attack. However, the figure must, if possible, use all its actions every turn to move into combat with and fight the closest enemy figure (including uncontrolled creatures) in line of sight and not currently in combat."
  },
  {
   "name": "Potion of Iron Mind",
@@ -93,7 +104,8 @@
   "tier": "lesser",
   "purchase": 50,
   "sale": 30,
-  "source": "Core Rules"
+  "source": "Core Rules",
+  "effect": "A figure that drinks this potion gains +5 Will for the rest of the game."
  },
  {
   "name": "Bottle of Burrowing",
@@ -101,7 +113,8 @@
   "tier": "lesser",
   "purchase": 200,
   "sale": 80,
-  "source": "Core Rules"
+  "source": "Core Rules",
+  "effect": "A figure that drinks this potion may use any remaining actions in the activation to move directly through terrain. The figure may not end its activation inside terrain, so must have enough movement to make it completely through the terrain piece."
  },
  {
   "name": "Philtre of Fairy Dust",
@@ -109,7 +122,8 @@
   "tier": "lesser",
   "purchase": 50,
   "sale": 30,
-  "source": "Core Rules"
+  "source": "Core Rules",
+  "effect": "If this dust is sprinkled over a weapon, that weapon counts as a magic weapon for the rest of the game. It may be sprinkled over an arrow or crossbow bolt, though these will be one-use items."
  },
  {
   "name": "Construct Oil",
@@ -117,7 +131,8 @@
   "tier": "lesser",
   "purchase": 100,
   "sale": 50,
-  "source": "Core Rules"
+  "source": "Core Rules",
+  "effect": "After any game, a wizard may use this magic oil on one construct in their warband, giving it a permanent +1 to its Move stat. Each construct may only ever receive the benefit of construct oil once."
  },
  {
   "name": "Potion of Fire Breath",
@@ -125,7 +140,8 @@
   "tier": "lesser",
   "purchase": 200,
   "sale": 80,
-  "source": "Core Rules"
+  "source": "Core Rules",
+  "effect": "A figure that drinks this potion and still has an action remaining in the same activation, may use that action to make a +3 elemental magic shooting attack at a figure within 6”."
  },
  {
   "name": "Potion of Preservation",
@@ -133,7 +149,8 @@
   "tier": "lesser",
   "purchase": 500,
   "sale": 200,
-  "source": "Core Rules"
+  "source": "Core Rules",
+  "effect": "This potion may be used on any figure, other than a wizard, who died in the previous game. This potion perfectly preserves the body of the figure for the next five games. After each of the next five games, a wizard may use an elixir of life potion or a Miraculous Cure spell on the preserved figure. While a figure is preserved, it does not count as a member of the warband for the purpose of calculating maximum warband size, but will do so if brought back to life. A wizard may not hire another apprentice if they have one preserved. If, after the fifth game, the preserved figure has not been brought back to life, it is dead, and should be removed from the Wizard Sheet."
  },
  {
   "name": "Elixir of the Chameleon",
@@ -141,7 +158,8 @@
   "tier": "lesser",
   "purchase": 400,
   "sale": 140,
-  "source": "Core Rules"
+  "source": "Core Rules",
+  "effect": "This potion allows a figure to blend in with their surroundings. No other figure may draw line of sight to this figure if they are more than 12” away. Thus, this figure may only be targeted by an attack or a spell from another figure that is within 12”."
  },
  {
   "name": "Cordial of Empowerment",
@@ -152,7 +170,8 @@
   "purchase": 500,
   "sale": 200,
   "ingredients": 200,
-  "source": "Core Rules"
+  "source": "Core Rules",
+  "effect": "The next time a spellcaster casts a spell after drinking this potion, they add +4 to their Casting Roll but suffer 2 damage, in addition to any other effects of casting the spell. A spellcaster may only use one cordial of empowerment per game. This potion may not be used to cast Out of Game spells. 90"
  },
  {
   "name": "Shrinking Potion",
@@ -163,7 +182,8 @@
   "purchase": 500,
   "sale": 200,
   "ingredients": 200,
-  "source": "Core Rules"
+  "source": "Core Rules",
+  "effect": "A figure that is carrying treasure may use the potion to shrink it down to a size that will fit in a pocket. This figure no longer suffers any penalties to Move, Fight, or swimming for carrying this treasure. It may even carry a second treasure token. If the effect of this potion is cancelled while the figure is carrying two treasures, it must choose one and immediately drop it. If the shrunk treasure is dropped for any reason, it returns to its normal size."
  },
  {
   "name": "Potion of Restoration",
@@ -174,7 +194,8 @@
   "purchase": 2000,
   "sale": 300,
   "ingredients": 750,
-  "source": "Core Rules"
+  "source": "Core Rules",
+  "effect": "A figure that drinks this potion is immediately restored to its starting Health and is cured of any poison or temporary stat reductions. This potion may also be used after a game to cure the figure of any permanent injuries."
  },
  {
   "name": "Bottle of Dreams and Nightmares",
@@ -185,7 +206,8 @@
   "purchase": 2000,
   "sale": 300,
   "ingredients": 500,
-  "source": "Core Rules"
+  "source": "Core Rules",
+  "effect": "This potion can only be used by a wizard immediately before a game. The wizard should immediately make a Will Roll (TN12). If successful, then the wizard gains an extra 50 experience points after the game. This does not count towards the 300 experience point maximum in a game. If unsuccessful, the wizard has 30 experience points deducted from those earned during the game (this cannot take the total experience gained for the game below 0). These 30 experience points are deducted from the maximum that can be earned (meaning a wizard that fails can earn a maximum of 270 experience points in the game)."
  },
  {
   "name": "Shatterstar Draught",
@@ -196,7 +218,8 @@
   "purchase": 1500,
   "sale": 200,
   "ingredients": 600,
-  "source": "Core Rules"
+  "source": "Core Rules",
+  "effect": "If a figure drinks this potion, and then casts a spell during the same activation, then the figure may attempt to cast that spell twice. The attempts should be made one right after another. Each attempt may have a separate target, both of which must be declared before any rolls are made."
  },
  {
   "name": "Bottle of Darkness",
@@ -207,7 +230,8 @@
   "purchase": 1500,
   "sale": 300,
   "ingredients": 600,
-  "source": "Core Rules"
+  "source": "Core Rules",
+  "effect": "If a figure shatters this bottle on the ground, an unnatural darkness immediately falls upon the battlefield. Line of sight for everyone is reduced to 12” for the rest of the game."
  },
  {
   "name": "Ethereal Vacuum",
@@ -218,7 +242,8 @@
   "purchase": 2000,
   "sale": 200,
   "ingredients": 800,
-  "source": "Core Rules"
+  "source": "Core Rules",
+  "effect": "When a character spends an action to open this bottle, all creatures with the Ethereal trait within 8” must make a Will Roll (TN20). If they fail, they are sucked into the bottle and imprisoned. Immediately remove the figure from the table and award any experience points that would have been earned for killing such a creature. 91"
  },
  {
   "name": "Potion of Invulnerability",
@@ -229,7 +254,8 @@
   "purchase": null,
   "sale": 400,
   "ingredients": 2000,
-  "source": "Core Rules"
+  "source": "Core Rules",
+  "effect": "A figure that drinks this potion is immune to damage from non-magic weapons. Whenever this figure activates, roll a die. On a 17+, the effects of the potion end immediately. 92"
  },
  {
   "name": "Bottle of Null",
@@ -240,7 +266,8 @@
   "purchase": null,
   "sale": 200,
   "ingredients": 1000,
-  "source": "Core Rules"
+  "source": "Core Rules",
+  "effect": "If a figure opens this bottle, all spells in play are immediately cancelled. This will not unsummon creatures, but it will cancel Control spells, including the Control Demon spell inherent in Summon Demon. Furthermore, all spellcasters must make a Will Roll (TN14) or suffer 1 point of damage."
  },
  {
   "name": "Elixir of Life",
@@ -251,7 +278,8 @@
   "purchase": null,
   "sale": 1000,
   "ingredients": 3000,
-  "source": "Core Rules"
+  "source": "Core Rules",
+  "effect": "This is the rarest and most valuable of all potions. It can never be bought and only a desperate fool would ever sell it. It may be used immediately after any game. If used, one figure that died during that game is brought back to life. The figure suffers no ill effects from death and may take part in the next game."
  },
  {
   "name": "Hand Weapon, +1 damage modifier",
@@ -383,7 +411,7 @@
   "name": "Heavy Armour, Elemental Absorption",
   "category": "Magic Weapon or Armour",
   "base_item": "Heavy Armour",
-  "effect": "Elemental Absorption",
+  "effect": "If a figure is wearing an item with Elemental Absorption, then any elemental damage they take (such as from the Elemental Bolt or Elemental Ball spells) is halved, rounding up.",
   "purchase": 800,
   "sale": 300,
   "source": "Core Rules"
@@ -410,7 +438,7 @@
   "name": "Cloak of Night, Elemental Absorption",
   "category": "Magic Weapon or Armour",
   "base_item": "Cloak of Night",
-  "effect": "Elemental Absorption",
+  "effect": "If a figure is wearing an item with Elemental Absorption, then any elemental damage they take (such as from the Elemental Bolt or Elemental Ball spells) is halved, rounding up.",
   "purchase": 500,
   "sale": 200,
   "source": "Core Rules"
@@ -580,7 +608,8 @@
   "purchase": 500,
   "sale": 200,
   "sale_requires_known_spell": true,
-  "source": "Core Rules"
+  "source": "Core Rules",
+  "effect": "Grimoires are books of magic. They may be actual books, piles of scrolls, stone tablets, or whatever. The exact physical nature of a grimoire is not important. What is important is that a wizard can use a grimoire to learn a spell they don’t know. Whenever a grimoire is found, roll on the Random Spell Table to identify the spell it contains. A grimoire is stored in the wizard’s vault until such a time as the wizard wants to learn the spell within (see Experience and Level, page 84) or to sell it. Once a grimoire’s spell has been learnt, the book loses its value, and should be removed from the Wizard Sheet. A wizard would never willingly part with a grimoire that contains a spell they do not know. If a wizard obtains a grimoire containing a spell they already know, they may sell it for 200gc."
  },
  {
   "name": "Scroll",
@@ -588,6 +617,7 @@
   "variant": "spell",
   "purchase": 250,
   "sale": 30,
-  "source": "Core Rules"
+  "source": "Core Rules",
+  "effect": "For each scroll, roll once on the Random Spell Table to determine what spell is written on the scroll. As scrolls only contain magic spells written in shorthand, they cannot be used to learn a new spell. Scrolls take up one item slot. Otherwise they may be sold for 30gc or stored in the wizard’s vault."
  }
 ]

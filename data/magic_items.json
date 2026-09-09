@@ -1290,6 +1290,11 @@
   "effect": "Wearer is immune to poison."
  },
  {
+  "name": "Construct Spikes",
+  "source": "The Red King",
+  "effect": "Attached to any construct permanently and may never be removed; the construct gains the “Horns” creature trait."
+ },
+ {
   "name": "Book of the Foulhorn",
   "source": "The Red King",
   "effect": "Hire a Foulhorn specialist soldier (200gc); risk of it injuring a random warband member (-3 Health) before each game on a 16+."

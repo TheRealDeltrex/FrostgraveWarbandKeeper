@@ -1956,8 +1956,9 @@
           The Captain is from The Frostgrave Folio — enable that source under Additional Rules and Homerules first.
         </p>
       {% else %}
+        <details class="ref-panel" id="captain-hire-panel">
+          <summary>Captain — none hired</summary>
         {% if hr.captain_mode in ('hire', 'both') %}
-          <h3>Hire captain</h3>
           <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" enctype="multipart/form-data">
             <input type="hidden" name="action" value="hire_captain" />
             <div class="form-row inline">
@@ -2009,6 +2010,7 @@
             No captain yet — promote an active soldier to Captain from Soldiers &amp; recruiting below.
           </p>
         {% endif %}
+        </details>
       {% endif %}
   {% endif %}
     {% if ragged_warbands_enabled %}
@@ -3638,8 +3640,8 @@
     {% if not hr.black_market_enabled %}
       <p class="muted" style="font-size:0.85rem">
         Grimoire 500gc / sells for 200gc · scroll 250gc / 30gc · potions, magic weapons, armour
-        and items at their listed prices. A sale price marked * is the app's own — that book
-        prints a purchase price only, so it suggests a third of it.
+        and items at their listed prices. A sale price marked * is not printed on that item's
+        own table; it is the Core Rules p.199 rule, 40% of the purchase price.
       </p>
       {# One shelf per category; Potions and Magic Items split further into
          collapsible sub-shelves (tier / source book) via group.subgroups. #}
@@ -3663,7 +3665,7 @@
                     {% endwith %}
                   </td>
                   <td class="gold">{% if row.purchase %}{{ row.purchase }} gc{% else %}<span class="muted">never sold</span>{% endif %}</td>
-                  <td class="muted">{% if row.sale %}{{ row.sale }} gc{% if row.sale_estimated %}<span title="This book prints no sale price. A third of the purchase price, rounded down to 5 gc.">*</span>{% endif %}{% else %}—{% endif %}</td>
+                  <td class="muted">{% if row.sale %}{{ row.sale }} gc{% if row.sale_estimated %}<span title="No sale price is printed for this item. Core Rules p.199: 40% of the purchase price, rounded up to the next 5 gc where it lands off one.">*</span>{% endif %}{% else %}—{% endif %}</td>
                   <td>
                     {% if row.purchase %}
                       <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">

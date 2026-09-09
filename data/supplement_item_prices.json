@@ -2,7 +2,7 @@
  {
   "name": "Wraithbottle",
   "purchase": 200,
-  "sale": 65,
+  "sale": 80,
   "source": "Thaw of the Lich Lord",
   "table": "Lich Lord Treasure Table",
   "sale_estimated": true
@@ -10,7 +10,7 @@
  {
   "name": "Magic Spectacles",
   "purchase": 250,
-  "sale": 80,
+  "sale": 100,
   "source": "Thaw of the Lich Lord",
   "table": "Lich Lord Treasure Table",
   "sale_estimated": true
@@ -18,7 +18,7 @@
  {
   "name": "Sword of Undead Slaying",
   "purchase": 300,
-  "sale": 100,
+  "sale": 120,
   "source": "Thaw of the Lich Lord",
   "table": "Lich Lord Treasure Table",
   "sale_estimated": true
@@ -26,7 +26,7 @@
  {
   "name": "Horn of Hellfire",
   "purchase": 400,
-  "sale": 130,
+  "sale": 160,
   "source": "Thaw of the Lich Lord",
   "table": "Lich Lord Treasure Table",
   "sale_estimated": true
@@ -34,7 +34,7 @@
  {
   "name": "Vampire Blade",
   "purchase": 300,
-  "sale": 100,
+  "sale": 120,
   "source": "Thaw of the Lich Lord",
   "table": "Lich Lord Treasure Table",
   "sale_estimated": true
@@ -42,7 +42,7 @@
  {
   "name": "Quiver of the Soul Seeker",
   "purchase": 300,
-  "sale": 100,
+  "sale": 120,
   "source": "Thaw of the Lich Lord",
   "table": "Lich Lord Treasure Table",
   "sale_estimated": true
@@ -50,7 +50,7 @@
  {
   "name": "Boots of Leaping",
   "purchase": 250,
-  "sale": 80,
+  "sale": 100,
   "source": "Thaw of the Lich Lord",
   "table": "Lich Lord Treasure Table",
   "sale_estimated": true
@@ -58,7 +58,7 @@
  {
   "name": "Eyes of Amoto",
   "purchase": 300,
-  "sale": 100,
+  "sale": 120,
   "source": "Thaw of the Lich Lord",
   "table": "Lich Lord Treasure Table",
   "sale_estimated": true
@@ -66,7 +66,7 @@
  {
   "name": "Ring of Life",
   "purchase": 400,
-  "sale": 130,
+  "sale": 160,
   "source": "Thaw of the Lich Lord",
   "table": "Lich Lord Treasure Table",
   "sale_estimated": true
@@ -74,7 +74,7 @@
  {
   "name": "Unbreakable Orb",
   "purchase": 300,
-  "sale": 100,
+  "sale": 120,
   "source": "Thaw of the Lich Lord",
   "table": "Lich Lord Treasure Table",
   "sale_estimated": true
@@ -82,7 +82,7 @@
  {
   "name": "Scarf of Obscurance",
   "purchase": 350,
-  "sale": 115,
+  "sale": 140,
   "source": "Thaw of the Lich Lord",
   "table": "Lich Lord Treasure Table",
   "sale_estimated": true
@@ -90,7 +90,7 @@
  {
   "name": "Vial of Starlight",
   "purchase": 600,
-  "sale": 200,
+  "sale": 240,
   "source": "Thaw of the Lich Lord",
   "table": "Lich Lord Treasure Table",
   "sale_estimated": true
@@ -98,7 +98,7 @@
  {
   "name": "Crystal Rose",
   "purchase": 400,
-  "sale": 130,
+  "sale": 160,
   "source": "Thaw of the Lich Lord",
   "table": "Lich Lord Treasure Table",
   "sale_estimated": true
@@ -106,7 +106,7 @@
  {
   "name": "Club of Battering",
   "purchase": 300,
-  "sale": 100,
+  "sale": 120,
   "source": "Thaw of the Lich Lord",
   "table": "Lich Lord Treasure Table",
   "sale_estimated": true
@@ -114,7 +114,7 @@
  {
   "name": "Book of Bones",
   "purchase": 500,
-  "sale": 165,
+  "sale": 200,
   "source": "Thaw of the Lich Lord",
   "table": "Lich Lord Treasure Table",
   "sale_estimated": true
@@ -122,7 +122,7 @@
  {
   "name": "Book of the Rangifer",
   "purchase": 300,
-  "sale": 100,
+  "sale": 120,
   "source": "Thaw of the Lich Lord",
   "table": "Lich Lord Treasure Table",
   "sale_estimated": true
@@ -130,7 +130,7 @@
  {
   "name": "Shroud of Foresight",
   "purchase": 500,
-  "sale": 165,
+  "sale": 200,
   "source": "Forgotten Pacts",
   "table": "Forgotten Pacts Treasure Table",
   "sale_estimated": true
@@ -138,7 +138,7 @@
  {
   "name": "Ring of Restoration",
   "purchase": 300,
-  "sale": 100,
+  "sale": 120,
   "source": "Forgotten Pacts",
   "table": "Forgotten Pacts Treasure Table",
   "sale_estimated": true
@@ -146,7 +146,7 @@
  {
   "name": "Robes of Faith",
   "purchase": 400,
-  "sale": 130,
+  "sale": 160,
   "source": "Forgotten Pacts",
   "table": "Forgotten Pacts Treasure Table",
   "sale_estimated": true
@@ -154,7 +154,7 @@
  {
   "name": "Spell Shield",
   "purchase": 400,
-  "sale": 130,
+  "sale": 160,
   "source": "Forgotten Pacts",
   "table": "Forgotten Pacts Treasure Table",
   "sale_estimated": true
@@ -162,7 +162,7 @@
  {
   "name": "Giant Slayer Blade",
   "purchase": 300,
-  "sale": 100,
+  "sale": 120,
   "source": "Forgotten Pacts",
   "table": "Forgotten Pacts Treasure Table",
   "sale_estimated": true
@@ -170,7 +170,7 @@
  {
   "name": "Smoke Bomb",
   "purchase": 100,
-  "sale": 30,
+  "sale": 40,
   "source": "Forgotten Pacts",
   "table": "Forgotten Pacts Treasure Table",
   "sale_estimated": true
@@ -178,7 +178,7 @@
  {
   "name": "Null Blade",
   "purchase": 250,
-  "sale": 80,
+  "sale": 100,
   "source": "Forgotten Pacts",
   "table": "Forgotten Pacts Treasure Table",
   "sale_estimated": true
@@ -186,7 +186,7 @@
  {
   "name": "Piercing Stiletto",
   "purchase": 300,
-  "sale": 100,
+  "sale": 120,
   "source": "Forgotten Pacts",
   "table": "Forgotten Pacts Treasure Table",
   "sale_estimated": true
@@ -194,7 +194,7 @@
  {
   "name": "Silver Star Pendant",
   "purchase": 350,
-  "sale": 115,
+  "sale": 140,
   "source": "Forgotten Pacts",
   "table": "Forgotten Pacts Treasure Table",
   "sale_estimated": true
@@ -202,7 +202,7 @@
  {
   "name": "Executioner's Blade",
   "purchase": 400,
-  "sale": 130,
+  "sale": 160,
   "source": "Forgotten Pacts",
   "table": "Forgotten Pacts Treasure Table",
   "sale_estimated": true
@@ -210,7 +210,7 @@
  {
   "name": "Golem Flesh",
   "purchase": 200,
-  "sale": 65,
+  "sale": 80,
   "source": "Forgotten Pacts",
   "table": "Forgotten Pacts Treasure Table",
   "sale_estimated": true
@@ -218,7 +218,7 @@
  {
   "name": "Ring of Focus",
   "purchase": 200,
-  "sale": 65,
+  "sale": 80,
   "source": "Forgotten Pacts",
   "table": "Forgotten Pacts Treasure Table",
   "sale_estimated": true
@@ -226,7 +226,7 @@
  {
   "name": "Crossbow of Force",
   "purchase": 200,
-  "sale": 65,
+  "sale": 80,
   "source": "Forgotten Pacts",
   "table": "Forgotten Pacts Treasure Table",
   "sale_estimated": true
@@ -234,7 +234,7 @@
  {
   "name": "Trapmaster Gloves",
   "purchase": 200,
-  "sale": 65,
+  "sale": 80,
   "source": "Forgotten Pacts",
   "table": "Forgotten Pacts Treasure Table",
   "sale_estimated": true
@@ -242,7 +242,7 @@
  {
   "name": "Soul Shield Pendant",
   "purchase": 300,
-  "sale": 100,
+  "sale": 120,
   "source": "Forgotten Pacts",
   "table": "Forgotten Pacts Treasure Table",
   "sale_estimated": true
@@ -250,7 +250,7 @@
  {
   "name": "Vampiric Staff",
   "purchase": 300,
-  "sale": 100,
+  "sale": 120,
   "source": "Forgotten Pacts",
   "table": "Forgotten Pacts Treasure Table",
   "sale_estimated": true
@@ -258,7 +258,7 @@
  {
   "name": "Amulet of the Stone Heart",
   "purchase": 600,
-  "sale": 200,
+  "sale": 240,
   "source": "Forgotten Pacts",
   "table": "Forgotten Pacts Treasure Table",
   "sale_estimated": true
@@ -266,7 +266,7 @@
  {
   "name": "Wraith Arrow",
   "purchase": 100,
-  "sale": 30,
+  "sale": 40,
   "source": "Forgotten Pacts",
   "table": "Magic Ammunition Table",
   "sale_estimated": true
@@ -274,7 +274,7 @@
  {
   "name": "Arrow of Demon Slaying",
   "purchase": 100,
-  "sale": 30,
+  "sale": 40,
   "source": "Forgotten Pacts",
   "table": "Magic Ammunition Table",
   "sale_estimated": true
@@ -282,7 +282,7 @@
  {
   "name": "Stunning Arrow",
   "purchase": 100,
-  "sale": 30,
+  "sale": 40,
   "source": "Forgotten Pacts",
   "table": "Magic Ammunition Table",
   "sale_estimated": true
@@ -290,7 +290,7 @@
  {
   "name": "Arrow of Piercing",
   "purchase": 100,
-  "sale": 30,
+  "sale": 40,
   "source": "Forgotten Pacts",
   "table": "Magic Ammunition Table",
   "sale_estimated": true
@@ -298,7 +298,7 @@
  {
   "name": "Soulseeker Arrow",
   "purchase": 100,
-  "sale": 30,
+  "sale": 40,
   "source": "Forgotten Pacts",
   "table": "Magic Ammunition Table",
   "sale_estimated": true
@@ -306,7 +306,7 @@
  {
   "name": "Mind Wrench",
   "purchase": 250,
-  "sale": 80,
+  "sale": 100,
   "source": "The Frostgrave Folio",
   "table": "The Hunt for the Golem Treasure Table",
   "sale_estimated": true
@@ -314,7 +314,7 @@
  {
   "name": "Truestroke Chisel",
   "purchase": 250,
-  "sale": 80,
+  "sale": 100,
   "source": "The Frostgrave Folio",
   "table": "The Hunt for the Golem Treasure Table",
   "sale_estimated": true
@@ -322,7 +322,7 @@
  {
   "name": "Book of the Construct",
   "purchase": 250,
-  "sale": 80,
+  "sale": 100,
   "source": "The Frostgrave Folio",
   "table": "The Hunt for the Golem Treasure Table",
   "sale_estimated": true
@@ -330,7 +330,7 @@
  {
   "name": "Scroll Case",
   "purchase": 150,
-  "sale": 50,
+  "sale": 60,
   "source": "The Maze of Malcor",
   "table": "Maze of Malcor Treasure Table",
   "sale_estimated": true
@@ -338,7 +338,7 @@
  {
   "name": "Potion Bag",
   "purchase": 150,
-  "sale": 50,
+  "sale": 60,
   "source": "The Maze of Malcor",
   "table": "Maze of Malcor Treasure Table",
   "sale_estimated": true
@@ -346,7 +346,7 @@
  {
   "name": "Wand of Casting",
   "purchase": 400,
-  "sale": 130,
+  "sale": 160,
   "source": "The Maze of Malcor",
   "table": "Maze of Malcor Treasure Table",
   "sale_estimated": true
@@ -354,7 +354,7 @@
  {
   "name": "Firehelm",
   "purchase": 400,
-  "sale": 130,
+  "sale": 160,
   "source": "The Maze of Malcor",
   "table": "Maze of Malcor Treasure Table",
   "sale_estimated": true
@@ -362,7 +362,7 @@
  {
   "name": "Construct Crossbow",
   "purchase": 250,
-  "sale": 80,
+  "sale": 100,
   "source": "The Maze of Malcor",
   "table": "Maze of Malcor Treasure Table",
   "sale_estimated": true
@@ -370,7 +370,7 @@
  {
   "name": "Wand of Lost Magic",
   "purchase": 400,
-  "sale": 130,
+  "sale": 160,
   "source": "The Maze of Malcor",
   "table": "Maze of Malcor Treasure Table",
   "sale_estimated": true
@@ -378,7 +378,7 @@
  {
   "name": "Mind Lock Ring",
   "purchase": 500,
-  "sale": 165,
+  "sale": 200,
   "source": "The Maze of Malcor",
   "table": "Maze of Malcor Treasure Table",
   "sale_estimated": true
@@ -386,7 +386,7 @@
  {
   "name": "Timelash Ring",
   "purchase": 400,
-  "sale": 130,
+  "sale": 160,
   "source": "The Maze of Malcor",
   "table": "Maze of Malcor Treasure Table",
   "sale_estimated": true
@@ -394,7 +394,7 @@
  {
   "name": "Miracle Stone",
   "purchase": 500,
-  "sale": 165,
+  "sale": 200,
   "source": "The Maze of Malcor",
   "table": "Maze of Malcor Treasure Table",
   "sale_estimated": true
@@ -402,7 +402,7 @@
  {
   "name": "Lycanthrope Serum",
   "purchase": 400,
-  "sale": 130,
+  "sale": 160,
   "source": "The Maze of Malcor",
   "table": "Maze of Malcor Treasure Table",
   "sale_estimated": true
@@ -410,7 +410,7 @@
  {
   "name": "Arrow Magnet",
   "purchase": 100,
-  "sale": 30,
+  "sale": 40,
   "source": "The Maze of Malcor",
   "table": "Maze of Malcor Treasure Table",
   "sale_estimated": true
@@ -418,7 +418,7 @@
  {
   "name": "Belt of Blade-breaking",
   "purchase": 300,
-  "sale": 100,
+  "sale": 120,
   "source": "The Maze of Malcor",
   "table": "Maze of Malcor Treasure Table",
   "sale_estimated": true
@@ -426,7 +426,7 @@
  {
   "name": "Gem Hammer",
   "purchase": 100,
-  "sale": 30,
+  "sale": 40,
   "source": "The Maze of Malcor",
   "table": "Maze of Malcor Treasure Table",
   "sale_estimated": true
@@ -434,7 +434,7 @@
  {
   "name": "Eye of Malcor",
   "purchase": 300,
-  "sale": 100,
+  "sale": 120,
   "source": "The Maze of Malcor",
   "table": "Maze of Malcor Treasure Table",
   "sale_estimated": true
@@ -442,7 +442,7 @@
  {
   "name": "Invisible Wire",
   "purchase": 200,
-  "sale": 65,
+  "sale": 80,
   "source": "The Maze of Malcor",
   "table": "Maze of Malcor Treasure Table",
   "sale_estimated": true
@@ -450,7 +450,7 @@
  {
   "name": "Troll Shackles",
   "purchase": 500,
-  "sale": 165,
+  "sale": 200,
   "source": "The Maze of Malcor",
   "table": "Maze of Malcor Treasure Table",
   "sale_estimated": true
@@ -458,7 +458,7 @@
  {
   "name": "Bearclaw Pendant",
   "purchase": 250,
-  "sale": 80,
+  "sale": 100,
   "source": "The Maze of Malcor",
   "table": "Maze of Malcor Treasure Table",
   "sale_estimated": true
@@ -466,7 +466,7 @@
  {
   "name": "Ring of Fog Form",
   "purchase": 350,
-  "sale": 115,
+  "sale": 140,
   "source": "The Maze of Malcor",
   "table": "Maze of Malcor Treasure Table",
   "sale_estimated": true
@@ -474,7 +474,7 @@
  {
   "name": "Boots of Standfirm",
   "purchase": 300,
-  "sale": 100,
+  "sale": 120,
   "source": "The Maze of Malcor",
   "table": "Maze of Malcor Treasure Table",
   "sale_estimated": true
@@ -482,7 +482,7 @@
  {
   "name": "Sky Gondola",
   "purchase": 1000,
-  "sale": 330,
+  "sale": 400,
   "source": "The Maze of Malcor",
   "table": "Maze of Malcor Treasure Table",
   "sale_estimated": true
@@ -490,7 +490,7 @@
  {
   "name": "Bloodstone Amulet",
   "purchase": 100,
-  "sale": 30,
+  "sale": 40,
   "source": "The Maze of Malcor",
   "table": "Maze of Malcor Treasure Table",
   "sale_estimated": true
@@ -498,7 +498,7 @@
  {
   "name": "Sickle of the Crowmaster",
   "purchase": 300,
-  "sale": 100,
+  "sale": 120,
   "source": "The Maze of Malcor",
   "table": "Maze of Malcor Treasure Table",
   "sale_estimated": true
@@ -506,7 +506,7 @@
  {
   "name": "Construct Varnish",
   "purchase": 250,
-  "sale": 80,
+  "sale": 100,
   "source": "The Maze of Malcor",
   "table": "Maze of Malcor Treasure Table",
   "sale_estimated": true
@@ -514,7 +514,7 @@
  {
   "name": "Karmic Belt",
   "purchase": 250,
-  "sale": 80,
+  "sale": 100,
   "source": "The Maze of Malcor",
   "table": "Maze of Malcor Treasure Table",
   "sale_estimated": true
@@ -522,7 +522,7 @@
  {
   "name": "Leash Arrow",
   "purchase": 100,
-  "sale": 30,
+  "sale": 40,
   "source": "The Maze of Malcor",
   "table": "Maze of Malcor Treasure Table",
   "sale_estimated": true
@@ -530,7 +530,7 @@
  {
   "name": "Bracers of True Flight",
   "purchase": 300,
-  "sale": 100,
+  "sale": 120,
   "source": "The Maze of Malcor",
   "table": "Maze of Malcor Treasure Table",
   "sale_estimated": true
@@ -538,7 +538,7 @@
  {
   "name": "Black Pipe",
   "purchase": 250,
-  "sale": 80,
+  "sale": 100,
   "source": "The Maze of Malcor",
   "table": "Maze of Malcor Treasure Table",
   "sale_estimated": true
@@ -546,7 +546,7 @@
  {
   "name": "Sandalwood Brace",
   "purchase": 200,
-  "sale": 65,
+  "sale": 80,
   "source": "The Maze of Malcor",
   "table": "Maze of Malcor Treasure Table",
   "sale_estimated": true
@@ -554,7 +554,7 @@
  {
   "name": "Gloves of the Paladin",
   "purchase": 200,
-  "sale": 65,
+  "sale": 80,
   "source": "The Maze of Malcor",
   "table": "Maze of Malcor Treasure Table",
   "sale_estimated": true
@@ -562,7 +562,7 @@
  {
   "name": "Backpack of Hefty Haulage",
   "purchase": 300,
-  "sale": 100,
+  "sale": 120,
   "source": "The Maze of Malcor",
   "table": "Maze of Malcor Treasure Table",
   "sale_estimated": true
@@ -570,7 +570,7 @@
  {
   "name": "Porter Control Rod",
   "purchase": 300,
-  "sale": 100,
+  "sale": 120,
   "source": "The Maze of Malcor",
   "table": "Maze of Malcor Treasure Table",
   "sale_estimated": true
@@ -578,7 +578,7 @@
  {
   "name": "Ring Chain",
   "purchase": 250,
-  "sale": 80,
+  "sale": 100,
   "source": "The Maze of Malcor",
   "table": "Maze of Malcor Treasure Table",
   "sale_estimated": true
@@ -586,7 +586,7 @@
  {
   "name": "Amulet of True Paths",
   "purchase": 300,
-  "sale": 100,
+  "sale": 120,
   "source": "The Maze of Malcor",
   "table": "Maze of Malcor Treasure Table",
   "sale_estimated": true
@@ -594,7 +594,7 @@
  {
   "name": "Partially Gnawed Grimoire",
   "purchase": 300,
-  "sale": 100,
+  "sale": 120,
   "source": "The Maze of Malcor",
   "table": "Maze of Malcor Treasure Table",
   "sale_estimated": true
@@ -602,7 +602,7 @@
  {
   "name": "Tookroot (x5 doses)",
   "purchase": 100,
-  "sale": 30,
+  "sale": 40,
   "source": "The Maze of Malcor",
   "table": "Maze of Malcor Treasure Table",
   "sale_estimated": true
@@ -610,7 +610,7 @@
  {
   "name": "Bladed Staff of Fire",
   "purchase": 350,
-  "sale": 115,
+  "sale": 140,
   "source": "The Maze of Malcor",
   "table": "Maze of Malcor Treasure Table",
   "sale_estimated": true
@@ -618,7 +618,7 @@
  {
   "name": "Book of Murders",
   "purchase": 350,
-  "sale": 115,
+  "sale": 140,
   "source": "The Maze of Malcor",
   "table": "Maze of Malcor Treasure Table",
   "sale_estimated": true
@@ -626,7 +626,7 @@
  {
   "name": "Flicker Stone",
   "purchase": 400,
-  "sale": 130,
+  "sale": 160,
   "source": "The Maze of Malcor",
   "table": "Maze of Malcor Treasure Table",
   "sale_estimated": true
@@ -634,7 +634,7 @@
  {
   "name": "Book of Charity",
   "purchase": 350,
-  "sale": 115,
+  "sale": 140,
   "source": "The Maze of Malcor",
   "table": "Maze of Malcor Treasure Table",
   "sale_estimated": true
@@ -642,7 +642,7 @@
  {
   "name": "Book of the Pentangle",
   "purchase": 1000,
-  "sale": 330,
+  "sale": 400,
   "source": "The Maze of Malcor",
   "table": "Maze of Malcor Treasure Table",
   "sale_estimated": true
@@ -650,7 +650,7 @@
  {
   "name": "Orb Plinth",
   "purchase": 500,
-  "sale": 165,
+  "sale": 200,
   "source": "The Perilous Dark",
   "table": "Perilous Dark Treasure Table",
   "sale_estimated": true
@@ -658,7 +658,7 @@
  {
   "name": "Bane Weapon",
   "purchase": 500,
-  "sale": 165,
+  "sale": 200,
   "source": "The Perilous Dark",
   "table": "Perilous Dark Treasure Table",
   "sale_estimated": true
@@ -666,7 +666,7 @@
  {
   "name": "Rat Flute",
   "purchase": 350,
-  "sale": 115,
+  "sale": 140,
   "source": "The Perilous Dark",
   "table": "Perilous Dark Treasure Table",
   "sale_estimated": true
@@ -674,7 +674,7 @@
  {
   "name": "Sword of Wounding and Healing",
   "purchase": 400,
-  "sale": 130,
+  "sale": 160,
   "source": "The Perilous Dark",
   "table": "Perilous Dark Treasure Table",
   "sale_estimated": true
@@ -682,7 +682,7 @@
  {
   "name": "Circlet of the Serpent",
   "purchase": 250,
-  "sale": 80,
+  "sale": 100,
   "source": "The Perilous Dark",
   "table": "Perilous Dark Treasure Table",
   "sale_estimated": true
@@ -690,7 +690,7 @@
  {
   "name": "Glitter Gloves",
   "purchase": 300,
-  "sale": 100,
+  "sale": 120,
   "source": "The Perilous Dark",
   "table": "Perilous Dark Treasure Table",
   "sale_estimated": true
@@ -698,7 +698,7 @@
  {
   "name": "Horned Helmet",
   "purchase": 300,
-  "sale": 100,
+  "sale": 120,
   "source": "The Perilous Dark",
   "table": "Perilous Dark Treasure Table",
   "sale_estimated": true
@@ -706,7 +706,7 @@
  {
   "name": "Dancing Blade",
   "purchase": 500,
-  "sale": 165,
+  "sale": 200,
   "source": "The Perilous Dark",
   "table": "Perilous Dark Treasure Table",
   "sale_estimated": true
@@ -714,7 +714,7 @@
  {
   "name": "Vampiric Crossbow",
   "purchase": 300,
-  "sale": 100,
+  "sale": 120,
   "source": "The Perilous Dark",
   "table": "Perilous Dark Treasure Table",
   "sale_estimated": true
@@ -722,7 +722,7 @@
  {
   "name": "Potion of Persistence",
   "purchase": 350,
-  "sale": 115,
+  "sale": 140,
   "source": "The Perilous Dark",
   "table": "Perilous Dark Treasure Table",
   "sale_estimated": true
@@ -730,7 +730,7 @@
  {
   "name": "Mindstone (4)",
   "purchase": 250,
-  "sale": 80,
+  "sale": 100,
   "source": "The Perilous Dark",
   "table": "Perilous Dark Treasure Table",
   "sale_estimated": true
@@ -738,7 +738,7 @@
  {
   "name": "Ground Manaworm Teeth",
   "purchase": 300,
-  "sale": 100,
+  "sale": 120,
   "source": "The Perilous Dark",
   "table": "Perilous Dark Treasure Table",
   "sale_estimated": true
@@ -746,7 +746,7 @@
  {
   "name": "Spellcatcher Glove",
   "purchase": 400,
-  "sale": 130,
+  "sale": 160,
   "source": "The Perilous Dark",
   "table": "Perilous Dark Treasure Table",
   "sale_estimated": true
@@ -754,7 +754,7 @@
  {
   "name": "Whitestar Diamond",
   "purchase": 250,
-  "sale": 80,
+  "sale": 100,
   "source": "The Perilous Dark",
   "table": "Perilous Dark Treasure Table",
   "sale_estimated": true
@@ -762,7 +762,7 @@
  {
   "name": "Ring of Command",
   "purchase": 400,
-  "sale": 130,
+  "sale": 160,
   "source": "The Perilous Dark",
   "table": "Perilous Dark Treasure Table",
   "sale_estimated": true
@@ -770,7 +770,7 @@
  {
   "name": "Nimblewalk Boots",
   "purchase": 200,
-  "sale": 65,
+  "sale": 80,
   "source": "The Perilous Dark",
   "table": "Perilous Dark Treasure Table",
   "sale_estimated": true
@@ -778,7 +778,7 @@
  {
   "name": "Barbarian's Blade",
   "purchase": 400,
-  "sale": 130,
+  "sale": 160,
   "source": "The Perilous Dark",
   "table": "Perilous Dark Treasure Table",
   "sale_estimated": true
@@ -786,7 +786,7 @@
  {
   "name": "Tyco's Magic Block",
   "purchase": 150,
-  "sale": 50,
+  "sale": 60,
   "source": "The Perilous Dark",
   "table": "Perilous Dark Treasure Table",
   "sale_estimated": true
@@ -794,7 +794,7 @@
  {
   "name": "Magic Staff Ring",
   "purchase": 300,
-  "sale": 100,
+  "sale": 120,
   "source": "The Perilous Dark",
   "table": "Perilous Dark Treasure Table",
   "sale_estimated": true
@@ -802,7 +802,7 @@
  {
   "name": "Book of the Werewolf",
   "purchase": 500,
-  "sale": 165,
+  "sale": 200,
   "source": "The Perilous Dark",
   "table": "Perilous Dark Treasure Table",
   "sale_estimated": true

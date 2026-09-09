@@ -3542,12 +3542,14 @@ def homunculus_claim_soul(wb: dict, branch: str = "death") -> tuple[bool, str]:
 # figures must match it.
 SHOP_VARIANT_ITEMS = {
     # The Perilous Dark p.78 Treasure Table prints a purchase price and no sale
-    # column, so the sale is the app's third-of-purchase estimate, as for every
-    # other item out of that book.
+    # column, so the sale comes from the Core Rules p.199 rule, as for every
+    # other item out of that book: 40% of purchase. It shadows
+    # this item's row in data/supplement_item_prices.json, so it has to match
+    # what scripts/extract_supplement_prices.py would compute.
     "Bane Weapon": {
         "source": "The Perilous Dark",
         "purchase": 500,
-        "sale": 165,
+        "sale": 200,
         "sale_estimated": True,
         "variants": expansions.BANE_WEAPON_VARIANT_NAMES,
     },

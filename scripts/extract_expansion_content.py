@@ -910,6 +910,24 @@ def build_ghost_spellcaster(doc: str) -> list[dict]:
     return sections
 
 
+# Items the reference documents above miss, transcribed from the source book
+# itself. They are also inserted by hand into data/magic_items.json, since this
+# script cannot currently run (see the WARNING in main()) — but they belong here
+# too, or a future run would drop them again.
+EXTRA_MAGIC_ITEMS = [
+    {
+        # The Red King p.69. Priced on that book's treasure table (roll 12) but
+        # absent from the reference doc's item list.
+        "name": "Construct Spikes",
+        "source": "The Red King",
+        "effect": (
+            "Attached to any construct permanently and may never be removed; "
+            "the construct gains the “Horns” creature trait."
+        ),
+    },
+]
+
+
 def main() -> int:
     supplements = Path(sys.argv[1]) if len(sys.argv) > 1 else DEFAULT_SUPPLEMENTS
     ghost = Path(sys.argv[2]) if len(sys.argv) > 2 else DEFAULT_GHOST
@@ -936,7 +954,10 @@ def main() -> int:
         **build_expansion_rules_spellcaster(doc3),
     }
     merged_items = (
-        build_magic_items(doc) + build_magic_items_2(doc2) + build_magic_items_spellcaster(doc3)
+        build_magic_items(doc)
+        + build_magic_items_2(doc2)
+        + build_magic_items_spellcaster(doc3)
+        + EXTRA_MAGIC_ITEMS
     )
     merged_items.sort(key=lambda it: (it["source"], it["name"].lower()))
 
