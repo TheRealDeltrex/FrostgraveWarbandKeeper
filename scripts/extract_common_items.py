@@ -39,6 +39,21 @@ LESSER_POTIONS_PAGE = 86
 GREATER_POTIONS_PAGE = 87
 MAGIC_ARMS_PAGE = 98
 MAGIC_ITEMS_PAGE = 100
+# The potion write-ups (pp.89-93), and the flat Scroll/Grimoire rules (p.95).
+# Each entry is an ALL-CAPS name followed by its paragraphs, so the shop can
+# show what a potion actually does instead of just its price.
+DESCRIPTION_PAGES = [89, 90, 91, 92, 93]
+SCROLL_GRIMOIRE_PAGE = 95
+# The Magic Weapon and Armour table names this effect but explains it only in
+# the p.97 prose above the table, which has no heading for descriptions() to
+# find. Quoted verbatim from there. The wording is generic ("an item with
+# Elemental Absorption"), so The Wildwoods' own elemental-absorption armour
+# borrows it too — see game_content.SHOP_NAME_ALIASES.
+ELEMENTAL_ABSORPTION_EFFECT = (
+    "If a figure is wearing an item with Elemental Absorption, then any elemental damage "
+    "they take (such as from the Elemental Bolt or Elemental Ball spells) is halved, "
+    "rounding up."
+)
 
 # "500gc" / "1,500gc" / "—" (never purchasable).
 # The trailing period is a typo in the Greater Potion Table ingredient
@@ -191,6 +206,34 @@ def flat_priced() -> list[dict]:
     ]
 
 
+# A description heading: the item name in capitals on its own line. Digits and
+# an apostrophe appear in a few ("PHILTRE OF FAIRY DUST", "WIZARD'S GRIMOIRE"),
+# so the test is "no lowercase letters" rather than str.isupper() on a slice.
+_HEADING = re.compile(r"^[A-Z][A-Z'’ /-]{3,44}$")
+
+
+def descriptions(doc: fitz.Document, pages: list[int]) -> dict[str, str]:
+    """{NAME: paragraph} for every write-up on `pages`.
+
+    The extracted text is one wrapped line per line, so a heading ends the
+    previous entry and everything up to the next heading is its body. Page
+    numbers and the odd running header sit on their own line and are dropped
+    by the same "must look like a heading" test that finds the names."""
+    out: dict[str, str] = {}
+    name = None
+    body: list[str] = []
+    for line in [ln for page in pages for ln in _lines(doc, page)]:
+        if _HEADING.match(line):
+            if name and body:
+                out[name] = " ".join(body).strip()
+            name, body = line, []
+        elif name:
+            body.append(line)
+    if name and body:
+        out[name] = " ".join(body).strip()
+    return out
+
+
 def main() -> int:
     if not CORE_PDF.exists():
         print(f"Core Rules PDF not found at {CORE_PDF}", file=sys.stderr)
@@ -203,8 +246,31 @@ def main() -> int:
         + magic_items(doc)
         + flat_priced()
     )
+    # Every potion's write-up, plus the p.95 rules for what a scroll and a
+    # grimoire are, so the Shop and the vault can show what a row does rather
+    # than only what it costs. Matched by upper-cased name; a row the book has
+    # no write-up for (the Magic Weapon and Armour table, whose names already
+    # state their effect) simply gets no "effect" key.
+    text = descriptions(doc, DESCRIPTION_PAGES)
+    text.update(descriptions(doc, [SCROLL_GRIMOIRE_PAGE]))
+    unmatched = []
     for item in items:
         item["source"] = "Core Rules"
+        # "Scroll"/"Grimoire" are single rows against the book's plural heading.
+        if item.get("effect") == "Elemental Absorption":
+            item["effect"] = ELEMENTAL_ABSORPTION_EFFECT
+        body = text.get(item["name"].upper()) or text.get(item["name"].upper() + "S")
+        # The SCROLLS write-up opens on the Treasure Table's "how many are
+        # found" sentence, which says nothing about what a scroll is. Dropped
+        # rather than reworded — the rest is the book's text, verbatim.
+        if body and item["name"] == "Scroll":
+            body = body.split(". ", 1)[1] if body.startswith("The number in brackets") else body
+        if body:
+            item["effect"] = body
+        elif item["category"] in ("Potion", "Scroll", "Grimoire"):
+            unmatched.append(item["name"])
+    if unmatched:
+        print(f"no write-up found for: {', '.join(unmatched)}", file=sys.stderr)
     OUT.write_text(json.dumps(items, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
     print(f"wrote {len(items)} items to {OUT}")
     return 0

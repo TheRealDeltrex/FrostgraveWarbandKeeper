@@ -1229,6 +1229,10 @@ def warband_view(warband_id: str) -> str:
     # .bags_bought, see warband_store.buy_component_bag()) rather than
     # wb.vault_items, but still need to be gated in the item-slot picker like
     # any other bought item — fold that count into the same owned pool.
+    # A set counts as more than one wearable item — the Eyes of Amoto are two
+    # amulets on two figures from a single vault entry.
+    for key, owned in list(vault_owned_counts.items()):
+        vault_owned_counts[key] = expansions.paired_item_copies(key, owned)
     component_bags_bought = int((wb.get("monster_hunting") or {}).get("bags_bought", 0))
     if component_bags_bought:
         bag_key = SPELL_COMPONENT_BAG_NAME.lower()

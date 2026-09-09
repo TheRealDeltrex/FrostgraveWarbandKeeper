@@ -14,11 +14,12 @@ one of each pair the other's price.
 Sale prices: the four newest books (The Red King, Blood Legacy, Fireheart, The
 Wildwoods) print a Sale Price column. The four older ones (Thaw of the Lich Lord,
 Forgotten Pacts, The Maze of Malcor, The Perilous Dark) print a Purchase Price
-column and nothing else, so an item from them would be findable and buyable but
-impossible to sell. Those get a sale price of a third of purchase, rounded down
-to the nearest 5gc, flagged `"sale_estimated": true` so the Shop can label it as
-the house rule it is. That fraction is a maintainer's decision, not a printed
-value; it sits roughly below the 40-50% the newer books actually print.
+column and nothing else. The Core Rules cover exactly that case on p.199 -- "in
+instances where an item isn't given a specific sale price, calculate it as 40%
+of the purchase price" -- so those rows get 40%, rounded up to the next multiple
+of 5 where the figure lands off one (Frostgrave prices nothing in units of 1).
+They keep `"sale_estimated": true`, which now means "computed by the p.199 rule
+rather than printed on the item's own table", and the Shop marks them so.
 
 Two books contribute no prices at all and are absent from the output by design:
 Into the Breeding Pits and The Wizards' Conclave describe their items in prose
@@ -48,8 +49,9 @@ OUT = Path(__file__).resolve().parent.parent / "data" / "supplement_item_prices.
 
 # The books that print a Sale Price column. The rest get an estimate; see the
 # module docstring.
-SALE_FRACTION = 3
-SALE_ROUNDING = 5
+SALE_NUMERATOR = 2
+SALE_DENOMINATOR = 5
+SALE_STEP = 5
 
 # A die-roll cell opening a row: "1", "19-20", "1\u201310", "20+".
 DIE = re.compile(r"^(\d+)(?:\s*[\u2012-\u2015-]\s*\d+)?\+?$")
@@ -222,7 +224,14 @@ def _superseded_by_core() -> set[str]:
 
 
 def _estimated_sale(purchase: int) -> int:
-    return (purchase // SALE_FRACTION) // SALE_ROUNDING * SALE_ROUNDING
+    """Core Rules p.199: 40% of the purchase price, rounded *up* to the next
+    multiple of 5 when it lands off one (a computed 11 becomes 15, 237 becomes
+    240).
+
+    Integer arithmetic throughout: 40% of an odd price is fractional, and
+    rounding a float would put the odd item a step out."""
+    steps = -(-(purchase * SALE_NUMERATOR) // (SALE_DENOMINATOR * SALE_STEP))
+    return steps * SALE_STEP
 
 
 def main() -> int:

@@ -1081,7 +1081,12 @@ def max_specialists(wb: dict) -> int:
     cap = base + extra
     if _has_legendary_soldier(wb):
         cap = min(cap, 3)
-    return cap
+    # The Inn's extra roster place "can be a specialist" (Core Rules p.106), so
+    # it raises this cap too — and after the Legendary clamp, not before. Both
+    # limits count who is *on the roster*, and the Inn's body never takes the
+    # field, so a legendary warband keeps the extra place rather than having it
+    # clamped away: 4 specialists with an Inn, one of whom stays behind.
+    return cap + (1 if inn_extra_slot(wb) else 0)
 
 
 def max_legendary_soldiers(wb: dict) -> int:
@@ -1470,6 +1475,25 @@ def spell_available(wb: dict, spell: dict, sources: set[str]) -> bool:
 _GRIMOIRE_SPELL_RE = re.compile(
     r"^grimoire\s*(?::|\bof\b)\s*(?P<spell>[^(]+?)\s*(?:\([^)]*\)\s*)?$", re.I
 )
+
+
+# Items that are a *set*, where one vault entry equips more than one figure.
+# Keyed lowercase, valued by how many wearers a single copy supports.
+#
+# Eyes of Amoto (Thaw of the Lich Lord p.49): "This is a set of two amulets,
+# one to be worn by a spellcaster, and one to be worn by any other member of
+# the warband. Each amulet takes up an item slot for the models carrying
+# them." One found set therefore has to fill two slots, on two figures, or the
+# item cannot be used as printed. The book's "an amulet only works when used
+# with its specific mate" and its two-sets bookkeeping are left to the player.
+PAIRED_ITEM_WEARERS = {
+    "eyes of amoto": 2,
+}
+
+
+def paired_item_copies(name: str, owned: int) -> int:
+    """How many figures can wear `owned` copies of `name`."""
+    return owned * PAIRED_ITEM_WEARERS.get((name or "").strip().lower(), 1)
 
 
 def vault_grimoire_spells(wb: dict) -> set[str]:

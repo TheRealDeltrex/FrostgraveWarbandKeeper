@@ -226,14 +226,35 @@ def supplement_item_index() -> dict[tuple[str, str], dict]:
     return {(it["source"], it["name"]): it for it in load_supplement_item_prices()}
 
 
+# Shop rows the books price separately but the item list describes as one
+# entry. The Wildwoods prints a price per armour type and one write-up covering
+# all three, so the split rows borrow the merged entry's text rather than
+# repeating it three times in data/magic_items.json.
+SHOP_NAME_ALIASES = {
+    "Toughened Light Armour": "Toughened Armour/Robes",
+    "Toughened Heavy Armour": "Toughened Armour/Robes",
+    "Toughened Robes": "Toughened Armour/Robes",
+    # The Wildwoods prices this one and defers to Frostgrave p.97 for what it
+    # does; that text is generic to the effect, not to the armour it is on.
+    "Light Armour with Elemental Absorption": "Heavy Armour, Elemental Absorption",
+}
+
+
 def item_effect_text(name: str) -> str:
     """This item's rules text, or "" for a name that matches no magic item.
 
     A thin read-only wrapper over item_restriction() for templates that want to
     show what an item does — the Shop's rows, where the name is the only thing
     a buyer has to go on."""
+    name = SHOP_NAME_ALIASES.get(name, name)
     entry = item_restriction(name)
-    return (entry or {}).get("effect") or ""
+    text = (entry or {}).get("effect") or ""
+    if text:
+        return text
+    # Core Rules potions, scrolls and grimoires are priced in common_items.json
+    # rather than magic_items.json, and carry their write-up there.
+    row = common_item_index().get(name) or {}
+    return row.get("effect") or ""
 
 
 def magic_items_for_sources(sources) -> list[dict]:
