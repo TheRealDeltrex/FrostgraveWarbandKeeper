@@ -226,6 +226,16 @@ def supplement_item_index() -> dict[tuple[str, str], dict]:
     return {(it["source"], it["name"]): it for it in load_supplement_item_prices()}
 
 
+def item_effect_text(name: str) -> str:
+    """This item's rules text, or "" for a name that matches no magic item.
+
+    A thin read-only wrapper over item_restriction() for templates that want to
+    show what an item does — the Shop's rows, where the name is the only thing
+    a buyer has to go on."""
+    entry = item_restriction(name)
+    return (entry or {}).get("effect") or ""
+
+
 def magic_items_for_sources(sources) -> list[dict]:
     """Treasure from the books this warband has switched on."""
     return [it for it in load_magic_items() if it.get("source") in sources]

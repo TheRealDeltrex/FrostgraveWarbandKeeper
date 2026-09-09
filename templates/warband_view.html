@@ -959,16 +959,17 @@
             <div class="stat-row">
               {# wizard_display_stats, not wiz.stats: a Beastcrafter III's Animal
                  Feature (Fast / Scales) is folded in, marked with a * below. #}
-              <div class="stat-pill"><span class="label">Move</span><span class="value">{{ wizard_display_stats.move }}{% if wizard_state_bonus.move %}*{% endif %}{% if wiz_mounted %} <span class="muted">({{ wizard_display_stats.move - hmd.move }})</span>{% endif %}</span></div>
-              <div class="stat-pill"><span class="label">Fight</span><span class="value">{{ format_stat(wizard_display_stats.fight) }}{% if wiz_mounted %} <span class="muted">({{ format_stat(wizard_display_stats.fight - hmd.fight) }})</span>{% endif %}</span></div>
+              <div class="stat-pill"><span class="label">Move</span><span class="value">{% if wiz_mounted %}{{ horse_rider.backup.move }}{% else %}{{ wizard_display_stats.move }}{% endif %}{% if wizard_state_bonus.move %}*{% endif %}{% if wiz_mounted %} <span class="muted">({{ wizard_display_stats.move }})</span>{% endif %}</span></div>
+              <div class="stat-pill"><span class="label">Fight</span><span class="value">{% if wiz_mounted %}{{ format_stat(horse_rider.backup.fight) }}{% else %}{{ format_stat(wizard_display_stats.fight) }}{% endif %}{% if wiz_mounted %} <span class="muted">({{ format_stat(wizard_display_stats.fight) }})</span>{% endif %}</span></div>
               <div class="stat-pill"><span class="label">Shoot</span><span class="value">{{ format_stat(wizard_display_stats.shoot) }}</span></div>
-              <div class="stat-pill"><span class="label">Armour</span><span class="value">{{ wizard_display_stats.armour }}{% if wizard_state_bonus.armour %}*{% endif %}{% if wiz_mounted %} <span class="muted">({{ horse_rider.backup.armour }})</span>{% endif %}</span></div>
+              <div class="stat-pill"><span class="label">Armour</span><span class="value">{% if wiz_mounted %}{{ horse_rider.backup.armour }}{% else %}{{ wizard_display_stats.armour }}{% endif %}{% if wizard_state_bonus.armour %}*{% endif %}{% if wiz_mounted %} <span class="muted">({{ wizard_display_stats.armour }})</span>{% endif %}</span></div>
               <div class="stat-pill"><span class="label">Will</span><span class="value">{{ format_stat(wizard_display_stats.will) }}</span></div>
               {# The book's split stat: actual on the left, effective on the
                  right while a homunculus exists. Only the actual value is
                  stored — see expansions.homunculus_health_penalty(). #}
               <div class="stat-pill"><span class="label">Health</span><span class="value">{{ wizard_display_stats.health }}{% if homunculus_health_penalty %} <span class="muted" title="Split stat: he begins each game at {{ wizard_display_stats.health - homunculus_health_penalty }} Health and may not heal beyond it while the homunculus exists.">/ {{ wizard_display_stats.health - homunculus_health_penalty }}</span>{% endif %}</span></div>
             </div>
+            {% if wiz_mounted %}<p class="muted" style="font-size:0.8rem;margin:0.2rem 0 0">Bracketed numbers are the mounted values.</p>{% endif %}
             {# Not a nested <form> — this card is already inside the big
                data-autosave "details" form, and HTML forbids nesting forms:
                a browser silently drops a nested <form> tag, and its stray
@@ -1058,13 +1059,14 @@
               <p class="muted">Stats synced from wizard (starting H12 when wizard is H14)</p>
               {% set ap_eff = apprentice_effective_stats(wb) %}
               <div class="stat-row">
-                <div class="stat-pill"><span class="label">Move</span><span class="value">{{ ap_eff.move }}{% if ap_mounted %} <span class="muted">({{ horse_rider.backup.move }})</span>{% endif %}</span></div>
-                <div class="stat-pill"><span class="label">Fight</span><span class="value">{{ format_stat(ap_eff.fight) }}{% if ap_mounted %} <span class="muted">({{ format_stat(horse_rider.backup.fight) }})</span>{% endif %}</span></div>
+                <div class="stat-pill"><span class="label">Move</span><span class="value">{% if ap_mounted %}{{ horse_rider.backup.move }}{% else %}{{ ap_eff.move }}{% endif %}{% if ap_mounted %} <span class="muted">({{ ap_eff.move }})</span>{% endif %}</span></div>
+                <div class="stat-pill"><span class="label">Fight</span><span class="value">{% if ap_mounted %}{{ format_stat(horse_rider.backup.fight) }}{% else %}{{ format_stat(ap_eff.fight) }}{% endif %}{% if ap_mounted %} <span class="muted">({{ format_stat(ap_eff.fight) }})</span>{% endif %}</span></div>
                 <div class="stat-pill"><span class="label">Shoot</span><span class="value">{{ format_stat(ap_eff.shoot) }}</span></div>
-                <div class="stat-pill"><span class="label">Armour</span><span class="value">{{ ap_eff.armour }}{% if ap_mounted %} <span class="muted">({{ horse_rider.backup.armour }})</span>{% endif %}</span></div>
+                <div class="stat-pill"><span class="label">Armour</span><span class="value">{% if ap_mounted %}{{ horse_rider.backup.armour }}{% else %}{{ ap_eff.armour }}{% endif %}{% if ap_mounted %} <span class="muted">({{ ap_eff.armour }})</span>{% endif %}</span></div>
                 <div class="stat-pill"><span class="label">Will</span><span class="value">{{ format_stat(ap_eff.will) }}</span></div>
                 <div class="stat-pill"><span class="label">Health</span><span class="value">{{ ap_eff.health }}</span></div>
               </div>
+              {% if ap_mounted %}<p class="muted" style="font-size:0.8rem;margin:0.2rem 0 0">Bracketed numbers are the mounted values.</p>{% endif %}
               {# See the wizard status control above: form="" instead of a
                  nested <form>, for the same reason. This is the one that was
                  actually silently discarding every apprentice edit — once
@@ -1728,6 +1730,26 @@
     {% endif %}
   </details>
 
+
+  {# ---- Soldiers / recruit ---- #}
+  <details class="card" id="recruit" open>
+    <summary><span class="card-title">Soldiers &amp; recruiting</span></summary>
+    <div class="limit-bar" style="margin-bottom:1rem">
+      <div class="limit {% if not limits.soldiers_ok %}bad{% endif %}">
+        Total soldiers: {{ limits.soldiers }} / {{ limits.max_soldiers }}
+      </div>
+      <div class="limit {% if not limits.specialists_ok %}bad{% endif %}">
+        Specialists: {{ limits.specialists }} / {{ limits.max_specialists }}
+      </div>
+      {% if legendary_soldiers_enabled %}
+        <div class="limit {% if not limits.legendary_soldiers_ok %}bad{% endif %}" title="Spellcaster Magazine, Issue 4: 1 base, +1 per 10 full wizard levels, capped at 8; never more than one of each type.">
+          Legendary Soldiers: {{ limits.legendary_soldiers }} / {{ limits.max_legendary_soldiers }}
+        </div>
+      {% endif %}
+      <div class="limit">Treasury: <span class="gold">{{ wb.gold }} gc</span></div>
+    </div>
+
+
   {% if hr.captain_mode != 'off' or cap %}
     {# ---- Captain ---- #}
     {% if cap %}
@@ -1736,8 +1758,8 @@
          <form> nested inside the big captain_edit details form further down. #}
       <form id="captain-status-form" method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" hidden></form>
     {% endif %}
-    <details class="card" id="captain">
-      <summary><span class="card-title">Captain</span></summary>
+    <details class="ref-panel" id="captain">
+      <summary>Captain</summary>
       {% if cap %}
         {% set cap_slots_n = hr.promote_captain_item_slots if cap.origin == 'promoted' else hr.captain_item_slots %}
         {% set cap_dismiss_cost = hr.promote_captain_cost if cap.origin == 'promoted' else hr.captain_hiring_cost %}
@@ -1763,13 +1785,13 @@
                 {% include '_portrait_picker.html' %}
               {% endwith %}
               <div class="figure-badges">
-                {% if cap_mounted %}<span class="badge" title="Riding the warband's horse: Move +{{ hmd.move }}, Fight +{{ hmd.fight }}, Armour {{ hmd.armour }}">mounted</span>{% endif %}
-                {{ mutated_badge(cap.mutations) }}
                 {% if legendary_soldiers_enabled %}
                   <span class="badge legendary" title="Spellcaster Magazine, Issue 4: the Captain is a Legendary Soldier, subject to the Legendary Soldier limit instead of the Specialist limit.">legendary</span>
                 {% else %}
                   <span class="badge specialist" title="Counts against the warband's specialist limit.">specialist</span>
                 {% endif %}
+                {% if cap_mounted %}<span class="badge" title="Riding the warband's horse: Move +{{ hmd.move }}, Fight +{{ hmd.fight }}, Armour {{ hmd.armour }}">mounted</span>{% endif %}
+                {{ mutated_badge(cap.mutations) }}
               </div>
             </div>
             <div class="char-body">
@@ -1780,13 +1802,14 @@
                 </div>
               </div>
               <div class="stat-row">
-                <div class="stat-pill"><span class="label">Move</span><span class="value">{{ cap_eff.move }}{% if cap_mounted %} <span class="muted">({{ cap_eff.move - hmd.move }})</span>{% endif %}</span></div>
-                <div class="stat-pill"><span class="label">Fight</span><span class="value">{{ format_stat(cap.stats.fight) }}{% if cap_mounted %} <span class="muted">({{ format_stat(cap.stats.fight - hmd.fight) }})</span>{% endif %}</span></div>
+                <div class="stat-pill"><span class="label">Move</span><span class="value">{% if cap_mounted %}{{ horse_rider.backup.move }}{% else %}{{ cap_eff.move }}{% endif %}{% if cap_mounted %} <span class="muted">({{ cap_eff.move }})</span>{% endif %}</span></div>
+                <div class="stat-pill"><span class="label">Fight</span><span class="value">{% if cap_mounted %}{{ format_stat(horse_rider.backup.fight) }}{% else %}{{ format_stat(cap.stats.fight) }}{% endif %}{% if cap_mounted %} <span class="muted">({{ format_stat(cap.stats.fight) }})</span>{% endif %}</span></div>
                 <div class="stat-pill"><span class="label">Shoot</span><span class="value">{{ format_stat(cap.stats.shoot) }}</span></div>
-                <div class="stat-pill"><span class="label">Armour</span><span class="value">{{ cap_eff.armour }}{% if cap_mounted %} <span class="muted">({{ horse_rider.backup.armour }})</span>{% endif %}</span></div>
+                <div class="stat-pill"><span class="label">Armour</span><span class="value">{% if cap_mounted %}{{ horse_rider.backup.armour }}{% else %}{{ cap_eff.armour }}{% endif %}{% if cap_mounted %} <span class="muted">({{ cap_eff.armour }})</span>{% endif %}</span></div>
                 <div class="stat-pill"><span class="label">Will</span><span class="value">{{ format_stat(cap_eff.will) }}</span></div>
                 <div class="stat-pill"><span class="label">Health</span><span class="value">{{ cap_eff.health }}</span></div>
               </div>
+              {% if cap_mounted %}<p class="muted" style="font-size:0.8rem;margin:0.2rem 0 0">Bracketed numbers are the mounted values.</p>{% endif %}
               {# See the wizard/apprentice status controls: form="" instead
                  of a nested <form>, since this card is itself already inside
                  the big data-autosave "captain_edit" form and a nested
@@ -1991,101 +2014,6 @@
       {% endif %}
     </details>
   {% endif %}
-
-  {# ---- Soldiers / recruit ---- #}
-  <details class="card" id="recruit" open>
-    <summary><span class="card-title">Soldiers &amp; recruiting</span></summary>
-    <div class="limit-bar" style="margin-bottom:1rem">
-      <div class="limit {% if not limits.soldiers_ok %}bad{% endif %}">
-        Total soldiers: {{ limits.soldiers }} / {{ limits.max_soldiers }}
-      </div>
-      <div class="limit {% if not limits.specialists_ok %}bad{% endif %}">
-        Specialists: {{ limits.specialists }} / {{ limits.max_specialists }}
-      </div>
-      {% if legendary_soldiers_enabled %}
-        <div class="limit {% if not limits.legendary_soldiers_ok %}bad{% endif %}" title="Spellcaster Magazine, Issue 4: 1 base, +1 per 10 full wizard levels, capped at 8; never more than one of each type.">
-          Legendary Soldiers: {{ limits.legendary_soldiers }} / {{ limits.max_legendary_soldiers }}
-        </div>
-      {% endif %}
-      <div class="limit">Treasury: <span class="gold">{{ wb.gold }} gc</span></div>
-    </div>
-
-    {% if giant_blooded_enabled or thrall_available %}
-      <details class="ref-panel" id="hiring-options-panel">
-        <summary>Hiring options</summary>
-        {% if giant_blooded_enabled %}
-          <h3>Giant-Blooded (Blood Legacy)</h3>
-          <p class="muted" style="font-size:0.85rem">
-            Declared at hire, per the book: +{{ GIANT_BLOODED_COST }}gc, -1 Move, -2 Will,
-            +2 Health, and the Giant-Blooded trait (+1 melee damage, +4 to TN-based Fight
-            rolls, includes Large). Animals, demons, constructs and undead aren't eligible.
-            Only one soldier in the warband may have it.
-          </p>
-          {% if giant_blooded_soldier %}
-            <p>
-              <strong>{{ giant_blooded_soldier.name }}</strong> is Giant-Blooded.
-            </p>
-            <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" onsubmit="return confirm('Remove Giant-Blooded from {{ giant_blooded_soldier.name }}? The stat changes will be reversed (the {{ GIANT_BLOODED_COST }}gc fee is not refunded).');">
-              <input type="hidden" name="action" value="remove_soldier_giant_blooded" />
-              <input type="hidden" name="soldier_id" value="{{ giant_blooded_soldier.id }}" />
-              <button class="btn secondary small" type="submit">Remove Giant-Blooded</button>
-            </form>
-          {% elif giant_blooded_pending %}
-            <p>Next eligible soldier hired will be Giant-Blooded.</p>
-            <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
-              <input type="hidden" name="action" value="set_giant_blooded_pending" />
-              <input type="hidden" name="fitted" value="0" />
-              <button class="btn secondary small" type="submit">Cancel</button>
-            </form>
-          {% else %}
-            <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
-              <input type="hidden" name="action" value="set_giant_blooded_pending" />
-              <input type="hidden" name="fitted" value="1" />
-              <button class="btn secondary small" type="submit">Declare next hire Giant-Blooded</button>
-            </form>
-          {% endif %}
-        {% endif %}
-        {% if thrall_available %}
-          <h3>Thralldom (Blood Legacy)</h3>
-          <p class="muted" style="font-size:0.85rem">
-            Cast Thralldom (Out of Game (A)) at the table between scenarios first. Once it
-            succeeds, the next soldier hired here — any type, no roster-cap exception — joins
-            free and permanently at -1 Will. If a Thrall is ever reduced to 0 Health in a game,
-            roll a die at the table: 1-10 it's lost (remove it from the roster), 11+ it recovers
-            and stays on. Thralldom may be cast again for another Thrall.
-          </p>
-          {% if thrall_soldiers %}
-            <ul class="list-plain">
-              {% for th in thrall_soldiers %}
-                <li>
-                  <strong>{{ th.name }}</strong> is a Thrall.
-                  <form class="inline-form" method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" onsubmit="return confirm('Remove Thrall from {{ th.name }}? The Will penalty will be reversed.');">
-                    <input type="hidden" name="action" value="remove_soldier_thrall" />
-                    <input type="hidden" name="soldier_id" value="{{ th.id }}" />
-                    <button class="btn secondary small" type="submit">Remove Thrall</button>
-                  </form>
-                </li>
-              {% endfor %}
-            </ul>
-          {% endif %}
-          {% if thrall_pending %}
-            <p>Next soldier hired will be a free Thrall.</p>
-            <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
-              <input type="hidden" name="action" value="set_thrall_pending" />
-              <input type="hidden" name="fitted" value="0" />
-              <button class="btn secondary small" type="submit">Cancel</button>
-            </form>
-          {% else %}
-            <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
-              <input type="hidden" name="action" value="set_thrall_pending" />
-              <input type="hidden" name="fitted" value="1" />
-              <button class="btn secondary small" type="submit">Declare next hire a Thrall</button>
-            </form>
-          {% endif %}
-        {% endif %}
-      </details>
-    {% endif %}
-
     {% if ragged_warbands_enabled %}
       <details class="ref-panel" id="ragged-warbands-panel">
         <summary>Ragged Warbands &amp; Random Recruits (The Red King)</summary>
@@ -3046,6 +2974,82 @@
         }
       });
     </script>
+
+    {% if giant_blooded_enabled or thrall_available %}
+      <details class="ref-panel" id="hiring-options-panel">
+        <summary>Hiring options</summary>
+        {% if giant_blooded_enabled %}
+          <h3>Giant-Blooded (Blood Legacy)</h3>
+          <p class="muted" style="font-size:0.85rem">
+            Declared at hire, per the book: +{{ GIANT_BLOODED_COST }}gc, -1 Move, -2 Will,
+            +2 Health, and the Giant-Blooded trait (+1 melee damage, +4 to TN-based Fight
+            rolls, includes Large). Animals, demons, constructs and undead aren't eligible.
+            Only one soldier in the warband may have it.
+          </p>
+          {% if giant_blooded_soldier %}
+            <p>
+              <strong>{{ giant_blooded_soldier.name }}</strong> is Giant-Blooded.
+            </p>
+            <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" onsubmit="return confirm('Remove Giant-Blooded from {{ giant_blooded_soldier.name }}? The stat changes will be reversed (the {{ GIANT_BLOODED_COST }}gc fee is not refunded).');">
+              <input type="hidden" name="action" value="remove_soldier_giant_blooded" />
+              <input type="hidden" name="soldier_id" value="{{ giant_blooded_soldier.id }}" />
+              <button class="btn secondary small" type="submit">Remove Giant-Blooded</button>
+            </form>
+          {% elif giant_blooded_pending %}
+            <p>Next eligible soldier hired will be Giant-Blooded.</p>
+            <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
+              <input type="hidden" name="action" value="set_giant_blooded_pending" />
+              <input type="hidden" name="fitted" value="0" />
+              <button class="btn secondary small" type="submit">Cancel</button>
+            </form>
+          {% else %}
+            <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
+              <input type="hidden" name="action" value="set_giant_blooded_pending" />
+              <input type="hidden" name="fitted" value="1" />
+              <button class="btn secondary small" type="submit">Declare next hire Giant-Blooded</button>
+            </form>
+          {% endif %}
+        {% endif %}
+        {% if thrall_available %}
+          <h3>Thralldom (Blood Legacy)</h3>
+          <p class="muted" style="font-size:0.85rem">
+            Cast Thralldom (Out of Game (A)) at the table between scenarios first. Once it
+            succeeds, the next soldier hired here — any type, no roster-cap exception — joins
+            free and permanently at -1 Will. If a Thrall is ever reduced to 0 Health in a game,
+            roll a die at the table: 1-10 it's lost (remove it from the roster), 11+ it recovers
+            and stays on. Thralldom may be cast again for another Thrall.
+          </p>
+          {% if thrall_soldiers %}
+            <ul class="list-plain">
+              {% for th in thrall_soldiers %}
+                <li>
+                  <strong>{{ th.name }}</strong> is a Thrall.
+                  <form class="inline-form" method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" onsubmit="return confirm('Remove Thrall from {{ th.name }}? The Will penalty will be reversed.');">
+                    <input type="hidden" name="action" value="remove_soldier_thrall" />
+                    <input type="hidden" name="soldier_id" value="{{ th.id }}" />
+                    <button class="btn secondary small" type="submit">Remove Thrall</button>
+                  </form>
+                </li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+          {% if thrall_pending %}
+            <p>Next soldier hired will be a free Thrall.</p>
+            <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
+              <input type="hidden" name="action" value="set_thrall_pending" />
+              <input type="hidden" name="fitted" value="0" />
+              <button class="btn secondary small" type="submit">Cancel</button>
+            </form>
+          {% else %}
+            <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
+              <input type="hidden" name="action" value="set_thrall_pending" />
+              <input type="hidden" name="fitted" value="1" />
+              <button class="btn secondary small" type="submit">Declare next hire a Thrall</button>
+            </form>
+          {% endif %}
+        {% endif %}
+      </details>
+    {% endif %}
   </details>
 
   {# ---- Treasury, Vault and Workshop ---- #}
@@ -3365,6 +3369,110 @@
         {% endif %}
       </details>
     {% endif %}
+    {% for oog in [brew_potion_info, write_scroll_info] if oog.casters %}
+      {% set is_brew = oog.spell == 'Brew Potion' %}
+      <details class="ref-panel" id="oog-{{ 'brew-potion' if is_brew else 'write-scroll' }}" style="margin-top:1rem">
+        <summary>Workshop — {{ oog.spell }} (Out of Game)</summary>
+        <p class="muted" style="font-size:0.85rem">
+          {% if is_brew %}
+            One Lesser Potion of your choice. A wizard may instead attempt a Greater Potion,
+            paying its ingredient cost first and rolling at −{{ BREW_GREATER_PENALTY }}; a failed
+            attempt still spends the ingredients.
+          {% else %}
+            One scroll of a spell the caster knows, or one they own the grimoire for.
+          {% endif %}
+          {% if oog.bonus %}
+            Your base adds <strong>+{{ oog.bonus }}</strong> to the Casting Roll
+            ({{ oog.bonus_from | join(', ') }}).
+          {% endif %}
+        </p>
+        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
+          <input type="hidden" name="action" value="{{ 'brew_potion' if is_brew else 'write_scroll' }}" />
+          <select name="caster">
+            {% for c in oog.casters %}
+              <option value="{{ c.kind }}">{{ c.name }} (CN {{ c.cn }})</option>
+            {% endfor %}
+          </select>
+          {% if is_brew %}
+            <select name="potion" required>
+              <option value="">— pick a potion —</option>
+              <optgroup label="Lesser">
+                {% for p in lesser_potions %}<option value="{{ p }}">{{ p }}</option>{% endfor %}
+              </optgroup>
+              <optgroup label="Greater (wizard only, −{{ BREW_GREATER_PENALTY }})">
+                {% for p in greater_potions %}<option value="{{ p }}">{{ p }}</option>{% endfor %}
+              </optgroup>
+            </select>
+          {% else %}
+            {# Core Rules p.135 allows a spell the caster knows or one the
+               warband holds the grimoire for, and nothing else — so the whole
+               spell list is not offered here. #}
+            <select name="spell" required>
+              <option value="">— pick a spell —</option>
+              <optgroup label="Known">
+                {% for n in write_scroll_known_names %}<option value="{{ n }}">{{ n }}</option>{% endfor %}
+              </optgroup>
+              {% if grimoire_only_spell_names %}
+                <optgroup label="Grimoire in the vault">
+                  {% for n in grimoire_only_spell_names %}<option value="{{ n }}">{{ n }}</option>{% endfor %}
+                </optgroup>
+              {% endif %}
+            </select>
+          {% endif %}
+          <button class="btn secondary small" type="submit" name="outcome" value="success">Succeeded</button>
+          <button class="btn secondary small" type="submit">Random roll</button>
+        </form>
+      </details>
+    {% endfor %}
+    {% if homunculus_book_on and homunculus_info.casters and not has_homunculus %}
+      {# Wizard only, so the caster list is not offered — out_of_game_cast_info
+         would include the apprentice if she somehow knew it. #}
+      <details class="ref-panel" id="oog-homunculus" style="margin-top:1rem">
+        <summary>Workshop — Homunculus (Out of Game)</summary>
+        <p class="muted" style="font-size:0.85rem">
+          A wizard only. {{ HOMUNCULUS_MATERIALS_COST }}gc of materials is spent whether the
+          casting roll succeeds or not. On a success the wizard begins each game at
+          −{{ HOMUNCULUS_HEALTH_PENALTY }} Health
+          until the homunculus is destroyed or used.
+          {% if homunculus_info.bonus %}
+            Your base adds <strong>+{{ homunculus_info.bonus }}</strong> to the Casting Roll
+            ({{ homunculus_info.bonus_from | join(', ') }}).
+          {% endif %}
+        </p>
+        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
+          <input type="hidden" name="action" value="cast_homunculus" />
+          {% for c in homunculus_info.casters if c.kind == 'wizard' %}
+            <span class="muted">{{ c.name }} (CN {{ c.cn }})</span>
+          {% endfor %}
+          <button class="btn secondary small" type="submit" name="outcome" value="success">Succeeded ({{ HOMUNCULUS_MATERIALS_COST }}gc)</button>
+          <button class="btn secondary small" type="submit">Random roll ({{ HOMUNCULUS_MATERIALS_COST }}gc)</button>
+        </form>
+      </details>
+    {% endif %}
+    {% if alchemical_workshop_ready %}
+      <details class="ref-panel" id="alchemical-workshop-panel" style="margin-top:1rem">
+        <summary>Workshop — Alchemical Workshop</summary>
+        <p class="muted" style="font-size:0.85rem">
+          Both potions are consumed. Two dice: both even produces the Greater Potion for the
+          lower die, both odd wastes them, a matching pair below 20 destroys the workshop and
+          starts the wizard's next game at −2 Health, and one of each returns both potions.
+        </p>
+        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
+          <input type="hidden" name="action" value="mix_potions" />
+          <select name="item_a" required>
+            <option value="">— first potion —</option>
+            {% for it in vault_potions %}<option value="{{ it.id }}">{{ it.name }}</option>{% endfor %}
+          </select>
+          <select name="item_b" required>
+            <option value="">— second potion —</option>
+            {% for it in vault_potions %}<option value="{{ it.id }}">{{ it.name }}</option>{% endfor %}
+          </select>
+          <input name="die_a" type="text" inputmode="numeric" pattern="[0-9]+" size="4" placeholder="d20" title="Leave blank to let the app roll" />
+          <input name="die_b" type="text" inputmode="numeric" pattern="[0-9]+" size="4" placeholder="d20" title="Leave blank to let the app roll" />
+          <button class="btn secondary small" type="submit">Mix</button>
+        </form>
+      </details>
+    {% endif %}
     {% if fin_dalka_enabled and fin_dalka_owned %}
       <details class="ref-panel" id="fin-dalka-panel" style="margin-top:1rem" open>
         <summary>Workshop — Grimoire of Fin Dalka (Blood Legacy) — owned</summary>
@@ -3419,100 +3527,6 @@
         </form>
       </details>
     {% endif %}
-    {% for oog in [write_scroll_info, brew_potion_info] if oog.casters %}
-      {% set is_brew = oog.spell == 'Brew Potion' %}
-      <details class="ref-panel" id="oog-{{ 'brew-potion' if is_brew else 'write-scroll' }}" style="margin-top:1rem">
-        <summary>Workshop — {{ oog.spell }} (Out of Game)</summary>
-        <p class="muted" style="font-size:0.85rem">
-          {% if is_brew %}
-            One Lesser Potion of your choice. A wizard may instead attempt a Greater Potion,
-            paying its ingredient cost first and rolling at −{{ BREW_GREATER_PENALTY }}; a failed
-            attempt still spends the ingredients.
-          {% else %}
-            One scroll of a spell the caster knows, or one they own the grimoire for.
-          {% endif %}
-          {% if oog.bonus %}
-            Your base adds <strong>+{{ oog.bonus }}</strong> to the Casting Roll
-            ({{ oog.bonus_from | join(', ') }}).
-          {% endif %}
-        </p>
-        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
-          <input type="hidden" name="action" value="{{ 'brew_potion' if is_brew else 'write_scroll' }}" />
-          <select name="caster">
-            {% for c in oog.casters %}
-              <option value="{{ c.kind }}">{{ c.name }} (CN {{ c.cn }})</option>
-            {% endfor %}
-          </select>
-          {% if is_brew %}
-            <select name="potion" required>
-              <option value="">— pick a potion —</option>
-              <optgroup label="Lesser">
-                {% for p in lesser_potions %}<option value="{{ p }}">{{ p }}</option>{% endfor %}
-              </optgroup>
-              <optgroup label="Greater (wizard only, −{{ BREW_GREATER_PENALTY }})">
-                {% for p in greater_potions %}<option value="{{ p }}">{{ p }}</option>{% endfor %}
-              </optgroup>
-            </select>
-          {% else %}
-            <select name="spell" required>
-              <option value="">— pick a spell —</option>
-              {% for n in spell_names %}<option value="{{ n }}">{{ n }}</option>{% endfor %}
-            </select>
-          {% endif %}
-          <input name="die" type="text" inputmode="numeric" pattern="[0-9]+" size="4" placeholder="d20" title="The die you rolled — leave blank to let the app roll" />
-          <button class="btn secondary small" type="submit">Cast</button>
-        </form>
-      </details>
-    {% endfor %}
-    {% if homunculus_book_on and homunculus_info.casters and not has_homunculus %}
-      {# Wizard only, so the caster list is not offered — out_of_game_cast_info
-         would include the apprentice if she somehow knew it. #}
-      <details class="ref-panel" id="oog-homunculus" style="margin-top:1rem">
-        <summary>Workshop — Homunculus (Out of Game)</summary>
-        <p class="muted" style="font-size:0.85rem">
-          A wizard only. {{ HOMUNCULUS_MATERIALS_COST }}gc of materials is spent whether the
-          casting roll succeeds or not. On a success the wizard begins each game at
-          −{{ HOMUNCULUS_HEALTH_PENALTY }} Health
-          until the homunculus is destroyed or used.
-          {% if homunculus_info.bonus %}
-            Your base adds <strong>+{{ homunculus_info.bonus }}</strong> to the Casting Roll
-            ({{ homunculus_info.bonus_from | join(', ') }}).
-          {% endif %}
-        </p>
-        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
-          <input type="hidden" name="action" value="cast_homunculus" />
-          {% for c in homunculus_info.casters if c.kind == 'wizard' %}
-            <span class="muted">{{ c.name }} (CN {{ c.cn }})</span>
-          {% endfor %}
-          <input name="die" type="text" inputmode="numeric" pattern="[0-9]+" size="4" placeholder="d20" title="The die you rolled — leave blank to let the app roll" />
-          <button class="btn secondary small" type="submit">Cast ({{ HOMUNCULUS_MATERIALS_COST }}gc)</button>
-        </form>
-      </details>
-    {% endif %}
-    {% if alchemical_workshop_ready %}
-      <details class="ref-panel" id="alchemical-workshop-panel" style="margin-top:1rem">
-        <summary>Workshop — Alchemical Workshop</summary>
-        <p class="muted" style="font-size:0.85rem">
-          Both potions are consumed. Two dice: both even produces the Greater Potion for the
-          lower die, both odd wastes them, a matching pair below 20 destroys the workshop and
-          starts the wizard's next game at −2 Health, and one of each returns both potions.
-        </p>
-        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
-          <input type="hidden" name="action" value="mix_potions" />
-          <select name="item_a" required>
-            <option value="">— first potion —</option>
-            {% for it in vault_potions %}<option value="{{ it.id }}">{{ it.name }}</option>{% endfor %}
-          </select>
-          <select name="item_b" required>
-            <option value="">— second potion —</option>
-            {% for it in vault_potions %}<option value="{{ it.id }}">{{ it.name }}</option>{% endfor %}
-          </select>
-          <input name="die_a" type="text" inputmode="numeric" pattern="[0-9]+" size="4" placeholder="d20" title="Leave blank to let the app roll" />
-          <input name="die_b" type="text" inputmode="numeric" pattern="[0-9]+" size="4" placeholder="d20" title="Leave blank to let the app roll" />
-          <button class="btn secondary small" type="submit">Mix</button>
-        </form>
-      </details>
-    {% endif %}
     <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:1rem">
       <input type="hidden" name="action" value="set_notes" />
       <div class="form-row">
@@ -3543,6 +3557,16 @@
       </label>
       <noscript><button class="btn secondary small" type="submit">Apply</button></noscript>
     </form>
+    {% if not hr.black_market_enabled %}
+      <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
+        <input type="hidden" name="action" value="set_shop_core_spells_only" />
+        <label class="checkbox-row" style="margin:0">
+          <input type="checkbox" name="shop_core_spells_only" {% if hr.shop_core_spells_only %}checked{% endif %} onchange="this.form.submit()" />
+          Only show core Grimoires and Scrolls
+        </label>
+        <noscript><button class="btn secondary small" type="submit">Apply</button></noscript>
+      </form>
+    {% endif %}
 
     {% if black_market_enabled %}
         <details class="ref-panel" id="black-market-panel" style="margin-top:1rem">
@@ -3629,7 +3653,18 @@
             <tbody>
               {% for row in rows %}
                 <tr>
-                  <td>{{ row.name }}</td>
+                  {# The name opens the item's rules text where there is any —
+                     a <details> rather than a dialog, since the shelf is a
+                     plain table and nothing here needs a form. #}
+                  <td>
+                    {% with effect = item_effect_text(row.name) %}
+                      {% if effect %}
+                        <details class="item-info"><summary>{{ row.name }}</summary><span class="muted">{{ effect }}</span></details>
+                      {% else %}
+                        {{ row.name }}
+                      {% endif %}
+                    {% endwith %}
+                  </td>
                   <td class="gold">{% if row.purchase %}{{ row.purchase }} gc{% else %}<span class="muted">never sold</span>{% endif %}</td>
                   <td class="muted">{% if row.sale %}{{ row.sale }} gc{% if row.sale_estimated %}<span title="This book prints no sale price. A third of the purchase price, rounded down to 5 gc.">*</span>{% endif %}{% else %}—{% endif %}</td>
                   <td>
@@ -3727,6 +3762,31 @@
 
   <details class="card" id="base">
     <summary><span class="card-title">Home base</span></summary>
+    {# Campaign reputations. Shown here, but stored on the wizard: changing base
+       wipes base.resources wholesale, and a reputation must survive that. #}
+    <details class="ref-panel" id="reputations-panel">
+      <summary>Campaign reputations</summary>
+      <ul class="list-plain">
+        {% for key, rep in REPUTATIONS.items() %}
+          {% set held = key in wizard_reputations %}
+          <li>
+            <strong>{{ rep.name }}</strong> <span class="badge">{{ rep.source }}</span>
+            {% if held %}<span class="badge">held</span>{% endif %}
+            <span class="muted">— {{ rep.effects }}</span>
+            <form class="inline-form" method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
+              <input type="hidden" name="action" value="set_wizard_reputation" />
+              <input type="hidden" name="reputation" value="{{ key }}" />
+              {% if held %}
+                <button class="btn danger small" type="submit">Remove</button>
+              {% else %}
+                <input type="hidden" name="held" value="on" />
+                <button class="btn secondary small" type="submit" {% if key not in reputations_grantable %}disabled title="Switch on {{ rep.source }} first"{% endif %}>Record</button>
+              {% endif %}
+            </form>
+          </li>
+        {% endfor %}
+      </ul>
+    </details>
     <p class="muted">
       Establishing a base is free after one or more games (2e p.106).
       Changing location loses purchased upgrades.
@@ -3750,10 +3810,6 @@
             </option>
           {% endfor %}
         </select>
-      </div>
-      <div class="form-row">
-        <label for="base_notes">Base notes</label>
-        <textarea id="base_notes" name="base_notes">{{ base.notes }}</textarea>
       </div>
       <button class="btn" type="submit">Save base location</button>
     </form>
@@ -3791,31 +3847,6 @@
         </form>
       </details>
     {% endif %}
-    {# Campaign reputations. Shown here, but stored on the wizard: changing base
-       wipes base.resources wholesale, and a reputation must survive that. #}
-    <details class="ref-panel" id="reputations-panel">
-      <summary>Campaign reputations</summary>
-      <ul class="list-plain">
-        {% for key, rep in REPUTATIONS.items() %}
-          {% set held = key in wizard_reputations %}
-          <li>
-            <strong>{{ rep.name }}</strong> <span class="badge">{{ rep.source }}</span>
-            {% if held %}<span class="badge">held</span>{% endif %}
-            <span class="muted">— {{ rep.effects }}</span>
-            <form class="inline-form" method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
-              <input type="hidden" name="action" value="set_wizard_reputation" />
-              <input type="hidden" name="reputation" value="{{ key }}" />
-              {% if held %}
-                <button class="btn danger small" type="submit">Remove</button>
-              {% else %}
-                <input type="hidden" name="held" value="on" />
-                <button class="btn secondary small" type="submit" {% if key not in reputations_grantable %}disabled title="Switch on {{ rep.source }} first"{% endif %}>Record</button>
-              {% endif %}
-            </form>
-          </li>
-        {% endfor %}
-      </ul>
-    </details>
 
     {% if base.location_key != 'none' %}
       <h3>Owned resources</h3>
@@ -4172,7 +4203,16 @@
       var dataEl = document.getElementById('loot-picker-data');
       if (!dataEl) return;
       var LOOT_DATA = JSON.parse(dataEl.textContent);
-      var SPELL_VARIANT_ITEMS = { 'Grimoire': true, 'Scroll': true };
+      // Items picked as a kind plus a second dropdown. `list` names the
+      // LOOT_DATA key the options come from; `compose` says how the two halves
+      // become a vault name — 'prefix' gives "Grimoire: Bone Dart", 'replace'
+      // gives the potion's own catalog name, which is what prices it.
+      var VARIANT_ITEMS = {
+        Grimoire: { label: 'Spell', list: 'spell_names', compose: 'prefix' },
+        Scroll: { label: 'Spell', list: 'spell_names', compose: 'prefix' },
+        'Lesser Potion': { label: 'Potion', list: 'lesser_potion_names', compose: 'replace' },
+        'Greater Potion': { label: 'Potion', list: 'greater_potion_names', compose: 'replace' }
+      };
 
       function opt(name) {
         var o = document.createElement('option');
@@ -4207,10 +4247,13 @@
         var itemSel = row.querySelector('.loot-item');
         var variantCell = row.querySelector('.loot-variant-cell');
         var variantSel = row.querySelector('.loot-variant');
-        if (SPELL_VARIANT_ITEMS[itemSel.value]) {
+        var spec = VARIANT_ITEMS[itemSel.value];
+        if (spec) {
           variantSel.innerHTML = '';
-          var ph = opt('— pick a spell —'); ph.value = ''; variantSel.appendChild(ph);
-          LOOT_DATA.spell_names.forEach(function (n) { variantSel.appendChild(opt(n)); });
+          var ph = opt('— pick a ' + spec.label.toLowerCase() + ' —'); ph.value = '';
+          variantSel.appendChild(ph);
+          (LOOT_DATA[spec.list] || []).forEach(function (n) { variantSel.appendChild(opt(n)); });
+          row.querySelector('.loot-variant-label').textContent = spec.label;
           variantCell.style.display = '';
         } else {
           variantCell.style.display = 'none';
@@ -4227,8 +4270,16 @@
           composed = itemText.value.trim();
         } else if (book && itemSel.value) {
           composed = itemSel.value;
-          if (SPELL_VARIANT_ITEMS[itemSel.value] && variantSel.value) {
-            composed += ': ' + variantSel.value;
+          var cspec = VARIANT_ITEMS[itemSel.value];
+          if (cspec && variantSel.value) {
+            composed = cspec.compose === 'replace'
+              ? variantSel.value
+              : composed + ': ' + variantSel.value;
+          } else if (cspec) {
+            // A real thing to carry out of the ruins and identify later, and
+            // the tag says so rather than leaving a bare "Scroll" that reads
+            // like someone forgot to finish picking.
+            composed += ' (unidentified)';
           }
           if ((LOOT_DATA.no_suffix_books || []).indexOf(book) === -1) {
             composed += ' (' + book + ')';

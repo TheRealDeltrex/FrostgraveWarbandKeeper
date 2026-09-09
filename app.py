@@ -133,6 +133,7 @@ from game_content import (
     construct_modifications,
     enrich_spells_with_descriptions,
     group_magic_items,
+    item_effect_text,
     load_bestiary,
     load_common_items,
     load_core_rules,
@@ -400,6 +401,7 @@ def portrait_src(
 
 app.jinja_env.globals.update(
     portrait_src=portrait_src,
+    item_effect_text=item_effect_text,
     bonus_choice_amount=bonus_choice_amount,
     format_stat=format_stat,
     APP_VERSION=paths.app_version(),
@@ -1081,15 +1083,38 @@ COMMON_ITEMS_BOOK = "Common items"
 COMMON_ITEM_CATEGORIES = ("Grimoire", "Scroll", "Potion", "Magic Weapon or Armour")
 
 
+# The item kinds the picker offers as one entry plus a second dropdown, in the
+# order they lead the list. Grimoire and Scroll are single catalog rows already;
+# the 28 potions collapse the same way, kept apart by tier because the two
+# tables are separate in the book and a Greater Potion is a different kind of
+# find. Anything else follows, alphabetically.
+COMMON_ITEM_LEAD = ("Lesser Potion", "Greater Potion", "Scroll", "Grimoire")
+
+
 def _common_item_names() -> list[str]:
-    return sorted(
+    """The Common items shelf for the loot picker's Item field.
+
+    Individual potions are replaced by the two tier entries, which the picker
+    pairs with a dropdown of that tier's table."""
+    names = sorted(
         (
             it["name"]
             for it in load_common_items()
-            if it.get("category") in COMMON_ITEM_CATEGORIES
+            if it.get("category") in COMMON_ITEM_CATEGORIES and it.get("category") != "Potion"
         ),
         key=str.lower,
     )
+    return [*COMMON_ITEM_LEAD, *(n for n in names if n not in COMMON_ITEM_LEAD)]
+
+
+def _common_potion_names(tier: str) -> list[str]:
+    """One tier's potions in table order, as the book prints them, rather than
+    alphabetically — so the dropdown reads like the table that was rolled on."""
+    return [
+        it["name"]
+        for it in load_common_items()
+        if it.get("category") == "Potion" and it.get("tier") == tier
+    ]
 
 
 def _wizard_knows_vault_grimoire_spell(wb: dict, item: dict) -> bool:
@@ -1646,6 +1671,22 @@ def warband_view(warband_id: str) -> str:
         spell_names=sorted(
             {s["name"] for s in all_spells_flat() if s["source"] in wb_sources}, key=str.lower
         ),
+        # Write Scroll writes "a spell the caster knows, or one they own the
+        # grimoire for" (Core Rules p.135) and nothing else, so its dropdown
+        # gets these two lists rather than every spell in the enabled books.
+        # vault_grimoire_spells() is lowercased, so it is matched back against
+        # the real names for display.
+        write_scroll_known_names=sorted(known_spell_names(wb), key=str.lower),
+        grimoire_only_spell_names=sorted(
+            {
+                s["name"]
+                for s in all_spells_flat()
+                if s["source"] in wb_sources
+                and s["name"].lower() in expansions.vault_grimoire_spells(wb)
+                and s["name"] not in known_spell_names(wb)
+            },
+            key=str.lower,
+        ),
         source_books=SOURCE_BOOK_OPTIONS,
         enabled_source_names=wb_sources,
         wizard_state=expansions.wizard_state(wb),
@@ -1696,6 +1737,12 @@ def warband_view(warband_id: str) -> str:
             "spell_names": sorted(
                 {s["name"] for s in all_spells_flat() if s["source"] in wb_sources}, key=str.lower
             ),
+            # A potion composes to its own name ("Potion of Healing"), not
+            # "Lesser Potion: Potion of Healing" the way a grimoire does — the
+            # vault prices an entry by matching that name against the catalog,
+            # so the stored name has to stay the catalog's.
+            "lesser_potion_names": _common_potion_names("lesser"),
+            "greater_potion_names": _common_potion_names("greater"),
         },
         grave_mutations_enabled=grave_mutations_enabled,
         mutation_picker_data=mutation_picker_data,
@@ -2385,7 +2432,13 @@ def _act_write_scroll(wb: dict) -> tuple[bool, str]:
     die, err = _optional_die("die")
     if err:
         return False, err
-    return cast_write_scroll(wb, request.form.get("caster") or "wizard", request.form.get("spell") or "", die)
+    return cast_write_scroll(
+        wb,
+        request.form.get("caster") or "wizard",
+        request.form.get("spell") or "",
+        die,
+        request.form.get("outcome") or "",
+    )
 
 
 @register_action("brew_potion")
@@ -2393,7 +2446,13 @@ def _act_brew_potion(wb: dict) -> tuple[bool, str]:
     die, err = _optional_die("die")
     if err:
         return False, err
-    return cast_brew_potion(wb, request.form.get("caster") or "wizard", request.form.get("potion") or "", die)
+    return cast_brew_potion(
+        wb,
+        request.form.get("caster") or "wizard",
+        request.form.get("potion") or "",
+        die,
+        request.form.get("outcome") or "",
+    )
 
 
 @register_action("cast_homunculus")
@@ -2401,7 +2460,7 @@ def _act_cast_homunculus(wb: dict) -> tuple[bool, str]:
     die, err = _optional_die("die")
     if err:
         return False, err
-    return cast_homunculus(wb, die)
+    return cast_homunculus(wb, die, request.form.get("outcome") or "")
 
 
 @register_action("destroy_homunculus")
@@ -2434,6 +2493,19 @@ def _act_set_black_market(wb: dict) -> tuple[bool, str]:
         "Black Market Contacts on — the open shop is closed."
         if hr["black_market_enabled"]
         else "Black Market Contacts off — the open shop is back."
+    )
+
+
+@register_action("set_shop_core_spells_only")
+def _act_set_shop_core_spells_only(wb: dict) -> tuple[bool, str]:
+    """Sits beside the Black Market toggle for the same reason: it selects what
+    the Shop offers, so it belongs on the Shop card."""
+    hr = wb.setdefault("homerules", default_homerules())
+    hr["shop_core_spells_only"] = request.form.get("shop_core_spells_only") == "on"
+    return True, (
+        "Shop grimoires and scrolls limited to Core Rules spells."
+        if hr["shop_core_spells_only"]
+        else "Shop grimoires and scrolls now offer every spell from your enabled books."
     )
 
 
@@ -2514,8 +2586,6 @@ def _act_reorder_soldiers(wb: dict) -> tuple[bool, str]:
 def _act_set_base_location(wb: dict) -> tuple[bool, str]:
     loc = request.form.get("location") or "none"
     ok, msg = set_base_location(wb, loc)
-    notes = (request.form.get("base_notes") or "").strip()
-    wb.setdefault("base", {})["notes"] = notes
     return ok, msg
 
 

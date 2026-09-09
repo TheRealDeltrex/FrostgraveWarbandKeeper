@@ -179,19 +179,29 @@
               // Busy feedback (D9): disable the pressed submit button so a slow
               // save or a second accidental click can't double-submit; it
               // re-enables naturally on the full-page reload that follows.
-              // Deferred via setTimeout(0) — some forms rely on the submitter
-              // button's own name/value pair (e.g. the mutation picker's
-              // "pick" vs "random" buttons), and disabling a form control
-              // synchronously inside the submit handler excludes it from the
-              // submitted data; deferring to the next tick lets the browser
-              // read the form first.
+              //
+              // Disabling a control excludes it from the submitted data, and
+              // several forms carry meaning on the submitter itself (the
+              // mutation picker's "pick" vs "random", the workshop's
+              // "Succeeded" vs "Random roll"). This used to defer the disable
+              // by setTimeout(0) and hope the browser had serialised the form
+              // first — a race, and one that lost often enough to silently
+              // break "Add random mutation": the value vanished, the server
+              // fell back to the empty number field, and nothing happened.
+              // So the pair is copied into a hidden input first, which makes
+              // disabling the button harmless whenever it lands.
               var submitter = e.submitter;
               if (submitter && submitter.tagName === "BUTTON" && !submitter.disabled) {
-                setTimeout(function () {
-                  submitter.disabled = true;
-                  submitter.classList.add("busy");
-                  submitter.textContent = "Saving…";
-                }, 0);
+                if (submitter.name) {
+                  var carry = document.createElement("input");
+                  carry.type = "hidden";
+                  carry.name = submitter.name;
+                  carry.value = submitter.value;
+                  form.appendChild(carry);
+                }
+                submitter.disabled = true;
+                submitter.classList.add("busy");
+                submitter.textContent = "Saving…";
               }
             }
           },
