@@ -8,7 +8,7 @@ If you just want to run the app and don't need to touch the code, you don't need
 **download a build** (Windows, or the browser build) from the
 [download page](https://therealdeltrex.github.io/FrostgraveWarbandKeeper/), the
 [`main` branch](../../tree/main), or the [latest Release](../../releases/latest). Linux binaries
-are published occasionally rather than every release; v5.0.0 is the most recent — see "Building
+are published occasionally rather than every release; v5.1.0 is the most recent — see "Building
 the executables yourself" below.
 
 A local Flask app for creating and maintaining warbands for **Frostgrave (2nd Edition)**. No login, no server — your warbands are saved as plain files on your own machine.
@@ -61,7 +61,7 @@ plus its bundled resources. Copy the whole folder wherever you want to run it fr
 Linux (build on Linux, for the same cross-compile reason — this repo builds it via
 `.github/workflows/build-linux.yml` on a GitHub Actions Ubuntu runner rather than locally).
 **This is not dispatched as part of shipping a new version** — it is run occasionally, on
-request; v5.0.0 is the most recent release it was built for:
+request; v5.1.0 is the most recent release it was built for:
 
 ```bash
 pip install -r requirements-dev.txt
