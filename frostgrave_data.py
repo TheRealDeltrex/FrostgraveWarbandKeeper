@@ -2988,12 +2988,14 @@ def group_soldiers_by_source(rows: list[dict]) -> list[dict]:
 # after these, by name.
 SUMMONED_ORDER = [
     "companion_bear",
-    "companion_boar",
-    "companion_ice_spider",
     "companion_ice_toad",
     "companion_snow_leopard",
     "companion_wolf",
     "companion_white_gorilla",
+    # The two Beastcrafter companions close out the animals, after the core
+    # ones, rather than sorting in among them alphabetically.
+    "companion_boar",
+    "companion_ice_spider",
     "small_construct",
     "medium_construct",
     "large_construct",

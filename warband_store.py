@@ -728,6 +728,17 @@ def sync_apprentice(wb: dict) -> None:
         for stat, offset in (m.get("stat_offsets") or {}).items():
             if stat in ap_stats:
                 ap_stats[stat] += offset
+    # Re-apply the warband horse's Mounted Modifier for the same reason as the
+    # mutation offsets above: mount_horse() writes it into ap["stats"], and this
+    # rebuild would otherwise discard it, leaving a mounted apprentice showing
+    # her on-foot Move and Fight. Taken from the current delta rather than from
+    # what was applied at mount time, since that value is exactly what this
+    # rebuild destroys — so an Advanced Horsemanship upgrade bought mid-mount
+    # reaches her a game earlier than it does the other riders.
+    if expansions.is_horse_rider(wb, "apprentice"):
+        for stat, delta in expansions.horse_mount_delta(wb).items():
+            if stat in ap_stats:
+                ap_stats[stat] += delta
     ap_stats = expansions.apply_hunger_penalty(ap_stats, ap.get("status"))
     for stat in ap_stats:
         ap_stats[stat] = max(1, ap_stats[stat]) if stat == "health" else max(0, ap_stats[stat])
@@ -737,6 +748,43 @@ def sync_apprentice(wb: dict) -> None:
     ap["item_slots"] = normalize_item_slots(
         ap.get("item_slots", ap.get("items")), expansions.apprentice_item_slots(wb)
     )
+
+
+def unmounted_effective_stats(wb: dict) -> dict | None:
+    """Move/Fight/Armour the current rider would have on foot, or None if
+    nobody is mounted.
+
+    mount_horse() backs up the *base* stats, so rider["backup"] carries none of
+    the equipment or wizard-state bonuses the effective stats do. Showing that
+    backup next to an effective figure compared two different things: a captain
+    in heavy armour and shield read "10 (11)" — a bare base 10 against an
+    equipped, mounted 11 — where both halves should have counted his gear and
+    read "13 (11)". The same bonuses each *_effective_stats() applies are added
+    back here, from the same sources.
+
+    No Mounted Armour floor: this is the figure on foot, where it doesn't apply.
+    """
+    rider = ((wb.get("horse") or {}).get("rider")) or None
+    if not rider:
+        return None
+    backup = rider.get("backup") or {}
+    kind = rider.get("kind")
+    if kind == "wizard":
+        bonus = expansions.wizard_state_stat_bonus(wb)
+    elif kind == "apprentice":
+        # apprentice_effective_stats() adds nothing but the floor.
+        bonus = {}
+    elif kind == "captain":
+        bonus = equipment_bonuses((wb.get("captain") or {}).get("item_slots") or [])
+    else:
+        soldier = next(
+            (s for s in wb.get("soldiers") or [] if s.get("id") == rider.get("soldier_id")), {}
+        )
+        bonus = equipment_bonuses(soldier.get("item_slots") or [])
+    return {
+        stat: int(backup.get(stat, 0)) + int(bonus.get(stat, 0))
+        for stat in ("move", "fight", "armour")
+    }
 
 
 def apprentice_effective_stats(wb: dict) -> dict:
