@@ -802,6 +802,75 @@ def build_expansion_rules_spellcaster(doc: str) -> dict:
     return out
 
 
+# Issue 4's eight Ulterior Motives cards ("Ulterior Motives in Ghost Archipelago
+# II", pp.39-43). Hand-authored from the PDF rather than pulled from an anchor,
+# because Spellcaster Magazine Reference.html carries no i4-ulterior section at
+# all — which is why the app's Ghost Archipelago reference sat eight cards short
+# of the full forty. Summaries, in the same one-line voice as the extracted
+# card sets; the cards themselves are the magazine's.
+ISSUE_4_ULTERIOR = {
+    "title": "Ulterior Motives II (Spellcaster Issue 4)",
+    "blurb": (
+        "Eight more cards, completing the Ghost Archipelago Ulterior Motives set to forty "
+        "across Issues 3, 4, 5 and 7. Same terrain vocabulary as Issue 3 — Arcane Disk, "
+        "Gateway, Pit, Runic Stone, Sarcophagus, Statue, Trapdoor, Swamp Zombie — with each "
+        "card naming two of them as Red Herrings."
+    ),
+    "entries": [
+        (
+            "The Warrior in Stone",
+            "A Warden touching a statue may try a Will TN14 (three attempts) to undo a "
+            "gorgon's work: 25 XP and a specialist of any book, kept free after the game.",
+        ),
+        (
+            "Vampire Island",
+            "Opening a sarcophagus (Fight TN14, one attempt each) gives 20 XP and a treasure "
+            "token, but releases an uncontrolled vampire; killing it earns 20 XP more.",
+        ),
+        (
+            "The Lost Treasury",
+            "A command word spoken on an arcane disk moves figures to a 12-inch side table "
+            "with four treasure tokens and a spirit warrior; the statue there sends them back.",
+        ),
+        (
+            "The Wishing Well",
+            "Offer 50gc, or an item worth 50gc or more, at a pit and roll once for XP, a "
+            "treasure token, or a map stone of your choice.",
+        ),
+        (
+            "Heart of the Island",
+            "A trapdoor (Fight TN12, unlimited attempts) hides a gemstone worth 500gc; once "
+            "open, every turn starts with an earthquake (Move TN12 or be reduced to one action).",
+        ),
+        (
+            "Zombie of Life",
+            "Kill the swamp zombie, then spend an action on its body to take the lingle "
+            "berries: two doses for the ship's hold and 25 XP.",
+        ),
+        (
+            "Return, Warrior",
+            "A Heritor or Warden at a gateway (Will TN14, repeatable) summons a spirit warrior "
+            "that joins the crew and may stay on as a specialist; 20 XP.",
+        ),
+        (
+            "The Lightning Stone",
+            "From the end of turn two the runic stone makes a +0 elemental shooting attack on "
+            "the two nearest figures each turn; Will TN12 in contact earns 40 XP, once each.",
+        ),
+    ],
+}
+
+# The HTML's own summary of the Issue 7 set says "Issues 3, 5, and 7 combined"
+# make forty cards. They make thirty-two; the missing eight are Issue 4's, which
+# that document doesn't carry at all.
+GHOST_BLURB_OVERRIDES = {
+    "Ulterior Motives (Spellcaster Issue 7)": (
+        "Sixteen new cards, the largest of the four Ghost Archipelago Ulterior Motives sets "
+        "(Issues 3, 4, 5 and 7 together make forty, matching the original Frostgrave set size)."
+    ),
+}
+
+
 def build_ghost_spellcaster(doc: str) -> list[dict]:
     """Ghost-Archipelago-only sections from Spellcaster Magazine Reference.html
     (plus the standalone Mech War variant, filed alongside GA content per the
@@ -820,12 +889,24 @@ def build_ghost_spellcaster(doc: str) -> list[dict]:
         ch = section(doc, anchor)
         entry = {
             "title": title,
-            "blurb": " ".join(notes(ch)),
+            "blurb": GHOST_BLURB_OVERRIDES.get(title) or " ".join(notes(ch)),
             "entries": cards(ch),
             "rows": [{"name": n, "text": t} for n, t in two_col_rows(ch)],
         }
         if entry["entries"] or entry["rows"] or entry["blurb"]:
             sections.append(entry)
+        if anchor == "i3-ulterior":
+            sections.append(
+                {
+                    "title": ISSUE_4_ULTERIOR["title"],
+                    "blurb": ISSUE_4_ULTERIOR["blurb"],
+                    "entries": [
+                        {"name": n, "tag": "", "text": t}
+                        for n, t in ISSUE_4_ULTERIOR["entries"]
+                    ],
+                    "rows": [],
+                }
+            )
     return sections
 
 
@@ -844,6 +925,11 @@ def main() -> int:
     doc3 = spellcaster.read_text(encoding="utf-8", errors="replace")
     DATA.mkdir(parents=True, exist_ok=True)
 
+    # WARNING: this merge is the whole file, so anything data/expansion_rules.json
+    # holds that no builder below produces is dropped on a run. Two books are in
+    # that position today — The Red King (3 sections) and The Wizards' Conclave
+    # (5) — neither of which appears in BOOKS or BOOKS_2. Re-add them here before
+    # regenerating, or merge over the existing file instead of replacing it.
     merged_rules = {
         **build_expansion_rules(doc),
         **build_expansion_rules_2(doc2),

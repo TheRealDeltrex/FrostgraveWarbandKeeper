@@ -5123,6 +5123,14 @@
      "text": "At the end of the campaign phase, any surviving random recruit may be kept for free, but normal warband-legality rules (specialist limits, required magic items for specific creatures) apply again immediately — a recruit that can no longer legally be part of the warband is lost."
     }
    ]
+  },
+  {
+   "title": "Artefacts (The Red King treasure table)",
+   "blurb": "The Red King's twenty treasures are Artefacts, which follow different rules from ordinary magic items (pp.76-77). Each is unique within a campaign — roll again if another player already has the one you rolled. A found artefact is inert until unlocked: after every game, starting with the game it was found in, the wizard may make one Will Roll against the target number printed on the item, and may keep it in the vault and retry after each game until it succeeds. Every artefact carries a drawback as well as a power. Otherwise they behave as magic items — one item slot if carried, lost on a Close Call on the Permanent Injury Table.",
+   "rows": [
+    {"name": "Unlocking", "text": "One Will Roll after each game against the artefact's own target number (TN12–TN22, listed in the item's entry in the Lexicon). Failure costs nothing but the game — retry after the next one."},
+    {"name": "Buying and selling", "text": "Artefacts may never be bought, except from another player. An unlocked artefact sells for its listed price; a locked one for half that."}
+   ]
   }
  ],
  "Blood Legacy": [

@@ -203,6 +203,41 @@ def _inn_and_underworld() -> dict:
     return wb
 
 
+def _homunculus_warband(warband_id: str, *, held: bool) -> dict:
+    wb = _warband(warband_id)
+    wb["homerules"]["enabled_sources"]["Thaw of the Lich Lord"] = True
+    sp = ws.find_spell(spell_id("Witch", "Homunculus"))
+    wb["wizard"]["spells"].append(
+        {"id": sp["id"], "name": sp["name"], "school": sp["school"], "base_cn": sp["cn"], "cn": sp["cn"]}
+    )
+    wb["wizard"]["homunculus"] = held
+    return wb
+
+
+def _homunculus_held() -> dict:
+    """The wizard card carrying a homunculus: the badge is a bare button inside
+    the card's big autosave form, driving a top-level hidden form through the
+    dialog. Exactly the shape that has gone wrong before."""
+    return _homunculus_warband("nesting-homunculus", held=True)
+
+
+def _homunculus_castable() -> dict:
+    """The other half — no homunculus yet, so the Workshop's cast panel renders
+    instead of the badge and dialog."""
+    return _homunculus_warband("nesting-homunculus-cast", held=False)
+
+
+def _vault_artefact() -> dict:
+    """A Red King artefact in the vault, which gives each vault row a second
+    inline form (Activate) beside the remove button."""
+    wb = _warband("nesting-artefact")
+    wb["homerules"]["enabled_sources"]["The Red King"] = True
+    ws.add_vault_item(wb, "Wraith Bow")
+    ws.add_vault_item(wb, "Potion of Healing")
+    wb["vault_items"][0]["activated"] = True
+    return wb
+
+
 @pytest.mark.parametrize(
     "build",
     [
@@ -215,6 +250,9 @@ def _inn_and_underworld() -> dict:
         _shop_open,
         _shop_black_market,
         _inn_and_underworld,
+        _homunculus_held,
+        _homunculus_castable,
+        _vault_artefact,
     ],
     ids=[
         "apprentice+captain",
@@ -226,6 +264,9 @@ def _inn_and_underworld() -> dict:
         "shop-open",
         "shop-black-market",
         "inn-and-underworld",
+        "homunculus-held",
+        "homunculus-castable",
+        "vault-artefact",
     ],
 )
 def test_warband_page_has_no_nested_forms(build):

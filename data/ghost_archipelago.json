@@ -750,6 +750,53 @@
    "rows": []
   },
   {
+   "title": "Ulterior Motives II (Spellcaster Issue 4)",
+   "blurb": "Eight more cards, completing the Ghost Archipelago Ulterior Motives set to forty across Issues 3, 4, 5 and 7. Same terrain vocabulary as Issue 3 — Arcane Disk, Gateway, Pit, Runic Stone, Sarcophagus, Statue, Trapdoor, Swamp Zombie — with each card naming two of them as Red Herrings.",
+   "entries": [
+    {
+     "name": "The Warrior in Stone",
+     "tag": "",
+     "text": "A Warden touching a statue may try a Will TN14 (three attempts) to undo a gorgon's work: 25 XP and a specialist of any book, kept free after the game."
+    },
+    {
+     "name": "Vampire Island",
+     "tag": "",
+     "text": "Opening a sarcophagus (Fight TN14, one attempt each) gives 20 XP and a treasure token, but releases an uncontrolled vampire; killing it earns 20 XP more."
+    },
+    {
+     "name": "The Lost Treasury",
+     "tag": "",
+     "text": "A command word spoken on an arcane disk moves figures to a 12-inch side table with four treasure tokens and a spirit warrior; the statue there sends them back."
+    },
+    {
+     "name": "The Wishing Well",
+     "tag": "",
+     "text": "Offer 50gc, or an item worth 50gc or more, at a pit and roll once for XP, a treasure token, or a map stone of your choice."
+    },
+    {
+     "name": "Heart of the Island",
+     "tag": "",
+     "text": "A trapdoor (Fight TN12, unlimited attempts) hides a gemstone worth 500gc; once open, every turn starts with an earthquake (Move TN12 or be reduced to one action)."
+    },
+    {
+     "name": "Zombie of Life",
+     "tag": "",
+     "text": "Kill the swamp zombie, then spend an action on its body to take the lingle berries: two doses for the ship's hold and 25 XP."
+    },
+    {
+     "name": "Return, Warrior",
+     "tag": "",
+     "text": "A Heritor or Warden at a gateway (Will TN14, repeatable) summons a spirit warrior that joins the crew and may stay on as a specialist; 20 XP."
+    },
+    {
+     "name": "The Lightning Stone",
+     "tag": "",
+     "text": "From the end of turn two the runic stone makes a +0 elemental shooting attack on the two nearest figures each turn; Will TN12 in contact earns 40 XP, once each."
+    }
+   ],
+   "rows": []
+  },
+  {
    "title": "High-Level Heritors (Spellcaster Issue 5)",
    "blurb": "Blood Burn still costs Health per power attempt and still damages on failure, but the damage shrinks (never to zero) as the Heritor levels. Specialist Crew caps at 4 early on, rising to 8 of 8 crew by level 40. Legendary Crew unlock at Heritor level 10, occupying a specialist slot each (a level-10 Heritor could run 5 specialists, or 1 Legendary + 4 specialists). Building a High-Level Heritor: pick a level (= total advancements) → take advancements one at a time → roll the Treasure Table once per level (reroll Map Stones) → recruit a Warden at level ÷ 3 (round up), who takes one advancement per level → hire crew up to the table's limits → distribute the accumulated treasure. Hiring Legendary Crew requires returning to the mainland; survival uses the Heritor/Warden Survival Table (main rulebook p.59) with \"Close Call\" treated as \"Full Recovery\" and \"Smashed Jaw\" rerolled.",
    "entries": [],
@@ -844,7 +891,7 @@
   },
   {
    "title": "Ulterior Motives (Spellcaster Issue 7)",
-   "blurb": "16 new cards, bringing the Ghost Archipelago Ulterior Motives set (Issues 3, 5, and 7 combined) to 40 cards — matching the original Frostgrave set size.",
+   "blurb": "Sixteen new cards, the largest of the four Ghost Archipelago Ulterior Motives sets (Issues 3, 4, 5 and 7 together make forty, matching the original Frostgrave set size).",
    "entries": [
     {
      "name": "Mercy Re-Killing",

@@ -29,43 +29,54 @@ def test_legendary_soldiers_no_longer_count_as_specialists(fresh_warband):
 
 
 def _enable_legendary(wb: dict) -> None:
-    # All three Spellcaster Magazine soldier toggles default True (a group
-    # opts out, not in) — tests exercise a specific combination, so set
-    # every flag explicitly rather than relying on the current default.
+    """Spellcaster Magazine on, Legendary Soldiers allowed, firearms not.
+
+    Both remaining toggles default True (a group opts out, not in), so set
+    each explicitly rather than relying on the current default.
+    """
     wb["homerules"]["enabled_sources"]["Spellcaster Magazine"] = True
     wb["homerules"]["spellcaster_magazine_legendary_soldiers"] = True
-    wb["homerules"]["spellcaster_magazine_soldiers"] = False
     wb["homerules"]["firearms_rules_enabled"] = False
 
 
 def _enable_ordinary(wb: dict) -> None:
+    """The book on, but neither of its own troop-class rules."""
     wb["homerules"]["enabled_sources"]["Spellcaster Magazine"] = True
-    wb["homerules"]["spellcaster_magazine_soldiers"] = True
     wb["homerules"]["spellcaster_magazine_legendary_soldiers"] = False
     wb["homerules"]["firearms_rules_enabled"] = False
 
 
-def test_legendary_toggle_is_independent_of_the_ordinary_toggle(fresh_warband):
+def test_legendary_toggle_is_independent_of_the_book_toggle(fresh_warband):
     wb = fresh_warband
-    _enable_ordinary(wb)  # ordinary on, legendary off
+    _enable_ordinary(wb)  # book on, legendary off
     ok, msg = warband_store.add_soldier(wb, "dire_hound", "Fang")
     assert not ok
-    assert "switched off" in msg.lower()
+    # The message names the rule that blocked it, not the book.
+    assert "allow legendary soldiers" in msg.lower()
 
 
-def test_ordinary_toggle_off_still_blocks_non_legendary_soldiers(fresh_warband):
+def test_ordinary_soldiers_ride_on_the_book_toggle_alone(fresh_warband):
+    """The retired "allow its soldiers" flag used to gate these separately."""
     wb = fresh_warband
-    _enable_legendary(wb)  # legendary on, ordinary off
+    _enable_ordinary(wb)
     warband_store.add_vault_item(wb, "Book of the Rangifer")
     ok, msg = warband_store.add_soldier(wb, "rangifer_herdsman", "Scout")
-    assert not ok
-    assert "switched off" in msg.lower()
+    assert ok, msg
 
 
-def test_both_toggles_on_allow_both_kinds(fresh_warband):
+def test_book_off_blocks_every_kind(fresh_warband):
     wb = fresh_warband
     _enable_legendary(wb)
-    wb["homerules"]["spellcaster_magazine_soldiers"] = True
+    wb["homerules"]["enabled_sources"]["Spellcaster Magazine"] = False
+    warband_store.add_vault_item(wb, "Book of the Rangifer")
+    for type_key in ("rangifer_herdsman", "dire_hound"):
+        ok, msg = warband_store.add_soldier(wb, type_key, "Nope")
+        assert not ok, type_key
+
+
+def test_legendary_on_allows_both_kinds(fresh_warband):
+    wb = fresh_warband
+    _enable_legendary(wb)
     warband_store.add_vault_item(wb, "Book of the Rangifer")
     ok, msg = warband_store.add_soldier(wb, "rangifer_herdsman", "Scout")
     assert ok, msg
@@ -73,40 +84,31 @@ def test_both_toggles_on_allow_both_kinds(fresh_warband):
     assert ok, msg
 
 
-# --- Firearms Rules toggle: needs BOTH itself and the ordinary toggle -------
+# --- Firearms Rules toggle: the only gate on firearm-armed soldiers --------
 
 
-def test_firearm_soldier_blocked_with_neither_toggle(fresh_warband):
+def test_firearm_soldier_blocked_with_firearms_toggle_off(fresh_warband):
     wb = fresh_warband
-    wb["homerules"]["enabled_sources"]["Spellcaster Magazine"] = True
-    wb["homerules"]["spellcaster_magazine_soldiers"] = False
-    wb["homerules"]["firearms_rules_enabled"] = False
+    _enable_ordinary(wb)  # book on, firearms off
     ok, msg = warband_store.add_soldier(wb, "musketeer", "Shooter")
     assert not ok
 
 
-def test_firearm_soldier_blocked_with_only_ordinary_toggle(fresh_warband):
-    wb = fresh_warband
-    _enable_ordinary(wb)
-    ok, msg = warband_store.add_soldier(wb, "musketeer", "Shooter")
-    assert not ok
-
-
-def test_firearm_soldier_blocked_with_only_firearms_toggle(fresh_warband):
-    wb = fresh_warband
-    wb["homerules"]["enabled_sources"]["Spellcaster Magazine"] = True
-    wb["homerules"]["spellcaster_magazine_soldiers"] = False
-    wb["homerules"]["firearms_rules_enabled"] = True
-    ok, msg = warband_store.add_soldier(wb, "musketeer", "Shooter")
-    assert not ok
-
-
-def test_firearm_soldier_hireable_with_both_toggles(fresh_warband):
+def test_firearm_soldier_hireable_on_the_firearms_toggle_alone(fresh_warband):
+    """Legendary off, firearms on — the Legendary toggle must not gate these."""
     wb = fresh_warband
     _enable_ordinary(wb)
     wb["homerules"]["firearms_rules_enabled"] = True
     ok, msg = warband_store.add_soldier(wb, "musketeer", "Shooter")
     assert ok, msg
+
+
+def test_firearm_soldier_blocked_when_the_book_is_off(fresh_warband):
+    wb = fresh_warband
+    wb["homerules"]["enabled_sources"]["Spellcaster Magazine"] = False
+    wb["homerules"]["firearms_rules_enabled"] = True
+    ok, msg = warband_store.add_soldier(wb, "musketeer", "Shooter")
+    assert not ok
 
 
 # --- Legendary Captain + specialist cap reduction ----------------------------

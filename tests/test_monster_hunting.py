@@ -183,7 +183,6 @@ def test_use_and_discard_component(fresh_warband):
 def test_monster_hunter_doubles_components_and_adds_gold_bonus(fresh_warband):
     wb = fresh_warband
     _enable(wb)
-    wb["homerules"]["spellcaster_magazine_soldiers"] = True
     wb["homerules"]["spellcaster_magazine_legendary_soldiers"] = True
     ok, msg = warband_store.add_soldier(wb, "monster_hunter", "Hunter")
     assert ok, msg
@@ -206,7 +205,6 @@ def test_potion_master_doubles_brew_potion_bonus(fresh_warband):
     wb = fresh_warband
     _enable(wb)
     assert expansions.brew_potion_component_bonus(wb) == (1, 25)
-    wb["homerules"]["spellcaster_magazine_soldiers"] = True
     wb["homerules"]["spellcaster_magazine_legendary_soldiers"] = True
     warband_store.add_soldier(wb, "potion_master", "Master")
     assert expansions.potion_master_active(wb)

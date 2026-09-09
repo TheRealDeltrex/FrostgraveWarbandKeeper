@@ -997,10 +997,49 @@ def wizard_level(wb: dict) -> int:
     return int((wb.get("wizard") or {}).get("level", 0))
 
 
+# --- Homunculus (Thaw of the Lich Lord p.39) ------------------------------
+#
+# A sliver of the wizard's soul in a miniature clone, "generally stored in a
+# jar or similar container in the wizard's vault". It is *not* a vault entry
+# here: it has no price, cannot be sold or looted, and every control it needs
+# hangs off the wizard, so it lives as one flag on the wizard and shows as a
+# badge on his card.
+HOMUNCULUS_SPELL = "Homunculus"
+# "Before casting this spell, the wizard must spend 50gc on materials. This
+# money is spent whether the casting roll is successful or not."
+HOMUNCULUS_MATERIALS_COST = 50
+# "he begins each game with his Health reduced by 2 (write as a split stat)"
+HOMUNCULUS_HEALTH_PENALTY = 2
+# Killed in the post-game survival check: "-2 levels ... a permanent reduction
+# of 2 points to his actual Health stat".
+HOMUNCULUS_DEATH_PENALTY = {"levels": 2, "health": 2, "will": 0}
+# The suicide branch, taken after a game in which the wizard picked up a
+# permanent injury: "a total of -3 levels, -2 Health, -1 Will".
+HOMUNCULUS_SUICIDE_PENALTY = {"levels": 3, "health": 2, "will": 1}
+
+
+def has_homunculus(wb: dict) -> bool:
+    return bool((wb.get("wizard") or {}).get("homunculus"))
+
+
+def homunculus_health_penalty(wb: dict) -> int:
+    """How much the wizard's Health is reduced *for play* while a homunculus
+    exists — the right-hand half of the book's split stat.
+
+    Display only, deliberately. wizard["stats"]["health"] stays the "actual
+    Health stat" the book distinguishes from the effective one, so a Health
+    level-up still raises it and wizard_stat_caps() is left alone: the cap
+    governs advancement, while "he may not heal beyond this effective stat"
+    governs in-game healing, which this app does not track at all. Lowering
+    the cap here would block a legal advance.
+    """
+    return HOMUNCULUS_HEALTH_PENALTY if has_homunculus(wb) else 0
+
+
 def legendary_soldiers_enabled(wb: dict) -> bool:
     """Spellcaster Magazine's Legendary Soldiers (Issue 4) — needs Spellcaster
-    Magazine switched on and its own soldiers-only sub-toggle, split apart
-    from the book's other (non-legendary, non-firearm) soldiers. See
+    Magazine switched on plus the Legendary Soldiers homerule, which gates
+    these and nothing else the book prints. See
     warband_store.soldier_from_book_enabled(). When on, the book also makes
     the Captain a Legendary Soldier ("Captains ... are now considered
     Legendary Soldiers and are thus subject to the hiring restrictions
@@ -1113,12 +1152,55 @@ def _elemental_archer_arrow_slot_bonus(current_items: list[str] | None) -> int:
     return arrows + 1
 
 
+# Soldier types the books call undead or demons. Every one of them has zero item
+# slots today, so these lists only matter if that ever changes — the exclusion
+# that actually bites is a revenant (an ordinary soldier with a flag) or an
+# undead wizard, both handled by figure_item_role() below.
+UNDEAD_SOLDIER_TYPE_KEYS = frozenset({"raised_zombie", "vampire"})
+DEMON_SOLDIER_TYPE_KEYS = frozenset(
+    {
+        "demonic_servant",
+        "summoned_imp",
+        "summoned_minor_demon",
+        "summoned_major_demon",
+        "chilopendra",
+        "minor_demon",
+    }
+)
+
+
+def figure_item_role(wb: dict, role: str, figure: dict | None = None) -> str:
+    """The role token to pass to item_eligible_for_role() for one figure —
+    its bare role plus any trait tags an item can exclude on ("wizard:undead").
+
+    A Lich and a Vampire Wizard are undead; their apprentice is not. A revenant
+    keeps whatever it was in life and gains Undead, so the flag decides rather
+    than the type_key.
+    """
+    traits = []
+    if role == "wizard" and (is_lich(wb) or is_vampire(wb)):
+        traits.append(game_content.UNDEAD_TRAIT)
+    else:
+        key = (figure or {}).get("type_key", "")
+        if (figure or {}).get("revenant") or key in UNDEAD_SOLDIER_TYPE_KEYS:
+            traits.append(game_content.UNDEAD_TRAIT)
+        if key in DEMON_SOLDIER_TYPE_KEYS:
+            traits.append(game_content.DEMON_TRAIT)
+    return ":".join([role, *traits])
+
+
 def item_eligible_for_role(name: str, role: str) -> bool:
     """True if this item (free-typed or vault name) carries no restriction, or
     `role` (a soldier type_key, or 'wizard'/'apprentice'/'captain') satisfies its
     restriction. Thin wrapper over game_content.item_eligible_for_role() so
     templates/app.py only need to import expansions."""
     return game_content.item_eligible_for_role(name, role)
+
+
+def is_artefact(name: str) -> bool:
+    """Whether a vault name is a Red King artefact. Thin wrapper over
+    game_content.is_artefact() so templates/app.py only need expansions."""
+    return game_content.is_artefact(name)
 
 
 def item_restricted_for_type_key(name: str, type_key: str) -> bool:
@@ -1377,6 +1459,40 @@ def spell_available(wb: dict, spell: dict, sources: set[str]) -> bool:
     if spell.get("source", "Core Rules") not in sources:
         return False
     return spell_state_block(wb, spell) is None
+
+
+# Grimoire vault entries name their spell in one of two shapes, depending on
+# where they came from: the Shop composes "Grimoire: Bone Dart (Elementalist)",
+# while the loot tables and the Black Market compose "Grimoire of Bone Dart".
+# Anything else (a hand-typed "Grimoire", the base resource's "Grimoire
+# (random)", Blood Legacy's "Grimoire of Fin Dalka") names no spell this app
+# can match, and simply contributes nothing.
+_GRIMOIRE_SPELL_RE = re.compile(
+    r"^grimoire\s*(?::|\bof\b)\s*(?P<spell>[^(]+?)\s*(?:\([^)]*\)\s*)?$", re.I
+)
+
+
+def vault_grimoire_spells(wb: dict) -> set[str]:
+    """Lowercased spell names the warband holds a grimoire for."""
+    out = set()
+    for item in wb.get("vault_items") or []:
+        name = (item.get("name") if isinstance(item, dict) else str(item)) or ""
+        m = _GRIMOIRE_SPELL_RE.match(name.strip())
+        if m:
+            out.add(m.group("spell").strip().lower())
+    return out
+
+
+def has_grimoire_for(wb: dict, spell_name: str, held: set[str] | None = None) -> bool:
+    """Core Rules p.84: a wizard may learn a new spell "for which they have a
+    grimoire in their vault". The app warns and confirms rather than refusing,
+    so this only decides whether to warn. Pass `held` when checking a whole
+    list, to parse the vault once.
+
+    """
+    if held is None:
+        held = vault_grimoire_spells(wb)
+    return (spell_name or "").strip().lower() in held
 
 
 def has_true_name(wb: dict) -> bool:

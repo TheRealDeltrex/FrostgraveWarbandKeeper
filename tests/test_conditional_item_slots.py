@@ -70,3 +70,62 @@ def test_equipment_bonuses_sums_fight_shoot_will_from_iron_collar():
     assert bonus["armour"] == 2
     assert bonus["fight"] == 2
     assert bonus["will"] == 1
+
+
+def test_mind_lock_ring_is_excluded_from_undead_and_demons():
+    """The Maze of Malcor p.95: the ring "cannot be worn by undead or demons".
+    An exclusion, not a whitelist — everyone else keeps it."""
+    assert expansions.item_eligible_for_role("Mind Lock Ring", "wizard") is True
+    assert expansions.item_eligible_for_role("Mind Lock Ring", "wizard:undead") is False
+    assert expansions.item_eligible_for_role("Mind Lock Ring", "infantryman:undead") is False
+    assert expansions.item_eligible_for_role("Mind Lock Ring", "minor_demon:demon") is False
+    # A trait tag must not disturb anything else the picker filters on.
+    assert expansions.item_eligible_for_role("Hand Weapon", "wizard:undead") is True
+    assert expansions.item_eligible_for_role("Bear Armour", "companion_bear:undead") is True
+    assert expansions.item_eligible_for_role("Bear Armour", "tracker:undead") is False
+
+
+def test_figure_item_role_tags_the_states_that_carry_the_trait(fresh_warband):
+    wb = fresh_warband
+    assert expansions.figure_item_role(wb, "wizard") == "wizard"
+    wb["wizard"]["state"] = {"kind": expansions.STATE_LICH, "tier": 1}
+    assert expansions.figure_item_role(wb, "wizard") == "wizard:undead"
+    # A Lich's apprentice is not itself undead.
+    assert expansions.figure_item_role(wb, "apprentice", wb.get("apprentice")) == "apprentice"
+    # A revenant is an ordinary soldier carrying a flag, not a type of its own.
+    soldier = {"type_key": "infantryman", "revenant": True}
+    assert expansions.figure_item_role(wb, "infantryman", soldier) == "infantryman:undead"
+    assert expansions.figure_item_role(wb, "infantryman", {"type_key": "infantryman"}) == "infantryman"
+
+
+def test_undead_wizard_is_not_offered_the_ring_but_keeps_one_already_worn(fresh_warband):
+    """Acquisition is gated; possession persists — the slot's text input still
+    carries an already-equipped ring once the picker stops offering it."""
+    import re
+
+    import app as app_module
+    import warband_store
+
+    wb = fresh_warband
+    wb["vault_items"] = [{"id": "v1", "name": "Mind Lock Ring"}]
+    warband_store.save_warband(wb)
+    client = app_module.app.test_client()
+
+    def slot_zero() -> str:
+        html = client.get(
+            f"/warband/{wb['id']}", headers={"Host": "127.0.0.1:5000"}
+        ).get_data(as_text=True)
+        start = html.index('data-prefix="wizard"')
+        return html[start : html.index('name="wizard_slot_1"')]
+
+    offered = re.compile(r'<option\s[^>]*value="Mind Lock Ring"', re.S)
+    equipped = re.compile(r'<input\s[^>]*value="Mind Lock Ring"', re.S)
+
+    assert offered.search(slot_zero()), "an ordinary wizard is offered the ring"
+
+    wb["wizard"]["state"] = {"kind": expansions.STATE_LICH, "tier": 1}
+    wb["wizard"]["item_slots"] = ["Mind Lock Ring"]
+    warband_store.save_warband(wb)
+    block = slot_zero()
+    assert not offered.search(block), "a Lich must not be offered it"
+    assert equipped.search(block), "one already worn must survive the render"
