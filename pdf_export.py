@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import re
 from io import BytesIO
 from pathlib import Path
 
@@ -36,7 +37,7 @@ from frostgrave_data import (
     get_soldier,
     unused_xp,
 )
-from game_content import item_slot_cost
+from game_content import item_effect_text, item_slot_cost
 from warband_store import (
     apprentice_effective_stats,
     base_summary,
@@ -1018,10 +1019,59 @@ def build_warband_pdf(wb: dict) -> bytes:
             if it.get("notes"):
                 line += f" - {it.get('notes')}"
             pdf.multi_cell(0, 5, _t(line), new_x="LMARGIN", new_y="NEXT")
+            # What the thing actually does, under its own line — the roster is
+            # what gets carried to the table, and looking an item up in three
+            # different books mid-game is the thing this saves.
+            rules = _vault_item_rules(name)
+            if rules:
+                pdf.set_font("Helvetica", "I", 8)
+                pdf.set_x(pdf.l_margin + 4)
+                pdf.multi_cell(0, 4, _t(rules), new_x="LMARGIN", new_y="NEXT")
+                pdf.set_font("Helvetica", "", 9)
 
     out = BytesIO()
     pdf.output(out)
     return out.getvalue()
+
+
+def _vault_item_rules(name: str) -> str:
+    """The item's rules text for the Vault list, or "" if nothing matches.
+
+    Vault names are free text and carry things the catalog's name does not: the
+    book they came from ("Fate Stone (Fireheart)"), the spell inside a grimoire
+    or scroll ("Grimoire: Bone Dart"), or an unidentified marker. Each is peeled
+    off in turn so the entry still finds its write-up; a hand-typed name that
+    matches nothing simply prints without one."""
+    bare = re.sub(r"\s*\([^)]*\)\s*$", "", _strip_source_suffix(name)).strip()
+    for candidate in (
+        name,
+        _strip_source_suffix(name),
+        bare,
+        name.split(":", 1)[0].strip(),
+        bare.split(":", 1)[0].strip(),
+    ):
+        if candidate:
+            text = item_effect_text(candidate)
+            if text:
+                return _shorten_rules(text)
+    return ""
+
+
+# A roster line is a reminder, not the rulebook: the Core Rules' grimoire entry
+# alone runs a full paragraph. Cut to whole sentences within this budget so the
+# text never breaks mid-clause; the book stays the authority for the rest.
+RULES_TEXT_BUDGET = 240
+
+
+def _shorten_rules(text: str) -> str:
+    if len(text) <= RULES_TEXT_BUDGET:
+        return text
+    kept = ""
+    for sentence in re.split(r"(?<=[.!?]) ", text):
+        if kept and len(kept) + len(sentence) + 1 > RULES_TEXT_BUDGET:
+            break
+        kept = f"{kept} {sentence}".strip()
+    return (kept or text[:RULES_TEXT_BUDGET].rsplit(" ", 1)[0]) + " [...]"
 
 
 def _section(pdf: FPDF, title: str) -> None:
