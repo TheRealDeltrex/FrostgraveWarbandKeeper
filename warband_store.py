@@ -767,22 +767,30 @@ def unmounted_effective_stats(wb: dict) -> dict | None:
     rider = ((wb.get("horse") or {}).get("rider")) or None
     if not rider:
         return None
-    backup = rider.get("backup") or {}
     kind = rider.get("kind")
     if kind == "wizard":
+        figure = wb.get("wizard") or {}
         bonus = expansions.wizard_state_stat_bonus(wb)
     elif kind == "apprentice":
+        figure = wb.get("apprentice") or {}
         # apprentice_effective_stats() adds nothing but the floor.
         bonus = {}
     elif kind == "captain":
-        bonus = equipment_bonuses((wb.get("captain") or {}).get("item_slots") or [])
+        figure = wb.get("captain") or {}
+        bonus = equipment_bonuses(figure.get("item_slots") or [])
     else:
-        soldier = next(
+        figure = next(
             (s for s in wb.get("soldiers") or [] if s.get("id") == rider.get("soldier_id")), {}
         )
-        bonus = equipment_bonuses(soldier.get("item_slots") or [])
+        bonus = equipment_bonuses(figure.get("item_slots") or [])
+    # Today's stats minus the mount, not the snapshot taken when the figure
+    # climbed on: that snapshot goes stale the moment anything else changes a
+    # stat mid-ride, and would show the on-foot Move a mutation has since
+    # raised as the old value.
+    stats = figure.get("stats") or {}
+    delta = _rider_mount_delta(wb, rider)
     return {
-        stat: int(backup.get(stat, 0)) + int(bonus.get(stat, 0))
+        stat: _as_int(stats.get(stat), 0) - _as_int(delta.get(stat), 0) + int(bonus.get(stat, 0))
         for stat in ("move", "fight", "armour")
     }
 
@@ -1671,6 +1679,16 @@ def _normalize_warband(wb: dict) -> dict:
     horse.setdefault("owned", False)
     if not isinstance(horse.get("rider"), dict):
         horse["rider"] = None
+    else:
+        # backup and delta are both read as {stat: int} and drive stat
+        # arithmetic on dismount, so a junk value would corrupt the rider.
+        for field in ("backup", "delta"):
+            raw = horse["rider"].get(field)
+            horse["rider"][field] = (
+                {k: _as_int(v, 0) for k, v in raw.items() if isinstance(k, str)}
+                if isinstance(raw, dict)
+                else {}
+            )
     horse["upgrades"] = [u for u in _as_list(horse.get("upgrades")) if isinstance(u, str)]
     wb["supply_points"] = _as_int(wb.get("supply_points"), 0)
     transport = wb.setdefault("cargo_transport", {"owned": False, "upgrades": []})
@@ -6297,14 +6315,30 @@ def buy_horse(wb: dict) -> tuple[bool, str]:
     return True, text
 
 
+def _rider_mount_delta(wb: dict, rider: dict) -> dict:
+    """What the mount added to this rider's stats. Recorded at mount time so an
+    Advanced Horsemanship upgrade bought mid-ride can't change what dismounting
+    takes back off; the current delta is the fallback for a rider mounted
+    before that was stored."""
+    delta = rider.get("delta")
+    if isinstance(delta, dict) and delta:
+        return {stat: _as_int(amount, 0) for stat, amount in delta.items()}
+    return expansions.horse_mount_delta(wb)
+
+
 def _dismount_rider(wb: dict, horse: dict) -> None:
     rider = horse.get("rider")
     if not rider:
         return
-    entity, _get_stat, set_stat, _label = _mutation_target(wb, rider["kind"], rider.get("soldier_id"))
+    entity, get_stat, set_stat, _label = _mutation_target(wb, rider["kind"], rider.get("soldier_id"))
     if entity is not None and set_stat is not None:
-        for stat, value in (rider.get("backup") or {}).items():
-            set_stat(stat, value)
+        # Subtract what the mount added rather than restoring the stats it
+        # snapshotted: a mutation, level-up or equipment change made while
+        # mounted belongs to the figure, and the old restore silently threw it
+        # away — a captain who took Long Legs in the saddle lost the +1 Move
+        # the moment he stepped down.
+        for stat, amount in _rider_mount_delta(wb, rider).items():
+            set_stat(stat, get_stat(stat) - amount)
     horse["rider"] = None
 
 
@@ -6372,7 +6406,16 @@ def mount_horse(wb: dict, kind: str, soldier_id: str | None = None) -> tuple[boo
     backup = {stat: get_stat(stat) for stat in mount_delta}
     for stat, delta in mount_delta.items():
         set_stat(stat, backup[stat] + delta)
-    horse["rider"] = {"kind": kind, "soldier_id": soldier_id, "backup": backup}
+    # `delta` is what dismounting takes back off. `backup` is kept for the
+    # warbands saved before this field existed, and read only as a fallback:
+    # restoring it wholesale is what used to discard a mutation or a level-up
+    # gained while mounted.
+    horse["rider"] = {
+        "kind": kind,
+        "soldier_id": soldier_id,
+        "backup": backup,
+        "delta": dict(mount_delta),
+    }
     text = f"{label} mounted the warband's horse."
     add_history(wb, text)
     return True, text
