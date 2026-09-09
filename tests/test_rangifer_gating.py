@@ -8,7 +8,6 @@ import warband_store
 
 def _enable(wb: dict) -> None:
     wb["homerules"]["enabled_sources"]["Spellcaster Magazine"] = True
-    wb["homerules"]["spellcaster_magazine_soldiers"] = True
 
 
 def test_rangifer_blocked_without_the_book(fresh_warband):

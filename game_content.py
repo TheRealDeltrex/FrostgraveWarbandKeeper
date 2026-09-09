@@ -193,11 +193,37 @@ def common_item_index() -> dict[str, dict]:
     """load_common_items() keyed by name, for pricing a vault entry.
 
     A plain name key is safe *only* because every entry here is Core Rules,
-    where names are unique. Supplement prices (todo.md) must be keyed by
-    (source, name): two books print "Book of the Construct" and two print
-    "Construct Hammer", so a name-keyed price table would silently give one of
-    each pair the other's price."""
+    where names are unique. Supplement prices are keyed by (source, name)
+    instead — see supplement_item_index()."""
     return {it["name"]: it for it in load_common_items()}
+
+
+@lru_cache(maxsize=1)
+def load_supplement_item_prices() -> list[dict]:
+    """The supplements' treasure-table prices, the counterpart to
+    load_common_items() for everything outside the Core Rules.
+
+    Fields: source, name, purchase, sale, table, sale_estimated. `purchase` is
+    None for The Red King's artefacts, which "may never be bought"; `sale` is
+    always a number, but where `sale_estimated` is true the book printed no
+    sale column and the figure is the app's own, so the Shop labels it.
+
+    Built by scripts/extract_supplement_prices.py, which regenerates the file
+    wholesale — hand edits are lost, put corrections in the script."""
+    path = DATA / "supplement_item_prices.json"
+    if not path.is_file():
+        return []
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+@lru_cache(maxsize=1)
+def supplement_item_index() -> dict[tuple[str, str], dict]:
+    """load_supplement_item_prices() keyed by (source, name).
+
+    Never by name alone, unlike common_item_index(): two books print "Book of
+    the Construct" at 250gc and 300gc, and a name key would silently give one
+    of them the other's price."""
+    return {(it["source"], it["name"]): it for it in load_supplement_item_prices()}
 
 
 def magic_items_for_sources(sources) -> list[dict]:
@@ -209,6 +235,16 @@ def magic_items_for_sources(sources) -> list[dict]:
 # rather than enumerating every companion_* key by hand (which would silently
 # miss a newly added companion type).
 ANY_ANIMAL_COMPANION = "__animal_companion__"
+
+# Some items are restricted by an exclusion rather than a whitelist — the Mind
+# Lock Ring "cannot be worn by undead or demons" (The Maze of Malcor p.95) — and
+# what a figure *is* isn't always its type_key: a revenant is an ordinary
+# soldier carrying a flag, and an undead wizard is a wizard in a state. So a
+# role passed to item_eligible_for_role() may carry trait tags after a colon
+# ("wizard:undead", "infantryman:undead"); expansions.figure_item_role() builds
+# them. A bare role has no traits and behaves exactly as it always did.
+UNDEAD_TRAIT = "undead"
+DEMON_TRAIT = "demon"
 
 # Hand-curated restriction/bonus data for named magic items (data/magic_items.json
 # itself is regenerated wholesale from the reference PDFs by
@@ -269,6 +305,10 @@ MAGIC_ITEM_RESTRICTIONS: dict[str, dict] = {
     "Thunderstrike Javelin": {
         "restricted_to": ["javelineer"],
         "note": "Once/game +3 Shoot or +3 Fight javelin attack.",
+    },
+    "Mind Lock Ring": {
+        "excluded_traits": [UNDEAD_TRAIT, DEMON_TRAIT],
+        "note": "Immune to Mind Control spells. Cannot be worn by undead or demons.",
     },
     "Mind Lock Collar": {
         "restricted_to": [ANY_ANIMAL_COMPANION],
@@ -367,6 +407,36 @@ def _magic_items_by_lower_name() -> dict[str, dict]:
     return {(it.get("name") or "").strip().lower(): it for it in load_magic_items()}
 
 
+@lru_cache(maxsize=1)
+def _artefact_names_lower() -> frozenset[str]:
+    """The Red King's artefacts, by lowercased name.
+
+    Artefacts are flagged in the JSON only by their effect text opening with
+    "Artefact" (the extractor writes the whole entry as one `effect` string), so
+    that prefix is the marker. Scoped to The Red King, the one book that prints
+    them, so a supplement adding an item whose effect happens to start that way
+    can't silently join the set.
+    """
+    return frozenset(
+        (it.get("name") or "").strip().lower()
+        for it in load_magic_items()
+        if it.get("source") == "The Red King"
+        and (it.get("effect") or "").startswith("Artefact")
+    )
+
+
+def is_artefact(name: str) -> bool:
+    """Whether a vault entry is a Red King artefact, which unlocks rather than
+    simply working (The Red King pp.76-77). The loot picker tags composed names
+    with their book ("Wraith Bow (The Red King)"), so the bare name is compared
+    too."""
+    name = (name or "").strip().lower()
+    if not name:
+        return False
+    known = _artefact_names_lower()
+    return name in known or name.split(" (")[0].strip() in known
+
+
 def item_restriction(name: str) -> dict | None:
     """This item's data for anything a caller might need at equip time: its
     hand-curated restriction/bonus entry (MAGIC_ITEM_RESTRICTIONS), if any, merged
@@ -388,10 +458,18 @@ def item_restriction(name: str) -> dict | None:
     return out
 
 
+def split_role(role: str) -> tuple[str, set[str]]:
+    """A role token into its bare role and its trait tags ("wizard:undead")."""
+    base, _, tags = (role or "").partition(":")
+    return base, {t for t in tags.split(":") if t}
+
+
 def item_role_matches(role: str, restricted_to: list[str]) -> bool:
-    """Whether `role` (a soldier type_key, or 'wizard'/'apprentice'/'captain')
-    satisfies a restriction's restricted_to list, expanding the
-    ANY_ANIMAL_COMPANION sentinel against the live set of companion type_keys."""
+    """Whether `role` (a soldier type_key, or 'wizard'/'apprentice'/'captain',
+    optionally trait-tagged) satisfies a restriction's restricted_to list,
+    expanding the ANY_ANIMAL_COMPANION sentinel against the live set of
+    companion type_keys."""
+    role, _ = split_role(role)
     if role in restricted_to:
         return True
     return ANY_ANIMAL_COMPANION in restricted_to and role in animal_companion_type_keys()
@@ -402,7 +480,11 @@ def item_eligible_for_role(name: str, role: str) -> bool:
     `role` satisfies its restricted_to list. Used to prune the Vault picker's
     options to what a given figure can actually use — see _item_slots.html."""
     r = item_restriction(name)
-    if not r or "restricted_to" not in r:
+    if not r:
+        return True
+    if set(r.get("excluded_traits") or ()) & split_role(role)[1]:
+        return False
+    if "restricted_to" not in r:
         return True
     return item_role_matches(role, r["restricted_to"])
 

@@ -213,14 +213,15 @@
             Needs Spellcaster Magazine switched on in Source books. All on by default.
           </p>
           <div class="hr-row">
-            <input id="hr_spellcaster_magazine_soldiers" name="spellcaster_magazine_soldiers" type="checkbox" {% if hr.spellcaster_magazine_soldiers %}checked{% endif %} />
-            <details class="hr-note" id="hrnote-spellcaster_magazine_soldiers">
-              <summary>Allow its soldiers (non-Legendary)</summary>
+            <input id="hr_spellcaster_magazine_legendary_soldiers" name="spellcaster_magazine_legendary_soldiers" type="checkbox" {% if hr.spellcaster_magazine_legendary_soldiers %}checked{% endif %} />
+            <details class="hr-note" id="hrnote-spellcaster_magazine_legendary_soldiers">
+              <summary>Allow Legendary Soldiers</summary>
               <p class="hr-note-body">
-                Some groups find the magazine's troop stat lines unbalanced — untick to drop just
-                its hireable soldiers while its spells, treasure and bestiary entries stay available
-                either way. Covers every Spellcaster Magazine soldier except Legendary Soldiers
-                (its own toggle below).
+                Legendary Soldiers (Issue 4) are a separate, more expensive troop category limited by
+                wizard level rather than freely hired (1 base, +1 per 10 full wizard levels, max 8) —
+                see the Legendary Soldiers limit bar in the roster once enabled. Fielding one caps
+                ordinary Specialists at 3. Also makes the Captain a Legendary Soldier, subject to the
+                same limit instead of the Specialist cap.
               </p>
             </details>
           </div>
@@ -232,19 +233,6 @@
                 The Dire Hound is both a beast and a Legendary Soldier, and no book settles which
                 side wins. On, it fills the Kennel's extra slot and is exempt from the Beastcrafter
                 surcharge, like a war hound. Off, it is an ordinary Legendary Soldier on both counts.
-              </p>
-            </details>
-          </div>
-          <div class="hr-row">
-            <input id="hr_spellcaster_magazine_legendary_soldiers" name="spellcaster_magazine_legendary_soldiers" type="checkbox" {% if hr.spellcaster_magazine_legendary_soldiers %}checked{% endif %} />
-            <details class="hr-note" id="hrnote-spellcaster_magazine_legendary_soldiers">
-              <summary>Allow Legendary Soldiers</summary>
-              <p class="hr-note-body">
-                Legendary Soldiers (Issue 4) are a separate, more expensive troop category limited by
-                wizard level rather than freely hired (1 base, +1 per 10 full wizard levels, max 8) —
-                see the Legendary Soldiers limit bar in the roster once enabled. Fielding one caps
-                ordinary Specialists at 3. Also makes the Captain a Legendary Soldier, subject to the
-                same limit instead of the Specialist cap.
               </p>
             </details>
           </div>
@@ -873,6 +861,34 @@
   <form id="wizard-status-form" method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" hidden></form>
   {% if ap %}<form id="apprentice-status-form" method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" hidden></form>{% endif %}
   {% if ap %}<form id="dismiss-apprentice-form" method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" hidden></form>{% endif %}
+  {# Homunculus badge -> dialog. Three outcomes that a confirm() could not tell
+     apart, and one form for all of them, out here rather than inside the
+     wizard card's form. #}
+  {% if has_homunculus %}
+    <form id="homunculus-form" method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" hidden>
+      <input type="hidden" name="action" id="homunculus-action" />
+      <input type="hidden" name="branch" id="homunculus-branch" />
+    </form>
+    <dialog id="homunculus-dialog" class="fg-dialog">
+      <p>What happened to {{ wiz.name or 'the wizard' }}?</p>
+      <p class="muted" style="font-size:0.85rem">
+        Destroying it between games simply lifts the −{{ homunculus_health_penalty }} Health.
+        The other two are for a wizard whose soul passes into the homunculus: the survival
+        check killing him ({{ HOMUNCULUS_DEATH_PENALTY.levels }} levels and a permanent
+        −{{ HOMUNCULUS_DEATH_PENALTY.health }} Health), or, if he took a permanent injury
+        during the game, choosing to die after it to return to a state predating that injury
+        (−{{ HOMUNCULUS_SUICIDE_PENALTY.levels }} levels, −{{ HOMUNCULUS_SUICIDE_PENALTY.health }} Health,
+        −{{ HOMUNCULUS_SUICIDE_PENALTY.will }} Will). Either way the homunculus is used up.
+        The app does not track per-game XP, so the "no experience from that game" part is yours to apply.
+      </p>
+      <div class="fg-dialog-actions">
+        <button class="btn secondary small" type="button" id="homunculus-destroy">Destroy it</button>
+        <button class="btn danger small" type="button" id="homunculus-died">Killed — soul transfers</button>
+        <button class="btn danger small" type="button" id="homunculus-suicide">Suicide after an injury</button>
+        <button class="btn secondary small" type="button" id="homunculus-cancel">Cancel</button>
+      </div>
+    </dialog>
+  {% endif %}
   <details class="card" id="wizard-apprentice-card" open>
     <summary><span class="card-title">Wizard &amp; apprentice</span></summary>
     <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" enctype="multipart/form-data" data-autosave>
@@ -916,6 +932,13 @@
               {% endfor %}
               {% if wiz_mounted %}<span class="badge" title="Riding the warband's horse: Move +{{ hmd.move }}, Fight +{{ hmd.fight }}, Armour {{ hmd.armour }}">mounted</span>{% endif %}
               {{ mutated_badge(wiz.mutations) }}
+              {% if has_homunculus %}
+                {# type="button" — this card is already inside the big autosave
+                   form, so the badge drives the top-level #homunculus-form via
+                   the dialog rather than opening a nested one. #}
+                <button type="button" class="badge" id="homunculus-badge"
+                        title="Homunculus (Thaw of the Lich Lord p.39): the wizard begins each game at −{{ homunculus_health_penalty }} Health. Click to use or destroy it.">homunculus</button>
+              {% endif %}
             </div>
           </div>
           <div class="char-body">
@@ -941,7 +964,10 @@
               <div class="stat-pill"><span class="label">Shoot</span><span class="value">{{ format_stat(wizard_display_stats.shoot) }}</span></div>
               <div class="stat-pill"><span class="label">Armour</span><span class="value">{{ wizard_display_stats.armour }}{% if wizard_state_bonus.armour %}*{% endif %}{% if wiz_mounted %} <span class="muted">({{ horse_rider.backup.armour }})</span>{% endif %}</span></div>
               <div class="stat-pill"><span class="label">Will</span><span class="value">{{ format_stat(wizard_display_stats.will) }}</span></div>
-              <div class="stat-pill"><span class="label">Health</span><span class="value">{{ wizard_display_stats.health }}</span></div>
+              {# The book's split stat: actual on the left, effective on the
+                 right while a homunculus exists. Only the actual value is
+                 stored — see expansions.homunculus_health_penalty(). #}
+              <div class="stat-pill"><span class="label">Health</span><span class="value">{{ wizard_display_stats.health }}{% if homunculus_health_penalty %} <span class="muted" title="Split stat: he begins each game at {{ wizard_display_stats.health - homunculus_health_penalty }} Health and may not heal beyond it while the homunculus exists.">/ {{ wizard_display_stats.health - homunculus_health_penalty }}</span>{% endif %}</span></div>
             </div>
             {# Not a nested <form> — this card is already inside the big
                data-autosave "details" form, and HTML forbids nesting forms:
@@ -988,7 +1014,7 @@
                 {% set slots = wiz.item_slots if wiz.item_slots is defined else [] %}
                 {% set prefix = 'wizard' %}
                 {% set n = wizard_item_slots %}
-                {% set vault_names = vault_names|select('item_eligible_for_role', 'wizard')|list %}
+                {% set vault_names = vault_names|select('item_eligible_for_role', wizard_item_role)|list %}
                 {% include '_item_slots.html' %}
               {% endwith %}
               <div class="form-row">
@@ -1066,7 +1092,7 @@
                   {% set slots = ap.item_slots if ap.item_slots is defined else [] %}
                   {% set prefix = 'apprentice' %}
                   {% set n = apprentice_item_slots %}
-                  {% set vault_names = vault_names|select('item_eligible_for_role', 'apprentice')|list %}
+                  {% set vault_names = vault_names|select('item_eligible_for_role', apprentice_item_role)|list %}
                   {% include '_item_slots.html' %}
                 {% endwith %}
                 <div class="form-row">
@@ -1428,7 +1454,7 @@
       {% endif %}
 
       {% if pending_levels %}
-        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:1rem">
+        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:1rem" onsubmit="return confirmLevelUp();">
           <input type="hidden" name="action" value="level_up" />
           <div class="form-row">
             <label>Choose improvement ({{ pending_levels }} available)</label>
@@ -1451,8 +1477,8 @@
             <label for="learn_spell">New spell</label>
             <select id="learn_spell" name="learn_spell">
               {% for sp in learnable %}
-                <option value="{{ sp.id }}" title="{{ sp.description }}">
-                  {{ sp.name }} ({{ sp.school }}, your CN {{ sp.effective_cn }}){% if sp.source != 'Core Rules' %} · {{ sp.source }}{% endif %}
+                <option value="{{ sp.id }}" title="{{ sp.description }}"{% if not sp.has_grimoire %} data-no-grimoire="1"{% endif %}>
+                  {{ sp.name }} ({{ sp.school }}, your CN {{ sp.effective_cn }}){% if sp.source != 'Core Rules' %} · {{ sp.source }}{% endif %}{% if not sp.has_grimoire %} · no grimoire{% endif %}
                 </option>
               {% endfor %}
             </select>
@@ -1477,6 +1503,16 @@
           }
           choice.addEventListener('change', syncLevelUI);
           syncLevelUI();
+          function confirmLevelUp() {
+            if (choice.value !== 'learn_spell') return true;
+            const sel = document.getElementById('learn_spell');
+            const opt = sel.options[sel.selectedIndex];
+            if (!opt || !opt.getAttribute('data-no-grimoire')) return true;
+            return confirm(
+              'You have no grimoire for this spell in your vault, and the core rules only let a '
+              + 'wizard learn a spell they hold a grimoire for. Learn it anyway?'
+            );
+          }
         </script>
       {% else %}
         <p class="empty">No pending level-ups. Add XP from post-game rewards first.</p>
@@ -1802,7 +1838,7 @@
                   {% set n = cap_slots_n %}
                   {% set standard_items = soldier_capable_items %}
                   {% set vault_names = vault_names|reject('equalto', SPELL_COMPONENT_BAG_NAME)|list %}
-                  {% set vault_names = vault_names|select('item_eligible_for_role', 'captain')|list %}
+                  {% set vault_names = vault_names|select('item_eligible_for_role', captain_item_role)|list %}
                   {% include '_item_slots.html' %}
                 {% endwith %}
                 <div class="form-row">
@@ -2270,7 +2306,14 @@
                     {% if s.giant_blooded %}<span class="badge" title="Blood Legacy's Giant-Blooded: -1 Move, -2 Will, +2 Health, Giant-Blooded trait">giant-blooded</span>{% endif %}
                     {% if s.thrall %}<span class="badge" title="Blood Legacy's Thralldom: hired free at -1 Will">thrall</span>{% endif %}
                     {% if s.at_inn %}<span class="badge" title="Staying at the Inn: on the roster, but misses the next game">at the inn</span>{% endif %}
-                    {% if s.underworld_muscle %}<span class="badge" title="Underworld hired muscle: doesn't count against the warband size; one more Marker if they die">hired muscle</span>{% endif %}
+                    {% if s.underworld_muscle %}
+                      {# type="button" outside any form, driving the shared
+                         #muscle-form via the dialog — the row already wraps a
+                         large form, so a second one here would nest. #}
+                      <button type="button" class="badge hired"
+                              data-muscle-id="{{ s.id }}" data-muscle-name="{{ s.name }}"
+                              title="Underworld hired muscle — click to settle up after the game">hired</button>
+                    {% endif %}
                     {% if s.knightly_order_info %}<span class="badge" title="{{ s.knightly_order_info.ability }}">{{ s.knightly_order_info.name }}</span>{% endif %}
                     {% set s_mounted = horse_rider and horse_rider.kind == 'soldier' and horse_rider.soldier_id == s.id %}
                     {% if s_mounted %}<span class="badge" title="Riding the warband's horse: Move +{{ hmd.move }}, Fight +{{ hmd.fight }}, Armour {{ hmd.armour }}">mounted</span>{% endif %}
@@ -2285,7 +2328,7 @@
                 <td>{{ s.health }}</td>
                 <td class="gold">{{ s.cost }}</td>
                 <td class="actions-cell">
-                  {% if s.description %}
+                  {% if s.description or s.underworld_muscle %}
                     <details class="actions-cell-persistent info-toggle-details">
                       <summary class="info-toggle">Info</summary>
                     </details>
@@ -2313,7 +2356,7 @@
                             {% set hide_normal_gear = not hr.soldier_normal_gear_enabled %}
                             {% set vault_names = vault_names|reject('equalto', SPELL_COMPONENT_BAG_NAME)|list %}
                             {% set vault_names = vault_names|reject('firearm_item')|list if hide_normal_gear else vault_names %}
-                            {% set vault_names = vault_names|select('item_eligible_for_role', s.type_key)|list %}
+                            {% set vault_names = vault_names|select('item_eligible_for_role', s.item_role)|list %}
                             {% set vault_names = vault_names|select('item_restricted_for', s.type_key)|list if is_conditional_creature else vault_names %}
                             {% set restricted_from = 0 if is_conditional_creature else (ELEMENTAL_ARCHER_BASE_ITEM_SLOTS if s.type_key == ELEMENTAL_ARCHER_TYPE_KEY else none) %}
                             {% set restricted_vault_test = 'magic_arrow_item' if s.type_key == ELEMENTAL_ARCHER_TYPE_KEY else none %}
@@ -2439,8 +2482,17 @@
                   </div>
                 </td>
               </tr>
-              {% if s.description %}
-                <tr class="info-desc-row"><td colspan="14">{{ s.description }}</td></tr>
+              {% if s.description or s.underworld_muscle %}
+                <tr class="info-desc-row">
+                  <td colspan="14">
+                    {{ s.description }}
+                    {% if s.underworld_muscle %}
+                      Underworld hired muscle: doesn't count against the warband size. After the
+                      game, click the <strong>hired</strong> badge to send them back to the guild
+                      or record that they died — a death costs one more Underworld Marker.
+                    {% endif %}
+                  </td>
+                </tr>
               {% endif %}
               {% set companion = SOLDIER_COMPANION_BY_TYPE_KEY.get(s.type_key) %}
               {% if companion %}
@@ -2480,6 +2532,27 @@
           {% endfor %}
         </table>
       </div>
+      {% if soldiers | selectattr('underworld_muscle') | list %}
+        {# One form and one dialog for every hired-muscle row; the badges are
+           plain buttons that fill these in. Outside the table so neither ends
+           up inside a soldier row's own form. #}
+        <form id="muscle-form" method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" hidden>
+          <input type="hidden" name="action" value="resolve_underworld_muscle" />
+          <input type="hidden" name="soldier_id" id="muscle-soldier-id" />
+          <input type="hidden" name="outcome" id="muscle-outcome" />
+        </form>
+        <dialog id="muscle-dialog" class="fg-dialog">
+          <p id="muscle-text"></p>
+          <p class="muted" style="font-size:0.85rem">
+            Either way they go back to the guild. A death costs one more Underworld Marker.
+          </p>
+          <div class="fg-dialog-actions">
+            <button class="btn secondary small" type="button" id="muscle-home">Send home</button>
+            <button class="btn danger small" type="button" id="muscle-died">Died in action</button>
+            <button class="btn secondary small" type="button" id="muscle-cancel">Cancel</button>
+          </div>
+        </dialog>
+      {% endif %}
       <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" id="soldier-reorder-form" style="margin-top:0.75rem">
         <input type="hidden" name="action" value="reorder_soldiers" />
         <input type="hidden" name="soldier_order" id="view-soldier-order" value="{% for s in soldiers %}{{ s.id }}{% if not loop.last %}|{% endif %}{% endfor %}" />
@@ -3031,8 +3104,17 @@
         <ul class="list-plain" style="columns:2;column-gap:1.5rem">
           {% for it in wb["vault_items"] %}
             <li style="break-inside:avoid">
-              <strong>{{ it.name }}</strong>
+              <strong>{{ it.name }}{% if it.activated %} (activated){% endif %}</strong>
               {% if it.notes %}<span class="muted"> — {{ it.notes }}</span>{% endif %}
+              {% if it.name is artefact %}
+                <form class="inline-form" method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
+                  <input type="hidden" name="action" value="toggle_vault_activated" />
+                  <input type="hidden" name="item_id" value="{{ it.id }}" />
+                  <input type="hidden" name="activated" value="{{ 'off' if it.activated else 'on' }}" />
+                  <button class="btn secondary small" type="submit"
+                          title="Red King artefacts do nothing until a post-game Will Roll unlocks them. Roll at the table, then record it here.">{{ 'Deactivate' if it.activated else 'Activate' }}</button>
+                </form>
+              {% endif %}
               <form class="inline-form" method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" onsubmit="return confirm('Remove “{{ it.name }}” from the vault?');">
                 <input type="hidden" name="action" value="remove_vault_item" />
                 <input type="hidden" name="item_id" value="{{ it.id }}" />
@@ -3382,6 +3464,31 @@
         </form>
       </details>
     {% endfor %}
+    {% if homunculus_book_on and homunculus_info.casters and not has_homunculus %}
+      {# Wizard only, so the caster list is not offered — out_of_game_cast_info
+         would include the apprentice if she somehow knew it. #}
+      <details class="ref-panel" id="oog-homunculus" style="margin-top:1rem">
+        <summary>Workshop — Homunculus (Out of Game)</summary>
+        <p class="muted" style="font-size:0.85rem">
+          A wizard only. {{ HOMUNCULUS_MATERIALS_COST }}gc of materials is spent whether the
+          casting roll succeeds or not. On a success the wizard begins each game at
+          −{{ HOMUNCULUS_HEALTH_PENALTY }} Health
+          until the homunculus is destroyed or used.
+          {% if homunculus_info.bonus %}
+            Your base adds <strong>+{{ homunculus_info.bonus }}</strong> to the Casting Roll
+            ({{ homunculus_info.bonus_from | join(', ') }}).
+          {% endif %}
+        </p>
+        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
+          <input type="hidden" name="action" value="cast_homunculus" />
+          {% for c in homunculus_info.casters if c.kind == 'wizard' %}
+            <span class="muted">{{ c.name }} (CN {{ c.cn }})</span>
+          {% endfor %}
+          <input name="die" type="text" inputmode="numeric" pattern="[0-9]+" size="4" placeholder="d20" title="The die you rolled — leave blank to let the app roll" />
+          <button class="btn secondary small" type="submit">Cast ({{ HOMUNCULUS_MATERIALS_COST }}gc)</button>
+        </form>
+      </details>
+    {% endif %}
     {% if alchemical_workshop_ready %}
       <details class="ref-panel" id="alchemical-workshop-panel" style="margin-top:1rem">
         <summary>Workshop — Alchemical Workshop</summary>
@@ -3510,7 +3617,8 @@
     {% if not hr.black_market_enabled %}
       <p class="muted" style="font-size:0.85rem">
         Grimoire 500gc / sells for 200gc · scroll 250gc / 30gc · potions, magic weapons, armour
-        and items at their listed prices.
+        and items at their listed prices. A sale price marked * is the app's own — that book
+        prints a purchase price only, so it suggests a third of it.
       </p>
       {# One shelf per category; Potions and Magic Items split further into
          collapsible sub-shelves (tier / source book) via group.subgroups. #}
@@ -3523,12 +3631,14 @@
                 <tr>
                   <td>{{ row.name }}</td>
                   <td class="gold">{% if row.purchase %}{{ row.purchase }} gc{% else %}<span class="muted">never sold</span>{% endif %}</td>
-                  <td class="muted">{% if row.sale %}{{ row.sale }} gc{% else %}—{% endif %}</td>
+                  <td class="muted">{% if row.sale %}{{ row.sale }} gc{% if row.sale_estimated %}<span title="This book prints no sale price. A third of the purchase price, rounded down to 5 gc.">*</span>{% endif %}{% else %}—{% endif %}</td>
                   <td>
                     {% if row.purchase %}
                       <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
                         <input type="hidden" name="action" value="shop_buy" />
-                        <input type="hidden" name="item_name" value="{{ row.name }}" />
+                        {# The book *and* the name: two supplements print "Book
+                           of the Construct" at different prices. #}
+                        <input type="hidden" name="item_name" value="{{ row.key }}" />
                         {% if row.choices %}
                           <select name="choice" required>
                             <option value="">Pick one…</option>
@@ -3577,7 +3687,7 @@
           {% for it in wb.vault_items %}
             {% with suggested = shop_sale_price(it) %}
               <li style="break-inside:avoid">
-                <strong>{{ it.name }}</strong>
+                <strong>{{ it.name }}{% if it.activated %} (activated){% endif %}</strong>
                 {% if suggested is not none %}<span class="muted gold">{{ suggested }} gc</span>{% endif %}
                 <button class="btn secondary small" type="button"
                         data-sell-id="{{ it.id }}"
@@ -3913,6 +4023,81 @@
   </script>
 
 
+
+  <script>
+    (function () {
+      // Hired-muscle badge -> settle-up dialog. Three outcomes rather than a
+      // confirm(), because "went home" and "died" are different debts and a
+      // yes/no box can't say which one you're agreeing to.
+      var dlg = document.getElementById('muscle-dialog');
+      if (!dlg) return;
+      var form = document.getElementById('muscle-form');
+      var idField = document.getElementById('muscle-soldier-id');
+      var outcomeField = document.getElementById('muscle-outcome');
+      var text = document.getElementById('muscle-text');
+      var pending = null;
+
+      function close() {
+        pending = null;
+        if (dlg.close) { dlg.close(); } else { dlg.removeAttribute('open'); }
+      }
+
+      function submit(outcome) {
+        if (!pending) return;
+        idField.value = pending.getAttribute('data-muscle-id');
+        outcomeField.value = outcome;
+        form.submit();
+      }
+
+      document.querySelectorAll('[data-muscle-id]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          pending = btn;
+          text.textContent = 'What happened to ' + btn.getAttribute('data-muscle-name') + '?';
+          if (dlg.showModal) { dlg.showModal(); } else { dlg.setAttribute('open', ''); }
+        });
+      });
+      document.getElementById('muscle-home').addEventListener('click', function () { submit('home'); });
+      document.getElementById('muscle-died').addEventListener('click', function () { submit('died'); });
+      document.getElementById('muscle-cancel').addEventListener('click', close);
+      dlg.addEventListener('cancel', function () { pending = null; });
+    })();
+  </script>
+  <script>
+    (function () {
+      // Homunculus badge -> dialog. Same shape as the hired-muscle one: three
+      // different outcomes, so a yes/no confirm() cannot say which is being
+      // agreed to.
+      var dlg = document.getElementById('homunculus-dialog');
+      if (!dlg) return;
+      var form = document.getElementById('homunculus-form');
+      var actionField = document.getElementById('homunculus-action');
+      var branchField = document.getElementById('homunculus-branch');
+
+      function close() {
+        if (dlg.close) { dlg.close(); } else { dlg.removeAttribute('open'); }
+      }
+
+      function submit(action, branch) {
+        actionField.value = action;
+        branchField.value = branch || '';
+        form.submit();
+      }
+
+      document.getElementById('homunculus-badge').addEventListener('click', function () {
+        if (dlg.showModal) { dlg.showModal(); } else { dlg.setAttribute('open', ''); }
+      });
+      document.getElementById('homunculus-destroy').addEventListener('click', function () {
+        submit('destroy_homunculus');
+      });
+      document.getElementById('homunculus-died').addEventListener('click', function () {
+        submit('homunculus_claim_soul', 'death');
+      });
+      document.getElementById('homunculus-suicide').addEventListener('click', function () {
+        submit('homunculus_claim_soul', 'suicide');
+      });
+      document.getElementById('homunculus-cancel').addEventListener('click', close);
+    })();
+  </script>
   <script>
     (function () {
       // Sell-from-vault dialog. One dialog for the whole list: a per-row price

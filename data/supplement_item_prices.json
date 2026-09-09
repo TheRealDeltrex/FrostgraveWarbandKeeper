@@ -1,0 +1,1906 @@
+[
+ {
+  "name": "Wraithbottle",
+  "purchase": 200,
+  "sale": 65,
+  "source": "Thaw of the Lich Lord",
+  "table": "Lich Lord Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Magic Spectacles",
+  "purchase": 250,
+  "sale": 80,
+  "source": "Thaw of the Lich Lord",
+  "table": "Lich Lord Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Sword of Undead Slaying",
+  "purchase": 300,
+  "sale": 100,
+  "source": "Thaw of the Lich Lord",
+  "table": "Lich Lord Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Horn of Hellfire",
+  "purchase": 400,
+  "sale": 130,
+  "source": "Thaw of the Lich Lord",
+  "table": "Lich Lord Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Vampire Blade",
+  "purchase": 300,
+  "sale": 100,
+  "source": "Thaw of the Lich Lord",
+  "table": "Lich Lord Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Quiver of the Soul Seeker",
+  "purchase": 300,
+  "sale": 100,
+  "source": "Thaw of the Lich Lord",
+  "table": "Lich Lord Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Boots of Leaping",
+  "purchase": 250,
+  "sale": 80,
+  "source": "Thaw of the Lich Lord",
+  "table": "Lich Lord Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Eyes of Amoto",
+  "purchase": 300,
+  "sale": 100,
+  "source": "Thaw of the Lich Lord",
+  "table": "Lich Lord Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Ring of Life",
+  "purchase": 400,
+  "sale": 130,
+  "source": "Thaw of the Lich Lord",
+  "table": "Lich Lord Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Unbreakable Orb",
+  "purchase": 300,
+  "sale": 100,
+  "source": "Thaw of the Lich Lord",
+  "table": "Lich Lord Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Scarf of Obscurance",
+  "purchase": 350,
+  "sale": 115,
+  "source": "Thaw of the Lich Lord",
+  "table": "Lich Lord Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Vial of Starlight",
+  "purchase": 600,
+  "sale": 200,
+  "source": "Thaw of the Lich Lord",
+  "table": "Lich Lord Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Crystal Rose",
+  "purchase": 400,
+  "sale": 130,
+  "source": "Thaw of the Lich Lord",
+  "table": "Lich Lord Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Club of Battering",
+  "purchase": 300,
+  "sale": 100,
+  "source": "Thaw of the Lich Lord",
+  "table": "Lich Lord Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Book of Bones",
+  "purchase": 500,
+  "sale": 165,
+  "source": "Thaw of the Lich Lord",
+  "table": "Lich Lord Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Book of the Rangifer",
+  "purchase": 300,
+  "sale": 100,
+  "source": "Thaw of the Lich Lord",
+  "table": "Lich Lord Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Shroud of Foresight",
+  "purchase": 500,
+  "sale": 165,
+  "source": "Forgotten Pacts",
+  "table": "Forgotten Pacts Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Ring of Restoration",
+  "purchase": 300,
+  "sale": 100,
+  "source": "Forgotten Pacts",
+  "table": "Forgotten Pacts Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Robes of Faith",
+  "purchase": 400,
+  "sale": 130,
+  "source": "Forgotten Pacts",
+  "table": "Forgotten Pacts Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Spell Shield",
+  "purchase": 400,
+  "sale": 130,
+  "source": "Forgotten Pacts",
+  "table": "Forgotten Pacts Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Giant Slayer Blade",
+  "purchase": 300,
+  "sale": 100,
+  "source": "Forgotten Pacts",
+  "table": "Forgotten Pacts Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Smoke Bomb",
+  "purchase": 100,
+  "sale": 30,
+  "source": "Forgotten Pacts",
+  "table": "Forgotten Pacts Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Null Blade",
+  "purchase": 250,
+  "sale": 80,
+  "source": "Forgotten Pacts",
+  "table": "Forgotten Pacts Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Piercing Stiletto",
+  "purchase": 300,
+  "sale": 100,
+  "source": "Forgotten Pacts",
+  "table": "Forgotten Pacts Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Silver Star Pendant",
+  "purchase": 350,
+  "sale": 115,
+  "source": "Forgotten Pacts",
+  "table": "Forgotten Pacts Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Executioner's Blade",
+  "purchase": 400,
+  "sale": 130,
+  "source": "Forgotten Pacts",
+  "table": "Forgotten Pacts Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Golem Flesh",
+  "purchase": 200,
+  "sale": 65,
+  "source": "Forgotten Pacts",
+  "table": "Forgotten Pacts Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Ring of Focus",
+  "purchase": 200,
+  "sale": 65,
+  "source": "Forgotten Pacts",
+  "table": "Forgotten Pacts Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Crossbow of Force",
+  "purchase": 200,
+  "sale": 65,
+  "source": "Forgotten Pacts",
+  "table": "Forgotten Pacts Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Trapmaster Gloves",
+  "purchase": 200,
+  "sale": 65,
+  "source": "Forgotten Pacts",
+  "table": "Forgotten Pacts Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Soul Shield Pendant",
+  "purchase": 300,
+  "sale": 100,
+  "source": "Forgotten Pacts",
+  "table": "Forgotten Pacts Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Vampiric Staff",
+  "purchase": 300,
+  "sale": 100,
+  "source": "Forgotten Pacts",
+  "table": "Forgotten Pacts Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Amulet of the Stone Heart",
+  "purchase": 600,
+  "sale": 200,
+  "source": "Forgotten Pacts",
+  "table": "Forgotten Pacts Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Wraith Arrow",
+  "purchase": 100,
+  "sale": 30,
+  "source": "Forgotten Pacts",
+  "table": "Magic Ammunition Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Arrow of Demon Slaying",
+  "purchase": 100,
+  "sale": 30,
+  "source": "Forgotten Pacts",
+  "table": "Magic Ammunition Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Stunning Arrow",
+  "purchase": 100,
+  "sale": 30,
+  "source": "Forgotten Pacts",
+  "table": "Magic Ammunition Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Arrow of Piercing",
+  "purchase": 100,
+  "sale": 30,
+  "source": "Forgotten Pacts",
+  "table": "Magic Ammunition Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Soulseeker Arrow",
+  "purchase": 100,
+  "sale": 30,
+  "source": "Forgotten Pacts",
+  "table": "Magic Ammunition Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Mind Wrench",
+  "purchase": 250,
+  "sale": 80,
+  "source": "The Frostgrave Folio",
+  "table": "The Hunt for the Golem Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Truestroke Chisel",
+  "purchase": 250,
+  "sale": 80,
+  "source": "The Frostgrave Folio",
+  "table": "The Hunt for the Golem Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Book of the Construct",
+  "purchase": 250,
+  "sale": 80,
+  "source": "The Frostgrave Folio",
+  "table": "The Hunt for the Golem Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Scroll Case",
+  "purchase": 150,
+  "sale": 50,
+  "source": "The Maze of Malcor",
+  "table": "Maze of Malcor Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Potion Bag",
+  "purchase": 150,
+  "sale": 50,
+  "source": "The Maze of Malcor",
+  "table": "Maze of Malcor Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Wand of Casting",
+  "purchase": 400,
+  "sale": 130,
+  "source": "The Maze of Malcor",
+  "table": "Maze of Malcor Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Firehelm",
+  "purchase": 400,
+  "sale": 130,
+  "source": "The Maze of Malcor",
+  "table": "Maze of Malcor Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Construct Crossbow",
+  "purchase": 250,
+  "sale": 80,
+  "source": "The Maze of Malcor",
+  "table": "Maze of Malcor Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Wand of Lost Magic",
+  "purchase": 400,
+  "sale": 130,
+  "source": "The Maze of Malcor",
+  "table": "Maze of Malcor Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Mind Lock Ring",
+  "purchase": 500,
+  "sale": 165,
+  "source": "The Maze of Malcor",
+  "table": "Maze of Malcor Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Timelash Ring",
+  "purchase": 400,
+  "sale": 130,
+  "source": "The Maze of Malcor",
+  "table": "Maze of Malcor Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Miracle Stone",
+  "purchase": 500,
+  "sale": 165,
+  "source": "The Maze of Malcor",
+  "table": "Maze of Malcor Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Lycanthrope Serum",
+  "purchase": 400,
+  "sale": 130,
+  "source": "The Maze of Malcor",
+  "table": "Maze of Malcor Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Arrow Magnet",
+  "purchase": 100,
+  "sale": 30,
+  "source": "The Maze of Malcor",
+  "table": "Maze of Malcor Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Belt of Blade-breaking",
+  "purchase": 300,
+  "sale": 100,
+  "source": "The Maze of Malcor",
+  "table": "Maze of Malcor Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Gem Hammer",
+  "purchase": 100,
+  "sale": 30,
+  "source": "The Maze of Malcor",
+  "table": "Maze of Malcor Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Eye of Malcor",
+  "purchase": 300,
+  "sale": 100,
+  "source": "The Maze of Malcor",
+  "table": "Maze of Malcor Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Invisible Wire",
+  "purchase": 200,
+  "sale": 65,
+  "source": "The Maze of Malcor",
+  "table": "Maze of Malcor Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Troll Shackles",
+  "purchase": 500,
+  "sale": 165,
+  "source": "The Maze of Malcor",
+  "table": "Maze of Malcor Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Bearclaw Pendant",
+  "purchase": 250,
+  "sale": 80,
+  "source": "The Maze of Malcor",
+  "table": "Maze of Malcor Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Ring of Fog Form",
+  "purchase": 350,
+  "sale": 115,
+  "source": "The Maze of Malcor",
+  "table": "Maze of Malcor Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Boots of Standfirm",
+  "purchase": 300,
+  "sale": 100,
+  "source": "The Maze of Malcor",
+  "table": "Maze of Malcor Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Sky Gondola",
+  "purchase": 1000,
+  "sale": 330,
+  "source": "The Maze of Malcor",
+  "table": "Maze of Malcor Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Bloodstone Amulet",
+  "purchase": 100,
+  "sale": 30,
+  "source": "The Maze of Malcor",
+  "table": "Maze of Malcor Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Sickle of the Crowmaster",
+  "purchase": 300,
+  "sale": 100,
+  "source": "The Maze of Malcor",
+  "table": "Maze of Malcor Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Construct Varnish",
+  "purchase": 250,
+  "sale": 80,
+  "source": "The Maze of Malcor",
+  "table": "Maze of Malcor Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Karmic Belt",
+  "purchase": 250,
+  "sale": 80,
+  "source": "The Maze of Malcor",
+  "table": "Maze of Malcor Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Leash Arrow",
+  "purchase": 100,
+  "sale": 30,
+  "source": "The Maze of Malcor",
+  "table": "Maze of Malcor Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Bracers of True Flight",
+  "purchase": 300,
+  "sale": 100,
+  "source": "The Maze of Malcor",
+  "table": "Maze of Malcor Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Black Pipe",
+  "purchase": 250,
+  "sale": 80,
+  "source": "The Maze of Malcor",
+  "table": "Maze of Malcor Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Sandalwood Brace",
+  "purchase": 200,
+  "sale": 65,
+  "source": "The Maze of Malcor",
+  "table": "Maze of Malcor Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Gloves of the Paladin",
+  "purchase": 200,
+  "sale": 65,
+  "source": "The Maze of Malcor",
+  "table": "Maze of Malcor Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Backpack of Hefty Haulage",
+  "purchase": 300,
+  "sale": 100,
+  "source": "The Maze of Malcor",
+  "table": "Maze of Malcor Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Porter Control Rod",
+  "purchase": 300,
+  "sale": 100,
+  "source": "The Maze of Malcor",
+  "table": "Maze of Malcor Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Ring Chain",
+  "purchase": 250,
+  "sale": 80,
+  "source": "The Maze of Malcor",
+  "table": "Maze of Malcor Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Amulet of True Paths",
+  "purchase": 300,
+  "sale": 100,
+  "source": "The Maze of Malcor",
+  "table": "Maze of Malcor Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Partially Gnawed Grimoire",
+  "purchase": 300,
+  "sale": 100,
+  "source": "The Maze of Malcor",
+  "table": "Maze of Malcor Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Tookroot (x5 doses)",
+  "purchase": 100,
+  "sale": 30,
+  "source": "The Maze of Malcor",
+  "table": "Maze of Malcor Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Bladed Staff of Fire",
+  "purchase": 350,
+  "sale": 115,
+  "source": "The Maze of Malcor",
+  "table": "Maze of Malcor Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Book of Murders",
+  "purchase": 350,
+  "sale": 115,
+  "source": "The Maze of Malcor",
+  "table": "Maze of Malcor Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Flicker Stone",
+  "purchase": 400,
+  "sale": 130,
+  "source": "The Maze of Malcor",
+  "table": "Maze of Malcor Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Book of Charity",
+  "purchase": 350,
+  "sale": 115,
+  "source": "The Maze of Malcor",
+  "table": "Maze of Malcor Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Book of the Pentangle",
+  "purchase": 1000,
+  "sale": 330,
+  "source": "The Maze of Malcor",
+  "table": "Maze of Malcor Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Orb Plinth",
+  "purchase": 500,
+  "sale": 165,
+  "source": "The Perilous Dark",
+  "table": "Perilous Dark Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Bane Weapon",
+  "purchase": 500,
+  "sale": 165,
+  "source": "The Perilous Dark",
+  "table": "Perilous Dark Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Rat Flute",
+  "purchase": 350,
+  "sale": 115,
+  "source": "The Perilous Dark",
+  "table": "Perilous Dark Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Sword of Wounding and Healing",
+  "purchase": 400,
+  "sale": 130,
+  "source": "The Perilous Dark",
+  "table": "Perilous Dark Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Circlet of the Serpent",
+  "purchase": 250,
+  "sale": 80,
+  "source": "The Perilous Dark",
+  "table": "Perilous Dark Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Glitter Gloves",
+  "purchase": 300,
+  "sale": 100,
+  "source": "The Perilous Dark",
+  "table": "Perilous Dark Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Horned Helmet",
+  "purchase": 300,
+  "sale": 100,
+  "source": "The Perilous Dark",
+  "table": "Perilous Dark Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Dancing Blade",
+  "purchase": 500,
+  "sale": 165,
+  "source": "The Perilous Dark",
+  "table": "Perilous Dark Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Vampiric Crossbow",
+  "purchase": 300,
+  "sale": 100,
+  "source": "The Perilous Dark",
+  "table": "Perilous Dark Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Potion of Persistence",
+  "purchase": 350,
+  "sale": 115,
+  "source": "The Perilous Dark",
+  "table": "Perilous Dark Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Mindstone (4)",
+  "purchase": 250,
+  "sale": 80,
+  "source": "The Perilous Dark",
+  "table": "Perilous Dark Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Ground Manaworm Teeth",
+  "purchase": 300,
+  "sale": 100,
+  "source": "The Perilous Dark",
+  "table": "Perilous Dark Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Spellcatcher Glove",
+  "purchase": 400,
+  "sale": 130,
+  "source": "The Perilous Dark",
+  "table": "Perilous Dark Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Whitestar Diamond",
+  "purchase": 250,
+  "sale": 80,
+  "source": "The Perilous Dark",
+  "table": "Perilous Dark Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Ring of Command",
+  "purchase": 400,
+  "sale": 130,
+  "source": "The Perilous Dark",
+  "table": "Perilous Dark Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Nimblewalk Boots",
+  "purchase": 200,
+  "sale": 65,
+  "source": "The Perilous Dark",
+  "table": "Perilous Dark Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Barbarian's Blade",
+  "purchase": 400,
+  "sale": 130,
+  "source": "The Perilous Dark",
+  "table": "Perilous Dark Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Tyco's Magic Block",
+  "purchase": 150,
+  "sale": 50,
+  "source": "The Perilous Dark",
+  "table": "Perilous Dark Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Magic Staff Ring",
+  "purchase": 300,
+  "sale": 100,
+  "source": "The Perilous Dark",
+  "table": "Perilous Dark Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Book of the Werewolf",
+  "purchase": 500,
+  "sale": 165,
+  "source": "The Perilous Dark",
+  "table": "Perilous Dark Treasure Table",
+  "sale_estimated": true
+ },
+ {
+  "name": "Lantern of Holy Light",
+  "purchase": 350,
+  "sale": 150,
+  "source": "The Red King",
+  "table": "Red King Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Cloak of Tattered Shadows",
+  "purchase": 300,
+  "sale": 100,
+  "source": "The Red King",
+  "table": "Red King Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Golden Incunabula",
+  "purchase": 400,
+  "sale": 150,
+  "source": "The Red King",
+  "table": "Red King Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Feather Blade",
+  "purchase": 400,
+  "sale": 150,
+  "source": "The Red King",
+  "table": "Red King Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Talisman of Speed",
+  "purchase": 200,
+  "sale": 100,
+  "source": "The Red King",
+  "table": "Red King Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Armring of Strength",
+  "purchase": 200,
+  "sale": 50,
+  "source": "The Red King",
+  "table": "Red King Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Mask of Many Faces",
+  "purchase": 250,
+  "sale": 100,
+  "source": "The Red King",
+  "table": "Red King Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Dazzling Cape",
+  "purchase": 300,
+  "sale": 100,
+  "source": "The Red King",
+  "table": "Red King Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Blood Beetle",
+  "purchase": 250,
+  "sale": 75,
+  "source": "The Red King",
+  "table": "Red King Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Quiver of the Hunter",
+  "purchase": 200,
+  "sale": 75,
+  "source": "The Red King",
+  "table": "Red King Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Bronze Star of the Apprentice",
+  "purchase": 200,
+  "sale": 50,
+  "source": "The Red King",
+  "table": "Red King Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Mind Lock Collar",
+  "purchase": 200,
+  "sale": 50,
+  "source": "The Red King",
+  "table": "Red King Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Lightning Brooch",
+  "purchase": 225,
+  "sale": 100,
+  "source": "The Red King",
+  "table": "Red King Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Mindguard Shield",
+  "purchase": 350,
+  "sale": 150,
+  "source": "The Red King",
+  "table": "Red King Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Icon of the Sun",
+  "purchase": 200,
+  "sale": 75,
+  "source": "The Red King",
+  "table": "Red King Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Enchanted Scroll Wax (6 uses)",
+  "purchase": 210,
+  "sale": 60,
+  "source": "The Red King",
+  "table": "Red King Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Slippery Boots",
+  "purchase": 200,
+  "sale": 50,
+  "source": "The Red King",
+  "table": "Red King Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Potion Drinker Staff",
+  "purchase": 250,
+  "sale": 120,
+  "source": "The Red King",
+  "table": "Red King Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Bottle Imp",
+  "purchase": 300,
+  "sale": 175,
+  "source": "The Red King",
+  "table": "Red King Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Enchanted Teetotum",
+  "purchase": 400,
+  "sale": 100,
+  "source": "The Red King",
+  "table": "Red King Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Sticky Finger Gloves",
+  "purchase": 300,
+  "sale": 50,
+  "source": "The Red King",
+  "table": "Red King Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Enchanted Vials (6 uses)",
+  "purchase": 210,
+  "sale": 60,
+  "source": "The Red King",
+  "table": "Red King Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Gutter Flail",
+  "purchase": 300,
+  "sale": 100,
+  "source": "The Red King",
+  "table": "Red King Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Hypnotic Puppet",
+  "purchase": 200,
+  "sale": 65,
+  "source": "The Red King",
+  "table": "Red King Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Lifelong Plant",
+  "purchase": 500,
+  "sale": 200,
+  "source": "The Red King",
+  "table": "Red King Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Surefoot Boots",
+  "purchase": 200,
+  "sale": 50,
+  "source": "The Red King",
+  "table": "Red King Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Golden Fangs (6 uses)",
+  "purchase": 120,
+  "sale": 90,
+  "source": "The Red King",
+  "table": "Red King Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Bracelet of Vigour",
+  "purchase": 400,
+  "sale": 150,
+  "source": "The Red King",
+  "table": "Red King Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Amulet of Elemental Energy Absorption",
+  "purchase": 400,
+  "sale": 150,
+  "source": "The Red King",
+  "table": "Red King Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Mantle of the Bear (or Leopard)",
+  "purchase": 350,
+  "sale": 200,
+  "source": "The Red King",
+  "table": "Red King Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Construct Spikes",
+  "purchase": 200,
+  "sale": 50,
+  "source": "The Red King",
+  "table": "Red King Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Burning Icon",
+  "purchase": 250,
+  "sale": 125,
+  "source": "The Red King",
+  "table": "Red King Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Extended Scroll",
+  "purchase": 200,
+  "sale": 150,
+  "source": "The Red King",
+  "table": "Red King Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Book of the Foulhorn",
+  "purchase": 300,
+  "sale": 100,
+  "source": "The Red King",
+  "table": "Red King Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Ivory Hand",
+  "purchase": 250,
+  "sale": 120,
+  "source": "The Red King",
+  "table": "Red King Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Ring of Elemental Fire",
+  "purchase": 220,
+  "sale": 140,
+  "source": "The Red King",
+  "table": "Red King Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Ice-Crystal Pin",
+  "purchase": 300,
+  "sale": 100,
+  "source": "The Red King",
+  "table": "Red King Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Book of Wisdom",
+  "purchase": 500,
+  "sale": 150,
+  "source": "The Red King",
+  "table": "Red King Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Amulet of Charisma",
+  "purchase": null,
+  "sale": 300,
+  "source": "The Red King",
+  "table": "Red King Artefact Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Scroll Shield",
+  "purchase": null,
+  "sale": 350,
+  "source": "The Red King",
+  "table": "Red King Artefact Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Ring of Destiny",
+  "purchase": null,
+  "sale": 300,
+  "source": "The Red King",
+  "table": "Red King Artefact Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Soulchill Blade",
+  "purchase": null,
+  "sale": 250,
+  "source": "The Red King",
+  "table": "Red King Artefact Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Wraith Bow",
+  "purchase": null,
+  "sale": 250,
+  "source": "The Red King",
+  "table": "Red King Artefact Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Vampire Staff",
+  "purchase": null,
+  "sale": 350,
+  "source": "The Red King",
+  "table": "Red King Artefact Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Mystic Shears",
+  "purchase": null,
+  "sale": 300,
+  "source": "The Red King",
+  "table": "Red King Artefact Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Creature Mask",
+  "purchase": null,
+  "sale": 250,
+  "source": "The Red King",
+  "table": "Red King Artefact Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Pulsing Gem",
+  "purchase": null,
+  "sale": 250,
+  "source": "The Red King",
+  "table": "Red King Artefact Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Staff of the Illusionist",
+  "purchase": null,
+  "sale": 350,
+  "source": "The Red King",
+  "table": "Red King Artefact Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Wand of Brilliant Power (3)",
+  "purchase": null,
+  "sale": 350,
+  "source": "The Red King",
+  "table": "Red King Artefact Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Tiger Eye Ring",
+  "purchase": null,
+  "sale": 350,
+  "source": "The Red King",
+  "table": "Red King Artefact Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Circlet of Defence",
+  "purchase": null,
+  "sale": 300,
+  "source": "The Red King",
+  "table": "Red King Artefact Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Sword of Woe",
+  "purchase": null,
+  "sale": 300,
+  "source": "The Red King",
+  "table": "Red King Artefact Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Mask of Death",
+  "purchase": null,
+  "sale": 250,
+  "source": "The Red King",
+  "table": "Red King Artefact Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Ring of Levitation",
+  "purchase": null,
+  "sale": 300,
+  "source": "The Red King",
+  "table": "Red King Artefact Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Skull Staff",
+  "purchase": null,
+  "sale": 350,
+  "source": "The Red King",
+  "table": "Red King Artefact Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Gloves of the Worm Rider",
+  "purchase": null,
+  "sale": 200,
+  "source": "The Red King",
+  "table": "Red King Artefact Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Golden Bottle of Yens",
+  "purchase": null,
+  "sale": 300,
+  "source": "The Red King",
+  "table": "Red King Artefact Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Sword of Elemental Fire",
+  "purchase": null,
+  "sale": 300,
+  "source": "The Red King",
+  "table": "Red King Artefact Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Misticene Quiver",
+  "purchase": 350,
+  "sale": 175,
+  "source": "Blood Legacy",
+  "table": "Blood Legacy Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Dancing Dagger",
+  "purchase": 500,
+  "sale": 200,
+  "source": "Blood Legacy",
+  "table": "Blood Legacy Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Ring of Foresight",
+  "purchase": 500,
+  "sale": 250,
+  "source": "Blood Legacy",
+  "table": "Blood Legacy Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Planebreaker Hammer",
+  "purchase": 500,
+  "sale": 200,
+  "source": "Blood Legacy",
+  "table": "Blood Legacy Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Magic Dog Whistle",
+  "purchase": 300,
+  "sale": 125,
+  "source": "Blood Legacy",
+  "table": "Blood Legacy Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Balancing Staff",
+  "purchase": 200,
+  "sale": 100,
+  "source": "Blood Legacy",
+  "table": "Blood Legacy Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Shield of the Paladin",
+  "purchase": 400,
+  "sale": 150,
+  "source": "Blood Legacy",
+  "table": "Blood Legacy Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Ring of Recall",
+  "purchase": 450,
+  "sale": 200,
+  "source": "Blood Legacy",
+  "table": "Blood Legacy Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Ring Sabre",
+  "purchase": 550,
+  "sale": 260,
+  "source": "Blood Legacy",
+  "table": "Blood Legacy Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Spitfire Wand",
+  "purchase": 400,
+  "sale": 150,
+  "source": "Blood Legacy",
+  "table": "Blood Legacy Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Firefairy",
+  "purchase": 200,
+  "sale": 75,
+  "source": "Blood Legacy",
+  "table": "Blood Legacy Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Living Quill",
+  "purchase": 400,
+  "sale": 150,
+  "source": "Blood Legacy",
+  "table": "Blood Legacy Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Obliteration Orb",
+  "purchase": 400,
+  "sale": 150,
+  "source": "Blood Legacy",
+  "table": "Blood Legacy Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Demonic Vessel",
+  "purchase": 500,
+  "sale": 220,
+  "source": "Blood Legacy",
+  "table": "Blood Legacy Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Shielding Pendant",
+  "purchase": 300,
+  "sale": 150,
+  "source": "Blood Legacy",
+  "table": "Blood Legacy Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Staff of Radiance",
+  "purchase": 400,
+  "sale": 175,
+  "source": "Blood Legacy",
+  "table": "Blood Legacy Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Winged Bracelet",
+  "purchase": 300,
+  "sale": 150,
+  "source": "Blood Legacy",
+  "table": "Blood Legacy Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Two-Headed Wand",
+  "purchase": 300,
+  "sale": 150,
+  "source": "Blood Legacy",
+  "table": "Blood Legacy Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Falconeye Mask",
+  "purchase": 300,
+  "sale": 150,
+  "source": "Blood Legacy",
+  "table": "Blood Legacy Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Devouring Skull Ring",
+  "purchase": 400,
+  "sale": 200,
+  "source": "Blood Legacy",
+  "table": "Blood Legacy Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Hammer Talisman",
+  "purchase": 200,
+  "sale": 120,
+  "source": "Fireheart",
+  "table": "Fireheart Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Heartsapper",
+  "purchase": 250,
+  "sale": 150,
+  "source": "Fireheart",
+  "table": "Fireheart Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Staff of Turmoil",
+  "purchase": 500,
+  "sale": 200,
+  "source": "Fireheart",
+  "table": "Fireheart Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Quiver of Free Will",
+  "purchase": 300,
+  "sale": 175,
+  "source": "Fireheart",
+  "table": "Fireheart Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Jumping Beans (5)",
+  "purchase": 200,
+  "sale": 125,
+  "source": "Fireheart",
+  "table": "Fireheart Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Construct Battery",
+  "purchase": 360,
+  "sale": 180,
+  "source": "Fireheart",
+  "table": "Fireheart Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Orb of Mystic Fire",
+  "purchase": 300,
+  "sale": 140,
+  "source": "Fireheart",
+  "table": "Fireheart Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Scattershot Comb",
+  "purchase": 300,
+  "sale": 100,
+  "source": "Fireheart",
+  "table": "Fireheart Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Endless Tea Flask",
+  "purchase": 300,
+  "sale": 300,
+  "source": "Fireheart",
+  "table": "Fireheart Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Invisibility Cloak",
+  "purchase": 600,
+  "sale": 300,
+  "source": "Fireheart",
+  "table": "Fireheart Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Sword of Power (1)",
+  "purchase": 400,
+  "sale": 200,
+  "source": "Fireheart",
+  "table": "Fireheart Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Construct Key",
+  "purchase": 450,
+  "sale": 225,
+  "source": "Fireheart",
+  "table": "Fireheart Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Wallbreaker",
+  "purchase": 300,
+  "sale": 100,
+  "source": "Fireheart",
+  "table": "Fireheart Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Bloodfeast Sword",
+  "purchase": 500,
+  "sale": 200,
+  "source": "Fireheart",
+  "table": "Fireheart Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Treasure Cloak",
+  "purchase": 400,
+  "sale": 150,
+  "source": "Fireheart",
+  "table": "Fireheart Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Thundershaker",
+  "purchase": 450,
+  "sale": 180,
+  "source": "Fireheart",
+  "table": "Fireheart Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Necklace of Protection",
+  "purchase": 300,
+  "sale": 150,
+  "source": "Fireheart",
+  "table": "Fireheart Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Construct Patch (2)",
+  "purchase": 150,
+  "sale": 100,
+  "source": "Fireheart",
+  "table": "Fireheart Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Apotropaic Charm",
+  "purchase": 300,
+  "sale": 120,
+  "source": "Fireheart",
+  "table": "Fireheart Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Book of the Construct",
+  "purchase": 300,
+  "sale": 150,
+  "source": "Fireheart",
+  "table": "Fireheart Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Toughened Light Armour",
+  "purchase": 450,
+  "sale": 250,
+  "source": "The Wildwoods",
+  "table": "Wildwoods Magic Weapon/Armour Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Toughened Heavy Armour",
+  "purchase": 450,
+  "sale": 250,
+  "source": "The Wildwoods",
+  "table": "Wildwoods Magic Weapon/Armour Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Toughened Robes",
+  "purchase": 500,
+  "sale": 250,
+  "source": "The Wildwoods",
+  "table": "Wildwoods Magic Weapon/Armour Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Sealskin Armour",
+  "purchase": 300,
+  "sale": 100,
+  "source": "The Wildwoods",
+  "table": "Wildwoods Magic Weapon/Armour Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Light Armour with Elemental Absorption",
+  "purchase": 600,
+  "sale": 300,
+  "source": "The Wildwoods",
+  "table": "Wildwoods Magic Weapon/Armour Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Mystically-honed Armour",
+  "purchase": 350,
+  "sale": 150,
+  "source": "The Wildwoods",
+  "table": "Wildwoods Magic Weapon/Armour Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Ice Axe",
+  "purchase": 325,
+  "sale": 150,
+  "source": "The Wildwoods",
+  "table": "Wildwoods Magic Weapon/Armour Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Warming Blade",
+  "purchase": 325,
+  "sale": 150,
+  "source": "The Wildwoods",
+  "table": "Wildwoods Magic Weapon/Armour Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Gleaming Trident",
+  "purchase": 350,
+  "sale": 150,
+  "source": "The Wildwoods",
+  "table": "Wildwoods Magic Weapon/Armour Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Elemental Whip",
+  "purchase": 400,
+  "sale": 175,
+  "source": "The Wildwoods",
+  "table": "Wildwoods Magic Weapon/Armour Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Parrying Dagger",
+  "purchase": 300,
+  "sale": 100,
+  "source": "The Wildwoods",
+  "table": "Wildwoods Magic Weapon/Armour Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Beastslayer Blade",
+  "purchase": 350,
+  "sale": 175,
+  "source": "The Wildwoods",
+  "table": "Wildwoods Magic Weapon/Armour Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Heartseeker Bow",
+  "purchase": 400,
+  "sale": 200,
+  "source": "The Wildwoods",
+  "table": "Wildwoods Magic Weapon/Armour Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Horn Quiver",
+  "purchase": 350,
+  "sale": 125,
+  "source": "The Wildwoods",
+  "table": "Wildwoods Magic Weapon/Armour Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Polished Shield",
+  "purchase": 400,
+  "sale": 200,
+  "source": "The Wildwoods",
+  "table": "Wildwoods Magic Weapon/Armour Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Snake Staff",
+  "purchase": 400,
+  "sale": 175,
+  "source": "The Wildwoods",
+  "table": "Wildwoods Magic Weapon/Armour Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Ring of Stoneskin",
+  "purchase": 550,
+  "sale": 200,
+  "source": "The Wildwoods",
+  "table": "Wildwoods Magic Weapon/Armour Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Spiced Arrows",
+  "purchase": 300,
+  "sale": 100,
+  "source": "The Wildwoods",
+  "table": "Wildwoods Magic Weapon/Armour Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "True Sight Arrow",
+  "purchase": 250,
+  "sale": 100,
+  "source": "The Wildwoods",
+  "table": "Wildwoods Magic Weapon/Armour Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Bag of Snacks",
+  "purchase": 100,
+  "sale": 80,
+  "source": "The Wildwoods",
+  "table": "Wildwoods Magic Item Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Animal Mind Leash",
+  "purchase": 300,
+  "sale": 100,
+  "source": "The Wildwoods",
+  "table": "Wildwoods Magic Item Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Magical Rope Ladder",
+  "purchase": 400,
+  "sale": 125,
+  "source": "The Wildwoods",
+  "table": "Wildwoods Magic Item Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Construct Cook",
+  "purchase": 300,
+  "sale": 150,
+  "source": "The Wildwoods",
+  "table": "Wildwoods Magic Item Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Quiver of the Wind Goddess",
+  "purchase": 300,
+  "sale": 125,
+  "source": "The Wildwoods",
+  "table": "Wildwoods Magic Item Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Heartshield Amulet",
+  "purchase": 400,
+  "sale": 200,
+  "source": "The Wildwoods",
+  "table": "Wildwoods Magic Item Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Elemental Bear Trap",
+  "purchase": 300,
+  "sale": 150,
+  "source": "The Wildwoods",
+  "table": "Wildwoods Magic Item Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Golden Wings",
+  "purchase": 300,
+  "sale": 150,
+  "source": "The Wildwoods",
+  "table": "Wildwoods Magic Item Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Utility Boots",
+  "purchase": 250,
+  "sale": 100,
+  "source": "The Wildwoods",
+  "table": "Wildwoods Magic Item Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Potion Bandolier",
+  "purchase": 300,
+  "sale": 150,
+  "source": "The Wildwoods",
+  "table": "Wildwoods Magic Item Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Golden Mead",
+  "purchase": 200,
+  "sale": 100,
+  "source": "The Wildwoods",
+  "table": "Wildwoods Magic Item Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Teleportation Collar",
+  "purchase": 400,
+  "sale": 200,
+  "source": "The Wildwoods",
+  "table": "Wildwoods Magic Item Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Stinkweed Extract (4)",
+  "purchase": 400,
+  "sale": 100,
+  "source": "The Wildwoods",
+  "table": "Wildwoods Magic Item Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Beartooth Talisman",
+  "purchase": 600,
+  "sale": 200,
+  "source": "The Wildwoods",
+  "table": "Wildwoods Magic Item Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Glitter Dust",
+  "purchase": 300,
+  "sale": 100,
+  "source": "The Wildwoods",
+  "table": "Wildwoods Magic Item Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Animal Whistle",
+  "purchase": 400,
+  "sale": 150,
+  "source": "The Wildwoods",
+  "table": "Wildwoods Magic Item Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Demonic Talisman",
+  "purchase": 600,
+  "sale": 200,
+  "source": "The Wildwoods",
+  "table": "Wildwoods Magic Item Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Locket of Broken Promises",
+  "purchase": 500,
+  "sale": 250,
+  "source": "The Wildwoods",
+  "table": "Wildwoods Magic Item Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Book of Charts",
+  "purchase": 400,
+  "sale": 200,
+  "source": "The Wildwoods",
+  "table": "Wildwoods Magic Item Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Talisman of Undead",
+  "purchase": 600,
+  "sale": 200,
+  "source": "The Wildwoods",
+  "table": "Wildwoods Magic Item Table",
+  "sale_estimated": false
+ }
+]

@@ -514,15 +514,6 @@ def default_homerules() -> dict:
         # black_market_roll() below; the actual dice are rolled at the table,
         # this only looks up the row and tracks the 4-roll cap per scenario.
         "black_market_enabled": False,
-        # Spellcaster Magazine's troop stat lines read as unbalanced to some
-        # groups; this lets a warband keep the book's spells/items/bestiary
-        # switched on while dropping just its hireable soldiers. On by
-        # default, same as every other source-book content toggle — a group
-        # opts out rather than in. Split into three independent toggles:
-        # this one covers every non-Legendary, non-firearm soldier; the
-        # other two below cover Legendary Soldiers and firearm-armed
-        # soldiers separately. See soldier_from_book_enabled().
-        "spellcaster_magazine_soldiers": True,
         # Legendary Soldiers (Issue 4) — a distinct, more expensive troop
         # category with its own wizard-level-gated hiring limit (see
         # expansions.max_legendary_soldiers()). On by default, same as the
@@ -535,9 +526,8 @@ def default_homerules() -> dict:
         # ordinary Legendary Soldier on both counts. One flag for both, so
         # they can never disagree — see expansions.dire_hound_is_hound().
         "dire_hound_counts_as_hound": True,
-        # Black Powder Firearms (Issue 1): the Musketeer/Coachman/Duellist
-        # only appear once BOTH this and spellcaster_magazine_soldiers above
-        # are on. Also gates the standalone Pistol/Musket/Blunderbuss items —
+        # Black Powder Firearms (Issue 1): gates the Musketeer/Coachman/
+        # Duellist, and the standalone Pistol/Musket/Blunderbuss items —
         # buy_standard_item(), upgrade_firearm() and app.py's
         # _filtered_standard_items() each check this flag on top of Spellcaster
         # Magazine being switched on, so turning it off hides the Workshop's
@@ -621,18 +611,23 @@ def enabled_sources(wb: dict) -> set[str]:
 
 def soldier_from_book_enabled(wb: dict, source: str, type_key: str = "") -> bool:
     """Whether soldiers from a source book may be hired, beyond the book
-    itself being switched on. Only Spellcaster Magazine has its own
-    soldiers-only toggles so far — see default_homerules(). Split three ways:
-    Legendary Soldiers and firearm-armed soldiers each need their own extra
-    toggle on top of (for firearms) the book's ordinary-soldiers toggle."""
+    itself being switched on.
+
+    Only Spellcaster Magazine narrows further, and only for the two troop
+    classes that carry their own rules: Legendary Soldiers and the
+    firearm-armed ones each ride on the toggle for the rule that introduces
+    them. Everything else the magazine prints is gated by the book toggle
+    alone — the extra "allow its soldiers" flag it used to need was a third
+    switch for the same decision.
+    """
     if source != "Spellcaster Magazine":
         return True
     hr = wb.get("homerules") or {}
     if type_key in LEGENDARY_SOLDIER_TYPE_KEYS:
         return hr.get("spellcaster_magazine_legendary_soldiers", True)
     if type_key in FIREARM_SOLDIER_TYPE_KEYS:
-        return hr.get("spellcaster_magazine_soldiers", True) and hr.get("firearms_rules_enabled", True)
-    return hr.get("spellcaster_magazine_soldiers", True)
+        return hr.get("firearms_rules_enabled", True)
+    return True
 
 
 def soldier_source_allowed(wb: dict, type_key: str) -> bool:
@@ -1212,7 +1207,7 @@ def portrait_dir(warband_id: str) -> Path:
     return d
 
 
-SCHEMA_VERSION = 3
+SCHEMA_VERSION = 4
 # Bump this and append a new (version, function) pair to MIGRATIONS whenever a
 # future format change needs one-time cleanup on old files. Each migration
 # only runs once per file: files with no "schema_version" are treated as
@@ -1278,6 +1273,24 @@ def _migrate_captain_mode_flags(wb: dict) -> None:
             hr["captain_mode"] = "off"
     hr.pop("captains_enabled", None)
     hr.pop("promote_captain_enabled", None)
+
+
+def _migrate_drop_spellcaster_soldiers_flag(wb: dict) -> None:
+    """Retire the "allow its soldiers" toggle (spellcaster_magazine_soldiers).
+
+    It was a third switch for a decision the Spellcaster Magazine source-book
+    toggle already makes; the magazine's two troop classes with rules of their
+    own — Legendary Soldiers and the firearm-armed ones — keep riding on the
+    toggle for the rule that introduces them instead.
+
+    A warband that had it switched *off* gets those soldiers back, since the
+    book toggle is now the only gate. Deliberate: the alternative is silently
+    switching the whole book off, which would take its spells, treasure and
+    bestiary with it.
+    """
+    hr = wb.get("homerules")
+    if isinstance(hr, dict):
+        hr.pop("spellcaster_magazine_soldiers", None)
 
 
 def _migrate_captain_levelup_counts(wb: dict) -> None:
@@ -1355,6 +1368,7 @@ MIGRATIONS: list[tuple[int, Callable[[dict], None]]] = [
     (1, _migrate_soldier_items_string_to_list),
     (2, _migrate_component_bags_to_item_slots),
     (3, _migrate_fin_dalka_owned_flag_to_vault),
+    (4, _migrate_drop_spellcaster_soldiers_flag),
 ]
 
 
@@ -1482,6 +1496,10 @@ def _normalize_vault_items(items: object) -> list[dict]:
         key = src.get("catalog_key")
         if isinstance(key, str) and key.strip():
             entry["catalog_key"] = key.strip()
+        # A Red King artefact the wizard has unlocked (The Red King p.77).
+        # Only written when true, so an ordinary item's entry is unchanged.
+        if src.get("activated"):
+            entry["activated"] = True
         out.append(entry)
     return out
 
@@ -1516,6 +1534,11 @@ def _normalize_warband(wb: dict) -> dict:
         wiz["stats"][stat] = _as_int(wiz["stats"].get(stat, value), value)
     wiz["stats"].setdefault("health", 14)
     wiz.pop("health_current", None)
+    # Strict `is True`, not bool(): the badge and the -2 Health hang off this,
+    # and a stray "false" string from another tool is truthy under bool() —
+    # it would show a homunculus the warband never had. Erring towards False
+    # loses nothing a re-cast cannot restore.
+    wiz["homunculus"] = wiz.get("homunculus") is True
     wiz.setdefault("has_dagger", True)
     wiz["mutations"] = [x for x in _as_list(wiz.get("mutations")) if isinstance(x, dict)]
     # Iterated by the template and used as a dict key in expansions.REPUTATIONS,
@@ -2331,9 +2354,16 @@ def add_soldier(
             f"{info['name']} is from {src}; enable that source under Additional Rules and Homerules first."
         )
     if not disable_mechanics and not soldier_from_book_enabled(wb, src, type_key):
+        # Name the rule that actually blocked it. Since the blanket "allow its
+        # soldiers" toggle was retired, the only two that can are the ones
+        # introducing these troop classes.
+        rule = (
+            "Allow Legendary Soldiers"
+            if type_key in LEGENDARY_SOLDIER_TYPE_KEYS
+            else "Firearms Rules"
+        )
         return False, (
-            f"{info['name']}'s soldiers are switched off for {src} under Additional Rules "
-            "and Homerules (its spells/items/bestiary can stay on)."
+            f"{info['name']} needs \"{rule}\" switched on under Additional Rules and Homerules."
         )
     illusion_source = (illusion_source or "").strip()
     illusion_info = None
@@ -3274,6 +3304,134 @@ def cast_brew_potion(wb: dict, caster: str, potion: str, die: int | None = None)
     return True, text
 
 
+# --- Homunculus (Thaw of the Lich Lord p.39) ------------------------------
+#
+# Gated by the Thaw of the Lich Lord book toggle alone, applied at all three
+# entry points below. Possession is not gated: switching the book off never
+# un-makes an existing homunculus, it only stops another being cast.
+#
+# The app has no post-game survival check (the wizard survival table was
+# deliberately left out in favour of a "gold lost" field), so nothing can fire
+# the death path automatically. It is a button the player presses when their
+# table's roll says the wizard died.
+
+
+def _homunculus_book_ok(wb: dict) -> str | None:
+    if "Thaw of the Lich Lord" not in enabled_sources(wb):
+        return (
+            "Homunculus is from Thaw of the Lich Lord; enable that source under "
+            "Additional Rules and Homerules first."
+        )
+    return None
+
+
+def cast_homunculus(wb: dict, die: int | None = None) -> tuple[bool, str]:
+    """Homunculus (Thaw of the Lich Lord p.39). Wizard only. The 50gc of
+    materials is spent whether or not the roll succeeds."""
+    blocked = _homunculus_book_ok(wb)
+    if blocked:
+        return False, blocked
+    if expansions.has_homunculus(wb):
+        return False, "The wizard already has a homunculus. Destroy it first."
+    cost = expansions.HOMUNCULUS_MATERIALS_COST
+    if int(wb.get("gold", 0)) < cost:
+        return False, f"Need {cost} gc of materials to attempt Homunculus."
+    ok, detail, success = _resolve_out_of_game_roll(wb, "wizard", expansions.HOMUNCULUS_SPELL, die)
+    if not ok:
+        return False, detail
+    wb["gold"] = int(wb.get("gold", 0)) - cost
+    if success:
+        wb.setdefault("wizard", {})["homunculus"] = True
+        text = (
+            f"Created a homunculus ({detail}). {cost} gc of materials spent. "
+            f"The wizard now begins each game at −{expansions.HOMUNCULUS_HEALTH_PENALTY} Health."
+        )
+    else:
+        text = f"Homunculus failed ({detail}). {cost} gc of materials lost."
+    add_history(wb, text)
+    return True, text
+
+
+def destroy_homunculus(wb: dict) -> tuple[bool, str]:
+    """"he may destroy the homunculus between games if he wishes" — the split
+    Health goes with it, since it was never stored."""
+    if not expansions.has_homunculus(wb):
+        return False, "The wizard has no homunculus."
+    wb.setdefault("wizard", {})["homunculus"] = False
+    text = "Destroyed the homunculus. The wizard's Health is no longer reduced."
+    add_history(wb, text)
+    return True, text
+
+
+def homunculus_claim_soul(wb: dict, branch: str = "death") -> tuple[bool, str]:
+    """The wizard's soul passes into the homunculus, which is used up.
+
+    Two branches, both player-triggered: `death` is the post-game survival
+    check killing him, `suicide` is a wizard who took a permanent injury during
+    the game choosing to die after it so as to return to a pre-injury state
+    (-1 further level and -1 Will on top).
+
+    "No experience from that game" is not applied — the app records total XP,
+    not a per-game figure, so there is nothing to withhold. The message says so
+    rather than letting the omission pass silently.
+
+    Levels are taken off with the XP that bought them, so the loss does not
+    immediately come back as two pending level-ups. Stat and spell picks made
+    at those levels are left alone: the book does not say which to give back,
+    and Reverse last level-up is there for a group that wants to.
+    """
+    blocked = _homunculus_book_ok(wb)
+    if blocked:
+        return False, blocked
+    if not expansions.has_homunculus(wb):
+        return False, "The wizard has no homunculus to claim his soul."
+    if branch not in ("death", "suicide"):
+        return False, "Unknown homunculus outcome."
+    penalty = (
+        expansions.HOMUNCULUS_SUICIDE_PENALTY
+        if branch == "suicide"
+        else expansions.HOMUNCULUS_DEATH_PENALTY
+    )
+
+    wiz = wb.setdefault("wizard", {})
+    wiz["homunculus"] = False
+    per_level = expansions.xp_per_level(wb)
+    lost = min(int(wiz.get("level", 0)), penalty["levels"])
+    wiz["level"] = int(wiz.get("level", 0)) - lost
+    wiz["xp"] = max(0, int(wiz.get("xp", 0)) - lost * per_level)
+    stats = wiz.setdefault("stats", deepcopy(WIZARD_BASE))
+    stats["health"] = max(1, int(stats.get("health", 14)) - penalty["health"])
+    if penalty["will"]:
+        stats["will"] = int(stats.get("will", 0)) - penalty["will"]
+    sync_apprentice(wb)
+
+    what = (
+        "committed suicide to activate the homunculus"
+        if branch == "suicide"
+        else "was killed; the homunculus claimed his soul"
+    )
+    bits = []
+    if lost:
+        bits.append(f"−{lost} level{'' if lost == 1 else 's'}")
+    bits.append(f"permanent −{penalty['health']} Health")
+    if penalty["will"]:
+        bits.append(f"−{penalty['will']} Will")
+    text = f"The wizard {what}: {', '.join(bits)}. He survives to play the next game."
+    if lost < penalty["levels"]:
+        text += (
+            f" (The book takes {penalty['levels']} levels; only {lost} could be, "
+            "as that is all he had.)"
+        )
+    if branch == "suicide":
+        text += " He returns to a state predating the injury — clear that permanent injury by hand."
+    text += (
+        " No experience from that game; the app does not track per-game XP, "
+        "so leave it out when you add it."
+    )
+    add_history(wb, text)
+    return True, text
+
+
 # --- Shop (Core Rules p.104, "Buying and Selling") ------------------------
 #
 # The book's default: grimoires, scrolls, potions, magic weapons/armour and
@@ -3283,16 +3441,20 @@ def cast_brew_potion(wb: dict, caster: str, potion: str, die: int | None = None)
 # treasure that is available for purchase" — so the Shop card shows one or the
 # other, switched by black_market_enabled.
 #
-# Two supplement items are stocked despite supplement pricing being deferred
-# (todo.md), because both are one entry plus a variant dropdown and their
-# prices are printed plainly in their own books.
+# The rest of the supplement treasure is priced in
+# data/supplement_item_prices.json; these two are listed here instead because
+# each is one entry plus a sub-table dropdown, which a plain price row has no
+# way to carry. They shadow their price-file rows in shop_catalog(), so their
+# figures must match it.
 SHOP_VARIANT_ITEMS = {
-    # The Perilous Dark p.78 Treasure Table prints a purchase price but no
-    # sale column, so a bane weapon can be bought and never sold back.
+    # The Perilous Dark p.78 Treasure Table prints a purchase price and no sale
+    # column, so the sale is the app's third-of-purchase estimate, as for every
+    # other item out of that book.
     "Bane Weapon": {
         "source": "The Perilous Dark",
         "purchase": 500,
-        "sale": None,
+        "sale": 165,
+        "sale_estimated": True,
         "variants": expansions.BANE_WEAPON_VARIANT_NAMES,
     },
     # Fireheart p.70. The app-only "(All)" convenience entry is deliberately
@@ -3307,9 +3469,44 @@ SHOP_VARIANT_ITEMS = {
 }
 
 
+# A supplement catalog row is identified by book *and* name, because names
+# collide across books at different prices ("Book of the Construct" is 250gc in
+# The Frostgrave Folio and 300gc in Fireheart). The two are joined into the one
+# string a form field and a vault entry's catalog_key can carry.
+SUPPLEMENT_KEY_SEP = "::"
+
+
+def supplement_catalog_key(source: str, name: str) -> str:
+    return f"{source}{SUPPLEMENT_KEY_SEP}{name}"
+
+
 def shop_prices(name: str) -> dict | None:
-    """The catalog row for `name`, or None if the app doesn't price it."""
+    """The catalog row for `name`, or None if the app doesn't price it.
+
+    Takes a Core Rules name or a "Source::Name" supplement key; a bare
+    supplement name is deliberately not accepted here, since it cannot be
+    priced without knowing which book it came out of."""
+    if SUPPLEMENT_KEY_SEP in name:
+        source, _, item = name.partition(SUPPLEMENT_KEY_SEP)
+        return game_content.supplement_item_index().get((source, item))
     return game_content.common_item_index().get(name)
+
+
+def supplement_price_for_name(wb: dict, name: str) -> dict | None:
+    """The price row for a *found* supplement item, matched by name across the
+    warband's enabled books only.
+
+    An item bought here records its catalog key and never comes through this
+    path. Something looted or typed by hand has only a name, so the enabled
+    books narrow it — and where that still leaves two books pricing the same
+    name, this returns None rather than picking one. A wrong price that looks
+    right is worse than no suggestion; the sale field stays editable."""
+    rows = [
+        row
+        for (source, item), row in game_content.supplement_item_index().items()
+        if item == name and source in enabled_sources(wb)
+    ]
+    return rows[0] if len(rows) == 1 else None
 
 
 def shop_catalog(wb: dict) -> list[dict]:
@@ -3323,7 +3520,11 @@ def shop_catalog(wb: dict) -> list[dict]:
     spells = shop_spell_choices(wb)
     groups: dict[str, list[dict]] = {}
     for item in game_content.load_common_items():
-        row = {**item, "choices": spells if item.get("variant") == "spell" else None}
+        row = {
+            **item,
+            "key": item["name"],
+            "choices": spells if item.get("variant") == "spell" else None,
+        }
         groups.setdefault(item["category"], []).append(row)
     sources = enabled_sources(wb)
     for name, info in SHOP_VARIANT_ITEMS.items():
@@ -3332,11 +3533,28 @@ def shop_catalog(wb: dict) -> list[dict]:
         groups.setdefault("Magic Item", []).append(
             {
                 "name": name,
+                "key": name,
                 "category": "Magic Item",
                 "source": info["source"],
                 "purchase": info["purchase"],
                 "sale": info["sale"],
+                "sale_estimated": info.get("sale_estimated", False),
                 "choices": [{"value": v, "label": v} for v in info["variants"]],
+            }
+        )
+    # Supplement treasure, gated by its source book like every other
+    # acquisition. The two SHOP_VARIANT_ITEMS above are the same items with a
+    # sub-table dropdown attached, so they win over the plain row.
+    variants = {(info["source"], name) for name, info in SHOP_VARIANT_ITEMS.items()}
+    for item in game_content.load_supplement_item_prices():
+        if item["source"] not in sources or (item["source"], item["name"]) in variants:
+            continue
+        groups.setdefault("Magic Item", []).append(
+            {
+                **item,
+                "key": supplement_catalog_key(item["source"], item["name"]),
+                "category": "Magic Item",
+                "choices": None,
             }
         )
     # Potions read Lesser then Greater rather than in table order, and each
@@ -3350,10 +3568,7 @@ def shop_catalog(wb: dict) -> list[dict]:
             for row in groups["Potion"]
             if row.get("tier") == tier
         ]
-    # Magic items get a collapsible shelf per source book — one shelf today
-    # (Core Rules, plus Fireheart's Book of the Construct and the Perilous
-    # Dark's Bane Weapon when those books are on), and the shape the supplement
-    # price extraction in todo.md will fill out.
+    # Magic items get a collapsible shelf per source book, in book order.
     if "Magic Item" in groups:
         groups["Magic Item"] = sorted(
             ({**row, "subgroup": row.get("source", "Core Rules")} for row in groups["Magic Item"]),
@@ -3402,11 +3617,18 @@ def shop_buy(wb: dict, name: str, choice: str = "") -> tuple[bool, str]:
     row = shop_prices(name)
     if variant is None and row is None:
         return False, "The shop doesn't stock that."
+    # A supplement row is only on the shelf while its book is on, and `name` is
+    # a "Source::Name" key straight off the form — so the gate is checked here
+    # too, not only where the catalog is built.
+    if row is not None and row.get("source") and row["source"] not in enabled_sources(wb):
+        return False, f"{row['name']} is from {row['source']}; enable that source first."
+    # `name` may be a "Source::Name" key; the label is the item's own name.
+    label = (row or {}).get("name") or name
     price = (variant or row).get("purchase")
     if price is None:
-        return False, f"{name} can never be bought — only found or brewed."
+        return False, f"{label} can never be bought — only found or brewed."
     if int(wb.get("gold", 0)) < int(price):
-        return False, f"Need {price} gc for {name}."
+        return False, f"Need {price} gc for {label}."
     # Grimoire/Scroll take a spell, the variant items take a sub-table result;
     # everything else ignores `choice`. The stored name is what a player reads
     # in the vault, so it carries the choice rather than hiding it in notes.
@@ -3417,7 +3639,7 @@ def shop_buy(wb: dict, name: str, choice: str = "") -> tuple[bool, str]:
         stored = choice
     elif row.get("variant") == "spell":
         if not choice:
-            return False, f"Pick the spell for the {name.lower()}."
+            return False, f"Pick the spell for the {label.lower()}."
         if choice not in {c["value"] for c in shop_spell_choices(wb)}:
             return False, "That spell isn't available from your enabled books."
         # The dropdown value is "School: Spell"; stored the other way round so
@@ -3425,9 +3647,9 @@ def shop_buy(wb: dict, name: str, choice: str = "") -> tuple[bool, str]:
         # ("Grimoire: Animal Companion (Witch)"). The school is kept because
         # two schools can print a spell of the same name.
         school, _, spell = choice.partition(": ")
-        stored = f"{name}: {spell} ({school})"
+        stored = f"{label}: {spell} ({school})"
     else:
-        stored = name
+        stored = label
     wb["gold"] = int(wb.get("gold", 0)) - int(price)
     add_vault_item(wb, stored, source="shop")
     # The exact catalog row that was paid for, so selling it back prices
@@ -3442,17 +3664,25 @@ def shop_sale_price(wb: dict, item: dict) -> int | None:
     """The suggested sale price for a vault entry, or None if unknown.
 
     Prefers the catalog key recorded when the item was bought here, since the
-    stored name may carry a spell or variant ("Grimoire: Bone Dart"). Falls
-    back to an exact name match, which is all a found or hand-typed item has.
+    stored name may carry a spell or variant ("Grimoire: Bone Dart") and, for
+    supplement treasure, tells the two books that print the same name apart.
+    Falls back to an exact name match, which is all a found or hand-typed item
+    has: Core Rules first, then the enabled supplements.
     """
     key = item.get("catalog_key")
     row = shop_prices(key) if isinstance(key, str) and key else None
-    if row is None:
-        row = shop_prices(item.get("name", ""))
     if row is None and isinstance(key, str):
         variant = SHOP_VARIANT_ITEMS.get(key)
         if variant:
             return variant["sale"]
+    if row is None:
+        # Core Rules first: the 2nd edition reprices the handful of items it
+        # took from the earlier books (Construct Oil is 300gc in The Frostgrave
+        # Folio and 100gc as a Core lesser potion), and the newer printing wins.
+        # The extractor drops those rows outright, so this only matters if one
+        # ever comes back.
+        name = item.get("name", "")
+        row = game_content.common_item_index().get(name) or supplement_price_for_name(wb, name)
     return row.get("sale") if row else None
 
 
@@ -3668,8 +3898,14 @@ def black_market_roll(wb: dict, table_title: str, d20: int | None = None) -> tup
                 "bought": False,
                 # Priced at roll time so the offer keeps the figure it was
                 # made at, rather than re-deriving it from a catalog that
-                # may have gained the item's price in the meantime.
-                "price": (shop_prices(name) or {}).get("purchase") or 0,
+                # may have gained the item's price in the meantime. The book
+                # rolled on settles which of two same-named items this is.
+                "price": (
+                    game_content.supplement_item_index().get((book, name))
+                    or shop_prices(name)
+                    or {}
+                ).get("purchase")
+                or 0,
             }
             for name in item_names
         ],
@@ -4523,7 +4759,6 @@ def update_homerules(wb: dict, form: "ImmutableMultiDict") -> tuple[bool, str]:
             # the stored value back rather than the absent field, or every save
             # of this panel would quietly turn the Black Market off.
             "black_market_enabled": bool(hr.get("black_market_enabled")),
-            "spellcaster_magazine_soldiers": form.get("spellcaster_magazine_soldiers") == "on",
             "spellcaster_magazine_legendary_soldiers": (
                 form.get("spellcaster_magazine_legendary_soldiers") == "on"
             ),
@@ -5259,6 +5494,27 @@ def remove_vault_item(wb: dict, item_id: str) -> bool:
             wb["vault_items"] = items
             return True
     return False
+
+
+def set_vault_item_activated(wb: dict, item_id: str, activated: bool) -> tuple[bool, str]:
+    """Mark a Red King artefact unlocked, or lock it again (The Red King p.77).
+
+    Unlocking is a Will Roll against the artefact's own target number after each
+    game; the app records the outcome rather than rolling it, since the target
+    number lives in the item's Lexicon entry and the roll happens at the table.
+    Reversible, because the only way to correct a misclick is to press it again.
+    """
+    for it in wb.get("vault_items") or []:
+        if it.get("id") == item_id:
+            if activated:
+                it["activated"] = True
+            else:
+                it.pop("activated", None)
+            verb = "Unlocked" if activated else "Locked"
+            text = f"{verb} {it.get('name', 'artefact')}."
+            add_history(wb, text)
+            return True, text
+    return False, "Item not found in the vault."
 
 
 def record_game_loot(
@@ -6424,6 +6680,41 @@ def hire_underworld_muscle(wb: dict, type_key: str, name: str = "") -> tuple[boo
         f"Hired {entry['label']} as Underworld muscle for {entry['markers']} Marker(s) "
         f"({held} held). Doesn't count against the warband size; if they die, take one more Marker."
     )
+    add_history(wb, text)
+    return True, text
+
+
+def resolve_underworld_muscle(wb: dict, soldier_id: str, outcome: str) -> tuple[bool, str]:
+    """Settle up with a hired-muscle model after the game (Spellcaster Issue 3).
+
+    Either way they leave the roster — the guild lends them "for the next
+    game", not permanently. The difference is the debt: "If the hired muscle
+    dies, the guild demands further reimbursement - the wizard takes one
+    additional Underworld Marker."
+
+    That Marker is taken even when it puts the wizard over the level cap that
+    _take_underworld_markers() enforces: the cap limits what a wizard may
+    *ask* for, and a death is the guild collecting, not the wizard choosing.
+    """
+    if outcome not in ("home", "died"):
+        return False, "Pick whether they went home or died."
+    soldiers = wb.get("soldiers") or []
+    figure = next(
+        (s for s in soldiers if s.get("id") == soldier_id and s.get("underworld_muscle")), None
+    )
+    if figure is None:
+        return False, "That isn't a hired-muscle model."
+    name = figure.get("name") or "The hired muscle"
+    soldiers.remove(figure)
+    if outcome == "home":
+        text = f"{name} went back to the guild after the game. Nothing further owed."
+    else:
+        uf = _underworld_markers(wb)
+        uf["markers"] = int(uf.get("markers", 0)) + 1
+        text = (
+            f"{name} died in action — the guild takes one more Marker "
+            f"({uf['markers']} held)."
+        )
     add_history(wb, text)
     return True, text
 

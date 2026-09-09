@@ -506,9 +506,13 @@ def build_warband_pdf(wb: dict) -> bytes:
         pdf.cell(0, 4, _t(_horse_companion_line(wb)), new_x="LMARGIN", new_y="NEXT")
     pdf.set_x(left)
     pdf.set_font("Helvetica", "", 10)
-    pdf.cell(
-        0, 5, _health_line(wstats.get("health", 14)), new_x="LMARGIN", new_y="NEXT", markdown=True
-    )
+    # Printed as the book's split stat while a homunculus exists: the actual
+    # Health, then the effective one he begins each game on.
+    wiz_health = wstats.get("health", 14)
+    hom_penalty = expansions.homunculus_health_penalty(wb)
+    if hom_penalty:
+        wiz_health = f"{wiz_health} / {int(wiz_health) - hom_penalty}"
+    pdf.cell(0, 5, _health_line(wiz_health), new_x="LMARGIN", new_y="NEXT", markdown=True)
     pdf.set_x(left)
     pdf.cell(
         0,
@@ -1005,6 +1009,8 @@ def build_warband_pdf(wb: dict) -> bytes:
             pdf.set_x(pdf.l_margin)
             name = it.get("name", "")
             line = f"* {_strip_source_suffix(name)}"
+            if it.get("activated"):
+                line += " (activated)"
             carriers = holders.get(name.strip().lower())
             if carriers:
                 line += f" - carried by {', '.join(carriers)}"

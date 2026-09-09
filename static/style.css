@@ -42,6 +42,7 @@
   --injured: #e3a35c;
   --dead: #8b7186;
   --arcane: #c79ae8;
+  --underworld: #d987c4;
 
   /* Channel triplets for anything that needs the same hue at an arbitrary
      alpha, written as rgb(var(--accent-rgb) / 0.12). That syntax has shipped
@@ -56,6 +57,7 @@
   --injured-rgb: 227 163 92;
   --dead-rgb: 139 113 134;
   --arcane-rgb: 199 154 232;
+  --underworld-rgb: 217 135 196;
   --frost-rgb: 174 226 255;
   --void-rgb: 2 6 12;
 
@@ -915,6 +917,15 @@ button.badge {
   border-color: rgb(var(--arcane-rgb) / 0.45);
   background: rgb(var(--arcane-rgb) / 0.12);
   color: var(--arcane);
+}
+
+/* Underworld hired muscle. Its own hue — every other badge colour is taken
+   (accent/specialist, gold/legendary, arcane/temporary, success/active,
+   injured, dead) and this one has to be spotted at a glance after a game. */
+.badge.hired {
+  border-color: rgb(var(--underworld-rgb) / 0.5);
+  background: rgb(var(--underworld-rgb) / 0.14);
+  color: var(--underworld);
 }
 
 .badge.active {

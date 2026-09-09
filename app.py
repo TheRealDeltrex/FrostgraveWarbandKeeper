@@ -214,6 +214,7 @@ from warband_store import (
     buy_supply_points,
     captain_effective_stats,
     cast_brew_potion,
+    cast_homunculus,
     cast_write_scroll,
     claim_free_underworld_favor,
     claim_monster_prize,
@@ -223,6 +224,7 @@ from warband_store import (
     create_warband,
     default_homerules,
     delete_warband,
+    destroy_homunculus,
     discard_component,
     dismiss_all_temporary_members,
     dismiss_apprentice,
@@ -239,6 +241,7 @@ from warband_store import (
     hire_cost_preview,
     hire_ragged_warbands_soldier,
     hire_underworld_muscle,
+    homunculus_claim_soul,
     import_warband_json,
     known_spell_ids,
     known_spell_names,
@@ -281,6 +284,7 @@ from warband_store import (
     reorder_soldiers,
     reorder_spells,
     resolve_portrait_path,
+    resolve_underworld_muscle,
     restore_portraits_by_name,
     reverse_last_captain_level_up,
     reverse_last_level_up,
@@ -304,6 +308,7 @@ from warband_store import (
     set_permanent_injury_prosthetic,
     set_soldier_status,
     set_thrall_pending,
+    set_vault_item_activated,
     set_wizard_reputation,
     set_wizard_state,
     shop_buy,
@@ -527,6 +532,7 @@ app.jinja_env.tests["item_eligible_for_role"] = expansions.item_eligible_for_rol
 # (not merely eligible) — drives a conditional bonus slot's dropdown (Bear,
 # Crow Master, ...) via restricted_vault_test in _item_slots.html.
 app.jinja_env.tests["item_restricted_for"] = expansions.item_restricted_for_type_key
+app.jinja_env.tests["artefact"] = expansions.is_artefact
 # True for a type_key whose item slots are entirely conditional (Crow Master,
 # or a creature under creature_item_slot_enabled) — see is_conditional_slot_type.
 app.jinja_env.tests["conditional_slot_type"] = expansions.is_conditional_slot_type
@@ -1148,6 +1154,10 @@ def warband_view(warband_id: str) -> str:
         enrich_soldier(wb, s)
         for s in sorted(all_soldiers, key=lambda s: _is_temporary(s))
     ]
+    # The item picker's role token, which carries the traits an item can be
+    # excluded on (a revenant is undead; see expansions.figure_item_role).
+    for s in soldiers:
+        s["item_role"] = expansions.figure_item_role(wb, s.get("type_key", ""), s)
     limits = warband_limits(wb)
     known = known_spell_ids(wb)
     wschool = (wb.get("wizard") or {}).get("school") or "Elementalist"
@@ -1170,6 +1180,11 @@ def warband_view(warband_id: str) -> str:
     wiz_spells = (wb.get("wizard") or {}).get("spells") or []
     wiz_spells = enrich_spells_with_descriptions(wiz_spells)
     learnable = enrich_spells_with_descriptions(learnable)
+    # Core Rules p.84: a wizard may only learn a spell they hold a grimoire for.
+    # The picker marks the ones they don't; confirming anyway is the player's call.
+    held_grimoires = expansions.vault_grimoire_spells(wb)
+    for sp in learnable:
+        sp["has_grimoire"] = expansions.has_grimoire_for(wb, sp["name"], held_grimoires)
     vault_names = []
     seen = set()
     vault_owned_counts: dict[str, int] = {}
@@ -1545,6 +1560,9 @@ def warband_view(warband_id: str) -> str:
         black_market_rolls_max=BLACK_MARKET_ROLLS_PER_SCENARIO,
         schools=SCHOOLS,
         learnable=learnable,
+        wizard_item_role=expansions.figure_item_role(wb, "wizard"),
+        apprentice_item_role=expansions.figure_item_role(wb, "apprentice", wb.get("apprentice")),
+        captain_item_role=expansions.figure_item_role(wb, "captain", wb.get("captain")),
         pending_levels=limits["pending_levels"],
         xp_per_level=limits["xp_per_level"],
         relations=SCHOOL_RELATIONS.get(wschool, {}),
@@ -1571,6 +1589,14 @@ def warband_view(warband_id: str) -> str:
         ),
         write_scroll_info=out_of_game_cast_info(wb, "Write Scroll"),
         brew_potion_info=out_of_game_cast_info(wb, "Brew Potion"),
+        homunculus_info=out_of_game_cast_info(wb, expansions.HOMUNCULUS_SPELL),
+        homunculus_book_on="Thaw of the Lich Lord" in enabled_sources(wb),
+        has_homunculus=expansions.has_homunculus(wb),
+        homunculus_health_penalty=expansions.homunculus_health_penalty(wb),
+        HOMUNCULUS_MATERIALS_COST=expansions.HOMUNCULUS_MATERIALS_COST,
+        HOMUNCULUS_HEALTH_PENALTY=expansions.HOMUNCULUS_HEALTH_PENALTY,
+        HOMUNCULUS_DEATH_PENALTY=expansions.HOMUNCULUS_DEATH_PENALTY,
+        HOMUNCULUS_SUICIDE_PENALTY=expansions.HOMUNCULUS_SUICIDE_PENALTY,
         lesser_potions=[
             it["name"] for it in load_common_items()
             if it.get("category") == "Potion" and it.get("tier") == "lesser"
@@ -2300,6 +2326,13 @@ def _act_hire_underworld_muscle(wb: dict) -> tuple[bool, str]:
     )
 
 
+@register_action("resolve_underworld_muscle")
+def _act_resolve_underworld_muscle(wb: dict) -> tuple[bool, str]:
+    return resolve_underworld_muscle(
+        wb, request.form.get("soldier_id") or "", request.form.get("outcome") or ""
+    )
+
+
 @register_action("underworld_intimidation")
 def _act_underworld_intimidation(wb: dict) -> tuple[bool, str]:
     own, err = _optional_die("own_roll")
@@ -2363,6 +2396,24 @@ def _act_brew_potion(wb: dict) -> tuple[bool, str]:
     return cast_brew_potion(wb, request.form.get("caster") or "wizard", request.form.get("potion") or "", die)
 
 
+@register_action("cast_homunculus")
+def _act_cast_homunculus(wb: dict) -> tuple[bool, str]:
+    die, err = _optional_die("die")
+    if err:
+        return False, err
+    return cast_homunculus(wb, die)
+
+
+@register_action("destroy_homunculus")
+def _act_destroy_homunculus(wb: dict) -> tuple[bool, str]:
+    return destroy_homunculus(wb)
+
+
+@register_action("homunculus_claim_soul")
+def _act_homunculus_claim_soul(wb: dict) -> tuple[bool, str]:
+    return homunculus_claim_soul(wb, request.form.get("branch") or "death")
+
+
 @register_action("shop_buy")
 def _act_shop_buy(wb: dict) -> tuple[bool, str]:
     return shop_buy(wb, request.form.get("item_name") or "", request.form.get("choice") or "")
@@ -2391,6 +2442,15 @@ def _act_remove_vault_item(wb: dict) -> tuple[bool, str]:
     if remove_vault_item(wb, request.form.get("item_id") or ""):
         return True, "Item removed from vault."
     return False, "Item not found."
+
+
+@register_action("toggle_vault_activated")
+def _act_toggle_vault_activated(wb: dict) -> tuple[bool, str]:
+    return set_vault_item_activated(
+        wb,
+        request.form.get("item_id") or "",
+        request.form.get("activated") == "on",
+    )
 
 
 @register_action("add_vault_item")
