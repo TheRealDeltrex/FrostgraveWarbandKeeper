@@ -514,6 +514,14 @@ def default_homerules() -> dict:
         # black_market_roll() below; the actual dice are rolled at the table,
         # this only looks up the row and tracks the 4-roll cap per scenario.
         "black_market_enabled": False,
+        # The Shop's Grimoire and Scroll rows take any spell from the enabled
+        # books, which is hundreds of entries once a few supplements are on.
+        # On by default, narrowing both dropdowns to Core Rules spells; it only
+        # trims what the shop offers and never touches what a warband holds.
+        # Sits beside the Black Market toggle on the Shop card, so like it, it
+        # is read back from storage in update_homerules() rather than from an
+        # absent form field.
+        "shop_core_spells_only": True,
         # Legendary Soldiers (Issue 4) — a distinct, more expensive troop
         # category with its own wizard-level-gated hiring limit (see
         # expansions.max_legendary_soldiers()). On by default, same as the
@@ -3222,15 +3230,24 @@ def out_of_game_cast_info(wb: dict, spell_name: str) -> dict:
 
 
 def _resolve_out_of_game_roll(
-    wb: dict, caster: str, spell_name: str, die: int | None, penalty: int = 0
+    wb: dict, caster: str, spell_name: str, die: int | None, penalty: int = 0, outcome: str = ""
 ) -> tuple[bool, str, bool]:
-    """(ok, message, succeeded). ok is False only for a bad request."""
+    """(ok, message, succeeded). ok is False only for a bad request.
+
+    `outcome` of "success" records a casting the player already made at the
+    table, with no die and no arithmetic. There is no matching "fail": a failed
+    out-of-game casting creates nothing, so there is nothing to record — except
+    where the attempt costs money either way, and those callers charge it
+    themselves before asking.
+    """
     figure = _caster_dict(wb, caster)
     if not figure:
         return False, "No such caster in this warband.", False
     sp = _known_spell(figure, spell_name)
     if sp is None:
         return False, f"{figure.get('name') or caster} doesn't know {spell_name}.", False
+    if outcome == "success":
+        return True, "reported as successful", True
     if die is not None and not (1 <= int(die) <= 20):
         return False, "The casting roll must be between 1 and 20.", False
     bonus, sources = expansions.base_casting_bonus(wb, spell_name)
@@ -3246,15 +3263,20 @@ def _resolve_out_of_game_roll(
     return True, detail, total >= cn
 
 
-def cast_write_scroll(wb: dict, caster: str, spell: str, die: int | None = None) -> tuple[bool, str]:
+def cast_write_scroll(
+    wb: dict, caster: str, spell: str, die: int | None = None, outcome: str = ""
+) -> tuple[bool, str]:
     """Write Scroll (Core Rules p.135): creates one scroll of a spell the
-    caster knows, or one they own the grimoire for. The grimoire side is not
-    checked — vault names are free text — so any spell is offered and the
-    player is the authority on whether they hold the book."""
+    caster knows, or one they own the grimoire for.
+
+    The dropdown offers exactly those two lists, but `spell` is not re-checked
+    here: vault names are free text, so a grimoire the app failed to recognise
+    would turn into a refusal the player cannot argue with. They remain the
+    authority on what is in their vault."""
     spell = (spell or "").strip()
     if not spell:
         return False, "Pick the spell to write."
-    ok, detail, success = _resolve_out_of_game_roll(wb, caster, WRITE_SCROLL_SPELL, die)
+    ok, detail, success = _resolve_out_of_game_roll(wb, caster, WRITE_SCROLL_SPELL, die, outcome=outcome)
     if not ok:
         return False, detail
     if not success:
@@ -3267,7 +3289,9 @@ def cast_write_scroll(wb: dict, caster: str, spell: str, die: int | None = None)
     return True, text
 
 
-def cast_brew_potion(wb: dict, caster: str, potion: str, die: int | None = None) -> tuple[bool, str]:
+def cast_brew_potion(
+    wb: dict, caster: str, potion: str, die: int | None = None, outcome: str = ""
+) -> tuple[bool, str]:
     """Brew Potion (Core Rules p.114). A Lesser Potion of the caster's choice
     is simply created on a successful casting. A Greater Potion is a wizard
     only, costs its ingredient price whether or not the roll succeeds, and is
@@ -3283,7 +3307,9 @@ def cast_brew_potion(wb: dict, caster: str, potion: str, die: int | None = None)
     ingredients = int(row.get("ingredients") or 0) if greater else 0
     if ingredients and int(wb.get("gold", 0)) < ingredients:
         return False, f"Need {ingredients} gc of ingredients for {potion}."
-    ok, detail, success = _resolve_out_of_game_roll(wb, caster, BREW_POTION_SPELL, die, penalty)
+    ok, detail, success = _resolve_out_of_game_roll(
+        wb, caster, BREW_POTION_SPELL, die, penalty, outcome=outcome
+    )
     if not ok:
         return False, detail
     if ingredients:
@@ -3325,7 +3351,7 @@ def _homunculus_book_ok(wb: dict) -> str | None:
     return None
 
 
-def cast_homunculus(wb: dict, die: int | None = None) -> tuple[bool, str]:
+def cast_homunculus(wb: dict, die: int | None = None, outcome: str = "") -> tuple[bool, str]:
     """Homunculus (Thaw of the Lich Lord p.39). Wizard only. The 50gc of
     materials is spent whether or not the roll succeeds."""
     blocked = _homunculus_book_ok(wb)
@@ -3336,7 +3362,9 @@ def cast_homunculus(wb: dict, die: int | None = None) -> tuple[bool, str]:
     cost = expansions.HOMUNCULUS_MATERIALS_COST
     if int(wb.get("gold", 0)) < cost:
         return False, f"Need {cost} gc of materials to attempt Homunculus."
-    ok, detail, success = _resolve_out_of_game_roll(wb, "wizard", expansions.HOMUNCULUS_SPELL, die)
+    ok, detail, success = _resolve_out_of_game_roll(
+        wb, "wizard", expansions.HOMUNCULUS_SPELL, die, outcome=outcome
+    )
     if not ok:
         return False, detail
     wb["gold"] = int(wb.get("gold", 0)) - cost
@@ -3595,9 +3623,13 @@ def shop_spell_choices(wb: dict) -> list[dict]:
     The school is part of the label *and* of the stored value because two
     schools can print a spell of the same name — the collision that already
     bites data/spell_descriptions.json (see CLAUDE.md). Scoped to the warband's
-    enabled books, like every other spell list on the page.
+    enabled books, like every other spell list on the page — and narrowed
+    further to Core Rules alone while the Shop's own `shop_core_spells_only`
+    toggle is on, which it is by default.
     """
     sources = enabled_sources(wb)
+    if (wb.get("homerules") or {}).get("shop_core_spells_only", True):
+        sources = {"Core Rules"}
     rows = [sp for sp in all_spells_flat() if sp.get("source", "Core Rules") in sources]
     # SPELLS is keyed in the app's canonical school order — the ten core
     # schools, then the supplement ones — which is what every other school
@@ -3683,7 +3715,28 @@ def shop_sale_price(wb: dict, item: dict) -> int | None:
         # ever comes back.
         name = item.get("name", "")
         row = game_content.common_item_index().get(name) or supplement_price_for_name(wb, name)
-    return row.get("sale") if row else None
+    if row is None:
+        return _grimoire_fallback_sale(item.get("name", ""))
+    return row.get("sale")
+
+
+def _grimoire_fallback_sale(name: str) -> int | None:
+    """Core Rules p.104's flat grimoire sale price, for any vault entry that
+    reads as a grimoire and that nothing else prices.
+
+    The catalog only knows the bare name "Grimoire", so everything a player
+    actually writes down — "Grimoire: Bone Dart", "Grimoire (unidentified)",
+    "Grimoire of the Homunculus" — came back unpriced while a plain "Grimoire"
+    fetched 200. A grimoire is a grimoire; the figure stays editable either way.
+
+    The Grimoire of Fin Dalka is the one exclusion: its price falls as its
+    spells are deciphered, and it has its own Sell button carrying that figure.
+    Suggesting a flat 200 here would put two different numbers on one item.
+    """
+    text = (name or "").lower()
+    if "grimoire" not in text or expansions.is_fin_dalka_name(name):
+        return None
+    return (game_content.common_item_index().get("Grimoire") or {}).get("sale")
 
 
 def shop_sell(wb: dict, item_id: str, price: str | int | None = None) -> tuple[bool, str]:
@@ -4759,6 +4812,9 @@ def update_homerules(wb: dict, form: "ImmutableMultiDict") -> tuple[bool, str]:
             # the stored value back rather than the absent field, or every save
             # of this panel would quietly turn the Black Market off.
             "black_market_enabled": bool(hr.get("black_market_enabled")),
+            # Same reason, same card. Defaults on for a warband saved before
+            # this setting existed.
+            "shop_core_spells_only": bool(hr.get("shop_core_spells_only", True)),
             "spellcaster_magazine_legendary_soldiers": (
                 form.get("spellcaster_magazine_legendary_soldiers") == "on"
             ),

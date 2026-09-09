@@ -890,7 +890,10 @@ summary.badge::-webkit-details-marker {
 /* A <button class="badge"> (the roster's clickable "temporary" badge) reads
    as a plain badge, not a native button. */
 button.badge {
-  font: inherit;
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: inherit;
   appearance: none;
   margin: 0;
   cursor: pointer;
@@ -1258,9 +1261,17 @@ code {
 /* Badge strip under a wizard/apprentice/captain portrait. Every badge for
    that figure belongs here — mounted, mutated, legendary/specialist, wizard
    reputations — rather than scattered through the card body. */
+/* One badge per line under the portrait: they read as a list of what a figure
+   *is* rather than a run-on sentence, and several are long enough ("Ambassador
+   of the Court") to wrap unpredictably side by side. Order is set in the
+   template — what the figure is (legendary/specialist, reputations) above what
+   it is currently doing (mounted, mutated). */
 .figure-badges {
-  text-align: center;
   margin-top: 0.3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
 }
 
 /* Spell picker */
@@ -1973,3 +1984,14 @@ button.busy:disabled {
     transform: none;
   }
 }
+
+/* Shop rows: the item name doubles as the disclosure for its rules text, so it
+   has to read as a name in a table cell, not as a nested panel. */
+details.item-info > summary {
+  cursor: pointer;
+  list-style: none;
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
+}
+details.item-info > summary::-webkit-details-marker { display: none; }
+details.item-info > span { display: block; font-size: 0.85rem; margin-top: 0.2rem; }
