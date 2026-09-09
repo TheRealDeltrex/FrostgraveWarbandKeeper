@@ -46,6 +46,7 @@ from warband_store import (
     recompute_spell_cns,
     resolve_portrait_path,
     specialist_count,
+    unmounted_effective_stats,
     wizard_effective_stats,
 )
 
@@ -105,18 +106,20 @@ def _t(text: object) -> str:
 
 def _stat_line(stats: dict, include_health: bool = False, unmounted: dict | None = None) -> str:
     """Combat stats with bold labels; render with markdown=True. Health optional
-    (soldiers). unmounted, if given, is this figure's Move/Fight/Armour before
-    the warband horse's mount bonus — shown in brackets behind the current
-    (mounted) value, matching the web UI."""
+    (soldiers). unmounted, if given, is this figure's Move/Fight/Armour on foot;
+    it leads and the mounted value goes in brackets behind it, matching the web
+    UI."""
 
-    move_bracket = f" ({unmounted['move']})" if unmounted else ""
-    fight_bracket = f" ({format_stat(int(unmounted['fight']))})" if unmounted else ""
-    armour_bracket = f" ({unmounted['armour']})" if unmounted else ""
+    def pair(stat: str, current, fmt=str) -> str:
+        if not unmounted:
+            return fmt(current)
+        return f"{fmt(unmounted[stat])} ({fmt(current)})"
+
     parts = [
-        f"**Move:** {stats.get('move', 0)}{move_bracket}",
-        f"**Fight:** {format_stat(int(stats.get('fight', 0)))}{fight_bracket}",
+        f"**Move:** {pair('move', stats.get('move', 0))}",
+        f"**Fight:** {pair('fight', int(stats.get('fight', 0)), lambda v: format_stat(int(v)))}",
         f"**Shoot:** {format_stat(int(stats.get('shoot', 0)))}",
-        f"**Armour:** {stats.get('armour', 10)}{armour_bracket}",
+        f"**Armour:** {pair('armour', stats.get('armour', 10))}",
         f"**Will:** {format_stat(int(stats.get('will', 0)))}",
     ]
     if include_health:
@@ -129,15 +132,13 @@ def _horse_rider_match(wb: dict, kind: str, soldier_id: str | None = None) -> bo
 
 
 def _unmounted_overlay(wb: dict) -> dict | None:
-    """This figure's Move/Fight/Armour before it climbed on the warband's
-    horse, straight from the mount's stored backup — not derived by
-    subtracting the Mounted Modifier from the current effective stat, because
-    Armour is floored at expansions.MOUNTED_ARMOUR_FLOOR while mounted (see
-    captain_effective_stats() et al.), which would make that subtraction
-    silently wrong whenever the floor is doing anything. None if no one is
-    currently mounted."""
-    rider = (wb.get("horse") or {}).get("rider")
-    return rider.get("backup") if rider else None
+    """This figure's Move/Fight/Armour on foot, or None if no one is mounted.
+
+    Not the mount's raw backup: that holds base stats only, so printing it
+    beside an effective figure put an unequipped number next to an equipped one
+    (see warband_store.unmounted_effective_stats(), which adds the same
+    bonuses back)."""
+    return unmounted_effective_stats(wb)
 
 
 def _horse_companion_line(wb: dict) -> str:

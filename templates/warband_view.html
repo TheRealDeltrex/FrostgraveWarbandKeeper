@@ -959,10 +959,10 @@
             <div class="stat-row">
               {# wizard_display_stats, not wiz.stats: a Beastcrafter III's Animal
                  Feature (Fast / Scales) is folded in, marked with a * below. #}
-              <div class="stat-pill"><span class="label">Move</span><span class="value">{% if wiz_mounted %}{{ horse_rider.backup.move }}{% else %}{{ wizard_display_stats.move }}{% endif %}{% if wizard_state_bonus.move %}*{% endif %}{% if wiz_mounted %} <span class="muted">({{ wizard_display_stats.move }})</span>{% endif %}</span></div>
-              <div class="stat-pill"><span class="label">Fight</span><span class="value">{% if wiz_mounted %}{{ format_stat(horse_rider.backup.fight) }}{% else %}{{ format_stat(wizard_display_stats.fight) }}{% endif %}{% if wiz_mounted %} <span class="muted">({{ format_stat(wizard_display_stats.fight) }})</span>{% endif %}</span></div>
+              <div class="stat-pill"><span class="label">Move</span><span class="value">{% if wiz_mounted %}{{ unmounted_stats.move }}{% else %}{{ wizard_display_stats.move }}{% endif %}{% if wizard_state_bonus.move %}*{% endif %}{% if wiz_mounted %} <span class="muted">({{ wizard_display_stats.move }})</span>{% endif %}</span></div>
+              <div class="stat-pill"><span class="label">Fight</span><span class="value">{% if wiz_mounted %}{{ format_stat(unmounted_stats.fight) }}{% else %}{{ format_stat(wizard_display_stats.fight) }}{% endif %}{% if wiz_mounted %} <span class="muted">({{ format_stat(wizard_display_stats.fight) }})</span>{% endif %}</span></div>
               <div class="stat-pill"><span class="label">Shoot</span><span class="value">{{ format_stat(wizard_display_stats.shoot) }}</span></div>
-              <div class="stat-pill"><span class="label">Armour</span><span class="value">{% if wiz_mounted %}{{ horse_rider.backup.armour }}{% else %}{{ wizard_display_stats.armour }}{% endif %}{% if wizard_state_bonus.armour %}*{% endif %}{% if wiz_mounted %} <span class="muted">({{ wizard_display_stats.armour }})</span>{% endif %}</span></div>
+              <div class="stat-pill"><span class="label">Armour</span><span class="value">{% if wiz_mounted %}{{ unmounted_stats.armour }}{% else %}{{ wizard_display_stats.armour }}{% endif %}{% if wizard_state_bonus.armour %}*{% endif %}{% if wiz_mounted %} <span class="muted">({{ wizard_display_stats.armour }})</span>{% endif %}</span></div>
               <div class="stat-pill"><span class="label">Will</span><span class="value">{{ format_stat(wizard_display_stats.will) }}</span></div>
               {# The book's split stat: actual on the left, effective on the
                  right while a homunculus exists. Only the actual value is
@@ -1059,10 +1059,10 @@
               <p class="muted">Stats synced from wizard (starting H12 when wizard is H14)</p>
               {% set ap_eff = apprentice_effective_stats(wb) %}
               <div class="stat-row">
-                <div class="stat-pill"><span class="label">Move</span><span class="value">{% if ap_mounted %}{{ horse_rider.backup.move }}{% else %}{{ ap_eff.move }}{% endif %}{% if ap_mounted %} <span class="muted">({{ ap_eff.move }})</span>{% endif %}</span></div>
-                <div class="stat-pill"><span class="label">Fight</span><span class="value">{% if ap_mounted %}{{ format_stat(horse_rider.backup.fight) }}{% else %}{{ format_stat(ap_eff.fight) }}{% endif %}{% if ap_mounted %} <span class="muted">({{ format_stat(ap_eff.fight) }})</span>{% endif %}</span></div>
+                <div class="stat-pill"><span class="label">Move</span><span class="value">{% if ap_mounted %}{{ unmounted_stats.move }}{% else %}{{ ap_eff.move }}{% endif %}{% if ap_mounted %} <span class="muted">({{ ap_eff.move }})</span>{% endif %}</span></div>
+                <div class="stat-pill"><span class="label">Fight</span><span class="value">{% if ap_mounted %}{{ format_stat(unmounted_stats.fight) }}{% else %}{{ format_stat(ap_eff.fight) }}{% endif %}{% if ap_mounted %} <span class="muted">({{ format_stat(ap_eff.fight) }})</span>{% endif %}</span></div>
                 <div class="stat-pill"><span class="label">Shoot</span><span class="value">{{ format_stat(ap_eff.shoot) }}</span></div>
-                <div class="stat-pill"><span class="label">Armour</span><span class="value">{% if ap_mounted %}{{ horse_rider.backup.armour }}{% else %}{{ ap_eff.armour }}{% endif %}{% if ap_mounted %} <span class="muted">({{ ap_eff.armour }})</span>{% endif %}</span></div>
+                <div class="stat-pill"><span class="label">Armour</span><span class="value">{% if ap_mounted %}{{ unmounted_stats.armour }}{% else %}{{ ap_eff.armour }}{% endif %}{% if ap_mounted %} <span class="muted">({{ ap_eff.armour }})</span>{% endif %}</span></div>
                 <div class="stat-pill"><span class="label">Will</span><span class="value">{{ format_stat(ap_eff.will) }}</span></div>
                 <div class="stat-pill"><span class="label">Health</span><span class="value">{{ ap_eff.health }}</span></div>
               </div>
@@ -1758,8 +1758,6 @@
          <form> nested inside the big captain_edit details form further down. #}
       <form id="captain-status-form" method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" hidden></form>
     {% endif %}
-    <details class="ref-panel" id="captain">
-      <summary>Captain</summary>
       {% if cap %}
         {% set cap_slots_n = hr.promote_captain_item_slots if cap.origin == 'promoted' else hr.captain_item_slots %}
         {% set cap_dismiss_cost = hr.promote_captain_cost if cap.origin == 'promoted' else hr.captain_hiring_cost %}
@@ -1802,10 +1800,10 @@
                 </div>
               </div>
               <div class="stat-row">
-                <div class="stat-pill"><span class="label">Move</span><span class="value">{% if cap_mounted %}{{ horse_rider.backup.move }}{% else %}{{ cap_eff.move }}{% endif %}{% if cap_mounted %} <span class="muted">({{ cap_eff.move }})</span>{% endif %}</span></div>
-                <div class="stat-pill"><span class="label">Fight</span><span class="value">{% if cap_mounted %}{{ format_stat(horse_rider.backup.fight) }}{% else %}{{ format_stat(cap.stats.fight) }}{% endif %}{% if cap_mounted %} <span class="muted">({{ format_stat(cap.stats.fight) }})</span>{% endif %}</span></div>
+                <div class="stat-pill"><span class="label">Move</span><span class="value">{% if cap_mounted %}{{ unmounted_stats.move }}{% else %}{{ cap_eff.move }}{% endif %}{% if cap_mounted %} <span class="muted">({{ cap_eff.move }})</span>{% endif %}</span></div>
+                <div class="stat-pill"><span class="label">Fight</span><span class="value">{% if cap_mounted %}{{ format_stat(unmounted_stats.fight) }}{% else %}{{ format_stat(cap_eff.fight) }}{% endif %}{% if cap_mounted %} <span class="muted">({{ format_stat(cap_eff.fight) }})</span>{% endif %}</span></div>
                 <div class="stat-pill"><span class="label">Shoot</span><span class="value">{{ format_stat(cap.stats.shoot) }}</span></div>
-                <div class="stat-pill"><span class="label">Armour</span><span class="value">{% if cap_mounted %}{{ horse_rider.backup.armour }}{% else %}{{ cap_eff.armour }}{% endif %}{% if cap_mounted %} <span class="muted">({{ cap_eff.armour }})</span>{% endif %}</span></div>
+                <div class="stat-pill"><span class="label">Armour</span><span class="value">{% if cap_mounted %}{{ unmounted_stats.armour }}{% else %}{{ cap_eff.armour }}{% endif %}{% if cap_mounted %} <span class="muted">({{ cap_eff.armour }})</span>{% endif %}</span></div>
                 <div class="stat-pill"><span class="label">Will</span><span class="value">{{ format_stat(cap_eff.will) }}</span></div>
                 <div class="stat-pill"><span class="label">Health</span><span class="value">{{ cap_eff.health }}</span></div>
               </div>
@@ -2012,7 +2010,6 @@
           </p>
         {% endif %}
       {% endif %}
-    </details>
   {% endif %}
     {% if ragged_warbands_enabled %}
       <details class="ref-panel" id="ragged-warbands-panel">
@@ -2248,10 +2245,10 @@
                   </div>
                 </td>
                 <td><span class="badge {{ s.status }}">{{ s.status }}</span></td>
-                <td>{{ s.move }}{% if s_mounted %} <span class="muted">({{ horse_rider.backup.move }})</span>{% endif %}</td>
-                <td>{{ format_stat(s.fight) }}{% if s_mounted %} <span class="muted">({{ format_stat(horse_rider.backup.fight) }})</span>{% endif %}</td>
+                <td>{% if s_mounted %}{{ unmounted_stats.move }} <span class="muted">({{ s.move }})</span>{% else %}{{ s.move }}{% endif %}</td>
+                <td>{% if s_mounted %}{{ format_stat(unmounted_stats.fight) }} <span class="muted">({{ format_stat(s.fight) }})</span>{% else %}{{ format_stat(s.fight) }}{% endif %}</td>
                 <td>{{ format_stat(s.shoot) }}</td>
-                <td>{{ s.armour }}{% if s_mounted %} <span class="muted">({{ horse_rider.backup.armour }})</span>{% endif %}</td>
+                <td>{% if s_mounted %}{{ unmounted_stats.armour }} <span class="muted">({{ s.armour }})</span>{% else %}{{ s.armour }}{% endif %}</td>
                 <td>{{ format_stat(s.will) }}</td>
                 <td>{{ s.health }}</td>
                 <td class="gold">{{ s.cost }}</td>
@@ -3132,43 +3129,61 @@
       {% endif %}
     </div>
     {% set constructs = soldiers|selectattr('type_key', 'in', STANDARD_CONSTRUCT_TYPE_KEYS)|selectattr('status', 'ne', 'dead')|list %}
-    {% if constructs %}
-      <details class="ref-panel" id="construct-modification-panel" style="margin-top:1rem">
-        <summary>Workshop — Construct Modification</summary>
+    {% for oog in [brew_potion_info, write_scroll_info] if oog.casters %}
+      {% set is_brew = oog.spell == 'Brew Potion' %}
+      <details class="ref-panel" id="oog-{{ 'brew-potion' if is_brew else 'write-scroll' }}" style="margin-top:1rem">
+        <summary>Workshop — {{ oog.spell }} (Out of Game)</summary>
         <p class="muted" style="font-size:0.85rem">
-          Fireheart's Construct Modification table — small/medium/large constructs only, one
-          modification per construct.
+          {% if is_brew %}
+            One Lesser Potion of your choice. A wizard may instead attempt a Greater Potion,
+            paying its ingredient cost first and rolling at −{{ BREW_GREATER_PENALTY }}; a failed
+            attempt still spends the ingredients.
+          {% else %}
+            One scroll of a spell the caster knows, or one they own the grimoire for.
+          {% endif %}
+          {% if oog.bonus %}
+            Your base adds <strong>+{{ oog.bonus }}</strong> to the Casting Roll
+            ({{ oog.bonus_from | join(', ') }}).
+          {% endif %}
         </p>
-        {% if constructs|length > 1 %}
-          <div class="form-row">
-            <label for="construct-modification-select">Construct</label>
-            <select id="construct-modification-select">
-              {% for s in constructs %}
-                <option value="construct-modification-block-{{ loop.index0 }}">{{ s.name }} ({{ s.modifications|length }} modification{{ 's' if s.modifications|length != 1 }})</option>
-              {% endfor %}
+        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
+          <input type="hidden" name="action" value="{{ 'brew_potion' if is_brew else 'write_scroll' }}" />
+          <select name="caster">
+            {% for c in oog.casters %}
+              <option value="{{ c.kind }}">{{ c.name }} (CN {{ c.cn }})</option>
+            {% endfor %}
+          </select>
+          {% if is_brew %}
+            <select name="potion" required>
+              <option value="">— pick a potion —</option>
+              <optgroup label="Lesser">
+                {% for p in lesser_potions %}<option value="{{ p }}">{{ p }}</option>{% endfor %}
+              </optgroup>
+              <optgroup label="Greater (wizard only, −{{ BREW_GREATER_PENALTY }})">
+                {% for p in greater_potions %}<option value="{{ p }}">{{ p }}</option>{% endfor %}
+              </optgroup>
             </select>
-          </div>
-        {% endif %}
-        {% for s in constructs %}
-          <div class="construct-modification-block" id="construct-modification-block-{{ loop.index0 }}" {% if not loop.first %}hidden{% endif %} style="margin-top:0.5rem">
-            {{ construct_modification_picker(s.id, s.modifications, s.name) }}
-          </div>
-        {% endfor %}
-        {% if constructs|length > 1 %}
-          <script>
-            (function () {
-              var sel = document.getElementById("construct-modification-select");
-              if (!sel) return;
-              sel.addEventListener("change", function () {
-                document.querySelectorAll(".construct-modification-block").forEach(function (b) {
-                  b.hidden = b.id !== sel.value;
-                });
-              });
-            })();
-          </script>
-        {% endif %}
+          {% else %}
+            {# Core Rules p.135 allows a spell the caster knows or one the
+               warband holds the grimoire for, and nothing else — so the whole
+               spell list is not offered here. #}
+            <select name="spell" required>
+              <option value="">— pick a spell —</option>
+              <optgroup label="Known">
+                {% for n in write_scroll_known_names %}<option value="{{ n }}">{{ n }}</option>{% endfor %}
+              </optgroup>
+              {% if grimoire_only_spell_names %}
+                <optgroup label="Grimoire in the vault">
+                  {% for n in grimoire_only_spell_names %}<option value="{{ n }}">{{ n }}</option>{% endfor %}
+                </optgroup>
+              {% endif %}
+            </select>
+          {% endif %}
+          <button class="btn secondary small" type="submit" name="outcome" value="success">Succeeded</button>
+          <button class="btn secondary small" type="submit">Random roll</button>
+        </form>
       </details>
-    {% endif %}
+    {% endfor %}
     {% if horses_enabled and has_stable %}
       <details class="ref-panel" id="horse-panel" style="margin-top:1rem">
         <summary>Workshop — Horse{% if wb.horse.owned %} — owned{% endif %}</summary>
@@ -3263,10 +3278,48 @@
         {% endif %}
       </details>
     {% endif %}
+    {% if constructs %}
+      <details class="ref-panel" id="construct-modification-panel" style="margin-top:1rem">
+        <summary>Workshop — Construct Modification</summary>
+        <p class="muted" style="font-size:0.85rem">
+          Fireheart's Construct Modification table — small/medium/large constructs only, one
+          modification per construct.
+        </p>
+        {% if constructs|length > 1 %}
+          <div class="form-row">
+            <label for="construct-modification-select">Construct</label>
+            <select id="construct-modification-select">
+              {% for s in constructs %}
+                <option value="construct-modification-block-{{ loop.index0 }}">{{ s.name }} ({{ s.modifications|length }} modification{{ 's' if s.modifications|length != 1 }})</option>
+              {% endfor %}
+            </select>
+          </div>
+        {% endif %}
+        {% for s in constructs %}
+          <div class="construct-modification-block" id="construct-modification-block-{{ loop.index0 }}" {% if not loop.first %}hidden{% endif %} style="margin-top:0.5rem">
+            {{ construct_modification_picker(s.id, s.modifications, s.name) }}
+          </div>
+        {% endfor %}
+        {% if constructs|length > 1 %}
+          <script>
+            (function () {
+              var sel = document.getElementById("construct-modification-select");
+              if (!sel) return;
+              sel.addEventListener("change", function () {
+                document.querySelectorAll(".construct-modification-block").forEach(function (b) {
+                  b.hidden = b.id !== sel.value;
+                });
+              });
+            })();
+          </script>
+        {% endif %}
+      </details>
+    {% endif %}
     {% set purchasable_items = full_standard_items|selectattr('cost', 'defined')|rejectattr('compatible_bases')|rejectattr('name', 'equalto', SPELL_COMPONENT_BAG_NAME)|list %}
-    {% if purchasable_items %}
+    {% if purchasable_items or owned_firearms %}
       <details class="ref-panel" id="firearms-panel" style="margin-top:1rem">
         <summary>Workshop — Firearms</summary>
+        {% if purchasable_items %}
         <p class="muted" style="font-size:0.85rem">
           Black Powder Firearms (Spellcaster Magazine) are the only items on the Arms &amp; Armour list
           with a real gold cost — everything else there is free starting gear. Buying one here adds
@@ -3299,11 +3352,9 @@
             </tbody>
           </table>
         </div>
-      </details>
-    {% endif %}
+        {% endif %}
     {% if owned_firearms %}
-      <details class="ref-panel" id="firearm-upgrade-panel" style="margin-top:1rem">
-        <summary>Workshop — Upgrade a firearm</summary>
+      <h3 style="margin-top:1rem">Upgrade a firearm</h3>
         <p class="muted" style="font-size:0.85rem">
           Commissioning an upgrade consumes the firearm it's applied to and adds the upgraded item to
           the vault in its place — e.g. Pistol + Double-barrelled becomes "Pistol (Double-barrelled)"
@@ -3367,63 +3418,9 @@
             })();
           </script>
         {% endif %}
+    {% endif %}
       </details>
     {% endif %}
-    {% for oog in [brew_potion_info, write_scroll_info] if oog.casters %}
-      {% set is_brew = oog.spell == 'Brew Potion' %}
-      <details class="ref-panel" id="oog-{{ 'brew-potion' if is_brew else 'write-scroll' }}" style="margin-top:1rem">
-        <summary>Workshop — {{ oog.spell }} (Out of Game)</summary>
-        <p class="muted" style="font-size:0.85rem">
-          {% if is_brew %}
-            One Lesser Potion of your choice. A wizard may instead attempt a Greater Potion,
-            paying its ingredient cost first and rolling at −{{ BREW_GREATER_PENALTY }}; a failed
-            attempt still spends the ingredients.
-          {% else %}
-            One scroll of a spell the caster knows, or one they own the grimoire for.
-          {% endif %}
-          {% if oog.bonus %}
-            Your base adds <strong>+{{ oog.bonus }}</strong> to the Casting Roll
-            ({{ oog.bonus_from | join(', ') }}).
-          {% endif %}
-        </p>
-        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
-          <input type="hidden" name="action" value="{{ 'brew_potion' if is_brew else 'write_scroll' }}" />
-          <select name="caster">
-            {% for c in oog.casters %}
-              <option value="{{ c.kind }}">{{ c.name }} (CN {{ c.cn }})</option>
-            {% endfor %}
-          </select>
-          {% if is_brew %}
-            <select name="potion" required>
-              <option value="">— pick a potion —</option>
-              <optgroup label="Lesser">
-                {% for p in lesser_potions %}<option value="{{ p }}">{{ p }}</option>{% endfor %}
-              </optgroup>
-              <optgroup label="Greater (wizard only, −{{ BREW_GREATER_PENALTY }})">
-                {% for p in greater_potions %}<option value="{{ p }}">{{ p }}</option>{% endfor %}
-              </optgroup>
-            </select>
-          {% else %}
-            {# Core Rules p.135 allows a spell the caster knows or one the
-               warband holds the grimoire for, and nothing else — so the whole
-               spell list is not offered here. #}
-            <select name="spell" required>
-              <option value="">— pick a spell —</option>
-              <optgroup label="Known">
-                {% for n in write_scroll_known_names %}<option value="{{ n }}">{{ n }}</option>{% endfor %}
-              </optgroup>
-              {% if grimoire_only_spell_names %}
-                <optgroup label="Grimoire in the vault">
-                  {% for n in grimoire_only_spell_names %}<option value="{{ n }}">{{ n }}</option>{% endfor %}
-                </optgroup>
-              {% endif %}
-            </select>
-          {% endif %}
-          <button class="btn secondary small" type="submit" name="outcome" value="success">Succeeded</button>
-          <button class="btn secondary small" type="submit">Random roll</button>
-        </form>
-      </details>
-    {% endfor %}
     {% if homunculus_book_on and homunculus_info.casters and not has_homunculus %}
       {# Wizard only, so the caster list is not offered — out_of_game_cast_info
          would include the apprentice if she somehow knew it. #}
