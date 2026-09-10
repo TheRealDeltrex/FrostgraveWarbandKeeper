@@ -4150,19 +4150,19 @@
         var warning = btn.getAttribute('data-sell-warn');
         warn.textContent = warning || '';
         warn.hidden = !warning;
-        if (price) {
-          text.textContent = name + ' will be sold for ' + price + ' gc.';
-          ask.hidden = true;
-          input.value = price;
-        } else {
-          text.textContent = name + ' will be sold. Please insert the sale price here:';
-          ask.hidden = false;
-          input.value = '';
-        }
+        // The field is always shown and always editable — a known price is
+        // filled in rather than fixed, since what an item fetches is the
+        // table's call and half these figures are the app's own p.199 maths.
+        ask.hidden = false;
+        input.value = price || '';
+        text.textContent = price
+          ? name + ' will be sold. Adjust the price if your table settled on another:'
+          : name + ' will be sold. Please insert the sale price here:';
         // showModal() is only missing on browsers this app never targets, but
         // falling back keeps the button working rather than doing nothing.
         if (dlg.showModal) { dlg.showModal(); } else { dlg.setAttribute('open', ''); }
-        if (!ask.hidden) input.focus();
+        input.focus();
+        input.select();
       }
 
       function close() {

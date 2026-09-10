@@ -1492,8 +1492,15 @@ PAIRED_ITEM_WEARERS = {
 
 
 def paired_item_copies(name: str, owned: int) -> int:
-    """How many figures can wear `owned` copies of `name`."""
-    return owned * PAIRED_ITEM_WEARERS.get((name or "").strip().lower(), 1)
+    """How many figures can wear `owned` copies of `name`.
+
+    Vault names are free text and usually carry the book they came from --
+    the loot picker records "Eyes of Amoto (Thaw of the Lich Lord)" -- so a
+    trailing parenthetical is stripped before the lookup. Without that the set
+    matched only when the player had typed the bare name themselves, which is
+    the minority of the time."""
+    key = re.sub(r"\s*\([^)]*\)\s*$", "", (name or "").strip()).strip().lower()
+    return owned * PAIRED_ITEM_WEARERS.get(key, 1)
 
 
 def vault_grimoire_spells(wb: dict) -> set[str]:
