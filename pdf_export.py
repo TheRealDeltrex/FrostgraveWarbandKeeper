@@ -37,7 +37,7 @@ from frostgrave_data import (
     get_soldier,
     unused_xp,
 )
-from game_content import item_effect_text, item_slot_cost
+from game_content import common_item_index, item_effect_text, item_slot_cost
 from warband_store import (
     apprentice_effective_stats,
     base_summary,
@@ -1043,18 +1043,28 @@ def _vault_item_rules(name: str) -> str:
     off in turn so the entry still finds its write-up; a hand-typed name that
     matches nothing simply prints without one."""
     bare = re.sub(r"\s*\([^)]*\)\s*$", "", _strip_source_suffix(name)).strip()
-    for candidate in (
-        name,
-        _strip_source_suffix(name),
-        bare,
-        name.split(":", 1)[0].strip(),
-        bare.split(":", 1)[0].strip(),
-    ):
-        if candidate:
-            text = item_effect_text(candidate)
-            if text:
-                return _shorten_rules(text)
+    for candidate in (name, _strip_source_suffix(name), bare):
+        if not candidate:
+            continue
+        if _is_self_explaining(candidate):
+            return ""
+        text = item_effect_text(candidate)
+        if text:
+            return _shorten_rules(text)
     return ""
+
+
+# Categories whose entries say nothing worth printing next to the item. A
+# grimoire or scroll write-up explains what grimoires and scrolls *are*, not
+# what this one does -- the spell inside is already in the item's name -- and a
+# magic weapon or armour is described by its own name ("Bow, +1 Shoot").
+# A named potion still prints: that text is specific to the potion.
+SELF_EXPLAINING_CATEGORIES = {"Grimoire", "Scroll", "Magic Weapon or Armour"}
+
+
+def _is_self_explaining(name: str) -> bool:
+    row = common_item_index().get(name) or {}
+    return row.get("category") in SELF_EXPLAINING_CATEGORIES
 
 
 # A roster line is a reminder, not the rulebook: the Core Rules' grimoire entry
