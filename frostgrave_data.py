@@ -2298,6 +2298,9 @@ SOLDIERS: dict[str, dict] = {
         "armour": 13,
         "will": 0,
         "health": 14,
+        # Fireheart p.86 prints these in brackets on the stat line: the totals
+        # while an imp is inside (the Possession spell's modifiers).
+        "possessed": {"fight": 6, "armour": 14, "will": -2},
         "gear": "—",
         "notes": "Construct, Demon Portal. Starts empty — cast Imp or Summon Demon on it to fill it with an Imp (always an Imp, regardless of which spell; doesn't count against the caster's demon-control limit). While possessed: Fight +6, Armour 14, Will -2. Already modified; cannot be modified further. Animated via a Book of the Construct (Demonic Prison).",
         "description": 'A construct shell built to house a demon (Fireheart, Book of the Construct (Demonic Prison)). Construct: immune to poison, never counts as wounded. Demon Portal: starts empty; casting Imp or Summon Demon on it fills it with an Imp regardless of the spell used, and doesn\'t count against the caster\'s demon-control limit. While possessed it fights as Fight +6, Armour 14, Will -2 instead of the stats above. Comes pre-modified and cannot take any further Construct Modification.',
