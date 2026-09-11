@@ -256,6 +256,8 @@ def _now() -> str:
 
 
 def _slug(name: str) -> str:
+    # An imported file's "name" is untrusted and need not be a string.
+    name = name if isinstance(name, str) else ""
     s = re.sub(r"[^a-zA-Z0-9]+", "-", (name or "warband").strip().lower()).strip("-")
     return s[:40] or "warband"
 
@@ -1457,7 +1459,8 @@ def _resync_permanent_injury_text(entity: dict) -> None:
     fix — e.g. removing a leaked implementation note — wouldn't otherwise reach
     a warband that already recorded that injury until this resync runs."""
     for inj in entity.get("permanent_injuries") or []:
-        row = PERMANENT_INJURY_BY_ID.get(inj.get("id"))
+        inj_id = inj.get("id")
+        row = PERMANENT_INJURY_BY_ID.get(inj_id) if isinstance(inj_id, str) else None
         if row:
             inj["name"] = row["name"]
             inj["text"] = row["text"]
@@ -1479,7 +1482,10 @@ def _as_list(value: object) -> list:
     not enough for the roster's list fields: a key that is present but
     explicitly null survives it untouched, and every template that renders one
     calls |length or iterates it — so a hand-edited "mutations": null imports
-    cleanly and then 500s warband_view forever."""
+    cleanly and then 500s warband_view forever.
+
+    It types the list, not its elements: where a consumer calls .get() on each
+    entry, filter to dicts as well (see "mutations", "permanent_injuries")."""
     return value if isinstance(value, list) else []
 
 
@@ -1610,7 +1616,7 @@ def _normalize_warband(wb: dict) -> dict:
     wiz["reputations"] = [
         r for r in _as_list(wiz.get("reputations")) if isinstance(r, str) and r
     ]
-    wiz["permanent_injuries"] = _as_list(wiz.get("permanent_injuries"))
+    wiz["permanent_injuries"] = [x for x in _as_list(wiz.get("permanent_injuries")) if isinstance(x, dict)]
     wiz["level_history"] = _as_list(wiz.get("level_history"))
     _resync_permanent_injury_text(wiz)
     wiz.setdefault("portrait_source_name", None)
@@ -1657,16 +1663,23 @@ def _normalize_warband(wb: dict) -> dict:
     wb.setdefault("giant_blooded_pending", False)
     wb.setdefault("thrall_pending", False)
     bm = wb.setdefault("black_market", {"rolls_used": 0})
+    if not isinstance(bm, dict):
+        bm = wb["black_market"] = {"rolls_used": 0}
     bm["rolls_used"] = _as_int(bm.get("rolls_used"), 0)
-    if not isinstance(bm.get("offers"), list):
-        bm["offers"] = []
+    # black_market_buy_item() indexes offer["id"], entry["id"] and
+    # entry["name"] directly.
+    bm["offers"] = [
+        o for o in _as_list(bm.get("offers")) if isinstance(o, dict) and isinstance(o.get("id"), str)
+    ]
     for offer in bm["offers"]:
-        if not isinstance(offer, dict):
-            continue
-        for entry in offer.get("entries") or []:
-            if isinstance(entry, dict):
-                # Reaches arithmetic in black_market_buy_item().
-                entry["price"] = max(0, _as_int(entry.get("price"), 0))
+        offer["entries"] = [
+            e
+            for e in _as_list(offer.get("entries"))
+            if isinstance(e, dict) and isinstance(e.get("id"), str) and isinstance(e.get("name"), str)
+        ]
+        for entry in offer["entries"]:
+            # Reaches arithmetic in black_market_buy_item().
+            entry["price"] = max(0, _as_int(entry.get("price"), 0))
     mh = wb.setdefault("monster_hunting", {"kills": [], "prizes": [], "bags_bought": 0})
     if not isinstance(mh, dict):
         mh = wb["monster_hunting"] = {"kills": [], "prizes": [], "bags_bought": 0}
@@ -1720,7 +1733,7 @@ def _normalize_warband(wb: dict) -> dict:
         ap["portrait"] = _safe_portrait_ref(ap.get("portrait"))
         ap.setdefault("has_dagger", True)
         ap["mutations"] = [x for x in _as_list(ap.get("mutations")) if isinstance(x, dict)]
-        ap["permanent_injuries"] = _as_list(ap.get("permanent_injuries"))
+        ap["permanent_injuries"] = [x for x in _as_list(ap.get("permanent_injuries")) if isinstance(x, dict)]
         _resync_permanent_injury_text(ap)
         ap.setdefault("portrait_source_name", None)
         ap.pop("health_current", None)
@@ -1768,7 +1781,9 @@ def _normalize_warband(wb: dict) -> dict:
         cap.setdefault("origin", "hired")
         cap["known_tricks"] = _as_list(cap.get("known_tricks"))
         cap["mutations"] = [x for x in _as_list(cap.get("mutations")) if isinstance(x, dict)]
-        cap["permanent_injuries"] = _as_list(cap.get("permanent_injuries"))
+        cap["permanent_injuries"] = [
+            x for x in _as_list(cap.get("permanent_injuries")) if isinstance(x, dict)
+        ]
         _resync_permanent_injury_text(cap)
         cap.setdefault("portrait_source_name", None)
         cap.setdefault("level", 0)
@@ -1803,7 +1818,7 @@ def _normalize_warband(wb: dict) -> dict:
         s.setdefault("portrait_source_name", None)
         s["mutations"] = [x for x in _as_list(s.get("mutations")) if isinstance(x, dict)]
         s["modifications"] = [x for x in _as_list(s.get("modifications")) if isinstance(x, dict)]
-        s["permanent_injuries"] = _as_list(s.get("permanent_injuries"))
+        s["permanent_injuries"] = [x for x in _as_list(s.get("permanent_injuries")) if isinstance(x, dict)]
         _resync_permanent_injury_text(s)
         s.pop("health_current", None)
         # Coerced, not merely backfilled: enrich_soldier() feeds these straight

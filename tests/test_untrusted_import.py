@@ -237,6 +237,62 @@ def test_unhashable_lookup_keys_are_coerced(fresh_warband):
     assert imported["soldiers"][0]["knightly_order"] is None
 
 
+def test_malformed_black_market_offers_are_dropped(fresh_warband):
+    """black_market_buy_item() indexes offer["id"], entry["id"] and
+    entry["name"] directly, so an offer or entry missing one raised out of the
+    Buy button. Well-formed ones survive and stay buyable."""
+    good_entry = {"id": "e1", "name": "Potion of Healing", "price": "junk"}
+    imported = _round_trip(
+        fresh_warband,
+        black_market={
+            "rolls_used": 1,
+            "offers": [
+                "not an offer",
+                {"entries": [good_entry]},
+                {"id": 7, "entries": [good_entry]},
+                {"id": "o1", "entries": 5},
+                {"id": "o2", "entries": [good_entry, {"name": "no id"}, {"id": "e2", "name": None}, "x"]},
+            ],
+        },
+    )
+    offers = imported["black_market"]["offers"]
+    assert [o["id"] for o in offers] == ["o1", "o2"]
+    assert offers[0]["entries"] == []
+    assert offers[1]["entries"] == [{"id": "e1", "name": "Potion of Healing", "price": 0}]
+
+    imported["homerules"]["black_market_enabled"] = True
+    ok, _ = ws.black_market_buy_item(imported, "o2", "e1")
+    assert ok
+    assert ws.black_market_buy_item(imported, "o1", "e1")[0] is False
+
+
+def test_non_dict_permanent_injuries_are_dropped(fresh_warband):
+    """Every consumer calls .get() on each injury, and the text resync uses its
+    id as a dict key -- a string entry or a list id raised out of
+    _normalize_warband(), so a file already on disk 500'd every view."""
+    known = next(iter(ws.PERMANENT_INJURY_BY_ID))
+    injuries = ["x", 3, None, {"id": ["unhashable"]}, {"id": known}]
+    raw = json.loads(ws.export_warband_json(fresh_warband))
+    raw["wizard"]["permanent_injuries"] = injuries
+    raw["soldiers"] = [{"id": "s1", "type_key": "thug", "permanent_injuries": injuries}]
+    imported = ws.import_warband_json(json.dumps(raw))
+    for figure in (imported["wizard"], imported["soldiers"][0]):
+        assert [inj["id"] for inj in figure["permanent_injuries"]] == [["unhashable"], known]
+        assert figure["permanent_injuries"][1]["name"] == ws.PERMANENT_INJURY_BY_ID[known]["name"]
+
+
+@pytest.mark.parametrize("bad_name", [["x"], {"a": 1}, 7, None])
+def test_non_string_warband_name_still_imports(fresh_warband, bad_name):
+    """The name seeds the new warband id; a non-string one raised
+    AttributeError out of _slug() and the import was refused with that
+    message instead of going through."""
+    raw = json.loads(ws.export_warband_json(fresh_warband))
+    raw["name"] = bad_name
+    raw["id"] = None
+    imported = ws.import_warband_json(json.dumps(raw))
+    assert imported["id"].startswith("warband-")
+
+
 @pytest.mark.parametrize("bad_resources", [None, 5, True, "stable"])
 def test_non_list_base_resources_becomes_a_list(fresh_warband, bad_resources):
     """The resources filter iterates it directly."""
@@ -363,9 +419,14 @@ def test_every_field_with_a_wrong_type_still_renders(bad):
         data["id"] = None
         try:
             wb = ws.import_warband_json(json.dumps(data))
+            ws.save_warband(wb)
         except Exception:
-            continue  # refused at import: fine
-        ws.save_warband(wb)
+            # Refused at import is fine -- but a file already in the warband
+            # folder never passes through import, and load_warband() can't
+            # refuse it. `"black_market": null` was refused here and still
+            # 500'd every view once on disk, so try that route too.
+            wb = {"id": "disk-fuzz"}
+            ws.warband_path(wb["id"]).write_text(json.dumps(data), encoding="utf-8")
         label = ".".join(map(str, path))
         for suffix in ("", "/pdf"):
             try:
