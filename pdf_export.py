@@ -105,23 +105,28 @@ def _t(text: object) -> str:
     return s.encode("latin-1", errors="replace").decode("latin-1")
 
 
-def _stat_line(stats: dict, include_health: bool = False, unmounted: dict | None = None) -> str:
+def _stat_line(
+    stats: dict, include_health: bool = False, unmounted: dict | None = None, possessed: dict | None = None
+) -> str:
     """Combat stats with bold labels; render with markdown=True. Health optional
     (soldiers). unmounted, if given, is this figure's Move/Fight/Armour on foot;
     it leads and the mounted value goes in brackets behind it, matching the web
-    UI."""
+    UI. possessed brackets a Demonic Prison's stats with its imp inside, the
+    way the book prints them."""
 
     def pair(stat: str, current, fmt=str) -> str:
-        if not unmounted:
-            return fmt(current)
-        return f"{fmt(unmounted[stat])} ({fmt(current)})"
+        if unmounted and stat in unmounted:
+            return f"{fmt(unmounted[stat])} ({fmt(current)})"
+        if possessed and stat in possessed:
+            return f"{fmt(current)} ({fmt(possessed[stat])})"
+        return fmt(current)
 
     parts = [
         f"**Move:** {pair('move', stats.get('move', 0))}",
         f"**Fight:** {pair('fight', int(stats.get('fight', 0)), lambda v: format_stat(int(v)))}",
         f"**Shoot:** {format_stat(int(stats.get('shoot', 0)))}",
         f"**Armour:** {pair('armour', stats.get('armour', 10))}",
-        f"**Will:** {format_stat(int(stats.get('will', 0)))}",
+        f"**Will:** {pair('will', int(stats.get('will', 0)), lambda v: format_stat(int(v)))}",
     ]
     if include_health:
         parts.append(f"**Health:** {stats.get('health', 0)}")
@@ -868,7 +873,7 @@ def build_warband_pdf(wb: dict) -> bytes:
                 0,
                 4.5,
                 _t(
-                    f"{_stat_line(stats, unmounted=s_unmounted)}  -  "
+                    f"{_stat_line(stats, unmounted=s_unmounted, possessed=s.get('possessed_stats'))}  -  "
                     f"{s.get('category', '')} - {s.get('cost', 0)} gc"
                 ),
                 new_x="LMARGIN",

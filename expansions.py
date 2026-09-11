@@ -1491,6 +1491,21 @@ PAIRED_ITEM_WEARERS = {
 }
 
 
+def possessed_stats(catalog: dict, figure: dict) -> dict | None:
+    """A possessable construct's stats with its demon inside, or None.
+
+    The book prints possessed totals against the base profile, so the gap
+    between the two is carried onto whatever the figure has now -- an item or
+    mutation that raised its Fight still counts once the imp moves in."""
+    possessed = catalog.get("possessed")
+    if not isinstance(possessed, dict):
+        return None
+    return {
+        stat: int(figure.get(stat, 0)) + int(value) - int(catalog.get(stat, 0))
+        for stat, value in possessed.items()
+    }
+
+
 def paired_item_copies(name: str, owned: int) -> int:
     """How many figures can wear `owned` copies of `name`.
 

@@ -2295,6 +2295,7 @@ def enrich_soldier(wb: dict, s: dict) -> dict:
     out["shoot"] = int(out.get("shoot", 0)) + bonus["shoot"]
     out["will"] = int(out.get("will", 0)) + bonus["will"] + expansions.brewery_will_bonus(wb)
     out = expansions.apply_hunger_penalty(out, s.get("status"))
+    out["possessed_stats"] = expansions.possessed_stats(cat, out)
     return out
 
 

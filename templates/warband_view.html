@@ -2248,10 +2248,10 @@
                 </td>
                 <td><span class="badge {{ s.status }}">{{ s.status }}</span></td>
                 <td>{% if s_mounted %}{{ unmounted_stats.move }} <span class="muted">({{ s.move }})</span>{% else %}{{ s.move }}{% endif %}</td>
-                <td>{% if s_mounted %}{{ format_stat(unmounted_stats.fight) }} <span class="muted">({{ format_stat(s.fight) }})</span>{% else %}{{ format_stat(s.fight) }}{% endif %}</td>
+                <td>{% if s_mounted %}{{ format_stat(unmounted_stats.fight) }} <span class="muted">({{ format_stat(s.fight) }})</span>{% else %}{{ format_stat(s.fight) }}{% if s.possessed_stats %} <span class="muted" title="Possessed">({{ format_stat(s.possessed_stats.fight) }})</span>{% endif %}{% endif %}</td>
                 <td>{{ format_stat(s.shoot) }}</td>
-                <td>{% if s_mounted %}{{ unmounted_stats.armour }} <span class="muted">({{ s.armour }})</span>{% else %}{{ s.armour }}{% endif %}</td>
-                <td>{{ format_stat(s.will) }}</td>
+                <td>{% if s_mounted %}{{ unmounted_stats.armour }} <span class="muted">({{ s.armour }})</span>{% else %}{{ s.armour }}{% if s.possessed_stats %} <span class="muted" title="Possessed">({{ s.possessed_stats.armour }})</span>{% endif %}{% endif %}</td>
+                <td>{{ format_stat(s.will) }}{% if s.possessed_stats %} <span class="muted" title="Possessed">({{ format_stat(s.possessed_stats.will) }})</span>{% endif %}</td>
                 <td>{{ s.health }}</td>
                 <td class="gold">{{ s.cost }}</td>
                 <td class="actions-cell">
@@ -2624,10 +2624,10 @@
                 </td>
                 <td class="gold">{% if c.cost_label %}{{ c.cost_label }}{% elif c.cost == 0 %}Free{% else %}{{ c.cost }}{% endif %}</td>
                 <td>{{ c.move }}</td>
-                <td>{{ format_stat(c.fight) }}</td>
+                <td>{{ format_stat(c.fight) }}{% if c.possessed %} <span class="muted" title="Possessed">({{ format_stat(c.possessed.fight) }})</span>{% endif %}</td>
                 <td>{{ format_stat(c.shoot) }}</td>
-                <td>{{ c.armour }}</td>
-                <td>{{ format_stat(c.will) }}</td>
+                <td>{{ c.armour }}{% if c.possessed %} <span class="muted" title="Possessed">({{ c.possessed.armour }})</span>{% endif %}</td>
+                <td>{{ format_stat(c.will) }}{% if c.possessed %} <span class="muted" title="Possessed">({{ format_stat(c.possessed.will) }})</span>{% endif %}</td>
                 <td>{{ c.health }}</td>
                 <td class="muted">{{ c.gear }}</td>
                 <td>
@@ -2735,10 +2735,10 @@
                 </td>
                 <td class="gold">{% if c.cost_label %}{{ c.cost_label }}{% else %}Spell{% endif %}</td>
                 <td>{{ c.move }}</td>
-                <td>{{ format_stat(c.fight) }}</td>
+                <td>{{ format_stat(c.fight) }}{% if c.possessed %} <span class="muted" title="Possessed">({{ format_stat(c.possessed.fight) }})</span>{% endif %}</td>
                 <td>{{ format_stat(c.shoot) }}</td>
-                <td>{{ c.armour }}</td>
-                <td>{{ format_stat(c.will) }}</td>
+                <td>{{ c.armour }}{% if c.possessed %} <span class="muted" title="Possessed">({{ c.possessed.armour }})</span>{% endif %}</td>
+                <td>{{ format_stat(c.will) }}{% if c.possessed %} <span class="muted" title="Possessed">({{ format_stat(c.possessed.will) }})</span>{% endif %}</td>
                 <td>{{ c.health }}</td>
                 <td class="muted">{{ c.gear }}</td>
                 <td>
@@ -2822,10 +2822,10 @@
                   <td><strong>{{ c.name }}</strong></td>
                   <td class="muted"><span class="badge">via {{ c.requires_spell }}</span></td>
                   <td>{{ c.move }}</td>
-                  <td>{{ format_stat(c.fight) }}</td>
+                  <td>{{ format_stat(c.fight) }}{% if c.possessed %} <span class="muted" title="Possessed">({{ format_stat(c.possessed.fight) }})</span>{% endif %}</td>
                   <td>{{ format_stat(c.shoot) }}</td>
-                  <td>{{ c.armour }}</td>
-                  <td>{{ format_stat(c.will) }}</td>
+                  <td>{{ c.armour }}{% if c.possessed %} <span class="muted" title="Possessed">({{ c.possessed.armour }})</span>{% endif %}</td>
+                  <td>{{ format_stat(c.will) }}{% if c.possessed %} <span class="muted" title="Possessed">({{ format_stat(c.possessed.will) }})</span>{% endif %}</td>
                   <td>{{ c.health }}</td>
                   <td>
                     {% if c.description %}
@@ -2921,10 +2921,10 @@
                   </td>
                   <td class="gold">{% if c.cost_label %}{{ c.cost_label }}{% elif c.cost == 0 %}Free{% else %}{{ c.cost }}{% endif %}</td>
                   <td>{{ c.move }}</td>
-                  <td>{{ format_stat(c.fight) }}</td>
+                  <td>{{ format_stat(c.fight) }}{% if c.possessed %} <span class="muted" title="Possessed">({{ format_stat(c.possessed.fight) }})</span>{% endif %}</td>
                   <td>{{ format_stat(c.shoot) }}</td>
-                  <td>{{ c.armour }}</td>
-                  <td>{{ format_stat(c.will) }}</td>
+                  <td>{{ c.armour }}{% if c.possessed %} <span class="muted" title="Possessed">({{ c.possessed.armour }})</span>{% endif %}</td>
+                  <td>{{ format_stat(c.will) }}{% if c.possessed %} <span class="muted" title="Possessed">({{ format_stat(c.possessed.will) }})</span>{% endif %}</td>
                   <td>{{ c.health }}</td>
                   <td class="muted">{{ c.gear }}</td>
                   <td>
