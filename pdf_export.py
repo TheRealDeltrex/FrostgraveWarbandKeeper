@@ -29,12 +29,12 @@ from frostgrave_data import (
     PROMOTE_CAPTAIN_ITEM_SLOTS,
     PROSTHETIC_LIMB_NAME_BY_INJURY_ID,
     PROSTHETIC_UPGRADE_BY_ID,
+    SOLDIER_ABILITIES,
     SOLDIER_COMPANION_BY_TYPE_KEY,
     SOURCE_BOOKS,
     animal_companion_type_keys,
     construct_type_keys,
     format_stat,
-    get_soldier,
     unused_xp,
 )
 from game_content import common_item_index, item_effect_text, item_slot_cost
@@ -900,6 +900,13 @@ def build_warband_pdf(wb: dict) -> bytes:
                     new_y="NEXT",
                     markdown=True,
                 )
+            s_abilities = SOLDIER_ABILITIES.get(s.get("type_key", ""))
+            if s_abilities:
+                pdf.set_x(left)
+                pdf.multi_cell(
+                    0, 4.5, _t(f"**Abilities:** {s_abilities}"),
+                    new_x="LMARGIN", new_y="NEXT", markdown=True,
+                )
             s_slot_n = expansions.soldier_item_slots(wb, s.get("type_key", ""), s.get("item_slots"))
             s_slots = s.get("item_slots") or []
             # Creatures (animal companions/constructs) only have a slot at all
@@ -929,16 +936,12 @@ def build_warband_pdf(wb: dict) -> bytes:
                     pdf.set_x(left)
                     pdf.multi_cell(0, 4.5, line, new_x="LMARGIN", new_y="NEXT", markdown=True)
             elif s.get("type_key", "") in PRE_MODIFIED_CONSTRUCT_TYPE_KEYS:
-                # The catalog's own "notes" (traits) — never s.get("notes"),
-                # which is the soldier's separate free-text Notes field and
-                # shares that key name once merged by enrich_soldier().
-                cat_notes = (get_soldier(s.get("type_key", "")) or {}).get("notes", "")
-                if cat_notes.strip():
-                    pdf.set_x(left)
-                    pdf.multi_cell(
-                        0, 4.5, _t(f"**Pre-modified (Fireheart):** {cat_notes}"),
-                        new_x="LMARGIN", new_y="NEXT", markdown=True,
-                    )
+                # Its traits are on the Abilities line above.
+                pdf.set_x(left)
+                pdf.multi_cell(
+                    0, 4.5, _t("**Pre-modified (Fireheart):** cannot take further modifications."),
+                    new_x="LMARGIN", new_y="NEXT", markdown=True,
+                )
             s_inj_lines = _mutation_lines(s.get("permanent_injuries"))
             if s_inj_lines:
                 pdf.set_x(left)

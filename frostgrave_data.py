@@ -1805,8 +1805,8 @@ SOLDIERS: dict[str, dict] = {
         "will": 4,
         "health": 12,
         "gear": "Bladed staff",
-        "notes": "Bladed staff: +1 Fight and -1 to the enemy's hand-to-hand attacks.",
-        "description": "A disciplined martial artist who fights with a bladed staff — a quarterstaff with a blade lashed to one end. It grants +1 Fight and reduces the enemy's hand-to-hand damage against the monk by 1.",
+        "notes": "Bladed staff: +1 damage and -1 to the enemy's hand-to-hand damage.",
+        "description": "A disciplined martial artist who fights with a bladed staff — a quarterstaff with a blade lashed to one end. It deals +1 damage and reduces the enemy's hand-to-hand damage against the monk by 1.",
     },
     "mystic_warrior": {
         "name": "Mystic Warrior",
@@ -2834,6 +2834,298 @@ SOLDIERS: dict[str, dict] = {
         "description": 'A minor demon that has joined the warband as a permanent member, rather than the temporary result of casting Summon Demon (see summoned_minor_demon). Demon: immune to poison, all its attacks count as magic, and it may carry treasure tokens but has no item slots.',
     },
 }
+
+# Compact rules text for each soldier type's special abilities, printed under
+# the soldier on the PDF roster so the sheet works without the app or the
+# book. Taken from each type's own entry and the trait definitions it cites
+# (Core Rules pp.194-197 unless noted); a type with no special rules has no
+# entry. Recruitment and hiring rules are left out -- they are the app's job.
+_CONSTRUCT = "Construct: immune to poison, never counts as wounded; carries treasure but has no item slots."
+_CONSTRUCT_NO_TREASURE = (
+    "Construct: immune to poison, never counts as wounded; no item slots. Cannot carry treasure."
+)
+_ANIMAL = "Animal: cannot pick up treasure tokens; no item slots."
+_DEMON = "Demon: all its attacks are magic; immune to poison; carries treasure but has no item slots."
+_UNDEAD = "Undead: immune to poison, never counts as wounded; carries treasure but has no item slots."
+_HORNS = "Horns: +2 Fight for an attack made in the same activation it moved into combat."
+_LARGE = "Large: -2 when defending against shooting."
+_STRONG = "Strong: +2 damage."
+_TRUE_SIGHT = (
+    "True Sight: ignores Beauty and Invisibility; an Illusionary Soldier it fights is removed."
+)
+_POISON_EFFECT = "reduced to one action per activation until healed or the game ends"
+_SUMMONED_DEMON = "Under its summoner's Control Demon."
+_LEGENDARY = "Legendary: rolls survival on the Wizard and Apprentice Survival Table."
+_FIREARM = (
+    "Firing takes the firearm -1 Shoot, which is not in the stat line. "
+    "A lost or destroyed firearm is replaced free after the game."
+)
+_TRAP_EXPERT = (
+    "+5 against trap numbers. Once per game, with traps in use, the first initiative roll of 2 "
+    "counts as a 1 for springing a trap (still a 2 for initiative)."
+)
+_PACK_MULE = (
+    'Carries up to 3 items. Action: hand one to a warband member within 1" with an open slot; '
+    "or that member spends an action to take or swap one."
+)
+# Spellcaster Magazine Issue 3, pp.7-8: every rangifer has these.
+_RANGIFER = (
+    "Hate Undead: +1 Fight and magic attacks against undead, when armed only with antlers or "
+    "flint/wooden weapons. Antlers: never unarmed; -1 Fight if antlers are its only weapon. "
+    "Flint Weapons: destroyed on any natural 1 rolled in combat."
+)
+_RANGIFER_NO_ANTLER_PENALTY = _RANGIFER.replace(
+    "; -1 Fight if antlers are its only weapon", ", and no Fight penalty with antlers alone"
+)
+_WILDERNESS_SURVIVAL = "Wilderness Survival: consumes no supply points unless reduced to 0 Health."
+# The Wildwoods' Guide entry (p.36) says +2sp; its trait list (p.94) says +4sp.
+_TERRAIN_EXPERT = (
+    "Terrain Expert (Mountains, Bogs, Ice or Forests): never consumes supply points. When the "
+    "scenario's dominant terrain matches: Nimble (no rough-ground penalty), +2 to the warband's "
+    "Initiative Rolls, and +2sp after the game if it survives (the trait list says +4sp). Only one "
+    "guide's benefit applies per game."
+)
+_CANDLE_JACK = (
+    f"{_CONSTRUCT} Magic Attack: all its attacks are magic. Organic Construction: affected by "
+    "Heal and Steal Health as if not a construct. Never counts as unarmed."
+)
+_DISTRACTING = (
+    'Distracting: it and figures within 2" get +1 Fight against shooting; Casting Rolls within 3" '
+    "of it take -1."
+)
+_SHARP_TEETH = "Sharp Teeth: +1 damage in melee."
+
+SOLDIER_ABILITIES: dict[str, str] = {
+    # --- Core Rules ---
+    "war_hound": _ANIMAL,
+    "apothecary": (
+        "Starts each game with a Potion of Healing. Action: give any potion it carries to a warband "
+        'member within 1" (neither in combat); it counts as drunk at once.'
+    ),
+    "raised_zombie": f"{_UNDEAD} Only one raised zombie at a time.",
+    "summoned_imp": f"{_DEMON} {_SUMMONED_DEMON}",
+    "summoned_minor_demon": f"{_DEMON} {_SUMMONED_DEMON}",
+    "summoned_major_demon": f"{_DEMON} {_LARGE} {_STRONG} {_TRUE_SIGHT} {_SUMMONED_DEMON}",
+    "illusionary_soldier": (
+        "Cannot pick up treasure or deal damage, but fights, pushes back and supports as normal. "
+        "Removed if it suffers any damage."
+    ),
+    "small_construct": _CONSTRUCT,
+    "medium_construct": _CONSTRUCT,
+    "large_construct": f"{_CONSTRUCT} {_LARGE} {_STRONG}",
+    "companion_bear": f"{_ANIMAL} {_LARGE} {_STRONG}",
+    "companion_ice_toad": (
+        f"{_ANIMAL} Amphibious: passes all Swimming Rolls, treats water as normal ground, no Fight "
+        "penalty in water. Powerful: its damage is doubled."
+    ),
+    "companion_snow_leopard": f"{_ANIMAL} Expert Climber: no movement penalty for climbing.",
+    "companion_wolf": f"{_ANIMAL} Pack Hunter: pack hunters in base contact activate and move as one.",
+    "companion_white_gorilla": f"{_ANIMAL} {_STRONG}",
+    # --- Thaw of the Lich Lord ---
+    "javelineer": (
+        'Javelins: hand weapons in melee, or thrown up to 10" as a shooting attack under the bow '
+        "and crossbow rules. Never runs out."
+    ),
+    "pack_mule": _PACK_MULE,
+    "bard": (
+        'Soldiers of its warband within 6" and line of sight get +1 to Will rolls (once, however '
+        "many bards; never a bard itself)."
+    ),
+    "crow_master": (
+        "Brings a blood crow that moves and fights on its own (no treasure or items; replaced "
+        "between games if killed). Can pick up treasure but carries no items."
+    ),
+    "rangifer": "Hate Undead: +1 Fight and its attacks count as magic when fighting undead.",
+    # --- The Maze of Malcor ---
+    "collegium_porter": (
+        "Construct: immune to poison, never counts as wounded; carries treasure. Never forces "
+        "combat with a spellcaster; if it wins a fight against one it deals no damage and steps "
+        'back. 3 item slots, potions or scrolls only; a warband member within 1" may spend an '
+        "action to take one."
+    ),
+    "snow_troll": (
+        f"{_LARGE} {_STRONG} Rolling a 1 on any roll breaks its Troll Shackles and it turns "
+        "uncontrolled; the shackles are destroyed if it is reduced to 0 Health."
+    ),
+    # --- Into the Breeding Pits ---
+    "trap_expert": _TRAP_EXPERT,
+    "tunnel_fighter": (
+        "+3 against trap numbers. With Secret Passages in use, an initiative roll of 19 lets one "
+        "of your tunnel fighters find a secret passage only it may use."
+    ),
+    "companion_boar": f"{_ANIMAL} {_HORNS}",
+    "companion_ice_spider": (
+        f"{_ANIMAL} Expert Climber: no movement penalty for climbing. Poison: a figure it damages "
+        f"is {_POISON_EFFECT}."
+    ),
+    # --- Forgotten Pacts ---
+    "assassin": (
+        f"Poison: a figure it damages is {_POISON_EFFECT} (undead and constructs are immune). "
+        "+2 Fight when already receiving support; never counts as a supporting figure."
+    ),
+    "demonic_servant": (
+        "Demon: all its attacks are magic; immune to poison. Carries one item and treasure. One "
+        "Minor Demonic Attribute. Out of Game Summon Demon: +1 to the Summon Demon Table result "
+        "(not the Casting Roll)."
+    ),
+    "chilopendra": f"{_DEMON} {_HORNS} Poisonous: a figure it damages in melee is {_POISON_EFFECT}.",
+    "demon_hunter": "+1 Fight and +1 damage in combat against demons, including possessed figures.",
+    "monk": "Bladed staff: +1 damage, and enemy hand-to-hand attacks against it take -1 damage.",
+    "mystic_warrior": (
+        "Unarmed, but never takes the unarmed Fight or damage penalties; all its hand-to-hand "
+        "attacks are magic."
+    ),
+    # --- The Wildwoods ---
+    "guide": _TERRAIN_EXPERT,
+    "expert_guide": _TERRAIN_EXPERT,
+    "trapper": (
+        f'{_WILDERNESS_SURVIVAL} Set Traps: an action (may replace the move) places a 1" trap '
+        "token beside it, max 3 per game; a figure touching one takes a +1 attack or must pass a "
+        "Move Roll (20) or end its activation and get 0 actions next time. Never triggers traps."
+    ),
+    "trophy_hunter": (
+        f"{_WILDERNESS_SURVIVAL} Prize Taker: +1 Shoot and +1 Fight against figures with Horns, "
+        "Antlers or Bounty; killing one gives +5 XP (once per game)."
+    ),
+    # --- Blood Legacy ---
+    "blood_merchant": (
+        'Starts each game with a vial of blood: within 1" of a vampire, with no enemy within 1" '
+        "of either, an action hands it over and the vampire regains up to 5 Health. Harvest Blood: "
+        "if it avoids Dead and Badly Wounded, its vampire regains 1 Health free per warband member "
+        "reduced to 0 Health that game (not undead, constructs, demons or animals)."
+    ),
+    "swordmaster": (
+        "No opponent gains more than +2 from supporting figures. Winning a fight against light or "
+        "heavy armour gives the opponent -1 Armour against that attack."
+    ),
+    "vampire_hunter": (
+        "Magic attacks against undead. +2 Will while a vampire is on the table. Immune to Energy "
+        "Drain."
+    ),
+    # --- Fireheart ---
+    "construct_familiar": (
+        f"{_CONSTRUCT_NO_TREASURE} Expert Climber: no movement penalty for climbing. Eye-Socket: "
+        "any spellcaster, even an enemy, may cast Wizard Eye on it; the eye moves with it and sees "
+        "all round, shooting spells through it take the Hasty Shot modifier, and it is cancelled "
+        "at 0 Health or on a critical hit."
+    ),
+    "construct_hound": _CONSTRUCT_NO_TREASURE,
+    "construct_hound_summoned": _CONSTRUCT_NO_TREASURE,
+    "blade_dog": (
+        "Construct: immune to poison, never counts as wounded; no item slots. Cannot pick up "
+        "treasure. Construct Spikes (Horns): +2 Fight for an attack made in the same activation "
+        f"it moved into combat. {_SHARP_TEETH}"
+    ),
+    "glass_man": f"{_CONSTRUCT} {_DISTRACTING} {_SHARP_TEETH}",
+    "glass_man_large": f"{_CONSTRUCT} {_DISTRACTING} Construct Hammer: counts as a magic weapon, +2 damage.",
+    "candle_jack": _CANDLE_JACK,
+    "candle_jack_two_handed": _CANDLE_JACK,
+    "candle_jack_large": _CANDLE_JACK,
+    "candle_jack_large_two_handed": _CANDLE_JACK,
+    "demonic_prison": (
+        f"{_CONSTRUCT} Starts empty: a spellcaster of its warband casts Imp or Summon Demon on it "
+        "(Summon counts as line of sight) to put an imp inside, outside the demon-control limit; "
+        "it is then Possessed, using the bracketed stats, and gains Demon. At 0 Health the imp is "
+        'placed beside it, uncontrolled. Demon Portal: a demon the wizard summons within 12" may '
+        "be placed in contact with it instead."
+    ),
+    "construct_of_burden": (
+        f"{_CONSTRUCT} Treasure Lifter: picks up treasure without spending an action. Smoke "
+        'Release (once per game, an action): a 3" cloud around it, or a 1" line up to 6" long '
+        "along its next move; blocks line of sight, removed on a 16+ at the end of each turn."
+    ),
+    "scrounger": (
+        "With Black Market rules, one extra roll after each game on the Construct Modification "
+        "Table; otherwise 20% off purchases from that table (one scrounger only). Chooses staff or "
+        "hand weapon each round before rolling."
+    ),
+    "tinkerer": (
+        "The wizard gets +1 to one Embed Enchantment or Animate Construct attempt between games. "
+        "Never unarmed: counts as armed with a dagger."
+    ),
+    # --- Spellcaster Magazine ---
+    "musketeer": _FIREARM,
+    "coachman": _FIREARM,
+    "duellist": f"{_FIREARM} The sword-and-pistol bonus is already in the stat line.",
+    "rangifer_boar": "Animal: cannot carry items or treasure tokens.",
+    "rangifer_ambusher": f"{_RANGIFER} Trap Expert: {_TRAP_EXPERT}",
+    "rangifer_charger": _RANGIFER_NO_ANTLER_PENALTY,
+    "rangifer_herdsman": _RANGIFER,
+    "rangifer_hewer": _RANGIFER,
+    "rangifer_hurler": (
+        f'{_RANGIFER} Once per game, a shooting attack with its flint throwing spear, 12" max.'
+    ),
+    "rangifer_packdeer": f"{_RANGIFER} Pack Mule: {_PACK_MULE}",
+    "rangifer_war_leader": (
+        f"{_RANGIFER} Otherwise uses the Captain rules (Frostgrave Folio p.18). Never carries a "
+        "shield or wears armour; Move never above 7."
+    ),
+    "bookhound": (
+        "Immune to critical hits; never takes more than 10 damage from one attack. Never triggers "
+        "an explosive rune. The wizard may re-roll grimoire results on the Random Spell Table, "
+        "sells grimoires for 270gc, and gets +1 to one Out of Game Casting Roll before or after "
+        f"each game. {_LEGENDARY}"
+    ),
+    "dire_hound": (
+        'Animal: cannot carry items or treasure tokens. Leap: up to 6" of a move may be a leap in '
+        f"any direction, even straight up. Powerful Jaws: +2 damage. {_LEGENDARY}"
+    ),
+    "elemental_archer": (
+        "All its shooting attacks are magic. Steady Aim: an action (may replace the move) followed "
+        "at once by a shot gives the target -1 Fight against it. Carries up to 3 magic arrows "
+        f"outside its item slots. {_LEGENDARY}"
+    ),
+    "graverobber": (
+        "+2 Fight and magic attacks against undead. Immune to Drain Life Force, Reveal Death and "
+        "Strike Dead. +5 against trap numbers. An Out of Game Raise Zombie may add a ghoul "
+        f"instead. {_LEGENDARY}"
+    ),
+    "shadow_walker": (
+        "Activating out of every enemy's line of sight, it may spend the whole activation moving "
+        "to any point also out of enemy line of sight (not while carrying treasure). Cannot be "
+        'seen from more than 12". +2 Fight against shooting attacks, including spells. Poison '
+        f"attacks: a figure it damages is {_POISON_EFFECT}. Immune to poison. {_LEGENDARY}"
+    ),
+    "telekinetic": (
+        "Once per activation, an action (may replace the move): move a visible treasure token up "
+        '''to 3" (not one carried or with special pick-up rules), or move itself 4" in any '''
+        f"direction, even up or across a gap. Immune to Mind Control. {_LEGENDARY}"
+    ),
+    "whip_master": (
+        'Whip: 3" shooting attack, bonus never above +2; on 1+ damage the target drops its '
+        'treasure and must pass a Move Roll (18) or be pulled 2" towards it. Falling over 3": a '
+        f'Move Roll (16) stops the fall 3" down. {_LEGENDARY}'
+    ),
+    "monster_hunter": (
+        "+1 Fight and +1 Shoot against uncontrolled creatures. Takes two spell components from a "
+        "kill instead of one; +5gc on sellable prizes. At set-up, may place a monster trap within "
+        '''8", sprung when an uncontrolled creature comes within 1": Deadfall (+2 shot, +10 '''
+        "damage), Spring-loaded Spike (+8 shot) or Net (Move Roll 20 or its activation ends and it "
+        f"has -4 Move, -2 Fight until a Fight Roll of 20 frees it). {_LEGENDARY}"
+    ),
+    "potion_master": (
+        'Drinks a potion as a free action. Action: apply a potion to a figure within 1" not in '
+        "combat. Doubles the wizard's Brew Potion component bonus (+2, 50gc off) and allows one "
+        f"potion-table re-roll after each game. 3 of its 4 item slots hold potions only. {_LEGENDARY}"
+    ),
+    # --- The Perilous Dark ---
+    "werewolf": (
+        "Expert Climber: no movement penalty for climbing. Carries no items. Bounty (20gc) on it "
+        "for whoever kills it. Costs 20gc after each game it survives, or it leaves."
+    ),
+    # --- The Red King ---
+    "foulhorn": (
+        f"{_HORNS} Keen Senses: for its movement, every figure within 6\" counts as in line of "
+        "sight. Carries treasure but has no item slots. Before each game, on a 16+ it has "
+        "wounded a random warband member, who starts at -3 Health."
+    ),
+    "vampire": (
+        f"{_UNDEAD} Immune to Normal Weapons: only hurt by magic. Magic Attack: all its attacks "
+        f"are magic. Mind Lock: immune to Mind Control and Suggestion. {_TRUE_SIGHT}"
+    ),
+    "minor_demon": _DEMON,
+}
+
 
 # Legendary Soldiers (Spellcaster Magazine, Issue 4): a rare troop category
 # limited by wizard level rather than freely hired. Never more than one of
