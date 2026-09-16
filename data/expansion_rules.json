@@ -5350,42 +5350,6 @@
     {
      "name": "Construct Modification rules",
      "text": "Construct Modification: constructs have no item slots but may take exactly one modification (two under an optional variant, which then always makes it a specialist soldier). The Modification Table below doubles as a Treasure Table; Black Market rules allow trading up to 2 rolls/game for it. New-with-modification costs an extra -2 to Animate Construct (cumulative with size); modifying an existing one costs -2 alone. Every modification (unless marked \"No modification penalty\") also imposes a permanent -1 to one stat of the owner's choice. Superseded prior items: Construct Crossbow (Maze of Malcor) → Projectile Weapon; Construct Hammer (rulebook/Folio) → the entry below; Construct Oil (Folio) → the entry below; Construct Spikes (Red King) → the entry below; Construct Varnish (Malcor) → Elemental Armour; Golem Flesh (Forgotten Pacts) → Improved Joints."
-    },
-    {
-     "name": "Animated Prosthetics",
-     "text": "Animated Prosthetics: spellcasters/apprentices/captains with Lost Toes, Smashed Leg, Crushed Arm, or Lost Fingers may cast Animate Construct to graft a replacement limb, removing the penalty (injury stays recorded); requires either a fresh casting or 10gc upkeep after every game. Multiple prosthetics need separate upkeep. Suffering the same injury again while already prosthetic-fitted instead becomes Badly Wounded."
-    },
-    {
-     "name": "Climbing Claws",
-     "text": "Requires Lost Toes/Fingers · Cost 350gc — Expert Climber."
-    },
-    {
-     "name": "Fighting Claws",
-     "text": "Requires Lost Fingers · Cost 450gc — +1 melee damage, never unarmed."
-    },
-    {
-     "name": "Gem of Power",
-     "text": "Requires Any · Cost 500gc — one power point for empowering."
-    },
-    {
-     "name": "Hidden Projectile",
-     "text": "Requires Lost Fingers/Crushed Arm · Cost 400gc — once/game, 12\" shooting attack at normal Shoot."
-    },
-    {
-     "name": "Potion Reservoir",
-     "text": "Requires Smashed Leg/Crushed Arm · Cost 400gc — carries 2 potions with no item slot."
-    },
-    {
-     "name": "Shock Absorbers",
-     "text": "Requires Smashed Leg · Cost 500gc — immune to fall damage."
-    },
-    {
-     "name": "Toe Ring",
-     "text": "Requires Lost Toes · Cost 200gc — may wear 2 rings, itself free of item-slot cost."
-    },
-    {
-     "name": "Upgrade rules",
-     "text": "Upgrades take an item slot (max one of each), share the normal upkeep, and are destroyed (repurchasable) if the same injury recurs."
     }
    ],
    "entries": [
@@ -5588,6 +5552,48 @@
      "name": "Wings",
      "tag": "",
      "text": "Flying; can no longer carry treasure (on top of the normal stat penalty)."
+    }
+   ]
+  },
+  {
+   "title": "Animated Prosthetics (implemented)",
+   "blurb": "A wizard, apprentice or captain who has suffered Lost Toes, Smashed Leg, Crushed Arm or Lost Fingers may cast Animate Construct to graft a replacement limb, which removes that injury's stat penalty. Fit or remove one, and buy it Prosthetic Upgrades, from the injury's own entry on the warband sheet.",
+   "rows": [
+    {
+     "name": "Animated Prosthetics",
+     "text": "Animated Prosthetics: spellcasters/apprentices/captains with Lost Toes, Smashed Leg, Crushed Arm, or Lost Fingers may cast Animate Construct to graft a replacement limb, removing the penalty (injury stays recorded); requires either a fresh casting or 10gc upkeep after every game. Multiple prosthetics need separate upkeep. Suffering the same injury again while already prosthetic-fitted instead becomes Badly Wounded."
+    },
+    {
+     "name": "Climbing Claws",
+     "text": "Requires Lost Toes/Fingers · Cost 350gc — Expert Climber."
+    },
+    {
+     "name": "Fighting Claws",
+     "text": "Requires Lost Fingers · Cost 450gc — +1 melee damage, never unarmed."
+    },
+    {
+     "name": "Gem of Power",
+     "text": "Requires Any · Cost 500gc — one power point for empowering."
+    },
+    {
+     "name": "Hidden Projectile",
+     "text": "Requires Lost Fingers/Crushed Arm · Cost 400gc — once/game, 12\" shooting attack at normal Shoot."
+    },
+    {
+     "name": "Potion Reservoir",
+     "text": "Requires Smashed Leg/Crushed Arm · Cost 400gc — carries 2 potions with no item slot."
+    },
+    {
+     "name": "Shock Absorbers",
+     "text": "Requires Smashed Leg · Cost 500gc — immune to fall damage."
+    },
+    {
+     "name": "Toe Ring",
+     "text": "Requires Lost Toes · Cost 200gc — may wear 2 rings, itself free of item-slot cost."
+    },
+    {
+     "name": "Upgrade rules",
+     "text": "Upgrades take an item slot (max one of each), share the normal upkeep, and are destroyed (repurchasable) if the same injury recurs."
     }
    ]
   },
