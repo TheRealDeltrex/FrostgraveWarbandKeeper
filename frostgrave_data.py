@@ -3758,6 +3758,44 @@ def all_spells_flat() -> list[dict]:
     return out
 
 
+# Size of the area a spell affects, taken verbatim from the measurement in each
+# spell's own book text ("every figure within 1.5" of that point"). The Type
+# column alone says a spell is Area Effect, or gives a Line of Sight range, but
+# never how wide the effect is, which is the number you need with a tape measure
+# in hand — so the PDF roster prints this next to it.
+#
+# Keyed by spell name, which is unique across the schools that appear here.
+# Deliberately absent: spells whose area is the whole table (Call Storm, Power
+# Word, Draining Word, Misalignment, Darkness) and those that affect only a
+# single target or the figures already in combat with the caster — there is no
+# radius to print.
+SPELL_AREA: dict[str, str] = {
+    "Collapse": '1.5" radius',
+    "Destructive Sphere": '3" radius',
+    "Earthquake": '8" radius',
+    "Elemental Ball": '1" radius',
+    "Explosive Rune": '2" radius',
+    "Grenade": '1.5" radius',
+    "Implode / Explode": '8" radius',
+    "Meteor Strike": '3" radius',
+    "Mist Shroud": '3" radius',
+    "Plague of Insects": '1" radius',
+    "Planar Tear": '2" radius',
+    "Pyre": '2" diameter',
+    "Raze": '3" section, 2" radius',
+    "Scatter Shot": '12" radius',
+    "Sound Cloud": '2" radius',
+    "Starfall": '2" radius per token',
+    "Charm": '12" radius',
+    "True Sight": '6" radius',
+}
+
+
+def spell_area(name: str) -> str:
+    """The printable effect-area size for a spell, or "" if it affects no area."""
+    return SPELL_AREA.get(name or "", "")
+
+
 def spell_id(school: str, name: str) -> str:
     return f"{school}::{name}"
 
