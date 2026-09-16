@@ -438,20 +438,28 @@ def build_expansion_rules_2(doc: str) -> dict:
     )
 
     # --- Fireheart ---
-    # Construct Modification (the 39-entry table) and Animated Prosthetics are
-    # both deferred mechanics (see the implementation plan) — captured as
-    # detailed reference text, including the 7 injury-gated Prosthetic Upgrade
-    # items (kept as reference rather than real treasure, since the gating
-    # mechanic itself isn't built yet).
+    # One chapter in the book, two Lexicon sections: Construct Modification
+    # (the 39-entry table, on constructs) and Animated Prosthetics (on a
+    # wizard/apprentice/captain's permanent injuries, with the 7 injury-gated
+    # Prosthetic Upgrades). Splitting them is what makes the prosthetics
+    # findable under their own name.
     ch = section(doc, "fire-animation")
     anim_notes = notes(ch)
     add(
         "Fireheart",
-        "Construct Modification (deferred mechanic — reference only)",
+        "Construct Modification (implemented)",
         anim_notes[0] if anim_notes else "",
         entries=cards(ch),
-        rows=([("Construct Modification rules", anim_notes[1])] if len(anim_notes) > 1 else [])
-        + ([("Animated Prosthetics", anim_notes[2])] if len(anim_notes) > 2 else [])
+        rows=[("Construct Modification rules", anim_notes[1])] if len(anim_notes) > 1 else [],
+    )
+    add(
+        "Fireheart",
+        "Animated Prosthetics (implemented)",
+        "A wizard, apprentice or captain who has suffered Lost Toes, Smashed Leg, "
+        "Crushed Arm or Lost Fingers may cast Animate Construct to graft a replacement "
+        "limb, which removes that injury's stat penalty. Fit or remove one, and buy it "
+        "Prosthetic Upgrades, from the injury's own entry on the warband sheet.",
+        rows=([("Animated Prosthetics", anim_notes[2])] if len(anim_notes) > 2 else [])
         + two_col_rows(ch)
         + ([("Upgrade rules", anim_notes[3])] if len(anim_notes) > 3 else []),
     )
