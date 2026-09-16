@@ -2,7 +2,7 @@
 {% from "_loot_picker.html" import loot_picker_row with context %}
 {% from "_mutation_picker.html" import mutation_picker, mutated_badge with context %}
 {% from "_construct_modification_picker.html" import construct_modification_picker, construct_modification_badge with context %}
-{% from "_permanent_injury_picker.html" import permanent_injury_picker with context %}
+{% from "_permanent_injury_picker.html" import permanent_injury_picker, permanent_injury_badge with context %}
 {% block title %}{{ wb.name }} · Frostgrave{% endblock %}
 {% block content %}
   {% set wiz = wb.wizard %}
@@ -932,6 +932,7 @@
               {% endfor %}
               {% if wiz_mounted %}<span class="badge" title="Riding the warband's horse: Move +{{ hmd.move }}, Fight +{{ hmd.fight }}, Armour {{ hmd.armour }}">mounted</span>{% endif %}
               {{ mutated_badge(wiz.mutations) }}
+              {{ permanent_injury_badge(wiz.permanent_injuries) }}
               {% if has_homunculus %}
                 {# type="button" — this card is already inside the big autosave
                    form, so the badge drives the top-level #homunculus-form via
@@ -1047,6 +1048,7 @@
               <div class="figure-badges">
                 {% if ap_mounted %}<span class="badge" title="Riding the warband's horse: Move +{{ hmd.move }}, Fight +{{ hmd.fight }}, Armour {{ hmd.armour }}">mounted</span>{% endif %}
                 {{ mutated_badge(ap.mutations) }}
+                {{ permanent_injury_badge(ap.permanent_injuries) }}
               </div>
             </div>
             <div class="char-body">
@@ -1790,6 +1792,7 @@
                 {% endif %}
                 {% if cap_mounted %}<span class="badge" title="Riding the warband's horse: Move +{{ hmd.move }}, Fight +{{ hmd.fight }}, Armour {{ hmd.armour }}">mounted</span>{% endif %}
                 {{ mutated_badge(cap.mutations) }}
+                {{ permanent_injury_badge(cap.permanent_injuries) }}
               </div>
             </div>
             <div class="char-body">
@@ -2229,6 +2232,7 @@
                     {% endif %}
                     {% if s.revenant %}<span class="badge" title="Reanimated with the Revenant spell">revenant</span>{% endif %}
                     {{ mutated_badge(s.mutations) }}
+                    {{ permanent_injury_badge(s.permanent_injuries) }}
                     {{ construct_modification_badge(s) }}
                     {% if s.giant_blooded %}<span class="badge" title="Blood Legacy's Giant-Blooded: -1 Move, -2 Will, +2 Health, Giant-Blooded trait">giant-blooded</span>{% endif %}
                     {% if s.thrall %}<span class="badge" title="Blood Legacy's Thralldom: hired free at -1 Will">thrall</span>{% endif %}
