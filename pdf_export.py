@@ -35,6 +35,7 @@ from frostgrave_data import (
     animal_companion_type_keys,
     construct_type_keys,
     format_stat,
+    spell_area,
     unused_xp,
 )
 from game_content import common_item_index, item_effect_text, item_slot_cost
@@ -646,8 +647,8 @@ def build_warband_pdf(wb: dict) -> bytes:
         pdf.ln(1)
         pdf.set_font("Helvetica", "B", 9)
         pdf.set_fill_color(220, 232, 242)
-        col_w = [50, 36, 32, 60]
-        headers = ["Spell", "School", "Difficulty", "Type"]
+        col_w = [40, 26, 22, 50, 40]
+        headers = ["Spell", "School", "Difficulty", "Type", "Area"]
         for w, h in zip(col_w, headers):
             pdf.cell(w, 6, _t(h), border=1, fill=True)
         pdf.ln()
@@ -658,6 +659,7 @@ def build_warband_pdf(wb: dict) -> bytes:
                 str(sp.get("school", "")),
                 _spell_cn_pair(sp),
                 str(sp.get("type", "")),
+                spell_area(str(sp.get("name", ""))),
             ]
             for w, val in zip(col_w, row):
                 pdf.cell(w, 5.5, _t(val[:42]), border=1)
