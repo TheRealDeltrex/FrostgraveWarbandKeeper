@@ -2,6 +2,22 @@
    outcome of a "Permanent Injury" result on the Spellcaster Survival Table.
    The player rolls at the table and records the result here; this app never
    rolls it for them. Shared by the Wizard/Apprentice/Captain/each Soldier. #}
+{# Roster/card badge: "injured" with the recorded injuries behind it. Mirrors
+   mutated_badge's shape. Uses "permanently injured" in the tooltip so it never
+   reads as the per-game injured status the status badge already shows. #}
+{% macro permanent_injury_badge(injuries) %}
+  {% if injuries %}
+    <details style="display:inline-block;vertical-align:middle">
+      <summary class="badge" title="{{ injuries|length }} permanent injur{{ 'ies' if injuries|length != 1 else 'y' }} — click for details">permanent injury</summary>
+      <ul class="list-plain" style="font-size:0.8rem;margin:0.3rem 0 0;max-width:26rem">
+        {% for inj in injuries %}
+          <li><strong>{{ inj.name }}</strong> — {{ inj.short or inj.text }}{% if inj.prosthetic %} <em>(Animated Prosthetic fitted — penalty removed)</em>{% endif %}</li>
+        {% endfor %}
+      </ul>
+    </details>
+  {% endif %}
+{% endmacro %}
+
 {% macro permanent_injury_picker(action, injuries, soldier_id=none, label="Permanent injuries", kind=none) %}
   {% set remove_action = action.replace('add_', 'remove_', 1) %}
   {% set prosthetic_action = "toggle_" ~ kind ~ "_injury_prosthetic" if kind else none %}
