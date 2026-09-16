@@ -707,6 +707,53 @@ def wizard_effective_stats(wb: dict) -> dict:
     return expansions.apply_hunger_penalty(stats, (wb.get("wizard") or {}).get("status"))
 
 
+def _record_stat_offset(record: dict, delta: dict | None) -> dict[str, int]:
+    """Net {stat: change} one recorded grave mutation / permanent injury applied.
+
+    Prefers a stored "stat_offsets" (add_mutation() writes one for the
+    apprentice) and otherwise replays the table row's stat_delta against the
+    record's own "stat_backup" of pre-event values, so an entry recorded before
+    offsets were stored still answers correctly. Replaying is why the delta has
+    to come from the table rather than be inverted from the after-value: a
+    "Health halved" multiply/round op isn't reversible on its own.
+    """
+    if record.get("prosthetic"):
+        # An Animated-Prosthetic-fitted injury's penalty is cancelled in the
+        # stored stats (set_permanent_injury_prosthetic), so it contributes
+        # nothing here.
+        return {}
+    stored = record.get("stat_offsets")
+    if isinstance(stored, dict) and stored:
+        return {k: _as_int(v, 0) for k, v in stored.items()}
+    backup = record.get("stat_backup") or {}
+    if not backup or not delta:
+        return {}
+    after = {k: _as_int(v, 0) for k, v in backup.items()}
+    _apply_mutation_stat_delta(
+        lambda k: after.get(k, 0), lambda k, v: after.__setitem__(k, v), delta
+    )
+    return {k: after[k] - _as_int(v, 0) for k, v in backup.items() if k in after}
+
+
+def figure_stat_offsets(figure: dict) -> dict[str, int]:
+    """Net {stat: change} this figure's grave mutations and permanent injuries
+    have already applied to its stored stats. Subtract it to recover the stat
+    line the figure would have without them."""
+    out: dict[str, int] = {}
+    table = grave_mutations_by_number()
+    records = [
+        (m, (table.get(_as_int(m.get("number"), 0)) or {}).get("stat_delta"))
+        for m in figure.get("mutations") or []
+    ] + [
+        (i, (PERMANENT_INJURY_BY_ID.get(i.get("id")) or {}).get("stat_delta"))
+        for i in figure.get("permanent_injuries") or []
+    ]
+    for record, delta in records:
+        for stat, amount in _record_stat_offset(record, delta).items():
+            out[stat] = out.get(stat, 0) + amount
+    return out
+
+
 def sync_apprentice(wb: dict) -> None:
     """Apprentice stats from wizard (2e p.27): M same, F-2, S same, A10, W-2, H-2."""
     ap = wb.get("apprentice")
@@ -714,22 +761,30 @@ def sync_apprentice(wb: dict) -> None:
     if not ap or not wiz:
         return
     wstats = wiz.get("stats") or WIZARD_BASE
-    wiz_h = int(wstats.get("health", 14))
+    # The wizard's *base* line: a grave mutation or permanent injury he suffered
+    # is his own misfortune and must not propagate down the derivation to an
+    # apprentice who was never there, so its recorded offset is backed out
+    # before the p.27 offsets are applied.
+    woff = figure_stat_offsets(wiz)
+
+    def wbase(stat: str, fallback: int) -> int:
+        return int(wstats.get(stat, fallback)) - woff.get(stat, 0)
+
     ap_stats = {
-        "move": int(wstats.get("move", 6)),
-        "fight": int(wstats.get("fight", 2)) - 2,
-        "shoot": int(wstats.get("shoot", 0)),
+        "move": wbase("move", 6),
+        "fight": wbase("fight", 2) - 2,
+        "shoot": wbase("shoot", 0),
         "armour": 10,
-        "will": int(wstats.get("will", 4)) - 2,
-        "health": max(1, wiz_h - 2),  # starting: 14-2 = 12
+        "will": wbase("will", 4) - 2,
+        "health": max(1, wbase("health", 14) - 2),  # starting: 14-2 = 12
     }
-    # Re-apply each grave mutation's recorded stat offset on top of the derived
-    # base (G1) — without this, add_apprentice_mutation()'s effect is discarded
-    # the moment sync_apprentice() runs again on the next save.
-    for m in ap.get("mutations") or []:
-        for stat, offset in (m.get("stat_offsets") or {}).items():
-            if stat in ap_stats:
-                ap_stats[stat] += offset
+    # Re-apply the apprentice's own mutations and permanent injuries on top of
+    # the derived base (G1) — without this, add_apprentice_mutation()'s and
+    # add_apprentice_permanent_injury()'s effects are discarded the moment
+    # sync_apprentice() runs again on the next save.
+    for stat, offset in figure_stat_offsets(ap).items():
+        if stat in ap_stats:
+            ap_stats[stat] += offset
     # Re-apply the warband horse's Mounted Modifier for the same reason as the
     # mutation offsets above: mount_horse() writes it into ap["stats"], and this
     # rebuild would otherwise discard it, leaving a mounted apprentice showing
@@ -1273,7 +1328,7 @@ def portrait_dir(warband_id: str) -> Path:
     return d
 
 
-SCHEMA_VERSION = 4
+SCHEMA_VERSION = 5
 # Bump this and append a new (version, function) pair to MIGRATIONS whenever a
 # future format change needs one-time cleanup on old files. Each migration
 # only runs once per file: files with no "schema_version" are treated as
@@ -1424,6 +1479,26 @@ def _migrate_fin_dalka_owned_flag_to_vault(wb: dict) -> None:
         add_vault_item(wb, FIN_DALKA_ITEM_NAME, source="migrated")
 
 
+def _migrate_apprentice_derived_stats(wb: dict) -> None:
+    """Rebuilds the apprentice's stat line under the corrected derivation.
+
+    Until schema 5, sync_apprentice() derived her stats from the wizard's
+    *current* stats, so every grave mutation and permanent injury he had
+    suffered flowed downhill into her line, and it re-applied only her own
+    mutations afterward — dropping the effect of any permanent injury she had
+    suffered herself. Both are stored values, so an existing file carries the
+    wrong numbers until something rewrites them.
+
+    The rebuild is the whole repair: sync_apprentice() derives from scratch, so
+    the wizard's offsets come out and hers go back in. A permanent injury's
+    stat_delta is always a plain "add", so replaying one lands on exactly the
+    value it originally applied.
+    """
+    if wb.get("apprentice"):
+        sync_apprentice(wb)
+
+
+
 MIGRATIONS: list[tuple[int, Callable[[dict], None]]] = [
     (1, _migrate_wizard_health_2e),
     (1, _migrate_item_slots),
@@ -1435,6 +1510,7 @@ MIGRATIONS: list[tuple[int, Callable[[dict], None]]] = [
     (2, _migrate_component_bags_to_item_slots),
     (3, _migrate_fin_dalka_owned_flag_to_vault),
     (4, _migrate_drop_spellcaster_soldiers_flag),
+    (5, _migrate_apprentice_derived_stats),
 ]
 
 
