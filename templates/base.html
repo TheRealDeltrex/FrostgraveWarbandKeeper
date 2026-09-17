@@ -192,16 +192,33 @@
               // disabling the button harmless whenever it lands.
               var submitter = e.submitter;
               if (submitter && submitter.tagName === "BUTTON" && !submitter.disabled) {
+                var carry = null;
                 if (submitter.name) {
-                  var carry = document.createElement("input");
+                  carry = document.createElement("input");
                   carry.type = "hidden";
                   carry.name = submitter.name;
                   carry.value = submitter.value;
                   form.appendChild(carry);
                 }
+                var label = submitter.textContent;
                 submitter.disabled = true;
                 submitter.classList.add("busy");
                 submitter.textContent = "Saving…";
+                // This listener is capture-phase, so a later listener on the
+                // form can still cancel the submit — the new-warband page does
+                // exactly that for an incomplete spell pick. Nothing navigates
+                // then, and without this the button is left disabled reading
+                // "Saving…" for good, which is a form that can never be
+                // submitted again. Re-check once the event has run its course;
+                // on a submit that really goes through the page unloads and
+                // defaultPrevented is false either way.
+                setTimeout(function () {
+                  if (!e.defaultPrevented) return;
+                  submitter.disabled = false;
+                  submitter.classList.remove("busy");
+                  submitter.textContent = label;
+                  if (carry && carry.parentNode) carry.parentNode.removeChild(carry);
+                }, 0);
               }
             }
           },
