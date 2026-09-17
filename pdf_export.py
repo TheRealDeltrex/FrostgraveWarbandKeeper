@@ -647,22 +647,26 @@ def build_warband_pdf(wb: dict) -> bytes:
         pdf.ln(1)
         pdf.set_font("Helvetica", "B", 9)
         pdf.set_fill_color(220, 232, 242)
-        col_w = [40, 26, 22, 50, 40]
-        headers = ["Spell", "School", "Difficulty", "Type", "Area"]
+        col_w = [48, 34, 30, 66]
+        headers = ["Spell", "School", "Difficulty", "Type"]
         for w, h in zip(col_w, headers):
             pdf.cell(w, 6, _t(h), border=1, fill=True)
         pdf.ln()
         pdf.set_font("Helvetica", "", 9)
         for sp in spells:
+            # Effect area rides in the Type cell rather than a column of its
+            # own: only a minority of spells have one, so a separate column was
+            # mostly empty while squeezing the four that are never blank.
+            area = spell_area(str(sp.get("name", "")))
+            spell_type = str(sp.get("type", ""))
             row = [
                 str(sp.get("name", "")),
                 str(sp.get("school", "")),
                 _spell_cn_pair(sp),
-                str(sp.get("type", "")),
-                spell_area(str(sp.get("name", ""))),
+                f"{spell_type} - {area}" if area else spell_type,
             ]
             for w, val in zip(col_w, row):
-                pdf.cell(w, 5.5, _t(val[:42]), border=1)
+                pdf.cell(w, 5.5, _t(val[:48]), border=1)
             pdf.ln()
     pdf.ln(3)
 
