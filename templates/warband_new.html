@@ -650,6 +650,11 @@
     function updateSubmit() {
       const ok = spellsValid(counts());
       submitBtn.disabled = !ok;
+      // The submit guard below reads this, not submitBtn.disabled: base.html's
+      // busy feedback disables the pressed button from a capture-phase submit
+      // listener, so by the time the guard runs .disabled is always true and
+      // every create was being cancelled.
+      submitBtn.dataset.fgIncomplete = ok ? "" : "1";
       document.getElementById('submit-hint').textContent = ok
         ? 'Ready to create.'
         : 'Complete spell selection to enable create.';
@@ -664,7 +669,7 @@
   if (!window.__fgSubmitGuardAttached) {
     window.__fgSubmitGuardAttached = true;
     document.getElementById('create-form').addEventListener('submit', function (e) {
-      if (document.getElementById('submit-btn').disabled) e.preventDefault();
+      if (document.getElementById('submit-btn').dataset.fgIncomplete) e.preventDefault();
     });
   }
 
