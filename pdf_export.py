@@ -44,6 +44,7 @@ from warband_store import (
     base_summary,
     captain_effective_stats,
     enrich_soldier,
+    figure_injury_penalties,
     normalize_item_slots,
     recompute_spell_cns,
     resolve_portrait_path,
@@ -106,26 +107,70 @@ def _t(text: object) -> str:
     return s.encode("latin-1", errors="replace").decode("latin-1")
 
 
+# Wraps the pre-injury base stat so _write_marked() can grey it out; markdown
+# cells cannot colour text.
+_FADE_ON, _FADE_OFF = "", ""
+_FADE_GREY = (150, 150, 150)
+
+
+def _faded_base(base) -> str:
+    return f" {_FADE_ON}({base}){_FADE_OFF}"
+
+
+def _write_marked(pdf: FPDF, h: float, text: str) -> None:
+    """Writes **bold** text at the current x, greying whatever sits between the
+    fade markers (write() has no markdown mode). Wrapped lines return to that
+    x, and it ends on a fresh line."""
+    left, margin = pdf.x, pdf.l_margin
+    family, size = pdf.font_family, pdf.font_size_pt
+    pdf.l_margin = left
+    bold = faded = False
+    for tok in re.split(rf"(\*\*|{_FADE_ON}|{_FADE_OFF})", text):
+        if tok == "**":
+            bold = not bold
+        elif tok in (_FADE_ON, _FADE_OFF):
+            faded = tok == _FADE_ON
+        elif tok:
+            pdf.set_font(family, "B" if bold else "", size)
+            pdf.set_text_color(*(_FADE_GREY if faded else (0, 0, 0)))
+            pdf.write(h, tok)
+    pdf.set_font(family, "", size)
+    pdf.set_text_color(0, 0, 0)
+    pdf.ln(h)
+    pdf.l_margin = margin
+    pdf.set_x(margin)
+
+
 def _stat_line(
-    stats: dict, include_health: bool = False, unmounted: dict | None = None, possessed: dict | None = None
+    stats: dict,
+    include_health: bool = False,
+    unmounted: dict | None = None,
+    possessed: dict | None = None,
+    penalties: dict | None = None,
 ) -> str:
     """Combat stats with bold labels; render with markdown=True. Health optional
     (soldiers). unmounted, if given, is this figure's Move/Fight/Armour on foot;
     it leads and the mounted value goes in brackets behind it, matching the web
     UI. possessed brackets a Demonic Prison's stats with its imp inside, the
-    way the book prints them."""
+    way the book prints them. penalties (permanent injuries) add the unused base
+    value in fade markers; print via _write_marked()."""
 
     def pair(stat: str, current, fmt=str) -> str:
         if unmounted and stat in unmounted:
-            return f"{fmt(unmounted[stat])} ({fmt(current)})"
-        if possessed and stat in possessed:
-            return f"{fmt(current)} ({fmt(possessed[stat])})"
-        return fmt(current)
+            out = f"{fmt(unmounted[stat])} ({fmt(current)})"
+        elif possessed and stat in possessed:
+            out = f"{fmt(current)} ({fmt(possessed[stat])})"
+        else:
+            out = fmt(current)
+        if penalties and penalties.get(stat):
+            shown = unmounted[stat] if unmounted and stat in unmounted else current
+            out += _faded_base(fmt(int(shown) + penalties[stat]))
+        return out
 
     parts = [
         f"**Move:** {pair('move', stats.get('move', 0))}",
         f"**Fight:** {pair('fight', int(stats.get('fight', 0)), lambda v: format_stat(int(v)))}",
-        f"**Shoot:** {format_stat(int(stats.get('shoot', 0)))}",
+        f"**Shoot:** {pair('shoot', int(stats.get('shoot', 0)), lambda v: format_stat(int(v)))}",
         f"**Armour:** {pair('armour', stats.get('armour', 10))}",
         f"**Will:** {pair('will', int(stats.get('will', 0)), lambda v: format_stat(int(v)))}",
     ]
@@ -161,9 +206,11 @@ def _horse_companion_line(wb: dict) -> str:
     )
 
 
-def _health_line(max_health: object) -> str:
-    """Max health only, bold label; render with markdown=True."""
-    return _t(f"**Health:** {max_health}")
+def _health_line(max_health: object, penalty: int = 0) -> str:
+    """Max health only, bold label; render via _write_marked() (or
+    markdown=True when there is no penalty)."""
+    base = _faded_base(int(max_health) + penalty) if penalty and str(max_health).isdigit() else ""
+    return _t(f"**Health:** {max_health}{base}")
 
 
 def _status_note(status: str | None) -> str:
@@ -520,15 +567,11 @@ def build_warband_pdf(wb: dict) -> bytes:
     hom_penalty = expansions.homunculus_health_penalty(wb)
     if hom_penalty:
         wiz_health = f"{wiz_health} / {int(wiz_health) - hom_penalty}"
-    pdf.cell(0, 5, _health_line(wiz_health), new_x="LMARGIN", new_y="NEXT", markdown=True)
+    wpen = figure_injury_penalties(wiz)
+    _write_marked(pdf, 5, _health_line(wiz_health, wpen.get("health", 0)))
     pdf.set_x(left)
-    pdf.cell(
-        0,
-        5,
-        _stat_line(wstats, unmounted=_unmounted_overlay(wb) if wiz_mounted else None),
-        new_x="LMARGIN",
-        new_y="NEXT",
-        markdown=True,
+    _write_marked(
+        pdf, 5, _stat_line(wstats, unmounted=_unmounted_overlay(wb) if wiz_mounted else None, penalties=wpen)
     )
     slots = wiz.get("item_slots", wiz.get("items") or [])
     _write_item_block(
@@ -582,22 +625,11 @@ def build_warband_pdf(wb: dict) -> bytes:
             pdf.cell(0, 4, _t(_horse_companion_line(wb)), new_x="LMARGIN", new_y="NEXT")
         pdf.set_x(left)
         pdf.set_font("Helvetica", "", 10)
-        pdf.cell(
-            0,
-            5,
-            _health_line(astats.get("health", 12)),
-            new_x="LMARGIN",
-            new_y="NEXT",
-            markdown=True,
-        )
+        apen = figure_injury_penalties(ap)
+        _write_marked(pdf, 5, _health_line(astats.get("health", 12), apen.get("health", 0)))
         pdf.set_x(left)
-        pdf.cell(
-            0,
-            5,
-            _stat_line(astats, unmounted=_unmounted_overlay(wb) if ap_mounted else None),
-            new_x="LMARGIN",
-            new_y="NEXT",
-            markdown=True,
+        _write_marked(
+            pdf, 5, _stat_line(astats, unmounted=_unmounted_overlay(wb) if ap_mounted else None, penalties=apen)
         )
         ap_slots = ap.get("item_slots", ap.get("items") or [])
         _write_item_block(
@@ -727,17 +759,13 @@ def build_warband_pdf(wb: dict) -> bytes:
         pdf.set_x(left)
         pdf.set_font("Helvetica", "", 10)
         cstats_eff = captain_effective_stats(wb, cap)
-        pdf.cell(
-            0, 5, _health_line(cstats_eff.get("health", 14)), new_x="LMARGIN", new_y="NEXT", markdown=True
-        )
+        cpen = figure_injury_penalties(cap)
+        _write_marked(pdf, 5, _health_line(cstats_eff.get("health", 14), cpen.get("health", 0)))
         pdf.set_x(left)
-        pdf.cell(
-            0,
+        _write_marked(
+            pdf,
             5,
-            _stat_line(cstats_eff, unmounted=_unmounted_overlay(wb) if cap_mounted else None),
-            new_x="LMARGIN",
-            new_y="NEXT",
-            markdown=True,
+            _stat_line(cstats_eff, unmounted=_unmounted_overlay(wb) if cap_mounted else None, penalties=cpen),
         )
         cap_slots = cap.get("item_slots") or []
         _write_item_block(
@@ -865,26 +893,19 @@ def build_warband_pdf(wb: dict) -> bytes:
                 "will": s.get("will"),
                 "health": s.get("health"),
             }
-            pdf.cell(
-                0,
-                4.5,
-                _health_line(s.get("health", 10)),
-                new_x="LMARGIN",
-                new_y="NEXT",
-                markdown=True,
-            )
+            spen = figure_injury_penalties(s)
+            _write_marked(pdf, 4.5, _health_line(s.get("health", 10), spen.get("health", 0)))
             s_unmounted = _unmounted_overlay(wb) if s_mounted else None
+            stat_text = _stat_line(
+                stats, unmounted=s_unmounted, possessed=s.get("possessed_stats"), penalties=spen
+            )
             pdf.set_x(left)
-            pdf.multi_cell(
-                0,
+            _write_marked(
+                pdf,
                 4.5,
                 _t(
-                    f"{_stat_line(stats, unmounted=s_unmounted, possessed=s.get('possessed_stats'))}  -  "
-                    f"{s.get('category', '')} - {s.get('cost', 0)} gc"
+                    f"{stat_text}  -  {s.get('category', '')} - {s.get('cost', 0)} gc"
                 ),
-                new_x="LMARGIN",
-                new_y="NEXT",
-                markdown=True,
             )
             pdf.set_x(left)
             pdf.multi_cell(

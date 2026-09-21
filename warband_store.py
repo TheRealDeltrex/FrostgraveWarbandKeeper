@@ -754,6 +754,17 @@ def figure_stat_offsets(figure: dict) -> dict[str, int]:
     return out
 
 
+def figure_injury_penalties(figure: dict) -> dict[str, int]:
+    """{stat: penalty} (positive) that unhealed permanent injuries are costing
+    this figure. Stat lines print the base value in brackets beside it."""
+    out: dict[str, int] = {}
+    for i in figure.get("permanent_injuries") or []:
+        delta = (PERMANENT_INJURY_BY_ID.get(i.get("id")) or {}).get("stat_delta")
+        for stat, amount in _record_stat_offset(i, delta).items():
+            out[stat] = out.get(stat, 0) - amount
+    return {k: v for k, v in out.items() if v > 0}
+
+
 def sync_apprentice(wb: dict) -> None:
     """Apprentice stats from wizard (2e p.27): M same, F-2, S same, A10, W-2, H-2."""
     ap = wb.get("apprentice")
@@ -3409,6 +3420,7 @@ BREW_POTION_SPELL = "Brew Potion"
 # "The wizard should then roll to cast Brew Potion with a -4 to the Casting
 # Roll" — Greater Potions only, and a wizard only (not the apprentice).
 BREW_GREATER_PENALTY = 4
+APPRENTICE_CAST_PENALTY = 2
 
 
 def _caster_dict(wb: dict, caster: str) -> dict | None:
@@ -3422,6 +3434,19 @@ def _known_spell(figure: dict, name: str) -> dict | None:
     return None
 
 
+def _caster_spell(wb: dict, caster: str, name: str) -> dict | None:
+    """The spell as `caster` casts it. The apprentice has no spell list of her
+    own: she casts what the wizard knows at -2 to the roll (p.27), which is
+    +2 on the Casting Number."""
+    figure = _caster_dict(wb, caster)
+    if not figure:
+        return None
+    if caster == "apprentice":
+        sp = _known_spell(wb.get("wizard") or {}, name)
+        return {**sp, "cn": int(sp.get("cn", 12)) + APPRENTICE_CAST_PENALTY} if sp else None
+    return _known_spell(figure, name)
+
+
 def out_of_game_cast_info(wb: dict, spell_name: str) -> dict:
     """What the UI needs to offer one Out of Game casting: who can cast it, its
     CN, and the base bonus that applies — shown whether or not the app rolls,
@@ -3432,7 +3457,7 @@ def out_of_game_cast_info(wb: dict, spell_name: str) -> dict:
         figure = _caster_dict(wb, kind)
         if not figure:
             continue
-        sp = _known_spell(figure, spell_name)
+        sp = _caster_spell(wb, kind, spell_name)
         if sp:
             casters.append({"kind": kind, "name": figure.get("name") or kind, "cn": int(sp.get("cn", 12))})
     return {"spell": spell_name, "bonus": bonus, "bonus_from": sources, "casters": casters}
@@ -3452,10 +3477,10 @@ def _resolve_out_of_game_roll(
     figure = _caster_dict(wb, caster)
     if not figure:
         return False, "No such caster in this warband.", False
-    sp = _known_spell(figure, spell_name)
+    sp = _caster_spell(wb, caster, spell_name)
     if sp is None:
         return False, f"{figure.get('name') or caster} doesn't know {spell_name}.", False
-    if outcome == "success":
+    if outcome in ("success", "critical"):
         return True, "reported as successful", True
     if die is not None and not (1 <= int(die) <= 20):
         return False, "The casting roll must be between 1 and 20.", False
@@ -3485,15 +3510,31 @@ def cast_write_scroll(
     spell = (spell or "").strip()
     if not spell:
         return False, "Pick the spell to write."
+    # Rolled here rather than inside the resolver so a natural 20 is visible.
+    if not outcome and die is None:
+        die = random.randint(1, 20)
     ok, detail, success = _resolve_out_of_game_roll(wb, caster, WRITE_SCROLL_SPELL, die, outcome=outcome)
     if not ok:
         return False, detail
-    if not success:
+
+    def _add(kind: str) -> None:
+        add_vault_item(wb, f"{kind}: {spell}", source="write_scroll")
+        wb["vault_items"][-1]["catalog_key"] = kind
+
+    # A critical success writes a Critical Scroll *instead* (Spellcaster
+    # Magazine, Casting Roll Criticals); a natural 20 on a rolled cast gives
+    # one *in addition* to the ordinary scroll.
+    if outcome == "critical":
+        _add("Critical Scroll")
+        text = f"Critical success: wrote a Critical Scroll: {spell}."
+    elif not success and die != 20:
         text = f"Write Scroll failed ({detail})."
     else:
-        add_vault_item(wb, f"Scroll: {spell}", source="write_scroll")
-        wb["vault_items"][-1]["catalog_key"] = "Scroll"
+        _add("Scroll")
         text = f"Wrote a Scroll: {spell} ({detail})."
+        if die == 20 and not outcome:
+            _add("Critical Scroll")
+            text += f" Natural 20: also wrote a Critical Scroll: {spell}."
     add_history(wb, text)
     return True, text
 
@@ -3516,11 +3557,18 @@ def cast_brew_potion(
     ingredients = int(row.get("ingredients") or 0) if greater else 0
     if ingredients and int(wb.get("gold", 0)) < ingredients:
         return False, f"Need {ingredients} gc of ingredients for {potion}."
+    if not outcome and die is None:
+        die = random.randint(1, 20)
     ok, detail, success = _resolve_out_of_game_roll(
         wb, caster, BREW_POTION_SPELL, die, penalty, outcome=outcome
     )
     if not ok:
         return False, detail
+    # A critical success (Spellcaster Magazine, Casting Roll Criticals) or a
+    # natural 20 brews two; the ingredients are still paid once.
+    critical = outcome == "critical" or (not outcome and die == 20)
+    if critical:
+        success = True
     if ingredients:
         # "If unsuccessful, the potion is not created and the money spent on
         # ingredients is lost" — paid up front either way.
@@ -3530,9 +3578,14 @@ def cast_brew_potion(
         if ingredients:
             text += f" {ingredients} gc of ingredients lost."
     else:
-        add_vault_item(wb, potion, source="brew_potion")
-        wb["vault_items"][-1]["catalog_key"] = potion
+        for _ in range(2 if critical else 1):
+            add_vault_item(wb, potion, source="brew_potion")
+            wb["vault_items"][-1]["catalog_key"] = potion
         text = f"Brewed {potion} ({detail})."
+        if critical:
+            text = f"Critical success: brewed two {potion}" + (
+                f" ({detail})." if not outcome else "."
+            )
         if ingredients:
             text += f" Ingredients cost {ingredients} gc."
     add_history(wb, text)
