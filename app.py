@@ -137,6 +137,7 @@ from game_content import (
     load_bestiary,
     load_common_items,
     load_core_rules,
+    load_demonic_attributes,
     load_expansion_rules,
     load_ghost_archipelago,
     load_grave_mutations,
@@ -175,6 +176,7 @@ from warband_store import (
     add_history,
     add_pact_tier,
     add_soldier,
+    add_demonic_attribute,
     add_soldier_mutation,
     add_soldier_permanent_injury,
     add_soldier_xp,
@@ -274,6 +276,7 @@ from warband_store import (
     remove_revenant,
     remove_soldier,
     remove_soldier_giant_blooded,
+    remove_demonic_attribute,
     remove_soldier_mutation,
     remove_soldier_permanent_injury,
     remove_soldier_thrall,
@@ -432,6 +435,8 @@ app.jinja_env.globals.update(
     LEGENDARY_SOLDIER_TYPE_KEYS=LEGENDARY_SOLDIER_TYPE_KEYS,
     ILLUSION_SOURCE_CHOICES=illusion_source_choices(),
     ANIMAL_COMPANION_TYPE_KEYS=animal_companion_type_keys(),
+    DEMON_SOLDIER_TYPE_KEYS=expansions.DEMON_SOLDIER_TYPE_KEYS,
+    DEMONIC_ATTRIBUTES=load_demonic_attributes(),
     CONSTRUCT_TYPE_KEYS=construct_type_keys(),
     STANDARD_CONSTRUCT_TYPE_KEYS=STANDARD_CONSTRUCT_TYPE_KEYS,
     PRE_MODIFIED_CONSTRUCT_TYPE_KEYS=PRE_MODIFIED_CONSTRUCT_TYPE_KEYS,
@@ -1081,7 +1086,7 @@ def _wizard_level_up_blocked(wb: dict, options: list[dict], learnable: list[dict
 # nobody records buying one) and so is the Magic Item Table itself, which the
 # per-book lists already reach.
 COMMON_ITEMS_BOOK = "Common items"
-COMMON_ITEM_CATEGORIES = ("Grimoire", "Scroll", "Potion", "Magic Weapon or Armour")
+COMMON_ITEM_CATEGORIES = ("Grimoire", "Scroll", "Critical Scroll", "Potion", "Magic Weapon or Armour")
 
 
 # The item kinds the picker offers as one entry plus a second dropdown, in the
@@ -1089,7 +1094,7 @@ COMMON_ITEM_CATEGORIES = ("Grimoire", "Scroll", "Potion", "Magic Weapon or Armou
 # the 28 potions collapse the same way, kept apart by tier because the two
 # tables are separate in the book and a Greater Potion is a different kind of
 # find. Anything else follows, alphabetically.
-COMMON_ITEM_LEAD = ("Lesser Potion", "Greater Potion", "Scroll", "Grimoire")
+COMMON_ITEM_LEAD = ("Lesser Potion", "Greater Potion", "Scroll", "Critical Scroll", "Grimoire")
 
 
 def _common_item_names() -> list[str]:
@@ -2615,6 +2620,22 @@ def _act_add_soldier_mutation(wb: dict) -> tuple[bool, str]:
     if not has_input:
         return False, "Pick a mutation to add, or use “Add random mutation”."
     return add_soldier_mutation(wb, request.form.get("soldier_id") or "", number)
+
+
+@register_action("add_demonic_attribute")
+def _act_add_demonic_attribute(wb: dict) -> tuple[bool, str]:
+    mode = request.form.get("da_mode") or "pick"
+    if mode in ("random_minor", "random_major"):
+        return add_demonic_attribute(wb, request.form.get("soldier_id") or "", mode[len("random_"):])
+    name = (request.form.get("da_name") or "").strip()
+    if not name:
+        return False, "Pick a demonic attribute, or roll a random one."
+    return add_demonic_attribute(wb, request.form.get("soldier_id") or "", request.form.get("da_tier") or "", name)
+
+
+@register_action("remove_demonic_attribute")
+def _act_remove_demonic_attribute(wb: dict) -> tuple[bool, str]:
+    return remove_demonic_attribute(wb, request.form.get("soldier_id") or "", _mutation_index_from_form())
 
 
 @register_action("remove_soldier_mutation")

@@ -619,5 +619,14 @@
   "sale": 30,
   "source": "Core Rules",
   "effect": "For each scroll, roll once on the Random Spell Table to determine what spell is written on the scroll. As scrolls only contain magic spells written in shorthand, they cannot be used to learn a new spell. Scrolls take up one item slot. Otherwise they may be sold for 30gc or stored in the wizard’s vault."
+ },
+ {
+  "name": "Critical Scroll",
+  "category": "Critical Scroll",
+  "variant": "spell",
+  "purchase": null,
+  "sale": null,
+  "source": "Spellcaster Magazine",
+  "effect": "A scroll that casts its spell as a Critical Success when used."
  }
 ]

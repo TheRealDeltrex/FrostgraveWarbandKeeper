@@ -1,5 +1,5 @@
 /**
- * Item slots: short primary list; Potion/Scroll/Grimoire open a second dropdown
+ * Item slots: short primary list; Potion/Scroll/Critical Scroll/Grimoire open a second dropdown
  * for the specific type. Free text remains for custom items.
  * 2H weapons occupy two slots; unselect clears both.
  */
@@ -76,7 +76,7 @@
       ph.textContent =
         kind === "potion"
           ? "— choose potion —"
-          : kind === "scroll"
+          : kind === "scroll" || kind === "critical_scroll"
             ? "— choose spell on scroll —"
             : "— choose spell in grimoire —";
       select.appendChild(ph);
@@ -115,9 +115,13 @@
     }
 
     function composedValue(kind, detailVal) {
-      if (!detailVal) return kind === "potion" ? "Potion" : kind === "scroll" ? "Scroll" : "Grimoire";
+      if (!detailVal) {
+        return kind === "potion" ? "Potion" : kind === "scroll" ? "Scroll"
+          : kind === "critical_scroll" ? "Critical Scroll" : "Grimoire";
+      }
       if (kind === "potion") return detailVal;
       if (kind === "scroll") return "Scroll of " + detailVal;
+      if (kind === "critical_scroll") return "Critical Scroll of " + detailVal;
       if (kind === "grimoire") return "Grimoire of " + detailVal;
       return detailVal;
     }
@@ -131,7 +135,8 @@
       if (pickEl) {
         const exact = [...pickEl.options].find(
           (o) => o.value === v && (o.dataset.kind || "simple") !== "potion" &&
-            (o.dataset.kind || "") !== "scroll" && (o.dataset.kind || "") !== "grimoire"
+            (o.dataset.kind || "") !== "scroll" && (o.dataset.kind || "") !== "critical_scroll" &&
+            (o.dataset.kind || "") !== "grimoire"
         );
         // check any pick for matching simple option
       }
@@ -158,6 +163,10 @@
         return { pick: "Scroll", kind: "scroll", detail: v.slice("Scroll of ".length) };
       }
       if (v === "Scroll") return { pick: "Scroll", kind: "scroll", detail: "" };
+      if (v.startsWith("Critical Scroll of ")) {
+        return { pick: "Critical Scroll", kind: "critical_scroll", detail: v.slice("Critical Scroll of ".length) };
+      }
+      if (v === "Critical Scroll") return { pick: "Critical Scroll", kind: "critical_scroll", detail: "" };
       if (v.startsWith("Grimoire of ")) {
         return { pick: "Grimoire", kind: "grimoire", detail: v.slice("Grimoire of ".length) };
       }
@@ -173,7 +182,7 @@
       const pick = pickAt(i);
       const det = detailAt(i);
 
-      if (parsed.kind === "potion" || parsed.kind === "scroll" || parsed.kind === "grimoire") {
+      if (parsed.kind === "potion" || parsed.kind === "scroll" || parsed.kind === "critical_scroll" || parsed.kind === "grimoire") {
         pick.value = parsed.pick;
         fillDetailOptions(det, parsed.kind);
         // for potions detail value is full name; for scroll/grimoire it's spell name
@@ -266,7 +275,7 @@
           return;
         }
 
-        if (kind === "potion" || kind === "scroll" || kind === "grimoire") {
+        if (kind === "potion" || kind === "scroll" || kind === "critical_scroll" || kind === "grimoire") {
           fillDetailOptions(det, kind);
           det.value = "";
           showMode(i, "detail");
@@ -298,7 +307,7 @@
         const pick = pickAt(i);
         const opt = pick.selectedOptions[0];
         const kind = opt ? opt.dataset.kind || "simple" : "simple";
-        if (kind === "potion" || kind === "scroll" || kind === "grimoire") {
+        if (kind === "potion" || kind === "scroll" || kind === "critical_scroll" || kind === "grimoire") {
           setText(i, composedValue(kind, det.value));
         }
       });

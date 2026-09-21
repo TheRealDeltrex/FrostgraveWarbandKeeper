@@ -879,6 +879,14 @@ tr.status-dead {
 /* A <summary class="badge"> (mutated_badge() macro) reads as a plain badge —
    display:inline-block above already drops the native disclosure triangle in
    Chrome/Firefox, but Safari/older WebKit needs the marker hidden explicitly. */
+/* Empty demonic-attribute badge: present so one can be added, but quiet. */
+.badge.faded {
+  opacity: 0.45;
+}
+.badge.faded:hover {
+  opacity: 1;
+}
+
 summary.badge {
   cursor: pointer;
   list-style: none;

@@ -1291,7 +1291,8 @@ def list_warbands() -> list[dict]:
                 "gold": data.get("gold", 0),
                 "soldiers": len(
                     [s for s in (data.get("soldiers") or []) if s.get("status") != "dead"]
-                ),
+                )
+                + (1 if isinstance(data.get("captain"), dict) and data["captain"] else 0),
                 "updated": data.get("updated", ""),
                 "portrait": (data.get("wizard") or {}).get("portrait"),
                 "gender": (data.get("wizard") or {}).get("gender"),
@@ -1893,6 +1894,11 @@ def _normalize_warband(wb: dict) -> dict:
         s["at_inn"] = s.get("at_inn") is True
         s.setdefault("portrait_source_name", None)
         s["mutations"] = [x for x in _as_list(s.get("mutations")) if isinstance(x, dict)]
+        s["demonic_attributes"] = [
+            {k: str(x.get(k) or "") for k in ("tier", "name", "text")}
+            for x in _as_list(s.get("demonic_attributes"))
+            if isinstance(x, dict) and isinstance(x.get("name"), str) and x["name"].strip()
+        ]
         s["modifications"] = [x for x in _as_list(s.get("modifications")) if isinstance(x, dict)]
         s["permanent_injuries"] = [x for x in _as_list(s.get("permanent_injuries")) if isinstance(x, dict)]
         _resync_permanent_injury_text(s)
@@ -2971,6 +2977,51 @@ def remove_mutation(
     if not ok:
         return False, "Mutation not found."
     text = f"Removed {label}'s mutation: {m.get('name', '?')}."
+    add_history(wb, text)
+    return True, text
+
+
+def add_demonic_attribute(
+    wb: dict, soldier_id: str, tier: str, name: str | None = None
+) -> tuple[bool, str]:
+    """Give a demon a Minor or Major Demonic Attribute (Forgotten Pacts): the
+    named one, or a random pick from the tier when `name` is empty. Each may
+    appear only once per demon, so a random roll skips ones it already has
+    (a reroll on a duplicate, in effect)."""
+    soldier = next((s for s in wb.get("soldiers") or [] if s.get("id") == soldier_id), None)
+    if soldier is None:
+        return False, "Soldier not found."
+    if soldier.get("type_key") not in expansions.DEMON_SOLDIER_TYPE_KEYS:
+        return False, f"{soldier.get('name', 'This figure')} isn't a demon."
+    table = game_content.load_demonic_attributes().get(tier)
+    if table is None:
+        return False, "Pick Minor or Major."
+    held = soldier.setdefault("demonic_attributes", [])
+    have = {a.get("name") for a in held}
+    if name:
+        row = next((r for r in table if r["name"] == name), None)
+        if row is None:
+            return False, f"{name} isn't a {tier} demonic attribute."
+        if name in have:
+            return False, f"{soldier.get('name', 'This demon')} already has {name}."
+    else:
+        left = [r for r in table if r["name"] not in have]
+        if not left:
+            return False, f"{soldier.get('name', 'This demon')} already has every {tier} attribute."
+        row = random.choice(left)
+    held.append({"tier": tier, "name": row["name"], "text": row["text"]})
+    text = f"{soldier.get('name', 'Demon')} gained the {tier} demonic attribute {row['name']}."
+    add_history(wb, text)
+    return True, text
+
+
+def remove_demonic_attribute(wb: dict, soldier_id: str, index: int) -> tuple[bool, str]:
+    soldier = next((s for s in wb.get("soldiers") or [] if s.get("id") == soldier_id), None)
+    held = (soldier or {}).get("demonic_attributes") or []
+    if not (0 <= index < len(held)):
+        return False, "Demonic attribute not found."
+    gone = held.pop(index)
+    text = f"Removed {soldier.get('name', 'the demon')}'s demonic attribute: {gone.get('name', '?')}."
     add_history(wb, text)
     return True, text
 
@@ -5857,6 +5908,16 @@ def apply_level_up(
         detail = f"Learned {sp['name']} (effective CN {eff})"
         meta["spell_id"] = sp["id"]
         meta["spell_name"] = sp["name"]
+        # The grimoire is consumed by learning; kept in the history entry so
+        # reversing the level-up can put it back.
+        vault = wb.get("vault_items") or []
+        for i, item in enumerate(vault):
+            iname = (item.get("name") if isinstance(item, dict) else str(item)) or ""
+            m = expansions._GRIMOIRE_SPELL_RE.match(iname.strip())
+            if m and m.group("spell").strip().lower() == sp["name"].lower():
+                meta["consumed_grimoire"] = vault.pop(i)
+                detail += "; grimoire removed from vault"
+                break
     elif choice == "improve_spell":
         if not improve_spell_id:
             return False, "Pick a spell to improve."
@@ -5963,6 +6024,11 @@ def reverse_last_level_up(wb: dict) -> tuple[bool, str]:
         if not removed:
             return False, f"Could not find learned spell to remove ({detail})."
         wiz["spells"] = spells
+        grimoire = entry.get("consumed_grimoire")
+        if isinstance(grimoire, dict):
+            wb["vault_items"] = _normalize_vault_items(
+                list(wb.get("vault_items") or []) + [grimoire]
+            )
     elif choice == "improve_spell":
         spell_id = entry.get("spell_id")
         spells = wiz.get("spells") or []

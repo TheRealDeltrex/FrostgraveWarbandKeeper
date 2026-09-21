@@ -558,6 +558,31 @@ def load_expansion_rules() -> dict:
 
 
 @lru_cache(maxsize=1)
+def load_demonic_attributes() -> dict[str, list[dict]]:
+    """Forgotten Pacts' Minor and Major Demonic Attributes as
+    {"minor": [{"name", "text"}], "major": [...]}, in the book's table order.
+
+    Parsed from the one-line "Name (effect) · Name (effect)" strings in
+    expansion_rules.json rather than duplicated, so the Lexicon and the picker
+    can't drift apart."""
+    section = next(
+        (
+            sec
+            for sec in load_expansion_rules().get("Forgotten Pacts", [])
+            if sec.get("title") == "Demonic Attributes"
+        ),
+        {},
+    )
+    out: dict[str, list[dict]] = {"minor": [], "major": []}
+    for entry in section.get("entries", []):
+        tier = "minor" if entry.get("name", "").startswith("Minor") else "major"
+        for chunk in entry.get("text", "").split(" · "):
+            name, sep, rest = chunk.strip().partition(" (")
+            out[tier].append({"name": name.strip(), "text": rest.rstrip(")").strip() if sep else ""})
+    return out
+
+
+@lru_cache(maxsize=1)
 def load_grave_mutation_meta() -> dict[int, dict]:
     """Authored per-mutation PDF summary + optional mechanical stat_delta,
     keyed by mutation number. Kept separate from expansion_rules.json's
@@ -810,6 +835,11 @@ def parse_item_selection(value: str) -> tuple[str, str]:
         return "Scroll", v[len("Scroll of ") :]
     if v == "Scroll":
         return "Scroll", ""
+
+    if v.startswith("Critical Scroll of "):
+        return "Critical Scroll", v[len("Critical Scroll of ") :]
+    if v == "Critical Scroll":
+        return "Critical Scroll", ""
 
     if v.startswith("Grimoire of "):
         return "Grimoire", v[len("Grimoire of ") :]

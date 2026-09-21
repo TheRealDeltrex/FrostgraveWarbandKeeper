@@ -63,6 +63,7 @@ jobs:
           diff static/style.css docs/static/style.css
           diff static/item_slots.js docs/static/item_slots.js
           diff static/logo.webp docs/static/logo.webp
+          diff static/favicon.png docs/static/favicon.png
 
       - uses: actions/upload-pages-artifact@v3
         with:

@@ -203,6 +203,18 @@ def flat_priced() -> list[dict]:
             "purchase": 250,
             "sale": 30,
         },
+        # Write Scroll's critical success (Spellcaster Magazine Issue 7,
+        # Casting Roll Criticals). The book prints no price, so it is never
+        # bought and its sale price is left to the player.
+        {
+            "name": "Critical Scroll",
+            "category": "Critical Scroll",
+            "variant": "spell",
+            "purchase": None,
+            "sale": None,
+            "source": "Spellcaster Magazine",
+            "effect": "A scroll that casts its spell as a Critical Success when used.",
+        },
     ]
 
 
@@ -255,7 +267,7 @@ def main() -> int:
     text.update(descriptions(doc, [SCROLL_GRIMOIRE_PAGE]))
     unmatched = []
     for item in items:
-        item["source"] = "Core Rules"
+        item.setdefault("source", "Core Rules")
         # "Scroll"/"Grimoire" are single rows against the book's plural heading.
         if item.get("effect") == "Elemental Absorption":
             item["effect"] = ELEMENTAL_ABSORPTION_EFFECT

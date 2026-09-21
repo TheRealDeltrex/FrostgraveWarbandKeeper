@@ -103,6 +103,14 @@
   "slot_cost": 1
  },
  {
+  "name": "Critical Scroll",
+  "category": "Consumable",
+  "kind": "critical_scroll",
+  "summary": "Pick which spell is on the scroll in the second field.",
+  "description": "One-use spell scroll that casts its spell as a Critical Success. Cannot be used to learn a new spell.",
+  "slot_cost": 1
+ },
+ {
   "name": "Grimoire",
   "category": "Consumable",
   "kind": "grimoire",
