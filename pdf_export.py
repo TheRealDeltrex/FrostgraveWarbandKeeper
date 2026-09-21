@@ -444,7 +444,8 @@ def _format_slots(slots: list[str], n: int, has_dagger: bool = False) -> str:
                 continue
         parts.append(f"**{i + 1}:** {disp}")
         i += 1
-    return "  ".join(parts)
+    # Non-breaking spaces keep each "N: item" entry whole when the line wraps.
+    return "  ".join(x.replace(" ", " ") for x in parts)
 
 
 def _write_item_block(
