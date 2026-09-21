@@ -1,5 +1,7 @@
 # Frostgrave Warband Keeper
 
+[![Frostgrave Warband Keeper](https://raw.githubusercontent.com/TheRealDeltrex/FrostgraveWarbandKeeper/devversion/static/logo.webp)](https://therealdeltrex.github.io/FrostgraveWarbandKeeper/)
+
 A local warband tracker for **Frostgrave (2nd Edition)**. No login, no server, no cloud — your
 warbands are saved as plain files on your own machine.
 
