@@ -26,7 +26,7 @@ AGENTS.md
 
 # Transitory holding list for work not yet filed as a GitHub issue. No value
 # once the tasks are implemented.
-TODO.md
+todo.md
 plans/
 
 # docs/app/index.html and docs/index.html are hand-authored source (tracked
