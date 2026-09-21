@@ -20,10 +20,12 @@ Two ways to use it — pick whichever suits you:
 - **💾 [Download page](https://therealdeltrex.github.io/FrostgraveWarbandKeeper/)** — packaged
   Windows and Linux builds, one click each, that save your warbands as files on your own machine.
 
-This is the **distribution branch** — it just contains this README plus the
-[download / online site](https://therealdeltrex.github.io/FrostgraveWarbandKeeper/). You can also
-grab a packaged build directly from the [Releases page](../../releases/latest). No Python install
-needed on either platform.
+This is the **distribution branch** — it's the landing page for the project, and carries nothing
+but this README and the release workflows. The
+[download / online site](https://therealdeltrex.github.io/FrostgraveWarbandKeeper/) is built and
+published straight from [`devversion`](../../tree/devversion) by the "Deploy Pages" workflow, so
+it always matches the source. You can also grab a packaged build directly from the
+[Releases page](../../releases/latest). No Python install needed on either platform.
 
 ### Windows
 
