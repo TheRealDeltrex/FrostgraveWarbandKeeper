@@ -1161,7 +1161,9 @@ def _elemental_archer_arrow_slot_bonus(current_items: list[str] | None) -> int:
 # slots today, so these lists only matter if that ever changes — the exclusion
 # that actually bites is a revenant (an ordinary soldier with a flag) or an
 # undead wizard, both handled by figure_item_role() below.
-UNDEAD_SOLDIER_TYPE_KEYS = frozenset({"raised_zombie", "vampire"})
+UNDEAD_SOLDIER_TYPE_KEYS = frozenset(
+    {"raised_zombie", "raised_skeleton", "raised_armoured_skeleton", "vampire"}
+)
 DEMON_SOLDIER_TYPE_KEYS = frozenset(
     {
         "demonic_servant",
