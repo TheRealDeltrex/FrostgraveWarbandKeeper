@@ -37,6 +37,8 @@ from PIL import Image
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 MASTER = REPO_ROOT / "static" / "logo.webp"
+# The F of the wordmark on black: the emblem is unreadable at tab size.
+FAVICON_MASTER = REPO_ROOT / "static" / "favicon.png"
 
 # 224px covers the largest in-app use (.home-hero-logo) at 1x with a little to
 # spare; going bigger costs base64 weight in a render-blocking stylesheet for a
@@ -48,8 +50,8 @@ FAVICON_SIZE = 48
 FAVICON_QUALITY = 88
 
 
-def _data_uri(size: int, quality: int) -> tuple[str, float]:
-    im = Image.open(MASTER).convert("RGBA").resize((size, size), Image.LANCZOS)
+def _data_uri(size: int, quality: int, master: Path = MASTER) -> tuple[str, float]:
+    im = Image.open(master).convert("RGBA").resize((size, size), Image.LANCZOS)
     buf = io.BytesIO()
     im.save(buf, format="WEBP", quality=quality, method=6)
     raw = buf.getvalue()
@@ -61,7 +63,7 @@ def main() -> None:
         raise SystemExit(f"missing master image: {MASTER}")
 
     css_uri, css_kb = _data_uri(CSS_SIZE, CSS_QUALITY)
-    fav_uri, fav_kb = _data_uri(FAVICON_SIZE, FAVICON_QUALITY)
+    fav_uri, fav_kb = _data_uri(FAVICON_SIZE, FAVICON_QUALITY, FAVICON_MASTER)
 
     # Output stays strictly ASCII: Python writes stdout in the console's locale
     # encoding (cp1252 here), so a stray em dash would land as a lone 0x97 byte in

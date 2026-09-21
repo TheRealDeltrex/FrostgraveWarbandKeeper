@@ -934,6 +934,13 @@ def build_warband_pdf(wb: dict) -> bytes:
                 for line in s_mut_lines:
                     pdf.set_x(left)
                     pdf.multi_cell(0, 4.5, line, new_x="LMARGIN", new_y="NEXT", markdown=True)
+            s_da_lines = _mutation_lines(s.get("demonic_attributes"))
+            if s_da_lines:
+                pdf.set_x(left)
+                pdf.multi_cell(0, 4.5, _t("**Demonic Attributes:**"), new_x="LMARGIN", new_y="NEXT", markdown=True)
+                for line in s_da_lines:
+                    pdf.set_x(left)
+                    pdf.multi_cell(0, 4.5, line, new_x="LMARGIN", new_y="NEXT", markdown=True)
             s_mod_lines = _mutation_lines(s.get("modifications"))
             if s_mod_lines:
                 pdf.set_x(left)

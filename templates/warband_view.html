@@ -18,6 +18,32 @@
   {% endif %}
   <script type="application/json" id="loot-picker-data">{{ loot_picker_data | tojson }}</script>
   <script type="application/json" id="mutation-picker-data">{{ mutation_picker_data | tojson }}</script>
+  <script type="application/json" id="demonic-attribute-data">{{ DEMONIC_ATTRIBUTES | tojson }}</script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var el = document.getElementById('demonic-attribute-data');
+      if (!el) return;
+      var table = JSON.parse(el.textContent);
+      document.querySelectorAll('.demonic-attribute-picker').forEach(function (form) {
+        var tier = form.querySelector('.da-tier');
+        var name = form.querySelector('.da-name');
+        tier.addEventListener('change', function () {
+          name.innerHTML = '';
+          var ph = document.createElement('option');
+          ph.value = '';
+          ph.textContent = tier.value ? '— pick an attribute —' : '— pick a tier first —';
+          name.appendChild(ph);
+          (table[tier.value] || []).forEach(function (a) {
+            var o = document.createElement('option');
+            o.value = a.name;
+            o.textContent = a.text ? a.name + ' (' + a.text + ')' : a.name;
+            name.appendChild(o);
+          });
+          name.disabled = !tier.value;
+        });
+      });
+    });
+  </script>
   {# Shared data for every _item_slots.html block on this page (wizard,
      apprentice, captain, and one per soldier). These are identical for every
      block, so they're emitted once here rather than once per block — with up
@@ -36,6 +62,7 @@
     {% endfor %}
     {% for name in spell_names %}
       <option value="Scroll of {{ name }}"></option>
+      <option value="Critical Scroll of {{ name }}"></option>
       <option value="Grimoire of {{ name }}"></option>
     {% endfor %}
     {% for it in vault_names %}
@@ -2232,6 +2259,43 @@
                     {% endif %}
                     {% if s.revenant %}<span class="badge" title="Reanimated with the Revenant spell">revenant</span>{% endif %}
                     {{ mutated_badge(s.mutations) }}
+                    {% if s.type_key in DEMON_SOLDIER_TYPE_KEYS %}
+                      <details class="demonic-attributes" style="display:block">
+                        <summary class="badge{{ '' if s.demonic_attributes else ' faded' }}" title="Demonic attributes{{ ' (' ~ s.demonic_attributes|length ~ ')' if s.demonic_attributes }} — click to view or add">demonic</summary>
+                        {% if s.demonic_attributes %}
+                          <ul class="list-plain" style="font-size:0.8rem;margin:0.3rem 0 0;max-width:26rem">
+                            {% for a in s.demonic_attributes %}
+                              <li>
+                                <strong>{{ a.name }}</strong> <span class="muted">({{ a.tier }})</span>{% if a.text %} — {{ a.text }}{% endif %}
+                                <form class="inline-form" method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" onsubmit="return confirm('Remove demonic attribute “{{ a.name }}”?');">
+                                  <input type="hidden" name="action" value="remove_demonic_attribute" />
+                                  <input type="hidden" name="soldier_id" value="{{ s.id }}" />
+                                  <input type="hidden" name="mutation_index" value="{{ loop.index0 }}" />
+                                  <button class="btn danger small" type="submit" title="Remove this attribute">Remove</button>
+                                </form>
+                              </li>
+                            {% endfor %}
+                          </ul>
+                        {% endif %}
+                        <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="demonic-attribute-picker stack-sm" style="margin-top:0.4rem;max-width:26rem">
+                          <input type="hidden" name="action" value="add_demonic_attribute" />
+                          <input type="hidden" name="soldier_id" value="{{ s.id }}" />
+                          <select name="da_tier" class="da-tier" aria-label="Minor or major">
+                            <option value="">— minor / major —</option>
+                            <option value="minor">Minor</option>
+                            <option value="major">Major</option>
+                          </select>
+                          <select name="da_name" class="da-name" aria-label="Demonic attribute" disabled>
+                            <option value="">— pick a tier first —</option>
+                          </select>
+                          <div class="actions">
+                            <button class="btn secondary small" type="submit" name="da_mode" value="pick">Add selected</button>
+                            <button class="btn secondary small" type="submit" name="da_mode" value="random_minor" formnovalidate>Random minor</button>
+                            <button class="btn secondary small" type="submit" name="da_mode" value="random_major" formnovalidate>Random major</button>
+                          </div>
+                        </form>
+                      </details>
+                    {% endif %}
                     {{ permanent_injury_badge(s.permanent_injuries) }}
                     {{ construct_modification_badge(s) }}
                     {% if s.giant_blooded %}<span class="badge" title="Blood Legacy's Giant-Blooded: -1 Move, -2 Will, +2 Health, Giant-Blooded trait">giant-blooded</span>{% endif %}
@@ -4213,6 +4277,7 @@
       var VARIANT_ITEMS = {
         Grimoire: { label: 'Spell', list: 'spell_names', compose: 'prefix' },
         Scroll: { label: 'Spell', list: 'spell_names', compose: 'prefix' },
+        'Critical Scroll': { label: 'Spell', list: 'spell_names', compose: 'prefix' },
         'Lesser Potion': { label: 'Potion', list: 'lesser_potion_names', compose: 'replace' },
         'Greater Potion': { label: 'Potion', list: 'greater_potion_names', compose: 'replace' }
       };

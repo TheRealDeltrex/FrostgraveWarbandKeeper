@@ -270,6 +270,7 @@ def main():
     # emblem as a data URI inside style.css (see scripts/build_logo_asset.py);
     # docs/index.html is a plain page on Pages, so it can just link the file.
     shutil.copyfile(REPO_ROOT / "static" / "logo.webp", docs / "static" / "logo.webp")
+    shutil.copyfile(REPO_ROOT / "static" / "favicon.png", docs / "static" / "favicon.png")
 
     # Only the default portraits these pages reference — shipping all 36 would put
     # a couple of MB on the Pages site for pictures nothing links to.
