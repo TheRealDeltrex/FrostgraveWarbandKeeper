@@ -12,11 +12,11 @@ Not affiliated with Osprey Games / Joseph A. McCullough.
 Two ways to use it — pick whichever suits you:
 
 - **▶ [Play online — no install](https://therealdeltrex.github.io/FrostgraveWarbandKeeper/app/)** —
-  the whole app runs right in your browser tab. Nothing is stored, so it's session-only: **export a
-  warband to a file to keep it**, and import it again next time. Everything works normally, including
-  custom pictures — they just won't survive a refresh or come back on import, so re-upload them if you
-  reload one. Great for a quick try or a one-off game. (First load fetches a runtime, so give it a few
-  seconds.)
+  the whole app runs right in your browser tab, and it works exactly like the desktop version,
+  custom pictures included. Your warbands are saved in the browser itself, so closing the tab or
+  refreshing is safe. That storage is per-browser — this device, this browser — so **use "Export
+  warband" for a portable backup** or to move a warband to another browser or device. (First load
+  fetches a runtime, so give it a few seconds.)
 - **💾 [Download page](https://therealdeltrex.github.io/FrostgraveWarbandKeeper/)** — packaged
   Windows and Linux builds, one click each, that save your warbands as files on your own machine.
 
@@ -65,7 +65,7 @@ folder.
 - **Home base**: set a base location and buy base resources, per the 2e core rules.
 - **Frostgrave Lexicon**: the full spell list per school (including the Lost Schools from The Maze of Malcor) with casting numbers and descriptions, the school relationship table, arms/armour/consumables, a full bestiary, random encounter tables, per-book loot tables, and a collapsible magic items & treasure reference — every entry tagged with its source book.
 - **PDF roster export**: a clean, printable warband sheet.
-- **Import/export**: warbands are saved as `.warbands` files (plain JSON) that can be exported, shared, and re-imported. (In the online version, this is how you save.)
+- **Import/export**: warbands are saved as `.warbands` files (plain JSON) that can be exported, shared, and re-imported. (In the online version, this is how you back a warband up or move it to another browser.)
 
 ## Want to modify the code?
 
