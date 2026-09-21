@@ -1,5 +1,7 @@
 # Frostgrave Warband Keeper — dev version
 
+[![Frostgrave Warband Keeper](https://raw.githubusercontent.com/TheRealDeltrex/FrostgraveWarbandKeeper/devversion/static/logo.webp)](https://therealdeltrex.github.io/FrostgraveWarbandKeeper/)
+
 This branch (`devversion`) holds the **full Python/Flask source code**. It exists so the app can be
 run from source, read, and altered — if you (or your gaming group) need a feature, rule tweak, or
 homerule this app doesn't already support, this is the branch to work from.
