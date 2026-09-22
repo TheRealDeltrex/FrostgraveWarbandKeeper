@@ -58,10 +58,11 @@ ALIASES = {
     "construct_large": "large_construct",
     # Temporary members (Raise Zombie, Summon Demon) — source art is drawn
     # plain ("Imp", "Minor Demon") since it's the same creature either way;
-    # "Zombie" already matches raised_zombie's SOLDIERS name directly.
+    # "Zombie" and "Skeleton" already match their SOLDIERS names directly.
     "imp": "summoned_imp",
     "minor_demon": "summoned_minor_demon",
     "major_demon": "summoned_major_demon",
+    "skeleton_armored": "raised_armoured_skeleton",
     "guide_expert": "expert_guide",
     "burden_construct": "construct_of_burden",
     "candle_jack_shield_normal": "candle_jack",
