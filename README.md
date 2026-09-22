@@ -25,4 +25,4 @@ are not tracked in git, unless a different folder is set in the app's Settings.
 ## Branches
 
 - `devversion` (this branch) — the application source.
-- `main` — distribution only: README, license and the two workflows. No source, no `docs/`.
+- `main` — distribution only: README, license and the two workflows.
