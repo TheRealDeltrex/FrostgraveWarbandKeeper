@@ -3183,6 +3183,38 @@ SOLDIER_ABILITIES: dict[str, str] = {
 }
 
 
+def _type_keys_with_trait(prefix: str) -> frozenset[str]:
+    """Soldier type_keys whose SOLDIER_ABILITIES line opens with this trait
+    (e.g. "Animal:"/"Demon:"/"Construct:"/"Undead:") — derived from that
+    dict's own text instead of a hand-maintained list, so it can't drift as
+    new soldiers are added."""
+    return frozenset(k for k, v in SOLDIER_ABILITIES.items() if v.startswith(prefix))
+
+
+# Used to pick which random-name pool a blank-name hire draws from
+# (warband_store._next_type_name()) — a construct or a raised skeleton
+# shouldn't get a human name from RANDOM_SOLDIER_NAMES_MALE.
+# Snow Troll and Foulhorn (The Red King / The Maze of Malcor bestiary hires)
+# are beasts in every way that matters for naming, but neither carries the
+# "Animal:" trait line in SOLDIER_ABILITIES — the book doesn't give them the
+# Animal trait itself (they keep full treasure/item-slot rights a true
+# Animal doesn't), so the text-prefix scan can't catch them. Added by hand.
+# The Werewolf is deliberately left off this list despite the same gap: it's
+# a shapeshifted human, not a beast, so it stays on the human name pool
+# (the default _next_type_name() falls through to).
+_NON_TRAIT_TAGGED_BEAST_TYPE_KEYS = frozenset({"snow_troll", "foulhorn"})
+ANIMAL_SOLDIER_TYPE_KEYS = _type_keys_with_trait("Animal:") | _NON_TRAIT_TAGGED_BEAST_TYPE_KEYS
+DEMON_SOLDIER_TYPE_KEYS = _type_keys_with_trait("Demon:")
+CONSTRUCT_SOLDIER_TYPE_KEYS = _type_keys_with_trait("Construct:")
+# "vampire" (The Red King's Undead specialist soldier, distinct from the
+# playable Vampire Wizard school) is excluded on purpose — unlike a mindless
+# raised zombie/skeleton, a vampire keeps its own mind and identity, so it
+# gets a real name (warband_store._next_type_name() special-cases it onto
+# the wizard name pool) rather than the "Type N" numbering the rest of the
+# undead fall back to.
+UNDEAD_SOLDIER_TYPE_KEYS = _type_keys_with_trait("Undead:") - {"vampire"}
+
+
 # Legendary Soldiers (Spellcaster Magazine, Issue 4): a rare troop category
 # limited by wizard level rather than freely hired. Never more than one of
 # each type at a time; the count only ever grows via level, so a wizard who
