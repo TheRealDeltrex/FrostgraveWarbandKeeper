@@ -574,6 +574,20 @@ textarea:focus {
   flex: 1 1 140px;
 }
 
+.input-with-button {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.input-with-button input {
+  flex: 1;
+  min-width: 0;
+}
+
+.input-with-button button {
+  flex: 0 0 auto;
+}
+
 .checkbox-row {
   display: flex;
   align-items: center;
@@ -1195,6 +1209,22 @@ code {
 .warband-list-item .card-link {
   flex: 1;
   min-width: 0;
+}
+
+input.warband-position {
+  width: 3.4rem;
+  flex: 0 0 auto;
+  align-self: center;
+  padding: 0.55rem 0.4rem;
+  text-align: center;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+input.warband-position::-webkit-outer-spin-button,
+input.warband-position::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .warband-delete-form {

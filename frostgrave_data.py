@@ -1775,6 +1775,23 @@ SOLDIERS: dict[str, dict] = {
         "notes": "Joins via Summon Demon (Casting Roll succeeded by 13+) as a temporary member; only one summoned demon at a time. Demon; Large; Strong (+2 damage); True Sight.",
         "description": "Placed by the Summon Demon spell as a temporary member of the warband — not a permanent hire, and doesn't count against the soldier or specialist limit. Which demon tier arrives depends on how much the Casting Roll succeeded by: 0–5 an imp, 6–12 a minor demon, 13+ gives this major demon. Summon Demon can't be cast again while a summoned demon is already under control. Demon: immune to poison, all attacks count as magic, can carry treasure tokens but has no item slots. Large: suffers the -2 Large Target penalty against shooting attacks. Strong: deals +2 damage. True Sight: ignores Beauty and Invisibility, and destroys any Illusionary Soldier it fights.",
     },
+    "animated_skull": {
+        "name": "Animated Skull",
+        "cost": 0,
+        "category": "temporary",
+        "temporary": True,
+        "temporary_group": "skull",
+        "requires_spell": "Animate Skull",
+        "move": 3,
+        "fight": 0,
+        "shoot": 0,
+        "armour": 10,
+        "will": -2,
+        "health": 1,
+        "gear": "—",
+        "notes": "Joins via Animate Skull as a temporary member; only one at a time. Undead; Levitate.",
+        "description": "Placed by the Animate Skull spell as a temporary member of the warband — not a permanent hire, and doesn't count against the soldier or specialist limit. Undead: immune to poison, never wounded, can carry treasure tokens but has no item slots. Levitate: no movement penalty for climbing or rough ground.",
+    },
     "illusionary_soldier": {
         "name": "Illusionary Soldier",
         "cost": 0,
@@ -2941,6 +2958,7 @@ SOLDIER_ABILITIES: dict[str, str] = {
     "raised_armoured_skeleton": (
         f'{_UNDEAD} Pack Hunter: activates and moves with other armoured skeletons in base contact.'
     ),
+    "animated_skull": f"{_UNDEAD} Levitate: no movement penalty for climbing or rough ground. Only one at a time.",
     "summoned_imp": f"{_DEMON} {_SUMMONED_DEMON}",
     "summoned_minor_demon": f"{_DEMON} {_SUMMONED_DEMON}",
     "summoned_major_demon": f"{_DEMON} {_LARGE} {_STRONG} {_TRUE_SIGHT} {_SUMMONED_DEMON}",
@@ -3346,16 +3364,18 @@ SUMMONED_ORDER = [
     "demonic_servant",
 ]
 
-# Order the temporary members appear in: the raised zombie, then the three
-# summoned-demon tiers from weakest to strongest.
+# Order the temporary members appear in: Illusionary Soldier, then Animated
+# Skull, then the raised zombie and the three summoned-demon tiers weakest to
+# strongest.
 TEMPORARY_ORDER = [
+    "illusionary_soldier",
+    "animated_skull",
     "raised_zombie",
     "raised_skeleton",
     "raised_armoured_skeleton",
     "summoned_imp",
     "summoned_minor_demon",
     "summoned_major_demon",
-    "illusionary_soldier",
 ]
 
 

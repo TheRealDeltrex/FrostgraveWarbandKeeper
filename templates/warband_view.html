@@ -1579,12 +1579,18 @@
 
     {% if not ap %}
       <h3>Hire apprentice</h3>
+      <script type="application/json" id="random-new-apprentice-name-pools-data">
+        {{ {"male": RANDOM_APPRENTICE_NAMES_MALE, "female": RANDOM_APPRENTICE_NAMES_FEMALE} | tojson }}
+      </script>
       <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" enctype="multipart/form-data">
         <input type="hidden" name="action" value="hire_apprentice" />
         <div class="form-row inline">
           <div>
             <label for="new_apprentice_name">Name</label>
-            <input id="new_apprentice_name" name="apprentice_name" type="text" />
+            <div class="input-with-button">
+              <input id="new_apprentice_name" name="apprentice_name" type="text" />
+              <button class="btn secondary small" type="button" id="random-new-apprentice-name-btn" title="Random apprentice name">🎲</button>
+            </div>
           </div>
           <div>
             <label for="new_apprentice_portrait">Picture</label>
@@ -1605,6 +1611,22 @@
           </div>
         </div>
       </form>
+      <script>
+        (function () {
+          var btn = document.getElementById('random-new-apprentice-name-btn');
+          var pools = JSON.parse(document.getElementById('random-new-apprentice-name-pools-data').textContent || '{}');
+          if (!btn) return;
+          btn.addEventListener('click', function () {
+            var el = document.getElementById('new_apprentice_name');
+            var female = document.getElementById('new_apprentice_gender_f');
+            var pool = (female && female.checked) ? pools.female : pools.male;
+            if (!pool || !pool.length) return;
+            var pick;
+            do { pick = pool[Math.floor(Math.random() * pool.length)]; } while (pool.length > 1 && pick === el.value);
+            el.value = pick;
+          });
+        })();
+      </script>
     {% else %}
       {% if wiz.level >= 6 %}
         <p class="muted" style="font-size:0.85rem;margin-top:0.75rem">
@@ -1799,7 +1821,7 @@
           <input type="hidden" name="action" value="captain_edit" />
           <div class="char-block">
             <div style="display:flex;flex-direction:column;align-items:center">
-              {% set cap_src = portrait_src(cap.portrait, 'captain', cap.type_key) %}
+              {% set cap_src = portrait_src(cap.portrait, 'captain', cap.type_key, cap.gender) %}
               {% set cap_mounted = horse_rider and horse_rider.kind == 'captain' %}
               {% with %}
                 {% set portrait_id = 'captain-portrait-picker' %}
@@ -1989,12 +2011,27 @@
         <details class="ref-panel" id="captain-hire-panel">
           <summary>Captain — none hired</summary>
         {% if hr.captain_mode in ('hire', 'both') %}
+          <script type="application/json" id="random-captain-name-pools-data">
+            {{ {"male": RANDOM_CAPTAIN_NAMES_MALE, "female": RANDOM_CAPTAIN_NAMES_FEMALE} | tojson }}
+          </script>
           <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" enctype="multipart/form-data">
             <input type="hidden" name="action" value="hire_captain" />
             <div class="form-row inline">
               <div>
                 <label for="captain_name">Name</label>
-                <input id="captain_name" name="captain_name" type="text" placeholder="Captain" />
+                <div class="input-with-button">
+                  <input id="captain_name" name="captain_name" type="text" placeholder="Captain" />
+                  <button class="btn secondary small" type="button" id="random-captain-name-btn" title="Random captain name">🎲</button>
+                </div>
+              </div>
+              <div>
+                <label>Gender</label>
+                <div class="gender-toggle">
+                  <input type="radio" id="captain_gender_m" name="captain_gender" value="male" checked />
+                  <label for="captain_gender_m">Male</label>
+                  <input type="radio" id="captain_gender_f" name="captain_gender" value="female" />
+                  <label for="captain_gender_f">Female</label>
+                </div>
               </div>
               {% if hr.captain_bonus_choice_enabled %}
                 <div>
@@ -2034,6 +2071,22 @@
               </details>
             {% endif %}
           </form>
+          <script>
+            (function () {
+              var btn = document.getElementById('random-captain-name-btn');
+              var pools = JSON.parse(document.getElementById('random-captain-name-pools-data').textContent || '{}');
+              if (!btn) return;
+              btn.addEventListener('click', function () {
+                var el = document.getElementById('captain_name');
+                var female = document.getElementById('captain_gender_f');
+                var pool = (female && female.checked) ? pools.female : pools.male;
+                if (!pool || !pool.length) return;
+                var pick;
+                do { pick = pool[Math.floor(Math.random() * pool.length)]; } while (pool.length > 1 && pick === el.value);
+                el.value = pick;
+              });
+            })();
+          </script>
         {% endif %}
         {% if hr.captain_mode in ('promote', 'both') %}
           <p class="muted" style="font-size:0.85rem">

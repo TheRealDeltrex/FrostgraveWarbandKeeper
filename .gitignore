@@ -19,6 +19,10 @@ dist/
 FrostgraveWarbandKeeper-*.zip
 .codesign/
 
+# Raw source art for static/portraits/ (build_default_portraits.py's input) —
+# large, external, never the shipped asset. Baked 256x256 PNGs are tracked.
+Default Profile Pictures/
+
 # Local AI-agent operating manual (CLAUDE.md) and its pointer for other tools.
 # Machine-specific (absolute paths, signing setup), deliberately not published.
 CLAUDE.md

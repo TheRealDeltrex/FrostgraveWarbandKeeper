@@ -190,14 +190,29 @@
           (never repeats the school currently shown).
         </span>
       </div>
+      <script type="application/json" id="random-name-pools-data">
+        {{ {
+          "warband": RANDOM_WARBAND_NAMES,
+          "wizard_male": RANDOM_WIZARD_NAMES_MALE,
+          "wizard_female": RANDOM_WIZARD_NAMES_FEMALE,
+          "apprentice_male": RANDOM_APPRENTICE_NAMES_MALE,
+          "apprentice_female": RANDOM_APPRENTICE_NAMES_FEMALE,
+        } | tojson }}
+      </script>
       <div class="grid-2">
         <div class="form-row">
           <label for="warband_name">Warband name</label>
-          <input id="warband_name" name="warband_name" type="text" required placeholder="The Frozen Hand" value="{{ warband_name }}" />
+          <div class="input-with-button">
+            <input id="warband_name" name="warband_name" type="text" required placeholder="The Frozen Hand" value="{{ warband_name }}" />
+            <button class="btn secondary small" type="button" id="random-warband-name-btn" title="Random warband name">🎲</button>
+          </div>
         </div>
         <div class="form-row">
           <label for="wizard_name">Wizard name</label>
-          <input id="wizard_name" name="wizard_name" type="text" required placeholder="Morvain" value="{{ wizard_name }}" />
+          <div class="input-with-button">
+            <input id="wizard_name" name="wizard_name" type="text" required placeholder="Morvain" value="{{ wizard_name }}" />
+            <button class="btn secondary small" type="button" id="random-wizard-name-btn" title="Random wizard name">🎲</button>
+          </div>
         </div>
         <div class="form-row" id="school-field">
           <label for="school">School of magic</label>
@@ -270,7 +285,10 @@
         <div class="grid-2">
           <div class="form-row">
             <label for="apprentice_name">Apprentice name</label>
-            <input id="apprentice_name" name="apprentice_name" type="text" placeholder="Sable" value="{{ apprentice_name }}" />
+            <div class="input-with-button">
+              <input id="apprentice_name" name="apprentice_name" type="text" placeholder="Sable" value="{{ apprentice_name }}" />
+              <button class="btn secondary small" type="button" id="random-apprentice-name-btn" title="Random apprentice name">🎲</button>
+            </div>
           </div>
           <div class="form-row">
             <label for="apprentice_portrait">Apprentice picture</label>
@@ -711,6 +729,41 @@
         if (apprenticeEl && names.apprentice_name) apprenticeEl.value = names.apprentice_name;
         if (withApprenticeEl) withApprenticeEl.checked = true;
       });
+    });
+  }
+
+  // Per-field random-name buttons (🎲) — unlike "Random wizard" above, these
+  // touch only their own text field: no school/spell/apprentice reroll, no
+  // server round-trip. Each reads its matching gender toggle at click time.
+  // Delegated on the form (never swapped by fgNewReload) rather than bound
+  // directly to the buttons, since the apprentice button lives inside
+  // #wizard-notes — replaced wholesale on every school change — and a
+  // directly-attached listener would be lost the first time that happens.
+  if (!window.__fgRandomNameButtonsAttached) {
+    window.__fgRandomNameButtonsAttached = true;
+    var namePools = JSON.parse(document.getElementById('random-name-pools-data').textContent || '{}');
+    function randomOtherThan(list, current) {
+      if (!list || !list.length) return current;
+      if (list.length === 1) return list[0];
+      var pick;
+      do { pick = list[Math.floor(Math.random() * list.length)]; } while (pick === current);
+      return pick;
+    }
+    document.getElementById('create-form').addEventListener('click', function (e) {
+      if (e.target.closest('#random-warband-name-btn')) {
+        var wb = document.getElementById('warband_name');
+        wb.value = randomOtherThan(namePools.warband, wb.value);
+      } else if (e.target.closest('#random-wizard-name-btn')) {
+        var wiz = document.getElementById('wizard_name');
+        var wizFemale = document.getElementById('wizard_gender_f');
+        var wizPool = (wizFemale && wizFemale.checked) ? namePools.wizard_female : namePools.wizard_male;
+        wiz.value = randomOtherThan(wizPool, wiz.value);
+      } else if (e.target.closest('#random-apprentice-name-btn')) {
+        var ap = document.getElementById('apprentice_name');
+        var apFemale = document.getElementById('apprentice_gender_f');
+        var apPool = (apFemale && apFemale.checked) ? namePools.apprentice_female : namePools.apprentice_male;
+        ap.value = randomOtherThan(apPool, ap.value);
+      }
     });
   }
 
