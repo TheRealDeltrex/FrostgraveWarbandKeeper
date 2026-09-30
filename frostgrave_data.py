@@ -1551,7 +1551,7 @@ SOLDIERS: dict[str, dict] = {
         "armour": 11,
         "will": 4,
         "health": 12,
-        "gear": "Hand weapon, leather armour",
+        "gear": "Hand weapon, light armour",
         "notes": "Soldiers within 6\" and line of sight gain +1 to Will rolls (once per warband).",
         "description": 'A traveling performer whose music steadies nerves in the field. Warband members within 6" and line of sight of a bard get +1 to Will rolls; this bonus doesn\'t stack with a second bard and never applies to the bard themself.',
     },
@@ -1566,7 +1566,7 @@ SOLDIERS: dict[str, dict] = {
         "armour": 11,
         "will": 2,
         "health": 10,
-        "gear": "Hand weapon, leather armour",
+        "gear": "Hand weapon, light armour",
         "item_slots": 0,
         "notes": "Requires a Crow Roost base upgrade (100gc). Brings one blood crow; may carry treasure but no items.",
         "description": "A handler bonded to a trained blood crow. Requires a Crow Roost base upgrade (100gc) before one can be hired. Comes with one blood crow that acts independently and is replaced free of charge if it's killed; the crow master may carry treasure but has no item slots of their own.",
@@ -1631,7 +1631,7 @@ SOLDIERS: dict[str, dict] = {
         "armour": 11,
         "will": 1,
         "health": 12,
-        "gear": "Two hand weapons, leather armour",
+        "gear": "Two hand weapons, light armour",
         "notes": "With the Secret Passages rules, an initiative roll of 19 lets one tunnel fighter discover a secret passage.",
         "description": "A specialist trained for the city's collapsed passages and hidden shortcuts. Under the Secret Passages rules, an initiative roll of 19 lets a tunnel fighter (and only a tunnel fighter) discover and use a secret passage that game.",
     },
@@ -1840,7 +1840,7 @@ SOLDIERS: dict[str, dict] = {
         "armour": 11,
         "will": 2,
         "health": 12,
-        "gear": "Two-handed weapon, crossbow, quiver, leather armour",
+        "gear": "Two-handed weapon, crossbow, quiver, light armour",
         "notes": "+1 Fight and +1 damage vs demons. Variable cost: base 100gc (+25gc if the wizard knows Summon Demon/Imp/Possess, +25gc if a Summoner, +50gc if the base has a summoning circle).",
         "description": 'A specialist trained specifically to fight demons, dealing +1 Fight and +1 damage against them. Cost is variable rather than fixed: base 100gc, +25gc if the wizard knows Summon Demon, Imp, or Possess, a further +25gc if the wizard is a Summoner, and +50gc if the base owns a Summoning Circle — the more demon-adjacent the warband already is, the more this specialist costs to bring in.',
     },
@@ -2418,7 +2418,7 @@ SOLDIERS: dict[str, dict] = {
         "armour": 11,
         "will": 1,
         "health": 10,
-        "gear": "Musket, powder horn, leather armour, hand weapon",
+        "gear": "Musket, powder horn, light armour, hand weapon",
         "notes": "Specialist Soldier (2E errata). Musket and Powder Horn are real catalog items — assign them from this soldier's item slots after hiring.",
         "description": 'A black-powder marksman (Spellcaster Magazine, Issue 1). Carries a Musket — a two-handed firearm, only one at a time, no shield; usable in melee as a two-handed weapon but without the usual +2 damage bonus. See the Lexicon\'s Black Powder Firearms table for the full firearm rules (Inaccurate/Armour Piercing/Loud traits, reload actions, the Misfire table) and its purchasable upgrades.',
     },
@@ -2433,7 +2433,7 @@ SOLDIERS: dict[str, dict] = {
         "armour": 11,
         "will": 1,
         "health": 10,
-        "gear": "Blunderbuss, powder horn, leather armour, hand weapon",
+        "gear": "Blunderbuss, powder horn, light armour, hand weapon",
         "notes": "Specialist Soldier (2E errata). Blunderbuss and Powder Horn are real catalog items — assign them from this soldier's item slots after hiring.",
         "description": 'A shotgun-armed guard (Spellcaster Magazine, Issue 1). Carries a Blunderbuss — a two-handed firearm whose shooting attack normally hits the target and every other figure within 1" of it; usable in melee like a pistol, but without the +1 Fight combo bonus. See the Lexicon\'s Black Powder Firearms table for the full firearm rules and its purchasable upgrades.',
     },
@@ -2448,7 +2448,7 @@ SOLDIERS: dict[str, dict] = {
         "armour": 11,
         "will": 2,
         "health": 12,
-        "gear": "2 pistols, powder horn, leather armour, hand weapon",
+        "gear": "2 pistols, powder horn, light armour, hand weapon",
         "notes": "Specialist Soldier (2E errata). Pistols and Powder Horn are real catalog items — assign them from this soldier's item slots after hiring.",
         "description": 'A two-pistol gunfighter (Spellcaster Magazine, Issue 1). Carries a pair of Pistols — one-handed firearms that double as daggers (never counts as unarmed) and grant +1 Fight when paired with a hand weapon in Frostgrave. See the Lexicon\'s Black Powder Firearms table for the full firearm rules and its purchasable upgrades.',
     },
@@ -2658,7 +2658,7 @@ SOLDIERS: dict[str, dict] = {
         "armour": 11,
         "will": 4,
         "health": 12,
-        "gear": "Hand weapon, bow, leather armour, space for up to 3 magic arrows without needing an item slot",
+        "gear": "Hand weapon, bow, light armour, space for up to 3 magic arrows without needing an item slot",
         "item_slots": 2,
         "notes": (
             "Legendary Soldier (Issue 4). All shooting attacks count as magic. May "
@@ -2679,7 +2679,7 @@ SOLDIERS: dict[str, dict] = {
         "armour": 11,
         "will": 4,
         "health": 14,
-        "gear": "Hand weapon, two-handed weapon, leather armour",
+        "gear": "Hand weapon, two-handed weapon, light armour",
         "item_slots": 2,
         "notes": (
             "Legendary Soldier (Issue 4). +2 Fight vs. undead, magic attacks vs. undead. "
@@ -2719,7 +2719,7 @@ SOLDIERS: dict[str, dict] = {
         "armour": 11,
         "will": 7,
         "health": 12,
-        "gear": "Hand weapon, leather armour",
+        "gear": "Hand weapon, light armour",
         "item_slots": 2,
         "notes": (
             "Legendary Soldier (Issue 4). Once per activation: move a visible treasure "
@@ -2739,7 +2739,7 @@ SOLDIERS: dict[str, dict] = {
         "armour": 11,
         "will": 3,
         "health": 14,
-        "gear": "Whip, hand weapon, leather armour",
+        "gear": "Whip, hand weapon, light armour",
         "item_slots": 2,
         "notes": (
             "Legendary Soldier (Issue 4). Whip: 3\" range shooting attack (max +2); on a "
@@ -2760,7 +2760,7 @@ SOLDIERS: dict[str, dict] = {
         "armour": 11,
         "will": 2,
         "health": 14,
-        "gear": "Hand weapon, dagger, crossbow, leather armour",
+        "gear": "Hand weapon, dagger, crossbow, light armour",
         "item_slots": 2,
         "notes": (
             "Legendary Soldier (Issue 5). +1 Fight/+1 Shoot vs. uncontrolled creatures; "
@@ -2781,7 +2781,7 @@ SOLDIERS: dict[str, dict] = {
         "armour": 11,
         "will": 5,
         "health": 14,
-        "gear": "Two-handed weapon, leather armour",
+        "gear": "Two-handed weapon, light armour",
         "item_slots": 4,
         "notes": (
             "Legendary Soldier (Issues 5 & 6, reprinted). With Monster Hunting enabled, "
