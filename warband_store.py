@@ -21,6 +21,7 @@ import game_content
 import paths
 from frostgrave_data import (
     ALIGNED_SCHOOL_SPELLS,
+    ANIMAL_SOLDIER_TYPE_KEYS,
     APPRENTICE_BASE,
     APPRENTICE_COST,
     APPRENTICE_ITEM_SLOTS,
@@ -43,6 +44,8 @@ from frostgrave_data import (
     CAPTAIN_TRICKS,
     CARGO_TRANSPORT_COST,
     CARGO_TRANSPORT_UPGRADES,
+    CONSTRUCT_SOLDIER_TYPE_KEYS,
+    DEMON_SOLDIER_TYPE_KEYS,
     EDITION1_LOOT_GOLD_VALUE,
     FIN_DALKA_BASE_SELL,
     FIN_DALKA_DECIPHER_COST,
@@ -96,6 +99,7 @@ from frostgrave_data import (
     SUPPLY_POINT_BUY_RATE,
     SUPPLY_POINT_SELL_RATE,
     TEMPORARY_MEMBER_LIMIT,
+    UNDEAD_SOLDIER_TYPE_KEYS,
     UNDERWORLD_LOAN_MAX,
     UNDERWORLD_LOAN_MIN,
     UNDERWORLD_PAYOFF_COST,
@@ -2782,14 +2786,91 @@ RANDOM_SOLDIER_NAMES_MALE = [
     "Nye Vance", "Pox Cole", "Zeb Pryde",
 ]
 
+# Animal companions/war hounds and demons get their own pools — a human name
+# from RANDOM_SOLDIER_NAMES_MALE doesn't suit either. Hired in small numbers
+# (at most a couple of animals; a demon is capped at one summoned + one
+# permanent + one pact boon at a time), so neither needs 200 entries the way
+# the soldier/wizard/captain pools do.
+RANDOM_ANIMAL_NAMES = [
+    "Fang", "Shadow", "Brutus", "Storm", "Ranger", "Scout", "Ash", "Rook", "Talon",
+    "Briar", "Ember", "Frost", "Gnaw", "Howl", "Ivy", "Jasper", "Karst", "Lupa",
+    "Moss", "Nettle", "Onyx", "Pike", "Quartz", "Rowan", "Sable", "Thorn", "Ursa",
+    "Vex", "Willow", "Yowl", "Bramble", "Cinder", "Dusk", "Elk", "Ferox", "Grit",
+    "Hollow", "Iron", "Juniper", "Kestrel", "Lichen", "Marrow", "Needle", "Oak",
+    "Pebble", "Quill", "Ridge", "Snag", "Tundra", "Warg", "Bristle", "Claw", "Drift",
+    "Echo", "Flint", "Growl", "Hazel", "Ink", "Birch", "Clover", "Dune", "Elder",
+    "Fen", "Gorse", "Heath", "Larch", "Mica", "Nook", "Otter", "Pinecone", "Quench",
+    "Reed", "Slate", "Thistle", "Umber", "Vole", "Wisp", "Yew", "Bracken", "Coal",
+    "Old Claw", "Grey Kestrel", "Broken Echo", "Swift Ash", "Silent Grit", "Old Umber",
+    "Fierce Storm", "Swift Gorse", "Grim Quartz", "Silent Otter", "Sly Briar",
+    "Fierce Marrow", "Grim Claw", "Swift Cinder", "Swift Heath", "Bold Hazel",
+    "Broken Pinecone", "Grim Thorn", "Wild Ferox", "Sly Reed", "Fierce Nook",
+    "Bold Moss", "Wild Ranger", "Fierce Scout", "Old Thistle", "Broken Elk",
+    "Bold Shadow", "Broken Marrow", "Grey Oak", "Bold Oak", "Wild Talon", "Wild Ridge",
+    "Silent Dusk", "Fierce Clover", "Bold Lichen", "Old Scout", "Broken Juniper",
+    "Bold Frost", "Swift Hollow", "Fierce Drift", "Swift Scout", "Bold Briar",
+    "Silent Needle", "Sly Shadow", "Swift Vex", "Broken Scout", "Grim Warg",
+    "Fierce Tundra", "Silent Drift", "Wild Iron", "Sly Umber", "Swift Vole",
+    "Sly Snag", "Sly Brutus", "Grim Elk", "Grim Dune", "Broken Coal", "Broken Sable",
+    "Fierce Ivy", "Grim Jasper", "Bold Mica", "Silent Gnaw", "Fierce Fen",
+    "Silent Rook", "Fierce Ember", "Old Ranger", "Wild Needle", "Swift Frost",
+    "Sly Slate", "Grim Larch",
+]
+RANDOM_DEMON_NAMES = [
+    "Malphas", "Vexar", "Grimtooth", "Ashmaw", "Korvyx", "Baelor", "Nethys", "Skarn",
+    "Vrogath", "Zaleth", "Drovax", "Icthar", "Malrus", "Nagrath", "Orvex", "Pallith",
+    "Quorax", "Rethis", "Saurith", "Thrax", "Ulvath", "Voranth", "Wraxis", "Xerath",
+    "Ygrath", "Zorvek", "Azrath", "Bhalzor", "Caldrith", "Dethros", "Eryndor",
+    "Fenrix", "Grazkul", "Helgrim", "Ithrax", "Jorvath", "Kelgroth", "Luthark",
+    "Morvane", "Nyxroth", "Obryx", "Pyrrath", "Quellith", "Rakthos", "Skorven",
+    "Tharzul", "Uxrath", "Velkor", "Wrenthos", "Xanvor", "Abraxis", "Charnax",
+    "Direth", "Ekron", "Fulgath", "Gorthis", "Hexmar", "Ishvane", "Jezrath", "Kraxul",
+    "Lorthak", "Mordriss", "Noxarath", "Ophyrn", "Pravok", "Quixnar", "Rhazgul",
+    "Slythar", "Tovrael", "Uzrik",
+]
 
-def _next_type_name(wb: dict) -> str:
-    """Default name for a newly hired soldier left blank on the hire form: a
-    random name from RANDOM_SOLDIER_NAMES_MALE, not repeating one already on
-    the roster unless every name in the pool is taken."""
+
+def _next_type_name(wb: dict, type_key: str) -> str:
+    """Default name for a newly hired soldier left blank on the hire form.
+
+    Constructs, the mindless undead and the Illusionary Soldier have no
+    identity of their own to name — they go back to the old "Type N"
+    numbering (_numbered_type_name() below). An animal or demon type draws
+    from its own pool. The vampire soldier is Undead but keeps its own mind
+    (unlike a raised zombie/skeleton), so it's excluded from
+    UNDEAD_SOLDIER_TYPE_KEYS and draws a real name from the wizard pool
+    instead. Everyone else (ordinary soldiers, Legendary Soldiers who aren't
+    also an animal — e.g. Dire Hound — companions, thralls, revenants) draws
+    from RANDOM_SOLDIER_NAMES_MALE, not repeating one already on the roster
+    unless every name in the pool is taken."""
+    if (
+        type_key == "illusionary_soldier"
+        or type_key in CONSTRUCT_SOLDIER_TYPE_KEYS
+        or type_key in UNDEAD_SOLDIER_TYPE_KEYS
+    ):
+        return _numbered_type_name(wb, type_key)
+    if type_key == "vampire":
+        # No gender field on a soldier hire to read (unlike the wizard/
+        # apprentice/captain forms). Male only for now, same as
+        # RANDOM_SOLDIER_NAMES_MALE — until a gender picker exists here too,
+        # every soldier hired blank is male by default.
+        return random.choice(RANDOM_WIZARD_NAMES_MALE)
+    if type_key in ANIMAL_SOLDIER_TYPE_KEYS:
+        return random.choice(RANDOM_ANIMAL_NAMES)
+    if type_key in DEMON_SOLDIER_TYPE_KEYS:
+        return random.choice(RANDOM_DEMON_NAMES)
     taken = {s.get("name") for s in wb.get("soldiers") or []}
     free = [n for n in RANDOM_SOLDIER_NAMES_MALE if n not in taken]
     return random.choice(free or RANDOM_SOLDIER_NAMES_MALE)
+
+
+def _numbered_type_name(wb: dict, type_key: str) -> str:
+    """Pre-random-name-pool default: 'Skeleton 1', 'Skeleton 2', ... — kept
+    for the types a personal name doesn't suit (see _next_type_name())."""
+    info = get_soldier(type_key) or {}
+    type_name = info.get("name", type_key)
+    existing = [s for s in wb.get("soldiers") or [] if s.get("type_key") == type_key]
+    return f"{type_name} {len(existing) + 1}"
 
 
 def _random_captain_name(gender: str) -> str:
@@ -2847,7 +2928,7 @@ def _build_soldier_record(
     soldier = {
         "id": uuid.uuid4().hex[:10],
         "type_key": type_key,
-        "name": (name or _next_type_name(wb)).strip(),
+        "name": (name or _next_type_name(wb, type_key)).strip(),
         "status": "active",
         "item_slots": empty_slots(expansions.soldier_item_slots(wb, type_key)),
         "mutations": [],
