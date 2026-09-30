@@ -217,8 +217,8 @@ def default_portrait_name(
     """Filename under static/portraits/ for a character with no custom picture,
     or None if nothing suitable ships with the app.
 
-    gender/state only apply to kind == "wizard"/"apprentice": gender picks the
-    male/female art (set once at creation/hire — see the toggle on those
+    gender/state apply to kind == "wizard"/"apprentice"/"captain": gender picks
+    the male/female art (set once at creation/hire — see the toggle on those
     forms), state picks "lich"/"vampire" art for a wizard currently in that
     form (see expansions.is_lich()/is_vampire()). Falls back one axis at a
     time (state+gender -> state -> gender -> plain) so a missing combination
@@ -227,8 +227,10 @@ def default_portrait_name(
         stems = [type_key, SOLDIER_PORTRAIT_ALIAS.get(type_key)]
     elif kind == "captain":
         # A promoted captain keeps the look of the soldier they were promoted
-        # from; a hired one falls back to the generic captain artwork.
-        stems = [type_key, "captain"]
+        # from; a hired one falls back to the generic (gendered) captain
+        # artwork — type_key is only ever set for a promoted captain, so the
+        # gender stem never masks that lookup.
+        stems = [type_key, "captain_female" if gender == "female" else None, "captain"]
     elif kind in ("wizard", "apprentice"):
         suffix = f"_{state}" if state and kind == "wizard" else ""
         female = gender == "female"
@@ -649,7 +651,9 @@ def soldier_source_allowed(wb: dict, type_key: str) -> bool:
     return src in enabled_sources(wb) and soldier_from_book_enabled(wb, src, type_key)
 
 
-def empty_captain(name: str = "", homerules: dict | None = None, origin: str = "hired") -> dict:
+def empty_captain(
+    name: str = "", homerules: dict | None = None, origin: str = "hired", gender: str = "male"
+) -> dict:
     hr = homerules or default_homerules()
     stats = deepcopy(hr.get("captain_base_stats") or CAPTAIN_BASE)
     n = int(hr.get("captain_item_slots", CAPTAIN_ITEM_SLOTS))
@@ -661,6 +665,11 @@ def empty_captain(name: str = "", homerules: dict | None = None, origin: str = "
         "has_dagger": True,
         "notes": "",
         "portrait": None,
+        # Only ever picks the default art (captain.png / captain_female.png)
+        # for a hired captain with no custom picture — a promoted captain's
+        # type_key look (empty_captain() isn't even called there) takes
+        # priority regardless, same as the pre-gender default did.
+        "gender": gender if gender == "female" else "male",
         "xp": 0,
         "level": 0,
         "levelup_counts": {s: 0 for s in LEVELUP_STATS},
@@ -1021,25 +1030,322 @@ def validate_starting_spells(
     return True, "OK"
 
 
-# Name pools for the "Random wizard" button on the creation page — invented
-# for this app (not from the rulebook), evoking the setting (a frozen,
-# fallen city) without being tied to any one school. Kept short and simple
-# on purpose; the player can always edit the result before accepting it.
+# Name pools for the "Random wizard" button and the per-field random-name
+# buttons on the creation page — invented for this app (not from the
+# rulebook), evoking the setting (a frozen, fallen city) without being tied
+# to any one school. The player can always edit the result before accepting.
 RANDOM_WARBAND_NAMES = [
-    "The Frozen Hand", "The Last Lantern", "The Grey Wanderers", "The Shattered Crown",
-    "The Ice-Bound", "The Hollow Vault", "The Winter Compact", "The Salt and Snow",
-    "The Ashfall Company", "The Northwind Cabal", "The Cracked Spire", "The Long Thaw",
-    "The Silent Ledger", "The Drift", "The Bonefire Circle", "The Pale Standard",
-    "The Sunken Crest", "The Iron Solstice", "The Wayfarer's Oath", "The Frost Reliquary",
+    "The Crimson Compact", "The Frozen Drift", "The Crimson Reliquary",
+    "The Hollow Thaw", "The Winter Standard", "The Cracked Legion",
+    "The Shattered Oath", "The Wayfarer's Compact", "The Withered Compact",
+    "The Pale Chapter", "The Nameless Compact", "The Grim Thaw", "The Last Guild",
+    "The Last Crown", "The Drifting Ledger", "The Northwind Spire",
+    "The Salt Standard", "The Bleak Thaw", "The Wayfarer's Drift",
+    "The Wandering Vault", "The Grey Snow", "The Nameless Watch", "The Long Coven",
+    "The Wayfarer's Pact", "The Salt Circle", "The Grim Compact", "The Last Company",
+    "The Frostbound Ledger", "The Ice-Bound Crest", "The Cursed Compact",
+    "The Shattered Circle", "The Drifting Host", "The Wandering Ledger",
+    "The Grim Reliquary", "The Sunken Order", "The Ice-Bound Chapter",
+    "The Sunken Thaw", "The Undying Company", "The Crimson Pact", "The Cursed Oath",
+    "The Gilded Legion", "The Withered Chapter", "The Ruined Vanguard",
+    "The Bonefire Spire", "The Frozen Company", "The Gilded Host", "The Grim Order",
+    "The Last Standard", "The Iron Fellowship", "The Nameless Crest", "The Long Vault",
+    "The Bleak Coven", "The Grey Legion", "The Bonefire Thaw", "The Winter Vanguard",
+    "The Forsaken Ruinseekers", "The Gilded Compact", "The Cracked Retinue",
+    "The Drifting Guild", "The Northwind Snow", "The Nameless Retinue",
+    "The Withered Coven", "The Ruined Oath", "The Crimson Company", "The Cursed Watch",
+    "The Ashfall Oath", "The Silent Ledger", "The Ruined Watch", "The Lost Crown",
+    "The Long Wanderers", "The Wayfarer's Guild", "The Gilded Retinue",
+    "The Winter Compact", "The Sunken Standard", "The Withered Oath",
+    "The Salt Reliquary", "The Broken Vanguard", "The Cursed Crest",
+    "The Ruined Cohort", "The Long Compact", "The Eternal Compact",
+    "The Wandering Reliquary", "The Salt Cabal", "The Lost Circle",
+    "The Forsaken Guild", "The Frozen Ledger", "The Grey Ledger", "The Iron Crown",
+    "The Undying Brotherhood", "The Lost Oath", "The Frozen Wanderers",
+    "The Silent Ruinseekers", "The Ice-Bound Cohort", "The Eternal Chapter",
+    "The Wandering Compact", "The Withered Snow", "The Winter Wanderers",
+    "The Nameless Chapter", "The Winter Cohort", "The Broken Drift",
+    "The Veiled Ruinseekers", "The Nameless Hand", "The Grim Vault",
+    "The Broken Cabal", "The Silent Thaw", "The Bleak Expedition",
+    "The Hollow Solstice", "The Undying Snow", "The Wandering Lantern",
+    "The Hollow Company", "The Iron Oath", "The Bonefire Host", "The Veiled Spire",
+    "The Bleak Crown", "The Frozen Crown", "The Pale Ledger", "The Ashfall Host",
+    "The Forsaken Standard", "The Frostbound Chapter", "The Frozen Spire",
+    "The Ashfall Solstice", "The Bonefire Cabal", "The Crimson Solstice",
+    "The Frozen Reliquary", "The Grey Solstice", "The Winter Snow", "The Iron Snow",
+    "The Undying Order", "The Eternal Legion", "The Wandering Cohort",
+    "The Wayfarer's Watch", "The Long Brotherhood", "The Forsaken Pact",
+    "The Silent Cabal", "The Salt Drift", "The Shattered Watch", "The Drifting Hand",
+    "The Cracked Guild", "The Grim Oath", "The Drifting Thaw", "The Silent Snow",
+    "The Northwind Retinue", "The Winter Cabal", "The Eternal Retinue",
+    "The Cursed Retinue", "The Last Legion", "The Bonefire Expedition",
+    "The Nameless Order", "The Undying Coven", "The Bleak Drift",
+    "The Northwind Coven", "The Grim Ledger", "The Withered Cohort",
+    "The Northwind Chapter", "The Frostbound Guild", "The Nameless Reliquary",
+    "The Pale Company", "The Silent Solstice", "The Long Ruinseekers",
+    "The Northwind Hand", "The Wayfarer's Spire", "The Last Order",
+    "The Gilded Company", "The Ice-Bound Ruinseekers", "The Ashfall Order",
+    "The Lost Compact", "The Nameless Cohort", "The Long Spire", "The Bleak Cohort",
+    "The Frozen Retinue", "The Frozen Vault", "The Nameless Circle",
+    "The Frostbound Thaw", "The Ashfall Wanderers", "The Long Reliquary",
+    "The Silent Legion", "The Ice-Bound Crown", "The Winter Thaw", "The Pale Cohort",
+    "The Cracked Vanguard", "The Lost Host", "The Drifting Vanguard",
+    "The Cursed Crown", "The Gilded Guild", "The Wandering Company",
+    "The Ruined Solstice", "The Withered Reliquary", "The Withered Ledger",
+    "The Bonefire Cohort", "The Drifting Order", "The Grey Drift",
+    "The Drifting Ruinseekers", "The Ice-Bound Coven", "The Bleak Crest",
+    "The Hollow Lantern", "The Hollow Drift", "The Ruined Snow", "The Grey Compact",
+    "The Long Pact", "The Sunken Crown",
 ]
-RANDOM_WIZARD_NAMES = [
-    "Morvain", "Sable", "Thessaly", "Corvinus", "Isolde", "Branick", "Vesper", "Old Halric",
-    "Ondine", "Fenrick", "Aldous Grey", "Lysenne", "Osric", "Marlowe", "Tamsin", "Grendric",
-    "Selwyn", "Ithra", "Corvan", "Wrenna",
+RANDOM_WIZARD_NAMES_MALE = [
+    "Percy Thorne", "Falk", "Nils", "Nils Frost", "Roderic", "Quen", "Morvain Isley",
+    "Jorund", "Tobin", "Urien Quill", "Dain Moss", "Ivor Fenn", "Eldric", "Kael",
+    "Idris", "Corvinus", "Varin Sable", "Nils Falk", "Selwyn Drake", "Wystan Pryde",
+    "Orin Falk", "Edric Isley", "Gustav", "Frode", "Farrin", "Eldric Lark",
+    "Edric Fenn", "Grendric Marrow", "Joric Corvine", "Morvain", "Ivor", "Alaric",
+    "Magnus", "Osric", "Pellan Rill", "Magnus Wick", "Alaric Thorne", "Cormac",
+    "Xaver", "Waldric", "Urien", "Yannick", "Kael Moss", "Vidar Wick", "Jorund Vane",
+    "Marlowe", "Baldemar Winters", "Baldemar", "Yorick", "Edric Gray", "Bran", "Ulric",
+    "Marlowe Grey", "Magnus Frost", "Rutger Vane", "Leofric Cade", "Godric Hollow",
+    "Zarek", "Tobin Quill", "Morvain Rill", "Varin Vane", "Hagen", "Farrin Oakes",
+    "Thaddeus Pryde", "Godric", "Idris Fenn", "Aldous Rook", "Ivor Ash", "Vidar Marsh",
+    "Edric", "Idris Marsh", "Frode Fenn", "Halvard Grey", "Leofric Hollow",
+    "Idris Winters", "Draven Wolfe", "Draven Grey", "Fenrick", "Magnus Lark",
+    "Quintus", "Loris Thorne", "Pellan", "Cedric", "Joric Hale", "Percy",
+    "Erasmus Sorrow", "Corvan", "Loris Cade", "Draven Ash", "Corvan Keane", "Aldous",
+    "Percy Hale", "Branick", "Devric", "Xaver Grey", "Draven", "Tobin Hollow", "Joric",
+    "Yorick Corvine", "Norin Pryde", "Halric", "Rutger", "Xaver Vance", "Norin Sorrow",
+    "Sten", "Quen Marsh", "Silas Rill", "Corvan Vane", "Halvard", "Farrin Fenn",
+    "Gustav Marrow", "Godric Rill", "Wystan", "Grendric", "Kaspar", "Grendric Rook",
+    "Nils Keane", "Aldous Gray", "Silas Pryde", "Leofric", "Yorick Lark",
+    "Hagen Marsh", "Corvan Rill", "Erasmus Thorne", "Norin Wren", "Gustav Quist",
+    "Dain Thorne", "Erasmus", "Baldemar Fenn", "Halric Cade", "Jorund Corvine",
+    "Merek", "Varin", "Grendric Gray", "Gustav Ash", "Aldous Marrow", "Alaric Moss",
+    "Merek Keane", "Falk Keane", "Baldemar Hollow", "Roderic Rill", "Halric Vance",
+    "Dain", "Silas", "Hagen Sorrow", "Roderic Ash", "Grendric Ash", "Yannick Fenn",
+    "Selwyn", "Ivor Oakes", "Cedric Fenn", "Farrin Pike", "Percy Marrow", "Nils Hale",
+    "Nils Corvine", "Merek Hale", "Vidar", "Aldous Hale", "Loris", "Corvinus Falk",
+    "Roderic Winters", "Branick Isley", "Gustav Winters", "Merek Moss", "Idris Quist",
+    "Silas Marsh", "Frode Quist", "Percy Harrow", "Ulric Winters", "Thaddeus Hale",
+    "Halric Cole", "Thaddeus", "Eldric Thorne", "Zarek Corvine", "Bran Wren",
+    "Morvain Oakes", "Waldric Marsh", "Sten Wolfe", "Zarek Fenn", "Baldemar Marsh",
+    "Idris Sable", "Quintus Thorne", "Yannick Cade", "Norin", "Marlowe Wolfe",
+    "Baldemar Oakes", "Baldemar Cole", "Urien Rook", "Baldemar Wolfe", "Quen Sable",
+    "Idris Thorne", "Gustav Lark", "Kaspar Winters", "Cedric Rill", "Farrin Gray",
+    "Percy Pryde", "Fenrick Wick", "Dain Frost", "Devric Winters", "Morvain Harrow",
 ]
-RANDOM_APPRENTICE_NAMES = [
-    "Pip", "Wick", "Nessa", "Bram", "Tally", "Oren", "Marnie", "Sorrel", "Fitch", "Ilsa",
-    "Cobb", "Vesna", "Dune", "Petra", "Ashwin", "Lark", "Bexley", "Rowan", "Sena", "Tobin",
+RANDOM_WIZARD_NAMES_FEMALE = [
+    "Thessaly Moss", "Elsbeth", "Nessa Vane", "Ondine Ash", "Zelda", "Mira Keane",
+    "Orla Moss", "Drusilla", "Sorrel Hollow", "Zelda Grey", "Ondine", "Quilla Sable",
+    "Isolde", "Fenna", "Kirsi Cade", "Kirsi Hale", "Talia Cole", "Sigrid Fenn",
+    "Kirsi", "Ilsa", "Freya Isley", "Coraline Sable", "Sigrid Keane", "Freya Wick",
+    "Hilde Cade", "Dagny Lark", "Liora", "Jora Vance", "Brianna", "Marnie", "Nadia",
+    "Wynne Wolfe", "Jovanka Pike", "Odalys", "Sigrid Frost", "Zelda Wick",
+    "Orla Locke", "Katla", "Vasilisa", "Ines Moss", "Runa Keane", "Ithra",
+    "Lark Corvine", "Solveig Cole", "Sigrid Wick", "Kirsi Gray", "Solveig",
+    "Katla Thorne", "Ines Marsh", "Thessaly", "Jora Thorne", "Orla Pike",
+    "Marnie Rook", "Petra", "Sorrel Sorrow", "Hilde", "Orla", "Petra Winters",
+    "Ulrike", "Liora Cade", "Lysenne Hollow", "Lark Rook", "Una Quist", "Jora Sorrow",
+    "Una", "Elsbeth Fenn", "Zofia Frost", "Verena", "Sigrid Oakes", "Zofia",
+    "Elsbeth Isley", "Elowen", "Greta", "Tamsin", "Jora", "Katla Cade", "Yseult",
+    "Helka Rook", "Nadia Vance", "Astrid Wren", "Linnea", "Thyra Wick", "Talia Cade",
+    "Morwenna", "Wynne", "Yseult Winters", "Thyra Keane", "Vasilisa Cade", "Cera",
+    "Vesper", "Talia", "Mira", "Wrenna Winters", "Runa Thorne", "Vesper Falk", "Ines",
+    "Wrenna Wick", "Isolde Falk", "Lysenne Pike", "Marnie Hale", "Perdita Wick",
+    "Coraline Quist", "Ithra Cole", "Astrid", "Zelda Winters", "Mira Frost", "Wrenna",
+    "Tamsin Grey", "Odalys Quist", "Ithra Pike", "Lark", "Ithra Grey", "Vesper Pryde",
+    "Freya", "Coraline", "Yseult Locke", "Linnea Thorne", "Nadia Ash", "Ravenna",
+    "Talia Thorne", "Tamsin Gray", "Sorrel", "Cera Marsh", "Liora Sorrow", "Vesna",
+    "Thyra", "Brigid", "Helka", "Elsbeth North", "Nadia Isley", "Liora Pike", "Sigrid",
+    "Liora Marsh", "Jora Marrow", "Quilla", "Lysenne Vane", "Brigid Pryde", "Yara",
+    "Gisela Frost", "Brianna Quist", "Gisela", "Wren", "Helka Thorne", "Talia Moss",
+    "Lysenne", "Greta Vance", "Perdita", "Ines Locke", "Zelda Hollow", "Ondine Wren",
+    "Ondine Hollow", "Odalys Vance", "Elowen Gray", "Zelda Fenn", "Solveig Falk",
+    "Tamsin Pryde", "Hilde Gray", "Brigid Cade", "Sable", "Liora Sable",
+    "Elsbeth Wolfe", "Fenna Sorrow", "Runa", "Wynne Rill", "Thessaly Keane",
+    "Nessa Moss", "Gisela Thorne", "Zofia Marrow", "Wynne Vane", "Lysenne Marsh",
+    "Odalys Hale", "Linnea Grey", "Vesper Hollow", "Jovanka", "Thessaly Wick",
+    "Wynne Hollow", "Gisela Pryde", "Adelheid", "Zofia Quist", "Zelda Sorrow",
+    "Cera Falk", "Elowen Moss", "Elsbeth Gray", "Isolde Grey", "Isolde Keane",
+    "Verena Wolfe", "Nessa", "Runa Sorrow", "Sorrel Harrow", "Helka Pryde",
+    "Solveig Isley", "Thyra Grey", "Fenna Falk", "Elsbeth Pike", "Solveig Hollow",
+    "Marnie Sable", "Solveig Corvine", "Vesna Vance", "Verena Falk", "Vasilisa Pryde",
+]
+# random_core_wizard() (the big "Random wizard" button) doesn't ask a gender
+# up front, so it draws from both pools combined.
+RANDOM_WIZARD_NAMES = RANDOM_WIZARD_NAMES_MALE + RANDOM_WIZARD_NAMES_FEMALE
+RANDOM_APPRENTICE_NAMES_MALE = [
+    "Rye Vane", "Rooke Rook", "Crispin Gray", "Rowan", "Loach", "Quill Rill",
+    "Wendel Thorne", "Hobb Frost", "Wendel", "Wick", "Jasper Moss", "Wilfrid Oakes",
+    "Tuck Rook", "Fitch Quist", "Tuck Thorne", "Elton", "Crispin Lark", "Otto Moss",
+    "Vance Cole", "Tuck Cole", "Moth Lark", "Farris Winters", "Gideon Frost",
+    "Ives Cole", "Ashwin", "Otto", "Quill Gray", "Sedge Fenn", "Corin Rook",
+    "Quill Frost", "Hobb", "Gideon Marsh", "Twig", "Ambrose Oakes", "Alder Quist",
+    "Barnaby Cade", "Farris Thorne", "Wren", "Merric Fenn", "Finch", "Crispin Cole",
+    "Finch Cade", "Merric Lark", "Osten Vane", "Gable Pike", "Elton Fenn", "Farris",
+    "Pell Pike", "Nye Sable", "Jory Oakes", "Silas", "Rye", "Sprig Thorne",
+    "Loach Thorne", "Fitch", "Farris Lark", "Osten Rook", "Perrin Fenn", "Hobb Fenn",
+    "Dash Pike", "Ives Pike", "Rowan Sable", "Hobbes Gray", "Dune", "Cobb Fenn",
+    "Ashwin Fenn", "Wilfrid", "Lowell", "Gideon Pike", "Isham Gray", "Oren Thorne",
+    "Rowan Ash", "Sedge", "Gable Frost", "Zeb Oakes", "Gable Sable", "Bram",
+    "Lowell Quist", "Loach Pike", "Barnaby Rill", "Ambrose Thorne", "Isham Marsh",
+    "Crispin Fenn", "Ives Hale", "Crispin Frost", "Nye", "Ambrose Ash", "Farris Vane",
+    "Dash", "Perrin Cole", "Wendel Ash", "Bram Quist", "Ives", "Sedge Hale", "Tobin",
+    "Pip", "Bodkin Frost", "Kess", "Dune Lark", "Linus", "Zeb Lark", "Wren Thorne",
+    "Ambrose Cole", "Vance", "Otto Wick", "Elton Marsh", "Bexley Frost", "Hobbes Rill",
+    "Isham Vane", "Farris Rill", "Farris Moss", "Wick Oakes", "Bodkin", "Wendel Wick",
+    "Sprig Wick", "Barnaby", "Nye Lark", "Isham Ash", "Finch Marsh", "Linus Frost",
+    "Quill Cade", "Wren Vane", "Rowan Oakes", "Bram Marsh", "Yew", "Rooke", "Hollis",
+    "Bodkin Gray", "Cobb", "Gideon Wick", "Perrin", "Vance Quist", "Alder Pike",
+    "Sprig", "Oren", "Gideon Gray", "Wren Ash", "Jasper Oakes", "Osten Fenn",
+    "Sprig Quist", "Bexley Gray", "Bram Frost", "Crispin Cade", "Cobb Thorne",
+    "Vance Thorne", "Sedge Winters", "Zeb Sable", "Fitch Winters", "Wilfrid Ash",
+    "Kess Rill", "Hobbes Cole", "Tuck Hale", "Quill Oakes", "Gable", "Jasper",
+    "Elton Hale", "Sedge Rill", "Ambrose Frost", "Wick Ash", "Kess Hale", "Sedge Gray",
+    "Crispin Vane", "Rye Pike", "Cobb Frost", "Ren Quist", "Linus Quist", "Tuck Ash",
+    "Alder Rill", "Moth Quist", "Ren Cole", "Oren Gray", "Wren Winters", "Gideon Rill",
+    "Ren Winters", "Quill", "Zeb", "Bexley Wick", "Hollis Oakes", "Alder",
+    "Bodkin Fenn", "Crispin", "Gideon", "Wren Wick", "Bodkin Thorne", "Oren Pike",
+    "Rowan Cade", "Sprig Marsh", "Cobb Ash", "Merric Winters", "Ulfric", "Jasper Rill",
+    "Perrin Frost", "Hobbes Wick", "Rowan Cole", "Bram Fenn", "Oren Lark",
+    "Finch Quist", "Dash Rill", "Dune Rill", "Corin",
+]
+RANDOM_APPRENTICE_NAMES_FEMALE = [
+    "Nix", "Orla Thorne", "Zephyra", "Teal Quist", "Bex Marsh", "Elva Rill", "Lark",
+    "Elva Marsh", "Fable Cade", "Lissa Vane", "Sprig Ash", "Tilda Gray", "Sorrel",
+    "Lark Rill", "Tansy", "Mercy", "Una", "Wisteria", "Verity Ash", "Opal Moss",
+    "Orla Vane", "Fable Frost", "Junie", "Sorrel Thorne", "Orla", "Marnie Lark",
+    "Mercy Rill", "Wisp", "Birdie Sable", "Mab Rill", "Marnie", "Fable", "Verity Fenn",
+    "Tally", "Dot", "Sprig Moss", "Elva", "Tilda Cade", "Dove Winters", "Ivy Wick",
+    "Sprig Fenn", "Marnie Ash", "Hazel Wick", "Linden Rook", "Wick Lark",
+    "Yarrow Lark", "Sparrow Cole", "Kip Winters", "Linden Cole", "Orla Fenn",
+    "Sparrow", "Mercy Fenn", "Elva Ash", "Nell", "Isolde", "Opal Frost", "Mercy Gray",
+    "Marnie Sable", "Fern Rook", "Thistle Frost", "Zinnia Cole", "Quince Marsh",
+    "Rue Vane", "Hazel Rook", "Sena Gray", "Nessa Rook", "Robin", "Mab Cole",
+    "Una Rill", "Wren Vane", "Fenn Sable", "Teal", "Wisp Marsh", "Tilda Rook",
+    "Kestrel Lark", "Nix Lark", "Lissa Pike", "Posy Ash", "Wren", "Posy Oakes",
+    "Robin Moss", "Reeve", "Mab Marsh", "Petra", "Nix Sable", "Cricket Quist",
+    "Nell Quist", "Kip Lark", "Vale", "Thistle Sable", "Yarrow Fenn", "Rue Oakes",
+    "Sena Quist", "Yarrow", "Wick", "Nessa", "Teal Cole", "Fenn Cade", "Vale Lark",
+    "Robin Sable", "Sprig Wick", "Wren Hale", "Tansy Rill", "Sena Cole", "Fenn Frost",
+    "Una Ash", "Fenn Moss", "Sprig Cade", "Kestrel", "Sprig", "Mercy Ash",
+    "Thistle Cade", "Vale Rook", "Sorrel Ash", "Kip Wick", "Una Gray", "Wick Sable",
+    "Posy", "Sprig Vane", "Kestrel Pike", "Wisp Ash", "Briar", "Kestrel Frost",
+    "Opal Cole", "Orla Gray", "Zinnia", "Elva Moss", "Kip Thorne", "Ivy Rill",
+    "Fern Cole", "Mercy Lark", "Mab Wick", "Ivy Gray", "Ilsa Oakes", "Sprig Pike",
+    "Isolde Oakes", "Nessa Vane", "Rue", "Sable Thorne", "Plum", "Linden Moss",
+    "Rue Rill", "Fern Wick", "Mab Rook", "Tansy Thorne", "Sparrow Frost",
+    "Tilda Oakes", "Quince Oakes", "Zinnia Fenn", "Teal Thorne", "Kestrel Ash",
+    "Yarrow Frost", "Teal Cade", "Quince", "Mercy Thorne", "Dove Frost", "Birdie",
+    "Vesna Wick", "Vale Marsh", "Tally Vane", "Gale Frost", "Kip", "Thistle Pike",
+    "Sparrow Rook", "Isolde Rook", "Fenn Wick", "Opal Rill", "Nessa Hale", "Teal Hale",
+    "Yarrow Oakes", "Fenn Cole", "Rue Thorne", "Cricket Moss", "Pip Thorne",
+    "Kestrel Fenn", "Mab", "Nix Cole", "Orla Moss", "Tilda Sable", "Sparrow Moss",
+    "Fenn Thorne", "Dove Wick", "Una Rook", "Una Sable", "Nix Wick", "Sable",
+    "Thistle Quist", "Zinnia Pike", "Briar Wick", "Teal Winters", "Sable Rook",
+    "Petra Pike", "Kestrel Oakes", "Posy Rill", "Fable Gray", "Posy Quist",
+    "Sable Wick", "Elke Rook", "Gale Ash", "Vale Oakes",
+]
+# random_core_wizard() draws the apprentice name unisex (no gender chosen yet
+# at that point in the flow), so it uses both pools combined.
+RANDOM_APPRENTICE_NAMES = RANDOM_APPRENTICE_NAMES_MALE + RANDOM_APPRENTICE_NAMES_FEMALE
+
+# Captain hire-panel name pools — a captain isn't a spellcaster (closer to the
+# soldier roster) but is a named leader, not rank-and-file, so its own pool
+# sits between RANDOM_SOLDIER_NAMES_MALE and the wizard pools in flavor.
+RANDOM_CAPTAIN_NAMES_MALE = [
+    "Marek Yarrow", "Dorian", "Icarus Thorne", "Ulysses Thane", "Vaughn Drake",
+    "Fenwick Kael", "Roric Novak", "Severin Marrow", "Xander", "Sabin Quade",
+    "Roric Yarrow", "Vaughn Halloway", "Quiller Underwood", "Yannis Greymane",
+    "Orsino Ravensworth", "Ulric Vance", "Nikolai Wraith", "Warric Osric", "Sabin",
+    "Malric Vance", "Nikolai Marrow", "Hollis Ironside", "Hadrian Osric",
+    "Jareth Novak", "Warric", "Edrik Osric", "Rurik Yarrow", "Fenwick",
+    "Tarquin Wraith", "Roric Kael", "Yannis Maddox", "Hollis Osric", "Roric Thane",
+    "Ignis Marrow", "Ewan Marrow", "Orin Wraith", "Varek Novak", "Zane Lockhart",
+    "Hollis Kael", "Dorian Maddox", "Torvald Voss", "Quillon Jasker",
+    "Vaughn Blackwood", "Bastian Halloway", "Zeph Delacroix", "Renard Ashford",
+    "Ignis Quade", "Ignis Everhart", "Kellan Falke", "Kester Corvain",
+    "Bastian Thorne", "Payne", "Hollis Kestrel", "Gallus Thane", "Aric",
+    "Icarus Ravensworth", "Wyatt Strand", "Quiller Novak", "Gallus Vance",
+    "Zane Pellman", "Orin Greymane", "Leoric Pellman", "Xander Ravensworth",
+    "Sabin Underwood", "Kester Novak", "Fenwick Everhart", "Nero Halloway", "Ulysses",
+    "Zane Vance", "Quillon Lockhart", "Marek Halloway", "Cassian Ashford",
+    "Gallus Maddox", "Darius Voss", "Nikolai Kestrel", "Kellan Strand",
+    "Bastian Osric", "Ewan Underwood", "Garrick Yarrow", "Yale Greymane",
+    "Payne Vance", "Nikolai Quade", "Cassian", "Quillon", "Ignis Underwood",
+    "Ulric Blackwood", "Lucan Stark", "Leoric Lockhart", "Ignis Falke",
+    "Garrick Everhart", "Rurik", "Jareth", "Cassius Halloway", "Marek", "Dorian Vance",
+    "Sabin Greymane", "Severin Blackwood", "Marek Delacroix", "Gallus Greymane",
+    "Yale Strand", "Jasper Underwood", "Quillon Vance", "Gallus Thorne",
+    "Varek Underwood", "Zeph Falke", "Zane", "Yannis Strand", "Ulysses Stark",
+    "Garrick Novak", "Roric Stark", "Perrault Ravensworth", "Edrik Corvain",
+    "Ewan Pellman", "Ulysses Corvain", "Icarus Kael", "Zane Thorne", "Nero",
+    "Leoric Wraith", "Jareth Maddox", "Jasper Ravensworth", "Quiller Voss",
+    "Aric Jasker", "Tarquin Corvain", "Varek Ironside", "Fenwick Delacroix",
+    "Jasper Kael", "Tarquin Underwood", "Quillon Novak", "Barric Novak",
+    "Roric Ironside", "Cassian Blackwood", "Kester Pellman", "Severin Wraith",
+    "Nero Wraith", "Yale Ironside", "Wyatt", "Payne Quade", "Malric Drake", "Zeph",
+    "Garrick Thorne", "Ewan Blackwood", "Severin Quade", "Gallus Quade",
+    "Ulric Corvain", "Quiller", "Icarus Voss", "Hadrian Strand", "Hollis",
+    "Tarquin Osric", "Quillon Everhart", "Orin Blackwood", "Kellan", "Torvald Kael",
+    "Lucan Marrow", "Gallus Ashford", "Zeph Ironside", "Garrick Greymane",
+    "Warric Jasker", "Torvald Underwood", "Roric Halloway", "Cassius Ashford",
+    "Warric Blackwood", "Yannis Ironside", "Perrault Yarrow", "Darius Vance",
+    "Orin Pellman", "Sabin Thorne", "Cassius Marrow", "Roric Wraith", "Renard Wraith",
+    "Orsino Jasker", "Kester Delacroix", "Vaughn Ashford", "Yannis Stark",
+    "Yannis Quade", "Zane Ashford", "Varek Delacroix", "Perrault Osric",
+    "Kellan Jasker", "Icarus Thane", "Bastian Drake", "Kester Everhart",
+    "Darius Thorne", "Garrick Falke", "Orsino Greymane", "Ignis Kael", "Leoric Maddox",
+    "Renard Ironside", "Ewan", "Kellan Lockhart", "Icarus Osric", "Xander Thorne",
+    "Xander Voss", "Perrault Quade", "Ewan Ashford", "Edrik Voss", "Dorian Greymane",
+    "Darius Thane", "Hadrian Wraith", "Cassius Voss",
+]
+RANDOM_CAPTAIN_NAMES_FEMALE = [
+    "Tamsin", "Una Ironside", "Rosalind Stark", "Giselle Pellman", "Liriel Thorne",
+    "Isadora Ashford", "Fira Jasker", "Morgaine Underwood", "Galadris Marrow",
+    "Xanthe", "Havilah Everhart", "Wilhelmina Lockhart", "Quenna Halloway",
+    "Petra Underwood", "Quilla Blackwood", "Lucienne Ashford", "Thessaly",
+    "Oriana Drake", "Nerissa Underwood", "Jovienne Novak", "Wilhelmina Maddox",
+    "Quilla Osric", "Ursula Ironside", "Morgaine Wraith", "Cassia Yarrow",
+    "Liriel Quade", "Havilah", "Wren Wraith", "Morgaine Osric", "Brynhild Corvain",
+    "Joslyn Everhart", "Nerissa Novak", "Tamsin Wraith", "Zinnia Osric",
+    "Sabine Pellman", "Fiora Ashford", "Fiora", "Phaedra Falke", "Verity Quade",
+    "Yolanda Drake", "Oriana", "Jovienne Kestrel", "Ariadne Stark", "Zinnia Jasker",
+    "Zinnia Ravensworth", "Verity Strand", "Katriel Novak", "Xanthe Falke",
+    "Wren Osric", "Fira Falke", "Kirian Voss", "Cassia Jasker", "Calla Drake",
+    "Fira Thorne", "Valeria Pellman", "Jovienne Jasker", "Verity", "Liriel Marrow",
+    "Elswyth Strand", "Eirwen", "Marisol Maddox", "Giselle Delacroix", "Fira Kael",
+    "Joslyn Ironside", "Katriel Vance", "Delphine Marrow", "Delphine Lockhart",
+    "Tamsin Ironside", "Odile Yarrow", "Wren Ravensworth", "Fira Quade",
+    "Nerissa Ravensworth", "Havilah Underwood", "Valeria Delacroix", "Delyth Wraith",
+    "Fiora Novak", "Brienne Strand", "Delphine Jasker", "Galadris Wraith", "Petra",
+    "Fira Osric", "Wren Ashford", "Galadris Stark", "Calla Ashford", "Delyth Lockhart",
+    "Petra Falke", "Tamsin Delacroix", "Seraphine", "Yolanda Marrow", "Yseult Thorne",
+    "Eirwen Marrow", "Zinnia Drake", "Rosalind Jasker", "Tamsin Novak",
+    "Ariadne Maddox", "Kirian Drake", "Odile Thorne", "Ursula Novak", "Fira",
+    "Quenna Pellman", "Quenna", "Eirwen Strand", "Wilhelmina Greymane", "Liriel",
+    "Giselle Ashford", "Wilhelmina Marrow", "Eirwen Maddox", "Aveline",
+    "Phaedra Greymane", "Ariadne Drake", "Fiora Quade", "Aveline Voss", "Tamsin Vance",
+    "Thessaly Falke", "Joslyn Marrow", "Brienne Greymane", "Calla Delacroix", "Quilla",
+    "Rosalind Strand", "Ariadne Greymane", "Thessaly Osric", "Kirian", "Calla Voss",
+    "Nerissa Stark", "Aveline Everhart", "Yolanda", "Jovienne Corvain",
+    "Jovienne Ravensworth", "Tamsin Strand", "Eirwen Novak", "Rosalind",
+    "Quilla Yarrow", "Nyssa Vance", "Morgaine", "Galadris Osric", "Phaedra Jasker",
+    "Wren", "Jovienne Quade", "Calla", "Joslyn Blackwood", "Lucienne Pellman",
+    "Marisol Jasker", "Liriel Strand", "Wilhelmina Vance", "Morgaine Corvain",
+    "Petra Blackwood", "Ursula Vance", "Odile Halloway", "Eirwen Vance", "Marisol",
+    "Wilhelmina Novak", "Ismay Underwood", "Brynhild Quade", "Seraphine Halloway",
+    "Seraphine Quade", "Lucienne Quade", "Isadora Quade", "Eirwen Voss", "Ismay Voss",
+    "Petra Ashford", "Verity Kael", "Yolanda Underwood", "Quenna Thane",
+    "Fiora Greymane", "Rhiannon Corvain", "Nyssa Ashford", "Ursula Kestrel",
+    "Kirian Delacroix", "Morgaine Ironside", "Brynhild Kestrel", "Lucienne Jasker",
+    "Joslyn Thorne", "Giselle Kestrel", "Zinnia Novak", "Havilah Lockhart",
+    "Ariadne Quade", "Zinnia Wraith", "Cassia Drake", "Quenna Stark",
+    "Katriel Corvain", "Kirian Osric", "Xanthe Novak", "Verity Novak",
+    "Rhiannon Falke", "Helwyn Strand", "Marisol Stark", "Petra Delacroix",
+    "Rhiannon Osric", "Tamsin Kestrel", "Delphine Thane", "Kirian Corvain", "Rhiannon",
+    "Petra Yarrow", "Calla Halloway", "Nyssa", "Ismay Marrow", "Zinnia Thorne",
+    "Lucienne Ironside", "Una Halloway", "Sabine Ashford",
 ]
 
 
@@ -1264,6 +1570,30 @@ def reorder_soldiers(wb: dict, soldier_ids_in_order: list[str]) -> tuple[bool, s
     return True, "Soldier order updated."
 
 
+def _warband_order_path() -> Path:
+    return warband_dir() / ".order.json"
+
+
+def _load_warband_order() -> list[str]:
+    try:
+        data = json.loads(_warband_order_path().read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return []
+    return data if isinstance(data, list) else []
+
+
+def reorder_warbands(order_ids: list[str]) -> tuple[bool, str]:
+    """Persist a manual home-page order. list_warbands() sorts by this file
+    when present; an id it doesn't cover (a warband created since the last
+    save) falls back to file mtime, newest first."""
+    existing = {p.stem for p in warband_dir().glob("*.warbands")}
+    filtered = [i for i in order_ids if i in existing]
+    if set(filtered) != existing:
+        return False, "Warband order does not match your warband list."
+    _warband_order_path().write_text(json.dumps(filtered), encoding="utf-8")
+    return True, "Order updated."
+
+
 def list_unreadable_warbands() -> list[dict]:
     """Warband files that exist on disk but fail to parse, for a home-page warning."""
     unreadable = []
@@ -1310,6 +1640,10 @@ def list_warbands() -> list[dict]:
                 "state": expansions.wizard_portrait_state(data),
             }
         )
+    order = _load_warband_order()
+    if order:
+        rank = {wid: i for i, wid in enumerate(order)}
+        items.sort(key=lambda it: rank.get(it["id"], len(order)))
     return items
 
 
@@ -1867,6 +2201,7 @@ def _normalize_warband(wb: dict) -> dict:
         cap.setdefault("notes", "")
         cap.setdefault("portrait", None)
         cap.setdefault("origin", "hired")
+        cap["gender"] = "female" if cap.get("gender") == "female" else "male"
         cap["known_tricks"] = _as_list(cap.get("known_tricks"))
         cap["mutations"] = [x for x in _as_list(cap.get("mutations")) if isinstance(x, dict)]
         cap["permanent_injuries"] = [
@@ -2407,10 +2742,60 @@ def enrich_soldier(wb: dict, s: dict) -> dict:
     return out
 
 
-def _next_type_name(wb: dict, type_key: str, type_name: str) -> str:
-    """Default name for a newly hired soldier: 'Archer 1', 'Archer 2', ..."""
-    existing = [s for s in wb.get("soldiers") or [] if s.get("type_key") == type_key]
-    return f"{type_name} {len(existing) + 1}"
+# Default names for a newly hired soldier left blank on the hire form.
+# Male only for now — see todo.md for adding a female pool and a gender
+# picker to the hire panel, matching the wizard/apprentice creation flow.
+RANDOM_SOLDIER_NAMES_MALE = [
+    "Osten Cade", "Gideon", "Silas Lark", "Hobb Rill", "Griswold", "Marnie Harrow",
+    "Ode", "Cobb", "Dune", "Wendel Drake", "Faro Fenn", "Isham Sorrow", "Otto Rook",
+    "Tobin Winters", "Linus", "Faro Locke", "Quint", "Emeric Sable", "Munro Keane",
+    "Kess", "Tam Wick", "Pip Isley", "Bexley", "Quint Doyle", "Marnie Stone",
+    "Pox Marsh", "Cole Wick", "Elton", "Nye Crane", "Vance Gore", "Bram", "Cole Rill",
+    "Gideon Quist", "Oren Oakes", "Faro Hollis", "Rye Pryde", "Gable", "Cole",
+    "Wyle Fenn", "Oren Fenn", "Munro Moss", "Jasper", "Ashwin", "Rowan North",
+    "Marnie", "Kip", "Vex Rook", "Nye North", "Hobbes", "Hobb Isley", "Farris",
+    "Hobb Wolfe", "Finch Lark", "Trell Sable", "Tam", "Gable Grey", "Ulm Locke",
+    "Perrin North", "Quill Pike", "Otto", "Wendel", "Osten Frost", "Ulm Crane",
+    "Quint Vance", "Wick Quill", "Gideon Kane", "Perrin Marrow", "Ives", "Rowan",
+    "Ulm Cade", "Munro Fenn", "Ulm Harrow", "Perrin Sorrow", "Alder Sable",
+    "Corin Sorrow", "Dag", "Munro Rook", "Vance Kane", "Loam Winters", "Pox",
+    "Hale Stone", "Alder Doyle", "Jace Vance", "Ulfric Marsh", "Zed", "Barn",
+    "Loam Kane", "Hobbes Hale", "Fitch Sable", "Finch", "Hobb Winters", "Jace",
+    "Quill", "Ulm", "Munro Wolfe", "Bram Crane", "Tam Kane", "Dash Hollow", "Dash",
+    "Bram Gore", "Kip Sable", "Hobb", "Trell Winters", "Pip Sable", "Norr Crane",
+    "Gable Isley", "Zeb Marsh", "Oren Isley", "Jory", "Tam Rook", "Hale Sorrow",
+    "Marnie Winters", "Cole Quist", "Rye", "Bram Doyle", "Elton Quill", "Gideon Grey",
+    "Vex Wick", "Lowell North", "Rye Falk", "Otto Winters", "Alder", "Rand",
+    "Jory Thorne", "Linus Cole", "Kip Falk", "Twig Hollow", "Wick Marsh", "Silas",
+    "Dag Pryde", "Farris Gore", "Dag Winters", "Isham Doyle", "Ashwin Rook",
+    "Stigg Oakes", "Finch Vane", "Yorik Doyle", "Elton Lark", "Isham Gore",
+    "Marnie Sable", "Nye Moss", "Ashwin Doyle", "Otto Quist", "Yew", "Kess Marsh",
+    "Hobb Hollow", "Kip Grey", "Rowan Doyle", "Jasper Pryde", "Nye Isley",
+    "Tobin Sable", "Vex Thorne", "Isham Oakes", "Emeric", "Kip Frost", "Rand Pryde",
+    "Yorik Vance", "Ashwin Isley", "Ulm Kane", "Loam", "Trell", "Zeb Rill",
+    "Merric Frost", "Quint Lark", "Rooke Quill", "Jasper Wick", "Lowell Fane",
+    "Otto Isley", "Loam Fenn", "Faro Grey", "Hale Fenn", "Hale Thorne", "Kess Moss",
+    "Gideon North", "Farris Quist", "Marnie Cole", "Gideon Harrow", "Vance", "Yorik",
+    "Quint Hale", "Linus Stone", "Dash Ash", "Corin", "Dash Pike", "Hobbes Hollow",
+    "Emeric Marsh", "Munro Cade", "Wendel Marsh", "Faro Harrow", "Vex", "Hobb Rook",
+    "Osten Rook", "Twig", "Ashwin Marsh", "Emeric Moss", "Pox Marrow", "Otto Crane",
+    "Nye Vance", "Pox Cole", "Zeb Pryde",
+]
+
+
+def _next_type_name(wb: dict) -> str:
+    """Default name for a newly hired soldier left blank on the hire form: a
+    random name from RANDOM_SOLDIER_NAMES_MALE, not repeating one already on
+    the roster unless every name in the pool is taken."""
+    taken = {s.get("name") for s in wb.get("soldiers") or []}
+    free = [n for n in RANDOM_SOLDIER_NAMES_MALE if n not in taken]
+    return random.choice(free or RANDOM_SOLDIER_NAMES_MALE)
+
+
+def _random_captain_name(gender: str) -> str:
+    """Default name for a captain hired with the name field left blank."""
+    pool = RANDOM_CAPTAIN_NAMES_FEMALE if gender == "female" else RANDOM_CAPTAIN_NAMES_MALE
+    return random.choice(pool)
 
 
 def _new_soldier_leveling_fields(info: dict) -> dict:
@@ -2462,7 +2847,7 @@ def _build_soldier_record(
     soldier = {
         "id": uuid.uuid4().hex[:10],
         "type_key": type_key,
-        "name": (name or _next_type_name(wb, type_key, info["name"])).strip(),
+        "name": (name or _next_type_name(wb)).strip(),
         "status": "active",
         "item_slots": empty_slots(expansions.soldier_item_slots(wb, type_key)),
         "mutations": [],
@@ -5167,6 +5552,7 @@ def hire_captain(
     name: str = "",
     extra_stat: str | None = None,
     tricks: list[str] | None = None,
+    gender: str = "male",
 ) -> tuple[bool, str]:
     hr = wb.setdefault("homerules", default_homerules())
     if hr.get("captain_mode") not in ("hire", "both"):
@@ -5203,7 +5589,7 @@ def hire_captain(
     if int(wb.get("gold", 0)) < cost:
         return False, f"Need {cost} gc for a captain."
     wb["gold"] = int(wb["gold"]) - cost
-    cap = empty_captain(name or "Captain", hr)
+    cap = empty_captain(name or _random_captain_name(gender), hr, gender=gender)
     cap["known_tricks"] = list(tricks or [])
     if hr.get("captain_bonus_choice_enabled") and extra_stat in CAPTAIN_BONUS_STATS:
         limits = hr.get("captain_stat_absolute_limits") or CAPTAIN_STAT_ABSOLUTE_LIMITS

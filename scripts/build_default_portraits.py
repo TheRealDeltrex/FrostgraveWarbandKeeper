@@ -53,6 +53,7 @@ ALIASES = {
     "female_wizard_fire_giant": "wizard_fire_giant_female",
     "rangifer_shamen": "wizard_rangifer_shaman",
     "captain": "captain",
+    "captain_female": "captain_female",
     "construct_small": "small_construct",
     "construct_medium": "medium_construct",
     "construct_large": "large_construct",

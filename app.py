@@ -161,6 +161,13 @@ from warband_store import (
     ALT_XP_CONVERSIONS,
     BLACK_MARKET_ROLLS_PER_SCENARIO,
     BREW_GREATER_PENALTY,
+    RANDOM_APPRENTICE_NAMES_FEMALE,
+    RANDOM_APPRENTICE_NAMES_MALE,
+    RANDOM_CAPTAIN_NAMES_FEMALE,
+    RANDOM_CAPTAIN_NAMES_MALE,
+    RANDOM_WARBAND_NAMES,
+    RANDOM_WIZARD_NAMES_FEMALE,
+    RANDOM_WIZARD_NAMES_MALE,
     UNDERWORLD_INTIMIDATION_MAX_MODIFIER,
     UNDERWORLD_MUSCLE,
     InvalidUpload,
@@ -287,6 +294,7 @@ from warband_store import (
     rename_warband,
     reorder_soldiers,
     reorder_spells,
+    reorder_warbands,
     resolve_portrait_path,
     resolve_underworld_muscle,
     restore_portraits_by_name,
@@ -1005,6 +1013,11 @@ def _render_new(
         random_identity=random_identity,
         wizard_gender=wizard_gender,
         apprentice_gender=apprentice_gender,
+        RANDOM_WARBAND_NAMES=RANDOM_WARBAND_NAMES,
+        RANDOM_WIZARD_NAMES_MALE=RANDOM_WIZARD_NAMES_MALE,
+        RANDOM_WIZARD_NAMES_FEMALE=RANDOM_WIZARD_NAMES_FEMALE,
+        RANDOM_APPRENTICE_NAMES_MALE=RANDOM_APPRENTICE_NAMES_MALE,
+        RANDOM_APPRENTICE_NAMES_FEMALE=RANDOM_APPRENTICE_NAMES_FEMALE,
     )
 
 
@@ -1759,6 +1772,10 @@ def warband_view(warband_id: str) -> str:
         mutation_picker_data=mutation_picker_data,
         fireheart_enabled=fireheart_enabled,
         construct_modification_data=construct_modification_data,
+        RANDOM_CAPTAIN_NAMES_MALE=RANDOM_CAPTAIN_NAMES_MALE,
+        RANDOM_CAPTAIN_NAMES_FEMALE=RANDOM_CAPTAIN_NAMES_FEMALE,
+        RANDOM_APPRENTICE_NAMES_MALE=RANDOM_APPRENTICE_NAMES_MALE,
+        RANDOM_APPRENTICE_NAMES_FEMALE=RANDOM_APPRENTICE_NAMES_FEMALE,
     )
 
 
@@ -2168,6 +2185,7 @@ def _act_hire_captain(wb: dict) -> tuple[bool, str]:
         (request.form.get("captain_name") or "").strip(),
         request.form.get("captain_extra_stat") or None,
         request.form.getlist("captain_tricks"),
+        "female" if request.form.get("captain_gender") == "female" else "male",
     )
     if ok:
         f = request.files.get("captain_portrait")
@@ -2920,6 +2938,16 @@ def _update_details(wb: dict) -> None:
             remove_portrait(ap, wb["id"], "apprentice")
         af = request.files.get("apprentice_portrait")
         apply_portrait(ap, wb["id"], "apprentice", af)
+
+
+@app.route("/warbands/reorder", methods=["POST"])
+def warbands_reorder() -> Response:
+    ids = (request.form.get("warband_order") or "").split("|")
+    ids = [i for i in ids if i]
+    ok, msg = reorder_warbands(ids)
+    if not ok:
+        flash(msg, "error")
+    return redirect(url_for("home"))
 
 
 @app.route("/warband/<warband_id>/delete", methods=["POST"])

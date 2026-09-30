@@ -40,9 +40,22 @@
           <input type="search" id="warband-filter" placeholder="Filter warbands…" aria-label="Filter warbands" />
         </div>
       {% endif %}
+      <form method="post" action="{{ url_for('warbands_reorder') }}" id="warband-reorder-form">
+        <input type="hidden" name="warband_order" id="warband-order-input" value="{% for w in warbands %}{{ w.id }}{% if not loop.last %}|{% endif %}{% endfor %}" />
+      </form>
+      <p class="muted" style="font-size:0.85rem;margin-bottom:0.5rem" id="warband-order-status">Type a number to move a warband to that position.</p>
       <ul class="warband-list" id="warband-list">
         {% for w in warbands %}
-          <li class="warband-list-item">
+          <li class="warband-list-item" data-warband-id="{{ w.id }}">
+            <input
+              type="number"
+              class="warband-position"
+              min="1"
+              max="{{ [warbands|length, 999] | min }}"
+              value="{{ loop.index }}"
+              aria-label="Position of {{ w.name }}"
+              title="Position"
+            />
             <a class="card-link" href="{{ url_for('warband_view', warband_id=w.id) }}">
               <div class="warband-row">
                 {% set src = portrait_src(w.portrait, 'wizard', None, w.gender, w.state) %}
@@ -99,6 +112,52 @@
           { itemSelector: ".warband-list-item" }
         );
       }
+      // Steam-wishlist-style reorder: typing a position in a row's number
+      // field moves that row there and shifts everything between its old
+      // and new spot by one, rather than swapping with whatever currently
+      // holds that number.
+      (function () {
+        const list = document.getElementById("warband-list");
+        if (!list) return;
+        const input = document.getElementById("warband-order-input");
+        const status = document.getElementById("warband-order-status");
+        const defaultStatus = status ? status.textContent : "";
+        function items() { return [...list.querySelectorAll(".warband-list-item")]; }
+        function renumber() {
+          items().forEach((li, i) => {
+            li.querySelector(".warband-position").value = i + 1;
+          });
+        }
+        function sync() {
+          input.value = items().map((li) => li.dataset.warbandId).join("|");
+          if (status) status.textContent = "Saving order…";
+          window.fgDebounceSubmit(input.form, 800);
+        }
+        list.addEventListener("change", (e) => {
+          const field = e.target.closest(".warband-position");
+          if (!field) return;
+          const rows = items();
+          const li = field.closest(".warband-list-item");
+          const from = rows.indexOf(li);
+          let to = parseInt(field.value, 10) - 1;
+          if (Number.isNaN(to)) to = from;
+          to = Math.max(0, Math.min(rows.length - 1, to));
+          if (to === from) {
+            renumber();
+            return;
+          }
+          rows.splice(from, 1);
+          rows.splice(to, 0, li);
+          rows.forEach((row) => list.appendChild(row));
+          renumber();
+          sync();
+        });
+        if (status) {
+          list.addEventListener("focusin", (e) => {
+            if (e.target.closest(".warband-position")) status.textContent = defaultStatus;
+          });
+        }
+      })();
     });
   </script>
 {% endblock %}
