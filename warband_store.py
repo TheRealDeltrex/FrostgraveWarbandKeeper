@@ -1565,6 +1565,33 @@ def reorder_spells(wb: dict, spell_ids_in_order: list[str]) -> tuple[bool, str]:
     return True, "Spell order updated."
 
 
+def add_spell(wb: dict, spell_key: str) -> tuple[bool, str]:
+    """Add a spell outside a level-up: no XP spent, no grimoire consumed."""
+    sp = find_spell(spell_key or "")
+    if not sp:
+        return False, "Pick a spell to add."
+    wiz = wb.get("wizard") or {}
+    if any(s.get("id") == sp["id"] for s in wiz.get("spells") or []):
+        return False, f"{sp['name']} is already known."
+    wiz.setdefault("spells", []).extend(
+        spells_from_keys([sp["id"]], wiz.get("school") or "Elementalist", school_symmetry(wb))
+    )
+    recompute_spell_cns(wb)
+    add_history(wb, f"Added spell {sp['name']}.")
+    return True, f"Added {sp['name']}."
+
+
+def remove_spell(wb: dict, spell_id: str) -> tuple[bool, str]:
+    wiz = wb.get("wizard") or {}
+    spells = wiz.get("spells") or []
+    for i, s in enumerate(spells):
+        if s.get("id") == spell_id:
+            spells.pop(i)
+            add_history(wb, f"Removed spell {s.get('name')}.")
+            return True, f"Removed {s.get('name')}."
+    return False, "Select a spell to remove."
+
+
 def reorder_soldiers(wb: dict, soldier_ids_in_order: list[str]) -> tuple[bool, str]:
     soldiers = wb.get("soldiers") or []
     by_id = {s.get("id"): s for s in soldiers}

@@ -2,7 +2,7 @@
 {% block title %}New warband · Frostgrave{% endblock %}
 {% block content %}
   <section class="hero">
-    <h1>Create your warband</h1>
+    <h1>Create Your Warband</h1>
     <p>
       Rules from Frostgrave 2e core: start with
       <span class="gold">{{ STARTING_GOLD }} gc</span>,
@@ -25,7 +25,7 @@
        Pentangle school only ever shows up in the dropdown once its toggle here
        is on. #}
     <details class="card" id="source-books-card" {% if enabled_sources_map and enabled_sources_map.values()|select|list %}open{% endif %}>
-      <summary><span class="card-title">1. Rules &amp; source books <span class="muted" style="font-weight:500;font-size:0.9rem">— optional</span></span></summary>
+      <summary><span class="card-title">1. Rules &amp; Source Books <span class="muted" style="font-weight:500;font-size:0.9rem">— Optional</span></span></summary>
       <p class="muted" style="font-size:0.88rem">
         Switch on the supplements you play with. Their spells become available below, and their
         mercenaries become hireable once the warband exists. You can change this later under
@@ -56,7 +56,7 @@
         Standard Wizards only
       </label>
       <details class="ref-panel" style="margin-top:0.4rem">
-        <summary>What the non-standard schools are</summary>
+        <summary>What the Non-Standard Schools Are</summary>
         <p class="hr-note-body">
           <strong>Pentangle schools</strong> ({{ PENTANGLE_SCHOOLS|join(', ') }}) — needs The Maze
           of Malcor. Their spells are scroll-only by the book; playing one as a real school is the
@@ -179,7 +179,7 @@
     </details>
 
     <details class="card" open>
-      <summary><span class="card-title">2. Warband &amp; wizard</span></summary>
+      <summary><span class="card-title">2. Warband &amp; Wizard</span></summary>
       <div class="actions" style="margin-bottom:0.75rem">
         <button class="btn small secondary" type="button" id="random-wizard-btn">
           Random wizard (core rules)
@@ -266,7 +266,7 @@
         <p class="muted">Starting wizard stats: Move 6 · Fight +2 · Shoot +0 · Armour 10 · Will +4 · Health 14</p>
       {% endif %}
 
-      <h3 style="margin-top:1.35rem">Apprentice (optional)</h3>
+      <h3 style="margin-top:1.35rem">Apprentice (Optional)</h3>
       {% if school == "Fire Giant" %}
         <p class="muted">A Fire Giant Wizard has no apprentice (Blood Legacy).</p>
       {% elif school == "Vampire" %}
@@ -349,13 +349,13 @@
       </div>
 
       <div style="margin-top:1rem">
-        <h3>Available spells</h3>
+        <h3>Available Spells</h3>
         <p class="muted" style="font-size:0.85rem">
           CN shown is <strong>your effective casting number</strong> (base + school penalty).
           Greyed-out spells cannot be picked under current selection rules.
         </p>
         <details class="ref-panel" open>
-          <summary>Spell list (collapse all)</summary>
+          <summary>Spell List (Collapse All)</summary>
           {% set schools_order = [school] + relations.aligned + relations.neutral + relations.opposed %}
           {% for sch in schools_order %}
             {% set rel = 'own' if sch == school else ('aligned' if sch in relations.aligned else ('opposed' if sch in relations.opposed else 'neutral')) %}
@@ -419,7 +419,7 @@
       </div>
 
       <div style="margin-top:1.5rem">
-        <h3>Selected spell order</h3>
+        <h3>Selected Spell Order</h3>
         <p class="muted" style="font-size:0.85rem">Drag to rearrange, or use ↑ / ↓. Order is saved on the warband sheet.</p>
         <ol id="selected-list" class="selected-spells"></ol>
         <p id="spell-status" class="empty"></p>

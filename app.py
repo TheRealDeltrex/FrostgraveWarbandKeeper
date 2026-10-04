@@ -187,6 +187,7 @@ from warband_store import (
     add_soldier_mutation,
     add_soldier_permanent_injury,
     add_soldier_xp,
+    add_spell,
     add_vault_item,
     add_wizard_mutation,
     add_wizard_permanent_injury,
@@ -287,6 +288,7 @@ from warband_store import (
     remove_soldier_mutation,
     remove_soldier_permanent_injury,
     remove_soldier_thrall,
+    remove_spell,
     remove_vault_item,
     remove_wizard_mutation,
     remove_wizard_permanent_injury,
@@ -552,6 +554,33 @@ app.jinja_env.tests["artefact"] = expansions.is_artefact
 # True for a type_key whose item slots are entirely conditional (Crow Master,
 # or a creature under creature_item_slot_enabled) — see is_conditional_slot_type.
 app.jinja_env.tests["conditional_slot_type"] = expansions.is_conditional_slot_type
+
+_HEADING_MINOR_WORDS = {
+    "a", "an", "the", "and", "but", "or", "nor", "for", "of", "in", "on", "at",
+    "to", "by", "from", "with", "as", "per", "vs", "vs.", "into",
+}
+
+
+def heading_case(text):
+    """Title-case a data-driven heading: minor words stay lower unless they open
+    the heading or follow a dash/colon; words already holding a capital keep it."""
+    words = str(text).split(" ")
+    out = []
+    for i, w in enumerate(words):
+        prev = words[i - 1] if i else ""
+        opens = i == 0 or prev in ("—", "–", "-") or prev.endswith(":")
+        bare = w.strip("()[],;:")
+        if bare.lower() in _HEADING_MINOR_WORDS and not opens:
+            out.append(w)
+            continue
+        lead = len(w) - len(w.lstrip("([\"'"))
+        if lead < len(w) and w[lead].islower() and not any(c.isupper() for c in w):
+            w = w[:lead] + w[lead].upper() + w[lead + 1:]
+        out.append(w)
+    return " ".join(out)
+
+
+app.jinja_env.filters["heading_case"] = heading_case
 
 
 # --- Local-only request guards ---------------------------------------------
@@ -1357,7 +1386,7 @@ def warband_view(warband_id: str) -> str:
     temporary_catalog = [c for c in hireable if c.get("temporary")]
     hireable = [c for c in hireable if not c.get("temporary")]
     # Spell-summoned permanent members (Animal Companion, Animate Construct,
-    # ...) get their own "Summoned creatures" panel too, between Hire soldier
+    # ...) get their own "Hire a Summoned Creature" panel too, between the hire panels
     # and Hire temporary member — they're gated by a known spell rather than
     # a source book, so mixing them into the source-book catalog read oddly.
     summoned_catalog = [c for c in hireable if c.get("requires_spell")]
@@ -2602,6 +2631,16 @@ def _act_reorder_spells(wb: dict) -> tuple[bool, str]:
     order_raw = (request.form.get("spell_order") or "").strip()
     ids = [x for x in order_raw.split("|") if x]
     return reorder_spells(wb, ids)
+
+
+@register_action("add_spell")
+def _act_add_spell(wb: dict) -> tuple[bool, str]:
+    return add_spell(wb, request.form.get("spell_key") or "")
+
+
+@register_action("remove_spell")
+def _act_remove_spell(wb: dict) -> tuple[bool, str]:
+    return remove_spell(wb, request.form.get("spell_id") or "")
 
 
 @register_action("reorder_soldiers")
