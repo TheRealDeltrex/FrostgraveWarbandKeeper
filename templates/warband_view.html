@@ -110,6 +110,10 @@
             <button class="btn secondary" type="submit">Duplicate</button>
           </form>
           <a class="btn secondary" href="{{ url_for('home') }}">All warbands</a>
+          <a class="btn secondary tv-only" href="{{ url_for('reference') }}">Lexicon</a>
+          <button class="btn secondary" type="button" id="layout-toggle">
+            <span class="tv-only">Classic layout</span><span class="classic-only">Tab layout</span>
+          </button>
           <form class="inline-form" method="post" action="{{ url_for('warband_delete', warband_id=wb.id) }}" onsubmit="return confirm('Delete warband “{{ wb.name }}” permanently? This cannot be undone.');">
             <button class="btn danger" type="submit">Delete</button>
           </form>
@@ -117,6 +121,30 @@
       </div>
     </div>
   </section>
+
+  {# ---- Tab layout: rail + cards. Both wrappers are plain blocks in classic.
+     Each rail button's data-tab names a card id; a new card needs an entry here. #}
+  <div class="wb-layout">
+  <nav class="tv-rail" aria-label="Warband sections">
+    <div class="tv-group">Warband</div>
+    <button type="button" class="tv-tab" data-tab="wizard-apprentice-card"><span class="tv-label">Wizard &amp; Apprentice</span>{% if pending_levels %}<span class="tv-badge alert" title="Level-up ready">!</span>{% endif %}</button>
+    <button type="button" class="tv-tab" data-tab="spells-card"><span class="tv-label">Spells</span></button>
+    <button type="button" class="tv-tab" data-tab="recruit"><span class="tv-label">Soldiers &amp; Recruiting</span><span class="tv-badge{% if not limits.soldiers_ok %} bad{% endif %}">{{ limits.soldiers }}/{{ limits.max_soldiers }}</span></button>
+    <div class="tv-group">Gold &amp; Gear</div>
+    <button type="button" class="tv-tab" data-tab="treasury-vault"><span class="tv-label">Treasury, Vault &amp; Workshop</span><span class="tv-badge gold">{{ wb.gold }}</span></button>
+    <button type="button" class="tv-tab" data-tab="shop"><span class="tv-label">Shop</span></button>
+    <button type="button" class="tv-tab" data-tab="base"><span class="tv-label">Home Base</span></button>
+    {% if wildwoods_enabled %}
+    <button type="button" class="tv-tab" data-tab="wildwoods-supplies"><span class="tv-label">Supplies &amp; Cargo</span><span class="tv-badge">{{ wildwoods.supply_points }}/{{ wildwoods.capacity }}</span></button>
+    {% endif %}
+    <div class="tv-group">Campaign</div>
+    <button type="button" class="tv-tab" data-tab="post-game"><span class="tv-label">After the Game</span></button>
+    <button type="button" class="tv-tab" data-tab="campaign-log"><span class="tv-label">Campaign Log</span></button>
+    <div class="tv-group">Setup</div>
+    <button type="button" class="tv-tab" data-tab="homerules"><span class="tv-label">Additional Rules &amp; Homerules</span></button>
+    <p class="tv-hint">Ctrl+click a tab to open or close it side by side. Alt+1–9 switches tabs.</p>
+  </nav>
+  <div class="wb-cards">
 
   {# ---- Additional Rules and Homerules ---- #}
   <details class="card" id="homerules">
@@ -918,7 +946,7 @@
   {% endif %}
   <details class="card" id="wizard-apprentice-card" open>
     <summary><span class="card-title">Wizard &amp; Apprentice</span></summary>
-    <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" enctype="multipart/form-data" data-autosave>
+    <form class="tv-figures" method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" enctype="multipart/form-data" data-autosave>
       <input type="hidden" name="action" value="details" />
       <details class="ref-panel" id="wizard-panel" open>
         <summary>Wizard — {{ wiz.name }} · {{ wiz.school }} · Level {{ wiz.level }} · {{ wiz.xp }} XP Total · {{ limits.unused_xp }} XP Unused</summary>
@@ -1167,15 +1195,19 @@
     {% if "Blood Legacy" in enabled_source_names and wiz.school not in ("Vampire", "Fire Giant") %}
       {% set _ = available_states.append(STATE_VAMPIRE) %}
     {% endif %}
-      <details class="ref-panel" id="wizard-mutations-state-panel">
+      {# Tab view: this panel hosts two sub-tabs (the grid, and the state panel).
+         The grid wrappers are display: contents in classic, so its order stands. #}
+      <details class="ref-panel tv-sub-host" id="wizard-mutations-state-panel">
         <summary>Mutations, Permanent Injuries &amp; Wizard State</summary>
-        {{ mutation_picker('add_wizard_mutation', wiz.mutations, label="Wizard Mutations") }}
-        {% if ap %}{{ mutation_picker('add_apprentice_mutation', ap.mutations, label="Apprentice Mutations") }}{% endif %}
-        {{ permanent_injury_picker('add_wizard_permanent_injury', wiz.permanent_injuries, label="Wizard Permanent Injuries", kind="wizard") }}
-        {% if ap %}{{ permanent_injury_picker('add_apprentice_permanent_injury', ap.permanent_injuries, label="Apprentice Permanent Injuries", kind="apprentice") }}{% endif %}
+        <div class="tv-mut-grid" data-subtab-label="Injuries &amp; Mutations">
+        <div class="tv-mut-wm">{{ mutation_picker('add_wizard_mutation', wiz.mutations, label="Wizard Mutations") }}</div>
+        {% if ap %}<div class="tv-mut-am">{{ mutation_picker('add_apprentice_mutation', ap.mutations, label="Apprentice Mutations") }}</div>{% endif %}
+        <div class="tv-mut-wi">{{ permanent_injury_picker('add_wizard_permanent_injury', wiz.permanent_injuries, label="Wizard Permanent Injuries", kind="wizard") }}</div>
+        {% if ap %}<div class="tv-mut-ai">{{ permanent_injury_picker('add_apprentice_permanent_injury', ap.permanent_injuries, label="Apprentice Permanent Injuries", kind="apprentice") }}</div>{% endif %}
+        </div>
 
     {% if available_states or wizard_state_kind == STATE_VAMPIRE %}
-      <details class="ref-panel" id="wizard-state-panel" {% if wizard_state_kind != STATE_NONE %}open{% endif %}>
+      <details class="ref-panel" id="wizard-state-panel" data-subtab-label="State: {{ STATE_LABELS[wizard_state_kind]|heading_case }}" {% if wizard_state_kind != STATE_NONE %}open{% endif %}>
         <summary>Wizard State — {{ STATE_LABELS[wizard_state_kind]|heading_case }}</summary>
         <p class="muted" style="font-size:0.85rem">Check lexicon for details.</p>
 
@@ -1310,7 +1342,7 @@
       </details>
 
     {% if underworld_favors_enabled %}
-      <details class="ref-panel" id="underworld-favours-panel">
+      <details class="ref-panel" id="underworld-favours-panel" data-subtab-label="Underworld Favours">
         <summary>Underworld Favours (Spellcaster Magazine) — {{ underworld_favors.markers }} Marker{{ 's' if underworld_favors.markers != 1 }} Held</summary>
         <p class="muted" style="font-size:0.85rem">
           A debt economy: take an Underworld Loan for gold now and Markers owed later, or claim a
@@ -1387,7 +1419,7 @@
     {% endif %}
 
     {% if monster_hunting_enabled %}
-      <details class="ref-panel" id="components-panel">
+      <details class="ref-panel" id="components-panel" data-subtab-label="Components">
         <summary>Spell &amp; Potion Components (Monster Hunting)</summary>
         <p class="muted" style="font-size:0.85rem">
           A free pouch holds {{ COMPONENT_POUCH_CAPACITY }} components. Buy a {{ SPELL_COMPONENT_BAG_NAME }}
@@ -1438,7 +1470,7 @@
       </details>
     {% endif %}
 
-    <details class="ref-panel" id="level-up-wizard-panel">
+    <details class="ref-panel" id="level-up-wizard-panel" data-subtab-label="Level Up" data-subtab-order="0">
       <summary>Level Up Wizard {% if pending_levels %}({{ pending_levels }} Ready){% endif %}</summary>
       <p class="muted">
         {{ xp_per_level }} XP per level (100 base, 120 Vampire, 150 Lich, 200 Fire Giant).
@@ -1578,6 +1610,7 @@
     </details>
 
     {% if not ap %}
+      <div id="hire-apprentice-block">
       <h3>Hire Apprentice</h3>
       <script type="application/json" id="random-new-apprentice-name-pools-data">
         {{ {"male": RANDOM_APPRENTICE_NAMES_MALE, "female": RANDOM_APPRENTICE_NAMES_FEMALE} | tojson }}
@@ -1627,7 +1660,9 @@
           });
         })();
       </script>
+      </div>
     {% else %}
+      <div data-subtab-label="If the Wizard Dies">
       {% if wiz.level >= 6 %}
         <p class="muted" style="font-size:0.85rem;margin-top:0.75rem">
           If the wizard dies (core rules, p.103): a level 6+ wizard's apprentice may take over as
@@ -1656,6 +1691,7 @@
           over until the wizard reaches level 6.
         </p>
       {% endif %}
+      </div>
     {% endif %}
   </details>
 
@@ -4186,6 +4222,13 @@
     </ul>
   </details>
   #}
+  <details class="card tv-only" id="campaign-log">
+    <summary><span class="card-title">Campaign Log</span></summary>
+    <p class="muted">Coming soon.</p>
+  </details>
+
+  </div>{# .wb-cards #}
+  </div>{# .wb-layout #}
 
   <script>
     (function () {
@@ -4571,6 +4614,173 @@
       var stored = null;
       try { stored = localStorage.getItem(KEY); } catch (err) { /* ignore */ }
       apply(stored === '1');
+    })();
+  </script>
+
+  <script>
+    (function () {
+      var root = document.documentElement;
+      var toggle = document.getElementById('layout-toggle');
+      if (toggle) {
+        toggle.addEventListener('click', function () {
+          var next = root.getAttribute('data-layout') === 'tabs' ? 'classic' : 'tabs';
+          try { localStorage.setItem('fgLayout', next); } catch (err) { /* ignore */ }
+          location.reload();
+        });
+      }
+      if (root.getAttribute('data-layout') !== 'tabs') return;
+
+      // DOMContentLoaded, so this runs after base.html's details-state restore
+      // (later in <body>) and the cards it opens stay open.
+      document.addEventListener('DOMContentLoaded', function () {
+        var rail = document.querySelector('.tv-rail');
+        if (!rail) return;
+        var tabs = [].slice.call(rail.querySelectorAll('.tv-tab')).filter(function (t) {
+          return document.getElementById(t.dataset.tab);
+        });
+        var ids = tabs.map(function (t) { return t.dataset.tab; });
+
+        // Every action redirects to the bare page URL, so the place in the
+        // page (tab, side tab, sub-tab, panel scroll) is kept per tab session.
+        var KEY = 'tabview:' + location.pathname;
+        var state = {};
+        try { state = JSON.parse(sessionStorage.getItem(KEY) || '{}') || {}; } catch (err) { state = {}; }
+        state.scroll = state.scroll || {};
+        if (ids.indexOf(state.tab) < 0) state.tab = 'wizard-apprentice-card';
+        if (ids.indexOf(state.split) < 0 || state.split === state.tab) state.split = null;
+        function save() {
+          try { sessionStorage.setItem(KEY, JSON.stringify(state)); } catch (err) { /* ignore */ }
+        }
+
+        function render() {
+          ids.forEach(function (id) {
+            var card = document.getElementById(id);
+            var on = id === state.tab || id === state.split;
+            card.classList.toggle('tv-on', on);
+            card.classList.toggle('tv-split', id === state.split);
+            if (on) {
+              card.open = true;
+              // display: none drops scrollTop, so each shown panel gets its own back.
+              if (state.scroll[id]) card.scrollTop = state.scroll[id];
+            }
+          });
+          tabs.forEach(function (t) {
+            t.classList.toggle('active', t.dataset.tab === state.tab);
+            t.classList.toggle('split', t.dataset.tab === state.split);
+          });
+          save();
+        }
+
+        tabs.forEach(function (t) {
+          t.addEventListener('click', function (e) {
+            var id = t.dataset.tab;
+            if (e.ctrlKey || e.metaKey) {
+              if (id !== state.tab) state.split = state.split === id ? null : id;
+            } else {
+              state.tab = id;
+              if (state.split === id) state.split = null;
+            }
+            render();
+          });
+        });
+        document.addEventListener('keydown', function (e) {
+          if (!e.altKey || e.ctrlKey || e.metaKey) return;
+          var t = tabs[parseInt(e.key, 10) - 1];
+          if (!t) return;
+          e.preventDefault();
+          t.click();
+        });
+
+        ids.forEach(function (id) {
+          var card = document.getElementById(id);
+          var pending = false;
+          card.addEventListener('scroll', function () {
+            if (pending) return;
+            pending = true;
+            setTimeout(function () {
+              pending = false;
+              state.scroll[id] = card.scrollTop;
+              save();
+            }, 150);
+          });
+        });
+
+        // ---- Wizard & Apprentice sub-tabs ----
+        var wizCard = document.getElementById('wizard-apprentice-card');
+        var figures = wizCard && wizCard.querySelector('.tv-figures');
+        if (figures) {
+          ['wizard-panel', 'apprentice-panel'].forEach(function (id) {
+            var el = document.getElementById(id);
+            if (el) el.open = true;
+          });
+          if (!state.equipmentOpened) {
+            ['wizard-equipment-notes-panel', 'apprentice-equipment-notes-panel'].forEach(function (id) {
+              var el = document.getElementById(id);
+              if (el) el.open = true;
+            });
+            state.equipmentOpened = true;
+          }
+          var anchor = figures;
+          var hire = document.getElementById('hire-apprentice-block');
+          if (hire) { figures.after(hire); anchor = hire; }
+
+          var sections = [].slice.call(wizCard.querySelectorAll('[data-subtab-label]'));
+          sections.sort(function (a, b) {
+            return (+(a.dataset.subtabOrder || 5)) - (+(b.dataset.subtabOrder || 5));
+          });
+          var keyOf = function (el) { return el.id || el.dataset.subtabLabel; };
+          if (state.sub === undefined && sections.length) state.sub = keyOf(sections[0]);
+          var strip = document.createElement('div');
+          strip.className = 'tv-subtabs';
+          var buttons = sections.map(function (el) {
+            var b = document.createElement('button');
+            b.type = 'button';
+            b.textContent = el.dataset.subtabLabel;
+            b.addEventListener('click', function () {
+              // Clicking the open sub-tab again closes it.
+              state.sub = state.sub === keyOf(el) ? null : keyOf(el);
+              applySub();
+              save();
+            });
+            strip.appendChild(b);
+            return b;
+          });
+          anchor.after(strip);
+
+          var applySub = function () {
+            sections.forEach(function (el, i) {
+              var on = keyOf(el) === state.sub;
+              el.classList.toggle('tv-sub-on', on);
+              buttons[i].classList.toggle('on', on);
+              if (!on) return;
+              if (el.tagName === 'DETAILS') el.open = true;
+              el.querySelectorAll(':scope > div > details').forEach(function (d) { d.open = true; });
+            });
+            wizCard.querySelectorAll('.tv-sub-host').forEach(function (host) {
+              var on = !!host.querySelector('.tv-sub-on');
+              host.classList.toggle('tv-sub-on', on);
+              if (on) host.open = true;
+            });
+          };
+          applySub();
+        }
+
+        // A #hash naming a card, or anything inside one, opens that card.
+        function followHash() {
+          var target = location.hash && document.getElementById(location.hash.slice(1));
+          if (!target) return false;
+          var card = target.closest('.wb-cards > details.card');
+          if (!card || ids.indexOf(card.id) < 0) return false;
+          state.tab = card.id;
+          if (state.split === card.id) state.split = null;
+          render();
+          if (target !== card) target.scrollIntoView({ block: 'start' });
+          return true;
+        }
+        window.addEventListener('hashchange', followHash);
+
+        if (!followHash()) render();
+      });
     })();
   </script>
 

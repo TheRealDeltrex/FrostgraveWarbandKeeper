@@ -2033,3 +2033,390 @@ details.item-info > summary {
 }
 details.item-info > summary::-webkit-details-marker { display: none; }
 details.item-info > span { display: block; font-size: 0.85rem; margin-top: 0.2rem; }
+
+/* ===== Warband page: tab layout =====
+   One template serves both layouts; <html data-layout> (set in base.html's
+   <head>) picks one. Everything tab-specific below is scoped to "tabs", and
+   the markup it relies on (rail, wrappers) is inert in classic. */
+html:not([data-layout="tabs"]) .tv-rail,
+html:not([data-layout="tabs"]) .tv-only,
+html[data-layout="tabs"] .classic-only {
+  display: none;
+}
+/* Classic keeps the mutation/injury panels in their own order and flow. */
+html:not([data-layout="tabs"]) .tv-mut-grid,
+html:not([data-layout="tabs"]) .tv-mut-grid > div {
+  display: contents;
+}
+
+html[data-layout="tabs"] body:has(.wb-layout) {
+  height: 100vh;
+  overflow: hidden;
+}
+html[data-layout="tabs"] .container:has(.wb-layout) {
+  width: auto;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+html[data-layout="tabs"] .container:has(.wb-layout) > .nav,
+html[data-layout="tabs"] .container:has(.wb-layout) > footer {
+  display: none;
+}
+html[data-layout="tabs"] .container:has(.wb-layout) > .flashes,
+html[data-layout="tabs"] .container:has(.wb-layout) > .session-warning,
+html[data-layout="tabs"] .container:has(.wb-layout) > .card.flash {
+  flex: none;
+  margin: var(--sp-2) 18px 0;
+}
+
+/* Header: the hero as one band */
+html[data-layout="tabs"] .container:has(.wb-layout) > .hero {
+  flex: none;
+  margin: 0;
+  padding: var(--sp-2) 18px;
+  border-width: 0 0 1px;
+  border-radius: 0;
+  box-shadow: var(--rim);
+}
+html[data-layout="tabs"] .hero .hero-with-portrait {
+  align-items: center;
+  gap: 14px;
+}
+html[data-layout="tabs"] .hero .portrait-lg {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-position: top;
+}
+html[data-layout="tabs"] .hero-with-portrait > div {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, auto) auto 1fr;
+  grid-template-areas: "name limits actions" "sub limits actions";
+  column-gap: var(--sp-4);
+  align-items: center;
+}
+html[data-layout="tabs"] .hero h1 {
+  grid-area: name;
+  margin: 0;
+  font-size: 1.3rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+html[data-layout="tabs"] .hero p {
+  grid-area: sub;
+  font-size: var(--fs-sm);
+  white-space: nowrap;
+}
+html[data-layout="tabs"] .hero .limit-bar {
+  grid-area: limits;
+  margin: 0;
+  flex-wrap: nowrap;
+  gap: 6px;
+}
+html[data-layout="tabs"] .hero .limit {
+  padding: 3px 9px;
+  font-size: var(--fs-xs);
+  white-space: nowrap;
+}
+html[data-layout="tabs"] .hero .section-actions {
+  grid-area: actions;
+  margin: 0;
+  justify-content: flex-end;
+  gap: 6px;
+}
+html[data-layout="tabs"] .hero .section-actions .btn {
+  padding: 0.3rem 0.7rem;
+  font-size: var(--fs-sm);
+}
+@media (max-width: 1250px) {
+  html[data-layout="tabs"] .hero .limit:not(.bad) {
+    display: none;
+  }
+}
+
+/* Rail + panels */
+html[data-layout="tabs"] .wb-layout {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+}
+.tv-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--sp-3) 10px;
+  overflow-y: auto;
+  border-right: 1px solid var(--border);
+  background: rgb(var(--void-rgb) / 0.35);
+}
+.tv-group {
+  margin: 14px 8px 4px;
+  color: var(--faint);
+  font-size: var(--fs-2xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.tv-group:first-child {
+  margin-top: 2px;
+}
+.tv-tab {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  width: 100%;
+  padding: var(--sp-2) 10px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: none;
+  font: inherit;
+  font-size: var(--fs-lg);
+  text-align: left;
+  color: var(--text-dim);
+  cursor: pointer;
+}
+.tv-tab:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.tv-tab.active {
+  background: linear-gradient(180deg, var(--surface-3), var(--surface-2));
+  border-color: var(--border-lit);
+  color: var(--ice);
+  box-shadow: var(--rim);
+}
+.tv-tab.active::before {
+  content: "";
+  position: absolute;
+  left: -10px;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--accent);
+}
+.tv-tab.split {
+  border-style: dashed;
+  border-color: var(--border-lit);
+}
+.tv-label {
+  flex: 1;
+  line-height: 1.25;
+}
+.tv-badge {
+  font-size: var(--fs-2xs);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.tv-badge.gold {
+  color: var(--gold);
+}
+.tv-badge.bad {
+  color: var(--error);
+}
+.tv-badge.alert {
+  padding: 0 7px;
+  border-radius: var(--radius-pill);
+  background: var(--gold);
+  color: var(--accent-ink);
+  font-weight: 700;
+}
+.tv-hint {
+  margin: auto 0 0;
+  padding: 14px 8px 2px;
+  color: var(--faint);
+  font-size: var(--fs-2xs);
+  line-height: 1.6;
+}
+
+html[data-layout="tabs"] .wb-cards {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+}
+html[data-layout="tabs"] .wb-cards > details.card {
+  display: none;
+  flex: 1 1 0;
+  min-width: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  margin: 0;
+  padding: 18px 26px 48px;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+html[data-layout="tabs"] .wb-cards > details.card.tv-on {
+  display: block;
+}
+html[data-layout="tabs"] .wb-cards > details.card.tv-split {
+  order: 1;
+  border-left: 1px solid var(--border);
+}
+/* The summary stays as the panel heading but no longer collapses it. */
+html[data-layout="tabs"] .wb-cards > details.card > summary {
+  pointer-events: none;
+  list-style: none;
+  margin-bottom: 14px;
+}
+html[data-layout="tabs"] .wb-cards > details.card > summary::-webkit-details-marker {
+  display: none;
+}
+html[data-layout="tabs"] .wb-cards > details.card > summary .card-title {
+  font-size: 1.45rem;
+}
+
+/* Wizard & Apprentice: figures side by side, extras as sub-tabs */
+html[data-layout="tabs"] .tv-figures {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(440px, 1fr));
+  gap: var(--sp-4);
+  align-items: start;
+}
+html[data-layout="tabs"] .tv-figures > details.ref-panel {
+  margin: 0;
+}
+html[data-layout="tabs"] .tv-figures .stat-row {
+  flex-wrap: nowrap;
+  gap: 6px;
+}
+html[data-layout="tabs"] .tv-figures .stat-pill {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 0.4rem 0.2rem;
+}
+.tv-subtabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 18px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.tv-subtabs button {
+  padding: 5px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  font: inherit;
+  font-size: var(--fs-md);
+  color: var(--text-dim);
+  cursor: pointer;
+}
+.tv-subtabs button:hover {
+  border-color: var(--border-lit);
+  color: var(--text);
+}
+.tv-subtabs button.on {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 600;
+}
+html[data-layout="tabs"] #wizard-apprentice-card [data-subtab-label],
+html[data-layout="tabs"] #wizard-apprentice-card .tv-sub-host {
+  display: none;
+}
+html[data-layout="tabs"] #wizard-apprentice-card [data-subtab-label].tv-sub-on,
+html[data-layout="tabs"] #wizard-apprentice-card .tv-sub-host.tv-sub-on {
+  display: block;
+  margin-top: var(--sp-3);
+}
+html[data-layout="tabs"] #wizard-apprentice-card .tv-sub-host > summary,
+html[data-layout="tabs"] #wizard-apprentice-card details[data-subtab-label] > summary {
+  display: none;
+}
+/* The host is only a frame for its two sub-tabs; they carry their own. */
+html[data-layout="tabs"] #wizard-apprentice-card .tv-sub-host.tv-sub-on {
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+html[data-layout="tabs"] #wizard-apprentice-card div[data-subtab-label="If the Wizard Dies"] {
+  padding: 0.35rem 0.75rem 0.75rem;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  background: var(--bg-deep);
+}
+html[data-layout="tabs"] #wizard-apprentice-card .tv-mut-grid.tv-sub-on {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas: "wi ai" "wm am";
+  gap: var(--sp-3);
+  align-items: start;
+  margin-top: 0;
+}
+.tv-mut-wi { grid-area: wi; }
+.tv-mut-ai { grid-area: ai; }
+.tv-mut-wm { grid-area: wm; }
+.tv-mut-am { grid-area: am; }
+html[data-layout="tabs"] .tv-mut-grid .ref-panel {
+  margin: 0;
+}
+html[data-layout="tabs"] #hire-apprentice-block {
+  margin-top: var(--sp-4);
+}
+
+/* Narrow screens: rail becomes a strip, the page scrolls as a whole. */
+@media (max-width: 820px) {
+  html[data-layout="tabs"] body:has(.wb-layout),
+  html[data-layout="tabs"] .container:has(.wb-layout) {
+    height: auto;
+    overflow: visible;
+  }
+  html[data-layout="tabs"] .hero-with-portrait > div {
+    display: block;
+  }
+  html[data-layout="tabs"] .hero .limit-bar,
+  html[data-layout="tabs"] .hero .section-actions {
+    flex-wrap: wrap;
+    margin-top: var(--sp-2);
+  }
+  html[data-layout="tabs"] .wb-layout {
+    display: block;
+  }
+  .tv-rail {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    flex-direction: row;
+    overflow-x: auto;
+    padding: var(--sp-2) 16px;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+  }
+  .tv-group,
+  .tv-hint {
+    display: none;
+  }
+  .tv-tab {
+    width: auto;
+    white-space: nowrap;
+  }
+  .tv-tab.active::before {
+    display: none;
+  }
+  html[data-layout="tabs"] .wb-cards > details.card {
+    overflow: visible;
+    padding: 16px;
+  }
+  html[data-layout="tabs"] .wb-cards > details.card.tv-split {
+    display: none;
+  }
+  html[data-layout="tabs"] .tv-figures,
+  html[data-layout="tabs"] #wizard-apprentice-card .tv-mut-grid.tv-sub-on {
+    grid-template-columns: 1fr;
+    grid-template-areas: "wi" "ai" "wm" "am";
+  }
+}
