@@ -2,12 +2,12 @@
 {% block title %}Import · Frostgrave{% endblock %}
 {% block content %}
   <section class="hero">
-    <h1>Import warband</h1>
+    <h1>Import Warband</h1>
     <p>Load a previously exported .warbands file, or paste the JSON below.</p>
   </section>
 
   <div class="card">
-    <h2>From file</h2>
+    <h2>From File</h2>
     <form method="post" action="{{ url_for('warband_import') }}" enctype="multipart/form-data">
       <div class="form-row">
         <label for="file">Warband file</label>

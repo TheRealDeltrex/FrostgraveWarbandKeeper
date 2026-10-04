@@ -21,7 +21,7 @@
       combat/shooting/casting procedures, and the post-game checklist.</p>
     {% for sec in quick_reference %}
       <details class="ref-panel">
-        <summary>{{ sec.title }}</summary>
+        <summary>{{ sec.title|heading_case }}</summary>
         {% for e in sec.entries %}
           <p style="margin:0.4rem 0">
             <strong>{{ e.name }}</strong>{% if e.tag %} <span class="badge">{{ e.tag }}</span>{% endif %}
@@ -41,7 +41,7 @@
       itself uses on the warband page, not a separate transcription.</p>
     {% for sec in core_rules %}
       <details class="ref-panel">
-        <summary>{{ sec.title }}</summary>
+        <summary>{{ sec.title|heading_case }}</summary>
         {% if sec.blurb %}<p class="muted" style="font-size:0.85rem">{{ sec.blurb }}</p>{% endif %}
         {% for row in sec.rows %}
           <p style="margin:0.4rem 0"><strong>{{ row.name }}</strong><br /><span class="muted">{{ row.text }}</span></p>
@@ -104,7 +104,7 @@
   </details>
 
   <details class="card">
-    <summary><span class="card-title">Spells by school</span></summary>
+    <summary><span class="card-title">Spells by School</span></summary>
     <p class="muted">Click <strong>Info</strong> on a spell line for full text.</p>
     {% for sch, splist in spells.items() %}
       <details class="ref-panel">
@@ -135,7 +135,7 @@
   </details>
 
   <details class="card">
-    <summary><span class="card-title">Arms, armour &amp; consumables</span></summary>
+    <summary><span class="card-title">Arms, Armour &amp; Consumables</span></summary>
     <p class="muted">General Arms and Armour List from Frostgrave 2e, plus a few notable supplement
       weapons and potion / scroll / grimoire types. Most of this is free starting equipment per the
       core rules; the black powder firearms and their upgrades are commissioned for real gold instead,
@@ -184,7 +184,7 @@
     </div>
     {% if potions_detailed %}
       <details class="ref-panel" style="margin-top:1rem">
-        <summary>Potions, elixirs &amp; bottles ({{ potions_detailed|length }})</summary>
+        <summary>Potions, Elixirs &amp; Bottles ({{ potions_detailed|length }})</summary>
         <div class="item-list-detail">
           <div class="item-list-head" aria-hidden="true">
             <span class="col-name">Name</span>
@@ -222,7 +222,7 @@
       wizard knows that spell (Animate Construct, Animal Companion).</p>
     {% for group in soldier_groups %}
       <details class="ref-panel">
-        <summary>{{ group.label }} ({{ group.soldiers|length }})</summary>
+        <summary>{{ group.label|heading_case }} ({{ group.soldiers|length }})</summary>
         <div class="table-wrap">
           <table>
             <thead>
@@ -275,7 +275,7 @@
         {% set creatures = bestiary|selectattr('category', 'equalto', category)|list %}
         {% if creatures %}
           <details class="ref-panel">
-            <summary>{{ category }} ({{ creatures|length }})</summary>
+            <summary>{{ category|heading_case }} ({{ creatures|length }})</summary>
             <div class="item-list-detail">
               <div class="item-list-head" aria-hidden="true">
                 <span class="col-name">Creature</span>
@@ -362,17 +362,17 @@
   </details>
 
   <details class="card">
-    <summary><span class="card-title">Random encounters</span></summary>
+    <summary><span class="card-title">Random Encounters</span></summary>
     <p class="muted">The optional random-encounter tables from the core rules and the supplements that
       give one — roll when a treasure token is first picked up (core: 10+), or however your group has
       house-ruled it. Not every supplement has a standalone table; Into the Breeding Pits' underground
       variant is under Expansion rules below instead.</p>
     {% for book, sections in random_encounters.items() %}
       <details class="ref-panel">
-        <summary>{{ book }}</summary>
+        <summary>{{ book|heading_case }}</summary>
         {% for sec in sections %}
           <details class="ref-panel">
-            <summary>{{ sec.title }}</summary>
+            <summary>{{ sec.title|heading_case }}</summary>
             {% if sec.blurb %}<p class="muted" style="font-size:0.85rem">{{ sec.blurb }}</p>{% endif %}
             {% if sec.rows %}
               <div class="table-wrap">
@@ -392,7 +392,7 @@
   </details>
 
   <details class="card">
-    <summary><span class="card-title">Magic items &amp; treasure ({{ magic_item_count }})</span></summary>
+    <summary><span class="card-title">Magic Items &amp; Treasure ({{ magic_item_count }})</span></summary>
     <p class="muted">Treasure from the core rules and the supplements. A book's items only become
       suggestions in a warband's vault once that book is switched on under its Additional Rules and
       Homerules — but everything is browsable here. Acquiring them: found as treasure during play
@@ -400,7 +400,7 @@
       directly, so no gc cost is listed.</p>
     {% for group in magic_item_groups %}
       <details class="ref-panel">
-        <summary>{{ group.source }} ({{ group.rows|length }})</summary>
+        <summary>{{ group.source|heading_case }} ({{ group.rows|length }})</summary>
         <div class="table-wrap">
           <table>
             <thead><tr><th>Item</th><th>Effect</th></tr></thead>
@@ -416,17 +416,17 @@
   </details>
 
   <details class="card">
-    <summary><span class="card-title">Loot tables</span></summary>
+    <summary><span class="card-title">Loot Tables</span></summary>
     <p class="muted">The top-level "roll to see what you found" tables — how many potions, scrolls, or
       rolls on the magic item/weapon/armour/grimoire tables a recovered treasure token is worth. The
       items themselves are the Magic items &amp; treasure table above and the Potions sub-list under
       Arms, armour &amp; consumables.</p>
     {% for book, sections in loot_tables.items() %}
       <details class="ref-panel">
-        <summary>{{ book }}</summary>
+        <summary>{{ book|heading_case }}</summary>
         {% for sec in sections %}
           <details class="ref-panel">
-            <summary>{{ sec.title }}</summary>
+            <summary>{{ sec.title|heading_case }}</summary>
             {% if sec.blurb %}<p class="muted" style="font-size:0.85rem">{{ sec.blurb }}</p>{% endif %}
             {% if sec.rows %}
               <div class="table-wrap">
@@ -446,21 +446,21 @@
   </details>
 
   <details class="card">
-    <summary><span class="card-title">Expansion rules</span></summary>
+    <summary><span class="card-title">Expansion Rules</span></summary>
     <p class="muted">The table rules each supplement adds beyond its soldiers, spells and creatures —
       traps, demonic attributes, underground play, the optional core-rule updates, the solo/co-op
       toolkit.</p>
     {% for book, sections in expansion_rules.items() %}
       <details class="ref-panel">
-        <summary>{{ book }}</summary>
+        <summary>{{ book|heading_case }}</summary>
         {% for sec in sections %}
           <details class="ref-panel">
-            <summary>{{ sec.title }}</summary>
+            <summary>{{ sec.title|heading_case }}</summary>
             {% if sec.blurb %}<p class="muted" style="font-size:0.85rem">{{ sec.blurb }}</p>{% endif %}
             {% if sec.subsections %}
               {% for sub in sec.subsections %}
                 <details class="ref-panel">
-                  <summary>{{ sub.title }}</summary>
+                  <summary>{{ sub.title|heading_case }}</summary>
                   <div class="table-wrap">
                     <table>
                       <tbody>
@@ -494,7 +494,7 @@
       </details>
     {% endfor %}
 
-    <h3>Wizard states</h3>
+    <h3>Wizard States</h3>
     <p class="muted" style="font-size:0.85rem">
       Mutually exclusive states a wizard may take on, each from its own supplement. Taking one
       clears any other; the app tracks all of the mechanical effects below. Vampire is the one
@@ -660,7 +660,7 @@
     {% if ghost.intro %}<p class="muted">{{ ghost.intro }}</p>{% endif %}
     {% for sec in ghost.sections %}
       <details class="ref-panel">
-        <summary>{{ sec.title }}</summary>
+        <summary>{{ sec.title|heading_case }}</summary>
         {% if sec.blurb %}<p class="muted" style="font-size:0.85rem">{{ sec.blurb }}</p>{% endif %}
         {% if sec.rows %}
           <div class="table-wrap">

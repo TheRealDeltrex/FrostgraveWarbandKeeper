@@ -4,7 +4,7 @@
   <section class="hero home-hero">
     <div class="home-hero-logo" role="img" aria-label="Frostgrave Warband Keeper"></div>
     <div class="home-hero-text">
-      <h1>Frostgrave warbands</h1>
+      <h1>Frostgrave Warbands</h1>
       <p>
         Create a wizard (name, school, picture, spells), auto-level an apprentice,
         recruit soldiers within cost and unit limits, record gold and items after games,
@@ -20,7 +20,7 @@
 
   {% if unreadable_warbands %}
     <div class="card flash error">
-      <h2>Some warband files could not be read</h2>
+      <h2>Some Warband Files Could Not Be Read</h2>
       <ul>
         {% for u in unreadable_warbands %}
           <li>
@@ -33,7 +33,7 @@
   {% endif %}
 
   <div class="card">
-    <h2>Your warbands</h2>
+    <h2>Your Warbands</h2>
     {% if warbands %}
       {% if warbands|length > 5 %}
         <div class="filter-bar">

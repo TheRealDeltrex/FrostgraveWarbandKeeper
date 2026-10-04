@@ -18,13 +18,13 @@
   {% endif %}
 {% endmacro %}
 
-{% macro permanent_injury_picker(action, injuries, soldier_id=none, label="Permanent injuries", kind=none) %}
+{% macro permanent_injury_picker(action, injuries, soldier_id=none, label="Permanent Injuries", kind=none) %}
   {% set remove_action = action.replace('add_', 'remove_', 1) %}
   {% set prosthetic_action = "toggle_" ~ kind ~ "_injury_prosthetic" if kind else none %}
   {% set add_upgrade_action = "add_" ~ kind ~ "_prosthetic_upgrade" if kind in ("wizard", "apprentice", "captain") else none %}
   {% set remove_upgrade_action = "remove_" ~ kind ~ "_prosthetic_upgrade" if add_upgrade_action else none %}
   <details class="ref-panel">
-    <summary>{{ label }} ({{ injuries|length }})</summary>
+    <summary>{{ label|heading_case }} ({{ injuries|length }})</summary>
     {% if injuries %}
       {% set ns = namespace(used_upgrade_ids=[]) %}
       {% for other in injuries %}
