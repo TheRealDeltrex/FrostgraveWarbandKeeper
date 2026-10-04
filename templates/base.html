@@ -4,6 +4,15 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{% block title %}Frostgrave Warbands{% endblock %}</title>
+    <script>
+      // Warband page layout, per browser. Set before first paint so neither
+      // layout flashes; without JS the attribute is absent and classic applies.
+      (function () {
+        var layout = "tabs";
+        try { if (localStorage.getItem("fgLayout") === "classic") layout = "classic"; } catch (e) { /* ignore */ }
+        document.documentElement.setAttribute("data-layout", layout);
+      })();
+    </script>
     <!-- Inlined, not a static file: bundle.json is a text-only channel, so the
          browser build cannot serve a binary icon. See scripts/build_logo_asset.py. -->
     <link rel="icon" href="data:image/webp;base64,UklGRhgDAABXRUJQVlA4IAwDAABQEACdASowADAAPj0WiUMiISEXHf5kIAPEs4BAx0tIMv+HMNz2efZfKivaOGuWf0z74X+R4wO4t/xOsQf0f/Kf0T8jPkSz9PSf/V9wT+S/1z/PdgZGET6UNVtKMRsYBIU5Xf5DXb3bNhdnD1TIXMcgyfMiEkwqBlMRaZwRAa195Ic/FaKCVkoeD8IAAP7//k5e6RVs4/463kS3WD//lZy1yViK8WHt3YGgMVFAqJOE81UAoaje795NI9QJJ+rA46EFdLf7F9rqpOqrtgspfpRbVMzuZt+v9EWzOFRN1+kP1hDc5OyIHMEs1BJEU57WI9ofLn9CJToOYJ06gxhNm2hKMI6RDCVbRfB/85tA12War5+zR0KjdptevU2yqH8UBIwTXEUPrOWa9f37wVtxf5UZ3PVe4iL/XEM9/Zcdp4vk3m+yVlOwD/nC0QWw4dubyDxleXsL9X7JXgedRL5Fskh/Flv8SghRhexsyz20OQQB6Jdleu5D6BzWW3m35oxd8//KuMe+TLE+XM/blJFh2w/+ySkN2HmsPTtxHXm19WsYCt7nIHQcRtxsa95tp0oVlhtSGYb4v7Xgwf+bLtGZHC/7bOb1ejVSxPLq2LHcLGS5wQrpt2J/IiLoEKAEQ4xv92tMsCzQtmxsHrQb9c0/4nhmgM55w1MUsxkLgqT4+FZ97dPEUIf/ggf8cA/9Tiuln70cQMy0SBC7etw13TiiPm/wdXDLzmdzGIHRgbpaxjC2RubHndMsiquI0Un91eY+TGEpdB7KkzAolB2vt8is/La8/8OjdwAddJnHfyQeDTf+h5v/MNEl0IJrHt6ll72lJSchrQlU0TR46z+tbYAXgQOqqPKxq8JnIvKnn6n8Su/7eBqfrJX0/qV8pCn/mU3xqSOxP2AWtDC5Pp6CIOTj9S5vFeyo2BPxq6diPLhjfb0b4zuWydaGaCX7qQryyqY/VpIXlhWgHesw/1HfCHrJEBFSO2LcQKTtzElrFAgaXCX4Yj+YGbMoHA9r6NFyIsSG/uaQpwdRIsuZGkAAAAA=" />
@@ -93,7 +102,9 @@
         // user to where they were on the page — same scroll position, and the
         // same cards left open/collapsed — instead of resetting to the top.
         var scrollKey = "scrollpos:" + location.pathname;
-        var detailsKey = "detailsstate:" + location.pathname;
+        // Per layout: the tab view force-opens cards, which must not leak
+        // into what classic remembers as open.
+        var detailsKey = "detailsstate:" + document.documentElement.getAttribute("data-layout") + ":" + location.pathname;
 
         function allDetails() {
           return [].slice.call(document.querySelectorAll("details"));
