@@ -52,3 +52,13 @@ def test_rail_and_cards_match(build):
     assert [t for t in rail.tabs if t not in rail.ids] == [], "rail tab with no card"
     assert [c for c in rail.cards if c not in rail.tabs] == [], "card with no rail tab"
     assert "Level Up" in rail.subtab_labels
+
+
+def test_creation_page_rail_and_cards_match():
+    html = app_module.app.test_client().get("/warband/new").get_data(as_text=True)
+    rail = _Rail()
+    rail.feed(html)
+
+    assert rail.tabs, "no rail rendered"
+    assert [t for t in rail.tabs if t not in rail.ids] == [], "rail tab with no card"
+    assert [c for c in rail.cards if c not in rail.tabs] == [], "card with no rail tab"

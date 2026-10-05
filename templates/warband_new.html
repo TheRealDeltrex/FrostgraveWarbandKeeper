@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}New warband · Frostgrave{% endblock %}
 {% block content %}
-  <section class="hero">
+  <section class="hero hero-create">
     <h1>Create Your Warband</h1>
     <p>
       Rules from Frostgrave 2e core: start with
@@ -13,9 +13,23 @@
       <strong>none from opposed</strong>.
       Casting numbers include school penalties (own +0 / aligned +2 / neutral +4 / opposed +6).
     </p>
+    <div class="section-actions">
+      <button class="btn secondary" type="button" id="layout-toggle">
+        <span class="tv-only">Classic layout</span><span class="classic-only">Tab layout</span>
+      </button>
+    </div>
   </section>
 
-  <form method="post" action="{{ url_for('warband_new') }}" enctype="multipart/form-data" id="create-form">
+  {# Tab layout: rail + cards, as on the warband page (_tab_view.html). #}
+  <div class="wb-layout">
+  <nav class="tv-rail" aria-label="Warband creation steps">
+    <div class="tv-group">New Warband</div>
+    <button type="button" class="tv-tab" data-tab="source-books-card"><span class="tv-label">1. Rules &amp; Source Books</span></button>
+    <button type="button" class="tv-tab" data-tab="create-wizard-card"><span class="tv-label">2. Warband &amp; Wizard</span></button>
+    <button type="button" class="tv-tab" data-tab="create-spells-card"><span class="tv-label">3. Spells</span><span class="tv-badge" id="tv-spell-badge"></span></button>
+    <button type="button" class="tv-tab" data-tab="create-confirm-card"><span class="tv-label">4. Confirm</span></button>
+  </nav>
+  <form class="wb-cards" method="post" action="{{ url_for('warband_new') }}" enctype="multipart/form-data" id="create-form">
     <input type="hidden" name="spell_order" id="spell_order" value="" />
 
     {# Source books, so supplement spells can be taken as starting spells. The
@@ -157,6 +171,7 @@
                 current.replaceWith(fresh);
               });
               window.fgInitSpellPicker();
+              if (window.fgAfterSwap) window.fgAfterSwap();
             })
             .catch(function () { location.href = url; });
         };
@@ -178,7 +193,7 @@
       </script>
     </details>
 
-    <details class="card" open>
+    <details class="card" id="create-wizard-card" open>
       <summary><span class="card-title">2. Warband &amp; Wizard</span></summary>
       <div class="actions" style="margin-bottom:0.75rem">
         <button class="btn small secondary" type="button" id="random-wizard-btn">
@@ -331,7 +346,7 @@
     {% if random_identity %}
       <script type="application/json" id="random-identity-data">{{ random_identity | tojson }}</script>
     {% endif %}
-    <details class="card" open>
+    <details class="card" id="create-spells-card" open>
       <summary><span class="card-title">3. Spells
         <span class="muted" style="font-weight:500;font-size:0.9rem">
           — <span id="spell-count">0</span> / {{ spell_count_needed }}
@@ -427,7 +442,7 @@
     </details>
     </div>
 
-    <details class="card" open>
+    <details class="card" id="create-confirm-card" open>
       <summary><span class="card-title">4. Confirm</span></summary>
       <p class="muted" style="margin:0 0 0.75rem">
         Soldiers aren't hired here — create the warband first, then recruit from the full roster
@@ -440,6 +455,7 @@
       <p class="muted" id="submit-hint" style="margin-top:0.5rem">Complete spell selection to enable create.</p>
     </details>
   </form>
+  </div>{# .wb-layout #}
 
   <script>
   // Re-run after every fgNewReload() swap of #creation-dynamic, since the school/
@@ -768,5 +784,76 @@
   }
 
   window.fgInitSpellPicker();
+
+  // Tab layout: the spell list as one tab per school, each with its picked
+  // count, plus the picked total on the rail. Rebuilt after every swap.
+  window.fgInitSchoolTabs = function () {
+    if (document.documentElement.getAttribute('data-layout') !== 'tabs') return;
+    var schools = [].slice.call(document.querySelectorAll('#create-spells-card .spell-school'));
+    if (!schools.length) return;
+    var list = schools[0].parentElement;
+    list.open = true;
+    var KEY = 'spellschool:' + location.pathname;
+    var current = null;
+    try { current = sessionStorage.getItem(KEY); } catch (err) { /* ignore */ }
+    var names = schools.map(function (d) { return d.querySelector('summary strong').textContent.trim(); });
+    if (names.indexOf(current) < 0) current = names[0];
+
+    var strip = document.createElement('div');
+    strip.className = 'tv-subtabs tv-school-tabs';
+    var buttons = schools.map(function (d, i) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.innerHTML = d.querySelector('summary').innerHTML + ' <span class="tv-school-count"></span>';
+      b.addEventListener('click', function () {
+        current = names[i];
+        try { sessionStorage.setItem(KEY, current); } catch (err) { /* ignore */ }
+        apply();
+      });
+      strip.appendChild(b);
+      return b;
+    });
+    list.before(strip);
+
+    function apply() {
+      schools.forEach(function (d, i) {
+        var on = names[i] === current;
+        d.classList.toggle('tv-sub-on', on);
+        d.open = true;
+        buttons[i].classList.toggle('on', on);
+      });
+    }
+    apply();
+    window.fgSchoolTabCounts = function () {
+      schools.forEach(function (d, i) {
+        var n = d.querySelectorAll('.spell-cb:checked').length;
+        buttons[i].querySelector('.tv-school-count').textContent = n ? n : '';
+      });
+    };
+    window.fgSchoolTabCounts();
+  };
+
+  function fgSpellRailBadge() {
+    var badge = document.getElementById('tv-spell-badge');
+    var count = document.getElementById('spell-count');
+    var btn = document.getElementById('submit-btn');
+    if (!badge || !count) return;
+    var need = JSON.parse(document.getElementById('creation-dynamic-data').textContent).need;
+    badge.textContent = count.textContent + '/' + need;
+    badge.classList.toggle('ok', !!btn && !btn.dataset.fgIncomplete);
+    if (window.fgSchoolTabCounts) window.fgSchoolTabCounts();
+  }
+  document.addEventListener('change', function (e) {
+    if (e.target.classList && e.target.classList.contains('spell-cb')) fgSpellRailBadge();
+  });
+  // fgNewReload() calls this after swapping the Spells card in.
+  window.fgAfterSwap = function () {
+    window.fgInitSchoolTabs();
+    fgSpellRailBadge();
+    if (window.fgTabView) window.fgTabView.render();
+  };
+  window.fgInitSchoolTabs();
+  fgSpellRailBadge();
   </script>
+  {% include "_tab_view.html" %}
 {% endblock %}

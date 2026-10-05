@@ -4617,171 +4617,72 @@
     })();
   </script>
 
+  {% include "_tab_view.html" %}
+
   <script>
-    (function () {
-      var root = document.documentElement;
-      var toggle = document.getElementById('layout-toggle');
-      if (toggle) {
-        toggle.addEventListener('click', function () {
-          var next = root.getAttribute('data-layout') === 'tabs' ? 'classic' : 'tabs';
-          try { localStorage.setItem('fgLayout', next); } catch (err) { /* ignore */ }
-          location.reload();
+    // Wizard & Apprentice in tab layout: figures open, extras as sub-tabs.
+    document.addEventListener('DOMContentLoaded', function () {
+      var tv = window.fgTabView;
+      var wizCard = document.getElementById('wizard-apprentice-card');
+      var figures = wizCard && wizCard.querySelector('.tv-figures');
+      if (!tv || !figures) return;
+      var state = tv.state;
+      ['wizard-panel', 'apprentice-panel'].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) el.open = true;
+      });
+      if (!state.equipmentOpened) {
+        ['wizard-equipment-notes-panel', 'apprentice-equipment-notes-panel'].forEach(function (id) {
+          var el = document.getElementById(id);
+          if (el) el.open = true;
+        });
+        state.equipmentOpened = true;
+      }
+      var anchor = figures;
+      var hire = document.getElementById('hire-apprentice-block');
+      if (hire) { figures.after(hire); anchor = hire; }
+
+      var sections = [].slice.call(wizCard.querySelectorAll('[data-subtab-label]'));
+      sections.sort(function (a, b) {
+        return (+(a.dataset.subtabOrder || 5)) - (+(b.dataset.subtabOrder || 5));
+      });
+      var keyOf = function (el) { return el.id || el.dataset.subtabLabel; };
+      if (state.sub === undefined && sections.length) state.sub = keyOf(sections[0]);
+      var strip = document.createElement('div');
+      strip.className = 'tv-subtabs';
+      var buttons = sections.map(function (el) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.textContent = el.dataset.subtabLabel;
+        b.addEventListener('click', function () {
+          // Clicking the open sub-tab again closes it.
+          state.sub = state.sub === keyOf(el) ? null : keyOf(el);
+          applySub();
+          tv.save();
+        });
+        strip.appendChild(b);
+        return b;
+      });
+      anchor.after(strip);
+
+      function applySub() {
+        sections.forEach(function (el, i) {
+          var on = keyOf(el) === state.sub;
+          el.classList.toggle('tv-sub-on', on);
+          buttons[i].classList.toggle('on', on);
+          if (!on) return;
+          if (el.tagName === 'DETAILS') el.open = true;
+          el.querySelectorAll(':scope > div > details').forEach(function (d) { d.open = true; });
+        });
+        wizCard.querySelectorAll('.tv-sub-host').forEach(function (host) {
+          var on = !!host.querySelector('.tv-sub-on');
+          host.classList.toggle('tv-sub-on', on);
+          if (on) host.open = true;
         });
       }
-      if (root.getAttribute('data-layout') !== 'tabs') return;
-
-      // DOMContentLoaded, so this runs after base.html's details-state restore
-      // (later in <body>) and the cards it opens stay open.
-      document.addEventListener('DOMContentLoaded', function () {
-        var rail = document.querySelector('.tv-rail');
-        if (!rail) return;
-        var tabs = [].slice.call(rail.querySelectorAll('.tv-tab')).filter(function (t) {
-          return document.getElementById(t.dataset.tab);
-        });
-        var ids = tabs.map(function (t) { return t.dataset.tab; });
-
-        // Every action redirects to the bare page URL, so the place in the
-        // page (tab, side tab, sub-tab, panel scroll) is kept per tab session.
-        var KEY = 'tabview:' + location.pathname;
-        var state = {};
-        try { state = JSON.parse(sessionStorage.getItem(KEY) || '{}') || {}; } catch (err) { state = {}; }
-        state.scroll = state.scroll || {};
-        if (ids.indexOf(state.tab) < 0) state.tab = 'wizard-apprentice-card';
-        if (ids.indexOf(state.split) < 0 || state.split === state.tab) state.split = null;
-        function save() {
-          try { sessionStorage.setItem(KEY, JSON.stringify(state)); } catch (err) { /* ignore */ }
-        }
-
-        function render() {
-          ids.forEach(function (id) {
-            var card = document.getElementById(id);
-            var on = id === state.tab || id === state.split;
-            card.classList.toggle('tv-on', on);
-            card.classList.toggle('tv-split', id === state.split);
-            if (on) {
-              card.open = true;
-              // display: none drops scrollTop, so each shown panel gets its own back.
-              if (state.scroll[id]) card.scrollTop = state.scroll[id];
-            }
-          });
-          tabs.forEach(function (t) {
-            t.classList.toggle('active', t.dataset.tab === state.tab);
-            t.classList.toggle('split', t.dataset.tab === state.split);
-          });
-          save();
-        }
-
-        tabs.forEach(function (t) {
-          t.addEventListener('click', function (e) {
-            var id = t.dataset.tab;
-            if (e.ctrlKey || e.metaKey) {
-              if (id !== state.tab) state.split = state.split === id ? null : id;
-            } else {
-              state.tab = id;
-              if (state.split === id) state.split = null;
-            }
-            render();
-          });
-        });
-        document.addEventListener('keydown', function (e) {
-          if (!e.altKey || e.ctrlKey || e.metaKey) return;
-          var t = tabs[parseInt(e.key, 10) - 1];
-          if (!t) return;
-          e.preventDefault();
-          t.click();
-        });
-
-        ids.forEach(function (id) {
-          var card = document.getElementById(id);
-          var pending = false;
-          card.addEventListener('scroll', function () {
-            if (pending) return;
-            pending = true;
-            setTimeout(function () {
-              pending = false;
-              state.scroll[id] = card.scrollTop;
-              save();
-            }, 150);
-          });
-        });
-
-        // ---- Wizard & Apprentice sub-tabs ----
-        var wizCard = document.getElementById('wizard-apprentice-card');
-        var figures = wizCard && wizCard.querySelector('.tv-figures');
-        if (figures) {
-          ['wizard-panel', 'apprentice-panel'].forEach(function (id) {
-            var el = document.getElementById(id);
-            if (el) el.open = true;
-          });
-          if (!state.equipmentOpened) {
-            ['wizard-equipment-notes-panel', 'apprentice-equipment-notes-panel'].forEach(function (id) {
-              var el = document.getElementById(id);
-              if (el) el.open = true;
-            });
-            state.equipmentOpened = true;
-          }
-          var anchor = figures;
-          var hire = document.getElementById('hire-apprentice-block');
-          if (hire) { figures.after(hire); anchor = hire; }
-
-          var sections = [].slice.call(wizCard.querySelectorAll('[data-subtab-label]'));
-          sections.sort(function (a, b) {
-            return (+(a.dataset.subtabOrder || 5)) - (+(b.dataset.subtabOrder || 5));
-          });
-          var keyOf = function (el) { return el.id || el.dataset.subtabLabel; };
-          if (state.sub === undefined && sections.length) state.sub = keyOf(sections[0]);
-          var strip = document.createElement('div');
-          strip.className = 'tv-subtabs';
-          var buttons = sections.map(function (el) {
-            var b = document.createElement('button');
-            b.type = 'button';
-            b.textContent = el.dataset.subtabLabel;
-            b.addEventListener('click', function () {
-              // Clicking the open sub-tab again closes it.
-              state.sub = state.sub === keyOf(el) ? null : keyOf(el);
-              applySub();
-              save();
-            });
-            strip.appendChild(b);
-            return b;
-          });
-          anchor.after(strip);
-
-          var applySub = function () {
-            sections.forEach(function (el, i) {
-              var on = keyOf(el) === state.sub;
-              el.classList.toggle('tv-sub-on', on);
-              buttons[i].classList.toggle('on', on);
-              if (!on) return;
-              if (el.tagName === 'DETAILS') el.open = true;
-              el.querySelectorAll(':scope > div > details').forEach(function (d) { d.open = true; });
-            });
-            wizCard.querySelectorAll('.tv-sub-host').forEach(function (host) {
-              var on = !!host.querySelector('.tv-sub-on');
-              host.classList.toggle('tv-sub-on', on);
-              if (on) host.open = true;
-            });
-          };
-          applySub();
-        }
-
-        // A #hash naming a card, or anything inside one, opens that card.
-        function followHash() {
-          var target = location.hash && document.getElementById(location.hash.slice(1));
-          if (!target) return false;
-          var card = target.closest('.wb-cards > details.card');
-          if (!card || ids.indexOf(card.id) < 0) return false;
-          state.tab = card.id;
-          if (state.split === card.id) state.split = null;
-          render();
-          if (target !== card) target.scrollIntoView({ block: 'start' });
-          return true;
-        }
-        window.addEventListener('hashchange', followHash);
-
-        if (!followHash()) render();
-      });
-    })();
+      applySub();
+      tv.save();
+    });
   </script>
 
 {% endblock %}
