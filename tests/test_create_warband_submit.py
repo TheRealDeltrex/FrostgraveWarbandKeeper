@@ -84,6 +84,9 @@ def browser():
 
 def _open_new_warband_form(browser, live_server, name: str):
     page = browser.new_page()
+    # Classic, where every field is on screen; the tab layout hides all but one
+    # step, and what's under test here is the submit guard, not the layout.
+    page.add_init_script("localStorage.setItem('fgLayout', 'classic')")
     page.goto(f"{live_server}/warband/new?school={SCHOOL}", wait_until="load")
     page.fill("[name=warband_name]", name)
     page.fill("[name=wizard_name]", "Test Wizard")

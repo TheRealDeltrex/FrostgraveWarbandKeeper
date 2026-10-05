@@ -2034,7 +2034,7 @@ details.item-info > summary {
 details.item-info > summary::-webkit-details-marker { display: none; }
 details.item-info > span { display: block; font-size: 0.85rem; margin-top: 0.2rem; }
 
-/* ===== Warband page: tab layout =====
+/* ===== Tab layout (warband page, warband creation) =====
    One template serves both layouts; <html data-layout> (set in base.html's
    <head>) picks one. Everything tab-specific below is scoped to "tabs", and
    the markup it relies on (rail, wrappers) is inert in classic. */
@@ -2081,17 +2081,17 @@ html[data-layout="tabs"] .container:has(.wb-layout) > .hero {
   border-radius: 0;
   box-shadow: var(--rim);
 }
-html[data-layout="tabs"] .hero .hero-with-portrait {
+html[data-layout="tabs"] .container:has(.wb-layout) .hero .hero-with-portrait {
   align-items: center;
   gap: 14px;
 }
-html[data-layout="tabs"] .hero .portrait-lg {
+html[data-layout="tabs"] .container:has(.wb-layout) .hero .portrait-lg {
   width: 48px;
   height: 48px;
   border-radius: 50%;
   object-position: top;
 }
-html[data-layout="tabs"] .hero-with-portrait > div {
+html[data-layout="tabs"] .container:has(.wb-layout) .hero-with-portrait > div {
   flex: 1;
   min-width: 0;
   display: grid;
@@ -2100,7 +2100,7 @@ html[data-layout="tabs"] .hero-with-portrait > div {
   column-gap: var(--sp-4);
   align-items: center;
 }
-html[data-layout="tabs"] .hero h1 {
+html[data-layout="tabs"] .container:has(.wb-layout) .hero h1 {
   grid-area: name;
   margin: 0;
   font-size: 1.3rem;
@@ -2108,34 +2108,34 @@ html[data-layout="tabs"] .hero h1 {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-html[data-layout="tabs"] .hero p {
+html[data-layout="tabs"] .container:has(.wb-layout) .hero p {
   grid-area: sub;
   font-size: var(--fs-sm);
   white-space: nowrap;
 }
-html[data-layout="tabs"] .hero .limit-bar {
+html[data-layout="tabs"] .container:has(.wb-layout) .hero .limit-bar {
   grid-area: limits;
   margin: 0;
   flex-wrap: nowrap;
   gap: 6px;
 }
-html[data-layout="tabs"] .hero .limit {
+html[data-layout="tabs"] .container:has(.wb-layout) .hero .limit {
   padding: 3px 9px;
   font-size: var(--fs-xs);
   white-space: nowrap;
 }
-html[data-layout="tabs"] .hero .section-actions {
+html[data-layout="tabs"] .container:has(.wb-layout) .hero .section-actions {
   grid-area: actions;
   margin: 0;
   justify-content: flex-end;
   gap: 6px;
 }
-html[data-layout="tabs"] .hero .section-actions .btn {
+html[data-layout="tabs"] .container:has(.wb-layout) .hero .section-actions .btn {
   padding: 0.3rem 0.7rem;
   font-size: var(--fs-sm);
 }
 @media (max-width: 1250px) {
-  html[data-layout="tabs"] .hero .limit:not(.bad) {
+  html[data-layout="tabs"] .container:has(.wb-layout) .hero .limit:not(.bad) {
     display: none;
   }
 }
@@ -2242,7 +2242,11 @@ html[data-layout="tabs"] .wb-cards {
   min-width: 0;
   min-height: 0;
 }
-html[data-layout="tabs"] .wb-cards > details.card {
+/* The creation page's partially reloaded region holds the Spells card. */
+html[data-layout="tabs"] #creation-dynamic {
+  display: contents;
+}
+html[data-layout="tabs"] .wb-cards details.card {
   display: none;
   flex: 1 1 0;
   min-width: 0;
@@ -2255,23 +2259,23 @@ html[data-layout="tabs"] .wb-cards > details.card {
   background: none;
   box-shadow: none;
 }
-html[data-layout="tabs"] .wb-cards > details.card.tv-on {
+html[data-layout="tabs"] .wb-cards details.card.tv-on {
   display: block;
 }
-html[data-layout="tabs"] .wb-cards > details.card.tv-split {
+html[data-layout="tabs"] .wb-cards details.card.tv-split {
   order: 1;
   border-left: 1px solid var(--border);
 }
 /* The summary stays as the panel heading but no longer collapses it. */
-html[data-layout="tabs"] .wb-cards > details.card > summary {
+html[data-layout="tabs"] .wb-cards details.card > summary {
   pointer-events: none;
   list-style: none;
   margin-bottom: 14px;
 }
-html[data-layout="tabs"] .wb-cards > details.card > summary::-webkit-details-marker {
+html[data-layout="tabs"] .wb-cards details.card > summary::-webkit-details-marker {
   display: none;
 }
-html[data-layout="tabs"] .wb-cards > details.card > summary .card-title {
+html[data-layout="tabs"] .wb-cards details.card > summary .card-title {
   font-size: 1.45rem;
 }
 
@@ -2374,11 +2378,11 @@ html[data-layout="tabs"] #hire-apprentice-block {
     height: auto;
     overflow: visible;
   }
-  html[data-layout="tabs"] .hero-with-portrait > div {
+  html[data-layout="tabs"] .container:has(.wb-layout) .hero-with-portrait > div {
     display: block;
   }
-  html[data-layout="tabs"] .hero .limit-bar,
-  html[data-layout="tabs"] .hero .section-actions {
+  html[data-layout="tabs"] .container:has(.wb-layout) .hero .limit-bar,
+  html[data-layout="tabs"] .container:has(.wb-layout) .hero .section-actions {
     flex-wrap: wrap;
     margin-top: var(--sp-2);
   }
@@ -2407,16 +2411,64 @@ html[data-layout="tabs"] #hire-apprentice-block {
   .tv-tab.active::before {
     display: none;
   }
-  html[data-layout="tabs"] .wb-cards > details.card {
+  html[data-layout="tabs"] .wb-cards details.card {
     overflow: visible;
     padding: 16px;
   }
-  html[data-layout="tabs"] .wb-cards > details.card.tv-split {
+  html[data-layout="tabs"] .wb-cards details.card.tv-split {
     display: none;
   }
   html[data-layout="tabs"] .tv-figures,
   html[data-layout="tabs"] #wizard-apprentice-card .tv-mut-grid.tv-sub-on {
     grid-template-columns: 1fr;
     grid-template-areas: "wi" "ai" "wm" "am";
+  }
+}
+
+/* Warband creation in tab layout: the hero's rules line wraps beside the title,
+   and the spell list shows one school at a time. */
+html[data-layout="tabs"] .container:has(.wb-layout) .hero-create {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+}
+html[data-layout="tabs"] .container:has(.wb-layout) .hero-create h1 {
+  flex: none;
+}
+html[data-layout="tabs"] .container:has(.wb-layout) .hero-create p {
+  flex: 1;
+  white-space: normal;
+  font-size: var(--fs-xs);
+}
+html[data-layout="tabs"] .container:has(.wb-layout) .hero-create .section-actions {
+  margin: 0;
+}
+html[data-layout="tabs"] #create-spells-card .spell-school {
+  display: none;
+}
+html[data-layout="tabs"] #create-spells-card .spell-school.tv-sub-on {
+  display: block;
+}
+html[data-layout="tabs"] #create-spells-card .spell-school > summary,
+html[data-layout="tabs"] #create-spells-card details:has(> .spell-school) > summary {
+  display: none;
+}
+.tv-school-tabs {
+  margin: 0 0 var(--sp-3);
+  padding-top: 0;
+  border-top: 0;
+}
+.tv-school-tabs .badge {
+  margin-left: 4px;
+}
+.tv-school-count {
+  font-weight: 700;
+}
+.tv-badge.ok {
+  color: var(--success);
+}
+@media (max-width: 820px) {
+  html[data-layout="tabs"] .container:has(.wb-layout) .hero-create {
+    display: block;
   }
 }

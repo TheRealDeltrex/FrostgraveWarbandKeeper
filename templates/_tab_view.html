@@ -1,0 +1,125 @@
+{# Tab layout behaviour shared by every page with a .tv-rail: the layout toggle,
+   tab and side-tab switching, Alt+number, per-panel scroll, #hash links, and
+   keeping all of it across a save. Each rail button's data-tab names a
+   details.card by id; the card may sit anywhere inside .wb-cards. Page-specific
+   extras run in their own DOMContentLoaded listener after this one and use
+   window.fgTabView (state, save, render). #}
+<script>
+  (function () {
+    var root = document.documentElement;
+    var toggle = document.getElementById('layout-toggle');
+    if (toggle) {
+      toggle.addEventListener('click', function () {
+        var next = root.getAttribute('data-layout') === 'tabs' ? 'classic' : 'tabs';
+        try { localStorage.setItem('fgLayout', next); } catch (err) { /* ignore */ }
+        location.reload();
+      });
+    }
+    if (root.getAttribute('data-layout') !== 'tabs') return;
+
+    // DOMContentLoaded, so this runs after base.html's details-state restore
+    // (later in <body>) and the cards it opens stay open.
+    document.addEventListener('DOMContentLoaded', function () {
+      var rail = document.querySelector('.tv-rail');
+      if (!rail) return;
+      // Cards are looked up by id on every render, so a card swapped out by a
+      // partial reload (the creation page's fgNewReload) picks its state back up.
+      var tabs = [].slice.call(rail.querySelectorAll('.tv-tab')).filter(function (t) {
+        return document.getElementById(t.dataset.tab);
+      });
+      var ids = tabs.map(function (t) { return t.dataset.tab; });
+      if (!ids.length) return;
+
+      // Every action redirects to the bare page URL, so the place in the
+      // page (tab, side tab, sub-tab, panel scroll) is kept per tab session.
+      var KEY = 'tabview:' + location.pathname;
+      var state = {};
+      try { state = JSON.parse(sessionStorage.getItem(KEY) || '{}') || {}; } catch (err) { state = {}; }
+      state.scroll = state.scroll || {};
+      if (ids.indexOf(state.tab) < 0) state.tab = ids[0];
+      if (ids.indexOf(state.split) < 0 || state.split === state.tab) state.split = null;
+      function save() {
+        try { sessionStorage.setItem(KEY, JSON.stringify(state)); } catch (err) { /* ignore */ }
+      }
+
+      function render() {
+        ids.forEach(function (id) {
+          var card = document.getElementById(id);
+          if (!card) return;
+          var on = id === state.tab || id === state.split;
+          card.classList.toggle('tv-on', on);
+          card.classList.toggle('tv-split', id === state.split);
+          if (on) {
+            card.open = true;
+            // display: none drops scrollTop, so each shown panel gets its own back.
+            if (state.scroll[id]) card.scrollTop = state.scroll[id];
+          }
+        });
+        tabs.forEach(function (t) {
+          t.classList.toggle('active', t.dataset.tab === state.tab);
+          t.classList.toggle('split', t.dataset.tab === state.split);
+        });
+        save();
+      }
+
+      function show(id) {
+        state.tab = id;
+        if (state.split === id) state.split = null;
+        render();
+      }
+
+      tabs.forEach(function (t) {
+        t.addEventListener('click', function (e) {
+          var id = t.dataset.tab;
+          if (e.ctrlKey || e.metaKey) {
+            if (id !== state.tab) state.split = state.split === id ? null : id;
+            render();
+          } else {
+            show(id);
+          }
+        });
+      });
+      document.addEventListener('keydown', function (e) {
+        if (!e.altKey || e.ctrlKey || e.metaKey) return;
+        var t = tabs[parseInt(e.key, 10) - 1];
+        if (!t) return;
+        e.preventDefault();
+        t.click();
+      });
+
+      // Scroll doesn't bubble, but it does reach a capturing listener.
+      var pending = false;
+      document.addEventListener('scroll', function (e) {
+        var id = e.target && e.target.id;
+        if (ids.indexOf(id) < 0 || pending) return;
+        pending = true;
+        setTimeout(function () {
+          pending = false;
+          var card = document.getElementById(id);
+          if (card) { state.scroll[id] = card.scrollTop; save(); }
+        }, 150);
+      }, true);
+
+      // A required field on a hidden tab would block the submit silently.
+      document.addEventListener('invalid', function (e) {
+        var card = e.target.closest && e.target.closest('details.card');
+        if (card && ids.indexOf(card.id) >= 0 && card.id !== state.tab && card.id !== state.split) show(card.id);
+      }, true);
+
+      // A #hash naming a card, or anything inside one, opens that card.
+      function followHash() {
+        var target = location.hash && document.getElementById(location.hash.slice(1));
+        if (!target) return false;
+        var card = target.closest('.wb-cards details.card');
+        if (!card || ids.indexOf(card.id) < 0) return false;
+        show(card.id);
+        if (target !== card) target.scrollIntoView({ block: 'start' });
+        return true;
+      }
+      window.addEventListener('hashchange', followHash);
+
+      window.fgTabView = { state: state, save: save, render: render };
+      if (!followHash()) render();
+    });
+  })();
+</script>
