@@ -196,3 +196,52 @@ def test_removing_mounted_soldier_clears_rider(fresh_warband):
     warband_store.mount_horse(wb, "soldier", sid)
     warband_store.remove_soldier(wb, sid)
     assert wb["horse"]["rider"] is None
+
+
+def _horse_warband(wb):
+    wb["homerules"]["enabled_sources"]["Spellcaster Magazine"] = True
+    wb["gold"] = 1000
+    _give_stable(wb)
+    warband_store.buy_horse(wb)
+    return wb
+
+
+def test_mounted_wizard_does_not_mount_apprentice(fresh_warband):
+    wb = _horse_warband(fresh_warband)
+    warband_store.hire_apprentice(wb)
+    warband_store.sync_apprentice(wb)
+    before = dict(wb["apprentice"]["stats"])
+    warband_store.mount_horse(wb, "wizard")
+    warband_store.sync_apprentice(wb)
+    assert wb["apprentice"]["stats"] == before
+
+
+def test_duplicated_mounted_soldier_dismounts_cleanly(fresh_warband):
+    wb = _horse_warband(fresh_warband)
+    warband_store.add_soldier(wb, "thug")
+    warband_store.mount_horse(wb, "soldier", wb["soldiers"][0]["id"])
+    warband_store.save_warband(wb)
+    copy, _ = warband_store.duplicate_warband(wb["id"])
+    assert copy["horse"]["rider"]["soldier_id"] == copy["soldiers"][0]["id"]
+    warband_store.dismount_horse(copy)
+    assert copy["soldiers"][0]["fight"] == warband_store.get_soldier("thug")["fight"]
+
+
+def test_dismissed_captain_leaves_no_rider_for_replacement(fresh_warband):
+    wb = _horse_warband(fresh_warband)
+    wb["captain"] = warband_store.empty_captain("Old", wb["homerules"])
+    warband_store.mount_horse(wb, "captain")
+    warband_store.dismiss_captain(wb)
+    assert wb["horse"]["rider"] is None
+    wb["captain"] = warband_store.empty_captain("New", wb["homerules"])
+    before = dict(wb["captain"]["stats"])
+    warband_store.dismount_horse(wb)
+    assert wb["captain"]["stats"] == before
+
+
+def test_dismissed_apprentice_leaves_no_rider(fresh_warband):
+    wb = _horse_warband(fresh_warband)
+    warband_store.hire_apprentice(wb)
+    warband_store.mount_horse(wb, "apprentice")
+    warband_store.dismiss_apprentice(wb)
+    assert wb["horse"]["rider"] is None

@@ -2,6 +2,8 @@
 
 import json
 
+import pytest
+
 import warband_store
 
 
@@ -40,3 +42,31 @@ def test_export_import_round_trip(fresh_warband):
     imported = warband_store.import_warband_json(exported)
     assert imported["name"] == wb["name"]
     assert imported["wizard"]["school"] == wb["wizard"]["school"]
+
+
+def test_duplicate_copies_captain_portrait(fresh_warband):
+    wb = fresh_warband
+    wb["captain"] = warband_store.empty_captain("Cap", wb["homerules"])
+    (warband_store.portrait_dir(wb["id"]) / "captain.png").write_bytes(b"png")
+    wb["captain"]["portrait"] = f"{wb['id']}/captain.png"
+    warband_store.save_warband(wb)
+    copy, _ = warband_store.duplicate_warband(wb["id"])
+    warband_store.delete_warband(wb["id"])
+    assert copy["captain"]["portrait"].startswith(f"{copy['id']}/")
+    assert warband_store.portrait_filesystem_path(copy["captain"]["portrait"])
+
+
+@pytest.mark.parametrize(
+    "raw",
+    ['[1, 2]', '{"wizard": "oops", "soldiers": []}', '{"wizard": {}, "soldiers": ["x"]}'],
+)
+def test_wrong_shaped_save_is_reported_not_listed(fresh_warband, raw):
+    warband_store.save_warband(fresh_warband)
+    bad = warband_store.warband_dir() / "bad.warbands"
+    bad.write_text(raw, encoding="utf-8")
+    try:
+        ids = [row["id"] for row in warband_store.list_warbands()]
+        assert fresh_warband["id"] in ids and "bad" not in ids
+        assert "bad.warbands" in [u["filename"] for u in warband_store.list_unreadable_warbands()]
+    finally:
+        bad.unlink()

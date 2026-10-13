@@ -790,6 +790,11 @@ def sync_apprentice(wb: dict) -> None:
     # apprentice who was never there, so its recorded offset is backed out
     # before the p.27 offsets are applied.
     woff = figure_stat_offsets(wiz)
+    # Likewise the horse's Mounted Modifier, which mount_horse() wrote into the
+    # wizard's stored stats: only the rider is in the saddle.
+    if expansions.is_horse_rider(wb, "wizard"):
+        for stat, amount in _rider_mount_delta(wb, wb["horse"]["rider"]).items():
+            woff[stat] = woff.get(stat, 0) + amount
 
     def wbase(stat: str, fallback: int) -> int:
         return int(wstats.get(stat, fallback)) - woff.get(stat, 0)
@@ -1625,13 +1630,42 @@ def reorder_warbands(order_ids: list[str]) -> tuple[bool, str]:
     return True, "Order updated."
 
 
+def _warband_list_row(path: Path, data) -> dict:
+    """One home-page row from raw JSON. Raises on a wrong-shaped file (valid
+    JSON, but a non-object root, wizard or soldier); both list functions call
+    this, so whatever the list skips is exactly what the warning reports."""
+    if not isinstance(data, dict):
+        raise ValueError("not a warband object")
+    wiz = data.get("wizard") or {}
+    if not isinstance(wiz, dict):
+        raise ValueError("wizard is not an object")
+    soldiers = data.get("soldiers") or []
+    if not isinstance(soldiers, list) or not all(isinstance(s, dict) for s in soldiers):
+        raise ValueError("soldiers is not a list of objects")
+    wid = data.get("id")
+    return {
+        "id": wid if isinstance(wid, str) and wid else path.stem,
+        "name": data.get("name", path.stem),
+        "wizard": wiz.get("name", "—"),
+        "school": wiz.get("school", "—"),
+        "level": wiz.get("level", 0),
+        "gold": data.get("gold", 0),
+        "soldiers": len([s for s in soldiers if s.get("status") != "dead"])
+        + (1 if isinstance(data.get("captain"), dict) and data["captain"] else 0),
+        "updated": data.get("updated", ""),
+        "portrait": wiz.get("portrait"),
+        "gender": wiz.get("gender"),
+        "state": expansions.wizard_portrait_state(data),
+    }
+
+
 def list_unreadable_warbands() -> list[dict]:
     """Warband files that exist on disk but fail to parse, for a home-page warning."""
     unreadable = []
     for path in warband_dir().glob("*.warbands"):
         try:
-            json.loads(path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError) as exc:
+            _warband_list_row(path, json.loads(path.read_text(encoding="utf-8")))
+        except (OSError, ValueError, TypeError, AttributeError) as exc:
             logger.warning("Warband file %s could not be read: %s", path, exc)
             unreadable.append({"filename": path.name, "path": str(path), "error": str(exc)})
     return unreadable
@@ -1650,27 +1684,9 @@ def list_warbands() -> list[dict]:
         warband_dir().glob("*.warbands"), key=lambda p: p.stat().st_mtime, reverse=True
     ):
         try:
-            data = json.loads(path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
+            items.append(_warband_list_row(path, json.loads(path.read_text(encoding="utf-8"))))
+        except (OSError, ValueError, TypeError, AttributeError):
             continue
-        items.append(
-            {
-                "id": data.get("id", path.stem),
-                "name": data.get("name", path.stem),
-                "wizard": (data.get("wizard") or {}).get("name", "—"),
-                "school": (data.get("wizard") or {}).get("school", "—"),
-                "level": (data.get("wizard") or {}).get("level", 0),
-                "gold": data.get("gold", 0),
-                "soldiers": len(
-                    [s for s in (data.get("soldiers") or []) if s.get("status") != "dead"]
-                )
-                + (1 if isinstance(data.get("captain"), dict) and data["captain"] else 0),
-                "updated": data.get("updated", ""),
-                "portrait": (data.get("wizard") or {}).get("portrait"),
-                "gender": (data.get("wizard") or {}).get("gender"),
-                "state": expansions.wizard_portrait_state(data),
-            }
-        )
     order = _load_warband_order()
     if order:
         rank = {wid: i for i, wid in enumerate(order)}
@@ -2448,10 +2464,17 @@ def duplicate_warband(source_id: str, new_name: str | None = None) -> tuple[Warb
         ap = wb["apprentice"]
         ap["portrait"] = _copy_portrait_file(ap.get("portrait"), old_id, new_id)
 
+    if wb.get("captain"):
+        cap = wb["captain"]
+        cap["portrait"] = _copy_portrait_file(cap.get("portrait"), old_id, new_id)
+
     # Soldiers: new ids + portraits
+    new_sids: dict[str, str] = {}
     for s in wb.get("soldiers") or []:
         old_sid = s.get("id")
         s["id"] = uuid.uuid4().hex[:10]
+        if old_sid:
+            new_sids[old_sid] = s["id"]
         old_por = s.get("portrait")
         # portrait may be named soldier_<old_sid>.ext
         new_por = _copy_portrait_file(old_por, old_id, new_id)
@@ -2468,6 +2491,10 @@ def duplicate_warband(source_id: str, new_name: str | None = None) -> tuple[Warb
                 except OSError:
                     pass
         s["portrait"] = new_por
+
+    rider = (wb.get("horse") or {}).get("rider")
+    if rider and rider.get("kind") == "soldier" and rider.get("soldier_id") in new_sids:
+        rider["soldier_id"] = new_sids[rider["soldier_id"]]
 
     # Vault item ids unique
     for it in wb.get("vault_items") or []:
@@ -5340,6 +5367,7 @@ def dismiss_apprentice(wb: dict, refund: bool = False) -> tuple[bool, str]:
         text = f"Dismissed apprentice and refunded {paid} gc."
     else:
         text = "Dismissed apprentice (no refund)."
+    _dismount_if_riding(wb, "apprentice")
     wb["apprentice"] = None
     wb.setdefault("history", []).append({"when": _now(), "text": text})
     return True, text
@@ -5402,6 +5430,10 @@ def apprentice_takes_over(wb: dict, keep_reputations: bool = False) -> tuple[boo
         )
     new_level = old_level - 6
     per_level = expansions.xp_per_level(wb)
+    # Before ap["stats"] is copied, so the new wizard doesn't keep the horse's
+    # modifier; a mounted old wizard leaves no one in the saddle.
+    _dismount_if_riding(wb, "apprentice")
+    _dismount_if_riding(wb, "wizard")
     old_wizard_name = wiz.get("name") or "The wizard"
     new_wizard = {
         "name": ap.get("name") or f"{old_wizard_name}'s former apprentice",
@@ -5726,6 +5758,7 @@ def dismiss_captain(wb: dict, refund: bool = False) -> tuple[bool, str]:
         text = f"Dismissed captain and refunded {cost} gc."
     else:
         text = "Dismissed captain (no refund)."
+    _dismount_if_riding(wb, "captain")
     wb["captain"] = None
     add_history(wb, text)
     return True, text
@@ -6035,6 +6068,7 @@ def promote_soldier_to_captain(
         spec_cap = expansions.max_specialists(wb)
         if not _soldier_is_specialist(soldier) and specialist_count(wb) >= spec_cap:
             return False, f"Specialist limit reached ({spec_cap})."
+    _dismount_if_riding(wb, "soldier", soldier_id)
     # Soldiers don't normally persist move/armour at all (they're read from the
     # catalog at display time) until a mutation writes them — so all six stats
     # must fall back to the catalog the same way, or mutation-driven move/armour
@@ -6793,6 +6827,7 @@ def become_vampire(wb: dict) -> tuple[bool, str]:
     spells = wiz.get("spells") or []
 
     hr = wb.setdefault("homerules", default_homerules())
+    _dismount_if_riding(wb, "apprentice")
     savepoint = {
         "school": school,
         "spells": deepcopy(spells),
@@ -7047,6 +7082,14 @@ def _dismount_rider(wb: dict, horse: dict) -> None:
         for stat, amount in _rider_mount_delta(wb, rider).items():
             set_stat(stat, get_stat(stat) - amount)
     horse["rider"] = None
+
+
+def _dismount_if_riding(wb: dict, kind: str, soldier_id: str | None = None) -> None:
+    """Call before a figure leaves its role: a rider record outliving its
+    figure would resolve to whoever fills that role next, and dismounting
+    then takes a modifier off stats that never had it."""
+    if expansions.is_horse_rider(wb, kind, soldier_id):
+        _dismount_rider(wb, wb["horse"])
 
 
 def sell_or_release_horse(wb: dict) -> tuple[bool, str]:
