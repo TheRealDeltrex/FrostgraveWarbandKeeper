@@ -44,6 +44,18 @@ def test_export_import_round_trip(fresh_warband):
     assert imported["wizard"]["school"] == wb["wizard"]["school"]
 
 
+def test_import_beside_original_copies_portraits(fresh_warband):
+    wb = fresh_warband
+    (warband_store.portrait_dir(wb["id"]) / "wizard.png").write_bytes(b"png")
+    wb["wizard"]["portrait"] = f"{wb['id']}/wizard.png"
+    warband_store.save_warband(wb)
+    copy = warband_store.import_warband_json(warband_store.export_warband_json(wb))
+    warband_store.delete_warband(wb["id"])
+    assert copy["id"] != wb["id"]
+    assert copy["wizard"]["portrait"].startswith(f"{copy['id']}/")
+    assert warband_store.portrait_filesystem_path(copy["wizard"]["portrait"])
+
+
 def test_duplicate_copies_captain_portrait(fresh_warband):
     wb = fresh_warband
     wb["captain"] = warband_store.empty_captain("Cap", wb["homerules"])

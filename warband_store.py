@@ -2536,7 +2536,17 @@ def import_warband_json(raw: str) -> Warband:
     data.setdefault("vault_items", [])
     data.setdefault("apprentice", None)
     data.setdefault("created", _now())
-    return _normalize_warband(data)
+    wb = _normalize_warband(data)
+    # A ref into another warband's folder (an export re-imported while the
+    # original still exists gets a new id) would share that warband's files:
+    # deleting it deletes these pictures. Copy them in instead.
+    new_id = wb["id"]
+    figures = [wb.get("wizard"), wb.get("apprentice"), wb.get("captain"), *wb.get("soldiers", [])]
+    for fig in figures:
+        if isinstance(fig, dict) and fig.get("portrait"):
+            if Path(fig["portrait"]).parts[0] != _sanitize_filename(new_id):
+                fig["portrait"] = _copy_portrait_file(fig["portrait"], old_id, new_id)
+    return wb
 
 
 def restore_portraits_by_name(wb: dict, files: "Iterable[FileStorage]") -> int:
@@ -2598,6 +2608,31 @@ def apply_portrait(entity: dict, warband_id: str, role: str, file_storage: "File
         return
     entity["portrait"] = save_portrait(warband_id, role, file_storage)
     entity["portrait_source_name"] = file_storage.filename
+
+
+def _move_portrait_to_role(warband_id: str, rel: str | None, old_role: str, new_role: str) -> str | None:
+    """Rename a figure's portrait file when the figure changes role, so the
+    next holder of `old_role` can't overwrite or delete it via save_portrait()'s
+    per-role glob. A ref that isn't this warband's `old_role` file is returned
+    unchanged."""
+    path = portrait_filesystem_path(rel)
+    if not path or path.stem != _sanitize_filename(old_role):
+        return rel
+    folder = portrait_dir(warband_id)
+    if path.parent != folder.resolve():
+        return rel
+    safe_role = _sanitize_filename(new_role)
+    dest = folder / f"{safe_role}{path.suffix}"
+    for old in folder.glob(f"{safe_role}.*"):
+        try:
+            old.unlink()
+        except OSError:
+            pass
+    try:
+        path.replace(dest)
+    except OSError:
+        return rel
+    return f"{_sanitize_filename(warband_id)}/{dest.name}"
 
 
 def remove_portrait(entity: dict, warband_id: str, role: str) -> None:
@@ -5447,7 +5482,12 @@ def apprentice_takes_over(wb: dict, keep_reputations: bool = False) -> tuple[boo
         "mutations": deepcopy(ap.get("mutations") or []),
         "permanent_injuries": deepcopy(ap.get("permanent_injuries") or []),
         "notes": ap.get("notes", ""),
-        "portrait": ap.get("portrait"),
+        "portrait": _move_portrait_to_role(wb.get("id") or "", ap.get("portrait"), "apprentice", "wizard"),
+        "portrait_source_name": ap.get("portrait_source_name"),
+        # Components are the apprentice's own gear. Capacity can't shrink: the
+        # bags come along in item_slots, and the wizard draws on bags_bought
+        # first (expansions.component_bag_credit()).
+        "components": deepcopy(ap.get("components") or []),
         "level_history": [],
         "state": expansions.default_wizard_state(),
         # Whether a campaign reputation passes to the apprentice is a group
