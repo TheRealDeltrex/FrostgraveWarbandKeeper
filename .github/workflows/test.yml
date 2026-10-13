@@ -1,0 +1,35 @@
+name: Tests
+
+# Runs the pytest suite on devversion. No workflow_dispatch: that only appears
+# when the file is on the default branch, and main is distribution-only.
+# tests/conftest.py points FWK_DATA_DIR at a fresh temp dir itself.
+# Playwright is not installed, so test_create_warband_submit.py skips; -rs
+# keeps that visible in the log.
+
+on:
+  push:
+    branches: [devversion]
+  pull_request:
+    branches: [devversion]
+
+permissions:
+  contents: read
+
+jobs:
+  pytest:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt pytest
+
+      - name: Run tests
+        run: python -m pytest tests -q -rs
