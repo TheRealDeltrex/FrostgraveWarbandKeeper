@@ -217,6 +217,32 @@ def test_apprentice_takes_over_keeps_gear_but_drops_old_wizard_spells(fresh_warb
     assert wb["wizard"]["level"] == 0
 
 
+def test_apprentice_takes_over_keeps_components(fresh_warband):
+    wb = fresh_warband
+    warband_store.hire_apprentice(wb, "Appy")
+    wb["wizard"]["level"] = 6
+    wb["apprentice"]["components"] = [{"id": "c1", "name": "Wyvern Scale", "kind": "spell"}]
+    ok, msg = warband_store.apprentice_takes_over(wb)
+    assert ok, msg
+    assert [c["id"] for c in wb["wizard"]["components"]] == ["c1"]
+
+
+def test_new_apprentice_portrait_does_not_touch_promoted_wizard(fresh_warband):
+    wb = fresh_warband
+    folder = warband_store.portrait_dir(wb["id"])
+    warband_store.hire_apprentice(wb, "Appy")
+    (folder / "apprentice.png").write_bytes(b"first")
+    wb["apprentice"]["portrait"] = f"{wb['id']}/apprentice.png"
+    wb["wizard"]["level"] = 6
+    ok, msg = warband_store.apprentice_takes_over(wb)
+    assert ok, msg
+    assert wb["wizard"]["portrait"] == f"{wb['id']}/wizard.png"
+    warband_store.hire_apprentice(wb, "Second")
+    (folder / "apprentice.png").write_bytes(b"second")
+    warband_store.remove_portrait(wb["apprentice"], wb["id"], "apprentice")
+    assert warband_store.portrait_filesystem_path(wb["wizard"]["portrait"]).read_bytes() == b"first"
+
+
 def test_apprentice_takes_over_resets_wizard_state(fresh_warband):
     wb = fresh_warband
     warband_store.hire_apprentice(wb, "Appy")
