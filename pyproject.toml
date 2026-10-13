@@ -1,6 +1,6 @@
 [project]
 name = "frostgrave-warband-keeper"
-version = "6.0.2"
+version = "6.0.3"
 description = "Local Frostgrave (2nd Edition) warband creator and maintainer"
 readme = "README.md"
 requires-python = ">=3.11"
