@@ -6,14 +6,16 @@ ruleset, reference-only here). Parsing them beats transcribing ~130 treasure
 items and 20 trap results by hand, and re-running the script is how you pick up
 edits to those documents.
 
-Writes three files the app loads at runtime:
+Adds to three files the app loads at runtime. Those files carry hand-made
+content the docs lack, so a run only adds books, items and sections that are
+missing and lists the ones that differ; it never replaces or removes anything:
 
     data/magic_items.json       supplement treasure, {name, source, effect}
     data/expansion_rules.json   the in-game table rules, grouped per book
     data/ghost_archipelago.json Lexicon-only content for the sister ruleset
 
 Usage:
-    python scripts/extract_expansion_content.py [SUPPLEMENTS_HTML] [GHOST_HTML]
+    python scripts/extract_expansion_content.py [SUPPLEMENTS] [GHOST] [SUPPLEMENTS_2] [SPELLCASTER]
 """
 
 from __future__ import annotations
@@ -31,15 +33,14 @@ sys.path.insert(0, str(REPO_ROOT))
 # Documented example only — set FWK_REFERENCE_DIR to point at your own copy of
 # these hand-compiled reference docs; they aren't part of the repo.
 REFERENCE_DIR = Path(os.environ.get("FWK_REFERENCE_DIR", r"E:/RPG/Tabletop/Frostgrave"))
-DEFAULT_SUPPLEMENTS = REFERENCE_DIR / "Frostgrave Expansion Reference.html"
-DEFAULT_GHOST = REFERENCE_DIR / "Ghost Archipelago Reference.html"
-# Second wave of supplements + the magazine, added in a later pass than the
-# above two docs (see build_expansion_rules_2 / build_magic_items_2 / BOOKS_2 /
-# SPELLCASTER_ISSUES below) — kept as separate documents/functions rather than
-# folded into the originals since their HTML uses different section-id schemes
-# per book (no shared "{prefix}-treasure" convention).
-DEFAULT_SUPPLEMENTS_2 = REFERENCE_DIR / "Frostgrave Expansion Reference 2.html"
-DEFAULT_SPELLCASTER = REFERENCE_DIR / "Spellcaster Magazine Reference.html"
+DEFAULT_SUPPLEMENTS = REFERENCE_DIR / "FG2E Reference - Expansion Reference.html"
+DEFAULT_GHOST = REFERENCE_DIR / "FGGA - Ghost Archipelago Reference.html"
+# Second wave of supplements + the magazine, added in a later pass (see
+# build_expansion_rules_2 / build_magic_items_2 / BOOKS_2 / SPELLCASTER_ISSUES
+# below). Both waves now sit in one reference doc, but keep separate builders
+# since their section-id schemes differ (no shared "{prefix}-treasure" convention).
+DEFAULT_SUPPLEMENTS_2 = REFERENCE_DIR / "FG2E Reference - Expansion Reference.html"
+DEFAULT_SPELLCASTER = REFERENCE_DIR / "FG - Spellcaster Magazine Reference.html"
 DATA = REPO_ROOT / "data"
 
 # Section id prefix in the reference -> the source-book name the app already uses
@@ -919,9 +920,13 @@ def build_ghost_spellcaster(doc: str) -> list[dict]:
 
 
 # Items the reference documents above miss, transcribed from the source book
-# itself. They are also inserted by hand into data/magic_items.json, since this
-# script cannot currently run (see the WARNING in main()) — but they belong here
-# too, or a future run would drop them again.
+# itself.
+# Reference-doc items that data/magic_items.json splits into the book's
+# separately priced items, so a run must not add the merged entry back.
+SPLIT_MAGIC_ITEMS = {
+    "Toughened Armour/Robes",  # Toughened Light/Heavy Armour and Toughened Robes
+}
+
 EXTRA_MAGIC_ITEMS = [
     {
         # The Red King p.69. Priced on that book's treasure table (roll 12) but
@@ -951,33 +956,65 @@ def main() -> int:
     doc3 = spellcaster.read_text(encoding="utf-8", errors="replace")
     DATA.mkdir(parents=True, exist_ok=True)
 
-    # WARNING: this merge is the whole file, so anything data/expansion_rules.json
-    # holds that no builder below produces is dropped on a run. Two books are in
-    # that position today — The Red King (3 sections) and The Wizards' Conclave
-    # (5) — neither of which appears in BOOKS or BOOKS_2. Re-add them here before
-    # regenerating, or merge over the existing file instead of replacing it.
-    merged_rules = {
+    built_rules = {
         **build_expansion_rules(doc),
         **build_expansion_rules_2(doc2),
         **build_expansion_rules_spellcaster(doc3),
     }
-    merged_items = (
+    built_items = (
         build_magic_items(doc)
         + build_magic_items_2(doc2)
         + build_magic_items_spellcaster(doc3)
         + EXTRA_MAGIC_ITEMS
     )
-    merged_items.sort(key=lambda it: (it["source"], it["name"].lower()))
+    built_ghost = build_ghost(ghost_doc)
+    built_ghost["sections"].extend(build_ghost_spellcaster(doc3))
 
-    ghost_payload = build_ghost(ghost_doc)
-    ghost_payload["sections"].extend(build_ghost_spellcaster(doc3))
+    # The data files are ahead of the reference docs: Red King, Wizards' Conclave
+    # and Core Rules content, the Grave Mutations subdivisions and every
+    # "(implemented)" blurb were added by hand. So a run only adds what the data
+    # lacks — never replaces or removes — and lists what differs for review.
+    rules = _load_json("expansion_rules.json", {})
+    added_rules = [b for b in built_rules if b not in rules]
+    for book in added_rules:
+        rules[book] = built_rules[book]
+    for book in built_rules:
+        if book not in added_rules and rules[book] != built_rules[book]:
+            print(f"expansion_rules.json: '{book}' differs from the reference doc, kept as is")
 
-    for name, payload in [
-        ("magic_items.json", merged_items),
-        ("expansion_rules.json", merged_rules),
-        ("ghost_archipelago.json", ghost_payload),
+    items = _load_json("magic_items.json", [])
+    # Name, not (source, name): a supplement item the Core Rules reprint lives
+    # under "Core Rules" and must not come back under its old book.
+    known_names = {it["name"] for it in items}
+    added_items = [
+        it for it in built_items if it["name"] not in known_names and it["name"] not in SPLIT_MAGIC_ITEMS
+    ]
+    items.extend(added_items)
+    items.sort(key=lambda it: (it["source"], it["name"].lower()))
+    by_key = {(it["source"], it["name"]): it for it in items}
+    for it in built_items:
+        if it not in added_items and by_key.get((it["source"], it["name"]), it) != it:
+            print(f"magic_items.json: '{it['name']}' differs from the reference doc, kept as is")
+
+    ghost = _load_json("ghost_archipelago.json", {**built_ghost, "sections": []})
+    known_titles = {s["title"] for s in ghost["sections"]}
+    added_sections = [s for s in built_ghost["sections"] if s["title"] not in known_titles]
+    ghost["sections"].extend(added_sections)
+    for s in built_ghost["sections"]:
+        if s not in added_sections and s not in ghost["sections"]:
+            print(f"ghost_archipelago.json: '{s['title']}' differs from the reference doc, kept as is")
+
+    for name, payload, added in [
+        ("magic_items.json", items, added_items),
+        ("expansion_rules.json", rules, added_rules),
+        ("ghost_archipelago.json", ghost, added_sections),
     ]:
         path = DATA / name
+        if not added:
+            print(f"{name}: nothing new, left untouched")
+            continue
+        # A json.dumps() rewrite reformats the hand-compacted lines in these files;
+        # review the diff and keep only the additions.
         path.write_text(json.dumps(payload, indent=1, ensure_ascii=False), encoding="utf-8")
         if isinstance(payload, list):
             count = len(payload)
@@ -985,8 +1022,15 @@ def main() -> int:
             count = len(payload["sections"])
         else:
             count = sum(len(v) for v in payload.values())
-        print(f"wrote {path.relative_to(REPO_ROOT)} ({count} entries, {path.stat().st_size // 1024} KiB)")
+        print(f"wrote {path} ({count} entries, {len(added)} new)")
     return 0
+
+
+def _load_json(name: str, default):
+    path = DATA / name
+    if not path.is_file():
+        return default
+    return json.loads(path.read_text(encoding="utf-8"))
 
 
 if __name__ == "__main__":
