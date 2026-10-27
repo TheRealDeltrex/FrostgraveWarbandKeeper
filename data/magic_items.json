@@ -1160,9 +1160,19 @@
   "effect": "Worn by an animal companion; wizard may teleport adjacent to it once/game (with treasure)."
  },
  {
-  "name": "Toughened Armour/Robes",
+  "name": "Toughened Heavy Armour",
   "source": "The Wildwoods",
-  "effect": "+1 starting Health (lost first, unrecoverable in-game); robes are caster/unarmoured-only."
+  "effect": "Heavy Armour; +1 starting Health (lost first, unrecoverable in-game)."
+ },
+ {
+  "name": "Toughened Light Armour",
+  "source": "The Wildwoods",
+  "effect": "Light Armour; +1 starting Health (lost first, unrecoverable in-game)."
+ },
+ {
+  "name": "Toughened Robes",
+  "source": "The Wildwoods",
+  "effect": "Spellcasters or figures that wear no armour only; +1 starting Health (lost first, unrecoverable in-game)."
  },
  {
   "name": "True Sight Arrow",

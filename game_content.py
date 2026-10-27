@@ -226,14 +226,8 @@ def supplement_item_index() -> dict[tuple[str, str], dict]:
     return {(it["source"], it["name"]): it for it in load_supplement_item_prices()}
 
 
-# Shop rows the books price separately but the item list describes as one
-# entry. The Wildwoods prints a price per armour type and one write-up covering
-# all three, so the split rows borrow the merged entry's text rather than
-# repeating it three times in data/magic_items.json.
+# Shop rows whose rules text lives under another item-list name.
 SHOP_NAME_ALIASES = {
-    "Toughened Light Armour": "Toughened Armour/Robes",
-    "Toughened Heavy Armour": "Toughened Armour/Robes",
-    "Toughened Robes": "Toughened Armour/Robes",
     # The Wildwoods prices this one and defers to Frostgrave p.97 for what it
     # does; that text is generic to the effect, not to the armour it is on.
     "Light Armour with Elemental Absorption": "Heavy Armour, Elemental Absorption",
