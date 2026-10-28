@@ -232,8 +232,11 @@ from warband_store import (
     consume_wilderness_supplies,
     consume_wilderness_supplies_half,
     consume_wilderness_supplies_none,
+    create_custom_soldier,
     create_warband,
+    custom_soldier_list,
     default_homerules,
+    delete_custom_soldier,
     delete_warband,
     destroy_homunculus,
     discard_component,
@@ -337,6 +340,7 @@ from warband_store import (
     underworld_muscle_count,
     unlock_fin_dalka_spell,
     unmounted_effective_stats,
+    update_custom_soldier,
     update_homerules,
     upgrade_firearm,
     use_component,
@@ -1412,6 +1416,7 @@ def warband_view(warband_id: str) -> str:
     # Cat / Source badge, it just no longer drives ordering here; other pages
     # (the full soldier reference) still group by book via _ui_sort_key.
     hireable.sort(key=lambda c: (c["cost"], c["category"] != "standard", c["name"]))
+    custom_hireable = [{**c, "cost": hire_cost_preview(wb, c, c["key"])} for c in custom_soldier_list()]
     # Total temporary members on the table right now — one shared cap across
     # zombies and demons (no per-type sub-limit), disables every "Hire"
     # button in that panel once reached, mirroring Animal Companion's block.
@@ -1586,6 +1591,7 @@ def warband_view(warband_id: str) -> str:
         limits=limits,
         hireable=hireable,
         special_hireable=special_hireable,
+        custom_hireable=custom_hireable,
         summoned_catalog=summoned_catalog,
         temporary_catalog=temporary_catalog,
         known_spell_names=wb_spells,
@@ -1864,6 +1870,24 @@ def _act_details(wb: dict) -> tuple[bool, str]:
 def _act_set_notes(wb: dict) -> tuple[bool, str]:
     wb["notes"] = request.form.get("notes") or ""
     return True, "Notes saved."
+
+
+# Custom soldier types live in the user data dir, not the warband; they ride
+# this dispatch so the forms sit in the hire tab like every other control.
+@register_action("create_custom_soldier")
+def _act_create_custom_soldier(wb: dict) -> tuple[bool, str]:
+    ok, msg, _ = create_custom_soldier(request.form.to_dict())
+    return ok, msg
+
+
+@register_action("update_custom_soldier")
+def _act_update_custom_soldier(wb: dict) -> tuple[bool, str]:
+    return update_custom_soldier(request.form.get("type_key") or "", request.form.to_dict())
+
+
+@register_action("delete_custom_soldier")
+def _act_delete_custom_soldier(wb: dict) -> tuple[bool, str]:
+    return delete_custom_soldier(request.form.get("type_key") or "")
 
 
 @register_action("hire_soldier")

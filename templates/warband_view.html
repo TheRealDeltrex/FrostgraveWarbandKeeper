@@ -3164,6 +3164,106 @@
       });
     </script>
 
+    {% macro custom_soldier_fields(c=None) %}
+      <div class="custom-soldier-fields" style="display:flex;flex-wrap:wrap;gap:0.5rem;align-items:flex-end">
+        <label>Name <input type="text" name="name" maxlength="60" required value="{{ c.name if c else '' }}" /></label>
+        <label>Category
+          <select name="category">
+            <option value="standard">Standard</option>
+            <option value="specialist" {% if c and c.category == 'specialist' %}selected{% endif %}>Specialist</option>
+          </select>
+        </label>
+        {% for f, label, default in [("cost", "Cost", 0), ("move", "Move", 6), ("fight", "Fight", 0), ("shoot", "Shoot", 0), ("armour", "Armour", 10), ("will", "Will", 0), ("health", "Health", 10), ("item_slots", "Item Slots", 1)] %}
+          <label>{{ label }} <input type="number" name="{{ f }}" value="{{ c[f] if c else default }}" style="width:4.5rem" /></label>
+        {% endfor %}
+        <label style="flex:1 1 14rem">Gear <input type="text" name="gear" maxlength="200" value="{{ c.gear if c else '' }}" style="width:100%" /></label>
+        <label style="flex:1 1 100%">Notes <textarea name="description" maxlength="2000" rows="2" style="width:100%">{{ c.description if c else '' }}</textarea></label>
+      </div>
+    {% endmacro %}
+
+    <details class="ref-panel" id="custom-soldiers-panel">
+      <summary>Custom Soldiers</summary>
+      <p class="muted" style="font-size:0.85rem">Your own soldier types, shared by every warband in this data folder.</p>
+      {% if custom_hireable %}
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Type</th><th>Cat</th><th>Cost</th>
+                <th>Move</th><th>Fight</th><th>Shoot</th><th>Armour</th><th>Will</th><th>Health</th><th>Gear</th>
+                <th></th><th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for c in custom_hireable %}
+                {% set can_afford = wb.gold >= c.cost %}
+                {% set within_soldiers = limits.soldiers < limits.max_soldiers %}
+                {% set within_specialists = c.category != 'specialist' or limits.specialists < limits.max_specialists %}
+                {% set can_hire = can_afford and within_soldiers and within_specialists %}
+                {% set ns = namespace(hire_reason='') %}
+                {% if not can_afford %}
+                  {% set ns.hire_reason = "Needs " ~ c.cost ~ " gc (have " ~ wb.gold ~ ")." %}
+                {% elif not within_soldiers %}
+                  {% set ns.hire_reason = "Soldier limit reached (" ~ limits.max_soldiers ~ ")." %}
+                {% elif not within_specialists %}
+                  {% set ns.hire_reason = "Specialist limit reached (" ~ limits.max_specialists ~ ")." %}
+                {% endif %}
+                <tr class="catalog-row" {% if not can_hire %}style="opacity:0.5"{% endif %}>
+                  <td><strong>{{ c.name }}</strong></td>
+                  <td><span class="badge {{ c.category }}">{{ c.category }}</span></td>
+                  <td class="gold">{% if c.cost == 0 %}Free{% else %}{{ c.cost }}{% endif %}</td>
+                  <td>{{ c.move }}</td>
+                  <td>{{ format_stat(c.fight) }}</td>
+                  <td>{{ format_stat(c.shoot) }}</td>
+                  <td>{{ c.armour }}</td>
+                  <td>{{ format_stat(c.will) }}</td>
+                  <td>{{ c.health }}</td>
+                  <td class="muted">{{ c.gear }}</td>
+                  <td>
+                    <details class="info-toggle-details">
+                      <summary class="info-toggle">Edit</summary>
+                    </details>
+                  </td>
+                  <td>
+                    <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
+                      <input type="hidden" name="action" value="hire_soldier" />
+                      <input type="hidden" name="type_key" value="{{ c.key }}" />
+                      <button class="btn small" type="submit" {% if not can_hire %}disabled{% endif %}{% if ns.hire_reason %} title="{{ ns.hire_reason }}"{% endif %}>Hire</button>
+                      {% if ns.hire_reason %}<div class="muted" style="font-size:0.78rem;margin-top:0.2rem">{{ ns.hire_reason }}</div>{% endif %}
+                    </form>
+                  </td>
+                </tr>
+                <tr class="info-desc-row">
+                  <td colspan="12">
+                    {% if c.description %}<p>{{ c.description }}</p>{% endif %}
+                    <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
+                      <input type="hidden" name="action" value="update_custom_soldier" />
+                      <input type="hidden" name="type_key" value="{{ c.key }}" />
+                      {{ custom_soldier_fields(c) }}
+                      <button class="btn small" type="submit" style="margin-top:0.4rem">Save</button>
+                    </form>
+                    <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" style="margin-top:0.4rem" onsubmit="return confirm('Delete the custom soldier {{ c.name|e }}?');">
+                      <input type="hidden" name="action" value="delete_custom_soldier" />
+                      <input type="hidden" name="type_key" value="{{ c.key }}" />
+                      <button class="btn secondary small" type="submit">Delete</button>
+                    </form>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="empty">No custom soldiers yet.</p>
+      {% endif %}
+      <h3>Create Custom Soldier</h3>
+      <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}">
+        <input type="hidden" name="action" value="create_custom_soldier" />
+        {{ custom_soldier_fields() }}
+        <button class="btn small" type="submit" style="margin-top:0.4rem">Create</button>
+      </form>
+    </details>
+
     {% if giant_blooded_enabled or thrall_available %}
       <details class="ref-panel" id="hiring-options-panel">
         <summary>Hiring Options</summary>
