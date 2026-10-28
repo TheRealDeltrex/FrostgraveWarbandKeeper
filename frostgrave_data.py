@@ -3319,8 +3319,17 @@ CREATION_SOURCE_BOOK_OPTIONS = [
 
 
 
+# User-defined mercenaries (warband_store registers them into SOLDIERS at
+# runtime). Listed on their own hire panel, never in the official catalog.
+CUSTOM_SOLDIER_SOURCE = "Custom"
+
+
 def soldier_list_for_ui() -> list[dict]:
-    rows = [{"key": k, "source": "Core Rules", **v} for k, v in SOLDIERS.items()]
+    rows = [
+        {"key": k, "source": "Core Rules", **v}
+        for k, v in SOLDIERS.items()
+        if v.get("source") != CUSTOM_SOLDIER_SOURCE
+    ]
     rows.sort(key=_ui_sort_key)
     return rows
 

@@ -45,6 +45,7 @@ from frostgrave_data import (
     CARGO_TRANSPORT_COST,
     CARGO_TRANSPORT_UPGRADES,
     CONSTRUCT_SOLDIER_TYPE_KEYS,
+    CUSTOM_SOLDIER_SOURCE,
     DEMON_SOLDIER_TYPE_KEYS,
     EDITION1_LOOT_GOLD_VALUE,
     FIN_DALKA_BASE_SELL,
@@ -1958,6 +1959,149 @@ def _as_list(value: object) -> list:
     return value if isinstance(value, list) else []
 
 
+CUSTOM_SOLDIER_PREFIX = "custom_"
+# field: (min, max, default). Bounds only keep a hand-edited file from
+# breaking arithmetic or layout; they're not a rules check.
+_CUSTOM_SOLDIER_INTS = {
+    "cost": (0, 9999, 0),
+    "move": (0, 20, 6),
+    "fight": (-10, 20, 0),
+    "shoot": (-10, 20, 0),
+    "armour": (0, 30, 10),
+    "will": (-10, 20, 0),
+    "health": (1, 50, 10),
+    "item_slots": (0, 5, 1),
+}
+_CUSTOM_SOLDIER_TEXT = {"name": 60, "gear": 200, "description": 2000}
+
+
+def custom_soldiers_path() -> Path:
+    return paths.user_data_dir() / "custom_soldiers.json"
+
+
+def _clean_custom_soldier(raw: object) -> dict | None:
+    """A custom type in catalog shape, or None without a usable name. Takes
+    form data, the library file and a warband's embedded copy alike."""
+    if not isinstance(raw, dict):
+        return None
+    out: dict = {}
+    for k, limit in _CUSTOM_SOLDIER_TEXT.items():
+        v = raw.get(k)
+        out[k] = v.strip()[:limit] if isinstance(v, str) else ""
+    if not out["name"]:
+        return None
+    for k, (lo, hi, default) in _CUSTOM_SOLDIER_INTS.items():
+        out[k] = min(hi, max(lo, _as_int(raw.get(k), default)))
+    out["category"] = "specialist" if raw.get("category") == "specialist" else "standard"
+    out["source"] = CUSTOM_SOLDIER_SOURCE
+    if raw.get("retired") is True:
+        out["retired"] = True
+    return out
+
+
+def _clean_custom_soldier_map(raw: object) -> dict[str, dict]:
+    # The prefix check keeps a file from overwriting a built-in SOLDIERS entry.
+    if not isinstance(raw, dict):
+        return {}
+    out = {}
+    for k, v in raw.items():
+        t = _clean_custom_soldier(v)
+        if isinstance(k, str) and k.startswith(CUSTOM_SOLDIER_PREFIX) and t:
+            out[k] = t
+    return out
+
+
+def _read_custom_soldiers() -> dict[str, dict]:
+    path = custom_soldiers_path()
+    if not path.is_file():
+        return {}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        logger.warning("Custom soldiers file %s could not be read: %s", path, exc)
+        return {}
+    return _clean_custom_soldier_map(data.get("types") if isinstance(data, dict) else None)
+
+
+def _write_custom_soldiers(types: dict[str, dict]) -> None:
+    path = custom_soldiers_path()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(".tmp")
+    tmp.write_text(json.dumps({"types": types}, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    os.replace(tmp, path)
+
+
+def sync_custom_soldiers() -> dict[str, dict]:
+    """Register the library into SOLDIERS so every catalog lookup sees it.
+    Re-read on each call: /settings can switch the data dir at runtime."""
+    types = _read_custom_soldiers()
+    SOLDIERS.update(types)
+    return types
+
+
+def custom_soldier_list() -> list[dict]:
+    """Hireable custom types, for the hire tab's own panel."""
+    rows = [{"key": k, **v} for k, v in sync_custom_soldiers().items() if not v.get("retired")]
+    return sorted(rows, key=lambda r: r["name"].lower())
+
+
+def create_custom_soldier(form: dict) -> tuple[bool, str, str | None]:
+    t = _clean_custom_soldier(form)
+    if not t:
+        return False, "Give the custom soldier a name.", None
+    types = _read_custom_soldiers()
+    key = CUSTOM_SOLDIER_PREFIX + uuid.uuid4().hex[:8]
+    types[key] = t
+    _write_custom_soldiers(types)
+    SOLDIERS[key] = t
+    return True, f"Created custom soldier {t['name']}.", key
+
+
+def update_custom_soldier(key: str, form: dict) -> tuple[bool, str]:
+    types = _read_custom_soldiers()
+    if key not in types or types[key].get("retired"):
+        return False, "Unknown custom soldier."
+    t = _clean_custom_soldier({k: v for k, v in form.items() if k != "retired"})
+    if not t:
+        return False, "Give the custom soldier a name."
+    types[key] = t
+    _write_custom_soldiers(types)
+    SOLDIERS[key] = t
+    return True, f"Saved custom soldier {t['name']}."
+
+
+def _custom_soldier_in_use(key: str) -> bool:
+    # Raw JSON, like list_warbands(): an unreadable file counts as not using it.
+    for path in warband_dir().glob("*.warbands"):
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        soldiers = data.get("soldiers") if isinstance(data, dict) else None
+        if any(isinstance(s, dict) and s.get("type_key") == key for s in _as_list(soldiers)):
+            return True
+    return False
+
+
+def delete_custom_soldier(key: str) -> tuple[bool, str]:
+    """Removed outright if no saved warband hires it; otherwise kept, retired,
+    so those soldiers still resolve their Move/Armour/cost."""
+    types = _read_custom_soldiers()
+    if key not in types:
+        return False, "Unknown custom soldier."
+    name = types[key]["name"]
+    if _custom_soldier_in_use(key):
+        types[key]["retired"] = True
+        SOLDIERS[key] = types[key]
+        msg = f"Removed {name} from hiring. Soldiers already hired keep their stats."
+    else:
+        del types[key]
+        SOLDIERS.pop(key, None)
+        msg = f"Deleted custom soldier {name}."
+    _write_custom_soldiers(types)
+    return True, msg
+
+
 def _coerce_numeric_homerules(hr: dict) -> None:
     """Force every homerule that defaults to a number back to a number, however
     deep it sits (captain_base_stats, wizard_stat_limits, wizard_level_cap, and
@@ -2060,6 +2204,14 @@ def _normalize_warband(wb: dict) -> dict:
     """
     if not isinstance(wb.get("wizard"), dict):
         wb["wizard"] = empty_wizard()
+    # Before the roster below, which falls back to catalog stats. A type only
+    # this warband carries (made on another install) registers retired: it
+    # renders here but isn't hireable.
+    library = sync_custom_soldiers()
+    wb["custom_soldier_types"] = _clean_custom_soldier_map(wb.get("custom_soldier_types"))
+    for k, t in wb["custom_soldier_types"].items():
+        if k not in library:
+            SOLDIERS[k] = {**t, "retired": True}
     wiz = wb["wizard"]
     wb["gold"] = _as_int(wb.get("gold"), STARTING_GOLD)
     wiz["xp"] = _as_int(wiz.get("xp"), 0)
@@ -2367,6 +2519,12 @@ def save_warband(wb: Warband) -> None:
         sync_apprentice(wb)
     wb.setdefault("schema_version", SCHEMA_VERSION)
     wb["updated"] = _now()
+    # Embedded so an exported warband still renders where the type is unknown.
+    wb["custom_soldier_types"] = {
+        k: {f: v for f, v in SOLDIERS[k].items() if f != "retired"}
+        for k in {s.get("type_key") for s in wb.get("soldiers") or []}
+        if isinstance(k, str) and k.startswith(CUSTOM_SOLDIER_PREFIX) and k in SOLDIERS
+    }
     path = warband_path(wb["id"])
     data = json.dumps(wb, indent=2, ensure_ascii=False) + "\n"
     tmp = path.with_suffix(".tmp")
@@ -3086,8 +3244,10 @@ def add_soldier(
     # doesn't model. Roster/specialist/legendary caps and gold cost, further
     # down, are never skipped.
     disable_mechanics = bool((wb.get("homerules") or {}).get("disable_app_mechanics_enabled"))
+    if info.get("retired"):
+        return False, f"{info['name']} is no longer in your custom soldiers."
     src = info.get("source", "Core Rules")
-    if not disable_mechanics and src not in enabled_sources(wb):
+    if not disable_mechanics and src not in enabled_sources(wb) | {CUSTOM_SOLDIER_SOURCE}:
         return False, (
             f"{info['name']} is from {src}; enable that source under Additional Rules and Homerules first."
         )
