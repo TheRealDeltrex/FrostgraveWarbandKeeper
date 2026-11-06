@@ -651,38 +651,12 @@
     </details>
   </details>
 
-  {% if ghost and ghost.sections %}
   <details class="card">
     <summary><span class="card-title">Ghost Archipelago</span></summary>
-    <p class="muted">A separate Osprey ruleset, not a Frostgrave supplement — a Heritor and a Warden
-      lead a Crew across the Lost Isles instead of a Wizard leading a Warband. Nothing here is
-      hireable and it has no source-book toggle.</p>
-    {% if ghost.intro %}<p class="muted">{{ ghost.intro }}</p>{% endif %}
-    {% for sec in ghost.sections %}
-      <details class="ref-panel">
-        <summary>{{ sec.title|heading_case }}</summary>
-        {% if sec.blurb %}<p class="muted" style="font-size:0.85rem">{{ sec.blurb }}</p>{% endif %}
-        {% if sec.rows %}
-          <div class="table-wrap">
-            <table>
-              <tbody>
-                {% for row in sec.rows %}
-                  <tr><td><strong>{{ row.name }}</strong></td><td class="muted">{{ row.text }}</td></tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-        {% endif %}
-        {% for e in sec.entries %}
-          <p style="margin:0.4rem 0">
-            <strong>{{ e.name }}</strong>{% if e.tag %} <span class="badge">{{ e.tag }}</span>{% endif %}
-            {% if e.text %}<br /><span class="muted">{{ e.text }}</span>{% endif %}
-          </p>
-        {% endfor %}
-      </details>
-    {% endfor %}
+    <p class="muted">Frostgrave: Ghost Archipelago is a separate Osprey ruleset related to Frostgrave,
+      in which a Heritor and a Warden lead a Crew across a chain of islands instead of a Wizard
+      leading a Warband through the Frozen City. It is currently not in scope for this app.</p>
   </details>
-  {% endif %}
 
   <script>
     document.addEventListener("DOMContentLoaded", function () {

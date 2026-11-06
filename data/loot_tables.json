@@ -1338,7 +1338,7 @@
   "The Wildwoods": [
     {
       "title": "Wildwoods Treasure Table",
-      "blurb": "Wildwoods games use this table instead of the core rulebook's Treasure Table. \"Xsp\" results grant that many Supply Points — the Wildwoods supply-point economy itself is reference-only in this app (see Expansion rules).",
+      "blurb": "Wildwoods games use this table instead of the core rulebook's Treasure Table. \"Xsp\" results grant that many Supply Points.",
       "rows": [
         {
           "name": "1",
@@ -1426,7 +1426,7 @@
   "Spellcaster Magazine": [
     {
       "title": "Rangifer Treasure Table",
-      "blurb": "Used instead of the normal Treasure Table when a Rangifer Shaman's hide (Issue 3 — the Shaman's own hide mechanic is reference-only in this app) recovers treasure tokens.",
+      "blurb": "Used instead of the normal Treasure Table when a Rangifer Shaman's hide (Issue 3) recovers treasure tokens.",
       "rows": [
         {
           "name": "1",

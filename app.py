@@ -139,7 +139,6 @@ from game_content import (
     load_core_rules,
     load_demonic_attributes,
     load_expansion_rules,
-    load_ghost_archipelago,
     load_grave_mutations,
     load_loot_tables,
     load_magic_items,
@@ -768,7 +767,6 @@ def reference() -> str:
         expansion_rules=_sorted_by_source_book(load_expansion_rules()),
         random_encounters=_sorted_by_source_book(load_random_encounters()),
         loot_tables=_sorted_by_source_book(load_loot_tables()),
-        ghost=load_ghost_archipelago(),
     )
 
 

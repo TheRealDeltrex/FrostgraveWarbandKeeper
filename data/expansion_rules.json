@@ -485,8 +485,8 @@
    ]
   },
   {
-   "title": "New Treasure & Magic Items (implemented — vault \"Add item\" suggestions & loot picker)",
-   "blurb": "Unique items explicitly kept in the winning wizard's vault for future games. All six are in data/magic_items.json under \"The Wizards' Conclave\", so with that book switched on they appear as autocomplete suggestions on the vault's \"Add item\" field and in the After the Game/vault loot picker, same as every other named magic item — no separate purchase mechanic exists for magic items of any book, this app only ever tracks them once found.",
+   "title": "New Treasure & Magic Items",
+   "blurb": "Unique items explicitly kept in the winning wizard's vault for future games. With The Wizards' Conclave switched on, all six appear as suggestions on the vault's \"Add item\" field and in the After the Game/vault loot picker, like every other named magic item. Magic items of any book are added once found, never bought.",
    "rows": [
     {
      "name": "The Boon of Sargosh",
@@ -515,7 +515,7 @@
    ]
   },
   {
-   "title": "Bestiary (reference only — scenario bosses, not added as hireable/summonable creatures)",
+   "title": "Bestiary (scenario bosses, not hireable or summonable)",
    "blurb": "",
    "entries": [
     {
@@ -5091,8 +5091,8 @@
    ]
   },
   {
-   "title": "Ragged Warbands & Random Recruits (optional alternate game mode — Random Recruit rolling implemented, rest reference only)",
-   "blurb": "An optional standalone campaign mode from the Red King campaign's endgame, explicitly flagged by the author as usable outside that campaign \"by anyone who just likes the idea of having completely random warbands.\" Switching on its homerule (Additional Rules and Homerules) enables a \"Roll random recruits\" control on the warband page that fills the roster up to ten members via the Random Recruit Tables below, bypassing the usual gold cost, soldier cap and specialist cap, with an optional roll on the Random Recruit Status Table for each new arrival — see roll_random_recruits(). The surrounding campaign restrictions (no vault spending, no hiring/dismissing outside this roll, survival rolls, injury/death handling) are not enforced by the app and stay reference text below, to apply at the table.",
+   "title": "Ragged Warbands & Random Recruits (optional alternate game mode)",
+   "blurb": "An optional standalone campaign mode from the Red King campaign's endgame, explicitly flagged by the author as usable outside that campaign \"by anyone who just likes the idea of having completely random warbands.\" Switching on its homerule (Additional Rules and Homerules) enables a \"Roll random recruits\" control on the warband page that fills the roster up to ten members via the Random Recruit Tables below, bypassing the usual gold cost, soldier cap and specialist cap, with an optional roll on the Random Recruit Status Table for each new arrival. The surrounding campaign restrictions (no vault spending, no hiring/dismissing outside this roll, survival rolls, injury/death handling) stay as text below, to apply at the table.",
    "rows": [
     {
      "name": "Ragged Warbands: injury, death & economy",
@@ -5135,8 +5135,8 @@
  ],
  "Blood Legacy": [
   {
-   "title": "Vampire Wizard (implemented — wizard-state mechanic)",
-   "blurb": "Becoming a Vampire is a real, reversible wizard-state (become_vampire/revert_vampire — see Wizard states below): drops Thaumaturge spells, +1 flat to remaining Casting Numbers, clamps Will/Health, trades the apprentice for a 9th soldier slot, and keeps a savepoint to revert. Creating a Vampire from scratch as a full PC/NPC (its own 8 spells, Unnatural Health economy, Sun Damage) and the GM-technique guidance for running one are still reference only.",
+   "title": "Vampire Wizard",
+   "blurb": "Becoming a Vampire is a reversible wizard state (see Wizard states below): drops Thaumaturge spells, +1 flat to remaining Casting Numbers, clamps Will/Health, trades the apprentice for a 9th soldier slot, and keeps a savepoint to revert.",
    "rows": [
     {
      "name": "Creating & running a Vampire",
@@ -5145,8 +5145,8 @@
    ]
   },
   {
-   "title": "Fire Giant Wizard (implemented)",
-   "blurb": "Playable from creation via the \"fire_giant_wizard_playable\" homerule (Additional Rules and Homerules) — stat line, item-slot restrictions, school relations, level cost/Health cap and empowering cost are all tracked. Deciphering the Grimoire of Fin Dalka to learn a Fire Giant spell mid-campaign is a separate, also-implemented mechanic — see below.",
+   "title": "Fire Giant Wizard",
+   "blurb": "Playable from creation via its homerule (Additional Rules and Homerules); stat line, item-slot restrictions, school relations, level cost/Health cap and empowering cost are all applied. Deciphering the Grimoire of Fin Dalka to learn a Fire Giant spell mid-campaign is separate, see below.",
    "rows": [
     {
      "name": "Creating & running a Fire Giant Wizard",
@@ -5155,8 +5155,8 @@
    ]
   },
   {
-   "title": "Giant-Blooded (implemented)",
-   "blurb": "Real soldier modification, gated behind the \"giant_blooded_enabled\" homerule: declared at hire, matching the book — toggle \"the next hire is Giant-Blooded\" on the Soldiers card, then hire an eligible type; the app applies the +50gc cost and stat changes automatically, and reverses them exactly if removed. One soldier per warband. The two convenience pre-built-cost tables in the source stay reference only — this app applies the cost/stat delta directly to any eligible hire instead.",
+   "title": "Giant-Blooded",
+   "blurb": "Gated behind its homerule and declared at hire, matching the book: toggle \"the next hire is Giant-Blooded\" on the Soldiers card, then hire an eligible type; the +50gc cost and stat changes are applied automatically and reversed exactly if removed. One soldier per warband. The two pre-built-cost tables in the source are not used; the cost/stat delta is applied directly to any eligible hire instead.",
    "rows": [
     {
      "name": "Giant-Blooded",
@@ -5166,7 +5166,7 @@
   },
   {
    "title": "High-Level Wizards",
-   "blurb": "Implemented as five separate homerule toggles under a warband's Additional Rules and Homerules (needs Blood Legacy switched on), matching the book's own \"each optional rule should be considered separately\" framing. Alternate Experience Point Expenditure adds a Spend XP option on the Wizard card.",
+   "blurb": "Five separate homerule toggles under a warband's Additional Rules and Homerules (needs Blood Legacy switched on), matching the book's own \"each optional rule should be considered separately\" framing. Alternate Experience Point Expenditure adds a Spend XP option on the Wizard card.",
    "rows": [
     {
      "name": "Optional rules",
@@ -5175,7 +5175,7 @@
    ]
   },
   {
-   "title": "Vampire Warband Creation & Play (reference only)",
+   "title": "Vampire Warband Creation & Play",
    "blurb": "",
    "rows": [
     {
@@ -5311,8 +5311,8 @@
    ]
   },
   {
-   "title": "The Grimoire of Fin Dalka (implemented)",
-   "blurb": "Any wizard can acquire the grimoire and attempt to decipher any of the 8 Fire Giant spells from the wizard card (Blood Legacy) — the app doesn't roll the Will Roll itself, but tracks the cumulative bonus on failure, the permanent lock on a natural 1, learning the spell on success, and the declining sale price.",
+   "title": "The Grimoire of Fin Dalka",
+   "blurb": "Any wizard can acquire the grimoire and attempt to decipher any of the 8 Fire Giant spells from the wizard card (Blood Legacy). The Will Roll is made at the table; the cumulative bonus on failure, the permanent lock on a natural 1, learning the spell on success, and the declining sale price are tracked.",
    "rows": [
     {
      "name": "Deciphering the grimoire",
@@ -5344,8 +5344,8 @@
  ],
  "Fireheart": [
   {
-   "title": "Construct Modification (implemented)",
-   "blurb": "Real add/remove picker on any standard small/medium/large construct (add_construct_modification/remove_construct_modification), applying each modification's stat effect and item-slot cost and reversing it exactly on removal; Animated Prosthetics are a related, also-implemented mechanic on the wizard/apprentice/captain's permanent injuries. The Animate Construct casting roll itself (and Repair & Re-Animation's roll modifiers below) isn't simulated — same as every other spellcasting roll in this app.",
+   "title": "Construct Modification",
+   "blurb": "Add/remove picker on any standard small/medium/large construct, applying each modification's stat effect and item-slot cost and reversing it exactly on removal; Animated Prosthetics work the same way on the wizard/apprentice/captain's permanent injuries. The Animate Construct casting roll itself (and Repair & Re-Animation's roll modifiers below) is made at the table, like every other spellcasting roll.",
    "rows": [
     {
      "name": "Construct Modification rules",
@@ -5556,7 +5556,7 @@
    ]
   },
   {
-   "title": "Animated Prosthetics (implemented)",
+   "title": "Animated Prosthetics",
    "blurb": "A wizard, apprentice or captain who has suffered Lost Toes, Smashed Leg, Crushed Arm or Lost Fingers may cast Animate Construct to graft a replacement limb, which removes that injury's stat penalty. Fit or remove one, and buy it Prosthetic Upgrades, from the injury's own entry on the warband sheet.",
    "rows": [
     {
@@ -5598,7 +5598,7 @@
    ]
   },
   {
-   "title": "Interactive Terrain (20 generic hazards — reference only)",
+   "title": "Interactive Terrain (20 generic hazards)",
    "blurb": "A toolbox for custom scenarios or random tables; immune to Crumble unless stated, otherwise indestructible unless a destruction method is given. Roll Table 1 for how many rolls on Table 2 (which terrain piece), then place for maximum conflict, filling the rest with mundane scenery.",
    "rows": [
     {
@@ -5809,7 +5809,7 @@
    ]
   },
   {
-   "title": "Supplies & Cargo Transports (implemented)",
+   "title": "Supplies & Cargo Transports",
    "blurb": "",
    "rows": [
     {
@@ -5924,8 +5924,8 @@
  ],
  "Spellcaster Magazine": [
   {
-   "title": "Black Powder Firearms (Issue 1 — items purchasable)",
-   "blurb": "Pistol, Musket, Blunderbuss, and Powder Horn are real catalog items — pick them from the item-slot dropdown on a wizard/apprentice/captain/soldier like any other weapon (Musket and Blunderbuss correctly take two slots). Double-barrelled, Axe-gun, Superior Craftsmanship and Silver Bullets are commissioned upgrades for an already-owned firearm — also real catalog items (Gear), written into a separate item slot alongside the firearm they upgrade; each may only be bought once per firearm, but a firearm may carry as many different upgrades as can be afforded. Optional rules for firearms in Frostgrave and Ghost Archipelago: firearms use bow/crossbow rules for LoS and cover; reloading costs an action (can replace the mandatory move); never usable In Combat. In Ghost Archipelago a firearm also requires a powder horn (free, takes a slot). Every firearm is Inaccurate (-1 Shoot), Armour Piercing (+2 damage; also -2 Armour, min 10, within half range), Loud (natural 20 triggers a Random Encounter roll), and subject to Misfire on a natural 1 — see the misfire table below for the roll result.",
+   "title": "Black Powder Firearms (Issue 1)",
+   "blurb": "Pistol, Musket, Blunderbuss, and Powder Horn are catalog items — pick them from the item-slot dropdown on a wizard/apprentice/captain/soldier like any other weapon (Musket and Blunderbuss take two slots). Double-barrelled, Axe-gun, Superior Craftsmanship and Silver Bullets are commissioned upgrades for an already-owned firearm — also catalog items (Gear), written into a separate item slot alongside the firearm they upgrade; each may only be bought once per firearm, but a firearm may carry as many different upgrades as can be afforded. Optional rules for firearms in Frostgrave and Ghost Archipelago: firearms use bow/crossbow rules for LoS and cover; reloading costs an action (can replace the mandatory move); never usable In Combat. In Ghost Archipelago a firearm also requires a powder horn (free, takes a slot). Every firearm is Inaccurate (-1 Shoot), Armour Piercing (+2 damage; also -2 Armour, min 10, within half range), Loud (natural 20 triggers a Random Encounter roll), and subject to Misfire on a natural 1 — see the misfire table below for the roll result.",
    "rows": [
     {
      "name": "1–5",
@@ -5998,8 +5998,8 @@
    ]
   },
   {
-   "title": "Horses in Frostgrave (Issue 1 — implemented)",
-   "blurb": "Buying the Stable base resource, buying/releasing the warband's one horse, and mounting/dismounting the wizard, apprentice, captain, or an eligible soldier (with the Mounted Modifiers applied and reverted automatically) are all real, tracked mechanics now — see the Base card. Taking a horse as a 1-slot item and the \"counts as one Large model\" table-footprint rule are table-play details this app doesn't need to track and stay reference only.",
+   "title": "Horses in Frostgrave (Issue 1)",
+   "blurb": "Buying the Stable base resource, buying/releasing the warband's one horse, and mounting/dismounting the wizard, apprentice, captain, or an eligible soldier (with the Mounted Modifiers applied and reverted automatically) are on the Base card. Taking a horse as a 1-slot item and the \"counts as one Large model\" table-footprint rule are table-play details.",
    "rows": [
     {
      "name": "Mounted Modifiers (added to rider)",
@@ -6061,7 +6061,7 @@
   },
   {
    "title": "Knightly Orders",
-   "blurb": "Implemented as a homerule toggle under a warband's Additional Rules and Homerules (needs Spellcaster Magazine switched on); once on, hiring a Knight or Templar shows an order picker that trades 1 point of Fight or Health for a special ability. \"Custom orders\" (below) stays a DIY guideline rather than a selectable option.",
+   "blurb": "A homerule toggle under a warband's Additional Rules and Homerules (needs Spellcaster Magazine switched on); once on, hiring a Knight or Templar shows an order picker that trades 1 point of Fight or Health for a special ability. \"Custom orders\" (below) is a DIY guideline rather than a selectable option.",
    "rows": [
     {
      "name": "Sun",
@@ -6114,7 +6114,7 @@
    ]
   },
   {
-   "title": "Dungeon Hazards (Issue 1 — reusable GM toolkit, reference only)",
+   "title": "Dungeon Hazards (Issue 1 — reusable GM toolkit)",
    "blurb": "Three reusable hazard mechanics pulled from the \"Catacombs of the Evrenbright\" mini-campaign (the campaign's plot and scenarios themselves are scenario-specific and omitted).",
    "entries": [
     {
@@ -6191,7 +6191,7 @@
    ]
   },
   {
-   "title": "Rangifer Shaman (Issue 3 — deferred mechanic, reference only)",
+   "title": "Rangifer Shaman (Issue 3)",
    "blurb": "",
    "rows": [
     {
@@ -6209,8 +6209,8 @@
    ]
   },
   {
-   "title": "Underworld Favours: A Debt Economy (Issue 3 — implemented)",
-   "blurb": "Markers are tracked on the wizard card (Spellcaster Magazine). Taking an Underworld Loan or claiming a free Favour adds Markers; paying one off costs 150gc any time. Rolling for a post-game debt call resolves the call-in table itself — the pure bookkeeping parts (paying Markers from gold, who owes a permanent injury) are applied automatically, while the parts that need a table-side choice (which soldiers sit out, which magic item to sell) are reported for you to apply. Intimidation and Hired Muscle stay table-time detail this app doesn't simulate.",
+   "title": "Underworld Favours: A Debt Economy (Issue 3)",
+   "blurb": "Markers are tracked on the wizard card (Spellcaster Magazine). Taking an Underworld Loan or claiming a free Favour adds Markers; paying one off costs 150gc any time. Rolling for a post-game debt call resolves the call-in table itself — the pure bookkeeping parts (paying Markers from gold, who owes a permanent injury) are applied automatically, while the parts that need a table-side choice (which soldiers sit out, which magic item to sell) are reported for you to apply. Intimidation and Hired Muscle are handled at the table.",
    "rows": [
     {
      "name": "Loan",
@@ -6251,7 +6251,7 @@
    ]
   },
   {
-   "title": "Monster Hunting: For Fun and Profit (Issue 5 — implemented)",
+   "title": "Monster Hunting: For Fun and Profit (Issue 5)",
    "blurb": "Assigns an individual XP value to every published Frostgrave monster, replacing the flat +5 XP from Experience Table II (Maze of Malcor) — this does not replace scenario-specific XP rewards, which are usually higher. The full 92-row Master Monster Table lives on the reference page rather than here; this panel covers the harvesting and component rules it depends on.",
    "rows": [
     {

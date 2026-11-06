@@ -2600,11 +2600,10 @@ SOLDIERS: dict[str, dict] = {
         "notes": (
             "Part of a rangifer \"hide\" (Issue 3). Hate Undead, Antlers, Flint Weapons. Free "
             "flint hand weapon, no shield/armour, Move never above 7. Uses the Captain rules "
-            "(The Frostgrave Folio) in place of the warband's own Captain — the actual "
-            "Captain-replacement mechanic is deferred; hires here as a stat-block soldier. "
-            "Requires the Book of the Rangifer (Thaw of the Lich Lord)."
+            "(The Frostgrave Folio) in place of the warband's own Captain; "
+            "hires here as a stat-block soldier. Requires the Book of the Rangifer (Thaw of the Lich Lord)."
         ),
-        "description": 'The chieftain of a rangifer "hide" (Spellcaster Magazine, Issue 3), who leads using the Captain rules (The Frostgrave Folio) in place of a warband\'s own Captain — never carries a shield or armour, and Move never rises above 7 regardless of bonuses. The actual Captain-replacement mechanic (fielding a War-Leader instead of hiring/promoting a Captain) is a deferred feature; for now this hires as an ordinary specialist stat-block.',
+        "description": 'The chieftain of a rangifer "hide" (Spellcaster Magazine, Issue 3), who leads using the Captain rules (The Frostgrave Folio) in place of a warband\'s own Captain — never carries a shield or armour, and Move never rises above 7 regardless of bonuses. Hires as an ordinary specialist stat-block.',
     },
     # --- Spellcaster Magazine: Legendary Soldiers (Issues 4-5) ---
     "bookhound": {
