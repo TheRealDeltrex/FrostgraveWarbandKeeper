@@ -710,16 +710,6 @@ def load_loot_tables() -> dict:
 
 
 @lru_cache(maxsize=1)
-def load_ghost_archipelago() -> dict:
-    """Ghost Archipelago: a separate Osprey ruleset, carried for reference only.
-    No source toggle, nothing hireable — see the Lexicon."""
-    path = DATA / "ghost_archipelago.json"
-    if not path.is_file():
-        return {}
-    return json.loads(path.read_text(encoding="utf-8"))
-
-
-@lru_cache(maxsize=1)
 def load_spell_names() -> list[str]:
     try:
         from frostgrave_data import SPELLS
