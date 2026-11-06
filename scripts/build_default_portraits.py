@@ -30,7 +30,7 @@ sys.path.insert(0, str(REPO_ROOT))
 
 from frostgrave_data import SOLDIERS  # noqa: E402
 
-DEFAULT_SOURCE = Path(r"E:/ClaudeCodeFolder/Default Profile Pictures")
+DEFAULT_SOURCE = REPO_ROOT / "Default Profile Pictures"
 OUT_DIR = REPO_ROOT / "static" / "portraits"
 SIZE = 256
 

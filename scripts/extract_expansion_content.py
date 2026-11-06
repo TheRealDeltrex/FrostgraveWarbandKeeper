@@ -30,9 +30,9 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
-# Documented example only — set FWK_REFERENCE_DIR to point at your own copy of
-# these hand-compiled reference docs; they aren't part of the repo.
-REFERENCE_DIR = Path(os.environ.get("FWK_REFERENCE_DIR", r"E:/RPG/Tabletop/Frostgrave"))
+# Hand-compiled reference docs, not part of the repo: set FWK_REFERENCE_DIR to your
+# own copy, or put them in the gitignored reference/ folder.
+REFERENCE_DIR = Path(os.environ.get("FWK_REFERENCE_DIR", REPO_ROOT / "reference"))
 DEFAULT_SUPPLEMENTS = REFERENCE_DIR / "FG2E Reference - Expansion Reference.html"
 DEFAULT_GHOST = REFERENCE_DIR / "FGGA - Ghost Archipelago Reference.html"
 # Second wave of supplements + the magazine, added in a later pass (see

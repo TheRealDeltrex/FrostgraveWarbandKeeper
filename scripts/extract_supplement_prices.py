@@ -38,14 +38,16 @@ Reads the source PDFs directly; the HTML references are unreliable (CLAUDE.md).
 from __future__ import annotations
 
 import json
+import os
 import re
 import sys
 from pathlib import Path
 
 import fitz  # PyMuPDF
 
-PDF_DIR = Path("E:/RPG/Tabletop/Frostgrave")
-OUT = Path(__file__).resolve().parent.parent / "data" / "supplement_item_prices.json"
+REPO_ROOT = Path(__file__).resolve().parent.parent
+PDF_DIR = Path(os.environ.get("FWK_REFERENCE_DIR", REPO_ROOT / "reference"))
+OUT = REPO_ROOT / "data" / "supplement_item_prices.json"
 
 # The books that print a Sale Price column. The rest get an estimate; see the
 # module docstring.

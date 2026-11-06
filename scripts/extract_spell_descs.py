@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -14,8 +15,9 @@ from pypdf import PdfReader  # noqa: E402
 
 from frostgrave_data import SCHOOLS, SPELLS  # noqa: E402
 
-CORE = Path(r"E:\RPG\Tabletop\Frostgrave\Frostgrave - 2e - Core Rules.pdf")
-CARDS = Path(r"E:\RPG\Tabletop\Frostgrave\FG2E - Spellcards_2nd-1.pdf")
+REFERENCE_DIR = Path(os.environ.get("FWK_REFERENCE_DIR", ROOT / "reference"))
+CORE = REFERENCE_DIR / "Frostgrave - 2e - Core Rules.pdf"
+CARDS = REFERENCE_DIR / "FG2E - Spellcards_2nd-1.pdf"
 OUT = ROOT / "data" / "spell_descriptions.json"
 
 

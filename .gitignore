@@ -23,6 +23,10 @@ FrostgraveWarbandKeeper-*.zip
 # large, external, never the shipped asset. Baked 256x256 PNGs are tracked.
 Default Profile Pictures/
 
+# Rulebook PDFs and reference docs for the scripts/extract_*.py extractors
+# (default when FWK_REFERENCE_DIR is unset). Copyrighted, never published.
+reference/
+
 # Machine-specific agent notes (absolute paths, backups). CLAUDE.md and AGENTS.md
 # are tracked.
 CLAUDE.local.md

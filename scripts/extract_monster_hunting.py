@@ -33,7 +33,7 @@ import fitz  # noqa: E402  (PyMuPDF)
 from frostgrave_data import SPELLS  # noqa: E402
 from game_content import load_bestiary, load_potion_choices  # noqa: E402
 
-REFERENCE_DIR = Path(os.environ.get("FWK_REFERENCE_DIR", r"E:/RPG/Tabletop/Frostgrave"))
+REFERENCE_DIR = Path(os.environ.get("FWK_REFERENCE_DIR", REPO_ROOT / "reference"))
 DEFAULT_PDF = REFERENCE_DIR / "FG - Magazine - Spellcaster - Issue 5.pdf"
 DATA = REPO_ROOT / "data"
 

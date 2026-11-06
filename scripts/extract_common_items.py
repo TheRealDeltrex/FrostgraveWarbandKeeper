@@ -25,14 +25,17 @@ Reads the source PDF directly; the HTML references are unreliable (CLAUDE.md).
 from __future__ import annotations
 
 import json
+import os
 import re
 import sys
 from pathlib import Path
 
 import fitz  # PyMuPDF
 
-CORE_PDF = Path("E:/RPG/Tabletop/Frostgrave/FG2E 01 2020 Core Rules.pdf")
-OUT = Path(__file__).resolve().parent.parent / "data" / "common_items.json"
+REPO_ROOT = Path(__file__).resolve().parent.parent
+REFERENCE_DIR = Path(os.environ.get("FWK_REFERENCE_DIR", REPO_ROOT / "reference"))
+CORE_PDF = REFERENCE_DIR / "FG2E 01 2020 Core Rules.pdf"
+OUT = REPO_ROOT / "data" / "common_items.json"
 
 # PDF page indices happen to equal the printed page numbers in this file.
 LESSER_POTIONS_PAGE = 86
