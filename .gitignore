@@ -23,10 +23,9 @@ FrostgraveWarbandKeeper-*.zip
 # large, external, never the shipped asset. Baked 256x256 PNGs are tracked.
 Default Profile Pictures/
 
-# Machine-specific agent notes (absolute paths, backups) and the pointer for other
-# tools. The CLAUDE.md files themselves are tracked.
+# Machine-specific agent notes (absolute paths, backups). CLAUDE.md and AGENTS.md
+# are tracked.
 CLAUDE.local.md
-AGENTS.md
 
 # Transitory holding list for work not yet filed as a GitHub issue. No value
 # once the tasks are implemented.
