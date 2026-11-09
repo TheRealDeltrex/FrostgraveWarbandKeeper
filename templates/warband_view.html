@@ -111,6 +111,7 @@
           </form>
           <a class="btn secondary" href="{{ url_for('home') }}">All warbands</a>
           <a class="btn secondary tv-only" href="{{ url_for('reference') }}">Lexicon</a>
+          <span class="tv-only">{% include "_theme_select.html" %}</span>
           <button class="btn secondary" type="button" id="layout-toggle">
             <span class="tv-only">Classic layout</span><span class="classic-only">Tab layout</span>
           </button>

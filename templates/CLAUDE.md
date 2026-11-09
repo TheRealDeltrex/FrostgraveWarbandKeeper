@@ -28,6 +28,14 @@ where a selector could hit another page's `.hero`. The rail (`.tv-rail`) is serv
   `base.html`'s details-state key includes the layout.
 - Check UI changes in both layouts.
 
+**Color themes.** `<html data-theme>` (frost default) is set from `localStorage`
+`fgTheme` in `base.html`'s `<head>`, whose id list must match `_theme_select.html`. That picker
+sits in the nav and, in tab layout, in the warband/creation top bar; it switches live.
+A theme is an `html[data-theme="..."]` block in `style.css` overriding `:root` color tokens.
+So new CSS must use tokens, never literal colors, or it breaks in the other themes. Parchment,
+Holy and Glacier are light and share a block re-tuning status colors, shadows and rims; check new UI
+in one of them too.
+
 **Roster table info cells.** `#roster-table`'s "Show actions" toggle hides the Actions
 column by default; wrap read-only info there in `<details class="actions-cell-persistent">`.
 

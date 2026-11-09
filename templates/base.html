@@ -11,6 +11,13 @@
         var layout = "tabs";
         try { if (localStorage.getItem("fgLayout") === "classic") layout = "classic"; } catch (e) { /* ignore */ }
         document.documentElement.setAttribute("data-layout", layout);
+        // Color theme, per browser, likewise before first paint.
+        var theme = "frost";
+        try {
+          var saved = localStorage.getItem("fgTheme");
+          if (["deepfrost", "mana", "firewater", "grave", "ember", "nature", "necropolis", "parchment", "holy", "glacier"].indexOf(saved) >= 0) theme = saved;
+        } catch (e) { /* ignore */ }
+        document.documentElement.setAttribute("data-theme", theme);
       })();
     </script>
     <!-- Inlined, not a static file: bundle.json is a text-only channel, so the
@@ -62,6 +69,9 @@
             <a href="{{ url_for('settings') }}" class="{% if request.endpoint == 'settings' %}active{% endif %}">Settings</a>
           </li>
           {% endif %}
+          <li>
+            {% include "_theme_select.html" %}
+          </li>
         </ul>
       </nav>
 
@@ -98,6 +108,21 @@
     </div>
     <script src="{{ url_for('static', filename='item_slots.js') }}"></script>
     <script src="{{ url_for('static', filename='filter.js') }}"></script>
+    <script>
+      (function () {
+        // One picker in the nav, another in the tab-layout top bar; keep them in step.
+        var root = document.documentElement;
+        var selects = [].slice.call(document.querySelectorAll(".theme-select"));
+        selects.forEach(function (select) {
+          select.value = root.getAttribute("data-theme") || "frost";
+          select.addEventListener("change", function () {
+            root.setAttribute("data-theme", select.value);
+            selects.forEach(function (other) { other.value = select.value; });
+            try { localStorage.setItem("fgTheme", select.value); } catch (err) { /* ignore */ }
+          });
+        });
+      })();
+    </script>
     <script>
       (function () {
         // Saving a form (post -> redirect -> get, same URL) should return the
