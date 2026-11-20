@@ -46,6 +46,9 @@ saves iff `ok`. New mutations go in `warband_store.py` with a thin wrapper in `a
 **`enrich_soldier(wb, s)`** merges `{**catalog, **soldier}`; templates get this, not raw
 `wb["soldiers"]`. Move and Armour are catalog-only, never stored per soldier, so a data fix
 reaches existing warbands — repair a stored wrong one, never add one.
+Custom types use the current data folder's library when available and that warband's embedded
+definition otherwise. Use `get_soldier(type_key, wb)` for roster lookups. Only the data folder's
+active custom types are hireable. Reducing a type's slot count requires clearing affected slots.
 
 **Bookkeeping, not rule enforcement.** The app records what a group decides. Dice rolls are
 optional, mechanics stay circumventable (hand-edit gold, leave a Pact via the state dropdown),

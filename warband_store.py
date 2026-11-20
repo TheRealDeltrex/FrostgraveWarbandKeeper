@@ -45,6 +45,7 @@ from frostgrave_data import (
     CARGO_TRANSPORT_COST,
     CARGO_TRANSPORT_UPGRADES,
     CONSTRUCT_SOLDIER_TYPE_KEYS,
+    CUSTOM_SOLDIER_PREFIX,
     CUSTOM_SOLDIER_SOURCE,
     DEMON_SOLDIER_TYPE_KEYS,
     EDITION1_LOOT_GOLD_VALUE,
@@ -1959,7 +1960,6 @@ def _as_list(value: object) -> list:
     return value if isinstance(value, list) else []
 
 
-CUSTOM_SOLDIER_PREFIX = "custom_"
 # field: (min, max, default). Bounds only keep a hand-edited file from
 # breaking arithmetic or layout; they're not a rules check.
 _CUSTOM_SOLDIER_INTS = {
@@ -2017,7 +2017,7 @@ def _read_custom_soldiers() -> dict[str, dict]:
         return {}
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
+    except (OSError, ValueError) as exc:
         logger.warning("Custom soldiers file %s could not be read: %s", path, exc)
         return {}
     return _clean_custom_soldier_map(data.get("types") if isinstance(data, dict) else None)
@@ -2031,17 +2031,23 @@ def _write_custom_soldiers(types: dict[str, dict]) -> None:
     os.replace(tmp, path)
 
 
-def sync_custom_soldiers() -> dict[str, dict]:
-    """Register the library into SOLDIERS so every catalog lookup sees it.
-    Re-read on each call: /settings can switch the data dir at runtime."""
-    types = _read_custom_soldiers()
-    SOLDIERS.update(types)
-    return types
+def _warband_custom_types(wb: dict) -> dict[str, dict]:
+    """Resolve roster types against this data folder, falling back to this warband's copies."""
+    keys = {s["type_key"] for s in _as_list(wb.get("soldiers"))
+            if isinstance(s, dict) and isinstance(s.get("type_key"), str)
+            and s["type_key"].startswith(CUSTOM_SOLDIER_PREFIX)}
+    if not keys:
+        return {}
+    known = _clean_custom_soldier_map(wb.get("custom_soldier_types")) | _read_custom_soldiers()
+    return {
+        key: {k: v for k, v in known[key].items() if k != "retired"}
+        for key in sorted(keys & known.keys())
+    }
 
 
 def custom_soldier_list() -> list[dict]:
     """Hireable custom types, for the hire tab's own panel."""
-    rows = [{"key": k, **v} for k, v in sync_custom_soldiers().items() if not v.get("retired")]
+    rows = [{"key": k, **v} for k, v in _read_custom_soldiers().items() if not v.get("retired")]
     return sorted(rows, key=lambda r: r["name"].lower())
 
 
@@ -2053,7 +2059,6 @@ def create_custom_soldier(form: dict) -> tuple[bool, str, str | None]:
     key = CUSTOM_SOLDIER_PREFIX + uuid.uuid4().hex[:8]
     types[key] = t
     _write_custom_soldiers(types)
-    SOLDIERS[key] = t
     return True, f"Created custom soldier {t['name']}.", key
 
 
@@ -2064,23 +2069,26 @@ def update_custom_soldier(key: str, form: dict) -> tuple[bool, str]:
     t = _clean_custom_soldier({k: v for k, v in form.items() if k != "retired"})
     if not t:
         return False, "Give the custom soldier a name."
+    slots = t["item_slots"]
+    if slots < types[key]["item_slots"]:
+        for soldier in _saved_custom_soldiers(key):
+            items = _coerce_item_slot_strings(soldier.get("item_slots") or soldier.get("items"))
+            if any(items[slots:]):
+                return False, "Unequip items in the affected slots before reducing this soldier's slots."
     types[key] = t
     _write_custom_soldiers(types)
-    SOLDIERS[key] = t
     return True, f"Saved custom soldier {t['name']}."
 
 
-def _custom_soldier_in_use(key: str) -> bool:
+def _saved_custom_soldiers(key: str) -> Iterable[dict]:
     # Raw JSON, like list_warbands(): an unreadable file counts as not using it.
     for path in warband_dir().glob("*.warbands"):
         try:
             data = json.loads(path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
+        except (OSError, ValueError):
             continue
         soldiers = data.get("soldiers") if isinstance(data, dict) else None
-        if any(isinstance(s, dict) and s.get("type_key") == key for s in _as_list(soldiers)):
-            return True
-    return False
+        yield from (s for s in _as_list(soldiers) if isinstance(s, dict) and s.get("type_key") == key)
 
 
 def delete_custom_soldier(key: str) -> tuple[bool, str]:
@@ -2090,13 +2098,11 @@ def delete_custom_soldier(key: str) -> tuple[bool, str]:
     if key not in types:
         return False, "Unknown custom soldier."
     name = types[key]["name"]
-    if _custom_soldier_in_use(key):
+    if next(_saved_custom_soldiers(key), None) is not None:
         types[key]["retired"] = True
-        SOLDIERS[key] = types[key]
         msg = f"Removed {name} from hiring. Soldiers already hired keep their stats."
     else:
         del types[key]
-        SOLDIERS.pop(key, None)
         msg = f"Deleted custom soldier {name}."
     _write_custom_soldiers(types)
     return True, msg
@@ -2204,14 +2210,8 @@ def _normalize_warband(wb: dict) -> dict:
     """
     if not isinstance(wb.get("wizard"), dict):
         wb["wizard"] = empty_wizard()
-    # Before the roster below, which falls back to catalog stats. A type only
-    # this warband carries (made on another install) registers retired: it
-    # renders here but isn't hireable.
-    library = sync_custom_soldiers()
-    wb["custom_soldier_types"] = _clean_custom_soldier_map(wb.get("custom_soldier_types"))
-    for k, t in wb["custom_soldier_types"].items():
-        if k not in library:
-            SOLDIERS[k] = {**t, "retired": True}
+    # Resolve before normalizing roster stats and item slots.
+    wb["custom_soldier_types"] = _warband_custom_types(wb)
     wiz = wb["wizard"]
     wb["gold"] = _as_int(wb.get("gold"), STARTING_GOLD)
     wiz["xp"] = _as_int(wiz.get("xp"), 0)
@@ -2454,7 +2454,7 @@ def _normalize_warband(wb: dict) -> dict:
         # a build carrying more supplements) leaves it empty — so a second
         # fallback is needed, or the old setdefault(k, info.get(k)) writes None
         # back and every later view of that warband is a 500.
-        info = get_soldier(s.get("type_key", "")) or {}
+        info = get_soldier(s.get("type_key", ""), wb) or {}
         for k in ("fight", "shoot", "will", "health"):
             s[k] = _as_int(s.get(k), _as_int(info.get(k), 0))
         # Move and Armour are catalog-only — a hired soldier never stores them,
@@ -2520,11 +2520,7 @@ def save_warband(wb: Warband) -> None:
     wb.setdefault("schema_version", SCHEMA_VERSION)
     wb["updated"] = _now()
     # Embedded so an exported warband still renders where the type is unknown.
-    wb["custom_soldier_types"] = {
-        k: {f: v for f, v in SOLDIERS[k].items() if f != "retired"}
-        for k in {s.get("type_key") for s in wb.get("soldiers") or []}
-        if isinstance(k, str) and k.startswith(CUSTOM_SOLDIER_PREFIX) and k in SOLDIERS
-    }
+    wb["custom_soldier_types"] = _warband_custom_types(wb)
     path = warband_path(wb["id"])
     data = json.dumps(wb, indent=2, ensure_ascii=False) + "\n"
     tmp = path.with_suffix(".tmp")
@@ -2671,7 +2667,7 @@ def duplicate_warband(source_id: str, new_name: str | None = None) -> tuple[Warb
 
 
 def export_warband_json(wb: Warband) -> str:
-    return json.dumps(wb, indent=2, ensure_ascii=False)
+    return json.dumps({**wb, "custom_soldier_types": _warband_custom_types(wb)}, indent=2, ensure_ascii=False)
 
 
 def import_warband_json(raw: str) -> Warband:
@@ -2846,12 +2842,12 @@ def resolve_portrait_path(
     return (DEFAULT_PORTRAIT_DIR / name) if name else None
 
 
-def _soldier_is_specialist(s: dict) -> bool:
+def _soldier_is_specialist(wb: dict, s: dict) -> bool:
     """A soldier's catalog category, or "specialist" if a Construct
     Modification (Projectile Weapon) forced it — see add_construct_modification."""
     if s.get("forced_specialist"):
         return True
-    info = SOLDIERS.get(s.get("type_key", ""), {})
+    info = get_soldier(s.get("type_key", ""), wb) or {}
     return info.get("category") == "specialist"
 
 
@@ -2860,7 +2856,7 @@ def count_specialists(wb: dict) -> int:
     for s in wb.get("soldiers") or []:
         if s.get("status") == "dead":
             continue
-        if _soldier_is_specialist(s):
+        if _soldier_is_specialist(wb, s):
             n += 1
     return n
 
@@ -2923,7 +2919,7 @@ def warband_limits(wb: dict) -> dict:
         spent += int((wb.get("homerules") or {}).get("captain_hiring_cost", CAPTAIN_HIRING_COST))
     for s in soldiers:
         type_key = s.get("type_key", "")
-        info = SOLDIERS.get(type_key, {})
+        info = get_soldier(type_key, wb) or {}
         spent += expansions.soldier_cost(wb, info, type_key, include_discount=False)
         if s.get("giant_blooded"):
             spent += GIANT_BLOODED_COST
@@ -2961,10 +2957,10 @@ def warband_limits(wb: dict) -> dict:
 
 def enrich_soldier(wb: dict, s: dict) -> dict:
     type_key = s.get("type_key", "")
-    cat = get_soldier(type_key) or {}
+    cat = get_soldier(type_key, wb) or {}
     out = {**cat, **s}
     out["type_name"] = cat.get("name", type_key or "?")
-    out["category"] = "specialist" if _soldier_is_specialist(s) else cat.get("category", "standard")
+    out["category"] = "specialist" if s.get("forced_specialist") else cat.get("category", "standard")
     # Live cost, not what was paid at hire time — same rule as everywhere else
     # cost is computed (hireable list, warband_limits): homerule adjustments
     # (Edition 2 toggle, Beastcrafter surcharge) always apply to the current
@@ -3114,7 +3110,7 @@ def _next_type_name(wb: dict, type_key: str) -> str:
 def _numbered_type_name(wb: dict, type_key: str) -> str:
     """Pre-random-name-pool default: 'Skeleton 1', 'Skeleton 2', ... — kept
     for the types a personal name doesn't suit (see _next_type_name())."""
-    info = get_soldier(type_key) or {}
+    info = get_soldier(type_key, wb) or {}
     type_name = info.get("name", type_key)
     existing = [s for s in wb.get("soldiers") or [] if s.get("type_key") == type_key]
     return f"{type_name} {len(existing) + 1}"
@@ -3214,7 +3210,7 @@ def hire_cost_preview(wb: dict, info: dict, type_key: str) -> int:
     attempt still gets its own rejection message from add_soldier() itself."""
     cost = expansions.soldier_cost(wb, info, type_key)
     if bool(wb.get("giant_blooded_pending")) and not _giant_blooded_homerule_gate(wb):
-        if type_key in giant_blooded_eligible_type_keys():
+        if info.get("source") == CUSTOM_SOLDIER_SOURCE or type_key in giant_blooded_eligible_type_keys():
             cost += GIANT_BLOODED_COST
     if bool(wb.get("thrall_pending")) and not _thrall_gate(wb):
         cost = 0
@@ -3234,7 +3230,8 @@ def add_soldier(
     Markers and "does not count against the warband's usual size limit". Only
     hire_underworld_muscle() passes it; every ordinary hire still pays and
     still counts."""
-    info = get_soldier(type_key)
+    custom = type_key.startswith(CUSTOM_SOLDIER_PREFIX)
+    info = _read_custom_soldiers().get(type_key) if custom else get_soldier(type_key)
     if not info:
         return False, "Unknown soldier type."
     # The "disable app mechanics" homerule escape hatch (default_homerules()):
@@ -3342,7 +3339,7 @@ def add_soldier(
     if wb.get("thrall_pending") and _thrall_gate(wb):
         wb["thrall_pending"] = False
     giant_blooded_now = bool(wb.get("giant_blooded_pending")) and not _giant_blooded_homerule_gate(wb)
-    if giant_blooded_now and type_key not in giant_blooded_eligible_type_keys():
+    if giant_blooded_now and not custom and type_key not in giant_blooded_eligible_type_keys():
         return False, (
             f"{info['name']} can't be Giant-Blooded (only ordinary human soldiers are "
             "eligible) — turn off the \"next hire is Giant-Blooded\" toggle first, or "
@@ -3353,6 +3350,8 @@ def add_soldier(
     if wb.get("gold", 0) < cost:
         return False, f"Not enough gold (need {cost} gc, have {wb.get('gold', 0)} gc)."
 
+    if custom:
+        wb.setdefault("custom_soldier_types", {})[type_key] = info
     soldier, order_suffix, illusion_suffix = _build_soldier_record(
         wb, type_key, info, name, order, illusion_info, illusion_source
     )
@@ -3394,7 +3393,7 @@ def remove_soldier(wb: dict, soldier_id: str, refund: bool = False) -> tuple[boo
     for i, s in enumerate(soldiers):
         if s.get("id") == soldier_id:
             type_key = s.get("type_key", "")
-            info = get_soldier(type_key) or {}
+            info = get_soldier(type_key, wb) or {}
             # No Carrier Pigeons discount here (see enrich_soldier): a refund
             # should reflect what this soldier is actually worth, not be cut
             # by a discount that only applies to new hires.
@@ -3501,7 +3500,7 @@ def raise_revenant(wb: dict, soldier_id: str) -> tuple[bool, str]:
         cap = expansions.max_soldiers(wb)
         if soldier_count(wb) >= cap:
             return False, f"Soldier limit reached ({cap}); the revenant has nowhere to stand."
-        cat = get_soldier(s.get("type_key", "")) or {}
+        cat = get_soldier(s.get("type_key", ""), wb) or {}
         # Remembered so remove_revenant() can restore it exactly, rather than
         # falling back to the type's catalog Will (which would silently lose
         # any Soldier Leveling bonus this soldier had before being raised).
@@ -3524,7 +3523,7 @@ def remove_revenant(wb: dict, soldier_id: str) -> tuple[bool, str]:
             continue
         if not s.get("revenant"):
             return False, "Not a revenant."
-        cat = get_soldier(s.get("type_key", "")) or {}
+        cat = get_soldier(s.get("type_key", ""), wb) or {}
         s["will"] = s.pop("_pre_revenant_will", cat.get("will", 0))
         s["revenant"] = False
         text = f"{s.get('name', 'Soldier')} is no longer a revenant."
@@ -3645,7 +3644,7 @@ def _mutation_target(wb: dict, kind: str, soldier_id: str | None = None):
     if kind == "soldier":
         for s in wb.get("soldiers") or []:
             if s.get("id") == soldier_id:
-                cat = get_soldier(s.get("type_key", "")) or {}
+                cat = get_soldier(s.get("type_key", ""), wb) or {}
                 # Unlike wizard/apprentice/captain's stats dicts (always seeded
                 # from a base stat block of real ints), a soldier's own stat
                 # fields are never normalized on load/import — _as_int() here
@@ -6243,13 +6242,13 @@ def promote_soldier_to_captain(
     blocked = _promotion_blocked_reason(soldier.get("type_key", ""))
     if blocked:
         return False, blocked
-    if hr.get("promote_captain_specialist_only") and not _soldier_is_specialist(soldier):
+    if hr.get("promote_captain_specialist_only") and not _soldier_is_specialist(wb, soldier):
         return False, "Only specialists may be promoted to Captain (see Homerules)."
     cost = int(hr.get("promote_captain_cost", PROMOTE_CAPTAIN_COST))
     if int(wb.get("gold", 0)) < cost:
         return False, f"Need {cost} gc to promote a captain."
 
-    info = get_soldier(soldier.get("type_key", "")) or {}
+    info = get_soldier(soldier.get("type_key", ""), wb) or {}
     # The promoted soldier leaves the roster (a wash on the soldier-count cap —
     # one member out, the Captain in). Which cap the new Captain is checked
     # against depends on Legendary Soldiers, same as hire_captain(): off, a
@@ -6266,7 +6265,7 @@ def promote_soldier_to_captain(
             )
     else:
         spec_cap = expansions.max_specialists(wb)
-        if not _soldier_is_specialist(soldier) and specialist_count(wb) >= spec_cap:
+        if not _soldier_is_specialist(wb, soldier) and specialist_count(wb) >= spec_cap:
             return False, f"Specialist limit reached ({spec_cap})."
     _dismount_if_riding(wb, "soldier", soldier_id)
     # Soldiers don't normally persist move/armour at all (they're read from the
@@ -7342,7 +7341,7 @@ def mount_horse(wb: dict, kind: str, soldier_id: str | None = None) -> tuple[boo
         soldier = next((s for s in soldiers if s.get("id") == soldier_id), None)
         if soldier is None:
             return False, "Soldier not found."
-        if soldier.get("type_key") not in horse_rider_eligible_type_keys():
+        if soldier.get("type_key") not in horse_rider_eligible_type_keys(wb):
             return False, "Only a non-Animal, non-Undead, non-Demon, non-Construct model may ride."
     entity, get_stat, set_stat, label = _mutation_target(wb, kind, soldier_id)
     if entity is None:
