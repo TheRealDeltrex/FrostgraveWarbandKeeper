@@ -28,6 +28,8 @@ from frostgrave_data import (
     CARGO_TRANSPORT_BASE_CAPACITY,
     CARGO_TRANSPORT_UPGRADES,
     COMPONENT_POUCH_CAPACITY,
+    CUSTOM_SOLDIER_PREFIX,
+    CUSTOM_SOLDIER_SOURCE,
     FIN_DALKA_ITEM_NAME,
     FIRE_GIANT_HEALTH_CAP,
     FIRE_GIANT_WIZARD_BASE,
@@ -1283,11 +1285,15 @@ def soldier_item_slots(wb: dict, type_key: str, current_items: list[str] | None 
     carrying — see _elemental_archer_arrow_slot_bonus) and the Crow Master
     (whether it's already carrying its conditional item). Every other soldier
     type ignores it."""
-    info = get_soldier(type_key) or {}
+    info = get_soldier(type_key, wb) or {}
     if type_key == ELEMENTAL_ARCHER_TYPE_KEY:
         return ELEMENTAL_ARCHER_BASE_ITEM_SLOTS + _elemental_archer_arrow_slot_bonus(current_items)
     if type_key == "crow_master":
         return _conditional_bonus_slot(wb, type_key, current_items)
+    if type_key.startswith(CUSTOM_SOLDIER_PREFIX):
+        # Keep occupied overflow slots editable in older saves and imports.
+        occupied = (i for i, item in enumerate(current_items or [], start=1) if item)
+        return max(int(info.get("item_slots", SOLDIER_ITEM_SLOTS)), max(occupied, default=0))
     if "item_slots" in info:
         return int(info["item_slots"])
     if type_key in animal_companion_type_keys() or type_key in construct_type_keys():
@@ -1320,7 +1326,9 @@ def free_dagger_gear(wb: dict, type_key: str, gear: str) -> str:
     item_slots, matching how "gear" is descriptive everywhere else."""
     if not (wb.get("homerules") or {}).get("free_dagger_enabled"):
         return gear
-    if type_key not in giant_blooded_eligible_type_keys():
+    if type_key not in giant_blooded_eligible_type_keys() and (
+        (get_soldier(type_key, wb) or {}).get("source") != CUSTOM_SOLDIER_SOURCE
+    ):
         return gear
     daggers = _count_gear_item(gear, "dagger")
     hand_weapons = _count_gear_item(gear, "hand weapon")

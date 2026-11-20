@@ -1507,7 +1507,7 @@ def warband_view(warband_id: str) -> str:
     # rider at a time, gated on the Stable base resource (see buy_horse).
     horses_enabled = "Spellcaster Magazine" in wb_sources
     has_stable = "stable" in ((wb.get("base") or {}).get("resources") or [])
-    horse_rider_eligible_keys = horse_rider_eligible_type_keys()
+    horse_rider_eligible_keys = horse_rider_eligible_type_keys(wb)
     horse_rider_choices = [
         {"id": s["id"], "name": s.get("name") or "Unnamed"}
         for s in all_soldiers
@@ -1515,8 +1515,7 @@ def warband_view(warband_id: str) -> str:
     ]
     # "Name - class" summary line for the horse panel, e.g. "Thug1 - Thug" —
     # computed here rather than in the template since a soldier rider needs
-    # the catalog's display name (SOLDIERS[type_key]["name"]), not the
-    # instance's own possibly-renamed one.
+    # the catalog's display name alongside the instance name.
     horse_rider_line = None
     _horse_rider = (wb.get("horse") or {}).get("rider")
     if _horse_rider:
@@ -1529,10 +1528,10 @@ def warband_view(warband_id: str) -> str:
             horse_rider_line = f"{(wb.get('captain') or {}).get('name') or 'Captain'} - Captain"
         elif _rider_kind == "soldier":
             _rider_soldier = next(
-                (s for s in all_soldiers if s.get("id") == _horse_rider.get("soldier_id")), None
+                (s for s in soldiers if s.get("id") == _horse_rider.get("soldier_id")), None
             )
             if _rider_soldier:
-                _rider_class = SOLDIERS.get(_rider_soldier.get("type_key"), {}).get("name", "Soldier")
+                _rider_class = _rider_soldier.get("type_name") or "Soldier"
                 horse_rider_line = f"{_rider_soldier.get('name') or 'Soldier'} - {_rider_class}"
     # Spellcaster Magazine's Underworld Favours: a debt economy tracked on
     # wb.wizard.underworld_favors (Markers held); the loan amounts and debt

@@ -3321,6 +3321,7 @@ CREATION_SOURCE_BOOK_OPTIONS = [
 # User-defined mercenaries (warband_store registers them into SOLDIERS at
 # runtime). Listed on their own hire panel, never in the official catalog.
 CUSTOM_SOLDIER_SOURCE = "Custom"
+CUSTOM_SOLDIER_PREFIX = "custom_"
 
 
 def soldier_list_for_ui() -> list[dict]:
@@ -3599,12 +3600,13 @@ HORSE_RIDER_EXCLUDED_TYPE_KEYS = {
 }
 
 
-def horse_rider_eligible_type_keys() -> set[str]:
+def horse_rider_eligible_type_keys(wb: dict | None = None) -> set[str]:
     """Soldier type keys that may ride the warband's horse."""
     excluded = (
         animal_companion_type_keys() | construct_type_keys() | HORSE_RIDER_EXCLUDED_TYPE_KEYS
     )
-    return {k for k, v in SOLDIERS.items() if k not in excluded and not v.get("temporary")}
+    custom = (wb or {}).get("custom_soldier_types") or {}
+    return {k for k, v in SOLDIERS.items() if k not in excluded and not v.get("temporary")} | custom.keys()
 
 
 # --- Blood Legacy: The Grimoire of Fin Dalka ---------------------------------
@@ -3812,8 +3814,10 @@ def illusion_source_choices() -> list[dict]:
     return rows
 
 
-def get_soldier(type_key: str) -> dict | None:
+def get_soldier(type_key: str, wb: dict | None = None) -> dict | None:
     s = SOLDIERS.get(type_key)
+    if wb is not None and isinstance(type_key, str) and type_key.startswith(CUSTOM_SOLDIER_PREFIX):
+        s = (wb.get("custom_soldier_types") or {}).get(type_key)
     if not s:
         return None
     out = deepcopy(s)
