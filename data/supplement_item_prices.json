@@ -1902,5 +1902,365 @@
   "source": "The Wildwoods",
   "table": "Wildwoods Magic Item Table",
   "sale_estimated": false
+ },
+ {
+  "name": "Book of Arcane Desire",
+  "purchase": null,
+  "sale": 200,
+  "listed_cost": 700,
+  "source": "Advanced Spellcraft",
+  "table": "Bibliosepulchre Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Mystical Draught",
+  "purchase": null,
+  "sale": 100,
+  "listed_cost": 400,
+  "source": "Advanced Spellcraft",
+  "table": "Bibliosepulchre Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Cloak of the Etherium",
+  "purchase": null,
+  "sale": 200,
+  "listed_cost": 600,
+  "source": "Advanced Spellcraft",
+  "table": "Bibliosepulchre Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Staff of the Chronomancer",
+  "purchase": null,
+  "sale": 150,
+  "listed_cost": 400,
+  "source": "Advanced Spellcraft",
+  "table": "Bibliosepulchre Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Sun Ring",
+  "purchase": null,
+  "sale": 150,
+  "listed_cost": 400,
+  "source": "Advanced Spellcraft",
+  "table": "Bibliosepulchre Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Ring of Transformation",
+  "purchase": null,
+  "sale": 200,
+  "listed_cost": 600,
+  "source": "Advanced Spellcraft",
+  "table": "Bibliosepulchre Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Oathmaker Blade",
+  "purchase": null,
+  "sale": 250,
+  "listed_cost": 600,
+  "source": "Advanced Spellcraft",
+  "table": "Bibliosepulchre Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Crystal Reading Glass",
+  "purchase": null,
+  "sale": 200,
+  "listed_cost": 800,
+  "source": "Advanced Spellcraft",
+  "table": "Bibliosepulchre Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Shining Aspergillum",
+  "purchase": null,
+  "sale": 150,
+  "listed_cost": 650,
+  "source": "Advanced Spellcraft",
+  "table": "Bibliosepulchre Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Concussion Orb (3)",
+  "purchase": null,
+  "sale": 100,
+  "listed_cost": 200,
+  "source": "Advanced Spellcraft",
+  "table": "Bibliosepulchre Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Rings of the Elementalist",
+  "purchase": null,
+  "sale": 150,
+  "listed_cost": 400,
+  "source": "Advanced Spellcraft",
+  "table": "Bibliosepulchre Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Spellcaster's Blade",
+  "purchase": null,
+  "sale": 150,
+  "listed_cost": 500,
+  "source": "Advanced Spellcraft",
+  "table": "Bibliosepulchre Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Manacrystal",
+  "purchase": null,
+  "sale": 50,
+  "listed_cost": 250,
+  "source": "Advanced Spellcraft",
+  "table": "Bibliosepulchre Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Chisel of the Enchanter",
+  "purchase": null,
+  "sale": 150,
+  "listed_cost": 400,
+  "source": "Advanced Spellcraft",
+  "table": "Bibliosepulchre Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Elemental Reflection Shield",
+  "purchase": null,
+  "sale": 200,
+  "listed_cost": 500,
+  "source": "Advanced Spellcraft",
+  "table": "Bibliosepulchre Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Torch of Radiance",
+  "purchase": null,
+  "sale": 200,
+  "listed_cost": 600,
+  "source": "Advanced Spellcraft",
+  "table": "Bibliosepulchre Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Porter Control Rod",
+  "purchase": null,
+  "sale": 50,
+  "listed_cost": 400,
+  "source": "Advanced Spellcraft",
+  "table": "Bibliosepulchre Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Wand of the Illusionist",
+  "purchase": null,
+  "sale": 150,
+  "listed_cost": 400,
+  "source": "Advanced Spellcraft",
+  "table": "Bibliosepulchre Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Box of Bones",
+  "purchase": null,
+  "sale": 100,
+  "listed_cost": 400,
+  "source": "Advanced Spellcraft",
+  "table": "Bibliosepulchre Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Wand of Illusionary Fire",
+  "purchase": null,
+  "sale": 180,
+  "listed_cost": 600,
+  "source": "Advanced Spellcraft",
+  "table": "Bibliosepulchre Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Arrows of Banishment (3)",
+  "purchase": null,
+  "sale": 90,
+  "listed_cost": 300,
+  "source": "Advanced Spellcraft",
+  "table": "Bibliosepulchre Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Cane of the Necromancer",
+  "purchase": null,
+  "sale": 150,
+  "listed_cost": 400,
+  "source": "Advanced Spellcraft",
+  "table": "Bibliosepulchre Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Ethereal Knife",
+  "purchase": null,
+  "sale": 100,
+  "listed_cost": 500,
+  "source": "Advanced Spellcraft",
+  "table": "Bibliosepulchre Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Necrotic Staff",
+  "purchase": null,
+  "sale": 200,
+  "listed_cost": 600,
+  "source": "Advanced Spellcraft",
+  "table": "Bibliosepulchre Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Quicksilver",
+  "purchase": null,
+  "sale": 75,
+  "listed_cost": 300,
+  "source": "Advanced Spellcraft",
+  "table": "Bibliosepulchre Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Spectacles of the Sigilist",
+  "purchase": null,
+  "sale": 150,
+  "listed_cost": 400,
+  "source": "Advanced Spellcraft",
+  "table": "Bibliosepulchre Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Torch of Revelation",
+  "purchase": null,
+  "sale": 200,
+  "listed_cost": 500,
+  "source": "Advanced Spellcraft",
+  "table": "Bibliosepulchre Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Sash of Freefall",
+  "purchase": null,
+  "sale": 150,
+  "listed_cost": 600,
+  "source": "Advanced Spellcraft",
+  "table": "Bibliosepulchre Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Eye Pendant of the Soothsayer",
+  "purchase": null,
+  "sale": 150,
+  "listed_cost": 400,
+  "source": "Advanced Spellcraft",
+  "table": "Bibliosepulchre Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Staff of Elemental Resistance",
+  "purchase": null,
+  "sale": 200,
+  "listed_cost": 500,
+  "source": "Advanced Spellcraft",
+  "table": "Bibliosepulchre Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Arrows of Undead Destruction (3)",
+  "purchase": null,
+  "sale": 90,
+  "listed_cost": 300,
+  "source": "Advanced Spellcraft",
+  "table": "Bibliosepulchre Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Dispel Ring",
+  "purchase": null,
+  "sale": 200,
+  "listed_cost": 800,
+  "source": "Advanced Spellcraft",
+  "table": "Bibliosepulchre Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Rod of the Summoner",
+  "purchase": null,
+  "sale": 150,
+  "listed_cost": 400,
+  "source": "Advanced Spellcraft",
+  "table": "Bibliosepulchre Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Enchanted Crowbar",
+  "purchase": null,
+  "sale": 150,
+  "listed_cost": 400,
+  "source": "Advanced Spellcraft",
+  "table": "Bibliosepulchre Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Crozier of the Thaumaturge",
+  "purchase": null,
+  "sale": 150,
+  "listed_cost": 400,
+  "source": "Advanced Spellcraft",
+  "table": "Bibliosepulchre Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Arrows of True Sight (3)",
+  "purchase": null,
+  "sale": 90,
+  "listed_cost": 300,
+  "source": "Advanced Spellcraft",
+  "table": "Bibliosepulchre Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Reaper's Scythe",
+  "purchase": null,
+  "sale": 125,
+  "listed_cost": 500,
+  "source": "Advanced Spellcraft",
+  "table": "Bibliosepulchre Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Potion of Luck",
+  "purchase": null,
+  "sale": 300,
+  "listed_cost": 800,
+  "source": "Advanced Spellcraft",
+  "table": "Bibliosepulchre Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Moon Pendant of the Witch",
+  "purchase": null,
+  "sale": 150,
+  "listed_cost": 400,
+  "source": "Advanced Spellcraft",
+  "table": "Bibliosepulchre Treasure Table",
+  "sale_estimated": false
+ },
+ {
+  "name": "Potion of Chance",
+  "purchase": null,
+  "sale": 125,
+  "listed_cost": 500,
+  "source": "Advanced Spellcraft",
+  "table": "Bibliosepulchre Treasure Table",
+  "sale_estimated": false
  }
 ]

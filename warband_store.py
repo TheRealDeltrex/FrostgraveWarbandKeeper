@@ -94,6 +94,7 @@ from frostgrave_data import (
     SPELL_COMPONENT_BAG_COST,
     SPELL_COMPONENT_BAG_LIMIT,
     SPELL_COMPONENT_BAG_NAME,
+    SPELLCRAFT_RULE_IDS,
     SPELLS,
     STANDARD_CONSTRUCT_TYPE_KEYS,
     STARTING_GOLD,
@@ -579,6 +580,11 @@ def default_homerules() -> dict:
         "hlw_max_health": True,
         "hlw_casting_min": True,
         "hlw_alt_xp": True,
+        # Advanced Spellcraft's optional spellcasting rules, one toggle each,
+        # read together with the book's own toggle. Forgetting Spells is the
+        # exception that starts off: the book sets it apart as "a much larger,
+        # more fundamental change" (p.15).
+        **{f"as_{rid}": rid != "forgetting_spells" for rid in SPELLCRAFT_RULE_IDS},
         # Wizard stat limits: the hard ceilings a wizard's level-ups run into.
         # Level is unlimited by default (2e core doesn't actually cap it — the
         # 40 figure below is only the starting point if a group ticks a limit
@@ -2280,6 +2286,8 @@ def _normalize_warband(wb: dict) -> dict:
         for key in ("id", "name", "school", "type", "relation"):
             if key in sp and not isinstance(sp[key], str):
                 sp[key] = ""
+        if "flourishes" in sp:
+            sp["flourishes"] = [f for f in _as_list(sp["flourishes"]) if isinstance(f, str)]
     wb["vault_items"] = _normalize_vault_items(wb.get("vault_items"))
     wb.setdefault("giant_blooded_pending", False)
     wb.setdefault("thrall_pending", False)
@@ -4744,6 +4752,27 @@ def shop_sell(wb: dict, item_id: str, price: str | int | None = None) -> tuple[b
     return True, text
 
 
+def drain_vault_item(wb: dict, item_id: str) -> tuple[bool, str]:
+    """Draining Magical Items (Advanced Spellcraft p.11): destroy a vault item
+    to empower one Out of Game spell. The roll itself happens at the table;
+    this removes the item and records the bonus."""
+    if not expansions.spellcraft_rule_on(wb, "draining_magical_items"):
+        return False, (
+            "Draining Magical Items is switched off; enable it under Additional Rules and Homerules."
+        )
+    items = wb.get("vault_items") or []
+    item = next((i for i in items if i.get("id") == item_id), None)
+    if item is None:
+        return False, "Item not found."
+    bonus = expansions.drain_bonus(wb, item, shop_sale_price(wb, item))
+    if not bonus:
+        return False, f"{item.get('name')} can't be drained for a bonus."
+    items.remove(item)
+    text = f"Drained {item.get('name')} for +{bonus} to an Out of Game Casting Roll."
+    add_history(wb, text)
+    return True, text
+
+
 BLACK_MARKET_ROLLS_PER_SCENARIO = 4
 # A concrete named item with its own price ("Amulet of Resistance — 300gc") —
 # most supplement Treasure Tables roll straight into these rather than the
@@ -5787,6 +5816,7 @@ def update_homerules(wb: dict, form: "ImmutableMultiDict") -> tuple[bool, str]:
                 for slug, book in SOURCE_BOOK_BY_SLUG.items()
             },
             "giant_blooded_enabled": form.get("giant_blooded_enabled") == "on",
+            **{f"as_{rid}": form.get(f"as_{rid}") == "on" for rid in SPELLCRAFT_RULE_IDS},
             "ragged_warbands_enabled": ragged_warbands_enabled,
             "monster_hunting_enabled": form.get("monster_hunting_enabled") == "on",
             "monster_hunting_edition1_loot_gold": (
@@ -6618,6 +6648,7 @@ def apply_level_up(
     choice: str,
     spell_key: str | None = None,
     improve_spell_id: str | None = None,
+    flourish_key: str | None = None,
 ) -> tuple[bool, str]:
     """Spend one pending level-up on the wizard; apprentice auto-syncs."""
     wiz = wb.setdefault("wizard", {})
@@ -6715,6 +6746,30 @@ def apply_level_up(
                 break
         if not found:
             return False, "Spell not found on wizard."
+    elif choice == "learn_flourish":
+        # Advanced Spellcraft p.11: a grimoire for a spell the wizard already
+        # knows teaches one of its flourishes, for a level like a new spell.
+        spell_id, _, flourish = (flourish_key or "").rpartition("::")
+        target = next((s for s in wiz.get("spells") or [] if s.get("id") == spell_id), None)
+        if target is None or not flourish:
+            return False, "Pick a flourish to learn."
+        codex = game_content.spell_codex_view(target.get("name", "")) or {}
+        offered = [f["name"] for f in codex.get("flourishes", [])]
+        if flourish not in offered:
+            return False, f"{flourish} is not a flourish of {target.get('name')}."
+        learned = target.setdefault("flourishes", [])
+        if flourish in learned:
+            return False, f"{flourish} is already learned."
+        learned.append(flourish)
+        detail = f"Learned the {flourish} flourish for {target['name']}"
+        meta.update(spell_id=spell_id, spell_name=target["name"], flourish=flourish)
+        vault = wb.get("vault_items") or []
+        for i, item in enumerate(vault):
+            m = expansions._GRIMOIRE_SPELL_RE.match((item.get("name") or "").strip())
+            if m and m.group("spell").strip().lower() == target["name"].lower():
+                meta["consumed_grimoire"] = vault.pop(i)
+                detail += "; grimoire removed from vault"
+                break
     else:
         return False, "Invalid level-up choice."
 
@@ -6837,6 +6892,17 @@ def reverse_last_level_up(wb: dict) -> tuple[bool, str]:
         base = int(target.get("base_cn", target.get("cn", 10)))
         pen = int(target.get("cn_penalty", 0))
         target["cn"] = max(expansions.casting_number_minimum(wb), base + pen - int(target["cn_improve"]))
+    elif choice == "learn_flourish":
+        target = next((s for s in wiz.get("spells") or [] if s.get("id") == entry.get("spell_id")), None)
+        flourish = entry.get("flourish")
+        if target is None or flourish not in (target.get("flourishes") or []):
+            return False, f"Could not find the learned flourish to remove ({detail})."
+        target["flourishes"].remove(flourish)
+        grimoire = entry.get("consumed_grimoire")
+        if isinstance(grimoire, dict):
+            wb["vault_items"] = _normalize_vault_items(
+                list(wb.get("vault_items") or []) + [grimoire]
+            )
     else:
         return False, f"Cannot reverse level-up type “{choice}” (missing undo data)."
 

@@ -1510,5 +1510,173 @@
         }
       ]
     }
+  ],
+  "Advanced Spellcraft": [
+    {
+      "title": "Bibliosepulchre Treasure Table",
+      "blurb": "The Bibliosepulchre had a unique culture within the magical city of ancient Felstad, and as such, there are many treasures that can be found within its ruined halls and broken tombs that cannot be found anywhere else. After any game set within the Bibliosepulchre, players are allowed to trade one treasure token for a roll on the Bibliosepulchre Treasure Table, this is in addition to the trade that can be made for a grimoire. Due to their rarity, items on this treasure table are never purchasable, even if using the black-market rule – the cost is given for each item just for comparative value and for any rules that might be based on the cost of an item. Players can sell and trade these items with one another if they wish. The Bibliosepulchre Treasure Table is a double-sized list, so roll two dice sequentially to determine what has been found. (p.125)",
+      "rows": [
+        {
+          "name": "1–10, then 1",
+          "text": "Book of Arcane Desire — 700gc (sell 200gc)"
+        },
+        {
+          "name": "1–10, then 2",
+          "text": "Mystical Draught — 400gc (sell 100gc)"
+        },
+        {
+          "name": "1–10, then 3",
+          "text": "Cloak of the Etherium — 600gc (sell 200gc)"
+        },
+        {
+          "name": "1–10, then 4",
+          "text": "Staff of the Chronomancer — 400gc (sell 150gc)"
+        },
+        {
+          "name": "1–10, then 5",
+          "text": "Sun Ring — 400gc (sell 150gc)"
+        },
+        {
+          "name": "1–10, then 6",
+          "text": "Ring of Transformation — 600gc (sell 200gc)"
+        },
+        {
+          "name": "1–10, then 7",
+          "text": "Oathmaker Blade — 600gc (sell 250gc)"
+        },
+        {
+          "name": "1–10, then 8",
+          "text": "Crystal Reading Glass — 800gc (sell 200gc)"
+        },
+        {
+          "name": "1–10, then 9",
+          "text": "Shining Aspergillum — 650gc (sell 150gc)"
+        },
+        {
+          "name": "1–10, then 10",
+          "text": "Concussion Orb (3) — 200gc each (sell 100gc each)"
+        },
+        {
+          "name": "1–10, then 11",
+          "text": "Rings of the Elementalist — 400gc (sell 150gc)"
+        },
+        {
+          "name": "1–10, then 12",
+          "text": "Spellcaster's Blade — 500gc (sell 150gc)"
+        },
+        {
+          "name": "1–10, then 13",
+          "text": "Manacrystal — 250gc (sell 50gc)"
+        },
+        {
+          "name": "1–10, then 14",
+          "text": "Chisel of the Enchanter — 400gc (sell 150gc)"
+        },
+        {
+          "name": "1–10, then 15",
+          "text": "Elemental Reflection Shield — 500gc (sell 200gc)"
+        },
+        {
+          "name": "1–10, then 16",
+          "text": "Torch of Radiance — 600gc (sell 200gc)"
+        },
+        {
+          "name": "1–10, then 17",
+          "text": "Porter Control Rod — 400gc (sell 50gc)"
+        },
+        {
+          "name": "1–10, then 18",
+          "text": "Wand of the Illusionist — 400gc (sell 150gc)"
+        },
+        {
+          "name": "1–10, then 19",
+          "text": "Box of Bones — 400gc (sell 100gc)"
+        },
+        {
+          "name": "1–10, then 20",
+          "text": "Wand of Illusionary Fire — 600gc (sell 180gc)"
+        },
+        {
+          "name": "11–20, then 1",
+          "text": "Arrows of Banishment (3) — 300gc (sell 90gc)"
+        },
+        {
+          "name": "11–20, then 2",
+          "text": "Cane of the Necromancer — 400gc (sell 150gc)"
+        },
+        {
+          "name": "11–20, then 3",
+          "text": "Ethereal Knife — 500gc (sell 100gc)"
+        },
+        {
+          "name": "11–20, then 4",
+          "text": "Necrotic Staff — 600gc (sell 200gc)"
+        },
+        {
+          "name": "11–20, then 5",
+          "text": "Quicksilver — 300gc (sell 75gc)"
+        },
+        {
+          "name": "11–20, then 6",
+          "text": "Spectacles of the Sigilist — 400gc (sell 150gc)"
+        },
+        {
+          "name": "11–20, then 7",
+          "text": "Torch of Revelation — 500gc (sell 200gc)"
+        },
+        {
+          "name": "11–20, then 8",
+          "text": "Sash of Freefall — 600gc (sell 150gc)"
+        },
+        {
+          "name": "11–20, then 9",
+          "text": "Eye Pendant of the Soothsayer — 400gc (sell 150gc)"
+        },
+        {
+          "name": "11–20, then 10",
+          "text": "Staff of Elemental Resistance — 500gc (sell 200gc)"
+        },
+        {
+          "name": "11–20, then 11",
+          "text": "Arrows of Undead Destruction (3) — 300gc (sell 90gc)"
+        },
+        {
+          "name": "11–20, then 12",
+          "text": "Dispel Ring — 800gc (sell 200gc)"
+        },
+        {
+          "name": "11–20, then 13",
+          "text": "Rod of the Summoner — 400gc (sell 150gc)"
+        },
+        {
+          "name": "11–20, then 14",
+          "text": "Enchanted Crowbar — 400gc (sell 150gc)"
+        },
+        {
+          "name": "11–20, then 15",
+          "text": "Crozier of the Thaumaturge — 400gc (sell 150gc)"
+        },
+        {
+          "name": "11–20, then 16",
+          "text": "Arrows of True Sight (3) — 300gc (sell 90gc)"
+        },
+        {
+          "name": "11–20, then 17",
+          "text": "Reaper's Scythe — 500gc (sell 125gc)"
+        },
+        {
+          "name": "11–20, then 18",
+          "text": "Potion of Luck — 800gc (sell 300gc)"
+        },
+        {
+          "name": "11–20, then 19",
+          "text": "Moon Pendant of the Witch — 400gc (sell 150gc)"
+        },
+        {
+          "name": "11–20, then 20",
+          "text": "Potion of Chance — 500gc (sell 125gc)"
+        }
+      ]
+    }
   ]
 }

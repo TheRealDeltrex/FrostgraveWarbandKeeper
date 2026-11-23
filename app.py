@@ -49,6 +49,7 @@ from frostgrave_data import (
     COMPONENT_POUCH_CAPACITY,
     CREATION_SOURCE_BOOK_OPTIONS,
     EDITION1_LOOT_GOLD_VALUE,
+    entry_sources,
     FIN_DALKA_BASE_SELL,
     FIN_DALKA_DECIPHER_COST,
     FIN_DALKA_SELL_PER_SPELL,
@@ -138,6 +139,7 @@ from game_content import (
     load_common_items,
     load_core_rules,
     load_demonic_attributes,
+    load_expansion_overviews,
     load_expansion_rules,
     load_grave_mutations,
     load_loot_tables,
@@ -150,10 +152,12 @@ from game_content import (
     load_soldier_capable_items,
     load_spell_descriptions,
     load_spell_names,
+    load_spellcraft_rules,
     load_spellcaster_items,
     load_standard_items,
     load_traits,
     magic_items_for_sources,
+    spell_codex_view,
 )
 from idle_watchdog import note_closing, note_heartbeat
 from warband_store import (
@@ -243,6 +247,7 @@ from warband_store import (
     dismiss_apprentice,
     dismiss_captain,
     dismount_horse,
+    drain_vault_item,
     duplicate_warband,
     enabled_sources,
     enrich_soldier,
@@ -418,6 +423,7 @@ def portrait_src(
 
 app.jinja_env.globals.update(
     portrait_src=portrait_src,
+    entry_sources=entry_sources,
     item_effect_text=item_effect_text,
     bonus_choice_amount=bonus_choice_amount,
     format_stat=format_stat,
@@ -722,6 +728,7 @@ def reference() -> str:
                 **sp,
                 "source": sp.get("source", "Core Rules"),
                 "description": descs.get(sp["name"], "") or "No description available.",
+                "codex": None if sp.get("source") else spell_codex_view(sp["name"]),
             }
             for sp in splist
         ]
@@ -765,6 +772,7 @@ def reference() -> str:
         magic_item_groups=group_magic_items(load_magic_items()),
         magic_item_count=len(load_magic_items()),
         expansion_rules=_sorted_by_source_book(load_expansion_rules()),
+        expansion_overviews=_sorted_by_source_book(load_expansion_overviews()),
         random_encounters=_sorted_by_source_book(load_random_encounters()),
         loot_tables=_sorted_by_source_book(load_loot_tables()),
     )
@@ -1115,6 +1123,8 @@ def _wizard_level_up_blocked(wb: dict, options: list[dict], learnable: list[dict
                 blocked[oid] = f"capped at {cap}"
         elif oid == "learn_spell" and not learnable:
             blocked[oid] = "no learnable spells available"
+        elif oid == "learn_flourish" and not expansions.learnable_flourishes(wb):
+            blocked[oid] = "no flourish left to learn"
         elif oid == "improve_spell" and (
             not known_spells or all(int(s.get("cn", 999)) <= min_cn for s in known_spells)
         ):
@@ -1253,7 +1263,7 @@ def warband_view(warband_id: str) -> str:
         if s["id"] not in known and expansions.spell_available(wb, s, wb_sources)
     ]
     wiz_spells = (wb.get("wizard") or {}).get("spells") or []
-    wiz_spells = enrich_spells_with_descriptions(wiz_spells)
+    wiz_spells = enrich_spells_with_descriptions(wiz_spells, wb_sources)
     learnable = enrich_spells_with_descriptions(learnable)
     # Core Rules p.84: a wizard may only learn a spell they hold a grimoire for.
     # The picker marks the ones they don't; confirming anyway is the player's call.
@@ -1641,6 +1651,7 @@ def warband_view(warband_id: str) -> str:
         black_market_rolls_max=BLACK_MARKET_ROLLS_PER_SCENARIO,
         schools=SCHOOLS,
         learnable=learnable,
+        learnable_flourishes=expansions.learnable_flourishes(wb),
         wizard_item_role=expansions.figure_item_role(wb, "wizard"),
         apprentice_item_role=expansions.figure_item_role(wb, "apprentice", wb.get("apprentice")),
         captain_item_role=expansions.figure_item_role(wb, "captain", wb.get("captain")),
@@ -1688,6 +1699,13 @@ def warband_view(warband_id: str) -> str:
         ],
         wizard_knows_vault_grimoire_spell=lambda item: _wizard_knows_vault_grimoire_spell(wb, item),
         shop_sale_price=lambda item: shop_sale_price(wb, item),
+        no_market_created=expansions.spellcraft_rule_on(wb, "no_market_for_created_items"),
+        is_created_item=expansions.is_created_item,
+        drain_bonus=(
+            (lambda item: expansions.drain_bonus(wb, item, shop_sale_price(wb, item)))
+            if expansions.spellcraft_rule_on(wb, "draining_magical_items")
+            else (lambda item: None)
+        ),
         base_post_game=base_post_game_effect(wb),
         base_locations=BASE_LOCATIONS,
         # Supplement resources (Crow Roost, Gondola Repair Shop) only appear once
@@ -1745,6 +1763,7 @@ def warband_view(warband_id: str) -> str:
         ),
         source_books=SOURCE_BOOK_OPTIONS,
         enabled_source_names=wb_sources,
+        spellcraft_rules=load_spellcraft_rules(),
         wizard_state=expansions.wizard_state(wb),
         wizard_state_kind=expansions.state_kind(wb),
         wizard_portrait_state=expansions.wizard_portrait_state(wb),
@@ -2368,6 +2387,7 @@ def _act_level_up(wb: dict) -> tuple[bool, str]:
         choice,
         spell_key=request.form.get("learn_spell") or None,
         improve_spell_id=request.form.get("improve_spell") or None,
+        flourish_key=request.form.get("learn_flourish") or None,
     )
 
 
@@ -2560,6 +2580,11 @@ def _act_shop_buy(wb: dict) -> tuple[bool, str]:
 @register_action("shop_sell")
 def _act_shop_sell(wb: dict) -> tuple[bool, str]:
     return shop_sell(wb, request.form.get("item_id") or "", request.form.get("price"))
+
+
+@register_action("drain_vault_item")
+def _act_drain_vault_item(wb: dict) -> tuple[bool, str]:
+    return drain_vault_item(wb, request.form.get("item_id") or "")
 
 
 @register_action("set_black_market")

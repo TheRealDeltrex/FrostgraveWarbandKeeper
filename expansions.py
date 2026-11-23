@@ -1375,9 +1375,73 @@ def alt_xp_enabled(wb: dict) -> bool:
 
 def level_up_options(wb: dict) -> list[dict]:
     """The level-up choices open to this wizard."""
+    opts = list(LEVEL_UP_OPTIONS)
     if is_lich(wb):
-        return [o for o in LEVEL_UP_OPTIONS if o["id"] not in LICH_FORBIDDEN_LEVELUP]
-    return list(LEVEL_UP_OPTIONS)
+        opts = [o for o in opts if o["id"] not in LICH_FORBIDDEN_LEVELUP]
+    if spellcraft_rule_on(wb, "flourishes"):
+        opts.append(LEARN_FLOURISH_OPTION)
+    return opts
+
+
+# Advanced Spellcraft p.11: learning a flourish costs a level like a new spell.
+LEARN_FLOURISH_OPTION = {"id": "learn_flourish", "label": "Learn a flourish", "stat": None}
+
+
+def learnable_flourishes(wb: dict) -> list[dict]:
+    """Flourishes the wizard could learn next: every listed flourish of a known
+    core spell not learned yet, flagged with whether a grimoire for that spell
+    is in the vault (the book asks for one; the picker warns, not refuses)."""
+    held = vault_grimoire_spells(wb)
+    out = []
+    for sp in (wb.get("wizard") or {}).get("spells") or []:
+        codex = game_content.spell_codex_view(sp.get("name", ""))
+        if not codex:
+            continue
+        learned = set(sp.get("flourishes") or [])
+        for f in codex["flourishes"]:
+            if f["name"] in learned:
+                continue
+            out.append({
+                "key": f"{sp.get('id')}::{f['name']}",
+                "spell": sp.get("name", ""),
+                "name": f["name"],
+                "modifier": f["modifier"],
+                "has_grimoire": has_grimoire_for(wb, sp.get("name", ""), held),
+            })
+    return out
+
+
+# Vault entries the warband made itself (No Market for Created Items, Advanced
+# Spellcraft p.13), by the `source` the app stamps when it creates them.
+CREATED_VAULT_SOURCES = frozenset({"brew_potion", "write_scroll", "alchemical_workshop"})
+
+
+def is_created_item(item: dict) -> bool:
+    return item.get("source") in CREATED_VAULT_SOURCES
+
+
+_NOT_DRAINABLE_RE = re.compile(r"(potion|scroll|grimoire)", re.I)
+
+
+def drain_bonus(wb: dict, item: dict, sale: int | None) -> int | None:
+    """Draining Magical Items (Advanced Spellcraft p.11): +1 to an Out of Game
+    Casting Roll per full 100gc of sell price. None where the book rules the
+    item out: potions, scrolls and grimoires, created items under No Market
+    for Created Items, or no known sell price."""
+    if not sale or _NOT_DRAINABLE_RE.search(item.get("name") or ""):
+        return None
+    if is_created_item(item) and spellcraft_rule_on(wb, "no_market_for_created_items"):
+        return None
+    return int(sale) // 100
+
+
+def spellcraft_rule_on(wb: dict, rule_id: str) -> bool:
+    """An Advanced Spellcraft optional rule is in play: the book is switched
+    on and the group agreed to that rule (homerule "as_<id>")."""
+    hr = (wb or {}).get("homerules") or {}
+    return bool((hr.get("enabled_sources") or {}).get("Advanced Spellcraft")) and bool(
+        hr.get(f"as_{rule_id}")
+    )
 
 
 def companions_per_caster(wb: dict) -> int:

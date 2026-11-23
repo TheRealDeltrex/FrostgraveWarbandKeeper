@@ -1955,6 +1955,26 @@ input.warband-position::-webkit-inner-spin-button {
   grid-column: 1 / -1;
 }
 
+/* Advanced Spellcraft extras under a spell's text (templates/_spell_codex.html). */
+.spell-codex,
+.spell-codex-src {
+  grid-column: 1 / -1;
+}
+.spell-codex-src {
+  display: block;
+  margin: 0.15rem 0;
+}
+.spell-desc .spell-codex p {
+  white-space: normal;
+}
+.spell-codex ul {
+  margin: 0 0 0.35rem;
+  padding-left: 1.4rem;
+  font-size: var(--fs-base);
+  line-height: 1.4;
+  color: var(--text-dim);
+}
+
 .spell-list-detail {
   display: grid;
   gap: 0.2rem;

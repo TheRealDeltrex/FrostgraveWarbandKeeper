@@ -67,7 +67,10 @@ NO_PRICE = re.compile(r"^[X\u2012-\u2015?-]$")
 def _lines(doc: fitz.Document, pages: list[int]) -> list[str]:
     out: list[str] = []
     for page in pages:
-        out += [ln.strip() for ln in doc[page].get_text().splitlines() if ln.strip()]
+        out += [
+            ln.strip() for ln in doc[page].get_text().splitlines()
+            if ln.strip() and not ln.startswith("This ebook belongs to")  # purchaser stamp
+        ]
     return out
 
 
@@ -129,22 +132,23 @@ def _rows(lines: list[str], source: str, start: str, stop: str | None, columns: 
             # An artefact row, or a sub-table heading that slipped past the die
             # pattern. Either way there is no price to record.
             continue
-        wanted = 2 if columns == "purchase+sale" else 1
+        wanted = 2 if columns in ("purchase+sale", "listed+sale") else 1
         if len(found) < wanted:
             raise ValueError(f"{start}: expected {wanted} prices in {text!r}, got {found}")
         # The artefact table's rows end in a bare unlock number rather than a
         # price, so only the gc figures are taken and the leftovers stripped.
-        name = PRICE.sub("", text)
+        name = PRICE.sub("", text).replace(" each", "")
         name = " ".join(w for w in name.split() if not NO_PRICE.match(w) and not w.isdigit())
         name = name.replace("\u2019", "'").strip(" .\u2012-\u2015")
         name = " ".join(name.split())
-        rows.append(
-            {
-                "name": ALIASES.get((source, name), name),
-                "purchase": None if columns == "sale" else int(found[0].replace(",", "")),
-                "sale": int(found[-1].replace(",", "")) if columns != "purchase" else None,
-            }
-        )
+        row = {
+            "name": ALIASES.get((source, name), name),
+            "purchase": None if columns in ("sale", "listed+sale") else int(found[0].replace(",", "")),
+            "sale": int(found[-1].replace(",", "")) if columns != "purchase" else None,
+        }
+        if columns == "listed+sale":
+            row["listed_cost"] = int(found[0].replace(",", ""))
+        rows.append(row)
     return rows
 
 
@@ -208,7 +212,20 @@ BOOKS: dict[str, tuple[str, list[tuple[str, str | None, list[int], str]]]] = {
             ("Wildwoods Magic Item Table", None, [63, 64], "purchase+sale"),
         ],
     ),
+    # "items on this treasure table are never purchasable, even if using the
+    # black-market rule" (p.125): the cost column is for comparison only, so it
+    # is kept as `listed_cost` and the row is sell-only like an artefact.
+    "Advanced Spellcraft": (
+        "MGT2E - Advanced Spellcraft.pdf",
+        # The page's only plain-text anchors: the column header before the
+        # table and the image caption after it.
+        [("Item", "Seriously, we found", [125, 126], "listed+sale")],
+    ),
 }
+
+
+# Where the start anchor is not the table's printed title.
+TABLE_TITLES = {("Advanced Spellcraft", "Item"): "Bibliosepulchre Treasure Table"}
 
 
 def _superseded_by_core() -> set[str]:
@@ -251,7 +268,7 @@ def main() -> int:
                     print(f"  skipping {source}: {row['name']} — repriced by the Core Rules")
                     continue
                 row["source"] = source
-                row["table"] = heading
+                row["table"] = TABLE_TITLES.get((source, heading), heading)
                 row["sale_estimated"] = row["sale"] is None
                 if row["sale"] is None:
                     row["sale"] = _estimated_sale(row["purchase"])

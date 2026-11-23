@@ -6691,5 +6691,114 @@
     }
    ]
   }
+ ],
+ "Advanced Spellcraft": [
+  {
+   "title": "The Bibliosepulchre",
+   "blurb": "",
+   "entries": [
+    {
+     "name": "The Bibliosepulchre",
+     "tag": "p.96",
+     "text": "Near the heart of Ancient Felstad stood a vast, sprawling library. It had been established in the earliest days of the city and over the passing centuries had grown in all directions, with new wings, annexes, catacombs, towers, basements, sub-basements, and halls being added by successive administrations. The proper name of this institution has long been forgotten for, even at the height of the great city, people called it the Bibliosepulchre because of the strange traditions kept by the librarians. Young men and women who joined the library first signed on as acolytes and spent a five-year apprenticeship studying the great books and learning the secrets of their care. At the end of this time, the acolyte selected one book, usually a rare grimoire, and spent the next several years painstakingly transcribing it, binding it, and decorating it. Once the new volume was finished, the acolyte had a choice. They could either leave the library, and their book, behind or they could take the final oath of the library. This oath bound them to the protection of the library and their book not just for the rest of their life, but also in death. For when a librarian died, they were entombed within the library and their precious volume stored nearby. If any non-librarian ever disturbed their rest, or attempted to take their book, they would rise as a wight, a terrible spirit of vengeance, to ensure the sanctity of the library. With passing centuries, hundreds of librarians were laid to rest in those labyrinthine passages, bricked up into walls, buried beneath the floor, or placed in purpose- built mausoleums. Despite these strange and, to some, distasteful traditions, the Bibliosepulchre stood as the greatest repository of magical knowledge in the world, and wizards would come from near and far to study its books. So long as they were respectful, nearly all were allowed in. However, those who broke the rules or damaged the books never left those halls, and the stories of their torments passed in whispers throughout the city. With so much magical knowledge at their fingertips, it is no surprise that the librarians knew greater enchantments and wards than nearly anyone else, and it was virtually impossible to enter the library without invitation. So strong was this magic, that it survived the great cataclysm, even if a lot of the structure of the library did not. The wizards of Frostgrave have long known the location of the Bibliosepulchre but had continuously failed to break through its wards. Now though, the planets have aligned in such a way that those magical defences are flickering, and it is possible to slip through. No one knows how long this window might last, but it is an opportunity that cannot be missed. Within those shattered halls and chambers lie magical secrets unknown anywhere else. You’ll just have to pry them loose from the cold, dead hands of the librarians…"
+    },
+    {
+     "name": "Creating the Bibliosepulchre in Miniature",
+     "tag": "p.97",
+     "text": "The Bibliosepulchre is designed to be the city of Frostgrave in microcosm. It is a vast, sprawling structure that has been shattered and ruined. In many places, it has collapsed, even through the floor into the chambers and catacombs beneath. It is, therefore, perfectly acceptable to play scenarios set within the Bibliosepulchre using the same snowy ruins you would use for the rest of the Frozen City. It is a library, however, and that means there are a lot of books. This in turn means there are numerous bookshelves, reading desks, scroll cases, display cases, and catalogues, as well as writing desks, lecterns, and other accoutrements associated with a large library or place of learning. How much the players want to depict this on the table is up to them, but all these things serve as great scatter terrain to help break up line of sight and give your table a more maze-like feel. One thing that is very prevalent within the library are the tombs of past librarians."
+    },
+    {
+     "name": "The Tombs",
+     "tag": "p.98",
+     "text": "One of the distinct features of the Bibliosepulchre scenarios is that most feature a tomb or mausoleum on the table. This should a 6” x 6” structure, or thereabouts, with a doorway in the middle of each side. This can be represented two-dimensionally on the table, but if you are going to be playing multiple scenarios from this book, it is probably worth going ahead and making one. It must be possible to access the inside of this tomb. Each scenario tells you where to place the tomb, but not what is inside it. The interior of the tomb is unknown to the players until someone opens one of the doors and peers inside. Any figure that moves into contact with a door may attempt to open it as a free action, though they may only make one attempt per activation. They may either try to bash it in with a Fight Roll (TN14) or pick the lock with a Will Roll (TN14); thieves and treasure hunters gain +4 when attempting to pick locks. Once a door is open, it remains open for the rest of the game. A figure may open a door from the inside merely by moving through it. As soon as a door is open, that player should roll on the Bibliosepulchre Tomb Table to find out what is inside. If players plan to play through all the scenarios as a campaign, they might wish to make each tomb interior unique and reroll any that have already appeared in the campaign. It doesn’t really matter though. Each one comes with its own challenges to test the wits and powers of the players. The tombs themselves have magical wards, which means that no spell effect that leaves something on the table (such as Wall, Explosive Rune, or Mud) can be placed inside or within 2” of a tomb. Nor can spells such as Crumble or Wizard Eye be cast upon them. Spells which don’t leave anything on the table can be cast normally. Most of the tombs include at least one special treasure token. These follow the normal rules for a treasure token, except that if a warband secures a special treasure token, they should roll three times on the Grimoire Table and select the result they want. If there is also a book wight placed on the table at the same time as the special treasure token, this is the treasure token that is associated with the wight’s Book Bound trait. Bibliosepulchre Tomb Table Die Roll Tomb"
+    }
+   ]
+  },
+  {
+   "title": "Bibliosepulchre Tomb Table",
+   "blurb": "(pp.99-101)",
+   "rows": [
+    {
+     "name": "1",
+     "text": "Place a book wight (Bestiary, page 145) in the centre of the tomb and a special treasure token in one random corner. Place a bag of gold in the corner opposite the treasure token. This counts as a treasure token for all rules purposes, but if secured it is exchanged for 100gc instead of rolling on the Treasure Table."
+    },
+    {
+     "name": "2",
+     "text": "Place a book wight (Bestiary, page 145) in the centre of the tomb and a special treasure token in one random corner. The tomb is filled with green mist. Any warband member who activates inside the tomb must make a Will Roll (TN8). If it fails, it makes one move in a random direction and its activation ends. Undead, constructs, and any figure that doesn’t need to breathe, automatically passes its Will Roll."
+    },
+    {
+     "name": "3",
+     "text": "Place a book wight (Bestiary, page 145) in the centre of the tomb and a special treasure token in each of the four corners. Whenever a figure picks up one of the treasure tokens, roll a die. On a 1–15, the token is a fake and should be removed from the table. On a 16+ the token is real, and all the other tokens should be removed. If three of the tokens have been revealed to be fake, the fourth is automatically real."
+    },
+    {
+     "name": "4",
+     "text": "Place a special treasure token in the centre of the tomb and a book wight (Bestiary, page 145) in one corner. Place one armoured skeleton (see Frostgrave rulebook, page 190) in each of the other three corners."
+    },
+    {
+     "name": "5",
+     "text": "Place a strange crystal in the middle of the tomb and a special treasure token in a random corner. At the same time, place a book wight (Bestiary, page 145) at a random point along the table edge. Any figure that steps into the tomb is immediately struck by a +5 elemental magic shooting attack as a lightning bolt blasts out from the crystal. Once the figure is inside the tomb, it is safe from these attacks."
+    },
+    {
+     "name": "6",
+     "text": "Place a candelabra in each corner of the tomb. Place a book wight (Bestiary, page 145) in the centre of the tomb with a special treasure token adjacent to it. Any time a figure casts a spell while inside this tomb, it gains +3 to its Casting Roll but the light from one candelabra is extinguished. Once all four have been extinguished, there is no longer a bonus to Casting Rolls. However, if the spellcaster rolls a natural ‘1’, ‘2’, or ‘3’ in the tomb while a candelabra is lit, treat the roll as a critical failure."
+    },
+    {
+     "name": "7",
+     "text": "Place two normal treasure tokens in two opposite corners of the tomb. Place five ghouls in the middle of the tomb."
+    },
+    {
+     "name": "8",
+     "text": "Place a sarcophagus in the centre of the tomb. Any figure may attempt to open this sarcophagus by spending an action and making a Fight Roll (TN14) – thieves and treasure hunters get +4 to this roll. If successful, the sarcophagus is opened, and a special treasure token is revealed. The figure that opened the sarcophagus may immediately pick up this treasure token up as a free action, if they decide to pick it up later on that will require an action as usual. Otherwise, it may be picked up as normal. As soon as the sarcophagus is opened, place a book wight (Bestiary, page 145) at a random point on the edge of the table."
+    },
+    {
+     "name": "9",
+     "text": "Place a special treasure token in the centre of the tomb. Place two blade-dogs (Bestiary, page 144) in the tomb, one in each of two random corners. Place a bag of gold in a random corner not occupied by a blade-dog. This counts as a treasure token for all rules purposes, but if secured it is exchanged for 100gc instead of rolling on the Treasure Table."
+    },
+    {
+     "name": "10",
+     "text": "Place a special treasure token in a random corner of the tomb. Place a large incunabulon (Bestiary, page150 in the diagonally opposite corner. At the end of every turn, rotate the tomb 90 degrees and randomly block one of the doorways so that no figure may enter or exit through that doorway. This doorway unblocks at the end of the next turn, but may be blocked again when the tomb rotates."
+    },
+    {
+     "name": "11",
+     "text": "Place a special treasure token in the centre of the tomb. Place two normal treasure tokens in the tomb, each in a different random corner. Place a book wight (Bestiary, page 145) at a random point along the edge of the table."
+    },
+    {
+     "name": "12",
+     "text": "As soon as a figure enters this tomb, roll die. On a 1–15, the figure is immediately transported that many inches in a random direction, placing the figure on top of terrain if necessary. On any other result, the figure enters the tomb as normal. As soon as the first figure enters the tomb, place one special treasure token in the centre of the tomb and place one leechwolf (Bestiary, page 150) in each table corner."
+    },
+    {
+     "name": "13",
+     "text": "Place a special treasure token in the centre of the tomb. Place a werewolf (Frostgrave rulebook, page 188) in a random corner of the tomb. Place a bag of gold in the random corner. This counts as a treasure token for all rules purposes, but if secured it is exchanged for 100gc instead of rolling on the Treasure Table."
+    },
+    {
+     "name": "14",
+     "text": "Place a special treasure token in a random corner of the tomb. Place a snow troll (Frostgrave rulebook, page 188) in the opposite corner. If the first figure to enter the tomb did so by smashing open the door (made a Fight Roll), the troll is awake and follows the normal rules for uncontrolled creatures. If the first figure to enter the tomb did so by picking the lock (made a Will Roll), the troll is asleep. For the remainder of this turn, it is at Fight +0, causes no damage if it wins a fight, and will not activate or force combat. At the start of the next turn, its Fight returns to normal and it follows the normal rules for uncontrolled creatures."
+    },
+    {
+     "name": "15",
+     "text": "Place a special treasure token in a random corner of the tomb. Place a white gorilla (Frostgrave rulebook, page 182) in the opposite corner. If the first figure to enter the tomb did so by smashing open the door (made a Fight Roll), the gorilla is awake and follows the normal rules for uncontrolled creatures. If the first figure to enter the tomb did so by picking the lock (made a Will Roll), the gorilla is asleep. For the remainder of this turn, it is at Fight +0, causes no damage if it wins a fight, and will not activate or force combat. At the start of the next turn, its Fight returns to normal and it follows the normal rules for uncontrolled creatures."
+    },
+    {
+     "name": "16",
+     "text": "Place a special treasure token in a random corner of the tomb. Place two snow leopards Frostgrave rulebook, page 182) in the opposite corner. If the first figure to enter the tomb did so by smashing open the door (made a Fight Roll), the leopards are awake and follow the normal rules for uncontrolled creatures. If the first figure to enter the tomb did so by picking the lock (made a Will Roll), the leopards are asleep. For the remainder of this turn, they are at Fight +0, cause no damage if they win a fight, and will not activate or force combat. At the start of the next turn, their Fight returns to normal and they follow the normal rules for uncontrolled creatures."
+    },
+    {
+     "name": "17",
+     "text": "Place a special treasure token in a random corner of the tomb. Place a chilopendra (Bestiary, page 146) in the centre of the tomb. The chilopendra immediately forces combat with the first figure that opens a door to the tomb, regardless of the actual distance. Otherwise, the chilopendra follows the normal rules for an uncontrolled creature."
+    },
+    {
+     "name": "18",
+     "text": "Place a special treasure token in a random corner of the tomb. Place two failing wretches (Bestiary, page 148) in the two adjacent corners. A random one of these forces combat with the first figure that opens the door to the tomb, regardless of the actual distance. Otherwise, these failing wretches follow the normal rules for uncontrolled creatures."
+    },
+    {
+     "name": "19",
+     "text": "Place a special treasure token in the centre of the tomb. Place a violent fungus (Bestiary, page 152) in each of the four corners of the tomb. These violent fungi follow the normal rules for uncontrolled creatures."
+    },
+    {
+     "name": "20",
+     "text": "There is nothing in the tomb except a giant hole. Roll a die: on an 11+ place a giant worm (Frostgrave rulebook, page 187) in the centre of the hole. Roll again at the end of the turn and every subsequent turn until a worm appears. Once the worm appears, remove the tomb as the worm crashes out of it but mark the tomb’s position – this remains a huge hole. Any figure that is pushed into the hole must make a Move Roll (TN18). If it succeeds, it clings on to the side (place it just by the edge); otherwise, it falls in and is immediately reduced to 0 Health. The giant worm cannot fall into the hole. As soon as the first figure opens the door, place a special treasure token on the table by rolling a die and placing it that many inches in a random direction from the centre of the table – reroll if this would leave the token in the hole."
+    }
+   ]
+  }
  ]
 }

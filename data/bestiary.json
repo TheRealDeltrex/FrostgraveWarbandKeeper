@@ -199,6 +199,7 @@
   "name": "Blood Crow",
   "category": "Animal",
   "source": "Thaw of the Lich Lord",
+  "sources": ["Thaw of the Lich Lord", "Advanced Spellcraft"],
   "stats": "Move 9\" · Fight +0 · Shoot +0 · Armour 14 · Will +3 · Health 1",
   "description": "Crows that have flocked to Frostgrave since its uncovering, feeding on long-frozen corpses and wandering zombies; the consumption of undead flesh has made them large and aggressive. It counts as an Animal and has the Flying trait, ignoring all terrain and movement penalties."
  },
@@ -353,6 +354,7 @@
   "name": "Chilopendra",
   "category": "Demon",
   "source": "Forgotten Pacts",
+  "sources": ["Forgotten Pacts", "Advanced Spellcraft"],
   "stats": "Move 6\" · Fight +4 · Shoot +0 · Armour 12 · Will +4 · Health 14",
   "description": "Demon/human hybrids created when a human sacrifices himself to the demon lord Tiszirain; human from the waist up, with the lower body of a great centipede. Though they often carry weapons, they are just as deadly without, attacking with sharp horns or envenomed legs. It is a Demon, has Horns, and is Poisonous."
  },
@@ -360,6 +362,7 @@
   "name": "Failing Wretch",
   "category": "Demon",
   "source": "Forgotten Pacts",
+  "sources": ["Forgotten Pacts", "Advanced Spellcraft"],
   "stats": "Move 5\" · Fight +1 · Shoot +0 · Armour 10 · Will +4 · Health 10",
   "description": "A common minor demon, living embodiment of senescence, mostly resembling very old, fat men with bulging eyes and long curving fingernails. Like their patron Ambronnax they possess Decaying Touch: any figure that activates while in combat with a failing wretch immediately loses 1 Health before taking any actions (undead, constructs and demons are immune). It has the Demon trait."
  },
@@ -878,6 +881,7 @@
   "name": "Leechwolf",
   "category": "Demon",
   "source": "Blood Legacy",
+  "sources": ["Blood Legacy", "Advanced Spellcraft"],
   "stats": "Move 7\" · Fight +2 · Shoot +0 · Armour 10 · Will +2 · Health 10",
   "description": "A demonic wolf that drains its prey. Demon, Latch On (a pushback against it requires actually dealing damage), Pack Hunter."
  },
@@ -1230,5 +1234,89 @@
   "source": "The Perilous Dark",
   "stats": "Move 5\" · Fight +3 · Shoot +0 · Armour 12 · Will +0 · Health 12",
   "description": "A larger vapour snake, otherwise identical in nature to its smaller kin. It has Shooting Attack Damage Maximum (bow, crossbow, javelin, and equivalent spell attacks do a maximum of 1 point of damage to it), is Flammable (set on fire, rather than destroyed, by an elemental hit that doesn't kill it, dealing 2 damage to any figure it fights while burning), and is Immune to Mind Control."
+ },
+ {
+  "name": "Blade-Dog",
+  "category": "Construct",
+  "source": "Advanced Spellcraft",
+  "stats": "Move 7\" · Fight +3 · Shoot +0 · Armour 12 · Will +0 · Health 14",
+  "description": "This construct has recently become a favourite of the wizards exploring Frostgrave. Essentially, the wizard takes a bunch of old bladed weapons such as swords, spears, axes, and knives, and beats them into the rough shape of an animal. Usually this is a dog, or some other four-legged animal, but it doesn’t really matter. The resulting construct is designed to move fast, strike hard, and inflict maximum damage while being ultimately disposable. If this construct becomes part of a warband it is treated as a specialist soldier. Construct, Horns, Sharp Teeth, Cannot Pick Up Treasure Tokens. (p.144)"
+ },
+ {
+  "name": "Book Wight",
+  "category": "Undead",
+  "source": "Advanced Spellcraft",
+  "stats": "Move 6\" · Fight +2 · Shoot +0 · Armour 10 · Will +5 · Health 10",
+  "description": "The spirits of the ancient librarians of the Biblosepluchre are bound to the books that they painstakingly transcribed during life. When these books are threatened, their entombed remains animate as a fearsome wight. Unlike normal wights, these creatures are impossible to control with magic if their book is nearby. The only way to permanently destroy a book wight is to destroy the book to which they are bound. Undead, Energy Drain, Ethereal, Immune to Normal Weapons, Magic Attack, Book Bound. (p.145)"
+ },
+ {
+  "name": "Bookeater",
+  "category": "Animal",
+  "source": "Advanced Spellcraft",
+  "stats": "Move 6\" · Fight +2 · Shoot +0 · Armour 11 · Will +0 · Health 10",
+  "description": "These emaciated, ghoul-like creatures prowl the forgotten libraries and catacombs of Frostgrave, feeding on the magical energy stored in books and scrolls. With long arms, short legs, bat-like heads, and pale skin, they can often be seen flitting between the shadows running on four legs, trying to escape the light. Unlike most of the denizens of the Frozen City, bookeaters have no interest in people, and tend to avoid them if possible. Unfortunately, these creatures are very interested in the magical books and scrolls that sustain them, and thus conflict with the wizards is unavoidable. Bookeaters are more than willing to fight to defend their food. While bookeaters are often mistaken for undead, they are living animals. Animal, Elemental Resistance (3), Treasure Eater, True Sight. (p.146)"
+ },
+ {
+  "name": "Collegium Porter",
+  "category": "Construct",
+  "source": "Advanced Spellcraft",
+  "stats": "Move 5\" · Fight +4 · Shoot +0 · Armour 13 · Will +3 · Health 14",
+  "description": "Over the centuries, the Bibliosepulchre had a strained relationship with the Collegium of Artistry (also known as The Maze of Malcor) that loomed on the cliffs above it. At one point, to promote friendship, the Collegium sent a set of collegium porter constructs to the library as a gift. It is unknown what effect this had at the time, but it means that some of these constructs are still wandering inside the library. Construct, Never Attacks Spellcasters, Possible Scroll, Item Slots – Collegium Porter. (p.147)"
+ },
+ {
+  "name": "Chronohound",
+  "category": "Animal",
+  "source": "Advanced Spellcraft",
+  "stats": "Move 8\" · Fight +3 · Shoot +0 · Armour 10 · Will +8 · Health 10",
+  "description": "The strange creatures known as chronohounds are only rarely seen in the Frozen City, as they exist in a different relationship to time than other living beings. While they are perfectly capable of moving around in three-dimensional space, they can also move forwards and backwards through time at will. In this way, chronohounds are functionally immortal. On the point of death, they just jump backwards to an earlier point in their own time stream. Thankfully, chronohounds rarely remain in one time for very long unless there is some focus point, usually time crystals, to drawn them to it. Chronohounds resemble large, lean, and hairless hounds. They have long tongues that loll out of their mouths and they are constantly salivating. Unfortunately, they seem to enjoy violence, and usually attack strangers on sight … which tends to mean anyone they meet is a stranger… The ability of chronohounds to essentially come back from the dead will be handled by individual scenarios and thus is not listed in their stats. Animal, Immune to Control Animal, Mind Control, Slow, Transpose, Poison. Never Wounded. Always Has Line of Sight. (p.148)"
+ },
+ {
+  "name": "Illusionary Fire",
+  "category": "Miscellaneous",
+  "source": "Advanced Spellcraft",
+  "stats": "Move 6\" · Fight +3 · Shoot +0 · Armour 10 · Will +0 · Health 5",
+  "description": "Illusionary fire isn’t really a creature, it’s more of an automated defence system. It appears as a man-sized ball of fire, floating a foot or two off the ground. Although it is only an illusion, it generates enough actual heat to burn flesh and set constructs alight. The ones in the library have been warded against setting the building or furniture on fire. Fighting such ‘creatures’ with normal weapons is basically useless. They can only be destroyed through magic, especially magic that can cancel illusions. Illusionary, Levitate, Magic Attack. (p.149)"
+ },
+ {
+  "name": "Incunabulon (Small)",
+  "category": "Construct",
+  "source": "Advanced Spellcraft",
+  "stats": "Move 6\" · Fight +1 · Shoot +0 · Armour 11 · Will +0 · Health 10",
+  "description": "Formed of hand-written books, bound together in the rough mimicry of human form, these constructs often wandered the great library, shelving, tidying, and running errands. However, while their main tasks were peaceful, they all had deep-buried commands to defend the library when needed. Now that the enchanted walls have failed, the remaining incunabulons have become aggressive, attacking anyone they don’t recognize. Thanks to their stiff, paper ‘hands’, the wounds from an incunabulon always include thousands of extremely painful papercuts. Being made of paper, the incunabulons are vulnerable to fire. Sometimes, a rare or magical book is included in the make-up of an incunabulon, so it’s always worth checking after it has been destroyed. Like most construct varieties, incunabulons come in three sizes. Construct, Elemental Vulnerability (2), Papercuts, Possible Grimoire. (p.150)"
+ },
+ {
+  "name": "Incunabulon (Medium)",
+  "category": "Construct",
+  "source": "Advanced Spellcraft",
+  "stats": "Move 5\" · Fight +3 · Shoot +0 · Armour 12 · Will +0 · Health 10",
+  "description": "Formed of hand-written books, bound together in the rough mimicry of human form, these constructs often wandered the great library, shelving, tidying, and running errands. However, while their main tasks were peaceful, they all had deep-buried commands to defend the library when needed. Now that the enchanted walls have failed, the remaining incunabulons have become aggressive, attacking anyone they don’t recognize. Thanks to their stiff, paper ‘hands’, the wounds from an incunabulon always include thousands of extremely painful papercuts. Being made of paper, the incunabulons are vulnerable to fire. Sometimes, a rare or magical book is included in the make-up of an incunabulon, so it’s always worth checking after it has been destroyed. Like most construct varieties, incunabulons come in three sizes. Construct, Elemental Vulnerability (3), Papercuts, Possible Grimoire. (p.150)"
+ },
+ {
+  "name": "Incunabulon (Large)",
+  "category": "Construct",
+  "source": "Advanced Spellcraft",
+  "stats": "Move 4\" · Fight +4 · Shoot +0 · Armour 13 · Will +0 · Health 14",
+  "description": "Formed of hand-written books, bound together in the rough mimicry of human form, these constructs often wandered the great library, shelving, tidying, and running errands. However, while their main tasks were peaceful, they all had deep-buried commands to defend the library when needed. Now that the enchanted walls have failed, the remaining incunabulons have become aggressive, attacking anyone they don’t recognize. Thanks to their stiff, paper ‘hands’, the wounds from an incunabulon always include thousands of extremely painful papercuts. Being made of paper, the incunabulons are vulnerable to fire. Sometimes, a rare or magical book is included in the make-up of an incunabulon, so it’s always worth checking after it has been destroyed. Like most construct varieties, incunabulons come in three sizes. Construct, Elemental Vulnerability (4), Papercuts, Possible Grimoire. (p.150)"
+ },
+ {
+  "name": "Lighthawk",
+  "category": "Demon",
+  "source": "Advanced Spellcraft",
+  "stats": "Move 7\" · Fight +3 · Shoot +0 · Armour 10 · Will +6 · Health 12",
+  "description": "These glowing, gold, demonic birds have a wingspan equal to the arm span of a full-grown man. Beautiful to the point of hypnotic, lighthawks are fearsome predators that prefer undead flesh or the flesh of other demons. Sometimes called ‘servants of the light’, they have an instinctive sense of those that wield the powers of thaumaturgy, and will not attack them … this mercy does not extend to their friends however. Demon, Flying, Preferred Targets (Demon & Undead), Spare the Thaumaturge. (p.152)"
+ },
+ {
+  "name": "Silver Fish Swarm",
+  "category": "Animal",
+  "source": "Advanced Spellcraft",
+  "stats": "Move 6\" · Fight +2 · Shoot +0 · Armour 12 · Will +0 · Health 12",
+  "description": "These small insects are found all over the world, especially in old books, which serve as perfect food sources and nesting grounds. Unfortunately those in Frostgrave, and especially in the Bibliosepulchre, have grown large and vicious due to feasting on magically infused texts. Around the size of a grown-man’s hand, they are little more than a nuisance individually; however, the more magic that is used within an area, the more likely the insects are to swarm! A swarm of silver fish can eat through a book in seconds and don’t mind burrowing through flesh to get at them. Animal, Swarm, Treasure Eater. (p.152)"
+ },
+ {
+  "name": "Violent Fungus",
+  "category": "Miscellaneous",
+  "source": "Advanced Spellcraft",
+  "stats": "Move 4\" · Fight +0 · Shoot +0 · Armour 10 · Will +6 · Health 6",
+  "description": "The slightly warmer and more humid chambers beneath Frostgrave are home to numerous species of aggressive fungus. Although these fungi come in numerous shapes, sizes, and colours, the most common form look like a cross between a man and a mushroom and stand between four and five feet high. Although these fungi tend to be slow and weak, they are generally poisonous and thus extremely dangerous to even the most skilful warriors. Fungus, Poison, Poisonous Spores. (p.152)"
  }
 ]

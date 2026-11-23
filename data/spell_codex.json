@@ -1,0 +1,3154 @@
+{
+ "Absorb Knowledge": {
+  "page": 17,
+  "criticals": [
+   {
+    "sources": [
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Advanced Spellcraft": "p.17"
+    },
+    "success": "The wizard gains +50 experience points (instead of +40) and gains +2 to the next Out of Game (A) spell cast before the next game. This does stack with the Channel Knowledge flourish.",
+    "failure": "The wizard absorbs a huge amount of meaningless gibberish, and suffers -1 Will in its next game."
+   },
+   {
+    "sources": [
+     "Spellcaster Magazine"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.38"
+    },
+    "success": "The wizard gains 50 experience points (instead of 40) and gains +2 to his first Casting Roll in his next game.",
+    "failure": "The wizard absorbs a huge amount of meaningless gibberish. He suffers -1 Will in his next game."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Channel Knowledge",
+    "modifier": -2,
+    "text": "The wizard gains +2 to the next Out of Game (A) spell cast directly after this one. This spell must be cast before the next game"
+   },
+   {
+    "name": "Every Last Word",
+    "modifier": -4,
+    "text": "The next time the wizard learns a flourish from a grimoire, that grimoire is not expended and can either be sold or used to learn another flourish for that spell."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Animal Companion": {
+  "page": 18,
+  "criticals": [
+   {
+    "sources": [
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Advanced Spellcraft": "p.18"
+    },
+    "success": "The spellcaster can choose to either gain a white gorilla, Frostgrave page 182 (but without any flourishes) as its animal companion or one of the creatures normally allowed, but with a permanent +1 Health (and flourishes).",
+    "failure": "In the next game, one random opponent may select a bear, wolf, snow leopard, or ice toad to add to their warband as a temporary member for that game only. This animal does not count against the player’s normal warband limit."
+   },
+   {
+    "sources": [
+     "Spellcaster Magazine"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.38"
+    },
+    "success": "The spellcaster can choose to either gain a White Gorilla as his animal companion or one of the creatures normally allowed, but with a permanent +1 Health.",
+    "failure": "In the next game, one random opponent may select a bear, wolf, snow leopard, or ice toad to add to his warband, for that game only. This animal does not count against the player’s normal warband limit."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Enchanted Friend",
+    "modifier": -3,
+    "text": "The animal companion permanently gains the Magic Attack trait."
+   },
+   {
+    "name": "Flying Friend",
+    "modifier": -3,
+    "text": "The spellcaster can select an ice toad or wolf animal companion that also has the Flying trait but does not receive the Will bonus."
+   },
+   {
+    "name": "Observant Friend",
+    "modifier": -2,
+    "text": "The animal companion permanently gains the True Sight trait."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Animate Construct": {
+  "page": 18,
+  "criticals": [
+   {
+    "sources": [
+     "Spellcaster Magazine",
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.38",
+     "Advanced Spellcraft": "p.18"
+    },
+    "success": "The power feeding into the construct enhances its abilities. The spellcaster may select one of the following bonuses for it: +1 Move, +1 Fight, +4 Will, +2 Health. This bonus lasts for the next game only.",
+    "failure": "In the next game, one random opponent may take a construct of the type you were attempting to animate as a temporary member of their warband for that game only. This construct does not count against the player’s normal warband limit."
+   }
+  ],
+  "flourishes": [],
+  "notes": [
+   "There are no flourishes for Animate Construct; instead, see the Advanced Animation rules in Frostgrave: Fireheart for different ways to use this spell and ways to modify constructs. When using a scroll of Animate Construct, the caster may animate a construct of any size, and the casting is automatically successful."
+  ],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Animate Skull": {
+  "page": 19,
+  "criticals": [
+   {
+    "sources": [
+     "Spellcaster Magazine",
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.38",
+     "Advanced Spellcraft": "p.19"
+    },
+    "success": "The animated skull has +1 Fight and +1 Armour.",
+    "failure": "Place an animated skull 6” away from the spellcaster in a random direction. This animated skull is an uncontrolled creature."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Controlled Skull",
+    "modifier": -3,
+    "text": "The animated skull counts as under the effects of a Control Undead spell cast by this caster and joins the warband as a temporary member."
+   },
+   {
+    "name": "Helmeted Skull",
+    "modifier": -1,
+    "text": "The animated skull gains +2 Armour."
+   },
+   {
+    "name": "Observant Skull",
+    "modifier": -2,
+    "text": "The animated skull gains the True Sight trait."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Awareness": {
+  "page": 21,
+  "criticals": [
+   {
+    "sources": [
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Advanced Spellcraft": "p.21"
+    },
+    "success": "In the coming game, the spellcaster adds +3 (instead of the normal +2) to their warband’s Initiative Rolls and gains +1 Fight when rolling against shooting attacks.This stacks with flourishes.",
+    "failure": "In the coming game, the spellcaster’s warband suffers -1 to all Initiative Rolls, while the spellcaster is on the table."
+   },
+   {
+    "sources": [
+     "Spellcaster Magazine"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.39"
+    },
+    "success": "For the rest of the game, the spellcaster adds +3 (instead of the normal +2) to his warband’s initiative rolls and gains +1 Fight whenever rolling against shooting attacks.",
+    "failure": "For the rest of the game, the spellcaster’s warband suffers -1 to all initiative rolls while the spellcaster is on the table. Additionally, the spellcaster may not attempt to cast this spell again for the rest of the game."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Know the Moment",
+    "modifier": -2,
+    "text": "Once during the coming game, the player may reroll an Initiative Roll. Only one such reroll can be made per game due to this flourish, even if the spell was cast multiple times."
+   },
+   {
+    "name": "Precognition",
+    "modifier": -1,
+    "text": "The caster gains +2 Fight when rolling against shooting attacks in the coming game."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Banish": {
+  "page": 22,
+  "criticals": [
+   {
+    "sources": [
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Advanced Spellcraft": "p.22"
+    },
+    "success": "All demons with a Will stat of +4 or lower on the table must roll a natural ‘20’ on a Will Roll or be removed from the game. Demons with a Will stat of +5 or higher should roll as normal but suffer damage equal to four times the amount by which they fail the roll. The wizard receives +5 experience points for each demon reduced to 0 Heath (to a maximum of +30).",
+    "failure": "One random opponent may place an uncontrolled imp (see Frostgrave, page 184) anywhere on the table, provided it is no closer than 4” to any warband member."
+   },
+   {
+    "sources": [
+     "Spellcaster Magazine"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.39"
+    },
+    "success": "All demons with a Will Stat of +4 or less on the table must roll a natural 20 on their Will Roll or be removed from the game. Demons with a Will Stat of +5 or higher should roll as normal but suffer damage equal to four times the amount by which they fail the roll. The wizard receives +5 experience points for each demon removed (to a maximum of +30).",
+    "failure": "One random opponent may place an imp anywhere on the table, provided it is no closer than 4\" to any warband member."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Steal Demonic Energy",
+    "modifier": -1,
+    "text": "The caster gains back 1 lost point of Health for each demon damaged or removed from the table by this casting of the spell."
+   },
+   {
+    "name": "Violent Banishment",
+    "modifier": -1,
+    "text": "Demons that pass their Will Roll, or that take damage but survive, are moved 6\" directly away from the caster, stopping if contacting the edge of the table or terrain over 1” high."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Beauty": {
+  "page": 23,
+  "criticals": [
+   {
+    "sources": [
+     "Spellcaster Magazine",
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.39",
+     "Advanced Spellcraft": "p.23"
+    },
+    "success": "So powerful is the aura of beauty surrounding the caster that the effect of the spell also applies to creatures.",
+    "failure": "For the rest of the game no other warband members may activate in the same phase as the spellcaster."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Blinding Aura",
+    "modifier": -1,
+    "text": "The spellcaster gains +2 Fight when rolling against shooting attacks from another figure."
+   },
+   {
+    "name": "Enduring Doubt",
+    "modifier": -1,
+    "text": "All figures in combat with the spellcaster that would have to make a Will Roll to enter combat (whether they did so or not) suffer -1 melee damage against the spellcaster."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Blinding Light": {
+  "page": 23,
+  "criticals": [
+   {
+    "sources": [
+     "Spellcaster Magazine",
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.39",
+     "Advanced Spellcraft": "p.23"
+    },
+    "success": "The caster can choose to make a +5 magic shooting attack against the target in addition to the normal effects of the spell.",
+    "failure": "The caster is blinded, suffering all the effects of the spell, until its next activation."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Burning Light",
+    "modifier": -1,
+    "text": "If the target of the spell fails its Will Roll it suffer 2 points of damage."
+   },
+   {
+    "name": "Wide Beam",
+    "modifier": -2,
+    "text": "This spell can target two figures that are within 1” of one another."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Blink": {
+  "page": 24,
+  "criticals": [
+   {
+    "sources": [
+     "Spellcaster Magazine",
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.40",
+     "Advanced Spellcraft": "p.24"
+    },
+    "success": "The caster may roll the random direction first, then choose to move the figure anywhere from 1–8”.",
+    "failure": "Move the caster 4” in a random direction."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Directed",
+    "modifier": -2,
+    "text": "The caster may choose which direction to move the target figure."
+   },
+   {
+    "name": "Puff of Smoke",
+    "modifier": -1,
+    "text": "If the target fails its Will Roll, or chooses not to make one, place a 2” diameter smoke cloud centred on where the figure was standing before it blinked. Figures can move through the smoke with no penalty, but line of sight may not be drawn through it. At the start of each new turn, roll a die. On a result of 1–4 the smoke dissipates and is removed from the table."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Bone Dart": {
+  "page": 24,
+  "criticals": [
+   {
+    "sources": [
+     "Spellcaster Magazine",
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.40",
+     "Advanced Spellcraft": "p.24"
+    },
+    "success": "Instead of the normal attack for this spell, the caster may make an immediate +5 magic shooting attack against one target within line of sight. This does not have to be the originally declared target.",
+    "failure": "A piece of the caster’s own bone tears through its skin. It takes 3 points of damage and suffers -1 to all Casting Rolls for the rest of the game."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Bone Club",
+    "modifier": -2,
+    "text": "Instead of a dart, the caster shoots a lumpy ball of bone, that does +2 damage against undead and constructs."
+   },
+   {
+    "name": "Extended Range",
+    "modifier": -2,
+    "text": "The range of the spell is increased to 18”, but it is decreased to a +4 shooting attack."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Bones of the Earth": {
+  "page": 25,
+  "criticals": [
+   {
+    "sources": [
+     "Spellcaster Magazine",
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.41",
+     "Advanced Spellcraft": "p.25"
+    },
+    "success": "Instead of the normal rules for this spell, the caster may place a skeleton in combat with the target figure. This skeleton counts as a temporary member of the caster’s warband for the rest of the game.",
+    "failure": "The caster successfully casts the spell on itself."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Clawed Hand",
+    "modifier": -1,
+    "text": "The hand does +1 damage if it wins a fight."
+   },
+   {
+    "name": "Ethereal Hand",
+    "modifier": -2,
+    "text": "The spell can target ethereal creatures and figures that are not standing on the ground."
+   },
+   {
+    "name": "Great Hand",
+    "modifier": -3,
+    "text": "The spell can affect Large creatures."
+   }
+  ],
+  "notes": [
+   "Bones of the Earth cannot target creatures with the Flying, Levitate, or Ethereal trait unless the caster uses the Ethereal Hand flourish. It cannot target figures in deep water, or any figure in any water that has the Amphibious or Aquatic traits."
+  ],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Brew Potion": {
+  "page": 26,
+  "criticals": [
+   {
+    "sources": [
+     "Spellcaster Magazine",
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.41",
+     "Advanced Spellcraft": "p.26"
+    },
+    "success": "The spellcaster creates two doses of the same potion.",
+    "failure": "The mixture explodes. The spellcaster starts the next game at -3 Health."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Explosive Batch",
+    "modifier": -3,
+    "text": "The spellcaster makes a highly volatile version of the potion. Select a lesser potion as normal; however, the potion can also be used as an explosive cocktail (Frostgrave rulebook, page 91) if desired."
+   },
+   {
+    "name": "Potent Dose",
+    "modifier": -3,
+    "text": "The spellcaster makes a very potent version of the potion, which can be contained in a tiny vial. A figure may carry this potion without it taking up an item slot. A figure may only carry one item that doesn’t take up an item slot."
+   }
+  ],
+  "notes": [
+   "When creating a greater potion, Brew Potion may not be empowered, even if the optional rules for empowering Out of Games spells are being used, unless some other rule allows it for this spell specifically."
+  ],
+  "description": {
+   "sources": [
+    "Advanced Spellcraft"
+   ],
+   "pages": {
+    "Advanced Spellcraft": "p.26"
+   },
+   "text": "The spellcaster creates one lesser potion of their choice (Frostgrave rulebook, page 86). A wizard (and only a wizard) may use this spell to create a greater potion (Frostgrave rulebook, page 87). First, they must declare what potion they are attempting to brew and pay the listed ingredients cost. The wizard should then roll to cast Brew Potion with a -4 to the Casting Roll. If successful, the potion is created and can be immediately assigned to a figure in the warband, sold, or stored in the wizard’s vault. If unsuccessful, the potion is not created, and the money spent on ingredients is lost."
+  }
+ },
+ "Bridge": {
+  "page": 28,
+  "criticals": [
+   {
+    "sources": [
+     "Spellcaster Magazine",
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.41",
+     "Advanced Spellcraft": "p.28"
+    },
+    "success": "Do not roll to see if this bridge vanishes. It will only vanish if the caster chooses to cancel it during their activation. Additionally, the caster can cast this spell again while this bridge is still active.",
+    "failure": "The spell is cast as normal. However, any time a figure steps on the bridge or activates while on the bridge, roll a die. On a 1–10, the bridge immediately vanishes."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Extended Length",
+    "modifier": -2,
+    "text": "Increase the length of the bridge up to a maximum of 9”."
+   },
+   {
+    "name": "Strange Runes",
+    "modifier": -1,
+    "text": "The bridge is covered in strange runes. Any figure that is not a member of the caster’s warband must make a Will Roll (TN14) to step onto the bridge. If the roll is failed, the figure ends its move adjacent to the bridge and its activation ends. Spellcasters may empower this Will Roll."
+   },
+   {
+    "name": "Vanishing Bridge",
+    "modifier": -3,
+    "text": "The caster may cancel the spell at any time, it does not have to be during its activation."
+   }
+  ],
+  "notes": [
+   "Bridges can be cancelled by Dispell, Spell Eater, or other rules that cancel spells."
+  ],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Call Storm": {
+  "page": 29,
+  "criticals": [
+   {
+    "sources": [
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Advanced Spellcraft": "p.29"
+    },
+    "success": "All bow and crossbow attacks are at -2 for the rest of the game. In addition, the caster may make one +2 elemental magic shooting attack against any one figure on the table that is not in cover from above.",
+    "failure": "Make an immediate +2 elemental magic shooting attack against the caster."
+   },
+   {
+    "sources": [
+     "Spellcaster Magazine"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.41"
+    },
+    "success": "All bow and crossbow attacks are at -2 for the rest of the game. In addition, the caster may make one +2 elemental magic shooting attack against any one figure on the table.",
+    "failure": "Make an immediate +2 elemental magic shooting attack against the caster."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Darkness",
+    "modifier": -3,
+    "text": "The storm clouds completely block out the sun. The maximum line of sight for the game is decreased to 14”."
+   },
+   {
+    "name": "Sleet",
+    "modifier": -3,
+    "text": "The storm brings sleet, freezing rain, and hail, making the ground treacherous. Any figure that attempts to take a second or third move action in the same activation, must make a Move Roll (TN14). If they fail the roll, the figure does not move, its activation ends, and it takes 1 point of damage."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Circle of Protection": {
+  "page": 30,
+  "criticals": [
+   {
+    "sources": [
+     "Spellcaster Magazine",
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.41",
+     "Advanced Spellcraft": "p.30"
+    },
+    "success": "As part of this activation, the spellcaster may move the circle of protection up to 6” in any direction, so long as it does not end up covering a demon or undead figure.",
+    "failure": "All uncontrolled demons or undead on the table that are not in combat, make an immediate 6” move directly towards the caster."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Arrow Guard",
+    "modifier": -2,
+    "text": "Figures inside the circle add +2 to their Fight Rolls when rolling against non-magical shooting attacks."
+   },
+   {
+    "name": "Magical Resistance",
+    "modifier": -2,
+    "text": "All figures inside the circle add +2 to all Will Rolls to resist spells or to overcome the effects of control spells."
+   }
+  ],
+  "notes": [
+   "Circle of Protection cannot be used to imprison undead or demons. The spell can only be cast if the caster can place the circle on the table in such a way that no undead or demons are inside of it. That said, the caster doesn’t necessarily have to be inside the circle. The circle is not affected by terrain in anyway and simply flows through it. The circle extends upwards to infinity, so demons and undead cannot fly over it. All non-undead, non-demon figures can move through a circle of protection as though it were not there."
+  ],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Combat Awareness": {
+  "page": 31,
+  "criticals": [
+   {
+    "sources": [
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Advanced Spellcraft": "p.31"
+    },
+    "success": "The target also gains a +1 damage modifier in melee.",
+    "failure": "The target suffers a -1 Fight for the rest of the game and may not be the target of further castings of Combat Awareness."
+   },
+   {
+    "sources": [
+     "Spellcaster Magazine"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.42"
+    },
+    "success": "The target also receives a +1 damage modifier.",
+    "failure": "The target suffers -1 Fight for the rest of the game and may not be the target of further castings of Combat Awareness."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Direct Hit",
+    "modifier": -3,
+    "text": "Whenever this figure rolls a natural ‘19’ for melee combat, treat it as a roll of a natural ‘20’ and a critical hit."
+   },
+   {
+    "name": "Extended Reach",
+    "modifier": -2,
+    "text": "Instead of Touch, the spell becomes Line of Sight with a range of 6”."
+   },
+   {
+    "name": "Just Missed",
+    "modifier": -2,
+    "text": "The target of the spell also gains the Immune to Critical Hits trait."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Control Animal": {
+  "page": 32,
+  "criticals": [
+   {
+    "sources": [
+     "Spellcaster Magazine",
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.42",
+     "Advanced Spellcraft": "p.32"
+    },
+    "success": "If the target animal fails its Will Roll, it does not count against the spellcaster’s limit of controlling one animal at a time.",
+    "failure": "The caster may not attempt to cast this spell on this animal for the rest of the game."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Fetch",
+    "modifier": -1,
+    "text": "This spell flourish may only be cast upon an animal that is already a temporary or permanent member of the warband. During the animal’s next activation, it is allowed to pick up and carry treasure tokens following the normal rules. At the start of its subsequent activation, it drops the treasure token unless this spell flourish has been cast upon it again."
+   },
+   {
+    "name": "Leap to Attack",
+    "modifier": -2,
+    "text": "If the animal has not already activated this turn, it may activate immediately after the spellcaster completes its activation. It does not count toward the normal number of figures that can activate during the phase."
+   },
+   {
+    "name": "Multiple Control",
+    "modifier": -2,
+    "text": "The spellcaster can use this flourish to cast the spell on an animal, even if it already has one under control. Each spellcaster is limited to a maximum of three animals under control at one time using this flourish or the critical success result."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ],
+  "boxes": [
+   {
+    "title": "Control Spells",
+    "page": 35,
+    "text": "The control spells are: Control Animal, Control Construct, Control Demon, Control Undead, and Mind Control. If a control spell is successfully cast on a figure that is already under the effects of an active control spell, the existing control spell is immediately cancelled. Thus, a figure may never be under the effects of multiple control spells. If a figure is a temporary member of a warband and has a control spell cast on it, all links to its temporary warband are broken. If this control spell is subsequently cancelled, the figure becomes an uncontrolled creature. If a figure is a permanent member of a warband and has a control spell cast on it, it remains linked to its original warband. If this control spell is subsequently resisted or cancelled, the figure reverts to its original warband. Note that, in this way, it is possible to use a control spell on a member of your own warband that is under the effects of an opponent’s control spell. If successfully cast, this new control spell cancels the effects of the existing one and is then itself cancelled because it has no further effect. A figure under control will never use a one-use magic item, such as a potion, but will use magic items that are always on. Captains that have been controlled will never use Tricks of the Trade. Spellcasters are normally immune to control spells, but in the event that one is controlled, it will never cast spells while under the spell. A figure may not cast a control spell while it currently has a control spell of that type already active unless a specific rule allows it (such as a flourish)."
+   }
+  ]
+ },
+ "Control Construct": {
+  "page": 32,
+  "criticals": [
+   {
+    "sources": [
+     "Spellcaster Magazine",
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.42",
+     "Advanced Spellcraft": "p.32"
+    },
+    "success": "If the target construct fails its Will Roll, it does not count against the spellcaster’s limit of controlling one construct at a time.",
+    "failure": "The caster may not attempt to cast this spell on this construct for the rest of the game."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Leap to Attack",
+    "modifier": -2,
+    "text": "If the construct has not already activated this turn, it may activate immediately after the spellcaster completes its activation. It does not count toward the normal number of figures that can activate during the phase."
+   },
+   {
+    "name": "Multiple Control",
+    "modifier": -2,
+    "text": "The spellcaster can use this flourish to cast the spell on a construct, even if it already has one under control. Each spellcaster is limited to a maximum of three constructs under control at one time using this flourish or the critical success result."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ],
+  "boxes": [
+   {
+    "title": "Control Spells",
+    "page": 35,
+    "text": "The control spells are: Control Animal, Control Construct, Control Demon, Control Undead, and Mind Control. If a control spell is successfully cast on a figure that is already under the effects of an active control spell, the existing control spell is immediately cancelled. Thus, a figure may never be under the effects of multiple control spells. If a figure is a temporary member of a warband and has a control spell cast on it, all links to its temporary warband are broken. If this control spell is subsequently cancelled, the figure becomes an uncontrolled creature. If a figure is a permanent member of a warband and has a control spell cast on it, it remains linked to its original warband. If this control spell is subsequently resisted or cancelled, the figure reverts to its original warband. Note that, in this way, it is possible to use a control spell on a member of your own warband that is under the effects of an opponent’s control spell. If successfully cast, this new control spell cancels the effects of the existing one and is then itself cancelled because it has no further effect. A figure under control will never use a one-use magic item, such as a potion, but will use magic items that are always on. Captains that have been controlled will never use Tricks of the Trade. Spellcasters are normally immune to control spells, but in the event that one is controlled, it will never cast spells while under the spell. A figure may not cast a control spell while it currently has a control spell of that type already active unless a specific rule allows it (such as a flourish)."
+   }
+  ]
+ },
+ "Control Demon": {
+  "page": 34,
+  "criticals": [
+   {
+    "sources": [
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Advanced Spellcraft": "p.34"
+    },
+    "success": "If the demon reaches the end of the game without being reduced to 0 Health, the caster can choose to extract information from the demon after the game and gain +20 experience points or have the demon join their warband for the next game as well. In the latter case, the demon does not count against the usual warband limit, but the spellcaster cannot attempt to control another demon while it is on the table (unless it is uses the Multiple Control flourish).",
+    "failure": "The spellcaster may not attempt to cast this spell for the rest of the game."
+   },
+   {
+    "sources": [
+     "Spellcaster Magazine"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.42"
+    },
+    "success": "If the demon reaches the end of the game without being Banished or reduced to 0 Health, the caster can choose to extract information from the demon after game and gain +20 experience points or have the demon join his warband for the next game as well. In the latter case, the demon does not count against the usual warband limit, but the spellcaster cannot attempt to control another demon while it is on the table.",
+    "failure": "The spellcaster may not attempt to cast this spell for the rest of the game."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Leap to Attack",
+    "modifier": -2,
+    "text": "If the demon has not already activated this turn, it may activate immediately after the spellcaster completes its activation. It does not count toward the normal number of figures that can activate during the phase."
+   },
+   {
+    "name": "Multiple Control",
+    "modifier": -2,
+    "text": "The spellcaster can use this flourish to cast the spell on a demon, even if it already has one under control. Each spellcaster is limited to a maximum of three demons under control at one time using this flourish."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ],
+  "boxes": [
+   {
+    "title": "Control Spells",
+    "page": 35,
+    "text": "The control spells are: Control Animal, Control Construct, Control Demon, Control Undead, and Mind Control. If a control spell is successfully cast on a figure that is already under the effects of an active control spell, the existing control spell is immediately cancelled. Thus, a figure may never be under the effects of multiple control spells. If a figure is a temporary member of a warband and has a control spell cast on it, all links to its temporary warband are broken. If this control spell is subsequently cancelled, the figure becomes an uncontrolled creature. If a figure is a permanent member of a warband and has a control spell cast on it, it remains linked to its original warband. If this control spell is subsequently resisted or cancelled, the figure reverts to its original warband. Note that, in this way, it is possible to use a control spell on a member of your own warband that is under the effects of an opponent’s control spell. If successfully cast, this new control spell cancels the effects of the existing one and is then itself cancelled because it has no further effect. A figure under control will never use a one-use magic item, such as a potion, but will use magic items that are always on. Captains that have been controlled will never use Tricks of the Trade. Spellcasters are normally immune to control spells, but in the event that one is controlled, it will never cast spells while under the spell. A figure may not cast a control spell while it currently has a control spell of that type already active unless a specific rule allows it (such as a flourish)."
+   }
+  ]
+ },
+ "Control Undead": {
+  "page": 34,
+  "criticals": [
+   {
+    "sources": [
+     "Spellcaster Magazine",
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.43",
+     "Advanced Spellcraft": "p.34"
+    },
+    "success": "If the target undead fails its Will Roll, it does not count against the spellcaster’s limit of controlling one undead at a time.",
+    "failure": "The caster may not attempt to cast this spell on this undead figure for the rest of the game."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Leap to Attack",
+    "modifier": -2,
+    "text": "If the undead creature has not already activated this turn, it may activate immediately after the spellcaster completes its activation. It does not count toward the normal number of figures that can activate during the phase."
+   },
+   {
+    "name": "Multiple Control",
+    "modifier": -2,
+    "text": "The spellcaster can use this flourish to cast the spell on an undead creature, even if it already has one under control. Each spellcaster is limited to a maximum of three undead creatures under control at one time using this flourish or the critical success result."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ],
+  "boxes": [
+   {
+    "title": "Control Spells",
+    "page": 35,
+    "text": "The control spells are: Control Animal, Control Construct, Control Demon, Control Undead, and Mind Control. If a control spell is successfully cast on a figure that is already under the effects of an active control spell, the existing control spell is immediately cancelled. Thus, a figure may never be under the effects of multiple control spells. If a figure is a temporary member of a warband and has a control spell cast on it, all links to its temporary warband are broken. If this control spell is subsequently cancelled, the figure becomes an uncontrolled creature. If a figure is a permanent member of a warband and has a control spell cast on it, it remains linked to its original warband. If this control spell is subsequently resisted or cancelled, the figure reverts to its original warband. Note that, in this way, it is possible to use a control spell on a member of your own warband that is under the effects of an opponent’s control spell. If successfully cast, this new control spell cancels the effects of the existing one and is then itself cancelled because it has no further effect. A figure under control will never use a one-use magic item, such as a potion, but will use magic items that are always on. Captains that have been controlled will never use Tricks of the Trade. Spellcasters are normally immune to control spells, but in the event that one is controlled, it will never cast spells while under the spell. A figure may not cast a control spell while it currently has a control spell of that type already active unless a specific rule allows it (such as a flourish)."
+   }
+  ]
+ },
+ "Crumble": {
+  "page": 37,
+  "criticals": [
+   {
+    "sources": [
+     "Spellcaster Magazine",
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.43",
+     "Advanced Spellcraft": "p.37"
+    },
+    "success": "If being used to create a door, the caster may create a door 6” wide by 3” tall or completely remove any terrain piece smaller than that. If being used to collapse a section of floor, the figure only avoids falling if they roll a natural ‘20’ on their Will Roll. In addition to any falling damage, they also suffer an immediate +3 attack.",
+    "failure": "If the caster is standing within 1” of any terrain piece over 1” high, it crumbles down on them. The caster suffers an immediate +1 attack. In addition, the caster suffers -2 on all future Casting Rolls for this spell for the rest of the game."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Rock Fall",
+    "modifier": -1,
+    "text": "The caster may select any point directly under a section of terrain. All figures within 1” of that point suffer a +3 shooting attack from directly above. This flourish can be combined with collapsing a floor (the caster needing line of sight to just the floor that is to be collapsed). In this case, the point selected must be that directly under the section of floor being collapsed."
+   },
+   {
+    "name": "Escape Route",
+    "modifier": -4,
+    "text": "If playing a scenario with limited exit points on the table, the spell can target any point on the table edge that was used as a player starting warband edge (or anywhere within 8” of a starting corner or doorway if those were used instead). A new door- sized exit from the table is created at this point."
+   }
+  ],
+  "notes": [
+   "Crumble can also be used to collapse a section of terrain under a treasure token in which case the treasure token will fall to the next level down."
+  ],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Curse": {
+  "page": 38,
+  "criticals": [
+   {
+    "sources": [
+     "Spellcaster Magazine",
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.43",
+     "Advanced Spellcraft": "p.38"
+    },
+    "success": "If the target fails its Will Roll, it suffers 3 points of damage in addition to the normal penalties from the spell.",
+    "failure": "The caster successfully casts the spell on themselves."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Croaking Voice",
+    "modifier": -1,
+    "text": "If the spell is cast on either a wizard or apprentice, a maximum of one soldier may also activate in the phase with them."
+   },
+   {
+    "name": "Ill-luck",
+    "modifier": -2,
+    "text": "Any time a figure suffering the effects of this curse rolls a natural ‘20’ they must immediately reroll the die and accept the second result."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Decay": {
+  "page": 38,
+  "criticals": [
+   {
+    "sources": [
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Advanced Spellcraft": "p.38"
+    },
+    "success": "The spell destroys all the target’s non-magical weapons and their non-magical shield if they have one (-1 Armour for the loss of the shield).",
+    "failure": "The spell destroys one randomly determined non- magical weapon carried by the caster. If the caster has no weapons that can be destroyed, it suffers -2 on all Casting Rolls for this spell for the rest of the game."
+   },
+   {
+    "sources": [
+     "Spellcaster Magazine"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.43"
+    },
+    "success": "The spell destroys all the target’s weapons and their shield if they have one (subtract -1 Armour for the loss of the shield).",
+    "failure": "The spell destroys one randomly determined weapon carried by the caster. If the caster has no weapons that can be destroyed, then they suffer -2 on all Casting Rolls for this spell for the rest of the game."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Ruin Footwear",
+    "modifier": -2,
+    "text": "The spell target’s the figure’s footwear, instead of a weapon, causing it to fall apart. The figure suffers -2 Move for the rest of the game. This flourish has no effect on undead, demons, constructs, animals, figures with the Flying or Levitate traits, or figures equipped with magical footwear."
+   },
+   {
+    "name": "Rust Armour",
+    "modifier": -2,
+    "text": "The spell can target a figure’s armour or shield, instead of its weapon. Provided the armour or shield is non-magical, it is destroyed. Reduce the figure’s Armour stat appropriately (-2 if it lost Heavy Armour, -1 if it lost Light Armour, -1 if it lost a shield)."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Destroy Undead": {
+  "page": 39,
+  "criticals": [
+   {
+    "sources": [
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Advanced Spellcraft": "p.39"
+    },
+    "success": "The target of this spell is treated as though its Will stat is 2 less. So, an undead creature with Will +4 would count as Will +2 for making their Will Roll and determining the effects of the spell.",
+    "failure": "The target of this spell is immediately restored to their starting Health."
+   },
+   {
+    "sources": [
+     "Spellcaster Magazine"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.44"
+    },
+    "success": "The target of this spell is treated as though its Will Stat is 2 less. So, an undead creature with Will +4 would count as Will +2 for making their Will Roll and determining the effects of the spell.",
+    "failure": "The target undead is immediately restored to its starting Health."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Chain of Destruction",
+    "modifier": -2,
+    "text": "If this spell successfully destroys or damages an undead creature, the caster may select another undead creature within 6” and line of sight of the original target. This undead creature is also affected by the spell following the same rules. This continues until there are no other targets within 6” and line of sight of the last affected target, or the spell fails to destroy or damage a target."
+   },
+   {
+    "name": "Life Sphere",
+    "modifier": -2,
+    "text": "Instead of targeting one creature, the spell targets all undead within 6” and line of sight of the caster."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Destructive Sphere": {
+  "page": 40,
+  "criticals": [
+   {
+    "sources": [
+     "Spellcaster Magazine",
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.44",
+     "Advanced Spellcraft": "p.40"
+    },
+    "success": "Every attack generated by the spell does an additional +2 damage.",
+    "failure": "The caster suffers a +5 attack."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Nova",
+    "modifier": -4,
+    "text": "Every figure that is within 6” of the caster, but more than 3” away, suffers a +2 elemental magic attack."
+   },
+   {
+    "name": "Shockwave",
+    "modifier": -2,
+    "text": "Every figure that suffers damage is moved 1” directly away from the caster for every point of damage it suffered. This move is stopped by the edge of the table or terrain over 1” in height."
+   }
+  ],
+  "notes": [
+   "Attacks from Destructive Sphere are not shooting attacks, so line of sight is not required, and cover offers no bonuses."
+  ],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Dispel": {
+  "page": 40,
+  "criticals": [
+   {
+    "sources": [
+     "Spellcaster Magazine",
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.44",
+     "Advanced Spellcraft": "p.40"
+    },
+    "success": "The spellcaster may cancel the effects of up to two ongoing spells.",
+    "failure": "The caster suffers 1 point of damage and may not cast this spell for the rest of the game."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Null Touch",
+    "modifier": -2,
+    "text": "Cancels all spells currently active on the target."
+   },
+   {
+    "name": "Null Zone",
+    "modifier": -4,
+    "text": "Cancels all active spells within 2” of a selected point."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Draining Word": {
+  "page": 42,
+  "criticals": [
+   {
+    "sources": [
+     "Spellcaster Magazine",
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.44",
+     "Advanced Spellcraft": "p.42"
+    },
+    "success": "This casting does not count against the spellcaster’s limit of having one Draining Word active, though multiple castings of Draining Word against the same spell are not cumulative.",
+    "failure": "Randomly select one spell known by the caster; the caster is at -3 to cast this spell for the rest of game (or between this game and the next for Out of Game spells)."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Encompass",
+    "modifier": -2,
+    "text": "The spellcaster can choose for the spell to affect all the spells from a specific school of magic, instead of a single spell. All Casting Rolls to cast a spell from that school are at -1 for the rest of the game. In a situation where a spell would be affected by multiple Draining Word spells, use the worst penalty to that spell, but the penalties do not stack."
+   },
+   {
+    "name": "Mystic Drain",
+    "modifier": -3,
+    "text": "Any time a spellcaster who knows the spell targeted by the draining word activates, it must make a Will Roll (TN10) or suffer 1 point of damage. A spellcaster only ever makes one Will Roll for this each turn and can only suffer a maximum of 1 point of damage, even if multiple Draining Word spells with the Mystic Drain flourish are in play."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Elemental Ball": {
+  "page": 42,
+  "criticals": [
+   {
+    "sources": [
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Advanced Spellcraft": "p.42"
+    },
+    "success": "All figures that suffer attacks from this spell, except the actual target, should also be moved 4” directly away from the target. They will move over any other figure, or obstruction, less than 1” high. Any higher obstruction will stop them from moving further.",
+    "failure": "Roll a die. The ball travels that many inches in a random direction. All figures within 1\" of the new target point suffer a +5 shooting attack as normal."
+   },
+   {
+    "sources": [
+     "Spellcaster Magazine"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.44"
+    },
+    "success": "All figures that suffer attacks from this spell should also be moved 4\" directly away from the target point. This will move them over any other figure, or obstruction less than 1\" high. Any higher obstruction, and they will stop. If the target point was on a figure, move this figure in a random direction.",
+    "failure": "Roll a die. The ball travels that many inches in a random direction. All figures within 1.5\" of the new target point suffer a +5 elemental magic shooting attack as normal."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Smoke Trail",
+    "modifier": -2,
+    "text": "The ball leaves a thick line of smoke in a trail behind it. Mark the line of flight of the ball on the table (with a piece of string or similar). For the rest of the turn, all shooting attacks made through that line suffer a -2 modifier."
+   },
+   {
+    "name": "Targeted Destruction",
+    "modifier": -4,
+    "text": "The caster may select which figures within 1” of the target are affected and which are not."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Elemental Bolt": {
+  "page": 44,
+  "criticals": [
+   {
+    "sources": [
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Advanced Spellcraft": "p.44"
+    },
+    "success": "The caster may choose to make an additional +3 shooting attack against another target that is within 2” of the original target.",
+    "failure": "Make a +7 elemental magic shooting attack against the closest member of your warband that is within line of sight, not counting the caster. If there are no other warband members in line of sight, the caster makes the attack against itself."
+   },
+   {
+    "sources": [
+     "Spellcaster Magazine"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.45"
+    },
+    "success": "The caster may choose to make an additional +3 shooting attack against up to 2 figures that are within 1.5\" of the target.",
+    "failure": "Make a +7 magic shooting attack against the closest member of the caster’s warband that is within line of sight, not counting the caster."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Banking Shot",
+    "modifier": -2,
+    "text": "The spellcaster may bounce the shot off a piece of terrain so that it strikes from a direction from which the target has no cover. The caster must still have line of sight to the target, and to the bounce point, and the entire path of the bolt cannot be greater than 16” in length."
+   },
+   {
+    "name": "Double Shot",
+    "modifier": -2,
+    "text": "The spellcaster can choose to make two +3 elemental magic shooting attacks against the target instead of one at +7. Roll each attack separately."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Elemental Hammer": {
+  "page": 45,
+  "criticals": [
+   {
+    "sources": [
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Advanced Spellcraft": "p.45"
+    },
+    "success": "The next two times this weapon causes at least 1 point of damage, it inflicts an additional 5 points of elemental magic damage, or the spell enchants two different arrows, crossbow bolts, or javelins.",
+    "failure": "The target weapon is destroyed. If it is a magic weapon, it is not destroyed, but it loses all bonuses and special powers until the end of the game, though it still counts as a magic weapon."
+   },
+   {
+    "sources": [
+     "Spellcaster Magazine"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.45"
+    },
+    "success": "The next two times this weapon causes at least 1 point of damage, it inflicts an additional 5 points of damage.",
+    "failure": "The target weapon is destroyed. If it is magic weapon, it is not destroyed, but it loses all bonuses and special powers until the end of the game, though it still counts as a magic weapon."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Construct Killer",
+    "modifier": -1,
+    "text": "If the next damage-dealing attack with the weapon is against a construct, it does an additional 8 points of elemental magic damage (instead of the normal 5 points)."
+   },
+   {
+    "name": "Enchanted Attack",
+    "modifier": -1,
+    "text": "The next damage-dealing attack counts as a magic attack, so a creature only harmed by magic weapons will take the full damage from the attack, not just the additional 5 points."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Elemental Shield": {
+  "page": 45,
+  "criticals": [
+   {
+    "sources": [
+     "Spellcaster Magazine",
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.45",
+     "Advanced Spellcraft": "p.45"
+    },
+    "success": "The shield absorbs the next 5 points of damage done to the caster from combat or a shooting attack.",
+    "failure": "The caster may not cast this spell for the rest of the game."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Deflecting",
+    "modifier": -2,
+    "text": "The caster also gains +2 Fight when rolling against shooting attacks."
+   },
+   {
+    "name": "Protecting",
+    "modifier": -3,
+    "text": "The spell becomes Touch instead of Self Only, though the caster is still limited to one elemental shield active at any time."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Embed Enchantment": {
+  "page": 47,
+  "criticals": [
+   {
+    "sources": [
+     "Spellcaster Magazine",
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.45",
+     "Advanced Spellcraft": "p.47"
+    },
+    "success": "You learn something valuable about the technique of enchanting. Next time this figure casts Embed Enchantment, it receives +3 to the Casting Roll.",
+    "failure": "You permanently damage the item you were trying to enchant and must pay 5gc in repair costs."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Keen Edge",
+    "modifier": -1,
+    "text": "If cast on a weapon, for the next game only, the weapon gains an additional +1 damage modifier on top of any it might already have."
+   },
+   {
+    "name": "Keen Shine",
+    "modifier": -1,
+    "text": "If cast on armour or a shield, for the next game only, the wearer gains +1 Fight when rolling against shooting attacks."
+   },
+   {
+    "name": "Valuable",
+    "modifier": -6,
+    "text": "If using the No Market for Created Items rule, this weapon or armour becomes an exception to that rule and can be sold for its usual sell price."
+   }
+  ],
+  "notes": [
+   "Embed Enchantment cannot be used to make bonuses from flourishes or critical successes permanent. It only embeds the bonuses granted under the main spell description."
+  ],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Enchant Armour": {
+  "page": 48,
+  "criticals": [
+   {
+    "sources": [
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Advanced Spellcraft": "p.48"
+    },
+    "success": "The spell not only increases the effectiveness of the Armour but lightens it as well. Increase the Move score of the figure wearing the armour by +1 (to a maximum of 7) for the rest of the game.",
+    "failure": "The spell damages the target armour. Reduce the figure’s Armour score by -1 for the rest of the game."
+   },
+   {
+    "sources": [
+     "Spellcaster Magazine"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.46"
+    },
+    "success": "The spell not only increases the effectiveness of the Armour but lightens it as well. Increase the Move score of the figure wearing the armour by +1 (to a Maximum of 7) for the rest of the game. This extra bonus cannot be embedded.",
+    "failure": "The spell damages the target armour. Reduce the figure’s Armour score by -1 for the rest of the game."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Aquatic",
+    "modifier": -1,
+    "text": "The wearer of the armour gains +2 on all Swimming Rolls and the armour itself confers no penalties to swimming."
+   },
+   {
+    "name": "Deflecting",
+    "modifier": -2,
+    "text": "The target of the spell gains +2 Fight when rolling against shooting attacks."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Enchant Weapon": {
+  "page": 49,
+  "criticals": [
+   {
+    "sources": [
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Advanced Spellcraft": "p.49"
+    },
+    "success": "The target weapon gains a +1 damage modifier in addition to the normal effects of the spell.",
+    "failure": "The target weapon is damaged by the spell, and it does -1 damage for the rest of the game."
+   },
+   {
+    "sources": [
+     "Spellcaster Magazine"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.46"
+    },
+    "success": "The target weapon receives a +1 damage modifier in addition to the normal effects of the spell. This extra bonus cannot be embedded.",
+    "failure": "The target weapon is damaged by the spell and does -1 damage for the rest of the game."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Construct Slayer",
+    "modifier": -1,
+    "text": "The weapon also gains a +2 damage modifier against constructs."
+   },
+   {
+    "name": "Diffuse Enchantment",
+    "modifier": -2,
+    "text": "The spell can be cast upon all the arrows or crossbow bolts carried by a figure, making them all magical, but conferring no other bonus. So, all its shooting attacks are magic shooting attacks, but made with their normal Shoot stat."
+   }
+  ],
+  "notes": [
+   "The rules for arrows and crossbow bolts also apply to javelins."
+  ],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Explosive Rune": {
+  "page": 50,
+  "criticals": [
+   {
+    "sources": [
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Advanced Spellcraft": "p.50"
+    },
+    "success": "When this rune explodes, make a +6 magic attack against every figure within 2”. In addition, this Explosive Rune does not count against a spellcaster’s maximum of three runes in play.",
+    "failure": "Roll a die. Place an explosive rune that many inches away from the caster in a random direction. This rune will explode when any figure moves within 1”."
+   },
+   {
+    "sources": [
+     "Spellcaster Magazine"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.46"
+    },
+    "success": "When this rune explodes, all figures that suffer attacks are also thrown 3\" directly away from the rune. In addition, this Explosive Rune does not count against a spellcaster’s maximum of three runes in play.",
+    "failure": "Roll a die. Place an explosive rune that many inches away from the caster in a random direction."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Keyed",
+    "modifier": -1,
+    "text": "When cast, the spellcaster can choose one of the following traits: undead, demon, construct, or animal. The rune will only explode if a figure possessing that specific trait moves within 2” (instead of the normal 1”)."
+   },
+   {
+    "name": "Shockwave",
+    "modifier": -1,
+    "text": "Any figure that is damaged by the rune is also moved directly away from the explosive rune 1” for every full 2 points of damage it took. It will move over other figures or terrain less than 1” height."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Familiar": {
+  "page": 51,
+  "criticals": [
+   {
+    "sources": [
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Advanced Spellcraft": "p.51"
+    },
+    "success": "The spellcaster attracts an unusual familiar that also grants the caster +1 Will along with the +2 Health.",
+    "failure": "The spellcaster attracts a rather pathetic example of the species. This familiar provides no health bonus and cannot be gotten rid of until the spellcaster is reduced to 1 Health or lower or the spell is successfully cast before another game. If successfully recast the pathetic familiar is replaced with a new (standard) familiar."
+   },
+   {
+    "sources": [
+     "Spellcaster Magazine"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.46"
+    },
+    "success": "The spellcaster attracts an unusual familiar that also grants the caster +1 Will along with the +2 Health. This lasts until the spellcaster is reduced to 0 Health.",
+    "failure": "The spellcaster attracts a rather pathetic example of the species. This familiar provides no Health bonus and cannot be gotten rid of until the spellcaster is reduced to 0 health."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Aggressive",
+    "modifier": -4,
+    "text": "The familiar is aggressive in the defence of its master. All figures in combat with the wizard do -1 melee damage."
+   },
+   {
+    "name": "Mystic Store",
+    "modifier": -4,
+    "text": "The familiar also has 1 point of power that the spellcaster can use to empower a spell or Will Roll. This point of power is renewed each game."
+   }
+  ],
+  "notes": [
+   "A spellcaster with a familiar may attempt to cast the spell again with a flourish to upgrade their familiar to one with special abilities, but if the caster critically fails they are stuck with the pathetic familiar."
+  ],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Fast Act": {
+  "page": 53,
+  "criticals": [
+   {
+    "sources": [
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Advanced Spellcraft": "p.53"
+    },
+    "success": "The target figure gains +1 Move as well as the normal results of the spell. This can be on top of the Extremely Fast flourish.",
+    "failure": "The target figure suffers -1 Move for the rest of the game. In addition, if it is a soldier, it cannot activate in either the Wizard Phase or the Apprentice Phase."
+   },
+   {
+    "sources": [
+     "Spellcaster Magazine"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.47"
+    },
+    "success": "The target figure gains +1 Move as well as the normal results of the spell.",
+    "failure": "The target figure suffers -1 Move for the rest of the game. In addition, if it is a soldier, it cannot activate in either the wizard or apprentice phase."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Enduring",
+    "modifier": -2,
+    "text": "The target of this spell will also activate in the same phase next turn."
+   },
+   {
+    "name": "Extremely Fast",
+    "modifier": -2,
+    "text": "The target of the spell also gains +2 Move during its next activation."
+   }
+  ],
+  "notes": [
+   "Figures that activate due to a Fast Act spell never count against the maximum number of figures that can normally activate in that phase."
+  ],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Fleet Feet": {
+  "page": 54,
+  "criticals": [
+   {
+    "sources": [
+     "Spellcaster Magazine",
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.47",
+     "Advanced Spellcraft": "p.54"
+    },
+    "success": "The target also gains an extra action next time it activates (to a maximum of 3).",
+    "failure": "The target figure suffers -2 Move for the rest of the game."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Evasion",
+    "modifier": -1,
+    "text": "The target also receives +5 Fight when rolling against attacks generated by spells that affect an area, including: Destructive Sphere, Elemental Ball, Scatter Shot, Grenade, and Explosive Rune."
+   },
+   {
+    "name": "Fancy Footwork",
+    "modifier": -1,
+    "text": "The target gains immunity to the Slow and Bones of the Earth spells."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Fog": {
+  "page": 54,
+  "criticals": [
+   {
+    "sources": [
+     "Spellcaster Magazine",
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.47",
+     "Advanced Spellcraft": "p.54"
+    },
+    "success": "The line of fog is 10” long and may include one 90-degree angle.",
+    "failure": "A random opponent of the caster places the fog following the normal rules."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Choking Fog",
+    "modifier": -3,
+    "text": "Any figure that enters the fog, or activates while in the fog, must make a Will Roll (TN10). If the roll is failed, it loses one action during the current activation. If it has no actions remaining, its current move action ends immediately. Otherwise, the figure can move through the fog as normal. Undead and constructs are immune to choking fog."
+   },
+   {
+    "name": "Extended Dimensions",
+    "modifier": -3,
+    "text": "The caster may add 3” to the length, the width, or the height of the fog."
+   },
+   {
+    "name": "Lingering",
+    "modifier": -2,
+    "text": "The fog only dissipates on a roll of a ‘1’ instead of the normal 1–4."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Fool’s Gold": {
+  "page": 55,
+  "criticals": [
+   {
+    "sources": [
+     "Spellcaster Magazine",
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.47",
+     "Advanced Spellcraft": "p.55"
+    },
+    "success": "The target does not get a Will Roll, and the treasure token may be moved up to 6”.",
+    "failure": "The target of the spell is immune to Fool’s Gold for the rest of the game."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Bewilderment",
+    "modifier": -2,
+    "text": "If the target fails its Will Roll it receives a maximum of one action the next time it activates."
+   },
+   {
+    "name": "Swipe",
+    "modifier": -3,
+    "text": "The caster may place the treasure token directly into the hands of another figure within 4”, if that figure is not in combat and is otherwise allowed to pick up a treasure token. This figure is now carrying the treasure token."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Furious Quill": {
+  "page": 56,
+  "criticals": [
+   {
+    "sources": [
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Advanced Spellcraft": "p.56"
+    },
+    "success": "The quill stabs at its target. Every time the target figure fails a Will Roll to cancel the Furious Quill, it takes 1 point of damage. If the quill ever reduces a spellcaster to 0 Health, do not roll for survival after the game, instead the spellcaster automatically receives the Lost Eye permanent injury.",
+    "failure": "This spell is cast against a randomly determined friendly figure within line of sight. If there are no friendly figures in line of sight, the spell is cast on the caster."
+   },
+   {
+    "sources": [
+     "Spellcaster Magazine"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.47"
+    },
+    "success": "The quill stabs at its target. Every time the target figure is activated with Furious Quill still active, it takes 1 point of damage. If the quill ever reduces a spellcaster to 0 Health, do not roll for survival after the game, instead the spellcaster automatically receives the Lost Eye permanent injury.",
+    "failure": "This spell is cast against a randomly determined friendly figure within line of sight. If there are no friendly figures in line of sight, the spell is cast on the caster."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Painful Inks",
+    "modifier": -2,
+    "text": "If the target fails its first Will Roll, but either passes a subsequent one, or the spell is cancelled, the target still suffers -1 Fight and -1 Shooting for the rest of game due to the painful inks marked on its body. This is not a magical effect and thus can’t be cancelled or dispelled. A figure can only suffer from this penalty once at a given time. The penalty can be removed if the target receives any magical healing during the game. Undead and constructs are immune to this flourish."
+   },
+   {
+    "name": "Poke and Prod",
+    "modifier": -2,
+    "text": "If the target fails its Will Roll when activated, and is not in combat, it makes an immediate 2” move in a random direction. Stop this movement if it would take the figure off the table or through terrain over 1” in height. This movement can move a figure into combat or cause it to fall. It may then take its actions as normal."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Glow": {
+  "page": 57,
+  "criticals": [
+   {
+    "sources": [
+     "Spellcaster Magazine",
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.48",
+     "Advanced Spellcraft": "p.57"
+    },
+    "success": "The glow is so bright the target of the spell has trouble seeing and suffers -1 Shoot and -1 to Casting Rolls for the rest of the game.",
+    "failure": "The spell is cast on a randomly determined friendly figure within line of sight of the caster, including the caster itself."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Creature Attraction",
+    "modifier": -3,
+    "text": "Any creature within 6” and line of sight of the target figure and not in combat will ignore all figures except this one when determining its actions."
+   },
+   {
+    "name": "Giant Light",
+    "modifier": -2,
+    "text": "If cast upon a figure with the Large trait, all shooting attacks against this figure from any source are at +4."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Grenade": {
+  "page": 59,
+  "criticals": [
+   {
+    "sources": [
+     "Spellcaster Magazine",
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.48",
+     "Advanced Spellcraft": "p.59"
+    },
+    "success": "Every figure within 3” of the target point suffers a +3 shooting attack.",
+    "failure": "Roll a die. The grenade explodes at a point that many inches from the caster in a random direction."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Construct Bomb",
+    "modifier": -2,
+    "text": "All constructs suffer a +6 magic shooting attacks instead of +3."
+   },
+   {
+    "name": "Flinty Barbs",
+    "modifier": -2,
+    "text": "All attacks generated by the spell do +1 damage."
+   },
+   {
+    "name": "Self Immunity",
+    "modifier": -2,
+    "text": "The caster does not suffer an attack from this spell even if it is within 1.5” of the target point."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Heal": {
+  "page": 59,
+  "criticals": [
+   {
+    "sources": [
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Advanced Spellcraft": "p.59"
+    },
+    "success": "The target of the spell is returned to its starting Health and is cured of one permanent injury if it had any.",
+    "failure": "The target of the spell counts as wounded for the rest of the game, regardless of any healing of any kind that it may receive. This is true even if players aren’t otherwise using the wounded optional rule (see Frostgrave rulebook, page 60)."
+   },
+   {
+    "sources": [
+     "Spellcaster Magazine"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.48"
+    },
+    "success": "The target of the spell is returned to their starting Health and is cured of one permanent injury if it had any.",
+    "failure": "The target of the spell counts as wounded for the rest of the game, regardless of any healing of any kind that it may receive."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Far Heal",
+    "modifier": -2,
+    "text": "Can target a figure up to 12” away."
+   },
+   {
+    "name": "Repair",
+    "modifier": -1,
+    "text": "The spell does affect constructs."
+   },
+   {
+    "name": "Split Cast",
+    "modifier": -3,
+    "text": "The spell restores up to 3 Health to two different figures provided they are both within 6”."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Illusionary Soldier": {
+  "page": 60,
+  "criticals": [
+   {
+    "sources": [
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Advanced Spellcraft": "p.60"
+    },
+    "success": "The illusionary soldier gains a bit of solidity. The caster gains a soldier of any type normally allowed by the spell, except the soldier only has 1 Health. Otherwise, it follows all the rules for a normal soldier except that it does not count against your warband limit and is still destroyed by True Sight or anything that specifically says it destroys illusionary soldiers. It vanishes at the end of the game.",
+    "failure": "One randomly selected opponent counts as having cast Illusionary Soldier."
+   },
+   {
+    "sources": [
+     "Spellcaster Magazine"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.48"
+    },
+    "success": "The Illusionary Soldier gains a bit of solidity. The caster gains a soldier of any type, except the soldier only has 1 Health. Otherwise, it follows all the rules for a normal soldier except that it does not count against your warband limit. It vanishes at the end of the game.",
+    "failure": "One randomly selected opponent counts as having cast Illusionary Soldier."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Extended Reach",
+    "modifier": -2,
+    "text": "The spell now counts as Line of Sight with a maximum range of 6”, but the illusionary soldier must be more than 1” away from any figures that are not part of the caster’s warband."
+   },
+   {
+    "name": "Illusionary Army",
+    "modifier": -2,
+    "text": "This flourish may only be cast in game. The warband can have a second illusionary soldier."
+   }
+  ],
+  "notes": [
+   "Mind Control cannot be cast on an illusionary soldier. Officially, a player must declare which figure is the illusionary soldier. However, if all players in the campaign agree this can be kept secret if cast Out of Game. Simply write which soldier is illusionary on a piece of paper to prove you are being honest about it!"
+  ],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Imp": {
+  "page": 61,
+  "criticals": [
+   {
+    "sources": [
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Advanced Spellcraft": "p.61"
+    },
+    "success": "The first time this imp is activated, the caster may decide its actions. After that, it becomes an uncontrolled creature.",
+    "failure": "Roll a die and divide the result by two, rounding down to a minimum of 1. Place an imp that many inches from the caster in a random direction."
+   },
+   {
+    "sources": [
+     "Spellcaster Magazine"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.49"
+    },
+    "success": "The first time this imp is activated, the caster may decide its actions. After that, it becomes an uncontrolled creature.",
+    "failure": "Roll a die and divide the result by 2, rounding down. Place an imp that many inches from the caster in a random direction."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Tough",
+    "modifier": -1,
+    "text": "The imp has Health 8 instead of Heath 6."
+   },
+   {
+    "name": "Vicious",
+    "modifier": -2,
+    "text": "The imp will attack other uncontrolled creatures, treating them as warband members when determining its actions."
+   },
+   {
+    "name": "Winged",
+    "modifier": -1,
+    "text": "The imp has the Flying trait."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Invisibility": {
+  "page": 62,
+  "criticals": [
+   {
+    "sources": [
+     "Spellcaster Magazine",
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.49",
+     "Advanced Spellcraft": "p.62"
+    },
+    "success": "The caster may change the target of the spell to any figure within 12”. This figure can pick up treasure tokens and remain invisible.",
+    "failure": "Choose a random enemy figure within line of sight. This figure is rendered invisible. If there are no enemy figures within line of sight, the closest enemy figure becomes invisible."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Extended Touch",
+    "modifier": -2,
+    "text": "The spell is now a Line of Sight spell with a range of 3”."
+   },
+   {
+    "name": "Quiet Casting",
+    "modifier": -2,
+    "text": "The spell is not cancelled if the figure casts spells that only target itself."
+   }
+  ],
+  "notes": [
+   "The Invisibility spell is cancelled if the invisible figure makes any kind of attack, including ranged attacks. Invisible figures never block line of sight, other figures can move straight through them, and they do not prevent other figures from picking up treasure tokens, or any other action that would normally be prevented by their proximity. If a figure is already in combat with another figure when it becomes invisible, either figure may still attack, however, either figure may now freely move out of the combat."
+  ],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Leap": {
+  "page": 63,
+  "criticals": [
+   {
+    "sources": [
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Advanced Spellcraft": "p.63"
+    },
+    "success": "The target may immediately take one action after the leap is completed. It may then take no other actions this turn.",
+    "failure": "The target figure leaps 10” in a random direction and takes 3 points of damage because of a hard landing."
+   },
+   {
+    "sources": [
+     "Spellcaster Magazine"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.49"
+    },
+    "success": "The target may immediately take one action after the Leap is completed. It may then take no other actions this turn.",
+    "failure": "The target figure leaps 10\" in a random direction and takes 3 points of damage because of a hard landing. (The figure takes no other damage for falling)."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Bounding Attack",
+    "modifier": -3,
+    "text": "The target of the spell can be moved into combat."
+   },
+   {
+    "name": "Soft Landing",
+    "modifier": -2,
+    "text": "If the leap ends with the figure in the air, it still falls as normal, but suffers no damage from that fall."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Mind Control": {
+  "page": 65,
+  "criticals": [
+   {
+    "sources": [
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Advanced Spellcraft": "p.65"
+    },
+    "success": "The figure may not make Will rolls to shake off the effect. The only way to return the figure to its normal allegiance is to cancel the spell (or at the end of the game).",
+    "failure": "The caster is shocked by a wave of psychic feedback, suffers 2 points of damage, and may not cast Mind Control for the rest of the game."
+   },
+   {
+    "sources": [
+     "Spellcaster Magazine"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.49"
+    },
+    "success": "The figure joins the caster's warband for the rest of the game and may not make Will rolls to shake off the effect.",
+    "failure": "The caster is shocked by a wave of psychic feedback, suffers 2 points of damage, and may not cast Mind Control for the rest of the game."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Implant Friendship",
+    "modifier": -1,
+    "text": "If the target of the spell succeeds on its Will Roll, or the spell is cancelled, the target suffers -1 on any attack made against the spellcaster for the rest of the game. This penalty can only be suffered once per game."
+   },
+   {
+    "name": "Mental Exhaustion",
+    "modifier": -1,
+    "text": "If the target of the spells succeeds on its Will Roll, or the spell is cancelled, the target suffers -1 Will for the rest of the game. This penalty can only be suffered once per game."
+   }
+  ],
+  "notes": [
+   "See the text box on control spells on page 35 for additional details."
+  ],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ],
+  "boxes": [
+   {
+    "title": "Control Spells",
+    "page": 35,
+    "text": "The control spells are: Control Animal, Control Construct, Control Demon, Control Undead, and Mind Control. If a control spell is successfully cast on a figure that is already under the effects of an active control spell, the existing control spell is immediately cancelled. Thus, a figure may never be under the effects of multiple control spells. If a figure is a temporary member of a warband and has a control spell cast on it, all links to its temporary warband are broken. If this control spell is subsequently cancelled, the figure becomes an uncontrolled creature. If a figure is a permanent member of a warband and has a control spell cast on it, it remains linked to its original warband. If this control spell is subsequently resisted or cancelled, the figure reverts to its original warband. Note that, in this way, it is possible to use a control spell on a member of your own warband that is under the effects of an opponent’s control spell. If successfully cast, this new control spell cancels the effects of the existing one and is then itself cancelled because it has no further effect. A figure under control will never use a one-use magic item, such as a potion, but will use magic items that are always on. Captains that have been controlled will never use Tricks of the Trade. Spellcasters are normally immune to control spells, but in the event that one is controlled, it will never cast spells while under the spell. A figure may not cast a control spell while it currently has a control spell of that type already active unless a specific rule allows it (such as a flourish)."
+   }
+  ]
+ },
+ "Mind Lock": {
+  "page": 66,
+  "criticals": [
+   {
+    "sources": [
+     "Spellcaster Magazine",
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.49",
+     "Advanced Spellcraft": "p.66"
+    },
+    "success": "The caster may pick a second target of the spell. Both targets receive the benefits of the spell.",
+    "failure": "The target figure suffers -2 Will and is Immune to Mind Lock for the rest of the game."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Brave Companion",
+    "modifier": -2,
+    "text": "Any figure standing within 2” of the target of this spell gains +2 on Will Rolls to resist or overcome Mind Control or Suggestion spells. A figure may only receive this bonus once, no matter how many Brave Companions are within 2”."
+   },
+   {
+    "name": "Break Control",
+    "modifier": -1,
+    "text": "Any control spells currently active on the target figure are immediately cancelled."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Miraculous Cure": {
+  "page": 67,
+  "criticals": [
+   {
+    "sources": [
+     "Spellcaster Magazine",
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.50",
+     "Advanced Spellcraft": "p.67"
+    },
+    "success": "In addition to the normal effects, the target receives +3 Health in its next game.",
+    "failure": "The target suffers a permanent injury. Roll on the Permanent Injury Table. If the target of the spell is dead, the caster suffers horrific visions of death and starts the next game at -3 Health."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Apprentice Casting",
+    "modifier": -4,
+    "text": "Apprentices are allowed to cast the spell. This means they will have one chance to resurrect their wizard, if they choose, before being promoted to a wizard themselves. They still suffer the -4 if attempting to use the spell for resurrection and will likely have to roll a ‘20’ and critically succeed due to all the penalties involved."
+   },
+   {
+    "name": "Resurrection",
+    "modifier": -2,
+    "text": "This flourish eliminates the -4 penalty to the Casting Roll when attempting to bring a figure back to life."
+   }
+  ],
+  "notes": [
+   "A figure brought back to life by Miraculous Cure keeps all the equipment it had when it died."
+  ],
+  "description": {
+   "sources": [
+    "Advanced Spellcraft"
+   ],
+   "pages": {
+    "Advanced Spellcraft": "p.67"
+   },
+   "text": "Wizard only. This spell may be used in several different ways. A successful casting of this spell will remove all permanent injuries from one figure. For example, a wizard suffering from Lost Fingers regrows all their missing digits, regardless of how many times they have suffered that particular injury. Or, it may be cast on a Badly Wounded figure – if successful, the figure is healed and may participate in the next game with no penalty. Finally, it may be used to attempt to bring a figure back from the dead. The figure must have died in the game just played, and using the spell in this fashion incurs a -4 penalty to the Casting Roll. If successful, the figure is restored to life, and may participate in the next game with no penalty. If Miraculous Cure is cast using a scroll, it cannot be used to resurrect the dead."
+  }
+ },
+ "Mud": {
+  "page": 68,
+  "criticals": [
+   {
+    "sources": [
+     "Spellcaster Magazine",
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.50",
+     "Advanced Spellcraft": "p.68"
+    },
+    "success": "The mud is boiling hot. Any figure that moves into the mud, or activates while in the mud, suffers 1 point of damage.",
+    "failure": "The spell is successfully cast with the caster treated as the target point."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Soft Tread",
+    "modifier": -1,
+    "text": "The mud does not count as rough ground for the caster of the spell."
+   },
+   {
+    "name": "Sticky",
+    "modifier": -2,
+    "text": "Any figure that wishes to pick up a treasure token in the mud must spend an action and make a Fight Roll (TN10). If the roll is failed, they do not pick up the token and the action is lost. If they succeed, they pick up the treasure token. Telekinesis cannot be used on a treasure token sitting in sticky mud."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Petrify": {
+  "page": 69,
+  "criticals": [
+   {
+    "sources": [
+     "Spellcaster Magazine",
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.50",
+     "Advanced Spellcraft": "p.69"
+    },
+    "success": "The target is petrified for its next two activations, instead of the next one, although it may attempt another Will Roll before the second.",
+    "failure": "The spell is successfully cast on the caster. The caster may attempt a Will Roll as normal."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Drop It",
+    "modifier": -1,
+    "text": "If the target of the spell was carrying a treasure token, and fails its Will Roll, it immediately drops the token. Place it 2” away from the figure in a random direction."
+   },
+   {
+    "name": "The Harder They Fall",
+    "modifier": -2,
+    "text": "Large creatures do not receive a bonus to their Will Roll to resist the spell."
+   }
+  ],
+  "notes": [
+   "A figure that is petrified may not force combat, nor does it stop figures from picking up treasure tokens or taking any other actions that would be prohibited by the figure’s proximity."
+  ],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Plague of Insects": {
+  "page": 70,
+  "criticals": [
+   {
+    "sources": [
+     "Spellcaster Magazine",
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.50",
+     "Advanced Spellcraft": "p.70"
+    },
+    "success": "The spell also summons one giant insect. The caster may place this insect anywhere in combat with the target figure. The giant insect has the same stats as a blood crow (Bestiary, page 145) and follows all the normal rules for uncontrolled creatures.",
+    "failure": "One random opponent may place a giant insect anywhere within 3” of the caster, including in combat with it."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Barbed Stingers",
+    "modifier": -1,
+    "text": "Each turn, if the target figure fails its Will Roll, or chooses not to make one, it suffers 1 point of damage."
+   },
+   {
+    "name": "Eye Biters",
+    "modifier": -2,
+    "text": "Large creatures are no longer immune to this spell, but only suffer -2 Fight and -2 Shoot."
+   },
+   {
+    "name": "Tasty Target",
+    "modifier": -1,
+    "text": "The spell may be cast on an undead creature or construct. The target suffers no penalties from the spell, but other non-undead, non-construct figures within 1” radius do."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Planar Tear": {
+  "page": 71,
+  "criticals": [
+   {
+    "sources": [
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Advanced Spellcraft": "p.71"
+    },
+    "success": "The rift is so large that an imp (see Frostgrave, page 184) crawls out of it. Place this imp on the target point for the spell. This imp counts as a temporary member of the caster’s warband for the rest of the game, under the effects of a Control Demon spell, but does not affect the spellcaster’s ability to summon or control other imps or demons.",
+    "failure": "Determine a random direction then roll a die. A rift is created at that point. For the rest of the game, at the beginning of each turn, a new imp appears at that point. These imps are uncontrolled creatures."
+   },
+   {
+    "sources": [
+     "Spellcaster Magazine"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.51"
+    },
+    "success": "The rift is so large that an imp crawls out of it. Place this imp on the target point for the spell. This imp counts as a member of the caster’s warband for the rest of the game but does not affect the spellcaster’s ability to summon or control other imps or demons.",
+    "failure": "Determine a random direction then roll a die. A rift is created that many inches away in the random direction. For the rest of the game, at the beginning of each turn, a new imp appears at that point. These imps are uncontrolled creatures."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Enduring",
+    "modifier": -3,
+    "text": "Mark the target point on the table. Any figure that ends an activation within 2” of this point must make a Will Roll against the Casting Roll or suffer damage as per the spell. At the end of each turn, after the one in which it is cast, roll a die. On a 1–4, the spell is cancelled, and the marked point should be removed from the table."
+   },
+   {
+    "name": "Narrow Field",
+    "modifier": -1,
+    "text": "The spellcaster can target a single demon instead of a target point. Only that demon needs to make a Will Roll, no other figures are affected by the spell."
+   },
+   {
+    "name": "Spatial Disorientation",
+    "modifier": -1,
+    "text": "Any model damaged by the spell is also moved 3” in a random direction."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Plane Walk": {
+  "page": 73,
+  "criticals": [
+   {
+    "sources": [
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Advanced Spellcraft": "p.73"
+    },
+    "success": "The caster, and up to one figure within 3”, may immediately move to any point on the table that is not occupied by another figure. If moving two figures, the figures must still be within 3” of one another after they move. All the other effects of the spells apply to both figures until their next activation.",
+    "failure": "The target of the spell is attacked by an extra-planar entity while attempting to walk and drags this creature back to this reality. Move the target 1–10” in a random direction and place a minor demon (see Frostgrave, page 185) in combat with it. This minor demon follows all the rules for an uncontrolled creature."
+   },
+   {
+    "sources": [
+     "Spellcaster Magazine"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.51"
+    },
+    "success": "The caster, and up to one figure within 3\", may immediately move to any point on the table that is not occupied by another figure. If moving two figures, the figures must still be within 3\" of one another after they move. All the other effects of the spells apply to both figures until their next activation.",
+    "failure": "The caster is attacked by an extra-planar entity while attempt to walk and drags this creature back to this reality. Move the caster 1–10\" in a random direction and place a minor demon in combat with it. This minor demon follows all the rules for an uncontrolled creature."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Doorway",
+    "modifier": -5,
+    "text": "Instead of the normal effects of the spell, the wizard and all selected figures within 1” are transported to another plane of existence. Remove all of them from the table. All treasure tokens they were carrying are lost, but otherwise they are counted as having exited the table."
+   },
+   {
+    "name": "Send on a Journey",
+    "modifier": -2,
+    "text": "The spell becomes Touch instead of Self-Only."
+   }
+  ],
+  "notes": [
+   "No figure may force combat with a figure that is under the effects of this spell."
+  ],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Poison Dart": {
+  "page": 74,
+  "criticals": [
+   {
+    "sources": [
+     "Spellcaster Magazine",
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.51",
+     "Advanced Spellcraft": "p.74"
+    },
+    "success": "Make a +5 poisonous magic shooting attack against the target figure.",
+    "failure": "The spellcaster shoots the dart into its own foot. It takes no damaged but is poisoned."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Barbed",
+    "modifier": -2,
+    "text": "The dart does +2 damage."
+   },
+   {
+    "name": "Potent Venom",
+    "modifier": -3,
+    "text": "The target also suffers -1 to all rolls for as long as it is poisoned."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Possess": {
+  "page": 74,
+  "criticals": [
+   {
+    "sources": [
+     "Spellcaster Magazine",
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.51",
+     "Advanced Spellcraft": "p.74"
+    },
+    "success": "In addition to the normal results of this spell, roll once on the Minor Demonic Attribute Table (Forgotten Pacts, page 14) and apply this to the target figure as well.",
+    "failure": "The spell is successfully cast, but the demon manages to take control of the target figure. For the rest of the game, this figure counts as an uncontrolled creature. In addition, roll once on the Minor Demonic Attribute Table and apply this to the target figure as well."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Enlarge",
+    "modifier": -4,
+    "text": "The spell gives the target +2 damage in melee combat and the Large trait."
+   },
+   {
+    "name": "Horned",
+    "modifier": -2,
+    "text": "The spell also gives the target the Horns trait."
+   },
+   {
+    "name": "Winged",
+    "modifier": -4,
+    "text": "The spell also gives the target the Flying trait."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Power Word": {
+  "page": 75,
+  "criticals": [
+   {
+    "sources": [
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Advanced Spellcraft": "p.75"
+    },
+    "success": "The effects of this spell only apply to spellcasters of the casting player’s choosing. In addition, this spellcaster can cast a second Power Word spell, if they so choose, but must choose a different spell or school for it to affect.",
+    "failure": "The figure manages to cast Draining Word instead, affecting the same spell or school that Power Word would have. This spell lasts until the end of the game unless it is dispelled."
+   },
+   {
+    "sources": [
+     "Spellcaster Magazine"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.52"
+    },
+    "success": "The effects of this spell only apply to spellcasters of the casting player’s choosing. In addition, this spellcaster can cast a second Power Word, if they so choose, but must choose a different spell for it to affect.",
+    "failure": "The figure manages to cast Draining Word instead, affecting the same spell that Power Word would have. This spell lasts until the end of the game, unless it is otherwise cancelled."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Encompass",
+    "modifier": -2,
+    "text": "The spellcaster can choose for the spell to affect all the spells from a specific school of magic, instead of a single spell. All Casting Rolls to cast a spell from that school are at +1 for the rest of the game. In a situation where a spell would be affected by multiple Power Word spells, use the largest bonus to that spell, but the bonuses do not stack."
+   },
+   {
+    "name": "Targeted Area",
+    "modifier": -2,
+    "text": "The effects of the spell only apply to one half of the table, chosen by the caster. The table can only be split in half by straight lines running between the centre points of opposite table edges or diagonally opposite corners."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Push": {
+  "page": 76,
+  "criticals": [
+   {
+    "sources": [
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Advanced Spellcraft": "p.76"
+    },
+    "success": "If the target of the spell was an enemy, the target also suffers damage equal to half the number of inches they were pushed, rounded down. If the target of the spell was a friendly figure, the caster can choose to modify the length of the push by +/-3” (this can be used in conjunction with the Pulled Punch flourish to decrease the distance up to 6”).",
+    "failure": "Roll a die. The caster manages to push themselves that many inches directly away from the target of the spell as though they themselves were the target of a Push spell."
+   },
+   {
+    "sources": [
+     "Spellcaster Magazine"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.52"
+    },
+    "success": "If the target of the spell was an enemy, the target also suffers damage equal to half the number of inches they were pushed. If the target of the spell was a friendly figure, the caster can choose to modify the length of the push by +/- 3\".",
+    "failure": "Roll a die. The caster manages to push himself that many inches directly away from the target of the spell as though he himself were the target of a Push spell."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Pulled Punch",
+    "modifier": -2,
+    "text": "The spellcaster can choose to decrease the distance pushed by up to 3” after the roll is made."
+   },
+   {
+    "name": "Wide Beam",
+    "modifier": -2,
+    "text": "The spell attack is also rolled against all figures in combat or within 0.5” of the target figure."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Raise Zombie": {
+  "page": 77,
+  "criticals": [
+   {
+    "sources": [
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Advanced Spellcraft": "p.77"
+    },
+    "success": "The caster may add one ghoul (see Frostgrave rulebook, page 191) to their warband instead of a zombie. (Though it still counts against the maximum of one zombie allowed by the spell).",
+    "failure": "If cast Out of Game, the spell fails, and the caster may not cast this spell during the coming game. If cast in game, the spell creates an uncontrolled zombie. One random opponent may place this figure anywhere within 3” of the caster, but at least 1” away."
+   },
+   {
+    "sources": [
+     "Spellcaster Magazine"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.52"
+    },
+    "success": "The caster may add one ghoul to their warband instead of a zombie.",
+    "failure": "If cast Out of Game, the spell fails, and the caster may not cast this spell during the coming game. If cast in game, the spell creates an uncontrolled zombie. One random opponent may place this figure anywhere within 3\" of the caster, but at least 1\" away."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Growing Hordes",
+    "modifier": -3,
+    "text": "This flourish allows the warband to have a second zombie, from the Raise Zombie spell, active on the table."
+   },
+   {
+    "name": "Rusting Weapons",
+    "modifier": -1,
+    "text": "The zombie is carrying old, rusty weapons and does +1 damage in melee."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Reveal Secret": {
+  "page": 78,
+  "criticals": [
+   {
+    "sources": [
+     "Spellcaster Magazine",
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.53",
+     "Advanced Spellcraft": "p.78"
+    },
+    "success": "The player may make three rolls for one treasure token and choose which one to take.",
+    "failure": "The spellcaster sees some vision of horror and suffers -1 Will for the coming game."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "All that Glitters",
+    "modifier": -1,
+    "text": "The affected treasure token also comes with d20 extra gc."
+   },
+   {
+    "name": "Book Hunter",
+    "modifier": -2,
+    "text": "Instead of making two rolls on the Treasure Table, the player may roll for two different grimoires and then select which one to take."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Scatter Shot": {
+  "page": 78,
+  "criticals": [
+   {
+    "sources": [
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Advanced Spellcraft": "p.78"
+    },
+    "success": "The spellcaster makes a +1 magic elemental shooting attack against every enemy figure within 12”; additionally, any figure that suffers damage from this attack is moved 2” directly away from the caster.",
+    "failure": "Every member of the caster’s warband within 12” and line of sight, including the caster, immediately suffers a +0 magic elemental shooting attack."
+   },
+   {
+    "sources": [
+     "Spellcaster Magazine"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.53"
+    },
+    "success": "The spellcaster makes a +1 elemental magic shooting attack against every enemy figure within 12\", additionally, any figure that suffers damage from this attack is moved 2\" directly away from the caster.",
+    "failure": "Every member of the caster's warband within 12\", including the caster himself, immediately suffers a +0 elemental magic shooting attack."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Extended Reach",
+    "modifier": -2,
+    "text": "Increase the range of the attacks to 14”."
+   },
+   {
+    "name": "Supercharge",
+    "modifier": -2,
+    "text": "Each attack does +1 damage."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Shield": {
+  "page": 80,
+  "criticals": [
+   {
+    "sources": [
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Advanced Spellcraft": "p.80"
+    },
+    "success": "In addition to the normal effects of the spell, the target also receives +2 Fight when rolling against shooting attacks for the rest of the game. This does stack with the Shield of Scattering flourish.",
+    "failure": "The caster may not cast this spell for the rest of the game."
+   },
+   {
+    "sources": [
+     "Spellcaster Magazine"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.54"
+    },
+    "success": "In addition to the normal effects of the spell, the target also receives +2 Fight when rolling against shooting attacks for the rest of the game.",
+    "failure": "The caster may not cast this spell for the rest of the game."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Extreme Protection",
+    "modifier": -3,
+    "text": "If cast upon a target that already has the Shield spell in effect, the bonus does stack, though the maximum armour rule still applies."
+   },
+   {
+    "name": "Shield of Scattering",
+    "modifier": -2,
+    "text": "The target also receives +2 Fight when rolling against shooting attacks."
+   },
+   {
+    "name": "Split Cast",
+    "modifier": -2,
+    "text": "This counts as two spells, targeting two different targets. Each gains +1 Armour."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Slow": {
+  "page": 81,
+  "criticals": [
+   {
+    "sources": [
+     "Spellcaster Magazine",
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.54",
+     "Advanced Spellcraft": "p.81"
+    },
+    "success": "In addition to the normal effects of the spell, the target also suffers -2 Move.",
+    "failure": "The spell is successfully cast upon the caster."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Deaden Reflexes",
+    "modifier": -1,
+    "text": "The target also suffers -1 Fight."
+   },
+   {
+    "name": "Stiff Fingers",
+    "modifier": -1,
+    "text": "The target also suffers -1 Shoot."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Spell Eater": {
+  "page": 81,
+  "criticals": [
+   {
+    "sources": [
+     "Spellcaster Magazine",
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.54",
+     "Advanced Spellcraft": "p.81"
+    },
+    "success": "This spell cancels the effect of up to two spells currently in play, and the caster takes no damage.",
+    "failure": "The spell cancels the effects of all the caster’s own spells that are currently in play. In addition, the caster takes 2 points of damage."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Fangs",
+    "modifier": -2,
+    "text": "If the cancelled spell was cast upon a specific figure, that figure suffers 1 point of damage."
+   },
+   {
+    "name": "Feast",
+    "modifier": -2,
+    "text": "If the spell cancelled was from the school of Necromancy, the caster gains 1 point of power that can be applied to Casting Rolls or Will Rolls. A spellcaster may have no more than 4 points of power stored at one time. These are lost at the end of the game."
+   }
+  ],
+  "notes": [
+   "Despite the slight difference in wording, Dispell and Spell Eater work exactly the same in their base rules (except Spell Eater hurts the caster)."
+  ],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Steal Health": {
+  "page": 82,
+  "criticals": [
+   {
+    "sources": [
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Advanced Spellcraft": "p.82"
+    },
+    "success": "The caster also gains +1 Fight for the rest of the game, while the target suffers -1 Fight for the rest of the game. Each bonus and penalty can only be gained once from this spell.",
+    "failure": "The caster takes 1 point of damage, while the target regains 1 lost point of Health."
+   },
+   {
+    "sources": [
+     "Spellcaster Magazine"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.54"
+    },
+    "success": "In addition to the normal effects of the spell, the caster gains +1 Fight for the rest of the game, while the target suffers -1 Fight for the rest of the game.",
+    "failure": "The caster loses one point of Health (in addition to whatever is normally lost for the Casting Roll), while the target regains one lost point of Health."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Every Last Drop",
+    "modifier": -2,
+    "text": "Increase the amount of Health loss and Health gain to 4."
+   },
+   {
+    "name": "Lifepower",
+    "modifier": -2,
+    "text": "Instead regaining 3 Health, the caster can choose to gain 2 points of power that can be used later in the game to empower Casting Rolls or Will Rolls. A spellcaster may only have 4 points of power stored at one time. These are lost at the end of the game."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Strength": {
+  "page": 83,
+  "criticals": [
+   {
+    "sources": [
+     "Spellcaster Magazine",
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.54",
+     "Advanced Spellcraft": "p.83"
+    },
+    "success": "In addition to the normal effects of this spell, the target also gains a +1 damage modifier in melee combat for the rest of the game.",
+    "failure": "The target suffers -1 Fight for the rest of the game."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Arms of the Giant",
+    "modifier": -1,
+    "text": "The target of the spell automatically passes the next Fight stat roll (a Fight Roll with a Target Number) that it is called upon to make."
+   },
+   {
+    "name": "Beast of Burden",
+    "modifier": -3,
+    "text": "The target suffers -1 Move, instead of the normal half move, when carrying a treasure token."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Strike Dead": {
+  "page": 83,
+  "criticals": [
+   {
+    "sources": [
+     "Spellcaster Magazine",
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.55",
+     "Advanced Spellcraft": "p.83"
+    },
+    "success": "The caster takes no damage for casting this spell. If this spell takes the target to 0 Health, and the target is a spellcaster or captain, they must roll for a permanent injury on top of any other results for their roll on the Survival Table.",
+    "failure": "The spell is successfully cast against the caster. (So, the caster immediately suffers 1 point of damage for casting the spell, and then must make a Will Roll against the spell with a Casting Roll of 14)."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Down and Up",
+    "modifier": -2,
+    "text": "If the target of the spell is reduced to 0 Health, replace the target with a zombie (see Frostgave rulebook, page 193) under the control of the caster. This zombie counts as a temporary member of the warband and under the effects of a Control Undead spell. It does not affect how many other undead may be controlled by the caster from any other spell."
+   },
+   {
+    "name": "Extended Reach",
+    "modifier": -2,
+    "text": "Increase the range of the spell to 10”."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Suggestion": {
+  "page": 84,
+  "criticals": [
+   {
+    "sources": [
+     "Spellcaster Magazine",
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.55",
+     "Advanced Spellcraft": "p.84"
+    },
+    "success": "The spellcaster may move the target up to 8” in any direction provided it doesn’t lead to damage, or up to 3” in any direction, but this can lead to damage (such as falling).",
+    "failure": "The spell is cast on the nearest member of the caster’s warband that is carrying a treasure token. A random opponent decides how to move this figure. If no figures in the caster’s warband are carrying treasure, the caster suffers -1 Will for the rest of the game instead."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Pass the Loot",
+    "modifier": -1,
+    "text": "If the target fails its Will Roll, instead of dropping the treasure token, the caster can choose for it to be passed to a member of its own warband that is within 2”, provided that figure is not in combat or already carrying loot. This figure is now carrying the treasure token."
+   },
+   {
+    "name": "Suicide Charge",
+    "modifier": -2,
+    "text": "The caster can move the target into combat and have it make an immediate attack, but not against a member of the target’s own warband."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Summon Demon": {
+  "page": 85,
+  "criticals": [
+   {
+    "sources": [
+     "Spellcaster Magazine",
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.55",
+     "Advanced Spellcraft": "p.85"
+    },
+    "success": "The spell generates a major demon. Roll once on the Major Demonic Attributes Table (Forgotten Pacts, page 18).",
+    "failure": "Place a demon on the table in combat with the caster. To determine the type of demon, roll a die: 1–10 imp; 11–17 minor demon; 18+ major demon."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Demonic Ambush",
+    "modifier": -2,
+    "text": "The demon can be placed directly into combat."
+   },
+   {
+    "name": "Gateway",
+    "modifier": -3,
+    "text": "The spell becomes line of sight within a range of 6”."
+   }
+  ],
+  "notes": [
+   "See the Advanced Summoning Rules in Frostgrave: Forgotten Pacts for expanded use of this spell."
+  ],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Telekinesis": {
+  "page": 86,
+  "criticals": [
+   {
+    "sources": [
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Advanced Spellcraft": "p.86"
+    },
+    "success": "The caster may move the treasure token up to 10”. If it is moved into contact with a member of the caster’s warband, it may pick up the treasure token as a free action.",
+    "failure": "Move the treasure token 6” directly away from the caster."
+   },
+   {
+    "sources": [
+     "Spellcaster Magazine"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.55"
+    },
+    "success": "The caster may move the treasure up to 10\". If it is moved into contact with a member of the caster’s warband, they may pick up the treasure as a free action.",
+    "failure": "One random opponent may move the treasure token up to 6\" in any direction."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Beyond Sight",
+    "modifier": -2,
+    "text": "So long as the treasure token begins and ends its movement in line of sight of the caster, it can pass out of it during the movement."
+   },
+   {
+    "name": "Far Reach",
+    "modifier": -2,
+    "text": "The spell can target a treasure token up to 20” away but can only move it 4”."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Teleport": {
+  "page": 87,
+  "criticals": [
+   {
+    "sources": [
+     "Spellcaster Magazine",
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.56",
+     "Advanced Spellcraft": "p.87"
+    },
+    "success": "After teleporting, the caster may take one more action this activation. This can be any action the figure is normally able to perform, including casting a spell.",
+    "failure": "Roll a die. Move the caster that many inches in a random direction."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Homing Beacon",
+    "modifier": -2,
+    "text": "The spell may be used to move off the table, but any treasure tokens carried by the caster are dropped before the teleport takes place."
+   },
+   {
+    "name": "Roll Out",
+    "modifier": -2,
+    "text": "If the caster would have had an action left after casting the spell, they may make one Move action, but at -3 Move."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Time Store": {
+  "page": 87,
+  "criticals": [
+   {
+    "sources": [
+     "Spellcaster Magazine",
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.56",
+     "Advanced Spellcraft": "p.87"
+    },
+    "success": "The caster may still take their second action for the turn as normal.",
+    "failure": "The caster receives a maximum of one action in their next activation."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Rapid Response",
+    "modifier": -2,
+    "text": "The caster may use the stored action at the end of a turn, after all other figures have activated. This one action can be any the caster is normally allowed to take. If more than one figure has this spell and flourish active, they must decide in priority order whether or not to use it at the end of the turn."
+   },
+   {
+    "name": "Quick Step",
+    "modifier": -2,
+    "text": "After casting the spell, the spellcaster can make one Move action at -3 Move."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Time Walk": {
+  "page": 89,
+  "criticals": [
+   {
+    "sources": [
+     "Spellcaster Magazine",
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.56",
+     "Advanced Spellcraft": "p.89"
+    },
+    "success": "Casting this spell does not count as one of the figure’s actions during this activation.",
+    "failure": "Remove the caster from the table but mark the spot. At the end of every turn, roll a die. On a 6+ it returns to the table at the exact spot it left it."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Time Rider",
+    "modifier": -4,
+    "text": "If the wizard cast this spell on consecutive turns, they only suffer 4 points of damage."
+   },
+   {
+    "name": "Novice Caster",
+    "modifier": -4,
+    "text": "The apprentice may cast this spell. They receive an additional action in the Soldier Phase and right at the end of the Creature Phase, after all other figures in that phase have activated."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Transpose": {
+  "page": 90,
+  "criticals": [
+   {
+    "sources": [
+     "Spellcaster Magazine",
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.56",
+     "Advanced Spellcraft": "p.90"
+    },
+    "success": "The caster may change the targets of this spell. Target figures receive no Will Rolls to resist this spell.",
+    "failure": "The caster switches places with a random member of its own warband."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Extended Reach",
+    "modifier": -2,
+    "text": "The two target figures must be within 16” of one another."
+   },
+   {
+    "name": "Glorious Triangle",
+    "modifier": -3,
+    "text": "The spell can target three figures, all of which switch places with one of the other two, at the caster’s discretion. Each figure must be within 12” of both the other figures and within line of sight of the caster. Will Rolls are still made as normal."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "True Sight": {
+  "page": 90,
+  "criticals": [
+   {
+    "sources": [
+     "Spellcaster Magazine",
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.56",
+     "Advanced Spellcraft": "p.90"
+    },
+    "success": "The range for all parts of this spell are increased to 12”.",
+    "failure": "The caster cannot cast this spell for the remainder of the game."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Banish Beauty",
+    "modifier": -1,
+    "text": "Instead of the normal rules for this spell, this spell may target a figure in line of sight of the caster with the Beauty spell active. The caster does not have to make a Will Roll. The Beauty spell is immediately cancelled."
+   },
+   {
+    "name": "Destroy Illusion",
+    "modifier": -1,
+    "text": "Instead of the normal rules for this spell, this spell may target an illusionary soldier in line of sight of the caster. The illusionary soldier is immediately removed from the table."
+   },
+   {
+    "name": "Grant Vision",
+    "modifier": -1,
+    "text": "Instead of the normal rules for this spell, it becomes Line of Sight with a range of 16”. The target gains the True Sight trait."
+   }
+  ],
+  "notes": [],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Wall": {
+  "page": 91,
+  "criticals": [
+   {
+    "sources": [
+     "Spellcaster Magazine",
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.57",
+     "Advanced Spellcraft": "p.91"
+    },
+    "success": "The spell generates a wall of fire. In addition to the normal effects of this spell, any figure that moves into contact with the wall, or activates while in contact, suffers 2 points of elemental magic damage.",
+    "failure": "Any walls the caster currently has on the table are immediately removed. The caster may not cast this spell again for the rest of the game."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Enduring",
+    "modifier": -2,
+    "text": "The wall only vanishes on a roll of 1–2."
+   },
+   {
+    "name": "Spiked",
+    "modifier": -1,
+    "text": "Any figure that falls onto the wall or is moved into the wall by an external force, such as getting pushed back in combat or moved by a spell or scenario effect, immediately suffers 2 points of damage."
+   }
+  ],
+  "notes": [
+   "Walls must be cast vertical to the ground and the bottom of the wall must be on the ground or on terrain. If any part of the wall is in the air, it crashes to the ground and the wall is cancelled. Walls must be exactly 6” long and 3” high but can be angled any way the caster wants to plug gaps. Walls have no appreciable thickness. Walls can be climbed as normal."
+  ],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ },
+ "Wizard Eye": {
+  "page": 92,
+  "criticals": [
+   {
+    "sources": [
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Advanced Spellcraft": "p.92"
+    },
+    "success": "The wizard eye may be placed on top of a piece of terrain (but not on the ground) and gains a 360-degree field of vision.",
+    "failure": "The caster may not cast this spell for the rest of the game."
+   },
+   {
+    "sources": [
+     "Spellcaster Magazine"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.57"
+    },
+    "success": "The wizard eye may be placed on top of a piece of terrain and gains a 360-degree field of vision.",
+    "failure": "The caster may not cast this spell for the rest of the game."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Clinging Eye",
+    "modifier": -2,
+    "text": "The spell may be cast on any vertical terrain; it doesn’t have to be flat."
+   },
+   {
+    "name": "Crawling Eye",
+    "modifier": -2,
+    "text": "Whenever the wizard activates, before taking any actions they may move their wizard eye 3” in any direction, so long as the eye stays on a vertical side of the same terrain."
+   },
+   {
+    "name": "Second Sight",
+    "modifier": -4,
+    "text": "The spellcaster may cast this spell even if it has an active wizard eye. If successful it may place a second wizard eye on the table and maintain both. Two is the absolute maximum though."
+   }
+  ],
+  "notes": [
+   "This spell can only be cast on a flat side of vertical terrain (not the top) and cannot be cast on the ground. When the spellcaster casts the spell, the caster may use the eye as the origin point for any Line of Sight or Touch spell. It cannot be used for Area Effect spells."
+  ],
+  "description": {
+   "sources": [
+    "Advanced Spellcraft"
+   ],
+   "pages": {
+    "Advanced Spellcraft": "p.92"
+   },
+   "text": "This spell may be cast on any vertical terrain feature within 12” that has a flat side, such as most ruins. Place a token on or next to the terrain feature to represent the wizard eye. For the rest of the game, the caster may choose to draw line of sight from the wizard eye instead of from the figure when casting spells. The wizard eye has a 180-degree field of vision. A spellcaster may only maintain one wizard eye at a time. If the terrain piece on which the wizard eye is placed is damaged or destroyed (such as by a Crumble spell), the spell is cancelled. The spellcaster may cancel this spell at the end of any turn."
+  }
+ },
+ "Write Scroll": {
+  "page": 93,
+  "criticals": [
+   {
+    "sources": [
+     "Spellcaster Magazine",
+     "Advanced Spellcraft"
+    ],
+    "pages": {
+     "Spellcaster Magazine": "Issue 7, p.57",
+     "Advanced Spellcraft": "p.93"
+    },
+    "success": "When this scroll is used, the spell is cast as though a critical success has been rolled.",
+    "failure": "The caster starts a fire in their scriptorium. Choose one scroll currently in the wizard’s vault. This scroll is destroyed. If the wizard has no other scrolls, there is no effect."
+   }
+  ],
+  "flourishes": [
+   {
+    "name": "Expert Penmanship",
+    "modifier": -2,
+    "text": "When cast, the spell is treated as having a Casting Roll of 15 (instead of the 14 that is normal for scrolls)."
+   },
+   {
+    "name": "Light as a Feather",
+    "modifier": -2,
+    "text": "This scroll can be carried with another scroll, with both scrolls only taking up one item slot."
+   }
+  ],
+  "notes": [
+   "Lichdom may never be cast from a scroll (see Frostgrave: Thaw of the Lich Lord)."
+  ],
+  "description_sources": [
+   "Core Rules",
+   "Advanced Spellcraft"
+  ]
+ }
+}

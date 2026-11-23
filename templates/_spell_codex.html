@@ -1,0 +1,37 @@
+{# Advanced Spellcraft's extras inside a spell's Info panel. `cx` comes from
+   game_content.spell_codex_view(), already filtered to the warband's books. #}
+{% from "_source_badges.html" import source_badges %}
+{% macro spell_codex(cx, learned=[]) %}
+  {%- if cx %}
+    {% if cx.description %}
+      <span class="spell-codex-src"><span class="badge">Core Rules</span></span>
+    {% elif cx.description_sources|length > 1 %}
+      <span class="spell-codex-src">{% for s in cx.description_sources %}<span class="badge">{{ s }}</span> {% endfor %}</span>
+    {% endif %}
+    <div class="spell-codex">
+      {% if cx.description %}
+        <p><strong>Revised text</strong>{{ source_badges(cx.description) }} <span class="muted">{{ cx.description.pages['Advanced Spellcraft'] }}</span><br>{{ cx.description.text }}</p>
+      {% endif %}
+      {% for c in cx.criticals %}
+        <p><strong>Casting Roll Criticals</strong>{{ source_badges(c) }}
+          <span class="muted">{% for s in c.sources %}{{ c.pages[s] }}{% if not loop.last %} · {% endif %}{% endfor %}</span><br>
+          <em>Critical Success:</em> {{ c.success }}<br>
+          <em>Critical Failure:</em> {{ c.failure }}</p>
+      {% endfor %}
+      {% if cx.flourishes %}
+        <p><strong>Flourishes</strong> <span class="badge">Advanced Spellcraft</span> <span class="muted">p.{{ cx.page }}</span></p>
+        <ul>
+          {% for f in cx.flourishes %}
+            <li><em>{{ f.name }} ({{ '%+d'|format(f.modifier) }}):</em>{% if f.name in learned %} <span class="badge">Learned</span>{% endif %} {{ f.text }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+      {% for n in cx.notes %}
+        <p><strong>Notes</strong> <span class="badge">Advanced Spellcraft</span><br>{{ n }}</p>
+      {% endfor %}
+      {% for b in cx.boxes %}
+        <p><strong>{{ b.title }}</strong> <span class="badge">Advanced Spellcraft</span> <span class="muted">p.{{ b.page }}</span><br>{{ b.text }}</p>
+      {% endfor %}
+    </div>
+  {%- endif %}
+{% endmacro %}

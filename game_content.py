@@ -729,7 +729,67 @@ def load_spell_descriptions() -> dict[str, str]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def enrich_spells_with_descriptions(spells: list[dict]) -> list[dict]:
+@lru_cache(maxsize=1)
+def load_spell_codex() -> dict[str, dict]:
+    """Advanced Spellcraft's per-spell flourishes, notes and Casting Roll
+    Criticals (scripts/extract_spell_codex.py), keyed by the plain-apostrophe
+    name SPELLS uses."""
+    path = DATA / "spell_codex.json"
+    if not path.is_file():
+        return {}
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    return {k.replace("’", "'"): v for k, v in raw.items()}
+
+
+@lru_cache(maxsize=1)
+def load_expansion_overviews() -> dict[str, str]:
+    """A short app-written overview per supplement, {book: text}, for the
+    Lexicon's Expansion Rules card."""
+    path = DATA / "expansion_overviews.json"
+    if not path.is_file():
+        return {}
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+@lru_cache(maxsize=1)
+def load_spellcraft_rules() -> list[dict]:
+    """Advanced Spellcraft's optional spellcasting rules, {id, title, page,
+    text} in book order (scripts/extract_spell_codex.py)."""
+    path = DATA / "spellcraft_rules.json"
+    if not path.is_file():
+        return []
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def spell_codex_view(name: str, enabled: set[str] | None = None) -> dict | None:
+    """The codex entry for a core spell, keeping only versions printed in a
+    book in `enabled` (None keeps everything, as the Lexicon does)."""
+    entry = load_spell_codex().get(name)
+    if not entry:
+        return None
+
+    def shown(srcs: list[str]) -> bool:
+        return enabled is None or any(s in enabled for s in srcs)
+
+    as_on = shown(["Advanced Spellcraft"])
+    desc = entry.get("description")
+    criticals = [c for c in entry["criticals"] if shown(c["sources"])]
+    if not as_on and not criticals:
+        return None
+    return {
+        "criticals": criticals,
+        "flourishes": entry["flourishes"] if as_on else [],
+        "notes": entry["notes"] if as_on else [],
+        "boxes": entry.get("boxes", []) if as_on else [],
+        "description": desc if desc and as_on else None,
+        "description_sources": [
+            s for s in entry.get("description_sources", []) if s == "Core Rules" or shown([s])
+        ],
+        "page": entry["page"],
+    }
+
+
+def enrich_spells_with_descriptions(spells: list[dict], enabled: set[str] | None = None) -> list[dict]:
     """Attach each spell's description text, looked up by name.
 
     A handful of supplement spells across different books happen to share a
@@ -746,6 +806,8 @@ def enrich_spells_with_descriptions(spells: list[dict]) -> list[dict]:
         school = sp.get("school", "")
         text = descs.get(f"{school}::{name}") or descs.get(name, "")
         row["description"] = text or "No description available."
+        if not sp.get("source") or sp.get("source") == "Core Rules":
+            row["codex"] = spell_codex_view(name, enabled)
         out.append(row)
     return out
 

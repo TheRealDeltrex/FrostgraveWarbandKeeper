@@ -3261,7 +3261,7 @@ KENNEL_ELIGIBLE_TYPE_KEYS = frozenset({
 # always available and is not part of this list.
 #
 # Order = real-world publication date (Thaw of the Lich Lord Nov 2015 through
-# The Wildwoods Jun 2023) — several of these predate the 2e core rules
+# Advanced Spellcraft 2025) — several of these predate the 2e core rules
 # (Aug 2020) themselves, since Frostgrave started as 1st edition and these
 # were folded into 2e later. Anywhere Core Rules is listed alongside these
 # (e.g. the loot picker's book dropdown — see source_book_order() below) it
@@ -3281,7 +3281,34 @@ SOURCE_BOOKS = [
     "Fireheart",
     "Grave Mutations",
     "The Wildwoods",
+    "Advanced Spellcraft",
 ]
+
+
+# Advanced Spellcraft's optional spellcasting rules (Chapter One), in book
+# order; their text is data/spellcraft_rules.json. Each is a homerule
+# "as_<id>": the book has the group agree to each separately (p.9).
+SPELLCRAFT_RULE_IDS = (
+    "blaze_of_glory",
+    "casting_roll_criticals",
+    "draining_magical_items",
+    "flourishes",
+    "holding_a_spell",
+    "no_market_for_created_items",
+    "out_of_game_empowering",
+    "out_of_game_spellcasting_limits",
+    "forgetting_spells",
+)
+
+
+def entry_sources(entry: dict) -> list[str]:
+    """Every book an entry is printed in. Entries identical in two books carry
+    a `sources` list; everything else has the single `source` (Core Rules when
+    absent)."""
+    srcs = entry.get("sources")
+    if isinstance(srcs, list) and srcs:
+        return [str(x) for x in srcs]
+    return [entry.get("source") or "Core Rules"]
 
 
 def source_slug(name: str) -> str:
@@ -3311,6 +3338,7 @@ SOURCE_BOOKS_WITHOUT_CREATION_IMPACT = [
     "Fireheart",
     "Grave Mutations",
     "The Wildwoods",
+    "Advanced Spellcraft",
 ]
 CREATION_SOURCE_BOOK_OPTIONS = [
     opt for opt in SOURCE_BOOK_OPTIONS if opt["name"] not in SOURCE_BOOKS_WITHOUT_CREATION_IMPACT

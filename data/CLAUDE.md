@@ -20,3 +20,16 @@ PDFs, folder in `CLAUDE.local.md`).
   truth**, ahead of the reference docs; `scripts/extract_expansion_content.py` only adds. Edit
   them as textual insertions — parts are hand-compacted onto single lines, so a `json.dumps()`
   round-trip reformats hundreds of lines. After a run that wrote, keep only the additions.
+- **`spell_codex.json`** — Advanced Spellcraft's flourishes, notes and Casting Roll Criticals
+  for the 80 core spells, with Spellcaster Issue 7's criticals beside them. Entries the same in
+  both books carry both in `sources`; changed ones are two entries. Written whole by
+  `scripts/extract_spell_codex.py` (its hand-judged change lists live there), which also writes
+  **`spellcraft_rules.json`** (the book's optional rules). The ebook stamps a purchaser line on
+  every page; extractors must drop it.
+- **Advanced Spellcraft additions** to `magic_items.json`, `loot_tables.json`, `bestiary.json`,
+  `traits.json`, `expansion_rules.json` and `random_encounters.json` come from the
+  `scripts/extract_advanced_spellcraft_*.py` add-only extractors. An entry printed unchanged in
+  two books carries a `sources` list (read via `frostgrave_data.entry_sources()`); a changed
+  reprint is a second entry under the new book.
+- **`expansion_overviews.json`** — app-written, three-sentence overview per supplement for the
+  Lexicon's Expansion Rules card. Not game text; hand-edited.

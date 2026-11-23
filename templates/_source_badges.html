@@ -1,0 +1,8 @@
+{# One badge per book an entry is printed in. Core Rules alone shows nothing,
+   matching the lists' long-standing "no badge means core" convention. #}
+{% macro source_badges(entry) %}
+  {%- set srcs = entry_sources(entry) -%}
+  {%- if srcs != ['Core Rules'] -%}
+    {%- for src in srcs %} <span class="badge">{{ src }}</span>{% endfor -%}
+  {%- endif -%}
+{% endmacro %}

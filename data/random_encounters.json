@@ -2006,5 +2006,265 @@
         }
       ]
     }
+  ],
+  "Advanced Spellcraft": [
+    {
+      "title": "Bibliosepulchre Random Encounter Table – Level 1 (first roll 1–12)",
+      "blurb": "(p.143)",
+      "rows": [
+        {
+          "name": "1",
+          "text": "Blade-Dog"
+        },
+        {
+          "name": "2",
+          "text": "Skeletons (2)"
+        },
+        {
+          "name": "3",
+          "text": "Armoured Skeleton"
+        },
+        {
+          "name": "4",
+          "text": "Zombie"
+        },
+        {
+          "name": "5",
+          "text": "Leechwolf"
+        },
+        {
+          "name": "6",
+          "text": "Ghoul"
+        },
+        {
+          "name": "7",
+          "text": "Silverfish Swarm"
+        },
+        {
+          "name": "8",
+          "text": "Boar"
+        },
+        {
+          "name": "9",
+          "text": "Giant Rat"
+        },
+        {
+          "name": "10",
+          "text": "Leechwolf"
+        },
+        {
+          "name": "11",
+          "text": "Bookeater"
+        },
+        {
+          "name": "12",
+          "text": "Silverfish Swarm"
+        },
+        {
+          "name": "13",
+          "text": "Snow Leopard"
+        },
+        {
+          "name": "14",
+          "text": "Wild Dog"
+        },
+        {
+          "name": "15",
+          "text": "Blade-Dog"
+        },
+        {
+          "name": "16",
+          "text": "Wolf"
+        },
+        {
+          "name": "17",
+          "text": "Failing Wrtech"
+        },
+        {
+          "name": "18",
+          "text": "Incunabulon (Small)"
+        },
+        {
+          "name": "19",
+          "text": "Imp"
+        },
+        {
+          "name": "20",
+          "text": "Ice Toad"
+        }
+      ]
+    },
+    {
+      "title": "Bibliosepulchre Random Encounter Table – Level 2 (first roll 13–18)",
+      "blurb": "(p.143)",
+      "rows": [
+        {
+          "name": "1",
+          "text": "Armoured Skeletons (2)"
+        },
+        {
+          "name": "2",
+          "text": "Ghoul"
+        },
+        {
+          "name": "3",
+          "text": "Bookeaters (2)"
+        },
+        {
+          "name": "4",
+          "text": "Wraith"
+        },
+        {
+          "name": "5",
+          "text": "Violent Fungus (2)"
+        },
+        {
+          "name": "6",
+          "text": "Chilopendra"
+        },
+        {
+          "name": "7",
+          "text": "Boar"
+        },
+        {
+          "name": "8",
+          "text": "Collegium Porter"
+        },
+        {
+          "name": "9",
+          "text": "Ice Spider"
+        },
+        {
+          "name": "10",
+          "text": "Failing Wretch"
+        },
+        {
+          "name": "11",
+          "text": "Snow Leopard"
+        },
+        {
+          "name": "12",
+          "text": "White Gorilla"
+        },
+        {
+          "name": "13",
+          "text": "Book Wight"
+        },
+        {
+          "name": "14",
+          "text": "Lighthawk"
+        },
+        {
+          "name": "15",
+          "text": "Chilopendra"
+        },
+        {
+          "name": "16",
+          "text": "Ice Toad"
+        },
+        {
+          "name": "17",
+          "text": "Book Wight"
+        },
+        {
+          "name": "18",
+          "text": "Violent Fungi (3)"
+        },
+        {
+          "name": "19",
+          "text": "Incunabulon (Medium)"
+        },
+        {
+          "name": "20",
+          "text": "Werewolf"
+        }
+      ]
+    },
+    {
+      "title": "Bibliosepulchre Random Encounter Table – Level 3 (first roll 19–20)",
+      "blurb": "(p.143)",
+      "rows": [
+        {
+          "name": "1",
+          "text": "Chronohound"
+        },
+        {
+          "name": "2",
+          "text": "Collegium Porter"
+        },
+        {
+          "name": "3",
+          "text": "Incunabulon (Large)"
+        },
+        {
+          "name": "4",
+          "text": "Book Wight"
+        },
+        {
+          "name": "5",
+          "text": "Wraith"
+        },
+        {
+          "name": "6",
+          "text": "Chilopendra (2)"
+        },
+        {
+          "name": "7",
+          "text": "Vampire"
+        },
+        {
+          "name": "8",
+          "text": "White Gorilla"
+        },
+        {
+          "name": "9",
+          "text": "Chronohound"
+        },
+        {
+          "name": "10",
+          "text": "Large Construct"
+        },
+        {
+          "name": "11",
+          "text": "Incunabulon"
+        },
+        {
+          "name": "12",
+          "text": "Minor Demon"
+        },
+        {
+          "name": "13",
+          "text": "Lighthawk"
+        },
+        {
+          "name": "14",
+          "text": "Frost Giant"
+        },
+        {
+          "name": "15",
+          "text": "Book Wight"
+        },
+        {
+          "name": "16",
+          "text": "Snow Troll"
+        },
+        {
+          "name": "17",
+          "text": "Snow Trolls (2)"
+        },
+        {
+          "name": "18",
+          "text": "Werewolf"
+        },
+        {
+          "name": "19",
+          "text": "Worm"
+        },
+        {
+          "name": "20",
+          "text": "Chronohound"
+        }
+      ]
+    }
   ]
 }

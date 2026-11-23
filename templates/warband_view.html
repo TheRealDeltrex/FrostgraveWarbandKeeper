@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_spell_codex.html" import spell_codex %}
 {% from "_loot_picker.html" import loot_picker_row with context %}
 {% from "_mutation_picker.html" import mutation_picker, mutated_badge with context %}
 {% from "_construct_modification_picker.html" import construct_modification_picker, construct_modification_badge with context %}
@@ -261,6 +262,22 @@
               </div>
             </div>
           </details>
+        </details>
+
+        <details class="ref-panel hr-group" id="hr-group-spellcraft">
+          <summary>Advanced Spellcraft<span class="hr-count"></span></summary>
+          <p class="muted" style="font-size:0.85rem">
+            Needs Advanced Spellcraft switched on in Source books. Each optional rule is agreed separately (p.9).
+          </p>
+          {% for rule in spellcraft_rules %}
+            <div class="hr-row">
+              <input id="hr_as_{{ rule.id }}" name="as_{{ rule.id }}" type="checkbox" {% if hr['as_' ~ rule.id] %}checked{% endif %} />
+              <details class="hr-note" id="hrnote-as_{{ rule.id }}">
+                <summary>{{ rule.title }}</summary>
+                <p class="hr-note-body">{{ rule.text }} <span class="muted">(p.{{ rule.page }})</span></p>
+              </details>
+            </div>
+          {% endfor %}
         </details>
 
         <details class="ref-panel hr-group" id="hr-group-spellcaster">
@@ -1547,6 +1564,16 @@
               {% endfor %}
             </select>
           </div>
+          <div class="form-row" id="learn-flourish-row" style="display:none">
+            <label for="learn_flourish">Flourish</label>
+            <select id="learn_flourish" name="learn_flourish">
+              {% for f in learnable_flourishes %}
+                <option value="{{ f.key }}"{% if not f.has_grimoire %} data-no-grimoire="1"{% endif %}>
+                  {{ f.spell }}: {{ f.name }} ({{ '%+d'|format(f.modifier) }}){% if not f.has_grimoire %} · no grimoire{% endif %}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
           <div class="form-row" id="improve-spell-row" style="display:none">
             <label for="improve_spell">Improve spell (−1 CN, min {{ casting_number_minimum }})</label>
             <select id="improve_spell" name="improve_spell">
@@ -1561,13 +1588,24 @@
           const choice = document.getElementById('level-choice');
           const learnRow = document.getElementById('learn-spell-row');
           const impRow = document.getElementById('improve-spell-row');
+          const flourishRow = document.getElementById('learn-flourish-row');
           function syncLevelUI() {
             learnRow.style.display = choice.value === 'learn_spell' ? '' : 'none';
+            flourishRow.style.display = choice.value === 'learn_flourish' ? '' : 'none';
             impRow.style.display = choice.value === 'improve_spell' ? '' : 'none';
           }
           choice.addEventListener('change', syncLevelUI);
           syncLevelUI();
           function confirmLevelUp() {
+            if (choice.value === 'learn_flourish') {
+              const fsel = document.getElementById('learn_flourish');
+              const fopt = fsel.options[fsel.selectedIndex];
+              if (!fopt || !fopt.getAttribute('data-no-grimoire')) return true;
+              return confirm(
+                'You have no grimoire for this spell in your vault, and Advanced Spellcraft only lets a '
+                + 'wizard learn a flourish from one. Learn it anyway?'
+              );
+            }
             if (choice.value !== 'learn_spell') return true;
             const sel = document.getElementById('learn_spell');
             const opt = sel.options[sel.selectedIndex];
@@ -1729,6 +1767,7 @@
                 <span class="col-info spell-desc-toggle">Info</span>
               </summary>
               <p class="spell-desc-body">{{ sp.description }}</p>
+              {{ spell_codex(sp.codex, sp.flourishes or []) }}
             </details>
           </div>
         {% endfor %}
@@ -2810,7 +2849,7 @@
                 <td><strong>{{ c.name }}</strong></td>
                 <td class="muted">
                   <span class="badge {{ c.category }}">{{ c.category }}</span><br />
-                  {% if c.source != 'Core Rules' %}<span class="badge">{{ c.source }}</span>{% else %}<span class="badge">Core</span>{% endif %}
+                  {% if c.source != 'Core Rules' %}{% for src in entry_sources(c) %}<span class="badge">{{ src }}</span> {% endfor %}{% else %}<span class="badge">Core</span>{% endif %}
                 </td>
                 <td class="gold">{% if c.cost_label %}{{ c.cost_label }}{% elif c.cost == 0 %}Free{% else %}{{ c.cost }}{% endif %}</td>
                 <td>{{ c.move }}</td>
@@ -3108,7 +3147,7 @@
                   <td><strong>{{ c.name }}</strong></td>
                   <td class="muted">
                     <span class="badge {{ c.category }}">{{ c.category }}</span><br />
-                    {% if c.source != 'Core Rules' %}<span class="badge">{{ c.source }}</span>{% else %}<span class="badge">Core</span>{% endif %}
+                    {% if c.source != 'Core Rules' %}{% for src in entry_sources(c) %}<span class="badge">{{ src }}</span> {% endfor %}{% else %}<span class="badge">Core</span>{% endif %}
                   </td>
                   <td class="gold">{% if c.cost_label %}{{ c.cost_label }}{% elif c.cost == 0 %}Free{% else %}{{ c.cost }}{% endif %}</td>
                   <td>{{ c.move }}</td>
@@ -4019,11 +4058,21 @@
                         data-sell-id="{{ it.id }}"
                         data-sell-name="{{ it.name }}"
                         data-sell-price="{{ suggested if suggested is not none else '' }}"
-                        {% if it.catalog_key == 'Grimoire' and not wizard_knows_vault_grimoire_spell(it) %}data-sell-warn="You have not learned the Spell contained in the Grimoire you're about to sell, this is forbidden by the core rules!"{% endif %}>Sell</button>
+                        {% if it.catalog_key == 'Grimoire' and not wizard_knows_vault_grimoire_spell(it) %}data-sell-warn="You have not learned the Spell contained in the Grimoire you're about to sell, this is forbidden by the core rules!"{% elif no_market_created and is_created_item(it) %}data-sell-warn="Your warband made this item. Under No Market for Created Items it can't be sold (Advanced Spellcraft p.13)."{% endif %}>Sell</button>
+                {% with bonus = drain_bonus(it) %}
+                  {% if bonus %}
+                    <button class="btn secondary small" type="submit" form="drain-vault-form" name="item_id" value="{{ it.id }}"
+                            title="Destroys it for +{{ bonus }} to one Out of Game Casting Roll (Advanced Spellcraft p.11)"
+                            onclick="return confirm('Drain this item for +{{ bonus }} to an Out of Game Casting Roll? It is destroyed.');">Drain +{{ bonus }}</button>
+                  {% endif %}
+                {% endwith %}
               </li>
             {% endwith %}
           {% endfor %}
         </ul>
+        <form id="drain-vault-form" method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" hidden>
+          <input type="hidden" name="action" value="drain_vault_item" />
+        </form>
         <form id="shop-sell-form" method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" hidden>
           <input type="hidden" name="action" value="shop_sell" />
           <input type="hidden" name="item_id" id="shop-sell-item-id" />

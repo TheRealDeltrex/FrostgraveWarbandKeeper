@@ -1,4 +1,6 @@
 {% extends "base.html" %}
+{% from "_spell_codex.html" import spell_codex %}
+{% from "_source_badges.html" import source_badges %}
 {% block title %}Frostgrave Lexicon · Frostgrave{% endblock %}
 {% block content %}
   <section class="hero">
@@ -126,6 +128,7 @@
                   <span class="col-info spell-desc-toggle">Info</span>
                 </summary>
                 <p class="spell-desc-body">{{ sp.description }}</p>
+                {{ spell_codex(sp.codex) }}
               </details>
             </div>
           {% endfor %}
@@ -288,7 +291,7 @@
                   <details class="item-desc">
                     <summary class="item-row-main">
                       <span class="col-name"><strong>{{ c.name }}</strong></span>
-                      <span class="col-cat"><span class="badge">{{ c.source }}</span></span>
+                      <span class="col-cat">{% for src in entry_sources(c) %}<span class="badge">{{ src }}</span> {% endfor %}</span>
                       <span class="col-summary muted">{{ c.stats }}</span>
                       <span class="col-info item-desc-toggle">Info</span>
                     </summary>
@@ -351,7 +354,7 @@
         <table>
           <tbody>
             {% for t in traits %}
-              <tr><td><strong>{{ t.name }}</strong>{% if t.source and t.source != 'Core Rules' %} <span class="badge">{{ t.source }}</span>{% endif %}</td><td class="muted">{{ t.text }}</td></tr>
+              <tr><td><strong>{{ t.name }}</strong>{{ source_badges(t) }}</td><td class="muted">{{ t.text }}</td></tr>
             {% endfor %}
           </tbody>
         </table>
@@ -365,8 +368,7 @@
     <summary><span class="card-title">Random Encounters</span></summary>
     <p class="muted">The optional random-encounter tables from the core rules and the supplements that
       give one — roll when a treasure token is first picked up (core: 10+), or however your group has
-      house-ruled it. Not every supplement has a standalone table; Into the Breeding Pits' underground
-      variant is under Expansion rules below instead.</p>
+      house-ruled it.</p>
     {% for book, sections in random_encounters.items() %}
       <details class="ref-panel">
         <summary>{{ book|heading_case }}</summary>
@@ -445,8 +447,10 @@
     {% endfor %}
   </details>
 
+  {# Expansion Rules is kept but not shown; flip this to bring it back. #}
+  {% if false %}
   <details class="card">
-    <summary><span class="card-title">Expansion Rules</span></summary>
+    <summary><span class="card-title">Expansion Rules (Hidden)</span></summary>
     <p class="muted">The table rules each supplement adds beyond its soldiers, spells and creatures —
       traps, demonic attributes, underground play, the optional core-rule updates, the solo/co-op
       toolkit.</p>
@@ -493,9 +497,12 @@
         {% endfor %}
       </details>
     {% endfor %}
+  </details>
+  {% endif %}
 
-    <h3>Wizard States</h3>
-    <p class="muted" style="font-size:0.85rem">
+  <details class="card">
+    <summary><span class="card-title">Wizard States</span></summary>
+    <p class="muted">
       Mutually exclusive states a wizard may take on, each from its own supplement. Taking one
       clears any other; the app tracks all of the mechanical effects below. Vampire is the one
       exception with two doors in — a wizard can be built as one from creation instead of
@@ -649,6 +656,17 @@
         {% for note in RANGIFER_SHAMAN_NOTES %}<li>{{ note }}</li>{% endfor %}
       </ul>
     </details>
+  </details>
+
+  <details class="card">
+    <summary><span class="card-title">Expansion Rules</span></summary>
+    <p class="muted">What each supplement brings to the game, in publication order.</p>
+    {% for book, overview in expansion_overviews.items() %}
+      <details class="ref-panel">
+        <summary>{{ book|heading_case }}</summary>
+        <p class="muted">{{ overview }}</p>
+      </details>
+    {% endfor %}
   </details>
 
   <details class="card">

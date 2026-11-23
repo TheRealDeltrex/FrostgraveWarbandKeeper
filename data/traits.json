@@ -418,5 +418,95 @@
     "name": "Wilderness Survival",
     "source": "The Wildwoods",
     "text": "A soldier with this trait consumes no supply unless reduced to 0 Health."
+  },
+  {
+    "name": "Always Has Line of Sight",
+    "text": "This figure can always draw line of sight to all other figures on the table. It is not affected by intervening terrain, invisibility, darkness, or any other rule that stops line of sight.",
+    "source": "Advanced Spellcraft"
+  },
+  {
+    "name": "Book Bound",
+    "text": "Whenever this figure is placed on the table, it should have a special treasure token associated with it – if not, place one 4” away in a random direction. While this treasure token is still on the table, this figure is Immune to all Control Spells and Suggestion. When determining this figure’s actions, it will never willingly move more than 6” away from its treasure token. If another figure picks up this treasure token, the figure with the Book bound trait will use all its actions to move towards and attack the figure holding the treasure token – only fighting others if necessary to reach that figure. If a figure exits the table carrying the special treasure token, the figure with the Book Bound trait follows the normal rules for uncontrolled creatures. If a warband secures the special treasure token, they may roll twice on the Grimoire Table and select which roll they want. However, if the creature associated with this token was still on the table when the scenario ended, the wizard gains the associated creature as a mortal enemy. (See Frostgrave: Mortal Enemies. Use the creature’s base stat-line for the mortal enemy and then continue the creation process from there.) A wizard may only have one mortal enemy at a time due to this trait.",
+    "source": "Advanced Spellcraft"
+  },
+  {
+    "name": "Decaying Touch",
+    "text": "Any figure that activates while in combat with a figure with this attribute immediately suffers 1 point of damage before taking any actions. Undead, constructs, and demons are immune to this trait.",
+    "source": "Advanced Spellcraft"
+  },
+  {
+    "name": "Fungus",
+    "text": "This figure is immune to the following spells: Beauty, Mind Control, Steal Health, and Suggestion.",
+    "source": "Advanced Spellcraft"
+  },
+  {
+    "name": "Elemental Vulnerability (X)",
+    "text": "Every time this figure suffers damage from an elemental source, it takes additional damage equal to X.",
+    "source": "Advanced Spellcraft"
+  },
+  {
+    "name": "Illusionary",
+    "text": "This ‘creature’ is an illusion, though it can still fight and cause damage in the normal way. It is Immune to Normal Weapons, Immune to Poison, Immune to Critical Hits, Never Wounded, and Immune to all Control Spells. Any effect that cancels magic, such as a Dispel or Spell Eater spell cast upon it, immediately reduces this figure to 0 Health. Any rule that says it destroys or cancels an Illusionary Soldier spell does the same to this creature.",
+    "source": "Advanced Spellcraft"
+  },
+  {
+    "name": "Item Slots – Collegium Porter",
+    "text": "If this creature becomes a member of a warband, it has three item slots. These item slots can only be used to carry potions or scrolls. Any member of the figure’s warband within 1” may spend an action to take one of these items if that figure has empty item slots.",
+    "source": "Advanced Spellcraft"
+  },
+  {
+    "name": "Latch On",
+    "text": "Figures in combat with this creature may push back either themselves or their opponent only if they do damage. Simply winning the combat is not enough.",
+    "source": "Advanced Spellcraft"
+  },
+  {
+    "name": "Never Attacks Spellcasters",
+    "text": "This figure never factors in spellcasters when determining its actions. It will never force combat with a spellcaster. If it is in combat with a spellcaster and wins a fight, it does no damage and will step back from the combat. This prohibition remains even if the figure is under the control of a spellcaster or becomes a member of a warband. A wizard can never receive any experience points from killing this creature.",
+    "source": "Advanced Spellcraft"
+  },
+  {
+    "name": "Papercuts",
+    "text": "Figures that take damage in melee combat from a figure with this trait are counted as wounded, no matter their current Health. This wounded state is cancelled if the figure gains back any Health for any reason. Undead and constructs are immune to this trait.",
+    "source": "Advanced Spellcraft"
+  },
+  {
+    "name": "Preferred Targets (X)",
+    "text": "This creature will always target warband member who have the ‘X’ attribute in preference to all others. When determining its actions, first see if any warband members in line of sight have this trait. If so, only take those figures into account. If there are not, follow the normal priority list for creature actions.",
+    "source": "Advanced Spellcraft"
+  },
+  {
+    "name": "Poisonous Spores",
+    "text": "Whenever this figure takes damage in melee combat, it spews out a small cloud of poisonous spores. Any figure in combat with this one must make a Will Roll (TN10). If this role is failed, the figure is poisoned.",
+    "source": "Advanced Spellcraft"
+  },
+  {
+    "name": "Possible Grimoire",
+    "text": "When this figure is reduced to 0 Health, leave it on the table on its side. Any warband member within 1” of the figure may spend an action to search it. Roll a die: on a 17+ the figure has found a special treasure token. On any other result, they have found nothing and the action is lost. Either way, remove the downed figure from the table. If the special treasure token is secured, it is exchanged for one roll on the Grimoire Table.",
+    "source": "Advanced Spellcraft"
+  },
+  {
+    "name": "Possible Scroll",
+    "text": "When this figure is reduced to 0 Health, leave it on the table on its side. Any warband member within 1” of the figure may spend an action to search it. Roll a die: on an 11+ the figure has found a special treasure token. On any other result, they have found nothing, and the action is lost. Either way, remove the downed figure from the table. This special treasure token does not cause the figure any movement penalties. If the special treasure token is secured, it is exchanged for one random scroll.",
+    "source": "Advanced Spellcraft"
+  },
+  {
+    "name": "Sharp Teeth",
+    "text": "This figure has extremely sharp teeth or some other natural deadly feature. This figure does +1 damage in melee combat.",
+    "source": "Advanced Spellcraft"
+  },
+  {
+    "name": "Spare the Thaumaturge",
+    "text": "When determining the actions of this figure, never take into account any spellcaster that knows at least three Thaumaturge spells. This figure will never force combat with any spellcaster that knows at least three Thaumaturge spells. If such a figure attacks it, it will fight back as normal.",
+    "source": "Advanced Spellcraft"
+  },
+  {
+    "name": "Swarm",
+    "text": "This figure is a collection of smaller creatures that for rules purposes are treated collectively, meaning that they activate, move, fight, take damage, and follow all other rules as though they were a single figure. Generally, they will be on one base. Due to their special nature, several rules apply:\n• Since these creatures are individually small, they can fit through extremely narrow holes and gaps. These figures are allowed to move through any hole or gap no matter the size.\n• All swarms are Expert Climbers unless their description specifically states otherwise.\n• Due to their collective nature, figures with this trait always count as having one supporting figure in melee. This support can be offset in the normal way.\n• Bow, crossbow, and javelin attacks can inflict a maximum of 3 points of damage against a swarm, even if they are magical.\n• Melee attacks can inflict a maximum of 6 points of damage against a swarm, even if they are magical.\n• Because hands and feet are generally as deadly to a swarm as hand- weapons, figures never count as unarmed when fighting a swarm.\n• Swarms are extremely vulnerable to attacks that effect all targets within a specific area, such as those generated by the Grenade, Destructive Sphere, Elemental Ball, and Scatter Shot spells. Any spell or effect that targets all figures within range of a specific point does x 3 damage against swarms.",
+    "source": "Advanced Spellcraft"
+  },
+  {
+    "name": "Treasure Eater",
+    "text": "If this creature activates while in contact with a treasure token, and is not in combat, that treasure token is consumed and removed from the table. When determining this creature’s actions, replace ‘warband member’ with ‘treasure token’ in the creature action priority list. Thus, it will always move towards the nearest treasure token in line of sight. This includes treasure tokens that are carried. If this moves the creature into combat with a figure, it will attack if it has actions remaining. Otherwise, it will always end its activation if it is in contact with a treasure token.",
+    "source": "Advanced Spellcraft"
   }
 ]
