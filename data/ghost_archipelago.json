@@ -761,7 +761,7 @@
     {
      "name": "Vampire Island",
      "tag": "",
-     "text": "Opening a sarcophagus (Fight TN14, one attempt each) gives 20 XP and a treasure token, but releases an uncontrolled vampire; killing it earns 20 XP more."
+     "text": "Opening a sarcophagus (Fight TN14, one attempt each) gives 20 XP and a treasure token, but releases an uncontrolled vampire; killing him earns 20 XP more."
     },
     {
      "name": "The Lost Treasury",
@@ -961,7 +961,7 @@
     {
      "name": "Stone of Lost Knowledge",
      "tag": "",
-     "text": "A Warden who succeeds a Will Roll (TN14) may, after the game, forgo XP earned to instead immediately gain a level and a new spell of choice (may temporarily exceed the normal spell cap for their level; no further new spells until legal again). Red Herrings: Swamp Zombie, Sarcophagus."
+     "text": "A Warden who succeeds a Will Roll (TN14) may, after the game, forgo XP earned to instead immediately gain a level and a new spell of choice (may temporarily exceed the normal spell cap for his level; no further new spells until legal again). Red Herrings: Swamp Zombie, Sarcophagus."
     },
     {
      "name": "The Siren in Stone",

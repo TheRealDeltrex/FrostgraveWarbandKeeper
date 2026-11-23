@@ -132,7 +132,7 @@
   "purchase": 100,
   "sale": 50,
   "source": "Core Rules",
-  "effect": "After any game, a wizard may use this magic oil on one construct in their warband, giving it a permanent +1 to its Move stat. Each construct may only ever receive the benefit of construct oil once."
+  "effect": "After any game, a wizard may use this magic oil on one construct in his warband, giving it a permanent +1 to its Move stat. Each construct may only ever receive the benefit of construct oil once."
  },
  {
   "name": "Potion of Fire Breath",
@@ -150,7 +150,7 @@
   "purchase": 500,
   "sale": 200,
   "source": "Core Rules",
-  "effect": "This potion may be used on any figure, other than a wizard, who died in the previous game. This potion perfectly preserves the body of the figure for the next five games. After each of the next five games, a wizard may use an elixir of life potion or a Miraculous Cure spell on the preserved figure. While a figure is preserved, it does not count as a member of the warband for the purpose of calculating maximum warband size, but will do so if brought back to life. A wizard may not hire another apprentice if they have one preserved. If, after the fifth game, the preserved figure has not been brought back to life, it is dead, and should be removed from the Wizard Sheet."
+  "effect": "This potion may be used on any figure, other than a wizard, who died in the previous game. This potion perfectly preserves the body of the figure for the next five games. After each of the next five games, a wizard may use an elixir of life potion or a Miraculous Cure spell on the preserved figure. While a figure is preserved, it does not count as a member of the warband for the purpose of calculating maximum warband size, but will do so if brought back to life. A wizard may not hire another apprentice if he has one preserved. If, after the fifth game, the preserved figure has not been brought back to life, it is dead, and should be removed from the Wizard Sheet."
  },
  {
   "name": "Elixir of the Chameleon",
@@ -159,7 +159,7 @@
   "purchase": 400,
   "sale": 140,
   "source": "Core Rules",
-  "effect": "This potion allows a figure to blend in with their surroundings. No other figure may draw line of sight to this figure if they are more than 12” away. Thus, this figure may only be targeted by an attack or a spell from another figure that is within 12”."
+  "effect": "This potion allows a figure to blend in with its surroundings. No other figure may draw line of sight to this figure if it is more than 12” away. Thus, this figure may only be targeted by an attack or a spell from another figure that is within 12”."
  },
  {
   "name": "Cordial of Empowerment",
@@ -171,7 +171,7 @@
   "sale": 200,
   "ingredients": 200,
   "source": "Core Rules",
-  "effect": "The next time a spellcaster casts a spell after drinking this potion, they add +4 to their Casting Roll but suffer 2 damage, in addition to any other effects of casting the spell. A spellcaster may only use one cordial of empowerment per game. This potion may not be used to cast Out of Game spells. 90"
+  "effect": "The next time a spellcaster casts a spell after drinking this potion, he adds +4 to his Casting Roll but suffers 2 damage, in addition to any other effects of casting the spell. A spellcaster may only use one cordial of empowerment per game. This potion may not be used to cast Out of Game spells. 90"
  },
  {
   "name": "Shrinking Potion",
@@ -609,7 +609,7 @@
   "sale": 200,
   "sale_requires_known_spell": true,
   "source": "Core Rules",
-  "effect": "Grimoires are books of magic. They may be actual books, piles of scrolls, stone tablets, or whatever. The exact physical nature of a grimoire is not important. What is important is that a wizard can use a grimoire to learn a spell they don’t know. Whenever a grimoire is found, roll on the Random Spell Table to identify the spell it contains. A grimoire is stored in the wizard’s vault until such a time as the wizard wants to learn the spell within (see Experience and Level, page 84) or to sell it. Once a grimoire’s spell has been learnt, the book loses its value, and should be removed from the Wizard Sheet. A wizard would never willingly part with a grimoire that contains a spell they do not know. If a wizard obtains a grimoire containing a spell they already know, they may sell it for 200gc."
+  "effect": "Grimoires are books of magic. They may be actual books, piles of scrolls, stone tablets, or whatever. The exact physical nature of a grimoire is not important. What is important is that a wizard can use a grimoire to learn a spell he doesn’t know. Whenever a grimoire is found, roll on the Random Spell Table to identify the spell it contains. A grimoire is stored in the wizard’s vault until such a time as the wizard wants to learn the spell within (see Experience and Level, page 84) or to sell it. Once a grimoire’s spell has been learnt, the book loses its value, and should be removed from the Wizard Sheet. A wizard would never willingly part with a grimoire that contains a spell he does not know. If a wizard obtains a grimoire containing a spell he already knows, he may sell it for 200gc."
  },
  {
   "name": "Scroll",

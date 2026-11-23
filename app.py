@@ -711,11 +711,9 @@ def home() -> str:
 
 def _sorted_by_source_book(d: dict) -> dict:
     """A {book: ...} dict (expansion rules / loot tables / random encounters),
-    reordered Core Rules-first-then-release-order for display — the
-    extractor scripts that generate these JSON files don't promise any
-    particular top-level key order, so this is the single place that fixes
-    it rather than hand-ordering the JSON (which a re-run would silently
-    revert, per CLAUDE.md's extract_*.py note)."""
+    reordered Core Rules-first-then-release-order for display — the JSON
+    files don't promise any particular top-level key order, so this is the
+    single place that fixes it."""
     return dict(sorted(d.items(), key=lambda kv: source_book_order(kv[0])))
 
 

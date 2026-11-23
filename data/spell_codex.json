@@ -10,7 +10,7 @@
      "Advanced Spellcraft": "p.17"
     },
     "success": "The wizard gains +50 experience points (instead of +40) and gains +2 to the next Out of Game (A) spell cast before the next game. This does stack with the Channel Knowledge flourish.",
-    "failure": "The wizard absorbs a huge amount of meaningless gibberish, and suffers -1 Will in its next game."
+    "failure": "The wizard absorbs a huge amount of meaningless gibberish, and suffers -1 Will in his next game."
    },
    {
     "sources": [
@@ -51,8 +51,8 @@
     "pages": {
      "Advanced Spellcraft": "p.18"
     },
-    "success": "The spellcaster can choose to either gain a white gorilla, Frostgrave page 182 (but without any flourishes) as its animal companion or one of the creatures normally allowed, but with a permanent +1 Health (and flourishes).",
-    "failure": "In the next game, one random opponent may select a bear, wolf, snow leopard, or ice toad to add to their warband as a temporary member for that game only. This animal does not count against the player’s normal warband limit."
+    "success": "The spellcaster can choose to either gain a white gorilla, Frostgrave page 182 (but without any flourishes) as his animal companion or one of the creatures normally allowed, but with a permanent +1 Health (and flourishes).",
+    "failure": "In the next game, one random opponent may select a bear, wolf, snow leopard, or ice toad to add to his warband as a temporary member for that game only. This animal does not count against the player’s normal warband limit."
    },
    {
     "sources": [
@@ -101,7 +101,7 @@
      "Advanced Spellcraft": "p.18"
     },
     "success": "The power feeding into the construct enhances its abilities. The spellcaster may select one of the following bonuses for it: +1 Move, +1 Fight, +4 Will, +2 Health. This bonus lasts for the next game only.",
-    "failure": "In the next game, one random opponent may take a construct of the type you were attempting to animate as a temporary member of their warband for that game only. This construct does not count against the player’s normal warband limit."
+    "failure": "In the next game, one random opponent may take a construct of the type you were attempting to animate as a temporary member of his warband for that game only. This construct does not count against the player’s normal warband limit."
    }
   ],
   "flourishes": [],
@@ -162,7 +162,7 @@
     "pages": {
      "Advanced Spellcraft": "p.21"
     },
-    "success": "In the coming game, the spellcaster adds +3 (instead of the normal +2) to their warband’s Initiative Rolls and gains +1 Fight when rolling against shooting attacks.This stacks with flourishes.",
+    "success": "In the coming game, the spellcaster adds +3 (instead of the normal +2) to his warband’s Initiative Rolls and gains +1 Fight when rolling against shooting attacks.This stacks with flourishes.",
     "failure": "In the coming game, the spellcaster’s warband suffers -1 to all Initiative Rolls, while the spellcaster is on the table."
    },
    {
@@ -283,7 +283,7 @@
      "Advanced Spellcraft": "p.23"
     },
     "success": "The caster can choose to make a +5 magic shooting attack against the target in addition to the normal effects of the spell.",
-    "failure": "The caster is blinded, suffering all the effects of the spell, until its next activation."
+    "failure": "The caster is blinded, suffering all the effects of the spell, until his next activation."
    }
   ],
   "flourishes": [
@@ -351,7 +351,7 @@
      "Advanced Spellcraft": "p.24"
     },
     "success": "Instead of the normal attack for this spell, the caster may make an immediate +5 magic shooting attack against one target within line of sight. This does not have to be the originally declared target.",
-    "failure": "A piece of the caster’s own bone tears through its skin. It takes 3 points of damage and suffers -1 to all Casting Rolls for the rest of the game."
+    "failure": "A piece of the caster’s own bone tears through his skin. He takes 3 points of damage and suffers -1 to all Casting Rolls for the rest of the game."
    }
   ],
   "flourishes": [
@@ -385,7 +385,7 @@
      "Advanced Spellcraft": "p.25"
     },
     "success": "Instead of the normal rules for this spell, the caster may place a skeleton in combat with the target figure. This skeleton counts as a temporary member of the caster’s warband for the rest of the game.",
-    "failure": "The caster successfully casts the spell on itself."
+    "failure": "The caster successfully casts the spell on himself."
    }
   ],
   "flourishes": [
@@ -451,7 +451,7 @@
    "pages": {
     "Advanced Spellcraft": "p.26"
    },
-   "text": "The spellcaster creates one lesser potion of their choice (Frostgrave rulebook, page 86). A wizard (and only a wizard) may use this spell to create a greater potion (Frostgrave rulebook, page 87). First, they must declare what potion they are attempting to brew and pay the listed ingredients cost. The wizard should then roll to cast Brew Potion with a -4 to the Casting Roll. If successful, the potion is created and can be immediately assigned to a figure in the warband, sold, or stored in the wizard’s vault. If unsuccessful, the potion is not created, and the money spent on ingredients is lost."
+   "text": "The spellcaster creates one lesser potion of his choice (Frostgrave rulebook, page 86). A wizard (and only a wizard) may use this spell to create a greater potion (Frostgrave rulebook, page 87). First, he must declare what potion he is attempting to brew and pay the listed ingredients cost. The wizard should then roll to cast Brew Potion with a -4 to the Casting Roll. If successful, the potion is created and can be immediately assigned to a figure in the warband, sold, or stored in the wizard’s vault. If unsuccessful, the potion is not created, and the money spent on ingredients is lost."
   }
  },
  "Bridge": {
@@ -466,7 +466,7 @@
      "Spellcaster Magazine": "Issue 7, p.41",
      "Advanced Spellcraft": "p.28"
     },
-    "success": "Do not roll to see if this bridge vanishes. It will only vanish if the caster chooses to cancel it during their activation. Additionally, the caster can cast this spell again while this bridge is still active.",
+    "success": "Do not roll to see if this bridge vanishes. It will only vanish if the caster chooses to cancel it during his activation. Additionally, the caster can cast this spell again while this bridge is still active.",
     "failure": "The spell is cast as normal. However, any time a figure steps on the bridge or activates while on the bridge, roll a die. On a 1–10, the bridge immediately vanishes."
    }
   ],
@@ -484,7 +484,7 @@
    {
     "name": "Vanishing Bridge",
     "modifier": -3,
-    "text": "The caster may cancel the spell at any time, it does not have to be during its activation."
+    "text": "The caster may cancel the spell at any time, it does not have to be during his activation."
    }
   ],
   "notes": [
@@ -528,7 +528,7 @@
    {
     "name": "Sleet",
     "modifier": -3,
-    "text": "The storm brings sleet, freezing rain, and hail, making the ground treacherous. Any figure that attempts to take a second or third move action in the same activation, must make a Move Roll (TN14). If they fail the roll, the figure does not move, its activation ends, and it takes 1 point of damage."
+    "text": "The storm brings sleet, freezing rain, and hail, making the ground treacherous. Any figure that attempts to take a second or third move action in the same activation, must make a Move Roll (TN14). If it fails the roll, the figure does not move, its activation ends, and it takes 1 point of damage."
    }
   ],
   "notes": [],
@@ -645,12 +645,12 @@
    {
     "name": "Leap to Attack",
     "modifier": -2,
-    "text": "If the animal has not already activated this turn, it may activate immediately after the spellcaster completes its activation. It does not count toward the normal number of figures that can activate during the phase."
+    "text": "If the animal has not already activated this turn, it may activate immediately after the spellcaster completes his activation. It does not count toward the normal number of figures that can activate during the phase."
    },
    {
     "name": "Multiple Control",
     "modifier": -2,
-    "text": "The spellcaster can use this flourish to cast the spell on an animal, even if it already has one under control. Each spellcaster is limited to a maximum of three animals under control at one time using this flourish or the critical success result."
+    "text": "The spellcaster can use this flourish to cast the spell on an animal, even if he already has one under control. Each spellcaster is limited to a maximum of three animals under control at one time using this flourish or the critical success result."
    }
   ],
   "notes": [],
@@ -662,7 +662,7 @@
    {
     "title": "Control Spells",
     "page": 35,
-    "text": "The control spells are: Control Animal, Control Construct, Control Demon, Control Undead, and Mind Control. If a control spell is successfully cast on a figure that is already under the effects of an active control spell, the existing control spell is immediately cancelled. Thus, a figure may never be under the effects of multiple control spells. If a figure is a temporary member of a warband and has a control spell cast on it, all links to its temporary warband are broken. If this control spell is subsequently cancelled, the figure becomes an uncontrolled creature. If a figure is a permanent member of a warband and has a control spell cast on it, it remains linked to its original warband. If this control spell is subsequently resisted or cancelled, the figure reverts to its original warband. Note that, in this way, it is possible to use a control spell on a member of your own warband that is under the effects of an opponent’s control spell. If successfully cast, this new control spell cancels the effects of the existing one and is then itself cancelled because it has no further effect. A figure under control will never use a one-use magic item, such as a potion, but will use magic items that are always on. Captains that have been controlled will never use Tricks of the Trade. Spellcasters are normally immune to control spells, but in the event that one is controlled, it will never cast spells while under the spell. A figure may not cast a control spell while it currently has a control spell of that type already active unless a specific rule allows it (such as a flourish)."
+    "text": "The control spells are: Control Animal, Control Construct, Control Demon, Control Undead, and Mind Control. If a control spell is successfully cast on a figure that is already under the effects of an active control spell, the existing control spell is immediately cancelled. Thus, a figure may never be under the effects of multiple control spells. If a figure is a temporary member of a warband and has a control spell cast on it, all links to its temporary warband are broken. If this control spell is subsequently cancelled, the figure becomes an uncontrolled creature. If a figure is a permanent member of a warband and has a control spell cast on it, it remains linked to its original warband. If this control spell is subsequently resisted or cancelled, the figure reverts to its original warband. Note that, in this way, it is possible to use a control spell on a member of your own warband that is under the effects of an opponent’s control spell. If successfully cast, this new control spell cancels the effects of the existing one and is then itself cancelled because it has no further effect. A figure under control will never use a one-use magic item, such as a potion, but will use magic items that are always on. Captains that have been controlled will never use Tricks of the Trade. Spellcasters are normally immune to control spells, but in the event that one is controlled, he will never cast spells while under the spell. A figure may not cast a control spell while it currently has a control spell of that type already active unless a specific rule allows it (such as a flourish)."
    }
   ]
  },
@@ -686,12 +686,12 @@
    {
     "name": "Leap to Attack",
     "modifier": -2,
-    "text": "If the construct has not already activated this turn, it may activate immediately after the spellcaster completes its activation. It does not count toward the normal number of figures that can activate during the phase."
+    "text": "If the construct has not already activated this turn, it may activate immediately after the spellcaster completes his activation. It does not count toward the normal number of figures that can activate during the phase."
    },
    {
     "name": "Multiple Control",
     "modifier": -2,
-    "text": "The spellcaster can use this flourish to cast the spell on a construct, even if it already has one under control. Each spellcaster is limited to a maximum of three constructs under control at one time using this flourish or the critical success result."
+    "text": "The spellcaster can use this flourish to cast the spell on a construct, even if he already has one under control. Each spellcaster is limited to a maximum of three constructs under control at one time using this flourish or the critical success result."
    }
   ],
   "notes": [],
@@ -703,7 +703,7 @@
    {
     "title": "Control Spells",
     "page": 35,
-    "text": "The control spells are: Control Animal, Control Construct, Control Demon, Control Undead, and Mind Control. If a control spell is successfully cast on a figure that is already under the effects of an active control spell, the existing control spell is immediately cancelled. Thus, a figure may never be under the effects of multiple control spells. If a figure is a temporary member of a warband and has a control spell cast on it, all links to its temporary warband are broken. If this control spell is subsequently cancelled, the figure becomes an uncontrolled creature. If a figure is a permanent member of a warband and has a control spell cast on it, it remains linked to its original warband. If this control spell is subsequently resisted or cancelled, the figure reverts to its original warband. Note that, in this way, it is possible to use a control spell on a member of your own warband that is under the effects of an opponent’s control spell. If successfully cast, this new control spell cancels the effects of the existing one and is then itself cancelled because it has no further effect. A figure under control will never use a one-use magic item, such as a potion, but will use magic items that are always on. Captains that have been controlled will never use Tricks of the Trade. Spellcasters are normally immune to control spells, but in the event that one is controlled, it will never cast spells while under the spell. A figure may not cast a control spell while it currently has a control spell of that type already active unless a specific rule allows it (such as a flourish)."
+    "text": "The control spells are: Control Animal, Control Construct, Control Demon, Control Undead, and Mind Control. If a control spell is successfully cast on a figure that is already under the effects of an active control spell, the existing control spell is immediately cancelled. Thus, a figure may never be under the effects of multiple control spells. If a figure is a temporary member of a warband and has a control spell cast on it, all links to its temporary warband are broken. If this control spell is subsequently cancelled, the figure becomes an uncontrolled creature. If a figure is a permanent member of a warband and has a control spell cast on it, it remains linked to its original warband. If this control spell is subsequently resisted or cancelled, the figure reverts to its original warband. Note that, in this way, it is possible to use a control spell on a member of your own warband that is under the effects of an opponent’s control spell. If successfully cast, this new control spell cancels the effects of the existing one and is then itself cancelled because it has no further effect. A figure under control will never use a one-use magic item, such as a potion, but will use magic items that are always on. Captains that have been controlled will never use Tricks of the Trade. Spellcasters are normally immune to control spells, but in the event that one is controlled, he will never cast spells while under the spell. A figure may not cast a control spell while it currently has a control spell of that type already active unless a specific rule allows it (such as a flourish)."
    }
   ]
  },
@@ -717,7 +717,7 @@
     "pages": {
      "Advanced Spellcraft": "p.34"
     },
-    "success": "If the demon reaches the end of the game without being reduced to 0 Health, the caster can choose to extract information from the demon after the game and gain +20 experience points or have the demon join their warband for the next game as well. In the latter case, the demon does not count against the usual warband limit, but the spellcaster cannot attempt to control another demon while it is on the table (unless it is uses the Multiple Control flourish).",
+    "success": "If the demon reaches the end of the game without being reduced to 0 Health, the caster can choose to extract information from the demon after the game and gain +20 experience points or have the demon join his warband for the next game as well. In the latter case, the demon does not count against the usual warband limit, but the spellcaster cannot attempt to control another demon while it is on the table (unless he is uses the Multiple Control flourish).",
     "failure": "The spellcaster may not attempt to cast this spell for the rest of the game."
    },
    {
@@ -735,12 +735,12 @@
    {
     "name": "Leap to Attack",
     "modifier": -2,
-    "text": "If the demon has not already activated this turn, it may activate immediately after the spellcaster completes its activation. It does not count toward the normal number of figures that can activate during the phase."
+    "text": "If the demon has not already activated this turn, it may activate immediately after the spellcaster completes his activation. It does not count toward the normal number of figures that can activate during the phase."
    },
    {
     "name": "Multiple Control",
     "modifier": -2,
-    "text": "The spellcaster can use this flourish to cast the spell on a demon, even if it already has one under control. Each spellcaster is limited to a maximum of three demons under control at one time using this flourish."
+    "text": "The spellcaster can use this flourish to cast the spell on a demon, even if he already has one under control. Each spellcaster is limited to a maximum of three demons under control at one time using this flourish."
    }
   ],
   "notes": [],
@@ -752,7 +752,7 @@
    {
     "title": "Control Spells",
     "page": 35,
-    "text": "The control spells are: Control Animal, Control Construct, Control Demon, Control Undead, and Mind Control. If a control spell is successfully cast on a figure that is already under the effects of an active control spell, the existing control spell is immediately cancelled. Thus, a figure may never be under the effects of multiple control spells. If a figure is a temporary member of a warband and has a control spell cast on it, all links to its temporary warband are broken. If this control spell is subsequently cancelled, the figure becomes an uncontrolled creature. If a figure is a permanent member of a warband and has a control spell cast on it, it remains linked to its original warband. If this control spell is subsequently resisted or cancelled, the figure reverts to its original warband. Note that, in this way, it is possible to use a control spell on a member of your own warband that is under the effects of an opponent’s control spell. If successfully cast, this new control spell cancels the effects of the existing one and is then itself cancelled because it has no further effect. A figure under control will never use a one-use magic item, such as a potion, but will use magic items that are always on. Captains that have been controlled will never use Tricks of the Trade. Spellcasters are normally immune to control spells, but in the event that one is controlled, it will never cast spells while under the spell. A figure may not cast a control spell while it currently has a control spell of that type already active unless a specific rule allows it (such as a flourish)."
+    "text": "The control spells are: Control Animal, Control Construct, Control Demon, Control Undead, and Mind Control. If a control spell is successfully cast on a figure that is already under the effects of an active control spell, the existing control spell is immediately cancelled. Thus, a figure may never be under the effects of multiple control spells. If a figure is a temporary member of a warband and has a control spell cast on it, all links to its temporary warband are broken. If this control spell is subsequently cancelled, the figure becomes an uncontrolled creature. If a figure is a permanent member of a warband and has a control spell cast on it, it remains linked to its original warband. If this control spell is subsequently resisted or cancelled, the figure reverts to its original warband. Note that, in this way, it is possible to use a control spell on a member of your own warband that is under the effects of an opponent’s control spell. If successfully cast, this new control spell cancels the effects of the existing one and is then itself cancelled because it has no further effect. A figure under control will never use a one-use magic item, such as a potion, but will use magic items that are always on. Captains that have been controlled will never use Tricks of the Trade. Spellcasters are normally immune to control spells, but in the event that one is controlled, he will never cast spells while under the spell. A figure may not cast a control spell while it currently has a control spell of that type already active unless a specific rule allows it (such as a flourish)."
    }
   ]
  },
@@ -776,12 +776,12 @@
    {
     "name": "Leap to Attack",
     "modifier": -2,
-    "text": "If the undead creature has not already activated this turn, it may activate immediately after the spellcaster completes its activation. It does not count toward the normal number of figures that can activate during the phase."
+    "text": "If the undead creature has not already activated this turn, it may activate immediately after the spellcaster completes his activation. It does not count toward the normal number of figures that can activate during the phase."
    },
    {
     "name": "Multiple Control",
     "modifier": -2,
-    "text": "The spellcaster can use this flourish to cast the spell on an undead creature, even if it already has one under control. Each spellcaster is limited to a maximum of three undead creatures under control at one time using this flourish or the critical success result."
+    "text": "The spellcaster can use this flourish to cast the spell on an undead creature, even if he already has one under control. Each spellcaster is limited to a maximum of three undead creatures under control at one time using this flourish or the critical success result."
    }
   ],
   "notes": [],
@@ -793,7 +793,7 @@
    {
     "title": "Control Spells",
     "page": 35,
-    "text": "The control spells are: Control Animal, Control Construct, Control Demon, Control Undead, and Mind Control. If a control spell is successfully cast on a figure that is already under the effects of an active control spell, the existing control spell is immediately cancelled. Thus, a figure may never be under the effects of multiple control spells. If a figure is a temporary member of a warband and has a control spell cast on it, all links to its temporary warband are broken. If this control spell is subsequently cancelled, the figure becomes an uncontrolled creature. If a figure is a permanent member of a warband and has a control spell cast on it, it remains linked to its original warband. If this control spell is subsequently resisted or cancelled, the figure reverts to its original warband. Note that, in this way, it is possible to use a control spell on a member of your own warband that is under the effects of an opponent’s control spell. If successfully cast, this new control spell cancels the effects of the existing one and is then itself cancelled because it has no further effect. A figure under control will never use a one-use magic item, such as a potion, but will use magic items that are always on. Captains that have been controlled will never use Tricks of the Trade. Spellcasters are normally immune to control spells, but in the event that one is controlled, it will never cast spells while under the spell. A figure may not cast a control spell while it currently has a control spell of that type already active unless a specific rule allows it (such as a flourish)."
+    "text": "The control spells are: Control Animal, Control Construct, Control Demon, Control Undead, and Mind Control. If a control spell is successfully cast on a figure that is already under the effects of an active control spell, the existing control spell is immediately cancelled. Thus, a figure may never be under the effects of multiple control spells. If a figure is a temporary member of a warband and has a control spell cast on it, all links to its temporary warband are broken. If this control spell is subsequently cancelled, the figure becomes an uncontrolled creature. If a figure is a permanent member of a warband and has a control spell cast on it, it remains linked to its original warband. If this control spell is subsequently resisted or cancelled, the figure reverts to its original warband. Note that, in this way, it is possible to use a control spell on a member of your own warband that is under the effects of an opponent’s control spell. If successfully cast, this new control spell cancels the effects of the existing one and is then itself cancelled because it has no further effect. A figure under control will never use a one-use magic item, such as a potion, but will use magic items that are always on. Captains that have been controlled will never use Tricks of the Trade. Spellcasters are normally immune to control spells, but in the event that one is controlled, he will never cast spells while under the spell. A figure may not cast a control spell while it currently has a control spell of that type already active unless a specific rule allows it (such as a flourish)."
    }
   ]
  },
@@ -809,8 +809,8 @@
      "Spellcaster Magazine": "Issue 7, p.43",
      "Advanced Spellcraft": "p.37"
     },
-    "success": "If being used to create a door, the caster may create a door 6” wide by 3” tall or completely remove any terrain piece smaller than that. If being used to collapse a section of floor, the figure only avoids falling if they roll a natural ‘20’ on their Will Roll. In addition to any falling damage, they also suffer an immediate +3 attack.",
-    "failure": "If the caster is standing within 1” of any terrain piece over 1” high, it crumbles down on them. The caster suffers an immediate +1 attack. In addition, the caster suffers -2 on all future Casting Rolls for this spell for the rest of the game."
+    "success": "If being used to create a door, the caster may create a door 6” wide by 3” tall or completely remove any terrain piece smaller than that. If being used to collapse a section of floor, the figure only avoids falling if it rolls a natural ‘20’ on its Will Roll. In addition to any falling damage, it also suffers an immediate +3 attack.",
+    "failure": "If the caster is standing within 1” of any terrain piece over 1” high, it crumbles down on him. The caster suffers an immediate +1 attack. In addition, the caster suffers -2 on all future Casting Rolls for this spell for the rest of the game."
    }
   ],
   "flourishes": [
@@ -846,19 +846,19 @@
      "Advanced Spellcraft": "p.38"
     },
     "success": "If the target fails its Will Roll, it suffers 3 points of damage in addition to the normal penalties from the spell.",
-    "failure": "The caster successfully casts the spell on themselves."
+    "failure": "The caster successfully casts the spell on himself."
    }
   ],
   "flourishes": [
    {
     "name": "Croaking Voice",
     "modifier": -1,
-    "text": "If the spell is cast on either a wizard or apprentice, a maximum of one soldier may also activate in the phase with them."
+    "text": "If the spell is cast on either a wizard or apprentice, a maximum of one soldier may also activate in the phase with him."
    },
    {
     "name": "Ill-luck",
     "modifier": -2,
-    "text": "Any time a figure suffering the effects of this curse rolls a natural ‘20’ they must immediately reroll the die and accept the second result."
+    "text": "Any time a figure suffering the effects of this curse rolls a natural ‘20’ it must immediately reroll the die and accept the second result."
    }
   ],
   "notes": [],
@@ -877,8 +877,8 @@
     "pages": {
      "Advanced Spellcraft": "p.38"
     },
-    "success": "The spell destroys all the target’s non-magical weapons and their non-magical shield if they have one (-1 Armour for the loss of the shield).",
-    "failure": "The spell destroys one randomly determined non- magical weapon carried by the caster. If the caster has no weapons that can be destroyed, it suffers -2 on all Casting Rolls for this spell for the rest of the game."
+    "success": "The spell destroys all the target’s non-magical weapons and its non-magical shield if it has one (-1 Armour for the loss of the shield).",
+    "failure": "The spell destroys one randomly determined non- magical weapon carried by the caster. If the caster has no weapons that can be destroyed, he suffers -2 on all Casting Rolls for this spell for the rest of the game."
    },
    {
     "sources": [
@@ -887,8 +887,8 @@
     "pages": {
      "Spellcaster Magazine": "Issue 7, p.43"
     },
-    "success": "The spell destroys all the target’s weapons and their shield if they have one (subtract -1 Armour for the loss of the shield).",
-    "failure": "The spell destroys one randomly determined weapon carried by the caster. If the caster has no weapons that can be destroyed, then they suffer -2 on all Casting Rolls for this spell for the rest of the game."
+    "success": "The spell destroys all the target’s weapons and its shield if it has one (subtract -1 Armour for the loss of the shield).",
+    "failure": "The spell destroys one randomly determined weapon carried by the caster. If the caster has no weapons that can be destroyed, then he suffers -2 on all Casting Rolls for this spell for the rest of the game."
    }
   ],
   "flourishes": [
@@ -919,8 +919,8 @@
     "pages": {
      "Advanced Spellcraft": "p.39"
     },
-    "success": "The target of this spell is treated as though its Will stat is 2 less. So, an undead creature with Will +4 would count as Will +2 for making their Will Roll and determining the effects of the spell.",
-    "failure": "The target of this spell is immediately restored to their starting Health."
+    "success": "The target of this spell is treated as though its Will stat is 2 less. So, an undead creature with Will +4 would count as Will +2 for making its Will Roll and determining the effects of the spell.",
+    "failure": "The target of this spell is immediately restored to its starting Health."
    },
    {
     "sources": [
@@ -929,7 +929,7 @@
     "pages": {
      "Spellcaster Magazine": "Issue 7, p.44"
     },
-    "success": "The target of this spell is treated as though its Will Stat is 2 less. So, an undead creature with Will +4 would count as Will +2 for making their Will Roll and determining the effects of the spell.",
+    "success": "The target of this spell is treated as though its Will Stat is 2 less. So, an undead creature with Will +4 would count as Will +2 for making its Will Roll and determining the effects of the spell.",
     "failure": "The target undead is immediately restored to its starting Health."
    }
   ],
@@ -1046,7 +1046,7 @@
    {
     "name": "Mystic Drain",
     "modifier": -3,
-    "text": "Any time a spellcaster who knows the spell targeted by the draining word activates, it must make a Will Roll (TN10) or suffer 1 point of damage. A spellcaster only ever makes one Will Roll for this each turn and can only suffer a maximum of 1 point of damage, even if multiple Draining Word spells with the Mystic Drain flourish are in play."
+    "text": "Any time a spellcaster who knows the spell targeted by the draining word activates, he must make a Will Roll (TN10) or suffer 1 point of damage. A spellcaster only ever makes one Will Roll for this each turn and can only suffer a maximum of 1 point of damage, even if multiple Draining Word spells with the Mystic Drain flourish are in play."
    }
   ],
   "notes": [],
@@ -1108,7 +1108,7 @@
      "Advanced Spellcraft": "p.44"
     },
     "success": "The caster may choose to make an additional +3 shooting attack against another target that is within 2” of the original target.",
-    "failure": "Make a +7 elemental magic shooting attack against the closest member of your warband that is within line of sight, not counting the caster. If there are no other warband members in line of sight, the caster makes the attack against itself."
+    "failure": "Make a +7 elemental magic shooting attack against the closest member of your warband that is within line of sight, not counting the caster. If there are no other warband members in line of sight, the caster makes the attack against himself."
    },
    {
     "sources": [
@@ -1331,7 +1331,7 @@
    {
     "name": "Diffuse Enchantment",
     "modifier": -2,
-    "text": "The spell can be cast upon all the arrows or crossbow bolts carried by a figure, making them all magical, but conferring no other bonus. So, all its shooting attacks are magic shooting attacks, but made with their normal Shoot stat."
+    "text": "The spell can be cast upon all the arrows or crossbow bolts carried by a figure, making them all magical, but conferring no other bonus. So, all its shooting attacks are magic shooting attacks, but made with its normal Shoot stat."
    }
   ],
   "notes": [
@@ -1421,7 +1421,7 @@
    }
   ],
   "notes": [
-   "A spellcaster with a familiar may attempt to cast the spell again with a flourish to upgrade their familiar to one with special abilities, but if the caster critically fails they are stuck with the pathetic familiar."
+   "A spellcaster with a familiar may attempt to cast the spell again with a flourish to upgrade his familiar to one with special abilities, but if the caster critically fails he is stuck with the pathetic familiar."
   ],
   "description_sources": [
    "Core Rules",
@@ -1634,7 +1634,7 @@
      "Advanced Spellcraft": "p.57"
     },
     "success": "The glow is so bright the target of the spell has trouble seeing and suffers -1 Shoot and -1 to Casting Rolls for the rest of the game.",
-    "failure": "The spell is cast on a randomly determined friendly figure within line of sight of the caster, including the caster itself."
+    "failure": "The spell is cast on a randomly determined friendly figure within line of sight of the caster, including the caster himself."
    }
   ],
   "flourishes": [
@@ -1685,7 +1685,7 @@
    {
     "name": "Self Immunity",
     "modifier": -2,
-    "text": "The caster does not suffer an attack from this spell even if it is within 1.5” of the target point."
+    "text": "The caster does not suffer an attack from this spell even if he is within 1.5” of the target point."
    }
   ],
   "notes": [],
@@ -1714,7 +1714,7 @@
     "pages": {
      "Spellcaster Magazine": "Issue 7, p.48"
     },
-    "success": "The target of the spell is returned to their starting Health and is cured of one permanent injury if it had any.",
+    "success": "The target of the spell is returned to its starting Health and is cured of one permanent injury if it had any.",
     "failure": "The target of the spell counts as wounded for the rest of the game, regardless of any healing of any kind that it may receive."
    }
   ],
@@ -1957,7 +1957,7 @@
    {
     "title": "Control Spells",
     "page": 35,
-    "text": "The control spells are: Control Animal, Control Construct, Control Demon, Control Undead, and Mind Control. If a control spell is successfully cast on a figure that is already under the effects of an active control spell, the existing control spell is immediately cancelled. Thus, a figure may never be under the effects of multiple control spells. If a figure is a temporary member of a warband and has a control spell cast on it, all links to its temporary warband are broken. If this control spell is subsequently cancelled, the figure becomes an uncontrolled creature. If a figure is a permanent member of a warband and has a control spell cast on it, it remains linked to its original warband. If this control spell is subsequently resisted or cancelled, the figure reverts to its original warband. Note that, in this way, it is possible to use a control spell on a member of your own warband that is under the effects of an opponent’s control spell. If successfully cast, this new control spell cancels the effects of the existing one and is then itself cancelled because it has no further effect. A figure under control will never use a one-use magic item, such as a potion, but will use magic items that are always on. Captains that have been controlled will never use Tricks of the Trade. Spellcasters are normally immune to control spells, but in the event that one is controlled, it will never cast spells while under the spell. A figure may not cast a control spell while it currently has a control spell of that type already active unless a specific rule allows it (such as a flourish)."
+    "text": "The control spells are: Control Animal, Control Construct, Control Demon, Control Undead, and Mind Control. If a control spell is successfully cast on a figure that is already under the effects of an active control spell, the existing control spell is immediately cancelled. Thus, a figure may never be under the effects of multiple control spells. If a figure is a temporary member of a warband and has a control spell cast on it, all links to its temporary warband are broken. If this control spell is subsequently cancelled, the figure becomes an uncontrolled creature. If a figure is a permanent member of a warband and has a control spell cast on it, it remains linked to its original warband. If this control spell is subsequently resisted or cancelled, the figure reverts to its original warband. Note that, in this way, it is possible to use a control spell on a member of your own warband that is under the effects of an opponent’s control spell. If successfully cast, this new control spell cancels the effects of the existing one and is then itself cancelled because it has no further effect. A figure under control will never use a one-use magic item, such as a potion, but will use magic items that are always on. Captains that have been controlled will never use Tricks of the Trade. Spellcasters are normally immune to control spells, but in the event that one is controlled, he will never cast spells while under the spell. A figure may not cast a control spell while it currently has a control spell of that type already active unless a specific rule allows it (such as a flourish)."
    }
   ]
  },
@@ -2033,7 +2033,7 @@
    "pages": {
     "Advanced Spellcraft": "p.67"
    },
-   "text": "Wizard only. This spell may be used in several different ways. A successful casting of this spell will remove all permanent injuries from one figure. For example, a wizard suffering from Lost Fingers regrows all their missing digits, regardless of how many times they have suffered that particular injury. Or, it may be cast on a Badly Wounded figure – if successful, the figure is healed and may participate in the next game with no penalty. Finally, it may be used to attempt to bring a figure back from the dead. The figure must have died in the game just played, and using the spell in this fashion incurs a -4 penalty to the Casting Roll. If successful, the figure is restored to life, and may participate in the next game with no penalty. If Miraculous Cure is cast using a scroll, it cannot be used to resurrect the dead."
+   "text": "Wizard only. This spell may be used in several different ways. A successful casting of this spell will remove all permanent injuries from one figure. For example, a wizard suffering from Lost Fingers regrows all his missing digits, regardless of how many times he has suffered that particular injury. Or, it may be cast on a Badly Wounded figure – if successful, the figure is healed and may participate in the next game with no penalty. Finally, it may be used to attempt to bring a figure back from the dead. The figure must have died in the game just played, and using the spell in this fashion incurs a -4 penalty to the Casting Roll. If successful, the figure is restored to life, and may participate in the next game with no penalty. If Miraculous Cure is cast using a scroll, it cannot be used to resurrect the dead."
   }
  },
  "Mud": {
@@ -2061,7 +2061,7 @@
    {
     "name": "Sticky",
     "modifier": -2,
-    "text": "Any figure that wishes to pick up a treasure token in the mud must spend an action and make a Fight Roll (TN10). If the roll is failed, they do not pick up the token and the action is lost. If they succeed, they pick up the treasure token. Telekinesis cannot be used on a treasure token sitting in sticky mud."
+    "text": "Any figure that wishes to pick up a treasure token in the mud must spend an action and make a Fight Roll (TN10). If the roll is failed, it does not pick up the token and the action is lost. If it succeeds, it picks up the treasure token. Telekinesis cannot be used on a treasure token sitting in sticky mud."
    }
   ],
   "notes": [],
@@ -2119,7 +2119,7 @@
      "Advanced Spellcraft": "p.70"
     },
     "success": "The spell also summons one giant insect. The caster may place this insect anywhere in combat with the target figure. The giant insect has the same stats as a blood crow (Bestiary, page 145) and follows all the normal rules for uncontrolled creatures.",
-    "failure": "One random opponent may place a giant insect anywhere within 3” of the caster, including in combat with it."
+    "failure": "One random opponent may place a giant insect anywhere within 3” of the caster, including in combat with him."
    }
   ],
   "flourishes": [
@@ -2213,7 +2213,7 @@
      "Spellcaster Magazine": "Issue 7, p.51"
     },
     "success": "The caster, and up to one figure within 3\", may immediately move to any point on the table that is not occupied by another figure. If moving two figures, the figures must still be within 3\" of one another after they move. All the other effects of the spells apply to both figures until their next activation.",
-    "failure": "The caster is attacked by an extra-planar entity while attempt to walk and drags this creature back to this reality. Move the caster 1–10\" in a random direction and place a minor demon in combat with it. This minor demon follows all the rules for an uncontrolled creature."
+    "failure": "The caster is attacked by an extra-planar entity while attempt to walk and drags this creature back to this reality. Move the caster 1–10\" in a random direction and place a minor demon in combat with him. This minor demon follows all the rules for an uncontrolled creature."
    }
   ],
   "flourishes": [
@@ -2249,7 +2249,7 @@
      "Advanced Spellcraft": "p.74"
     },
     "success": "Make a +5 poisonous magic shooting attack against the target figure.",
-    "failure": "The spellcaster shoots the dart into its own foot. It takes no damaged but is poisoned."
+    "failure": "The spellcaster shoots the dart into his own foot. He takes no damaged but is poisoned."
    }
   ],
   "flourishes": [
@@ -2319,7 +2319,7 @@
     "pages": {
      "Advanced Spellcraft": "p.75"
     },
-    "success": "The effects of this spell only apply to spellcasters of the casting player’s choosing. In addition, this spellcaster can cast a second Power Word spell, if they so choose, but must choose a different spell or school for it to affect.",
+    "success": "The effects of this spell only apply to spellcasters of the casting player’s choosing. In addition, this spellcaster can cast a second Power Word spell, if he so chooses, but must choose a different spell or school for it to affect.",
     "failure": "The figure manages to cast Draining Word instead, affecting the same spell or school that Power Word would have. This spell lasts until the end of the game unless it is dispelled."
    },
    {
@@ -2329,7 +2329,7 @@
     "pages": {
      "Spellcaster Magazine": "Issue 7, p.52"
     },
-    "success": "The effects of this spell only apply to spellcasters of the casting player’s choosing. In addition, this spellcaster can cast a second Power Word, if they so choose, but must choose a different spell for it to affect.",
+    "success": "The effects of this spell only apply to spellcasters of the casting player’s choosing. In addition, this spellcaster can cast a second Power Word, if he so chooses, but must choose a different spell for it to affect.",
     "failure": "The figure manages to cast Draining Word instead, affecting the same spell that Power Word would have. This spell lasts until the end of the game, unless it is otherwise cancelled."
    }
   ],
@@ -2361,8 +2361,8 @@
     "pages": {
      "Advanced Spellcraft": "p.76"
     },
-    "success": "If the target of the spell was an enemy, the target also suffers damage equal to half the number of inches they were pushed, rounded down. If the target of the spell was a friendly figure, the caster can choose to modify the length of the push by +/-3” (this can be used in conjunction with the Pulled Punch flourish to decrease the distance up to 6”).",
-    "failure": "Roll a die. The caster manages to push themselves that many inches directly away from the target of the spell as though they themselves were the target of a Push spell."
+    "success": "If the target of the spell was an enemy, the target also suffers damage equal to half the number of inches it was pushed, rounded down. If the target of the spell was a friendly figure, the caster can choose to modify the length of the push by +/-3” (this can be used in conjunction with the Pulled Punch flourish to decrease the distance up to 6”).",
+    "failure": "Roll a die. The caster manages to push himself that many inches directly away from the target of the spell as though he himself were the target of a Push spell."
    },
    {
     "sources": [
@@ -2371,7 +2371,7 @@
     "pages": {
      "Spellcaster Magazine": "Issue 7, p.52"
     },
-    "success": "If the target of the spell was an enemy, the target also suffers damage equal to half the number of inches they were pushed. If the target of the spell was a friendly figure, the caster can choose to modify the length of the push by +/- 3\".",
+    "success": "If the target of the spell was an enemy, the target also suffers damage equal to half the number of inches it was pushed. If the target of the spell was a friendly figure, the caster can choose to modify the length of the push by +/- 3\".",
     "failure": "Roll a die. The caster manages to push himself that many inches directly away from the target of the spell as though he himself were the target of a Push spell."
    }
   ],
@@ -2403,7 +2403,7 @@
     "pages": {
      "Advanced Spellcraft": "p.77"
     },
-    "success": "The caster may add one ghoul (see Frostgrave rulebook, page 191) to their warband instead of a zombie. (Though it still counts against the maximum of one zombie allowed by the spell).",
+    "success": "The caster may add one ghoul (see Frostgrave rulebook, page 191) to his warband instead of a zombie. (Though it still counts against the maximum of one zombie allowed by the spell).",
     "failure": "If cast Out of Game, the spell fails, and the caster may not cast this spell during the coming game. If cast in game, the spell creates an uncontrolled zombie. One random opponent may place this figure anywhere within 3” of the caster, but at least 1” away."
    },
    {
@@ -2413,7 +2413,7 @@
     "pages": {
      "Spellcaster Magazine": "Issue 7, p.52"
     },
-    "success": "The caster may add one ghoul to their warband instead of a zombie.",
+    "success": "The caster may add one ghoul to his warband instead of a zombie.",
     "failure": "If cast Out of Game, the spell fails, and the caster may not cast this spell during the coming game. If cast in game, the spell creates an uncontrolled zombie. One random opponent may place this figure anywhere within 3\" of the caster, but at least 1\" away."
    }
   ],
@@ -2716,7 +2716,7 @@
      "Spellcaster Magazine": "Issue 7, p.55",
      "Advanced Spellcraft": "p.83"
     },
-    "success": "The caster takes no damage for casting this spell. If this spell takes the target to 0 Health, and the target is a spellcaster or captain, they must roll for a permanent injury on top of any other results for their roll on the Survival Table.",
+    "success": "The caster takes no damage for casting this spell. If this spell takes the target to 0 Health, and the target is a spellcaster or captain, he must roll for a permanent injury on top of any other results for his roll on the Survival Table.",
     "failure": "The spell is successfully cast against the caster. (So, the caster immediately suffers 1 point of damage for casting the spell, and then must make a Will Roll against the spell with a Casting Roll of 14)."
    }
   ],
@@ -2828,7 +2828,7 @@
     "pages": {
      "Spellcaster Magazine": "Issue 7, p.55"
     },
-    "success": "The caster may move the treasure up to 10\". If it is moved into contact with a member of the caster’s warband, they may pick up the treasure as a free action.",
+    "success": "The caster may move the treasure up to 10\". If it is moved into contact with a member of the caster’s warband, it may pick up the treasure as a free action.",
     "failure": "One random opponent may move the treasure token up to 6\" in any direction."
    }
   ],
@@ -2875,7 +2875,7 @@
    {
     "name": "Roll Out",
     "modifier": -2,
-    "text": "If the caster would have had an action left after casting the spell, they may make one Move action, but at -3 Move."
+    "text": "If the caster would have had an action left after casting the spell, he may make one Move action, but at -3 Move."
    }
   ],
   "notes": [],
@@ -2896,8 +2896,8 @@
      "Spellcaster Magazine": "Issue 7, p.56",
      "Advanced Spellcraft": "p.87"
     },
-    "success": "The caster may still take their second action for the turn as normal.",
-    "failure": "The caster receives a maximum of one action in their next activation."
+    "success": "The caster may still take his second action for the turn as normal.",
+    "failure": "The caster receives a maximum of one action in his next activation."
    }
   ],
   "flourishes": [
@@ -2931,19 +2931,19 @@
      "Advanced Spellcraft": "p.89"
     },
     "success": "Casting this spell does not count as one of the figure’s actions during this activation.",
-    "failure": "Remove the caster from the table but mark the spot. At the end of every turn, roll a die. On a 6+ it returns to the table at the exact spot it left it."
+    "failure": "Remove the caster from the table but mark the spot. At the end of every turn, roll a die. On a 6+ he returns to the table at the exact spot he left it."
    }
   ],
   "flourishes": [
    {
     "name": "Time Rider",
     "modifier": -4,
-    "text": "If the wizard cast this spell on consecutive turns, they only suffer 4 points of damage."
+    "text": "If the wizard cast this spell on consecutive turns, he only suffers 4 points of damage."
    },
    {
     "name": "Novice Caster",
     "modifier": -4,
-    "text": "The apprentice may cast this spell. They receive an additional action in the Soldier Phase and right at the end of the Creature Phase, after all other figures in that phase have activated."
+    "text": "The apprentice may cast this spell. He receives an additional action in the Soldier Phase and right at the end of the Creature Phase, after all other figures in that phase have activated."
    }
   ],
   "notes": [],
@@ -2965,7 +2965,7 @@
      "Advanced Spellcraft": "p.90"
     },
     "success": "The caster may change the targets of this spell. Target figures receive no Will Rolls to resist this spell.",
-    "failure": "The caster switches places with a random member of its own warband."
+    "failure": "The caster switches places with a random member of his own warband."
    }
   ],
   "flourishes": [
@@ -3094,12 +3094,12 @@
    {
     "name": "Crawling Eye",
     "modifier": -2,
-    "text": "Whenever the wizard activates, before taking any actions they may move their wizard eye 3” in any direction, so long as the eye stays on a vertical side of the same terrain."
+    "text": "Whenever the wizard activates, before taking any actions he may move his wizard eye 3” in any direction, so long as the eye stays on a vertical side of the same terrain."
    },
    {
     "name": "Second Sight",
     "modifier": -4,
-    "text": "The spellcaster may cast this spell even if it has an active wizard eye. If successful it may place a second wizard eye on the table and maintain both. Two is the absolute maximum though."
+    "text": "The spellcaster may cast this spell even if he has an active wizard eye. If successful he may place a second wizard eye on the table and maintain both. Two is the absolute maximum though."
    }
   ],
   "notes": [
@@ -3128,7 +3128,7 @@
      "Advanced Spellcraft": "p.93"
     },
     "success": "When this scroll is used, the spell is cast as though a critical success has been rolled.",
-    "failure": "The caster starts a fire in their scriptorium. Choose one scroll currently in the wizard’s vault. This scroll is destroyed. If the wizard has no other scrolls, there is no effect."
+    "failure": "The caster starts a fire in his scriptorium. Choose one scroll currently in the wizard’s vault. This scroll is destroyed. If the wizard has no other scrolls, there is no effect."
    }
   ],
   "flourishes": [

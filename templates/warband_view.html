@@ -1341,7 +1341,7 @@
             clamped to the Vampire caps, apprentice traded for a 9th soldier slot.
           </p>
           {% set revert_wizard_label = wiz.name or "your wizard" %}
-          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" onsubmit="return confirm('Revert {{ revert_wizard_label }} from Vampire? Restores their school, spells and apprentice as they stood before the transformation (clamped stats are not restored).');">
+          <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" onsubmit="return confirm('Revert {{ revert_wizard_label }} from Vampire? Restores his school, spells and apprentice as they stood before the transformation (clamped stats are not restored).');">
             <input type="hidden" name="action" value="revert_vampire" />
             <button class="btn danger small" type="submit">Revert from Vampire</button>
           </form>
@@ -1418,7 +1418,7 @@
         <p class="muted" style="font-size:0.85rem">
           1 Marker to scare off one enemy model, plus one per +1 up to
           +{{ UNDERWORLD_INTIMIDATION_MAX_MODIFIER }}. Both players roll a d20; you add your
-          modifier, they add the target's Will. A tie goes to them, and a failure returns half the
+          modifier, he adds the target's Will. A tie goes to him, and a failure returns half the
           Markers spent, rounded up. Wizards and apprentices can't be targeted.
         </p>
         <form method="post" action="{{ url_for('warband_update', warband_id=wb.id) }}" class="inline-form">
@@ -1430,7 +1430,7 @@
           </select>
           <input name="target_will" type="number" min="-10" max="20" placeholder="Target Will" style="width:7rem" />
           <input name="own_roll" type="number" min="1" max="20" placeholder="Your d20" style="width:7rem" />
-          <input name="target_roll" type="number" min="1" max="20" placeholder="Their d20" style="width:7rem" />
+          <input name="target_roll" type="number" min="1" max="20" placeholder="His d20" style="width:7rem" />
           <button class="btn secondary small" type="submit">Intimidate</button>
         </form>
       </details>
@@ -1612,7 +1612,7 @@
             if (!opt || !opt.getAttribute('data-no-grimoire')) return true;
             return confirm(
               'You have no grimoire for this spell in your vault, and the core rules only let a '
-              + 'wizard learn a spell they hold a grimoire for. Learn it anyway?'
+              + 'wizard learn a spell he holds a grimoire for. Learn it anyway?'
             );
           }
         </script>
@@ -1705,7 +1705,7 @@
       {% if wiz.level >= 6 %}
         <p class="muted" style="font-size:0.85rem;margin-top:0.75rem">
           If the wizard dies (core rules, p.103): a level 6+ wizard's apprentice may take over as
-          the new wizard, keeping their current stats, at the old wizard's level minus 6. The old
+          the new wizard, keeping his current stats, at the old wizard's level minus 6. The old
           wizard's spellbook and gear are lost; the new wizard starts with no spells known.
         </p>
         {% set old_wizard_label = wiz.name or "The wizard" %}
@@ -3345,7 +3345,7 @@
             Cast Thralldom (Out of Game (A)) at the table between scenarios first. Once it
             succeeds, the next soldier hired here — any type, no roster-cap exception — joins
             free and permanently at -1 Will. If a Thrall is ever reduced to 0 Health in a game,
-            roll a die at the table: 1-10 it's lost (remove it from the roster), 11+ it recovers
+            roll a die at the table: 1-10 he's lost (remove him from the roster), 11+ he recovers
             and stays on. Thralldom may be cast again for another Thrall.
           </p>
           {% if thrall_soldiers %}
@@ -3471,7 +3471,7 @@
             paying its ingredient cost first and rolling at −{{ BREW_GREATER_PENALTY }}; a failed
             attempt still spends the ingredients.
           {% else %}
-            One scroll of a spell the caster knows, or one they own the grimoire for.
+            One scroll of a spell the caster knows, or one he owns the grimoire for.
           {% endif %}
           {% if oog.bonus %}
             Your base adds <strong>+{{ oog.bonus }}</strong> to the Casting Roll

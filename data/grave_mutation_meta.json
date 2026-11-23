@@ -315,7 +315,7 @@
   "stat_delta": null
  },
  "157": {
-  "short": "Soul-Bonded: +1 Health; bonded to one random warband member - if they hit 0 Health, so does this figure (not reverse); rebond if that member leaves/dies",
+  "short": "Soul-Bonded: +1 Health; bonded to one random warband member - if it hits 0 Health, so does this figure (not reverse); rebond if that member leaves/dies",
   "stat_delta": {
    "health": {
     "add": 1
@@ -1527,7 +1527,7 @@
   }
  },
  "387": {
-  "short": "Disease Carrier: -3 Health; damages another in melee -> they fail Health Roll (TN20) -> -3 Health next game (cumulative)",
+  "short": "Disease Carrier: -3 Health; damages another in melee -> it fails Health Roll (TN20) -> -3 Health next game (cumulative)",
   "stat_delta": {
    "health": {
     "add": -3
@@ -1547,7 +1547,7 @@
   "stat_delta": null
  },
  "390": {
-  "short": "Poison Leech: Immune to Poison; action (can replace move), within 1\" of a non-combat ally, removes their poisoned condition",
+  "short": "Poison Leech: Immune to Poison; action (can replace move), within 1\" of a non-combat ally, removes its poisoned condition",
   "stat_delta": null
  },
  "391": {
@@ -1591,7 +1591,7 @@
   "stat_delta": null
  },
  "399": {
-  "short": "Soul-Paired: +2 Health; bonded to one random warband member - if they hit 0 Health, so does this figure (not reverse); rebond if that member leaves",
+  "short": "Soul-Paired: +2 Health; bonded to one random warband member - if it hits 0 Health, so does this figure (not reverse); rebond if that member leaves",
   "stat_delta": {
    "health": {
     "add": 2
@@ -2272,7 +2272,7 @@
   "stat_delta": null
  },
  "528": {
-  "short": "Soul-Linked: +3 Health; bonded to one random warband member - if they hit 0 Health, so does this figure (not reverse); rebond if that member leaves",
+  "short": "Soul-Linked: +3 Health; bonded to one random warband member - if it hits 0 Health, so does this figure (not reverse); rebond if that member leaves",
   "stat_delta": {
    "health": {
     "add": 3
@@ -2567,7 +2567,7 @@
   }
  },
  "584": {
-  "short": "Plague Carrier: -4 Health; wounds another in melee -> they fail Health Roll (TN20) -> -5 Health next game (cumulative)",
+  "short": "Plague Carrier: -4 Health; wounds another in melee -> it fails Health Roll (TN20) -> -5 Health next game (cumulative)",
   "stat_delta": {
    "health": {
     "add": -4
@@ -3323,7 +3323,7 @@
   "stat_delta": null
  },
  "732": {
-  "short": "Unnatural Health: only heals via blood (pay 5gc, or take a warband member's blood and remove them from the roster until after the next game) or via spells during a game",
+  "short": "Unnatural Health: only heals via blood (pay 5gc, or take a warband member's blood and remove it from the roster until after the next game) or via spells during a game",
   "stat_delta": null
  },
  "733": {
@@ -3436,7 +3436,7 @@
   }
  },
  "751": {
-  "short": "Infectious: wounds another in melee -> they start their next game at -2 Health (cumulative)",
+  "short": "Infectious: wounds another in melee -> it starts its next game at -2 Health (cumulative)",
   "stat_delta": null
  },
  "752": {
@@ -3888,7 +3888,7 @@
   }
  },
  "843": {
-  "short": "Poison Feeder: Immune to Poison, +3 Armour vs poison attacks; action (can replace move), within 1\" of a non-combat ally, removes their poisoned condition and heals this figure up to 3 Health",
+  "short": "Poison Feeder: Immune to Poison, +3 Armour vs poison attacks; action (can replace move), within 1\" of a non-combat ally, removes its poisoned condition and heals this figure up to 3 Health",
   "stat_delta": null
  },
  "844": {
@@ -4354,7 +4354,7 @@
   "stat_delta": null
  },
  "936": {
-  "short": "Magic Infusion: action: touch an ally within 1\" (or itself) -> their attacks count as magic for the rest of the game",
+  "short": "Magic Infusion: action: touch an ally within 1\" (or itself) -> its attacks count as magic for the rest of the game",
   "stat_delta": null
  },
  "937": {

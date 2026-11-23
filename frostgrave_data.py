@@ -424,7 +424,7 @@ KNIGHTLY_ORDERS = [
     {"id": "river", "name": "Order of the River", "stat": "health", "delta": -1, "ability": "Once per game, may spend an action to heal 3 damage"},
     {"id": "gauntlet", "name": "Order of the Gauntlet", "stat": "health", "delta": -1, "ability": "If activated in the soldier phase, may declare a group activation with one other soldier within 3\""},
     {"id": "tower", "name": "Order of the Tower", "stat": "health", "delta": -1, "ability": "+1 Fight and +1 damage when fighting a creature with the Large trait"},
-    {"id": "gallows", "name": "Order of the Gallows", "stat": "health", "delta": -1, "ability": "May reroll its survival roll after the game, but must keep the reroll even if it's worse"},
+    {"id": "gallows", "name": "Order of the Gallows", "stat": "health", "delta": -1, "ability": "May reroll his survival roll after the game, but must keep the reroll even if it's worse"},
 ]
 KNIGHTLY_ORDER_IDS = {o["id"] for o in KNIGHTLY_ORDERS}
 KNIGHTLY_ORDER_BY_ID = {o["id"]: o for o in KNIGHTLY_ORDERS}
@@ -1087,7 +1087,7 @@ del _school, _extra
 # warband_store.playable_schools()), unless "Standard Wizards only" is ticked.
 #
 # Casting numbers and ranges are extracted from the Lost Spells chapter of the
-# book itself (scripts/extract_pentangle_spells.py), not guessed.
+# book itself, not guessed.
 PENTANGLE_SCHOOLS = ["Astromancer", "Distortionist", "Fatecaster", "Sonancer", "Spiritualist"]
 
 # Each combines two existing schools and is aligned with both. The book gives no
@@ -1278,9 +1278,9 @@ RANGIFER_SHAMAN_NOTES = [
     "armed with antlers/flint/wood), Antlers (never unarmed), Flint Weapons (destroyed on "
     "any natural 1 rolled in combat).",
     "Starts with a wooden staff or flint hand weapon at no cost (free item slot).",
-    "Fields only their own kind — no thugs, mercenaries, or other soldier types.",
+    "Fields only his own kind — no thugs, mercenaries, or other soldier types.",
     "Roster capped at 5 rangifer (the shaman's \"hide\"), not the usual soldier limit.",
-    "Pays the table cost for their own rangifer troop types, not the +80gc surcharge an "
+    "Pays the table cost for his own rangifer troop types, not the +80gc surcharge an "
     "ordinary wizard pays via the Book of the Rangifer.",
 ]
 
@@ -1307,7 +1307,7 @@ SOLDIERS: dict[str, dict] = {
         "health": 10,
         "gear": "Hand weapon",
         "notes": "Free standard soldier.",
-        "description": 'A common laborer or petty criminal turned muscle-for-hire — no training, just a hand weapon and a willingness to fight. No special rules beyond their listed gear.',
+        "description": 'A common laborer or petty criminal turned muscle-for-hire — no training, just a hand weapon and a willingness to fight. No special rules beyond his listed gear.',
     },
     "thief": {
         "name": "Thief",
@@ -1321,7 +1321,7 @@ SOLDIERS: dict[str, dict] = {
         "health": 10,
         "gear": "Dagger",
         "notes": "Free standard soldier.",
-        "description": 'Fast and light-fingered, trained to slip in, grab treasure, and slip out again rather than stand and fight. Free to hire, armed only with a dagger. No special rules beyond their listed gear.',
+        "description": 'Fast and light-fingered, trained to slip in, grab treasure, and slip out again rather than stand and fight. Free to hire, armed only with a dagger. No special rules beyond his listed gear.',
     },
     "war_hound": {
         "name": "War Hound",
@@ -1350,7 +1350,7 @@ SOLDIERS: dict[str, dict] = {
         "health": 10,
         "gear": "Two-handed weapon, light armour",
         "notes": "Standard soldier.",
-        "description": 'A basic melee soldier, competent with a two-handed weapon and equipped with light armour. No special rules beyond their listed gear.',
+        "description": 'A basic melee soldier, competent with a two-handed weapon and equipped with light armour. No special rules beyond his listed gear.',
     },
     "man_at_arms": {
         "name": "Man-at-Arms",
@@ -1364,7 +1364,7 @@ SOLDIERS: dict[str, dict] = {
         "health": 12,
         "gear": "Hand weapon, shield, light armour",
         "notes": "Standard soldier.",
-        "description": "A disciplined hand-weapon-and-shield fighter in light armour, sturdier than an infantryman thanks to the shield's extra protection. No special rules beyond their listed gear.",
+        "description": "A disciplined hand-weapon-and-shield fighter in light armour, sturdier than an infantryman thanks to the shield's extra protection. No special rules beyond his listed gear.",
     },
     "apothecary": {
         "name": "Apothecary",
@@ -1378,7 +1378,7 @@ SOLDIERS: dict[str, dict] = {
         "health": 12,
         "gear": "Staff, healing potion",
         "notes": "Standard. Starts with potion of healing each game.",
-        "description": 'A battlefield healer who starts every game already carrying a potion of healing. May spend an action to hand any potion they carry — not just the free one — to a warband member within 1" who isn\'t in combat; that figure counts as having drunk it immediately, with the effects applied right away.',
+        "description": 'A battlefield healer who starts every game already carrying a potion of healing. May spend an action to hand any potion he carries — not just the free one — to a warband member within 1" who isn\'t in combat; that figure counts as having drunk it immediately, with the effects applied right away.',
     },
     "archer": {
         "name": "Archer",
@@ -1420,7 +1420,7 @@ SOLDIERS: dict[str, dict] = {
         "health": 12,
         "gear": "Hand weapon, dagger, light armour",
         "notes": "Specialist.",
-        "description": 'A scrappy adventurer built for grabbing loot and getting out alive, with solid Fight and Will for a mid-cost specialist. No special rules beyond their listed gear.',
+        "description": 'A scrappy adventurer built for grabbing loot and getting out alive, with solid Fight and Will for a mid-cost specialist. No special rules beyond his listed gear.',
     },
     "tracker": {
         "name": "Tracker",
@@ -1434,7 +1434,7 @@ SOLDIERS: dict[str, dict] = {
         "health": 12,
         "gear": "Staff, bow, quiver, light armour",
         "notes": "Specialist.",
-        "description": 'A woodsman equally comfortable at range or in melee, carrying both a staff and a bow. Like all bows, theirs loads and fires as a single action, so they can move and shoot in the same activation.',
+        "description": 'A woodsman equally comfortable at range or in melee, carrying both a staff and a bow. Like all bows, his loads and fires as a single action, so he can move and shoot in the same activation.',
     },
     "knight": {
         "name": "Knight",
@@ -1448,7 +1448,7 @@ SOLDIERS: dict[str, dict] = {
         "health": 12,
         "gear": "Hand weapon, dagger, shield, heavy armour",
         "notes": "Specialist.",
-        "description": 'A heavily armoured melee specialist with a hand weapon, dagger, and shield. No special rules beyond their listed gear.',
+        "description": 'A heavily armoured melee specialist with a hand weapon, dagger, and shield. No special rules beyond his listed gear.',
     },
     "templar": {
         "name": "Templar",
@@ -1462,7 +1462,7 @@ SOLDIERS: dict[str, dict] = {
         "health": 12,
         "gear": "Two-handed weapon, heavy armour",
         "notes": "Specialist.",
-        "description": "A heavily armoured warrior who trades the knight's shield for a two-handed weapon, giving up some defense for extra damage. No special rules beyond their listed gear.",
+        "description": "A heavily armoured warrior who trades the knight's shield for a two-handed weapon, giving up some defense for extra damage. No special rules beyond his listed gear.",
     },
     "ranger": {
         "name": "Ranger",
@@ -1476,7 +1476,7 @@ SOLDIERS: dict[str, dict] = {
         "health": 12,
         "gear": "Bow, quiver, hand weapon, light armour",
         "notes": "Specialist.",
-        "description": 'A versatile fighter carrying both a bow and a hand weapon, able to switch between ranged and melee as a fight develops. Like all bows, theirs loads and fires as a single action.',
+        "description": 'A versatile fighter carrying both a bow and a hand weapon, able to switch between ranged and melee as a fight develops. Like all bows, his loads and fires as a single action.',
     },
     "barbarian": {
         "name": "Barbarian",
@@ -1490,7 +1490,7 @@ SOLDIERS: dict[str, dict] = {
         "health": 14,
         "gear": "Two-handed weapon, dagger",
         "notes": "Specialist.",
-        "description": 'A savage two-handed fighter with the highest Health of any specialist, built to wade into combat and keep swinging. No special rules beyond their listed gear.',
+        "description": 'A savage two-handed fighter with the highest Health of any specialist, built to wade into combat and keep swinging. No special rules beyond his listed gear.',
     },
     "marksman": {
         "name": "Marksman",
@@ -1504,7 +1504,7 @@ SOLDIERS: dict[str, dict] = {
         "health": 12,
         "gear": "Crossbow, quiver, hand weapon, heavy armour",
         "notes": "Specialist.",
-        "description": 'An elite crossbowman in heavy armour, backing up their hard-hitting shot with a hand weapon for when an enemy closes the distance. Like all crossbows, theirs must be loaded and fired as two separate actions, so a marksman cannot move and shoot in the same activation.',
+        "description": 'An elite crossbowman in heavy armour, backing up his hard-hitting shot with a hand weapon for when an enemy closes the distance. Like all crossbows, his must be loaded and fired as two separate actions, so a marksman cannot move and shoot in the same activation.',
     },
     # --- Supplement soldiers (gated by the per-warband source-book toggles) ---
     # Categorisation (standard/specialist) follows the Supplemental Soldier
@@ -1538,7 +1538,7 @@ SOLDIERS: dict[str, dict] = {
         "gear": "Dagger",
         "item_slots": 3,
         "notes": "May carry up to three items and hand them to nearby warband members (3 item slots).",
-        "description": 'A hired hand whose whole job is logistics: they carry three items and can hand any of them off to (or take one from) a warband member within 1", freeing up other soldiers\' single item slot for something more useful in a fight.',
+        "description": 'A hired hand whose whole job is logistics: he carries three items and can hand any of them off to (or take one from) a warband member within 1", freeing up other soldiers\' single item slot for something more useful in a fight.',
     },
     "bard": {
         "name": "Bard",
@@ -1553,7 +1553,7 @@ SOLDIERS: dict[str, dict] = {
         "health": 12,
         "gear": "Hand weapon, light armour",
         "notes": "Soldiers within 6\" and line of sight gain +1 to Will rolls (once per warband).",
-        "description": 'A traveling performer whose music steadies nerves in the field. Warband members within 6" and line of sight of a bard get +1 to Will rolls; this bonus doesn\'t stack with a second bard and never applies to the bard themself.',
+        "description": 'A traveling performer whose music steadies nerves in the field. Warband members within 6" and line of sight of a bard get +1 to Will rolls; this bonus doesn\'t stack with a second bard and never applies to the bard himself.',
     },
     "crow_master": {
         "name": "Crow Master",
@@ -1569,7 +1569,7 @@ SOLDIERS: dict[str, dict] = {
         "gear": "Hand weapon, light armour",
         "item_slots": 0,
         "notes": "Requires a Crow Roost base upgrade (100gc). Brings one blood crow; may carry treasure but no items.",
-        "description": "A handler bonded to a trained blood crow. Requires a Crow Roost base upgrade (100gc) before one can be hired. Comes with one blood crow that acts independently and is replaced free of charge if it's killed; the crow master may carry treasure but has no item slots of their own.",
+        "description": "A handler bonded to a trained blood crow. Requires a Crow Roost base upgrade (100gc) before one can be hired. Comes with one blood crow that acts independently and is replaced free of charge if it's killed; the crow master may carry treasure but has no item slots of his own.",
     },
     "rangifer": {
         "name": "Rangifer",
@@ -1648,7 +1648,7 @@ SOLDIERS: dict[str, dict] = {
         "health": 12,
         "gear": "Hand weapon",
         "notes": "Attacks poison (target reduced to one action). +2 Fight when already supported; never counts as a supporting figure.",
-        "description": 'A killer for hire who works best from the shadows of a crowd rather than alone. Attacks are poisoned, reducing the target to one action. Gains +2 Fight whenever already supported by another figure, but never counts as a supporting figure themself.',
+        "description": 'A killer for hire who works best from the shadows of a crowd rather than alone. Attacks are poisoned, reducing the target to one action. Gains +2 Fight whenever already supported by another figure, but never counts as a supporting figure himself.',
     },
     "demonic_servant": {
         "name": "Demonic Servant",
@@ -1857,7 +1857,7 @@ SOLDIERS: dict[str, dict] = {
         "health": 12,
         "gear": "Bladed staff",
         "notes": "Bladed staff: +1 damage and -1 to the enemy's hand-to-hand damage.",
-        "description": "A disciplined martial artist who fights with a bladed staff — a quarterstaff with a blade lashed to one end. It deals +1 damage and reduces the enemy's hand-to-hand damage against the monk by 1.",
+        "description": "A disciplined martial artist who fights with a bladed staff — a quarterstaff with a blade lashed to one end. He deals +1 damage and reduces the enemy's hand-to-hand damage against the monk by 1.",
     },
     "mystic_warrior": {
         "name": "Mystic Warrior",
@@ -1872,7 +1872,7 @@ SOLDIERS: dict[str, dict] = {
         "health": 12,
         "gear": "Unarmed (gauntlets / vambraces)",
         "notes": "Never suffers unarmed penalties; all hand-to-hand attacks count as magic attacks.",
-        "description": 'A warrior who has trained the body itself into a weapon. Fights unarmed with no penalty, and every hand-to-hand attack they make counts as a magic attack — able to hurt creatures that are otherwise immune to normal weapons.',
+        "description": 'A warrior who has trained the body itself into a weapon. Fights unarmed with no penalty, and every hand-to-hand attack he makes counts as a magic attack — able to hurt creatures that are otherwise immune to normal weapons.',
     },
     # --- Spell-summoned members: only hireable (free) when the wizard knows the
     # listed spell. Gated by "requires_spell", not a source book. ---
@@ -2061,7 +2061,7 @@ SOLDIERS: dict[str, dict] = {
             "warband gains +2 Initiative and +2sp post-game; only one guide's bonus "
             "applies per game even with multiple in the warband."
         ),
-        "description": 'A wilderness scout (The Wildwoods) who knows one kind of terrain intimately. Picks a Terrain Expertise (Mountain, Bog, Ice, or Forest) at hire; never consumes Supply Points. In a wilderness game whose dominant terrain matches, gains the Nimble trait (no rough-ground movement penalty) and the whole warband gains +2 to its Initiative Roll and +2 Supply Points after the game. Multiple Guides may be hired, but only one grants its bonus in any given game.',
+        "description": 'A wilderness scout (The Wildwoods) who knows one kind of terrain intimately. Picks a Terrain Expertise (Mountain, Bog, Ice, or Forest) at hire; never consumes Supply Points. In a wilderness game whose dominant terrain matches, gains the Nimble trait (no rough-ground movement penalty) and the whole warband gains +2 to its Initiative Roll and +2 Supply Points after the game. Multiple Guides may be hired, but only one grants his bonus in any given game.',
     },
     "expert_guide": {
         "name": "Expert Guide",
@@ -2081,7 +2081,7 @@ SOLDIERS: dict[str, dict] = {
             "warband gains +2 Initiative and +2sp post-game; only one guide's bonus "
             "applies per game even with multiple in the warband."
         ),
-        "description": 'A higher-trained wilderness scout (The Wildwoods) than an ordinary Guide, gaining +2 Fight and +2 Shoot in matching terrain instead of +0/+0. Picks a Terrain Expertise (Mountain, Bog, Ice, or Forest) at hire; never consumes Supply Points. In a wilderness game whose dominant terrain matches, also gains the Nimble trait (no rough-ground movement penalty) and the whole warband gains +2 to its Initiative Roll and +2 Supply Points after the game. Multiple Guides may be hired, but only one grants its bonus in any given game.',
+        "description": 'A higher-trained wilderness scout (The Wildwoods) than an ordinary Guide, gaining +2 Fight and +2 Shoot in matching terrain instead of +0/+0. Picks a Terrain Expertise (Mountain, Bog, Ice, or Forest) at hire; never consumes Supply Points. In a wilderness game whose dominant terrain matches, also gains the Nimble trait (no rough-ground movement penalty) and the whole warband gains +2 to its Initiative Roll and +2 Supply Points after the game. Multiple Guides may be hired, but only one grants his bonus in any given game.',
     },
     "trapper": {
         "name": "Trapper",
@@ -2146,8 +2146,8 @@ SOLDIERS: dict[str, dict] = {
         "will": 1,
         "health": 12,
         "gear": "Hand weapon, dagger, light armour",
-        "notes": "Supporting Figure Maximum (opponents gain at most +2 from supporting figures against it). Opponent Armour Reduction: -1 Armour to a light/heavy-armoured foe it beats in combat.",
-        "description": 'A blade specialist (Blood Legacy) who thrives against groups. Supporting Figure Maximum limits any opponent to at most +2 Fight from supporting figures when fighting the Swordmaster. Opponent Armour Reduction: a light- or heavy-armoured foe it beats in combat suffers -1 Armour.',
+        "notes": "Supporting Figure Maximum (opponents gain at most +2 from supporting figures against him). Opponent Armour Reduction: -1 Armour to a light/heavy-armoured foe he beats in combat.",
+        "description": 'A blade specialist (Blood Legacy) who thrives against groups. Supporting Figure Maximum limits any opponent to at most +2 Fight from supporting figures when fighting the Swordmaster. Opponent Armour Reduction: a light- or heavy-armoured foe he beats in combat suffers -1 Armour.',
     },
     "vampire_hunter": {
         "name": "Vampire Hunter",
@@ -2662,10 +2662,10 @@ SOLDIERS: dict[str, dict] = {
         "notes": (
             "Legendary Soldier (Issue 4). All shooting attacks count as magic. May "
             "\"steady aim\" (an action, can replace the move) for -1 Fight on the target's "
-            "defence if it shoots the same activation. The archer has space for up to 3 "
-            "magic arrows without needing one of its 2 item slots."
+            "defence if he shoots the same activation. The archer has space for up to 3 "
+            "magic arrows without needing one of his 2 item slots."
         ),
-        "description": 'An archer whose every shot is magical ("Legendary Soldier", Spellcaster Magazine Issue 4). All shooting attacks count as magic. May "steady aim" — an action that can replace its move — to impose -1 Fight on the target\'s defence if it also shoots that activation. The archer has space for up to 3 magic arrows without needing one of its 2 item slots.',
+        "description": 'An archer whose every shot is magical ("Legendary Soldier", Spellcaster Magazine Issue 4). All shooting attacks count as magic. May "steady aim" — an action that can replace his move — to impose -1 Fight on the target\'s defence if he also shoots that activation. The archer has space for up to 3 magic arrows without needing one of his 2 item slots.',
     },
     "graverobber": {
         "name": "Graverobber",
@@ -2685,7 +2685,7 @@ SOLDIERS: dict[str, dict] = {
             "Immune to Drain Life Force, Reveal Death, Strike Dead. Raise Zombie may add a "
             "ghoul instead. +5 vs. Trap Numbers. 2 item slots."
         ),
-        "description": 'A tomb-raiding specialist ("Legendary Soldier", Spellcaster Magazine Issue 4). +2 Fight against undead, and its attacks count as magic against them. Immune to Drain Life Force, Reveal Death, and Strike Dead. When Raise Zombie targets the warband, a ghoul may be added instead. +5 to resist Trap Numbers.',
+        "description": 'A tomb-raiding specialist ("Legendary Soldier", Spellcaster Magazine Issue 4). +2 Fight against undead, and his attacks count as magic against them. Immune to Drain Life Force, Reveal Death, and Strike Dead. When Raise Zombie targets the warband, a ghoul may be added instead. +5 to resist Trap Numbers.',
     },
     "shadow_walker": {
         "name": "Shadow-Walker",
@@ -2722,10 +2722,10 @@ SOLDIERS: dict[str, dict] = {
         "item_slots": 2,
         "notes": (
             "Legendary Soldier (Issue 4). Once per activation: move a visible treasure "
-            "token 3\", or move itself 4\" (either may replace the move action). Immune to "
+            "token 3\", or move himself 4\" (either may replace the move action). Immune to "
             "Mind Control. 2 item slots."
         ),
-        "description": 'A mind-over-matter specialist ("Legendary Soldier", Spellcaster Magazine Issue 4). Once per activation may move a visible treasure token 3", or move itself 4" — either can replace its move action. Immune to Mind Control.',
+        "description": 'A mind-over-matter specialist ("Legendary Soldier", Spellcaster Magazine Issue 4). Once per activation may move a visible treasure token 3", or move himself 4" — either can replace his move action. Immune to Mind Control.',
     },
     "whip_master": {
         "name": "Whip-Master",
@@ -2746,7 +2746,7 @@ SOLDIERS: dict[str, dict] = {
             "Falling more than 3\": a Move Roll (TN16) catches terrain with the whip to "
             "soften the landing. 2 item slots."
         ),
-        "description": 'A whip-fighting specialist ("Legendary Soldier", Spellcaster Magazine Issue 4). Its whip makes a 3" range shooting attack (max +2); on a hit the target drops any carried treasure and must pass a Move Roll (TN18) or be reeled in 2". When falling more than 3", a Move Roll (TN16) lets it catch terrain with the whip to soften the landing.',
+        "description": 'A whip-fighting specialist ("Legendary Soldier", Spellcaster Magazine Issue 4). His whip makes a 3" range shooting attack (max +2); on a hit the target drops any carried treasure and must pass a Move Roll (TN18) or be reeled in 2". When falling more than 3", a Move Roll (TN16) lets him catch terrain with the whip to soften the landing.',
     },
     "monster_hunter": {
         "name": "Monster Hunter",
@@ -2862,7 +2862,7 @@ SOLDIERS: dict[str, dict] = {
         "health": 14,
         "gear": "—",
         "notes": "Undead: can carry treasure but has no item slots. Immune to Normal Weapons, Magic Attack, Mind Lock, True Sight.",
-        "description": 'A vampire fielded as a soldier rather than a wizard\'s school (see the separate playable Vampire Wizard, Blood Legacy). Undead: immune to poison, never wounded, may carry treasure tokens but has no item slots. Immune to Normal Weapons: can only be harmed by magic. Magic Attack: all its attacks count as magic. Mind Lock: immune to Mind Control and Suggestion. True Sight: ignores Beauty and Invisibility, and destroys any Illusionary Soldier it fights.',
+        "description": 'A vampire fielded as a soldier rather than a wizard\'s school (see the separate playable Vampire Wizard, Blood Legacy). Undead: immune to poison, never wounded, may carry treasure tokens but has no item slots. Immune to Normal Weapons: can only be harmed by magic. Magic Attack: all his attacks count as magic. Mind Lock: immune to Mind Control and Suggestion. True Sight: ignores Beauty and Invisibility, and destroys any Illusionary Soldier he fights.',
     },
     "minor_demon": {
         "name": "Minor Demon",
@@ -2932,7 +2932,7 @@ _WILDERNESS_SURVIVAL = "Wilderness Survival: consumes no supply points unless re
 _TERRAIN_EXPERT = (
     "Terrain Expert (Mountains, Bogs, Ice or Forests): never consumes supply points. When the "
     "scenario's dominant terrain matches: Nimble (no rough-ground penalty), +2 to the warband's "
-    "Initiative Rolls, and +2sp after the game if it survives (the trait list says +4sp). Only one "
+    "Initiative Rolls, and +2sp after the game if he survives (the trait list says +4sp). Only one "
     "guide's benefit applies per game."
 )
 _CANDLE_JACK = (
@@ -2949,7 +2949,7 @@ SOLDIER_ABILITIES: dict[str, str] = {
     # --- Core Rules ---
     "war_hound": _ANIMAL,
     "apothecary": (
-        "Starts each game with a Potion of Healing. Action: give any potion it carries to a warband "
+        "Starts each game with a Potion of Healing. Action: give any potion he carries to a warband "
         'member within 1" (neither in combat); it counts as drunk at once.'
     ),
     "raised_zombie": f"{_UNDEAD} Only one raised zombie at a time.",
@@ -2983,8 +2983,8 @@ SOLDIER_ABILITIES: dict[str, str] = {
     ),
     "pack_mule": _PACK_MULE,
     "bard": (
-        'Soldiers of its warband within 6" and line of sight get +1 to Will rolls (once, however '
-        "many bards; never a bard itself)."
+        'Soldiers of his warband within 6" and line of sight get +1 to Will rolls (once, however '
+        "many bards; never a bard himself)."
     ),
     "crow_master": (
         "Brings a blood crow that moves and fights on its own (no treasure or items; replaced "
@@ -3006,7 +3006,7 @@ SOLDIER_ABILITIES: dict[str, str] = {
     "trap_expert": _TRAP_EXPERT,
     "tunnel_fighter": (
         "+3 against trap numbers. With Secret Passages in use, an initiative roll of 19 lets one "
-        "of your tunnel fighters find a secret passage only it may use."
+        "of your tunnel fighters find a secret passage only he may use."
     ),
     "companion_boar": f"{_ANIMAL} {_HORNS}",
     "companion_ice_spider": (
@@ -3025,9 +3025,9 @@ SOLDIER_ABILITIES: dict[str, str] = {
     ),
     "chilopendra": f"{_DEMON} {_HORNS} Poisonous: a figure it damages in melee is {_POISON_EFFECT}.",
     "demon_hunter": "+1 Fight and +1 damage in combat against demons, including possessed figures.",
-    "monk": "Bladed staff: +1 damage, and enemy hand-to-hand attacks against it take -1 damage.",
+    "monk": "Bladed staff: +1 damage, and enemy hand-to-hand attacks against him take -1 damage.",
     "mystic_warrior": (
-        "Unarmed, but never takes the unarmed Fight or damage penalties; all its hand-to-hand "
+        "Unarmed, but never takes the unarmed Fight or damage penalties; all his hand-to-hand "
         "attacks are magic."
     ),
     # --- The Wildwoods ---
@@ -3035,7 +3035,7 @@ SOLDIER_ABILITIES: dict[str, str] = {
     "expert_guide": _TERRAIN_EXPERT,
     "trapper": (
         f'{_WILDERNESS_SURVIVAL} Set Traps: an action (may replace the move) places a 1" trap '
-        "token beside it, max 3 per game; a figure touching one takes a +1 attack or must pass a "
+        "token beside him, max 3 per game; a figure touching one takes a +1 attack or must pass a "
         "Move Roll (20) or end its activation and get 0 actions next time. Never triggers traps."
     ),
     "trophy_hunter": (
@@ -3046,7 +3046,7 @@ SOLDIER_ABILITIES: dict[str, str] = {
     "blood_merchant": (
         'Starts each game with a vial of blood: within 1" of a vampire, with no enemy within 1" '
         "of either, an action hands it over and the vampire regains up to 5 Health. Harvest Blood: "
-        "if it avoids Dead and Badly Wounded, its vampire regains 1 Health free per warband member "
+        "if he avoids Dead and Badly Wounded, his vampire regains 1 Health free per warband member "
         "reduced to 0 Health that game (not undead, constructs, demons or animals)."
     ),
     "swordmaster": (
@@ -3126,8 +3126,8 @@ SOLDIER_ABILITIES: dict[str, str] = {
         f"any direction, even straight up. Powerful Jaws: +2 damage. {_LEGENDARY}"
     ),
     "elemental_archer": (
-        "All its shooting attacks are magic. Steady Aim: an action (may replace the move) followed "
-        "at once by a shot gives the target -1 Fight against it. Carries up to 3 magic arrows "
+        "All his shooting attacks are magic. Steady Aim: an action (may replace the move) followed "
+        "at once by a shot gives the target -1 Fight against him. Carries up to 3 magic arrows "
         f"outside its item slots. {_LEGENDARY}"
     ),
     "graverobber": (
@@ -3136,19 +3136,19 @@ SOLDIER_ABILITIES: dict[str, str] = {
         f"instead. {_LEGENDARY}"
     ),
     "shadow_walker": (
-        "Activating out of every enemy's line of sight, it may spend the whole activation moving "
+        "Activating out of every enemy's line of sight, he may spend the whole activation moving "
         "to any point also out of enemy line of sight (not while carrying treasure). Cannot be "
         'seen from more than 12". +2 Fight against shooting attacks, including spells. Poison '
         f"attacks: a figure it damages is {_POISON_EFFECT}. Immune to poison. {_LEGENDARY}"
     ),
     "telekinetic": (
         "Once per activation, an action (may replace the move): move a visible treasure token up "
-        '''to 3" (not one carried or with special pick-up rules), or move itself 4" in any '''
+        '''to 3" (not one carried or with special pick-up rules), or move himself 4" in any '''
         f"direction, even up or across a gap. Immune to Mind Control. {_LEGENDARY}"
     ),
     "whip_master": (
         'Whip: 3" shooting attack, bonus never above +2; on 1+ damage the target drops its '
-        'treasure and must pass a Move Roll (18) or be pulled 2" towards it. Falling over 3": a '
+        'treasure and must pass a Move Roll (18) or be pulled 2" towards him. Falling over 3": a '
         f'Move Roll (16) stops the fall 3" down. {_LEGENDARY}'
     ),
     "monster_hunter": (
@@ -3684,7 +3684,7 @@ POTION_MASTER_TYPE_KEY = "potion_master"
 MONSTER_HUNTER_PRIZE_BONUS = 5  # extra gc per sellable prize, with a Monster Hunter on the roster
 MONSTER_HUNTER_COMPONENTS_PER_KILL = 2  # vs. 1 normally
 # A handful of Master Monster Table prizes target a spell/potion this app has
-# no record of (flagged "known": False by scripts/extract_monster_hunting.py
+# no record of (flagged "known": False in data/monster_hunting.json
 # — likely a 1st-edition-only spell/potion never carried into the 2e lists
 # this app uses). The "Replace Edition 1 Loot with Gold" homerule swaps those
 # for a flat gc prize instead of a component for a spell that doesn't exist

@@ -23,7 +23,7 @@
       { "name": "Light Armour", "text": "+1 Armour. Spellcasters may not wear it." },
       { "name": "Heavy Armour", "text": "+2 Armour, -1 Move. Spellcasters may not wear it." },
       { "name": "Maximum Armour", "text": "A permanent warband member's Armour stat is capped at 15 (excess is reduced to 15). Creatures are exempt, even as temporary warband members." },
-      { "name": "Magic weapons/armour on soldiers", "text": "A soldier may only carry/wear a magic version of a weapon or armour type it's already listed with (e.g. a dagger-armed thief can only use a magic dagger, never a magic hand weapon or any armour) — it replaces the mundane item and still fills the soldier's one item slot." }
+      { "name": "Magic weapons/armour on soldiers", "text": "A soldier may only carry/wear a magic version of a weapon or armour type he's already listed with (e.g. a dagger-armed thief can only use a magic dagger, never a magic hand weapon or any armour) — it replaces the mundane item and still fills the soldier's one item slot." }
     ]
   },
   {
@@ -77,7 +77,7 @@
       { "name": "Wizard death", "text": "Level 5 or less: discard the warband and start over. Level 6+: may instead promote the apprentice to wizard (new level = old wizard's level − 6, keeping the apprentice's current stats and spells); the old wizard's own carried items are lost, but everything else (other members' items, the vault) passes to the new wizard." },
       { "name": "Buying", "text": "Grimoire (any spell, player's choice) 500gc · scroll 250gc · potions/magic weapons/armour/items at their listed price. No identification roll is needed for a purchase." },
       { "name": "Selling", "text": "Grimoire of an already-known spell 200gc (a grimoire for an unknown spell may never be sold) · scroll 30gc · other treasure at its listed sale price." },
-      { "name": "Optional Rule: Black Market Contacts", "text": "Instead of open buying, each player rolls 4x on the Treasure Table after a game (ignore any gc in the results) and resolves the sub-tables to see exactly what's on offer this time; a player may only buy from their own results. One of the four rolls may be swapped for a roll on a supplement's own treasure table if that book is in use." }
+      { "name": "Optional Rule: Black Market Contacts", "text": "Instead of open buying, each player rolls 4x on the Treasure Table after a game (ignore any gc in the results) and resolves the sub-tables to see exactly what's on offer this time; a player may only buy from his own results. One of the four rolls may be swapped for a roll on a supplement's own treasure table if that book is in use." }
     ]
   }
 ]

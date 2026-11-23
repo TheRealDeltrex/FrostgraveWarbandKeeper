@@ -932,7 +932,7 @@ VAMPIRE_NOTES = [
     "Never has a Rangifer in the warband.",
     "Animal Companion yields an undead version of the animal.",
     "May never benefit from Heal or Miraculous Cure, and may not drink Healing Potions.",
-    "Regains lost Health equal to the damage inflicted (up to its starting Health) whenever it "
+    "Regains lost Health equal to the damage inflicted (up to his starting Health) whenever he "
     "damages a giant in hand-to-hand combat.",
 ]
 
@@ -958,7 +958,7 @@ VAMPIRE_TRANSFORM_NOTES = [
     "Recalculate the wizard's level afterward: -1 for each spell whose Casting Number went "
     "up, -1 for each spell lost, -1 for each improvement lost with it, -1 for each point of "
     "Will lost.",
-    "Loses their apprentice, gaining a 9th soldier slot instead (still capped at 4 specialists).",
+    "Loses his apprentice, gaining a 9th soldier slot instead (still capped at 4 specialists).",
 ]
 
 # "Creating a Fire Giant Wizard" (Blood Legacy p.19-21) — the wizard's own
@@ -1475,7 +1475,7 @@ def soldier_state_block(wb: dict, type_key: str, ignore_vault_item: bool = False
     if type_key in LICH_BLOCKED_SOLDIERS and (is_lich(wb) or is_vampire(wb)):
         return "A Rangifer will not serve an undead wizard."
     if is_rangifer_shaman(wb) and type_key not in RANGIFER_TROOP_TYPE_KEYS:
-        return "A Rangifer Shaman only fields their own kind (Spellcaster Magazine, Issue 3)."
+        return "A Rangifer Shaman only fields his own kind (Spellcaster Magazine, Issue 3)."
     if type_key in NEVER_HIREABLE_SOLDIERS and not is_rangifer_shaman(wb):
         return "Only hireable by a Rangifer Shaman."
     need_tier = BEASTCRAFTER_COMPANIONS.get(type_key)

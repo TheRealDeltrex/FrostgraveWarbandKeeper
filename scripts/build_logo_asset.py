@@ -17,7 +17,7 @@ Two derivatives are printed:
 
 This script writes NOTHING. It prints both blocks to stdout, to be pasted in
 once — a script that rewrote style.css in place would silently revert hand-tuning
-on every re-run, the same hazard CLAUDE.md documents for scripts/extract_*.py.
+on every re-run.
 
 Usage (from the repo root, with the venv active):
     python scripts/build_logo_asset.py > logo-blocks.txt

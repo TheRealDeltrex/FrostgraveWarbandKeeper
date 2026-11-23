@@ -106,7 +106,7 @@
     {
      "name": "Random Encounters (underground)",
      "tag": "",
-     "text": "On a treasure's first pickup, roll a die — 14+ spawns a random creature, placed by whoever beats their level in an opposed roll."
+     "text": "On a treasure's first pickup, roll a die — 14+ spawns a random creature, placed by whoever beats his level in an opposed roll."
     },
     {
      "name": "Burrowing (new ability)",
@@ -480,7 +480,7 @@
     },
     {
      "name": "Gem/Statue Result (d20)",
-     "text": "1-2 Figure overcome — a wizard/apprentice loses the rest of this turn and their next activation; a soldier becomes an uncontrolled creature for the rest of the game. 3-4 Releases a Wraith within 3\", as a normal uncontrolled creature. 5-6 Gems explode — a +5 shooting attack against anyone within 3\". 7-8 Statue animates — a Medium (1-10) or Large (11-20) Construct, uncontrolled. 9-11 Gems worth d20×20gc, nothing else. 12-14 +100 experience points (stacks with normal scenario XP). 15-16 Eyes of Runic Light (see New Treasure). 17-18 The wizard gains a level and a new spell from the Random Spell Table. 19-20 Eyes of Eternity (see New Treasure). Prying gems loose requires an 11+ roll while in contact (Thieves +1, Treasure Hunters +2) — a reusable skill-gated loot mechanic."
+     "text": "1-2 Figure overcome — a wizard/apprentice loses the rest of this turn and his next activation; a soldier becomes an uncontrolled creature for the rest of the game. 3-4 Releases a Wraith within 3\", as a normal uncontrolled creature. 5-6 Gems explode — a +5 shooting attack against anyone within 3\". 7-8 Statue animates — a Medium (1-10) or Large (11-20) Construct, uncontrolled. 9-11 Gems worth d20×20gc, nothing else. 12-14 +100 experience points (stacks with normal scenario XP). 15-16 Eyes of Runic Light (see New Treasure). 17-18 The wizard gains a level and a new spell from the Random Spell Table. 19-20 Eyes of Eternity (see New Treasure). Prying gems loose requires an 11+ roll while in contact (Thieves +1, Treasure Hunters +2) — a reusable skill-gated loot mechanic."
     }
    ]
   },
@@ -1142,7 +1142,7 @@
       },
       {
        "name": "110. Health Transference",
-       "text": "If this figure is within 2\" of a friendly figure, and that figure is not in combat, it may spend an action and take up to 3 points of damage. The other figure heals an amount of damage equal to that amount (though this may not take either figure below 0 Health or above their starting Health)."
+       "text": "If this figure is within 2\" of a friendly figure, and that figure is not in combat, it may spend an action and take up to 3 points of damage. The other figure heals an amount of damage equal to that amount (though this may not take either figure below 0 Health or above its starting Health)."
       },
       {
        "name": "111. Blood Frenzy",
@@ -1518,7 +1518,7 @@
       },
       {
        "name": "199. Rat Attracter",
-       "text": "If this figure is on the table when the controlling player rolls a 1 - 3 for its Initiative Roll, place a giant rat on the table at a random point along the table edge."
+       "text": "If this figure is on the table when the controlling player rolls a 1 - 3 for his Initiative Roll, place a giant rat on the table at a random point along the table edge."
       },
       {
        "name": "200. Snake Arms",
@@ -2634,7 +2634,7 @@
       },
       {
        "name": "458. Undead Attracter",
-       "text": "If this figure is on the table when the controlling player rolls a \"1 - 3\" for its Initiative Roll, place a skeleton on the table at a random point along the table edge."
+       "text": "If this figure is on the table when the controlling player rolls a \"1 - 3\" for his Initiative Roll, place a skeleton on the table at a random point along the table edge."
       },
       {
        "name": "459. Mana Battery (1/1)",
@@ -3345,7 +3345,7 @@
       },
       {
        "name": "622. Demon Attracter",
-       "text": "If this figure is on the table when the controlling player rolls a natural \"1 - 3\" for its Initiative Roll, place an imp on the table at a random point along the table edge."
+       "text": "If this figure is on the table when the controlling player rolls a natural \"1 - 3\" for his Initiative Roll, place an imp on the table at a random point along the table edge."
       },
       {
        "name": "623. Frequent Insanity",
@@ -3571,7 +3571,7 @@
       },
       {
        "name": "676. Innate Undead Slayer",
-       "text": "Whenever the player controlling this figure rolls a natural \"18 - 20\" for their Initiative Roll, this figure may immediately cast Destroy Undead at a target of its choosing as a free action."
+       "text": "Whenever the player controlling this figure rolls a natural \"18 - 20\" for his Initiative Roll, this figure may immediately cast Destroy Undead at a target of its choosing as a free action."
       },
       {
        "name": "677. Chameleon Head",
@@ -3924,7 +3924,7 @@
       },
       {
        "name": "758. Giant Worm Attracter",
-       "text": "If this figure is on the table when the controlling player rolls a natural \"1\" on their Initiative Roll, place a giant worm on the table at a random point along the table edge."
+       "text": "If this figure is on the table when the controlling player rolls a natural \"1\" on his Initiative Roll, place a giant worm on the table at a random point along the table edge."
       },
       {
        "name": "759. Wounded Eagle",
@@ -4042,7 +4042,7 @@
       },
       {
        "name": "785. Uncontrollable Rage Projection",
-       "text": "Whenever the player that controls this figure rolls a natural \"1 or 2\" for their Initiative Roll, a Destructive Sphere spell is immediately cast centred on this figure. This figure is immune to the effects of this casting. This does not apply to the first turn of the game."
+       "text": "Whenever the player that controls this figure rolls a natural \"1 or 2\" for his Initiative Roll, a Destructive Sphere spell is immediately cast centred on this figure. This figure is immune to the effects of this casting. This does not apply to the first turn of the game."
       },
       {
        "name": "786. Radiant Aura",
@@ -4484,7 +4484,7 @@
       },
       {
        "name": "888. Uncontrollable Lightning",
-       "text": "If the controlling player ever rolls a natural \"1\" for their Initiative Roll, this figure immediately fires an elemental bolt (as per the spell) at the closest figure, friend or foe, even if the figure is in combat (in which case it will target a random other figure in the combat, not itself). This does not apply on the first turn of the game."
+       "text": "If the controlling player ever rolls a natural \"1\" for his Initiative Roll, this figure immediately fires an elemental bolt (as per the spell) at the closest figure, friend or foe, even if the figure is in combat (in which case it will target a random other figure in the combat, not itself). This does not apply on the first turn of the game."
       },
       {
        "name": "889. Continue after Death",
@@ -4492,7 +4492,7 @@
       },
       {
        "name": "890. Uncontrollable Poison Cloud",
-       "text": "If the controlling player ever rolls a natural \"1\" for their Initiative Roll, this figure immediately produces a toxic cloud centred on itself. The cloud is 3\" in diameter and blocks all line of sight. Any figure that activates in, or moves through the cloud, must make a Health Roll (TN20) or be immediately poisoned. This figure is immune to the poison of its own cloud. Roll a die at the end of the turn. On a 1 - 5 the cloud dissipates and is removed from the table."
+       "text": "If the controlling player ever rolls a natural \"1\" for his Initiative Roll, this figure immediately produces a toxic cloud centred on itself. The cloud is 3\" in diameter and blocks all line of sight. Any figure that activates in, or moves through the cloud, must make a Health Roll (TN20) or be immediately poisoned. This figure is immune to the poison of its own cloud. Roll a die at the end of the turn. On a 1 - 5 the cloud dissipates and is removed from the table."
       },
       {
        "name": "891. Magically Charged",
@@ -4546,7 +4546,7 @@
      "rows": [
       {
        "name": "901. Uncontrollable Push",
-       "text": "If the controlling player ever rolls a natural \"1\" for their Initiative Roll, this figure immediately makes a \"Push\" attack (as per the spell) at the closest figure, friend or foe, even if the figure is in combat. This does not apply on the first turn of the game."
+       "text": "If the controlling player ever rolls a natural \"1\" for his Initiative Roll, this figure immediately makes a \"Push\" attack (as per the spell) at the closest figure, friend or foe, even if the figure is in combat. This does not apply on the first turn of the game."
       },
       {
        "name": "902. Painful Invisibility",
@@ -4679,7 +4679,7 @@
       },
       {
        "name": "933. Massively Unstable Portal",
-       "text": "This figure is a portal to other realms. If the controlling player ever rolls a natural \"1\" for their Initiative Roll while this figure is on the table, place an uncontrolled minor demon on the table 3d6\" away from this figure in a random direction."
+       "text": "This figure is a portal to other realms. If the controlling player ever rolls a natural \"1\" for his Initiative Roll while this figure is on the table, place an uncontrolled minor demon on the table 3d6\" away from this figure in a random direction."
       },
       {
        "name": "934. Burst of Quickness",
@@ -5041,7 +5041,7 @@
     {
      "name": "11",
      "tag": "",
-     "text": "End of each turn, each player randomly selects one warband member, who immediately switches places with the figure selected by the player to their left (a player with only one figure left may opt out; if only one player selects, that player must pick a second figure to swap with the first)."
+     "text": "End of each turn, each player randomly selects one warband member, who immediately switches places with the figure selected by the player to his left (a player with only one figure left may opt out; if only one player selects, that player must pick a second figure to swap with the first)."
     },
     {
      "name": "12",
@@ -5081,7 +5081,7 @@
     {
      "name": "19",
      "tag": "",
-     "text": "End of every turn, each player secretly selects one non-undead, non-construct warband member; choices are revealed simultaneously, then in priority order each selected figure swaps places with the one selected by the player to their left (rippling around the table). If a treasure-carrying figure swaps, roll a die: 13+ the token moves with it, else the token moves 2\" randomly from its original spot. If only one player has an eligible figure, the crack ends; a player with only one eligible figure may decline to select."
+     "text": "End of every turn, each player secretly selects one non-undead, non-construct warband member; choices are revealed simultaneously, then in priority order each selected figure swaps places with the one selected by the player to his left (rippling around the table). If a treasure-carrying figure swaps, roll a die: 13+ the token moves with it, else the token moves 2\" randomly from its original spot. If only one player has an eligible figure, the crack ends; a player with only one eligible figure may decline to select."
     },
     {
      "name": "20",
@@ -5140,7 +5140,7 @@
    "rows": [
     {
      "name": "Creating & running a Vampire",
-     "text": "Creating a Vampire (GM/NPC villain, or PC by group agreement): same starting stats as a wizard, same item slots minus armour/shields. No apprentices (may nominate a warband member as one per game); 9 soldiers (4 specialist). School \"Vampire\" — Aligned (+2): Chronomancer, Necromancer, Soothsayer; Neutral (+4): Elementalist, Enchanter, Illusionist, Sigilist, Summoner, Witch; Antithetical: Thaumaturge (never learnable). Starts with 8 spells: 3 Vampire, 1 per aligned school, 2 from 2 neutral schools. Traits: Undead, Immune to Control Undead, Magic Attacks, Mind Lock, Thaumaturgic Vulnerability, True Sight, Partial Immunity to Normal Damage. New levels cost 120xp (max 300xp/game); Will capped at +5; Health cap 22; can't learn/cast Transcendence; can't benefit from Heal/Miraculous Cure/Healing Potions; Animal Companion yields an undead animal; never has Rangifers. Unnatural Health: no natural post-game healing — pay 5gc per Health point regained, or consume a permanent (non-undead/construct/demon) warband member's blood instead (removes them from the roster, replaceable next game; vampire runs at 8 soldiers that game); failing to pay at 0 Health counts as a Dead result. Sun Damage: 1 damage per activation in uncovered sunlight. Becoming a Vampire (usually accidental): gains all vampire traits/rules, loses Thaumaturge spells (all other Casting Numbers +1), Will capped at +5, level recalculated down for lost/degraded spells and Will, school becomes Vampire, loses apprentice (gains a 9th soldier slot instead). A card-deck version of the 8 Vampire spells (\"Vampire Spell Cards\") appears in the book's appendix, identical in effect. Running Creature Spellcasters (GM technique, reusable for any monster spellcaster): Recruit Another Player to run it; Fight and Switch (play the scenario twice, swapping sides); Shared Control (control passes between players, e.g. per-turn or by secret bid); or an Instruction List (attack spells vs. visible enemies first, buffs otherwise, and generally move away from warband members rather than toward them to keep casting)."
+     "text": "Creating a Vampire (GM/NPC villain, or PC by group agreement): same starting stats as a wizard, same item slots minus armour/shields. No apprentices (may nominate a warband member as one per game); 9 soldiers (4 specialist). School \"Vampire\" — Aligned (+2): Chronomancer, Necromancer, Soothsayer; Neutral (+4): Elementalist, Enchanter, Illusionist, Sigilist, Summoner, Witch; Antithetical: Thaumaturge (never learnable). Starts with 8 spells: 3 Vampire, 1 per aligned school, 2 from 2 neutral schools. Traits: Undead, Immune to Control Undead, Magic Attacks, Mind Lock, Thaumaturgic Vulnerability, True Sight, Partial Immunity to Normal Damage. New levels cost 120xp (max 300xp/game); Will capped at +5; Health cap 22; can't learn/cast Transcendence; can't benefit from Heal/Miraculous Cure/Healing Potions; Animal Companion yields an undead animal; never has Rangifers. Unnatural Health: no natural post-game healing — pay 5gc per Health point regained, or consume a permanent (non-undead/construct/demon) warband member's blood instead (removes it from the roster, replaceable next game; vampire runs at 8 soldiers that game); failing to pay at 0 Health counts as a Dead result. Sun Damage: 1 damage per activation in uncovered sunlight. Becoming a Vampire (usually accidental): gains all vampire traits/rules, loses Thaumaturge spells (all other Casting Numbers +1), Will capped at +5, level recalculated down for lost/degraded spells and Will, school becomes Vampire, loses apprentice (gains a 9th soldier slot instead). A card-deck version of the 8 Vampire spells (\"Vampire Spell Cards\") appears in the book's appendix, identical in effect. Running Creature Spellcasters (GM technique, reusable for any monster spellcaster): Recruit Another Player to run it; Fight and Switch (play the scenario twice, swapping sides); Shared Control (control passes between players, e.g. per-turn or by secret bid); or an Instruction List (attack spells vs. visible enemies first, buffs otherwise, and generally move away from warband members rather than toward them to keep casting)."
     }
    ]
   },
@@ -5327,7 +5327,7 @@
     {"name": "Burning", "text": "+2 damage on a won fight, even with no other damage."},
     {"name": "Chilling Touch", "text": "+2 damage except vs. undead/constructs."},
     {"name": "Giant-blooded", "text": "See Giant-Blooded above."},
-    {"name": "Harvest Blood", "text": "Surviving figures in a vampire's warband heal it per warband member reduced to 0 Health that game, max one source/game."},
+    {"name": "Harvest Blood", "text": "Surviving figures in a vampire's warband heal him per warband member reduced to 0 Health that game, max one source/game."},
     {"name": "Hunter's Will (X)", "text": "+2 Will while creature X is on table."},
     {"name": "Hurl Rock", "text": "12\" +4 damage shooting attack."},
     {"name": "Latch On", "text": "Pushback needs damage dealt, not just a win."},
@@ -6204,7 +6204,7 @@
     },
     {
      "name": "Book of the Rangifer",
-     "text": "A wizard with a Book of the Rangifer (Thaw of the Lich Lord p.47) may hire any one of these (except the Boar) as their one rangifer, at listed cost +80gc; a War-Leader takes the captain's place."
+     "text": "A wizard with a Book of the Rangifer (Thaw of the Lich Lord p.47) may hire any one of these (except the Boar) as his one rangifer, at listed cost +80gc; a War-Leader takes the captain's place."
     }
    ]
   },
@@ -6700,7 +6700,7 @@
     {
      "name": "The Bibliosepulchre",
      "tag": "p.96",
-     "text": "Near the heart of Ancient Felstad stood a vast, sprawling library. It had been established in the earliest days of the city and over the passing centuries had grown in all directions, with new wings, annexes, catacombs, towers, basements, sub-basements, and halls being added by successive administrations. The proper name of this institution has long been forgotten for, even at the height of the great city, people called it the Bibliosepulchre because of the strange traditions kept by the librarians. Young men and women who joined the library first signed on as acolytes and spent a five-year apprenticeship studying the great books and learning the secrets of their care. At the end of this time, the acolyte selected one book, usually a rare grimoire, and spent the next several years painstakingly transcribing it, binding it, and decorating it. Once the new volume was finished, the acolyte had a choice. They could either leave the library, and their book, behind or they could take the final oath of the library. This oath bound them to the protection of the library and their book not just for the rest of their life, but also in death. For when a librarian died, they were entombed within the library and their precious volume stored nearby. If any non-librarian ever disturbed their rest, or attempted to take their book, they would rise as a wight, a terrible spirit of vengeance, to ensure the sanctity of the library. With passing centuries, hundreds of librarians were laid to rest in those labyrinthine passages, bricked up into walls, buried beneath the floor, or placed in purpose- built mausoleums. Despite these strange and, to some, distasteful traditions, the Bibliosepulchre stood as the greatest repository of magical knowledge in the world, and wizards would come from near and far to study its books. So long as they were respectful, nearly all were allowed in. However, those who broke the rules or damaged the books never left those halls, and the stories of their torments passed in whispers throughout the city. With so much magical knowledge at their fingertips, it is no surprise that the librarians knew greater enchantments and wards than nearly anyone else, and it was virtually impossible to enter the library without invitation. So strong was this magic, that it survived the great cataclysm, even if a lot of the structure of the library did not. The wizards of Frostgrave have long known the location of the Bibliosepulchre but had continuously failed to break through its wards. Now though, the planets have aligned in such a way that those magical defences are flickering, and it is possible to slip through. No one knows how long this window might last, but it is an opportunity that cannot be missed. Within those shattered halls and chambers lie magical secrets unknown anywhere else. You’ll just have to pry them loose from the cold, dead hands of the librarians…"
+     "text": "Near the heart of Ancient Felstad stood a vast, sprawling library. It had been established in the earliest days of the city and over the passing centuries had grown in all directions, with new wings, annexes, catacombs, towers, basements, sub-basements, and halls being added by successive administrations. The proper name of this institution has long been forgotten for, even at the height of the great city, people called it the Bibliosepulchre because of the strange traditions kept by the librarians. Young men and women who joined the library first signed on as acolytes and spent a five-year apprenticeship studying the great books and learning the secrets of their care. At the end of this time, the acolyte selected one book, usually a rare grimoire, and spent the next several years painstakingly transcribing it, binding it, and decorating it. Once the new volume was finished, the acolyte had a choice. He could either leave the library, and his book, behind or he could take the final oath of the library. This oath bound him to the protection of the library and his book not just for the rest of his life, but also in death. For when a librarian died, he was entombed within the library and his precious volume stored nearby. If any non-librarian ever disturbed his rest, or attempted to take his book, he would rise as a wight, a terrible spirit of vengeance, to ensure the sanctity of the library. With passing centuries, hundreds of librarians were laid to rest in those labyrinthine passages, bricked up into walls, buried beneath the floor, or placed in purpose- built mausoleums. Despite these strange and, to some, distasteful traditions, the Bibliosepulchre stood as the greatest repository of magical knowledge in the world, and wizards would come from near and far to study its books. So long as they were respectful, nearly all were allowed in. However, those who broke the rules or damaged the books never left those halls, and the stories of their torments passed in whispers throughout the city. With so much magical knowledge at their fingertips, it is no surprise that the librarians knew greater enchantments and wards than nearly anyone else, and it was virtually impossible to enter the library without invitation. So strong was this magic, that it survived the great cataclysm, even if a lot of the structure of the library did not. The wizards of Frostgrave have long known the location of the Bibliosepulchre but had continuously failed to break through its wards. Now though, the planets have aligned in such a way that those magical defences are flickering, and it is possible to slip through. No one knows how long this window might last, but it is an opportunity that cannot be missed. Within those shattered halls and chambers lie magical secrets unknown anywhere else. You’ll just have to pry them loose from the cold, dead hands of the librarians…"
     },
     {
      "name": "Creating the Bibliosepulchre in Miniature",
@@ -6710,7 +6710,7 @@
     {
      "name": "The Tombs",
      "tag": "p.98",
-     "text": "One of the distinct features of the Bibliosepulchre scenarios is that most feature a tomb or mausoleum on the table. This should a 6” x 6” structure, or thereabouts, with a doorway in the middle of each side. This can be represented two-dimensionally on the table, but if you are going to be playing multiple scenarios from this book, it is probably worth going ahead and making one. It must be possible to access the inside of this tomb. Each scenario tells you where to place the tomb, but not what is inside it. The interior of the tomb is unknown to the players until someone opens one of the doors and peers inside. Any figure that moves into contact with a door may attempt to open it as a free action, though they may only make one attempt per activation. They may either try to bash it in with a Fight Roll (TN14) or pick the lock with a Will Roll (TN14); thieves and treasure hunters gain +4 when attempting to pick locks. Once a door is open, it remains open for the rest of the game. A figure may open a door from the inside merely by moving through it. As soon as a door is open, that player should roll on the Bibliosepulchre Tomb Table to find out what is inside. If players plan to play through all the scenarios as a campaign, they might wish to make each tomb interior unique and reroll any that have already appeared in the campaign. It doesn’t really matter though. Each one comes with its own challenges to test the wits and powers of the players. The tombs themselves have magical wards, which means that no spell effect that leaves something on the table (such as Wall, Explosive Rune, or Mud) can be placed inside or within 2” of a tomb. Nor can spells such as Crumble or Wizard Eye be cast upon them. Spells which don’t leave anything on the table can be cast normally. Most of the tombs include at least one special treasure token. These follow the normal rules for a treasure token, except that if a warband secures a special treasure token, they should roll three times on the Grimoire Table and select the result they want. If there is also a book wight placed on the table at the same time as the special treasure token, this is the treasure token that is associated with the wight’s Book Bound trait. Bibliosepulchre Tomb Table Die Roll Tomb"
+     "text": "One of the distinct features of the Bibliosepulchre scenarios is that most feature a tomb or mausoleum on the table. This should a 6” x 6” structure, or thereabouts, with a doorway in the middle of each side. This can be represented two-dimensionally on the table, but if you are going to be playing multiple scenarios from this book, it is probably worth going ahead and making one. It must be possible to access the inside of this tomb. Each scenario tells you where to place the tomb, but not what is inside it. The interior of the tomb is unknown to the players until someone opens one of the doors and peers inside. Any figure that moves into contact with a door may attempt to open it as a free action, though it may only make one attempt per activation. It may either try to bash it in with a Fight Roll (TN14) or pick the lock with a Will Roll (TN14); thieves and treasure hunters gain +4 when attempting to pick locks. Once a door is open, it remains open for the rest of the game. A figure may open a door from the inside merely by moving through it. As soon as a door is open, that player should roll on the Bibliosepulchre Tomb Table to find out what is inside. If players plan to play through all the scenarios as a campaign, they might wish to make each tomb interior unique and reroll any that have already appeared in the campaign. It doesn’t really matter though. Each one comes with its own challenges to test the wits and powers of the players. The tombs themselves have magical wards, which means that no spell effect that leaves something on the table (such as Wall, Explosive Rune, or Mud) can be placed inside or within 2” of a tomb. Nor can spells such as Crumble or Wizard Eye be cast upon them. Spells which don’t leave anything on the table can be cast normally. Most of the tombs include at least one special treasure token. These follow the normal rules for a treasure token, except that if a warband secures a special treasure token, they should roll three times on the Grimoire Table and select the result they want. If there is also a book wight placed on the table at the same time as the special treasure token, this is the treasure token that is associated with the wight’s Book Bound trait. Bibliosepulchre Tomb Table Die Roll Tomb"
     }
    ]
   },
@@ -6748,7 +6748,7 @@
     },
     {
      "name": "8",
-     "text": "Place a sarcophagus in the centre of the tomb. Any figure may attempt to open this sarcophagus by spending an action and making a Fight Roll (TN14) – thieves and treasure hunters get +4 to this roll. If successful, the sarcophagus is opened, and a special treasure token is revealed. The figure that opened the sarcophagus may immediately pick up this treasure token up as a free action, if they decide to pick it up later on that will require an action as usual. Otherwise, it may be picked up as normal. As soon as the sarcophagus is opened, place a book wight (Bestiary, page 145) at a random point on the edge of the table."
+     "text": "Place a sarcophagus in the centre of the tomb. Any figure may attempt to open this sarcophagus by spending an action and making a Fight Roll (TN14) – thieves and treasure hunters get +4 to this roll. If successful, the sarcophagus is opened, and a special treasure token is revealed. The figure that opened the sarcophagus may immediately pick up this treasure token up as a free action, if it decides to pick it up later on that will require an action as usual. Otherwise, it may be picked up as normal. As soon as the sarcophagus is opened, place a book wight (Bestiary, page 145) at a random point on the edge of the table."
     },
     {
      "name": "9",

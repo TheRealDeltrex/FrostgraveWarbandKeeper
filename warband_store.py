@@ -4462,8 +4462,7 @@ SHOP_VARIANT_ITEMS = {
     # The Perilous Dark p.78 Treasure Table prints a purchase price and no sale
     # column, so the sale comes from the Core Rules p.199 rule, as for every
     # other item out of that book: 40% of purchase. It shadows
-    # this item's row in data/supplement_item_prices.json, so it has to match
-    # what scripts/extract_supplement_prices.py would compute.
+    # this item's row in data/supplement_item_prices.json, so the two must match.
     "Bane Weapon": {
         "source": "The Perilous Dark",
         "purchase": 500,
@@ -7115,7 +7114,7 @@ def become_vampire(wb: dict) -> tuple[bool, str]:
     ap_note = ""
     if wb.get("apprentice"):
         dismiss_apprentice(wb)
-        ap_note = "; lost their apprentice, gaining a 9th soldier slot instead"
+        ap_note = "; lost his apprentice, gaining a 9th soldier slot instead"
     hr["max_soldiers"] = max(int(hr.get("max_soldiers", MAX_SOLDIERS)), VAMPIRE_MIN_MAX_SOLDIERS)
 
     state = expansions.default_wizard_state()
@@ -7127,7 +7126,7 @@ def become_vampire(wb: dict) -> tuple[bool, str]:
     cap_note = f"; {', '.join(clamped)}" if clamped else ""
     text = (
         f"{wiz.get('name', 'The wizard')} became a Vampire (Blood Legacy){spell_note}{cap_note}{ap_note}. "
-        "Recalculate their level for any XP a lost spell or capped stat no longer justifies."
+        "Recalculate his level for any XP a lost spell or capped stat no longer justifies."
     )
     add_history(wb, text)
     return True, text
@@ -7567,7 +7566,7 @@ def consume_wilderness_supplies(wb: dict) -> tuple[bool, str]:
         text = (
             f"Consumed {consumed}sp feeding {members} member(s), {shortfall}sp short. "
             "Mark who goes hungry (-2 Health/-1 Will next game) or very hungry "
-            "(-5 Health/-2 Will next game) via their status control."
+            "(-5 Health/-2 Will next game) via its status control."
         )
     add_history(wb, text)
     return True, text
@@ -7859,7 +7858,7 @@ def resolve_underworld_muscle(wb: dict, soldier_id: str, outcome: str) -> tuple[
     *ask* for, and a death is the guild collecting, not the wizard choosing.
     """
     if outcome not in ("home", "died"):
-        return False, "Pick whether they went home or died."
+        return False, "Pick whether it went home or died."
     soldiers = wb.get("soldiers") or []
     figure = next(
         (s for s in soldiers if s.get("id") == soldier_id and s.get("underworld_muscle")), None
@@ -7917,7 +7916,7 @@ def underworld_intimidation(
     if attack > defence:
         text = (
             f"Intimidation succeeded ({detail}) for {taken} Marker(s) — the target misses the "
-            "next game, staying in their warband and unfireable until it's over."
+            "next game, staying in its warband and unfireable until it's over."
         )
     else:
         # Half, rounded up — but "a wizard always receives a minimum of one

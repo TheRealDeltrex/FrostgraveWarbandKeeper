@@ -107,13 +107,11 @@ OTHER_CREATURE_ROW = {
 def load_monster_hunting() -> list[dict]:
     """The Master Monster Table (Spellcaster Magazine, Issue 5): per-monster
     XP and harvestable prize, {monster, rules, source, xp, bestiary_name,
-    prize: {name, kind, target, gold, known}}. Built from the source PDF by
-    scripts/extract_monster_hunting.py — see that script's docstring for why
-    the HTML reference other supplement content is extracted from can't be
-    used for this table. Prepends OTHER_CREATURE_ROW, a catch-all for a kill
-    that isn't actually on the book's table — 5 XP (the table's own lowest
-    tier), no prize — kept here rather than in the extracted JSON so the
-    extractor never silently drops it."""
+    prize: {name, kind, target, gold, known}}. Taken from the source PDF, not
+    the hand-compiled HTML reference (its columns are shifted). Prepends
+    OTHER_CREATURE_ROW, a catch-all for a kill that isn't actually on the
+    book's table — 5 XP (the table's own lowest tier), no prize — kept here
+    rather than in the book-sourced JSON."""
     path = DATA / "monster_hunting.json"
     if not path.is_file():
         return [OTHER_CREATURE_ROW]
@@ -159,8 +157,7 @@ def load_core_rules() -> list[dict]:
 
 @lru_cache(maxsize=1)
 def load_magic_items() -> list[dict]:
-    """Supplement treasure, {name, source, effect}. Built by
-    scripts/extract_expansion_content.py from the local reference documents."""
+    """Supplement treasure, {name, source, effect}."""
     path = DATA / "magic_items.json"
     if not path.is_file():
         return []
@@ -178,10 +175,7 @@ def load_common_items() -> list[dict]:
     the three Greater Potions the book prints a dash for (they can be brewed
     or found but never bought), and Greater Potions also carry `ingredients`
     for Brew Potion. A `variant` of "spell" means the entry is one row plus a
-    spell dropdown rather than one row per spell.
-
-    Built by scripts/extract_common_items.py, which regenerates the file
-    wholesale — hand edits are lost, put corrections in the script."""
+    spell dropdown rather than one row per spell."""
     path = DATA / "common_items.json"
     if not path.is_file():
         return []
@@ -206,10 +200,7 @@ def load_supplement_item_prices() -> list[dict]:
     Fields: source, name, purchase, sale, table, sale_estimated. `purchase` is
     None for The Red King's artefacts, which "may never be bought"; `sale` is
     always a number, but where `sale_estimated` is true the book printed no
-    sale column and the figure is the app's own, so the Shop labels it.
-
-    Built by scripts/extract_supplement_prices.py, which regenerates the file
-    wholesale — hand edits are lost, put corrections in the script."""
+    sale column and the figure is the app's own, so the Shop labels it."""
     path = DATA / "supplement_item_prices.json"
     if not path.is_file():
         return []
@@ -272,10 +263,7 @@ UNDEAD_TRAIT = "undead"
 DEMON_TRAIT = "demon"
 
 # Hand-curated restriction/bonus data for named magic items (data/magic_items.json
-# itself is regenerated wholesale from the reference PDFs by
-# scripts/extract_expansion_content.py — see its docstring and CLAUDE.md's note on
-# extract_*.py scripts — so anything added directly to that JSON would be silently
-# wiped on the next extraction run. This table is hand-maintained here instead and
+# stays plain {name, source, effect} triples). This table is hand-maintained here and
 # merged with the Lexicon's `effect` text at lookup time via item_restriction().
 #
 # restricted_to: soldier type_keys, ANY_ANIMAL_COMPANION, or the role strings
@@ -358,7 +346,7 @@ MAGIC_ITEM_RESTRICTIONS: dict[str, dict] = {
             "No dagger or shield alongside it; +2 damage. The bearer can never be "
             "targeted by an attack or spell from beyond 12\" (friendly or enemy), "
             "and is immune to Glow (though Cordial of Clearsight still works "
-            "normally against them). A natural 20 in melee lets the bearer "
+            "normally against it). A natural 20 in melee lets the bearer "
             "immediately take another action (needn't be a move)."
         ),
     },
@@ -437,7 +425,7 @@ def _artefact_names_lower() -> frozenset[str]:
     """The Red King's artefacts, by lowercased name.
 
     Artefacts are flagged in the JSON only by their effect text opening with
-    "Artefact" (the extractor writes the whole entry as one `effect` string), so
+    "Artefact" (the JSON holds the whole entry as one `effect` string), so
     that prefix is the marker. Scoped to The Red King, the one book that prints
     them, so a supplement adding an item whose effect happens to start that way
     can't silently join the set.
@@ -732,7 +720,7 @@ def load_spell_descriptions() -> dict[str, str]:
 @lru_cache(maxsize=1)
 def load_spell_codex() -> dict[str, dict]:
     """Advanced Spellcraft's per-spell flourishes, notes and Casting Roll
-    Criticals (scripts/extract_spell_codex.py), keyed by the plain-apostrophe
+    Criticals, keyed by the plain-apostrophe
     name SPELLS uses."""
     path = DATA / "spell_codex.json"
     if not path.is_file():
@@ -754,7 +742,7 @@ def load_expansion_overviews() -> dict[str, str]:
 @lru_cache(maxsize=1)
 def load_spellcraft_rules() -> list[dict]:
     """Advanced Spellcraft's optional spellcasting rules, {id, title, page,
-    text} in book order (scripts/extract_spell_codex.py)."""
+    text} in book order."""
     path = DATA / "spellcraft_rules.json"
     if not path.is_file():
         return []

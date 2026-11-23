@@ -172,7 +172,7 @@
   "category": "Undead",
   "source": "Core Rules",
   "stats": "Move 7\" · Fight +4 · Shoot +0 · Armour 12 · Will +5 · Health 14",
-  "description": "Vampires troubled the city even at the height of its glory, too dangerous to allow free but too powerful to eliminate; frozen along with the rest of Frostgrave, they have since thawed out. It is Immune to Normal Weapons (can only be harmed by magic), has Magic Attack (all its attacks count as magic), Mind Lock (immune to Mind Control and Suggestion), True Sight, and the Undead trait."
+  "description": "Vampires troubled the city even at the height of its glory, too dangerous to allow free but too powerful to eliminate; frozen along with the rest of Frostgrave, they have since thawed out. He is Immune to Normal Weapons (can only be harmed by magic), has Magic Attack (all his attacks count as magic), Mind Lock (immune to Mind Control and Suggestion), True Sight, and the Undead trait."
  },
  {
   "name": "Wraith",
@@ -644,7 +644,7 @@
   "category": "Undead",
   "source": "The Wildwoods",
   "stats": "Move 4\" · Fight +2 · Shoot +0 · Armour 16 · Will +0 · Health 16",
-  "description": "The stone-turned dead of the wilderness. Undead, Strong, Rock-hard Skin (an attacker who rolls a natural 1 against it has their non-magic weapon broken)."
+  "description": "The stone-turned dead of the wilderness. Undead, Strong, Rock-hard Skin (an attacker who rolls a natural 1 against it has its non-magic weapon broken)."
  },
  {
   "name": "Phase Cats",
@@ -728,7 +728,7 @@
   "category": "Miscellaneous",
   "source": "The Frostgrave Folio",
   "stats": "Move 6\" · Fight +1 · Shoot +0 · Armour 12 · Will +10 · Health 5",
-  "description": "Unaligned beings that hunt magic itself. Not undead, demon, construct, or animal. Drawn to Magic: instead of moving randomly, heads toward the highest-level wizard within 18\" (or their apprentice, or moves randomly if none present). Immune to Magic: can't be targeted by spells and never takes magic damage; a figure fighting one loses all magic-item bonuses for the duration (magic weapons become mundane)."
+  "description": "Unaligned beings that hunt magic itself. Not undead, demon, construct, or animal. Drawn to Magic: instead of moving randomly, heads toward the highest-level wizard within 18\" (or his apprentice, or moves randomly if none present). Immune to Magic: can't be targeted by spells and never takes magic damage; a figure fighting one loses all magic-item bonuses for the duration (magic weapons become mundane)."
  },
  {
   "name": "The Alchemical Monstrosity",
@@ -875,7 +875,7 @@
   "category": "Undead",
   "source": "Blood Legacy",
   "stats": "Move 7\" · Fight +5 · Shoot +0 · Armour 12 · Will +7 · Health 22",
-  "description": "A named vampire spellcaster. Immune to Control Undead, Magic Attack, Mind Lock, Partial Immunity to Normal Damage, Thaumaturgic Vulnerability, True Sight, Undead. Spells: Control Undead (8), Ghoul Call (8), Hypnotic Gaze (10), Mist Form (6). Uses Hypnotic Gaze if already in combat; otherwise Control Undead on an enemy-held undead in line of sight; otherwise Ghoul Call if it has no controlled ghoul; otherwise takes Mist Form and flees below 5 Health; otherwise closes and fights."
+  "description": "A named vampire spellcaster. Immune to Control Undead, Magic Attack, Mind Lock, Partial Immunity to Normal Damage, Thaumaturgic Vulnerability, True Sight, Undead. Spells: Control Undead (8), Ghoul Call (8), Hypnotic Gaze (10), Mist Form (6). Uses Hypnotic Gaze if already in combat; otherwise Control Undead on an enemy-held undead in line of sight; otherwise Ghoul Call if he has no controlled ghoul; otherwise takes Mist Form and flees below 5 Health; otherwise closes and fights."
  },
  {
   "name": "Leechwolf",

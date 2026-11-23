@@ -427,7 +427,7 @@
  {
   "name": "Amulet of Repelling",
   "source": "Spellcaster Magazine",
-  "effect": "Once/game, In Combat: action forces a Will Roll TN18 on one opponent or they're pushed back 1\"; wearer exits combat."
+  "effect": "Once/game, In Combat: action forces a Will Roll TN18 on one opponent or it's pushed back 1\"; wearer exits combat."
  },
  {
   "name": "Arrow of Crumbling",
@@ -1612,7 +1612,7 @@
  {
   "name": "Arrows of True Sight (3)",
   "source": "Advanced Spellcraft",
-  "effect": "These arrows come in bunches of three. When these arrows are purchased or found the player may decide if they are arrows or crossbow bolts (and may even take two of one type and one of the other). A figure may shoot one of these arrows at a figure using the Beauty spell without making a Will Roll. A figure may shoot one of these arrows at an invisible figure, even if they can’t otherwise see invisible figures, assuming they otherwise have line of sight. If one of these arrows hits an illusionary soldier, even if no damage is done, the illusionary soldier is destroyed and removed from the table. Once shot, the arrow is expended and should be crossed off the Wizard Sheet. If sold, the player receives 30gc per arrow."
+  "effect": "These arrows come in bunches of three. When these arrows are purchased or found the player may decide if they are arrows or crossbow bolts (and may even take two of one type and one of the other). A figure may shoot one of these arrows at a figure using the Beauty spell without making a Will Roll. A figure may shoot one of these arrows at an invisible figure, even if it can’t otherwise see invisible figures, assuming it otherwise has line of sight. If one of these arrows hits an illusionary soldier, even if no damage is done, the illusionary soldier is destroyed and removed from the table. Once shot, the arrow is expended and should be crossed off the Wizard Sheet. If sold, the player receives 30gc per arrow."
  },
  {
   "name": "Arrows of Undead Destruction (3)",
@@ -1622,7 +1622,7 @@
  {
   "name": "Book of Arcane Desire",
   "source": "Advanced Spellcraft",
-  "effect": "When a person first opens this crumbling tome, they see whatever magical knowledge they most desire. However, once the book is closed, the text disappears and if this person ever opens the book again, they find only blank pages. A wizard with this book may spend a level to learn a flourish for any single spell they know, in place of having the grimoire. Once the book is used, it is worthless to that wizard but may be sold for its sell price."
+  "effect": "When a person first opens this crumbling tome, he sees whatever magical knowledge he most desires. However, once the book is closed, the text disappears and if this person ever opens the book again, he finds only blank pages. A wizard with this book may spend a level to learn a flourish for any single spell he knows, in place of having the grimoire. Once the book is used, it is worthless to that wizard but may be sold for its sell price."
  },
  {
   "name": "Box of Bones",
@@ -1632,12 +1632,12 @@
  {
   "name": "Cane of the Necromancer",
   "source": "Advanced Spellcraft",
-  "effect": "This black cane, topped with a silver skull, has faint, green skull faces painted along its length. The faces clack their jaws whenever the bearer casts a spell from the Necromancer school. Once per game, if the spellcaster casts a Necromancer spell with a flourish, they do not suffer the normal penalty for the flourish and instead gain +2 to the Casting Roll. The decision to use the cane must be made before the die is rolled."
+  "effect": "This black cane, topped with a silver skull, has faint, green skull faces painted along its length. The faces clack their jaws whenever the bearer casts a spell from the Necromancer school. Once per game, if the spellcaster casts a Necromancer spell with a flourish, he does not suffer the normal penalty for the flourish and instead gain +2 to the Casting Roll. The decision to use the cane must be made before the die is rolled."
  },
  {
   "name": "Chisel of the Enchanter",
   "source": "Advanced Spellcraft",
-  "effect": "This small chisel is cast from meteoric iron and inscribed with powerful runes of creation. These runes glow brightly whenever the bearer casts a spell from the Enchanter school. Once per game, if the spellcaster casts an Enchanter spell with a flourish, they do not suffer the normal penalty for the flourish and instead gain +2 to the Casting Roll. The decision to use the chisel must be made before the die is rolled."
+  "effect": "This small chisel is cast from meteoric iron and inscribed with powerful runes of creation. These runes glow brightly whenever the bearer casts a spell from the Enchanter school. Once per game, if the spellcaster casts an Enchanter spell with a flourish, he does not suffer the normal penalty for the flourish and instead gain +2 to the Casting Roll. The decision to use the chisel must be made before the die is rolled."
  },
  {
   "name": "Cloak of the Etherium",
@@ -1647,17 +1647,17 @@
  {
   "name": "Concussion Orb (3)",
   "source": "Advanced Spellcraft",
-  "effect": "When this item is found or purchased, it comes with three orbs. Each orb counts as a separate item and is expended after use. A figure with a concussion orb may spend an action to throw it up to 8”. All figures within 4” of the point of impact should roll a die: divide the result by three and round up. The figure is moved that many inches directly away from the point of impact. This will move the figure over other figures and any terrain 1” high or less. The figure will stop if it moves into any terrain higher than 1” or at the edge of the table. If the figure was carrying a treasure token, it must make a Will Roll (TN14). If it fails, move the treasure token 6” in a random direction from where the figure was before they were moved."
+  "effect": "When this item is found or purchased, it comes with three orbs. Each orb counts as a separate item and is expended after use. A figure with a concussion orb may spend an action to throw it up to 8”. All figures within 4” of the point of impact should roll a die: divide the result by three and round up. The figure is moved that many inches directly away from the point of impact. This will move the figure over other figures and any terrain 1” high or less. The figure will stop if it moves into any terrain higher than 1” or at the edge of the table. If the figure was carrying a treasure token, it must make a Will Roll (TN14). If it fails, move the treasure token 6” in a random direction from where the figure was before it was moved."
  },
  {
   "name": "Crozier of the Thaumaturge",
   "source": "Advanced Spellcraft",
-  "effect": "This hooked magic staff features a carving of the sun held within the hook that flashes and sparkles whenever the bearer casts a spell from the Thaumaturge school. Once per game, if the spellcaster casts a Thaumaturge spell with a flourish, they do not suffer the normal penalty for the flourish and instead gain +2 to the Casting Roll. The decision to use the crozier must be made before the die is rolled."
+  "effect": "This hooked magic staff features a carving of the sun held within the hook that flashes and sparkles whenever the bearer casts a spell from the Thaumaturge school. Once per game, if the spellcaster casts a Thaumaturge spell with a flourish, he does not suffer the normal penalty for the flourish and instead gain +2 to the Casting Roll. The decision to use the crozier must be made before the die is rolled."
  },
  {
   "name": "Crystal Reading Glass",
   "source": "Advanced Spellcraft",
-  "effect": "This perfectly sculpted crystal, bound round with a brass ring, can be laid upon a text to magnify the writing. In this way, it can be used to clarify the letters and discover small secret marginalia. This item can be stored in a wizard’s vault. Whenever the wizard learns a flourish, they may use this item. In this case, the grimoire is not expended and can be used to learn another flourish for the same spell. However, the wizard must wait at least one game to learn a further flourish. Every time the wizard uses the crystal reading glass, roll a die. On a 17+ the crystal cracks and is destroyed. Remove it from the Wizard Sheet."
+  "effect": "This perfectly sculpted crystal, bound round with a brass ring, can be laid upon a text to magnify the writing. In this way, it can be used to clarify the letters and discover small secret marginalia. This item can be stored in a wizard’s vault. Whenever the wizard learns a flourish, he may use this item. In this case, the grimoire is not expended and can be used to learn another flourish for the same spell. However, the wizard must wait at least one game to learn a further flourish. Every time the wizard uses the crystal reading glass, roll a die. On a 17+ the crystal cracks and is destroyed. Remove it from the Wizard Sheet."
  },
  {
   "name": "Dispel Ring",
@@ -1682,7 +1682,7 @@
  {
   "name": "Eye Pendant of the Soothsayer",
   "source": "Advanced Spellcraft",
-  "effect": "This golden pendant, crafted in the shape of an open eye, has a clear blue diamond set in the middle. A small beam of white light blinks out of this diamond three times whenever the wearer casts a spell from the Soothsayer school. Once per game, if the spellcaster casts a Soothsayer spell with a flourish, they do not suffer the normal penalty for the flourish and instead gain +2 to the Casting Roll. The decision to use the pendant must be made before the die is rolled."
+  "effect": "This golden pendant, crafted in the shape of an open eye, has a clear blue diamond set in the middle. A small beam of white light blinks out of this diamond three times whenever the wearer casts a spell from the Soothsayer school. Once per game, if the spellcaster casts a Soothsayer spell with a flourish, he does not suffer the normal penalty for the flourish and instead gain +2 to the Casting Roll. The decision to use the pendant must be made before the die is rolled."
  },
  {
   "name": "Manacrystal",
@@ -1692,12 +1692,12 @@
  {
   "name": "Moon Pendant of the Witch",
   "source": "Advanced Spellcraft",
-  "effect": "This wooden pendant appears to be a plain circle of polished wood held on a leather strap; however, whenever the wearer casts a spell from the Witch school it glows with a crescent moon. Once per game, if the spellcaster casts a Witch spell with a flourish, they do not suffer the normal penalty for the flourish and instead gain +2 to the Casting Roll. The decision to use the pendant must be made before the die is rolled."
+  "effect": "This wooden pendant appears to be a plain circle of polished wood held on a leather strap; however, whenever the wearer casts a spell from the Witch school it glows with a crescent moon. Once per game, if the spellcaster casts a Witch spell with a flourish, he does not suffer the normal penalty for the flourish and instead gain +2 to the Casting Roll. The decision to use the pendant must be made before the die is rolled."
  },
  {
   "name": "Mystical Draught",
   "source": "Advanced Spellcraft",
-  "effect": "This is a single-use potion. If a spellcaster drinks this draught and then casts a spell during the same activation, they receive +5 to the Casting Roll."
+  "effect": "This is a single-use potion. If a spellcaster drinks this draught and then casts a spell during the same activation, he receives +5 to the Casting Roll."
  },
  {
   "name": "Necrotic Staff",
@@ -1712,12 +1712,12 @@
  {
   "name": "Porter Control Rod",
   "source": "Advanced Spellcraft",
-  "effect": "If a wizard has a porter control rod in their vault and ends a game with a collegium porter (Bestiary, page 147) under control, the wizard may add the collegium porter as a permanent member of their warband, taking the place of a specialist soldier."
+  "effect": "If a wizard has a porter control rod in his vault and ends a game with a collegium porter (Bestiary, page 147) under control, the wizard may add the collegium porter as a permanent member of his warband, taking the place of a specialist soldier."
  },
  {
   "name": "Potion of Chance",
   "source": "Advanced Spellcraft",
-  "effect": "The formula for this lesser potion has long been lost. Once drunk, every time the figure rolls a natural ‘1’ or ‘2’ for the rest of the game, they suffer 1 point of damage. Whenever they roll a natural ‘19’ or ‘20’ for the rest of the game, they find some interesting trinket worth 20gc – immediately add this money to the wizard’s vault."
+  "effect": "The formula for this lesser potion has long been lost. Once drunk, every time the figure rolls a natural ‘1’ or ‘2’ for the rest of the game, it suffers 1 point of damage. Whenever it rolls a natural ‘19’ or ‘20’ for the rest of the game, it finds some interesting trinket worth 20gc – immediately add this money to the wizard’s vault."
  },
  {
   "name": "Potion of Luck",
@@ -1742,17 +1742,17 @@
  {
   "name": "Rings of the Elementalist",
   "source": "Advanced Spellcraft",
-  "effect": "This set of five rings, each featuring a different gemstone, is designed to be worn on one hand. The rings glow brightly whenever the wearer casts a spell from the Elementalist school. Once per game, if the spellcaster casts an Elementalist spell with a flourish, they do not suffer the normal penalty for the flourish and instead gain +2 to the Casting Roll. The decision to use the rings must be made before the die is rolled."
+  "effect": "This set of five rings, each featuring a different gemstone, is designed to be worn on one hand. The rings glow brightly whenever the wearer casts a spell from the Elementalist school. Once per game, if the spellcaster casts an Elementalist spell with a flourish, he does not suffer the normal penalty for the flourish and instead gain +2 to the Casting Roll. The decision to use the rings must be made before the die is rolled."
  },
  {
   "name": "Rod of the Summoner",
   "source": "Advanced Spellcraft",
-  "effect": "This brass rod collapses and expands in a similar fashion to a spyglass. When fully extended, numerous pentagrams and other summoning symbols are revealed. These glow with a deep, purple light whenever the bearer casts a spell from the Summoner school. Once per game, if the spellcaster casts a Summoner spell with a flourish, they do not suffer the normal penalty for the flourish and instead gain +2 to the Casting Roll. The decision to use the rod must be made before the die is rolled."
+  "effect": "This brass rod collapses and expands in a similar fashion to a spyglass. When fully extended, numerous pentagrams and other summoning symbols are revealed. These glow with a deep, purple light whenever the bearer casts a spell from the Summoner school. Once per game, if the spellcaster casts a Summoner spell with a flourish, he does not suffer the normal penalty for the flourish and instead gain +2 to the Casting Roll. The decision to use the rod must be made before the die is rolled."
  },
  {
   "name": "Sash of Freefall",
   "source": "Advanced Spellcraft",
-  "effect": "A figure wearing this sash can fall any distance without taking damage. Additionally, when falling, the figure can attempt to glide. The figure must make a Move Roll (TN16). If successful, the figure may move their landing point by up to 1” for every 2” they fell (to a maximum of 4”). If the Move Roll is failed, the figure moves the maximum amount of distance in a random direction."
+  "effect": "A figure wearing this sash can fall any distance without taking damage. Additionally, when falling, the figure can attempt to glide. The figure must make a Move Roll (TN16). If successful, the figure may move its landing point by up to 1” for every 2” it fell (to a maximum of 4”). If the Move Roll is failed, the figure moves the maximum amount of distance in a random direction."
  },
  {
   "name": "Shining Aspergillum",
@@ -1762,12 +1762,12 @@
  {
   "name": "Spectacles of the Sigilist",
   "source": "Advanced Spellcraft",
-  "effect": "These rather plain-looking, golden-rimmed spectacles attune themselves to the wearer’s eyesight, providing whatever magnification is necessary for perfect vision in any situation. Small flames flicker along the rims whenever the wearer casts a spell from the Sigilist school. Once per game, if the spellcaster casts a Sigilist spell with a flourish, they do not suffer the normal penalty for the flourish and instead gain +2 to the Casting Roll. The decision to use the spectacles must be made before the die is rolled."
+  "effect": "These rather plain-looking, golden-rimmed spectacles attune themselves to the wearer’s eyesight, providing whatever magnification is necessary for perfect vision in any situation. Small flames flicker along the rims whenever the wearer casts a spell from the Sigilist school. Once per game, if the spellcaster casts a Sigilist spell with a flourish, he does not suffer the normal penalty for the flourish and instead gain +2 to the Casting Roll. The decision to use the spectacles must be made before the die is rolled."
  },
  {
   "name": "Spellcaster's Blade",
   "source": "Advanced Spellcraft",
-  "effect": "When this magical weapon is bought or purchased, the player may decide if it is a hand weapon or a two-handed weapon but once the decision is made it is fixed. If this weapon is wielded by a spellcaster, they may empower the weapon before any Combat Roll by spending 1 Health (or other point of power). If empowered, the blade grants the wielder +1 Fight and gains a +1 damage modifier for the rest of the turn."
+  "effect": "When this magical weapon is bought or purchased, the player may decide if it is a hand weapon or a two-handed weapon but once the decision is made it is fixed. If this weapon is wielded by a spellcaster, he may empower the weapon before any Combat Roll by spending 1 Health (or other point of power). If empowered, the blade grants the wielder +1 Fight and gains a +1 damage modifier for the rest of the turn."
  },
  {
   "name": "Staff of Elemental Resistance",
@@ -1777,12 +1777,12 @@
  {
   "name": "Staff of the Chronomancer",
   "source": "Advanced Spellcraft",
-  "effect": "This magic staff has numerous inset metal rings covered in the symbols for time. These rings spin around the staff whenever the bearer casts a spell from the Chronomancer school. Once per game, if the spellcaster casts a Chronomancer spell with a flourish, they do not suffer the normal penalty for that flourish and instead gain +2 to the Casting Roll. The decision to use the staff must be made before the die is rolled."
+  "effect": "This magic staff has numerous inset metal rings covered in the symbols for time. These rings spin around the staff whenever the bearer casts a spell from the Chronomancer school. Once per game, if the spellcaster casts a Chronomancer spell with a flourish, he does not suffer the normal penalty for that flourish and instead gain +2 to the Casting Roll. The decision to use the staff must be made before the die is rolled."
  },
  {
   "name": "Sun Ring",
   "source": "Advanced Spellcraft",
-  "effect": "The wearer of this ring gains +1 Fight when in combat with undead. Additionally, they are immune to Energy Drain."
+  "effect": "The wearer of this ring gains +1 Fight when in combat with undead. Additionally, it is immune to Energy Drain."
  },
  {
   "name": "Torch of Radiance",
@@ -1802,6 +1802,6 @@
  {
   "name": "Wand of the Illusionist",
   "source": "Advanced Spellcraft",
-  "effect": "This long wand is decorated with incredibly intricate marquetry showing tiny squares of coloured wood inlaid with polished, semi-precious stones. These colours move and swirl across the wand whenever the bearer casts a spell from the Illusionist school. Once per game, if the spellcaster casts an Illusionist spell with a flourish, they do not suffer the normal penalty for that flourish and instead gain +2 to the Casting Roll. The decision to use the wand must be made before the die is rolled."
+  "effect": "This long wand is decorated with incredibly intricate marquetry showing tiny squares of coloured wood inlaid with polished, semi-precious stones. These colours move and swirl across the wand whenever the bearer casts a spell from the Illusionist school. Once per game, if the spellcaster casts an Illusionist spell with a flourish, he does not suffer the normal penalty for that flourish and instead gain +2 to the Casting Roll. The decision to use the wand must be made before the die is rolled."
  }
 ]

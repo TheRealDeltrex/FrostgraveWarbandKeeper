@@ -232,7 +232,7 @@
   {
     "name": "Melt Weapon",
     "source": "The Red King",
-    "text": "If a figure that is fighting this creature rolls a natural '1' on their attack roll, then the weapon they are using is immediately destroyed. This attribute has no effect on magic weapons."
+    "text": "If a figure that is fighting this creature rolls a natural '1' on its attack roll, then the weapon it is using is immediately destroyed. This attribute has no effect on magic weapons."
   },
   {
     "name": "Mind Lock",
@@ -382,7 +382,7 @@
   {
     "name": "Terrain Expert (X)",
     "source": "The Wildwoods",
-    "text": "This soldier picks a Terrain Expertise (Mountain, Bog, Ice, or Forest) and never consumes supplies. In a game where that terrain type is dominant, it also gains Nimble, and the warband gains +2 Initiative and +2 supply points after the game."
+    "text": "This soldier picks a Terrain Expertise (Mountain, Bog, Ice, or Forest) and never consumes supplies. In a game where that terrain type is dominant, he also gains Nimble, and the warband gains +2 Initiative and +2 supply points after the game."
   },
   {
     "name": "Thaumaturgic Vulnerability",
@@ -481,12 +481,12 @@
   },
   {
     "name": "Possible Grimoire",
-    "text": "When this figure is reduced to 0 Health, leave it on the table on its side. Any warband member within 1” of the figure may spend an action to search it. Roll a die: on a 17+ the figure has found a special treasure token. On any other result, they have found nothing and the action is lost. Either way, remove the downed figure from the table. If the special treasure token is secured, it is exchanged for one roll on the Grimoire Table.",
+    "text": "When this figure is reduced to 0 Health, leave it on the table on its side. Any warband member within 1” of the figure may spend an action to search it. Roll a die: on a 17+ the figure has found a special treasure token. On any other result, it has found nothing and the action is lost. Either way, remove the downed figure from the table. If the special treasure token is secured, it is exchanged for one roll on the Grimoire Table.",
     "source": "Advanced Spellcraft"
   },
   {
     "name": "Possible Scroll",
-    "text": "When this figure is reduced to 0 Health, leave it on the table on its side. Any warband member within 1” of the figure may spend an action to search it. Roll a die: on an 11+ the figure has found a special treasure token. On any other result, they have found nothing, and the action is lost. Either way, remove the downed figure from the table. This special treasure token does not cause the figure any movement penalties. If the special treasure token is secured, it is exchanged for one random scroll.",
+    "text": "When this figure is reduced to 0 Health, leave it on the table on its side. Any warband member within 1” of the figure may spend an action to search it. Roll a die: on an 11+ the figure has found a special treasure token. On any other result, it has found nothing, and the action is lost. Either way, remove the downed figure from the table. This special treasure token does not cause the figure any movement penalties. If the special treasure token is secured, it is exchanged for one random scroll.",
     "source": "Advanced Spellcraft"
   },
   {

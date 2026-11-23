@@ -3,9 +3,9 @@
     "title": "Turn Order",
     "entries": [
       {"name": "Initiative", "text": "Roll to see who goes first in each of the following phases."},
-      {"name": "Wizard Phase", "text": "Each player activates their wizard plus up to 3 soldiers within 3\"."},
-      {"name": "Apprentice Phase", "text": "Each player activates their apprentice plus up to 3 soldiers within 3\"."},
-      {"name": "Soldier Phase", "text": "Each player activates all their soldiers that have not previously activated."},
+      {"name": "Wizard Phase", "text": "Each player activates his wizard plus up to 3 soldiers within 3\"."},
+      {"name": "Apprentice Phase", "text": "Each player activates his apprentice plus up to 3 soldiers within 3\"."},
+      {"name": "Soldier Phase", "text": "Each player activates all his soldiers that have not previously activated."},
       {"name": "Creature Phase", "text": "All non-controlled creatures activate."}
     ]
   },

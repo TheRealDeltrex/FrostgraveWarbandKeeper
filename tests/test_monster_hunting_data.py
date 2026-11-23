@@ -1,6 +1,6 @@
 """Data-integrity guard for data/monster_hunting.json (the Master Monster
-Table, Spellcaster Magazine Issue 5) — hand-curated from a PDF extraction
-(scripts/extract_monster_hunting.py), so this checks the shape and the
+Table, Spellcaster Magazine Issue 5) — hand-curated from a PDF extraction,
+so this checks the shape and the
 cross-references stay consistent rather than the row content itself."""
 
 from frostgrave_data import SOURCE_BOOKS, SPELLS

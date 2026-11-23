@@ -11,8 +11,7 @@ for free, with no new entry in STATIC_FILES, renderPage(), or either .spec.
 
 This script writes NOTHING. It prints the finished @font-face block to stdout, to be
 pasted into static/style.css once. That is deliberate: a script that rewrote style.css
-in place would silently revert hand-tuning on every re-run — the same hazard CLAUDE.md
-documents for scripts/extract_*.py. The arguments below are the provenance record.
+in place would silently revert hand-tuning on every re-run. The arguments below are the provenance record.
 
 Usage (from the repo root, with the venv active):
     python scripts/build_display_font.py > font-face.txt
